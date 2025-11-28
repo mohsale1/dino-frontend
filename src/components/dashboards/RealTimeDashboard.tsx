@@ -83,7 +83,7 @@ const RealTimeDashboard: React.FC<RealTimeDashboardProps> = ({ className = '' })
             <ConnectionStatus showLabel={true} />
           </div>
           <div className="text-sm text-gray-500">
-            {user?.venue_id ? `Venue: ${user.venue_id}` : 'All Venues'}
+            {user?.venueId ? `Venue: ${user.venueId}` : 'All Venues'}
           </div>
         </div>
       </Card>

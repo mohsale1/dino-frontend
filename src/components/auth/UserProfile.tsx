@@ -158,7 +158,7 @@ const UserProfile: React.FC = () => {
 
   return (
     <Box sx={{ 
-      minHeight: '100vh',
+      minHeight: '80vh',
       pt: { xs: '80px', sm: '88px', md: '96px' }, // Add top padding to avoid navbar
       pb: { xs: 4, sm: 6, md: 8 },
       backgroundColor: 'background.default',
@@ -446,7 +446,7 @@ const UserProfile: React.FC = () => {
                 </ListItemIcon>
                 <ListItemText
                   primary="Account Status"
-                  secondary={user?.isVerified ? "Verified account" : "Unverified account"}
+                  secondary={user?.isVerified ? "Verified account" : "Unverified account"} 
                   sx={{ 
                     pr: { xs: 0, sm: 2 },
                     '& .MuiListItemText-primary': {
