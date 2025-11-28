@@ -55,6 +55,17 @@ import VenueNotAcceptingOrdersPage from '../../components/VenueNotAcceptingOrder
 import { SmartLoading } from '../../components/ui/LoadingStates';
 import { MenuError } from '../../components/ErrorStates';
 import { useMenuData as useMenuData, type MenuItemType } from '../../hooks/useMenuData';
+import DynamicMenuRenderer from '../../components/menu/DynamicMenuRenderer';
+import { getTemplateConfig } from '../../config/menuTemplates';
+import TemplateHeader from '../../components/preview/TemplateHeader';
+import TemplateCategoryFilter from '../../components/preview/TemplateCategoryFilter';
+
+// Fragment Components
+import HomeFragment from './fragments/HomeFragment';
+import MenuFragment from './fragments/MenuFragment';
+import OrderStatusFragment from './fragments/OrderStatusFragment';
+import FloatingCartCard from '../../components/menu/FloatingCartCard';
+import FragmentNavigation, { FragmentType } from '../../components/ui/FragmentNavigation';
 
 // --- Mock Data and Assets for Theming ---
 const petThemeImages = {
@@ -160,7 +171,7 @@ const MenuPage: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const { theme: venueTheme, setTheme: setVenueTheme } = useVenueTheme();
-  const { addItem, items: cartItems, getTotalItems } = useCart();
+  const { addItem, items: cartItems, getTotalItems, getTotalAmount } = useCart();
 
   // Use the new menu data hook
   const {
@@ -186,15 +197,32 @@ const MenuPage: React.FC = () => {
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [activeCategory, setActiveCategory] = useState<string>('');
   const [showFilters, setShowFilters] = useState(false);
+  
+  // Fragment state
+  const [activeFragment, setActiveFragment] = useState<FragmentType>('home');
 
   // Refs
   const categoryRefs = useRef<Record<string, HTMLElement | null>>({});
   const menuContainerRef = useRef<HTMLDivElement | null>(null);
 
+  // State for template rendering
+  const [useTemplateRenderer, setUseTemplateRenderer] = useState(false);
+  const [templateConfig, setTemplateConfig] = useState<any>(null);
+
   // When restaurant data is available, set the theme from the backend.
   useEffect(() => {
     if (restaurant?.theme) {
       setVenueTheme(restaurant.theme);
+    }
+    
+    // Check if venue has a menu template configured
+    if (restaurant?.menu_template) {
+      console.log('📋 Loading menu template:', restaurant.menu_template);
+      const config = getTemplateConfig(restaurant.menu_template);
+      setTemplateConfig(config);
+      setUseTemplateRenderer(true);
+    } else {
+      setUseTemplateRenderer(false);
     }
     // If no theme is in the backend, it will keep the default 'pet' theme from the context.
   }, [restaurant, setVenueTheme]);
@@ -406,6 +434,7 @@ const MenuPage: React.FC = () => {
 
   const handleCategoryClick = (categoryId: string) => {
     setActiveCategory(categoryId);
+    setActiveFragment('menu'); // Switch to menu fragment
     setTimeout(() => {
       const element = categoryRefs.current[categoryId];
       if (element) {
@@ -538,445 +567,50 @@ const MenuPage: React.FC = () => {
       sx={{ 
         minHeight: '100vh', 
         backgroundColor: theme.palette.background.default,
-        pb: getTotalItems() > 0 ? { xs: 10, sm: 8 } : 0,
-        pt: { xs: '56px', sm: '64px' },
+        pb: { xs: 9, sm: 10 },
         position: 'relative',
       }}>
-      <CustomerNavbar 
-        restaurantName={restaurant?.name || 'Menu'}
-        tableId={tableName || tableId}
-        showBackButton={false}
-        showCart={true}
+      {/* Fragment Content */}
+      {activeFragment === 'home' && (
+        <HomeFragment
+          restaurant={restaurant}
+          categories={categories}
+          onCategoryClick={handleCategoryClick}
+        />
+      )}
+
+      {activeFragment === 'menu' && (
+        <MenuFragment
+          groupedMenuItems={groupedMenuItems}
+          allCategories={categories}
+          categoryRefs={categoryRefs}
+          onAddToCart={handleAddToCart}
+          getItemQuantityInCart={getItemQuantityInCart}
+          onToggleFavorite={toggleFavorite}
+          isFavorite={(itemId) => favorites.has(itemId)}
+          getMenuItemImage={getMenuItemImage}
+        />
+      )}
+
+      {activeFragment === 'orders' && (
+        <OrderStatusFragment venueId={venueId} tableId={tableId} />
+      )}
+
+      {/* Floating Cart Card */}
+      <FloatingCartCard
+        totalItems={getTotalItems()}
+        totalAmount={getTotalAmount()}
+        venueId={venueId}
+        tableId={tableId}
+        show={getTotalItems() > 0}
       />
 
-      {/* Clean Hero Section */}
-      <HeroSection sx={{ py: { xs: 3, md: 4 } }}>
-        <Container maxWidth="lg">
-          <Box sx={{ textAlign: 'center' }}>
-            <Typography 
-              variant="h4" 
-              sx={{ 
-                fontWeight: 600,
-                mb: 1,
-                color: theme.palette.text.primary,
-              }}
-            >
-              {restaurant?.name}
-            </Typography>
-            
-            <Typography 
-              variant="body1" 
-              color="text.secondary"
-              sx={{ mb: 2 }}
-            >
-              {restaurant?.cuisine_types?.join(' • ')} • Table {tableName || tableId}
-            </Typography>
-
-            <Stack direction="row" spacing={3} justifyContent="center" alignItems="center" flexWrap="wrap">
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                <Star sx={{ color: '#FFB400', fontSize: 18 }} />
-                <Typography variant="body2" fontWeight="500">
-                  {restaurant?.rating?.toFixed(1) || '4.2'}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  ({restaurant?.total_reviews || 0}+ reviews)
-                </Typography>
-              </Box>
-              
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                <LocationOn sx={{ fontSize: 16, color: 'text.secondary' }} />
-                <Typography variant="body2" color="text.secondary">
-                  {restaurant?.location.city}
-                </Typography>
-              </Box>
-
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                <Schedule sx={{ fontSize: 16, color: 'text.secondary' }} />
-                <Typography variant="body2" color="text.secondary">
-                  25-30 min
-                </Typography>
-              </Box>
-            </Stack>
-          </Box>
-        </Container>
-      </HeroSection>
-
-
-
-      {/* Category Navigation with Integrated Filters */}
-      <Box sx={{ 
-        py: { xs: 2, sm: 3 }, 
-        px: { xs: 2, sm: 3 },
-        borderBottom: `1px solid ${theme.palette.grey[200]}`,
-        backgroundColor: theme.palette.background.paper,
-        position: 'sticky',
-        top: { xs: 56, sm: 64 },
-        zIndex: 10,
-      }}>
-        <Container maxWidth="lg">
-          {/* Header with Search and Filters */}
-          <Box sx={{ 
-            display: 'flex', 
-            flexDirection: { xs: 'column', md: 'row' },
-            justifyContent: 'space-between', 
-            alignItems: { xs: 'stretch', md: 'center' },
-            gap: { xs: 2, md: 3 },
-            mb: 3
-          }}>
-            <Typography variant="h5" fontWeight="600" sx={{ color: 'text.primary' }}>
-              Menu Categories
-            </Typography>
-            
-            {/* Integrated Search and Filters */}
-            <Box sx={{ 
-              display: 'flex', 
-              flexDirection: { xs: 'column', sm: 'row' },
-              gap: { xs: 1.5, sm: 2 },
-              alignItems: { xs: 'stretch', sm: 'center' },
-              minWidth: { md: '60%' }
-            }}>
-              {/* Search Bar */}
-              <TextField
-                size="small"
-                placeholder="Search dishes..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                sx={{ 
-                  minWidth: { xs: '100%', sm: 200, md: 250 },
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: 2,
-                  }
-                }}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Search sx={{ color: 'text.secondary', fontSize: 20 }} />
-                    </InputAdornment>
-                  ),
-                  endAdornment: searchQuery && (
-                    <InputAdornment position="end">
-                      <IconButton size="small" onClick={() => setSearchQuery('')}>
-                        <Clear sx={{ fontSize: 18 }} />
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }}
-              />
-              
-              {/* Filter Buttons */}
-              <Stack direction="row" spacing={1} sx={{ flexShrink: 0 }}>
-                <Button
-                  variant={vegFilter === VEG_FILTERS.ALL ? 'contained' : 'outlined'}
-                  onClick={() => setVegFilter(VEG_FILTERS.ALL)}
-                  size="small"
-                  sx={{ minWidth: 50, fontSize: '0.75rem' }}
-                >
-                  All
-                </Button>
-                
-                <Button
-                  variant={vegFilter === VEG_FILTERS.VEG ? 'contained' : 'outlined'}
-                  onClick={() => setVegFilter(VEG_FILTERS.VEG)}
-                  size="small"
-                  startIcon={
-                    <Box sx={{ 
-                      width: 6, 
-                      height: 6, 
-                      borderRadius: '50%', 
-                      backgroundColor: '#4CAF50',
-                    }} />
-                  }
-                  sx={{ 
-                    minWidth: 50,
-                    fontSize: '0.75rem',
-                    color: vegFilter === VEG_FILTERS.VEG ? 'white' : '#4CAF50',
-                    borderColor: '#4CAF50',
-                    backgroundColor: vegFilter === VEG_FILTERS.VEG ? '#4CAF50' : 'transparent',
-                    '&:hover': { 
-                      backgroundColor: vegFilter === VEG_FILTERS.VEG ? '#43A047' : alpha('#4CAF50', 0.08),
-                      borderColor: '#4CAF50',
-                    }
-                  }}
-                >
-                  Veg
-                </Button>
-                
-                <Button
-                  variant={vegFilter === VEG_FILTERS.NON_VEG ? 'contained' : 'outlined'}
-                  onClick={() => setVegFilter(VEG_FILTERS.NON_VEG)}
-                  size="small"
-                  startIcon={
-                    <Box sx={{ 
-                      width: 6, 
-                      height: 6, 
-                      backgroundColor: '#F44336',
-                    }} />
-                  }
-                  sx={{ 
-                    minWidth: 70,
-                    fontSize: '0.75rem',
-                    color: vegFilter === VEG_FILTERS.NON_VEG ? 'white' : '#F44336',
-                    borderColor: '#F44336',
-                    backgroundColor: vegFilter === VEG_FILTERS.NON_VEG ? '#F44336' : 'transparent',
-                    '&:hover': { 
-                      backgroundColor: vegFilter === VEG_FILTERS.NON_VEG ? '#E53935' : alpha('#F44336', 0.08),
-                      borderColor: '#F44336',
-                    }
-                  }}
-                >
-                  Non-Veg
-                </Button>
-
-                <IconButton 
-                  onClick={() => setShowFilters(!showFilters)}
-                  size="small"
-                  sx={{ 
-                    border: `1px solid ${theme.palette.grey[300]}`,
-                    borderRadius: 1,
-                  }}
-                >
-                  <FilterList fontSize="small" />
-                </IconButton>
-              </Stack>
-            </Box>
-          </Box>
-
-          {/* Advanced Filters */}
-          <Collapse in={showFilters}>
-            <Box sx={{ mb: 3, p: 2, backgroundColor: alpha(theme.palette.grey[100], 0.5), borderRadius: 2 }}>
-              <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
-                <Typography variant="body2" color="text.secondary" sx={{ mr: 1 }}>
-                  Sort by:
-                </Typography>
-                {Object.entries({
-                  [SORT_OPTIONS.POPULAR]: 'Popular',
-                  [SORT_OPTIONS.PRICE_LOW]: 'Price ↑',
-                  [SORT_OPTIONS.PRICE_HIGH]: 'Price ↓',
-                  [SORT_OPTIONS.RATING]: 'Rating',
-                  [SORT_OPTIONS.NAME]: 'Name',
-                }).map(([value, label]) => (
-                  <Chip
-                    key={value}
-                    label={label}
-                    onClick={() => setSortBy(value)}
-                    variant={sortBy === value ? 'filled' : 'outlined'}
-                    size="small"
-                    color={sortBy === value ? 'primary' : 'default'}
-                  />
-                ))}
-                
-                {(searchQuery || vegFilter !== VEG_FILTERS.ALL || sortBy !== SORT_OPTIONS.POPULAR) && (
-                  <Button
-                    size="small"
-                    onClick={clearFilters}
-                    startIcon={<Clear />}
-                    sx={{ ml: 2 }}
-                  >
-                    Clear
-                  </Button>
-                )}
-              </Stack>
-            </Box>
-          </Collapse>
-
-          {/* Category Chips */}
-          <Box sx={{
-            display: 'flex',
-            overflowX: 'auto',
-            gap: { xs: 1.5, sm: 2 },
-            pb: 1,
-            px: { xs: 0.5, sm: 0 },
-            '&::-webkit-scrollbar': { height: { xs: 2, sm: 4 } },
-            '&::-webkit-scrollbar-track': { backgroundColor: theme.palette.grey[100] },
-            '&::-webkit-scrollbar-thumb': { 
-              backgroundColor: theme.palette.grey[400],
-              borderRadius: 2,
-            },
-            scrollSnapType: 'x mandatory',
-            '& > *': {
-              scrollSnapAlign: 'start',
-            },
-          }}>
-            {groupedMenuItems.map((category) => (
-              <CategoryChip
-                key={category.id}
-                active={activeCategory === category.id}
-                onClick={() => handleCategoryClick(category.id)}
-                sx={{
-                  minWidth: { xs: 80, sm: 90 },
-                  p: { xs: 1.5, sm: 2 },
-                }}
-              >
-                <Avatar
-                  sx={{
-                    width: { xs: 36, sm: 44 },
-                    height: { xs: 36, sm: 44 },
-                    backgroundColor: activeCategory === category.id ? 'primary.main' : 'grey.100',
-                    color: activeCategory === category.id ? 'white' : 'text.secondary',
-                    fontSize: { xs: '1.1rem', sm: '1.3rem' },
-                    mb: { xs: 0.75, sm: 1 },
-                  }}
-                >
-                  {category.icon}
-                </Avatar>
-                <Typography
-                  variant="caption"
-                  sx={{
-                    fontWeight: activeCategory === category.id ? 600 : 500,
-                    color: activeCategory === category.id ? 'primary.main' : 'text.secondary',
-                    textAlign: 'center',
-                    maxWidth: { xs: 60, sm: 70 },
-                    lineHeight: 1.2,
-                    fontSize: { xs: '0.7rem', sm: '0.8rem' },
-                    display: '-webkit-box',
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: 'vertical',
-                    overflow: 'hidden',
-                  }}
-                >
-                  {category.name}
-                </Typography>
-                <Typography
-                  variant="caption"
-                  sx={{
-                    fontSize: { xs: '0.65rem', sm: '0.7rem' },
-                    color: 'text.disabled',
-                    mt: 0.5,
-                    display: { xs: 'none', sm: 'block' },
-                  }}
-                >
-                  {category.itemCount} items
-                </Typography>
-              </CategoryChip>
-            ))}
-          </Box>
-        </Container>
-      </Box>
-
-      {/* Menu Content */}
-      <Box sx={{ 
-        backgroundColor: alpha(theme.palette.grey[50], 0.3),
-        minHeight: '60vh',
-        py: { xs: 3, sm: 4 }
-      }}>
-        <Container maxWidth="lg">
-          {groupedMenuItems.map((group) => (
-            <Box
-              key={group.id}
-              id={group.id}
-              ref={(el: HTMLDivElement | null) => (categoryRefs.current[group.id] = el)}
-              sx={{ 
-                mb: { xs: 4, sm: 5 },
-                backgroundColor: 'background.paper',
-                borderRadius: 3,
-                p: { xs: 2, sm: 3 },
-                boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-                border: `1px solid ${theme.palette.grey[100]}`
-              }}
-            >
-              {/* Category Header */}
-              <Box sx={{ mb: { xs: 2, sm: 3 } }}>
-                <Typography variant="h5" fontWeight="600" sx={{ mb: 1, color: 'text.primary' }}>
-                  {group.name}
-                </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                  {group.description || `Discover our delicious ${group.name.toLowerCase()}`}
-                </Typography>
-                <Divider />
-              </Box>
-
-              {/* Menu Items Grid - Responsive layout */}
-              <Grid container spacing={{ xs: 2, sm: 3 }}>
-                {group.items.map((item) => (
-                  <Grid item xs={12} sm={6} md={4} lg={3} key={item.id}>
-                    <EnhancedMenuItemCard 
-                      item={item} 
-                  imageOverride={getMenuItemImage(item)}
-                      onAddToCart={handleAddToCart}
-                      onToggleFavorite={toggleFavorite}
-                      isFavorite={favorites.has(item.id)}
-                      quantityInCart={getItemQuantityInCart(item.id)}
-                      isMobile={isMobile}
-                    />
-                  </Grid>
-                ))}
-              </Grid>
-            </Box>
-          ))}
-
-          {/* Debug: Show all items if no grouped items */}
-          {groupedMenuItems.length === 0 && menuItems.length > 0 && (
-            <Box sx={{ 
-              backgroundColor: 'background.paper',
-              borderRadius: 3,
-              p: { xs: 2, sm: 3 },
-              boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-              border: `1px solid ${theme.palette.grey[100]}`,
-              mb: 4
-            }}>
-              <Typography variant="h5" fontWeight="600" sx={{ mb: 2, color: 'text.primary' }}>
-                All Menu Items (Debug Mode)
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                Categories not matching - showing all items for debugging
-              </Typography>
-              <Grid container spacing={{ xs: 2, sm: 3 }}>
-                {menuItems.map((item) => (
-                  <Grid item xs={12} sm={6} md={4} lg={3} key={item.id}>
-                    <EnhancedMenuItemCard
-                      item={item} 
-                      onAddToCart={handleAddToCart}
-                      onToggleFavorite={toggleFavorite}
-                      isFavorite={favorites.has(item.id)}
-                      quantityInCart={getItemQuantityInCart(item.id)}
-                      isMobile={isMobile}
-                    />
-                  </Grid>
-                ))}
-              </Grid>
-            </Box>
-          )}
-
-          {/* Empty State */}
-          {filteredItems.length === 0 && menuItems.length === 0 && (
-            <Box sx={{ 
-              textAlign: 'center', 
-              py: 8,
-              backgroundColor: 'background.paper',
-              borderRadius: 3,
-              border: `2px dashed ${theme.palette.grey[300]}`,
-            }}>
-              <Restaurant sx={{ fontSize: 64, color: 'text.disabled', mb: 2 }} />
-              <Typography variant="h5" color="text.secondary" gutterBottom fontWeight="500">
-                No items found
-              </Typography>
-              <Typography variant="body1" color="text.secondary" sx={{ mb: 3, maxWidth: 400, mx: 'auto' }}>
-                We couldn't find any dishes matching your criteria. Try adjusting your search or filters.
-              </Typography>
-              <Button 
-                variant="contained" 
-                onClick={clearFilters}
-                sx={{ px: 4, py: 1.5, borderRadius: 2 }}
-              >
-                Clear All Filters
-              </Button>
-            </Box>
-          )}
-        </Container>
-      </Box>
-
-      {/* Floating Cart Button */}
-      {getTotalItems() > 0 && !isMobile && (
-        <Tooltip title="View Cart">
-          <FloatingCartButton
-            onClick={() => navigate(`/checkout/${venueId}/${tableId}`)}
-          >
-            <Badge badgeContent={getTotalItems()} color="error">
-              <ShoppingCart />
-            </Badge>
-          </FloatingCartButton>
-        </Tooltip>
-      )}
+      {/* Fragment Navigation */}
+      <FragmentNavigation
+        activeFragment={activeFragment}
+        onFragmentChange={setActiveFragment}
+        orderCount={0}
+      />
 
       {/* Desktop Restriction Overlay */}
       {isDesktopRestricted && <DesktopRestrictionOverlay />}

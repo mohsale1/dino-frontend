@@ -127,7 +127,7 @@ const OrdersManagement: React.FC = () => {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [openOrderDialog, setOpenOrderDialog] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
   const theme = useTheme();
@@ -140,13 +140,8 @@ const OrdersManagement: React.FC = () => {
       const venue = getVenue();
       
       if (!venue?.id) {
-        // Try to refresh user data to get venue
-        try {
-          await refreshUserData();
-          setError('No venue assigned to your account. Please contact support.');
-        } catch (refreshError) {
-          setError('Unable to load venue data. Please contact support.');
-        }
+        // No venue - just keep empty orders, don't show error
+        setOrders([]);
         setLoading(false);
         return;
       }
@@ -158,7 +153,9 @@ const OrdersManagement: React.FC = () => {
         const ordersData = await orderService.getVenueOrders(venue.id);
         setOrders(ordersData);
       } catch (error) {
-        setError('Failed to load orders. Please try again.');
+        // API failed - show error alert but keep UI visible
+        console.error('Failed to load orders:', error);
+        setError('Network error. Please check your connection.');
       } finally {
         setLoading(false);
       }
@@ -174,25 +171,7 @@ const OrdersManagement: React.FC = () => {
     };
   }, [userData?.venue?.id]);
 
-  // Retry loading orders when venue becomes available
-  useEffect(() => {
-    const venue = getVenue();
-    if (venue?.id && orders.length === 0 && !loading) {
-      const loadOrders = async () => {
-        try {
-          setLoading(true);
-          setError(null);
-          const ordersData = await orderService.getVenueOrders(venue.id);
-          setOrders(ordersData);
-        } catch (error) {
-          setError('Failed to load orders. Please try again.');
-        } finally {
-          setLoading(false);
-        }
-      };
-      loadOrders();
-    }
-  }, [userData?.venue?.id]);
+  // Removed retry logic - let user manually refresh if needed
 
   // Filter orders based on search and status (cancelled orders are already excluded from API)
   useEffect(() => {
@@ -670,76 +649,8 @@ const OrdersManagement: React.FC = () => {
     );
   };
 
-  if (loading) {
-    return (
-      <Box
-        sx={{
-          minHeight: 'auto',
-          height: 'auto',
-          backgroundColor: '#f8f9fa',
-          padding: 0,
-          margin: 0,
-          width: '100%',
-          overflow: 'visible',
-        }}
-      >
-        <Container maxWidth="xl" sx={{ pt: { xs: '56px', sm: '64px' } }}>
-          <Box sx={{ py: { xs: 2, sm: 4 } }}>
-            <Grid container spacing={{ xs: 2, sm: 3 }}>
-              {[...Array(6)].map((_, index) => (
-                <Grid item xs={12} md={6} lg={4} key={index}>
-                  <Card className="card-responsive">
-                    <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-                      <Skeleton variant="text" height={isMobile ? 28 : 32} />
-                      <Skeleton variant="text" height={isMobile ? 20 : 24} />
-                      <Skeleton variant="rectangular" height={isMobile ? 100 : 120} sx={{ mt: 2 }} />
-                    </CardContent>
-                  </Card>
-                </Grid>
-              ))}
-            </Grid>
-          </Box>
-        </Container>
-      </Box>
-    );
-  }
-
-  if (error) {
-    return (
-      <Box
-        sx={{
-          minHeight: 'auto',
-          height: 'auto',
-          backgroundColor: '#f8f9fa',
-          padding: 0,
-          margin: 0,
-          width: '100%',
-          overflow: 'visible',
-        }}
-      >
-        <Container maxWidth="xl" sx={{ pt: { xs: '56px', sm: '64px' } }}>
-          <Box sx={{ textAlign: 'center', py: { xs: 6, sm: 8 } }}>
-            <Typography 
-              variant={isMobile ? "body1" : "h6"} 
-              color="error" 
-              gutterBottom
-              fontWeight="600"
-            >
-              {error}
-            </Typography>
-            <Button 
-              variant="contained" 
-              onClick={handleRefreshOrders} 
-              className="btn-responsive"
-              sx={{ mt: 2 }}
-            >
-              Try Again
-            </Button>
-          </Box>
-        </Container>
-      </Box>
-    );
-  }
+  // Only show loading on first load, not on subsequent refreshes
+  // This keeps the UI visible even when API fails
 
   return (
     <Box
@@ -920,6 +831,18 @@ const OrdersManagement: React.FC = () => {
           margin: 0,
         }}
       >
+        {/* Error Alert */}
+        {error && (
+          <Box sx={{ px: { xs: 3, sm: 4 }, pt: 3, pb: 1 }}>
+            <Alert 
+              severity="error" 
+              onClose={() => setError(null)}
+            >
+              {error}
+            </Alert>
+          </Box>
+        )}
+
         {/* Kitchen Statistics */}
         <FlagGate flag="orders.showOrderStats">
           <Box sx={{ mb: 4, px: { xs: 3, sm: 4 }, py: 2 }}>

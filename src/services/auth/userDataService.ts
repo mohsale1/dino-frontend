@@ -39,6 +39,8 @@ export interface UserData {
     is_active: boolean;
     is_open: boolean;
     theme?: string; // Venue theme (e.g., 'pet', 'default')
+    menu_template?: string; // Menu template name (e.g., 'modern', 'classic', 'elegant')
+    menu_template_config?: any; // Full template configuration JSON
     created_at: string;
     updated_at?: string;
     // Compatibility fields
@@ -122,8 +124,8 @@ class UserDataService {
    */
   private async _fetchUserData(): Promise<UserData | null> {
     try {
-      console.log('🔄 UserDataService: Fetching user data from /auth/user-data...');
-      const response = await apiService.get<{data: UserData, timestamp: string}>('/auth/user-data');
+      console.log('🔄 UserDataService: Fetching user data from /users/me/data...');
+      const response = await apiService.get<{data: UserData, timestamp: string}>('/users/me/data');
       
       if (response.success && response.data) {
         // Extract the actual user data from the response
@@ -206,7 +208,8 @@ class UserDataService {
             description: userData.venue.description || '',
             phone: userData.venue.phone || '',
             email: userData.venue.email || '',
-            theme: userData.venue.theme || (userData.venue as any).theme || 'pet' // Default to pet theme
+            theme: userData.venue.theme || (userData.venue as any).theme || 'pet', // Default to pet theme
+            menu_template: userData.venue.menu_template || (userData.venue as any).menu_template || 'classic' // Default to classic template
           };
           
           // Set status field separately to avoid TypeScript issues
@@ -271,7 +274,7 @@ class UserDataService {
    */
   async getVenueData(venueId: string): Promise<VenueData | null> {
     try {
-      const response = await apiService.get<VenueData>(`/auth/venue-data/${venueId}`);
+      const response = await apiService.get<VenueData>(`/venues/${venueId}/data`);
       
       if (response.success && response.data) {
         return response.data;

@@ -105,12 +105,16 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ dashboardData, stats }) => {
                 />
               </Box>
               
-              {dashboardData?.recent_activity && dashboardData.recent_activity.length > 0 ? (
+              {(() => {
+                // Check for both snake_case and camelCase versions
+                const recentActivity = dashboardData?.recent_activity || dashboardData?.recentActivity || [];
+                console.log('📋 OverviewTab - Recent activity:', recentActivity);
+                return recentActivity && recentActivity.length > 0 ? (
                 <List sx={{ maxHeight: 400, overflow: 'auto' }}>
-                  {dashboardData.recent_activity.slice(0, 6).map((activity: any, index: number) => (
+                  {recentActivity.slice(0, 6).map((activity: any, index: number) => (
                     <ListItem 
                       key={activity.id || index} 
-                      divider={index < dashboardData.recent_activity.length - 1}
+                      divider={index < recentActivity.length - 1}
                       sx={{ 
                         px: 0,
                         '&:hover': {
@@ -188,7 +192,8 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ dashboardData, stats }) => {
                     Recent system activity will appear here once orders start coming in
                   </Typography>
                 </Box>
-              )}
+              );
+              })()}
             </CardContent>
           </Card>
         </Grid>

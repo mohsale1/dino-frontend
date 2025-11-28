@@ -98,7 +98,7 @@ const MenuManagement: React.FC = () => {
     message: '', 
     severity: 'success' as 'success' | 'error' | 'warning' | 'info' 
   });
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
   // Delete confirmation modal state
@@ -120,7 +120,9 @@ const MenuManagement: React.FC = () => {
 
       const venue = getVenue();
       if (!venue?.id) {
-        setError('No venue assigned to your account. Please contact support.');
+        // No venue - just keep empty data, don't show error
+        setMenuItems([]);
+        setCategories([]);
         setLoading(false);
         return;
       }
@@ -159,13 +161,9 @@ const MenuManagement: React.FC = () => {
         setMenuItems(processedMenuItems);
         
       } catch (error) {
-        setMenuItems([]);
-        setCategories([]);
-        setSnackbar({
-          open: true,
-          message: 'Failed to load menu data. Please try refreshing.',
-          severity: 'error'
-        });
+        // API failed - show error alert but keep UI visible
+        console.error('Failed to load menu data:', error);
+        setError('Network error. Please check your connection.');
       } finally {
         setLoading(false);
       }
@@ -562,57 +560,8 @@ const MenuManagement: React.FC = () => {
     }).format(amount);
   };
 
-  if (loading) {
-    return (
-      <Box sx={{ 
-        minHeight: '100vh',
-        backgroundColor: '#f8f9fa',
-        display: 'flex', 
-        flexDirection: 'column',
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        textAlign: 'center',
-        gap: 2,
-        py: { xs: 2, sm: 4 }
-      }}>
-        <CircularProgress size={isMobile ? 48 : 60} />
-        <Typography variant={isMobile ? "body1" : "h6"}>
-          Loading Menu Management...
-        </Typography>
-      </Box>
-    );
-  }
-
-  if (error) {
-    return (
-      <Box sx={{ 
-        minHeight: '100vh',
-        backgroundColor: '#f8f9fa',
-        py: { xs: 2, sm: 4 },
-        px: { xs: 2, sm: 4 }
-      }}>
-        <Alert severity="warning" sx={{ mb: 4 }}>
-          <Typography variant={isMobile ? "body1" : "h6"} gutterBottom fontWeight="600">
-            Unable to Load Menu Data
-          </Typography>
-          <Typography variant="body2">
-            Don't worry! You can still manage your menu. Start by adding your first menu item or category.
-          </Typography>
-        </Alert>
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems={{ xs: 'stretch', sm: 'center' }}>
-          <Button variant="contained" onClick={handleAddItem} fullWidth={isMobile}>
-            Add Menu Item
-          </Button>
-          <Button variant="outlined" onClick={handleAddCategory} fullWidth={isMobile}>
-            Add Category
-          </Button>
-          <Button variant="outlined" onClick={() => window.location.reload()} fullWidth={isMobile}>
-            Retry Loading
-          </Button>
-        </Stack>
-      </Box>
-    );
-  }
+  // Don't block UI with loading or error states
+  // Show page immediately with empty data if API fails
 
   return (
     <Box
@@ -758,6 +707,18 @@ const MenuManagement: React.FC = () => {
           margin: 0,
         }}
       >
+        {/* Error Alert */}
+        {error && (
+          <Box sx={{ px: { xs: 3, sm: 4 }, pt: 3, pb: 1 }}>
+            <Alert 
+              severity="error" 
+              onClose={() => setError(null)}
+            >
+              {error}
+            </Alert>
+          </Box>
+        )}
+
         <FlagGate flag="menu.showMenuStats">
           <Box sx={{ px: { xs: 3, sm: 4 }, py: 2 }}>
             <MenuStats menuItems={menuItems} categories={categories} />

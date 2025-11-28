@@ -46,6 +46,10 @@ class PermissionService {
         { id: '27', name: PERMISSIONS.VENUE_DEACTIVATE, resource: 'venue', action: 'update', description: 'Deactivate venues' },
         { id: '28', name: PERMISSIONS.VENUE_VIEW_ALL, resource: 'venue', action: 'read', description: 'View all venues' },
         { id: '29', name: PERMISSIONS.VENUE_SWITCH, resource: 'venue', action: 'manage', description: 'Switch venues' },
+        { id: '30', name: PERMISSIONS.TEMPLATE_VIEW, resource: 'template', action: 'read', description: 'View templates' },
+        { id: '31', name: PERMISSIONS.TEMPLATE_UPDATE, resource: 'template', action: 'update', description: 'Update templates' },
+        { id: '32', name: PERMISSIONS.TEMPLATE_CREATE, resource: 'template', action: 'create', description: 'Create templates' },
+        { id: '33', name: PERMISSIONS.TEMPLATE_DELETE, resource: 'template', action: 'delete', description: 'Delete templates' },
       ]
     },
     [ROLES.ADMIN]: {
@@ -74,6 +78,8 @@ class PermissionService {
         { id: '18', name: PERMISSIONS.USERS_UPDATE, resource: 'user', action: 'update', description: 'Update users' },
         { id: '19', name: PERMISSIONS.USERS_CREATE, resource: 'user', action: 'create', description: 'Create users' },
         { id: '20', name: PERMISSIONS.USERS_DELETE, resource: 'user', action: 'delete', description: 'Delete users' },
+        { id: '30', name: PERMISSIONS.TEMPLATE_VIEW, resource: 'template', action: 'read', description: 'View templates' },
+        { id: '31', name: PERMISSIONS.TEMPLATE_UPDATE, resource: 'template', action: 'update', description: 'Update templates' },
       ]
     },
     [ROLES.OPERATOR]: {
@@ -97,7 +103,7 @@ class PermissionService {
     }
 
     // Special case for superadmin emails - grant all permissions
-    if (user.email?.includes('saleem') || user.email?.includes('admin')) {
+    if (user.email?.includes('admin')) {
       return true;
     }
 
@@ -157,7 +163,11 @@ class PermissionService {
         'venue.update': ['venue.update', 'venue.manage'],
         'venue.manage': ['venue.manage'],
         'settings.read': ['workspace.read', 'venue.read', 'workspace.manage', 'venue.manage'],
-        'settings.update': ['workspace.update', 'venue.update', 'workspace.manage', 'venue.manage']
+        'settings.update': ['workspace.update', 'venue.update', 'workspace.manage', 'venue.manage'],
+        'template.read': ['template.read', 'template.manage'],
+        'template.update': ['template.update', 'template.manage'],
+        'template.create': ['template.create', 'template.manage'],
+        'template.delete': ['template.delete', 'template.manage']
       };
       
       // Check mapped permissions

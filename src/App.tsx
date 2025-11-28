@@ -17,7 +17,6 @@ import { SidebarProvider } from './contexts/SidebarContext';
 import { DinoAvatarProvider } from './contexts/DinoAvatarContext';
 import { TourProvider } from './contexts/TourContext';
 import { FlagProvider } from './flags/FlagContext';
-import { isPasswordHashingSupported } from './utils/security';
 
 // Public Pages
 import { HomePage } from './pages/public';
@@ -69,19 +68,12 @@ const LoadingFallback = () => (
 );
 
 function App() {
-  // Validate password hashing setup and cleanup storage on app startup
+  // Cleanup storage and initialize app on startup
   useEffect(() => {
     try {
       // Clean up legacy data from localStorage
       StorageCleanup.performCleanup();
       logger.info('Storage cleanup completed successfully');
-      
-      // Validate password hashing setup
-      if (!isPasswordHashingSupported()) {
-        logger.warn('Password hashing not supported - crypto.subtle not available');
-      } else {
-        logger.info('Password hashing setup validated successfully');
-      }
       
       // Refresh API configuration from runtime config
       if (typeof window !== 'undefined') {
@@ -205,6 +197,15 @@ function App() {
                     <RoleProtectedRoute requiredPermissions={[PERMISSIONS.SETTINGS_VIEW]}>
                       <Suspense fallback={<LoadingFallback />}>
                         {React.createElement(LazyComponents.VenueSettings.component)}
+                      </Suspense>
+                    </RoleProtectedRoute>
+                  </Layout>
+                } />
+                <Route path="/admin/menu-template" element={
+                  <Layout>
+                    <RoleProtectedRoute requiredPermissions={[PERMISSIONS.TEMPLATE_VIEW]}>
+                      <Suspense fallback={<LoadingFallback />}>
+                        {React.createElement(LazyComponents.MenuTemplateSettings.component)}
                       </Suspense>
                     </RoleProtectedRoute>
                   </Layout>

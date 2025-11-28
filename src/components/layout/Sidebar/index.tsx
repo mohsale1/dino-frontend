@@ -28,6 +28,7 @@ import {
   CheckCircle,
   Cancel,
   LocalOffer,
+  Palette,
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
@@ -94,6 +95,14 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
       path: '/admin/menu', 
       icon: <Restaurant />, 
       permission: PERMISSIONS.MENU_VIEW,
+      roles: ['admin'],
+      flagKey: 'showMenuNav'
+    },
+    { 
+      label: 'Menu Template', 
+      path: '/admin/menu-template', 
+      icon: <Palette />, 
+      permission: PERMISSIONS.TEMPLATE_VIEW,
       roles: ['admin'],
       flagKey: 'showMenuNav'
     },

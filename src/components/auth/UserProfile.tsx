@@ -73,6 +73,7 @@ const UserProfile: React.FC = () => {
   
   // Dialog states
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
   
   // Form states
   const [passwordData, setPasswordData] = useState({
@@ -131,12 +132,12 @@ const UserProfile: React.FC = () => {
   const handlePasswordChange = async () => {
     try {
       if (passwordData.newPassword !== passwordData.confirmPassword) {
-        setError('Passwords do not match');
+        setPasswordError('Passwords do not match');
         return;
       }
 
       setLoading(true);
-      setError(null);
+      setPasswordError(null);
       
       await authService.changePassword(passwordData.currentPassword, passwordData.newPassword);
       
@@ -146,9 +147,10 @@ const UserProfile: React.FC = () => {
         newPassword: '',
         confirmPassword: ''
       });
+      setPasswordError(null);
       setSuccess('Password changed successfully');
     } catch (err: any) {
-      setError(err.message || 'Failed to change password');
+      setPasswordError(err.message || 'Failed to change password');
     } finally {
       setLoading(false);
     }
@@ -158,7 +160,7 @@ const UserProfile: React.FC = () => {
 
   return (
     <Box sx={{ 
-      minHeight: '80vh',
+      minHeight: '100vh',
       pt: { xs: '80px', sm: '88px', md: '96px' }, // Add top padding to avoid navbar
       pb: { xs: 4, sm: 6, md: 8 },
       backgroundColor: 'background.default',
@@ -446,7 +448,7 @@ const UserProfile: React.FC = () => {
                 </ListItemIcon>
                 <ListItemText
                   primary="Account Status"
-                  secondary={user?.isVerified ? "Verified account" : "Unverified account"} 
+                  secondary={user?.isVerified ? "Verified account" : "Unverified account"}
                   sx={{ 
                     pr: { xs: 0, sm: 2 },
                     '& .MuiListItemText-primary': {
@@ -479,9 +481,27 @@ const UserProfile: React.FC = () => {
       </Paper>
 
       {/* Change Password Dialog */}
-      <Dialog open={passwordDialogOpen} onClose={() => setPasswordDialogOpen(false)} maxWidth="sm" fullWidth>
+      <Dialog 
+        open={passwordDialogOpen} 
+        onClose={() => {
+          setPasswordDialogOpen(false);
+          setPasswordError(null);
+          setPasswordData({
+            currentPassword: '',
+            newPassword: '',
+            confirmPassword: ''
+          });
+        }} 
+        maxWidth="sm" 
+        fullWidth
+      >
         <DialogTitle>Change Password</DialogTitle>
         <DialogContent>
+          {passwordError && (
+            <Alert severity="error" sx={{ mb: 2, mt: 2 }} onClose={() => setPasswordError(null)}>
+              {passwordError}
+            </Alert>
+          )}
           <Grid container spacing={2} sx={{ mt: 1 }}>
             <Grid item xs={12}>
               <TextField
@@ -521,13 +541,26 @@ const UserProfile: React.FC = () => {
           </Grid>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setPasswordDialogOpen(false)}>Cancel</Button>
+          <Button 
+            onClick={() => {
+              setPasswordDialogOpen(false);
+              setPasswordError(null);
+              setPasswordData({
+                currentPassword: '',
+                newPassword: '',
+                confirmPassword: ''
+              });
+            }}
+            disabled={loading}
+          >
+            Cancel
+          </Button>
           <Button 
             onClick={handlePasswordChange} 
             variant="contained"
             disabled={loading || !passwordData.currentPassword || !passwordData.newPassword || passwordData.newPassword !== passwordData.confirmPassword}
           >
-            Change Password
+            {loading ? 'Changing...' : 'Change Password'}
           </Button>
         </DialogActions>
       </Dialog>

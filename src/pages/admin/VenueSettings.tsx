@@ -147,7 +147,7 @@ const TabPanel: React.FC<TabPanelProps> = ({ children, value, index }) => {
 const VenueSettings: React.FC = () => {
   const { getVenue, getVenueDisplayName, refreshUserData, userData, loading: userDataLoading } = useUserData();
   const [tabValue, setTabValue] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   
   const theme = useTheme();
@@ -225,7 +225,7 @@ const VenueSettings: React.FC = () => {
       
       if (!venue?.id) {
         console.error('No venue found in UserData context');
-        setError('No venue assigned to your account. Please contact support.');
+        // No venue - keep default settings, don't show error
         setLoading(false);
         return;
       }
@@ -266,11 +266,8 @@ const VenueSettings: React.FC = () => {
         }
       } catch (error) {
         console.error('Error loading venue settings:', error);
-        setSnackbar({ 
-          open: true, 
-          message: 'Failed to load venue settings', 
-          severity: 'error' 
-        });
+        // API failed - show error alert but keep UI visible
+        setError('Network error. Please check your connection.');
       } finally {
         setLoading(false);
       }
@@ -455,25 +452,15 @@ const VenueSettings: React.FC = () => {
     'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'
   ];
 
-  if (loading) {
-    return (
-      <Box sx={{ pt: { xs: '56px', sm: '64px' }, py: 4, width: '100%' }}>
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
-          <CircularProgress size={60} />
-          <Typography variant="h6" sx={{ ml: 2 }}>
-            Loading venue settings...
-          </Typography>
-        </Box>
-      </Box>
-    );
-  }
-
-  if (error) {
+  // Don't block UI with loading or error states
+  // Show page immediately with default settings if API fails
+  
+  if (false) { // Disabled blocking UI
     return (
       <Box sx={{ pt: { xs: '56px', sm: '64px' }, py: 4, width: '100%' }}>
         <Container maxWidth="xl">
           <Alert severity="error" sx={{ mb: 3 }}>
-            {error}
+            Placeholder
           </Alert>
           <Box sx={{ textAlign: 'center' }}>
             <Button 
@@ -664,7 +651,17 @@ const VenueSettings: React.FC = () => {
           margin: 0,
         }}
       >
-
+        {/* Error Alert */}
+        {error && (
+          <Box sx={{ px: { xs: 3, sm: 4 }, pt: 3, pb: 1 }}>
+            <Alert 
+              severity="error" 
+              onClose={() => setError(null)}
+            >
+              {error}
+            </Alert>
+          </Box>
+        )}
 
         {/* Unsaved Changes Banner */}
         {hasChanges && (

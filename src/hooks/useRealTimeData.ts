@@ -101,7 +101,7 @@ export const useRealTimeData = <T>(
 // Real-time orders hook
 export const useRealTimeOrders = (venueId?: string, status?: string) => {
   const { user } = useAuth();
-  const targetVenueId = venueId || user?.venue_id;
+  const targetVenueId = venueId || user?.venueId;
 
   const fetchOrders = useCallback(async () => {
     if (!targetVenueId) return [];
@@ -124,7 +124,7 @@ export const useRealTimeOrders = (venueId?: string, status?: string) => {
 // Real-time live orders hook (for dashboard)
 export const useRealTimeLiveOrders = (venueId?: string) => {
   const { user } = useAuth();
-  const targetVenueId = venueId || user?.venue_id;
+  const targetVenueId = venueId || user?.venueId;
 
   const fetchLiveOrders = useCallback(async () => {
     if (!targetVenueId) return null;
@@ -142,7 +142,7 @@ export const useRealTimeLiveOrders = (venueId?: string) => {
 // Real-time tables hook
 export const useRealTimeTables = (venueId?: string) => {
   const { user } = useAuth();
-  const targetVenueId = venueId || user?.venue_id;
+  const targetVenueId = venueId || user?.venueId;
 
   const fetchTables = useCallback(async () => {
     if (!targetVenueId) return [];
@@ -161,7 +161,7 @@ export const useRealTimeTables = (venueId?: string) => {
 // Real-time live tables hook (for dashboard)
 export const useRealTimeLiveTables = (venueId?: string) => {
   const { user } = useAuth();
-  const targetVenueId = venueId || user?.venue_id;
+  const targetVenueId = venueId || user?.venueId;
 
   const fetchLiveTables = useCallback(async () => {
     if (!targetVenueId) return null;

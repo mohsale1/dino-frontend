@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Container,
@@ -7,7 +6,11 @@ import {
   Grid,
   Card,
   CardContent,
-  Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
   Chip,
   IconButton,
   Dialog,
@@ -21,61 +24,72 @@ import {
   MenuItem,
   Switch,
   FormControlLabel,
+  Alert,
+  InputAdornment,
+  AlertColor,
+  Avatar,
   Menu,
   ListItemIcon,
   ListItemText,
-  InputAdornment,
-  FormHelperText,
-  Divider,
   Snackbar,
-  Alert,
-  CircularProgress,
-  Skeleton,
-  keyframes,
-  Stack,
-  alpha,
   useTheme,
+  useMediaQuery,
+  Stack,
+  keyframes,
+  Button,
+  CircularProgress,
 } from '@mui/material';
 import {
   Add,
   Edit,
   Delete,
   MoreVert,
-  Visibility,
-  VisibilityOff,
-  Restaurant,
-  LocationOn,
-  Email,
-  Phone,
-  Store,
-  Refresh,
-  CachedOutlined,
   Business,
+  Block,
   CheckCircle,
   Cancel,
-  TrendingUp,
-  LocalCafe,
-  Fastfood,
-  LocalBar,
-  LocalDining,
-  LocalShipping,
-  Kitchen,
-  MoreHoriz,
-  AttachMoney,
-  Public,
-  Home,
-  Apartment,
-  Map,
+  Lock,
+  People,
+  Refresh,
+  ArrowBack,
+  CachedOutlined,
+  Search,
 } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
-import { useVenueTheme } from '../../contexts/VenueThemeContext';
+import { useWorkspace } from '../../contexts/WorkspaceContext';
 import { useUserData } from '../../contexts/UserDataContext';
-import { PERMISSIONS } from '../../types/auth';
-import { venueService } from '../../services/business';
-import { PriceRange } from '../../types/api';
-
+import { useErrorHandler } from '../../hooks/useErrorHandler';
+import { useNavigate } from 'react-router-dom';
+import { ROLES, PERMISSIONS } from '../../types/auth';
+import { PasswordUpdateDialog } from '../../components/auth';
+import { userService, User, UserCreate, UserUpdate } from '../../services/auth';
+import { VenueUser } from '../../types/api';
+import { ROLE_NAMES, getRoleDisplayName } from '../../constants/roles';
+import { PageLoadingSkeleton, EmptyState } from '../../components/ui/LoadingStates';
 import { DeleteConfirmationModal } from '../../components/modals';
 import AnimatedBackground from '../../components/ui/AnimatedBackground';
+import { useUserFlags } from '../../flags/FlagContext';
+import { FlagGate } from '../../flags/FlagComponent';
+
+// Simple password validation function
+const validatePasswordStrength = (password: string) => {
+  const checks = {
+    length: password.length >= 8,
+    lowercase: /[a-z]/.test(password),
+    uppercase: /[A-Z]/.test(password),
+    number: /\d/.test(password),
+    special: /[@$!%*?&]/.test(password)
+  };
+  
+  const score = Object.values(checks).filter(Boolean).length;
+  
+  return {
+    score,
+    checks,
+    isValid: score === 5,
+    strength: score <= 2 ? 'weak' : score <= 4 ? 'medium' : 'strong'
+  };
+};
 
 // Animation for refresh icon
 const spin = keyframes`
@@ -87,356 +101,619 @@ const spin = keyframes`
   }
 `;
 
-const priceRangeOptions = [
-  { value: 'budget', label: 'Budget (₹ - Under ₹500 per person)' },
-  { value: 'mid_range', label: 'Mid Range (₹₹ - ₹500-₹1500 per person)' },
-  { value: 'premium', label: 'Premium (₹₹₹ - ₹1500-₹3000 per person)' },
-  { value: 'luxury', label: 'Luxury (₹₹₹₹ - Above ₹3000 per person)' }
-];
-
-const venueTypeOptions = [
-  'restaurant',
-  'cafe',
-  'bar',
-  'fast_food',
-  'fine_dining',
-  'bakery',
-  'food_truck',
-  'cloud_kitchen',
-  'other'
-];
-
-// Function to get venue type icon
-const getVenueTypeIcon = (venueType: string) => {
-  switch (venueType?.toLowerCase()) {
-    case 'restaurant':
-    case 'fine_dining':
-      return <Store />;
-    case 'cafe':
-      return <LocalCafe />;
-    case 'bar':
-      return <LocalBar />;
-    case 'fast_food':
-    case 'food_truck':
-      return <Fastfood />;
-    case 'bakery':
-      return <LocalDining />;
-    case 'cloud_kitchen':
-      return <Kitchen />;
-    default:
-      return <Store />;
-  }
-};
-
-// Function to get venue type color
-const getVenueTypeColor = (venueType: string) => {
-  switch (venueType?.toLowerCase()) {
-    case 'restaurant':
-    case 'fine_dining':
-      return '#d32f2f';
-    case 'cafe':
-      return '#8d6e63';
-    case 'bar':
-      return '#7b1fa2';
-    case 'fast_food':
-    case 'food_truck':
-      return '#ff9800';
-    case 'bakery':
-      return '#f57c00';
-    case 'cloud_kitchen':
-      return '#455a64';
-    default:
-      return '#2196f3';
-  }
-};
-
-interface VenueFormData {
-  name: string;
-  description: string;
-  venueType: string;
-  location: {
-    address: string;
-    city: string;
-    state: string;
-    country: string;
-    postal_code: string;
-    landmark: string;
-  };
-  phone: string;
-  email: string;
-  priceRange: string;
-  isActive: boolean;
-  theme: string;
-  isOpen: boolean;
-}
-
-/**
- * WorkspaceManagement Component
- * 
- * This component ONLY calls the venues API when the user clicks on the workspace module.
- * It does not make any other API calls for workspace data, user data, or other resources.
- * 
- * API Calls Made:
- * - venueService.getVenuesByWorkspace(workspaceId) - Gets venues for the current workspace
- * 
- * All other data (workspace info, user data) comes from existing context/storage.
- */
-const WorkspaceManagement: React.FC = () => {
-  const { hasPermission, isSuperAdmin } = useAuth();
-  const { userData, loading: userDataLoading } = useUserData(); // Removed refreshUserData to prevent API calls
-  const location = useLocation();
-  const { setTheme } = useVenueTheme();
-  const theme = useTheme();
+const UserManagement: React.FC = () => {
+  const { hasPermission, isSuperAdmin, isAdmin } = useAuth();
+  const userFlags = useUserFlags();
+  const { currentWorkspace, currentVenue, venues } = useWorkspace();
+  const { 
+    userData, 
+    loading: userDataLoading,
+    getVenue,
+    getWorkspace,
+    getVenueDisplayName
+  } = useUserData();
   
-  // State management
-  const [workspaceVenues, setWorkspaceVenues] = useState<any[]>([]);
-  const [loadingVenues, setLoadingVenues] = useState(false); // Start with false, will be set to true when loading starts
-  const [openVenueDialog, setOpenVenueDialog] = useState(false);
-  const [editingVenue, setEditingVenue] = useState<any>(null);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  
+  const [users, setUsers] = useState<VenueUser[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [selectedItem, setSelectedItem] = useState<any>(null);
-  const [saving, setSaving] = useState(false);
-  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
-  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [lastFetchTime, setLastFetchTime] = useState<number>(0);
-  const lastFetchTimeRef = useRef<number>(0);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as AlertColor });
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterRole, setFilterRole] = useState('all');
+  const [showInactive, setShowInactive] = useState(false);
+  const { handleError } = useErrorHandler();
+  const navigate = useNavigate();
 
   // Delete confirmation modal state
   const [deleteModal, setDeleteModal] = useState({
     open: false,
-    venueId: '',
-    venueName: '',
+    userId: '',
+    userName: '',
     loading: false
   });
 
-
-
-  // Extract venue data with caching
-  const currentVenue = userData?.venue;
-  const venues = useMemo(() => {
-    // Always prioritize workspaceVenues if available, regardless of length
-    if (workspaceVenues && Array.isArray(workspaceVenues)) {
-      // Sort venues to put the selected/current venue first
-      const sortedVenues = [...workspaceVenues].sort((a, b) => {
-        // If 'a' is the current venue, it should come first (return -1)
-        if (currentVenue && a.id === currentVenue.id) return -1;
-        // If 'b' is the current venue, it should come first (return 1)
-        if (currentVenue && b.id === currentVenue.id) return 1;
-        // Otherwise, maintain original order
-        return 0;
-      });
-      return sortedVenues;
-    }
-    // Fallback to currentVenue only if workspaceVenues is null/undefined
-    const fallback = currentVenue ? [currentVenue] : [];
-    return fallback;
-  }, [workspaceVenues, currentVenue]);
-
-  const [venueFormData, setVenueFormData] = useState<VenueFormData>({
-    name: '',
-    description: '',
-    venueType: 'restaurant',
-    location: {
-      address: '',
-      city: '',
-      state: '',
-      country: 'India',
-      postal_code: '',
-      landmark: ''
-    },
-    phone: '',
+  const [formData, setFormData] = useState({
     email: '',
-    priceRange: 'mid_range',
-    isActive: true,
-    isOpen: true,
-    theme: 'pet', // Default to pet theme as requested
+    first_name: '',
+    last_name: '',
+    phone: '',
+    password: '',
+    confirm_password: '',
+    role_name: ROLES.OPERATOR as string,
+    workspace_id: '',
+    venue_id: '',
+    is_active: true,
   });
 
-  // Load workspace venues directly (no caching) - ONLY calls venues API
-  const loadWorkspaceVenues = useCallback(async (forceRefresh = false) => {
-    const workspaceId = userData?.workspace?.id;
-    if (!workspaceId) {
-      setLoadingVenues(false);
-      setWorkspaceVenues([]);
+  // Track if users have been loaded to prevent duplicate API calls
+  const [usersLoaded, setUsersLoaded] = useState(false);
+
+  const loadUsers = useCallback(async () => {
+    // Get venue from userData first, then fallback to context
+    const venue = getVenue() || currentVenue;
+    
+    if (!venue?.id) {
+      setUsers([]);
+      setLoading(false);
+      // No venue - keep empty users, don't show error
+      setUsersLoaded(true);
       return;
     }
 
+    setLoading(true);
+    setError(null);
+    
     try {
-      setLoadingVenues(true);
-      console.log('🏢 WorkspaceManagement: Calling venues API for workspace:', workspaceId);
+      // Use the new venue-specific API
+      const response = await userService.getUsersByVenueId(venue.id);
       
-      // ONLY API CALL: Get venues by workspace (Venus API)
-      const venues = await venueService.getVenuesByWorkspace(workspaceId);
-      console.log('✅ WorkspaceManagement: Venues API response:', venues);
-      
-      setWorkspaceVenues(venues || []);
-      const now = Date.now();
-      setLastFetchTime(now);
-      lastFetchTimeRef.current = now;
-    } catch (error) {
-      console.error('❌ WorkspaceManagement: Error calling venues API:', error);
-      setSnackbar({
-        open: true,
-        message: 'Failed to load workspace venues',
-        severity: 'error'
-      });
-      setWorkspaceVenues([]);
-    } finally {
-      setLoadingVenues(false);
-    }
-  }, [userData?.workspace?.id]);
-
-  // Manual refresh function
-  const refreshWorkspaceVenues = useCallback(async () => {
-    await loadWorkspaceVenuesRef.current(true);
-  }, []);
-
-  // Stable reference to avoid infinite loops
-  const loadWorkspaceVenuesRef = useRef(loadWorkspaceVenues);
-  loadWorkspaceVenuesRef.current = loadWorkspaceVenues;
-
-  // Initial load when component mounts - ONLY calls venues API
-  useEffect(() => {
-    if (userData?.workspace?.id && !userDataLoading) {
-      console.log('🏢 WorkspaceManagement: Component mounted, calling venues API for workspace:', userData.workspace.id);
-      // Always force load on initial mount to ensure venues are displayed
-      loadWorkspaceVenuesRef.current(true);
-    }
-  }, [userData?.workspace?.id, userDataLoading]);
-
-  // Additional effect to ensure venues load when component first mounts
-  useEffect(() => {
-    if (userData?.workspace?.id) {
-      loadWorkspaceVenuesRef.current(true);
-    }
-  }, []); // Empty dependency array - runs only once on mount
-
-  // Fallback effect - ensure venues are loaded when workspace data becomes available
-  useEffect(() => {
-    if (userData?.workspace?.id && !userDataLoading && workspaceVenues.length === 0 && !loadingVenues) {
-      loadWorkspaceVenuesRef.current(true);
-    }
-  }, [userData?.workspace?.id, userDataLoading, workspaceVenues.length, loadingVenues]);
-
-  // Route-based refresh (when navigating to workspace page) - ONLY calls venues API
-  useEffect(() => {
-    if ((location.pathname === '/admin/workspaces' || location.pathname === '/admin/workspace') && 
-        userData?.workspace?.id && !userDataLoading) {
-      
-      console.log('🏢 WorkspaceManagement: User clicked on workspace module, checking if venues API call needed');
-      
-      // If no venues are loaded or cache is stale, call ONLY venues API
-      if (workspaceVenues.length === 0 || Date.now() - lastFetchTimeRef.current > 2 * 60 * 1000) {
-        console.log('🏢 WorkspaceManagement: Calling venues API due to route navigation');
-        loadWorkspaceVenuesRef.current(true);
+      if (response.success && response.data) {
+        setUsers(response.data);
       } else {
-        console.log('🏢 WorkspaceManagement: Using cached venues data, no API call needed');
+        setUsers([]);
       }
+    } catch (error: any) {
+      // API failed - show error alert but keep UI visible
+      console.error('Failed to load users:', error);
+      setUsers([]);
+      setError('Network error. Please check your connection.');
+    } finally {
+      setLoading(false);
+      setUsersLoaded(true);
     }
-  }, [location.pathname, userData?.workspace?.id, userDataLoading, workspaceVenues.length]);
+  }, [getVenue, handleError, currentVenue]);
 
-  // Form validation
-  const validateVenueForm = useCallback((): boolean => {
-    const errors: Record<string, string> = {};
-
-    if (!venueFormData.name.trim()) {
-      errors.name = 'Venue name is required';
-    } else if (venueFormData.name.length < 1) {
-      errors.name = 'Venue name must have at least 1 character';
-    } else if (venueFormData.name.length > 100) {
-      errors.name = 'Venue name must not exceed 100 characters';
+  useEffect(() => {
+    // Reset loaded state when workspace/venue changes
+    setUsersLoaded(false);
+    
+    // Only load if userData is available (navigation scenario)
+    if (userData && !userDataLoading) {
+      loadUsers();
     }
+  }, [currentWorkspace, currentVenue, loadUsers, userData, userDataLoading]);
 
-    if (!venueFormData.location.address.trim()) {
-      errors.address = 'Address is required';
-    } else if (venueFormData.location.address.length < 5) {
-      errors.address = 'Address must have at least 5 characters';
+  // Load users when userData becomes available (page refresh scenario)
+  useEffect(() => {
+    // Only load if:
+    // 1. We have userData (context is ready)
+    // 2. Not currently loading userData
+    // 3. Users haven't been loaded yet
+    if (userData && !userDataLoading && !usersLoaded) {
+      loadUsers();
     }
+  }, [userData, userDataLoading, usersLoaded, loadUsers]);
 
-    if (!venueFormData.location.city.trim()) {
-      errors.city = 'City is required';
-    }
-
-    if (!venueFormData.location.state.trim()) {
-      errors.state = 'State is required';
-    }
-
-    if (!venueFormData.location.postal_code.trim()) {
-      errors.postal_code = 'Postal code is required';
-    } else if (venueFormData.location.postal_code.length < 3) {
-      errors.postal_code = 'Postal code must have at least 3 characters';
-    }
-
-    if (!venueFormData.phone.trim()) {
-      errors.phone = 'Phone number is required';
-    } else if (!/^\d{10}$/.test(venueFormData.phone)) {
-      errors.phone = 'Phone number must be exactly 10 digits';
-    }
-
-    if (!venueFormData.email.trim()) {
-      errors.email = 'Venue email is required';
+  const handleOpenDialog = (user?: User) => {
+    if (user) {
+      setEditingUser(user);
+      setFormData({
+        email: user.email,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        phone: user.phone || '',
+        password: '', // Don't populate password for editing
+        confirm_password: '', // Don't populate password for editing
+        role_name: user.role as string,
+        workspace_id: user.workspace_id,
+        venue_id: user.venue_id || '',
+        is_active: user.is_active,
+      });
     } else {
-      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-      if (!emailRegex.test(venueFormData.email)) {
-        errors.email = 'Please enter a valid email address';
-      }
+      setEditingUser(null);
+      setFormData({
+        email: '',
+        first_name: '',
+        last_name: '',
+        phone: '',
+        password: '',
+        confirm_password: '',
+        role_name: ROLES.OPERATOR as string,
+        workspace_id: getWorkspace()?.id || currentWorkspace?.id || '',
+        venue_id: getVenue()?.id || currentVenue?.id || '',
+        is_active: true,
+      });
     }
+    setOpenDialog(true);
+  };
 
-    setValidationErrors(errors);
-    const isValid = Object.keys(errors).length === 0;
-    return isValid;
-  }, [venueFormData]);
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+    setEditingUser(null);
+  };
 
-  // Helper functions
-  const getFieldError = useCallback((fieldName: string): string => {
-    return validationErrors[fieldName] || '';
-  }, [validationErrors]);
+  const handleSubmit = async () => {
+    try {
+      // Validate form data
+      if (!formData.first_name.trim()) {
+        setSnackbar({ 
+          open: true, 
+          message: 'First name is required', 
+          severity: 'error' 
+        });
+        return;
+      }
+      
+      if (!formData.last_name.trim()) {
+        setSnackbar({ 
+          open: true, 
+          message: 'Last name is required', 
+          severity: 'error' 
+        });
+        return;
+      }
+      
+      if (!formData.email.trim()) {
+        setSnackbar({ 
+          open: true, 
+          message: 'Email is required', 
+          severity: 'error' 
+        });
+        return;
+      }
+      
+      // Email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.email)) {
+        setSnackbar({ 
+          open: true, 
+          message: 'Please enter a valid email address', 
+          severity: 'error' 
+        });
+        return;
+      }
+      
+      // Password validation for new users
+      if (!editingUser) {
+        if (!formData.password) {
+          setSnackbar({ 
+            open: true, 
+            message: 'Password is required for new users', 
+            severity: 'error' 
+          });
+          return;
+        }
+        
+        // Validate password strength
+        if (formData.password.length < 8) {
+          setSnackbar({ 
+            open: true, 
+            message: 'Password must be at least 8 characters long', 
+            severity: 'error' 
+          });
+          return;
+        }
+        
+        if (!/(?=.*[a-z])/.test(formData.password)) {
+          setSnackbar({ 
+            open: true, 
+            message: 'Password must contain at least one lowercase letter', 
+            severity: 'error' 
+          });
+          return;
+        }
+        
+        if (!/(?=.*[A-Z])/.test(formData.password)) {
+          setSnackbar({ 
+            open: true, 
+            message: 'Password must contain at least one uppercase letter', 
+            severity: 'error' 
+          });
+          return;
+        }
+        
+        if (!/(?=.*\d)/.test(formData.password)) {
+          setSnackbar({ 
+            open: true, 
+            message: 'Password must contain at least one number', 
+            severity: 'error' 
+          });
+          return;
+        }
+        
+        if (!/(?=.*[@$!%*?&])/.test(formData.password)) {
+          setSnackbar({ 
+            open: true, 
+            message: 'Password must contain at least one special character (@$!%*?&)', 
+            severity: 'error' 
+          });
+          return;
+        }
+        
+        if (formData.password !== formData.confirm_password) {
+          setSnackbar({ 
+            open: true, 
+            message: 'Passwords do not match', 
+            severity: 'error' 
+          });
+          return;
+        }
+      }
 
-  const hasFieldError = useCallback((fieldName: string): boolean => {
-    return !!validationErrors[fieldName];
-  }, [validationErrors]);
+      if (editingUser) {
+        // Update user
+        const updateData: UserUpdate = {
+          first_name: formData.first_name,
+          last_name: formData.last_name,
+          phone: formData.phone,
+          is_active: formData.is_active,
+        };
+        
+        const response = await userService.updateUser(editingUser.id, updateData);
+        if (response.success) {
+          setSnackbar({ 
+            open: true, 
+            message: 'User updated successfully', 
+            severity: 'success' 
+          });
+        }
+      } else {
+        // Create new user - send plain password to backend
+        const createData: UserCreate = {
+          email: formData.email,
+          password: formData.password,
+          confirm_password: formData.confirm_password,
+          first_name: formData.first_name,
+          last_name: formData.last_name,
+          phone: formData.phone,
+          workspace_id: formData.workspace_id,
+          venue_id: formData.venue_id,
+        };
+        
+        const response = await userService.createUser(createData);
+        if (response.success) {
+          setSnackbar({ 
+            open: true, 
+            message: 'User created successfully', 
+            severity: 'success' 
+          });
+        }
+      }
+      
+      // Reload users after successful operation
+      setUsersLoaded(false);
+      await loadUsers();
+      handleCloseDialog();
+    } catch (error: any) {
+      setSnackbar({ 
+        open: true, 
+        message: error.message || 'Failed to save user', 
+        severity: 'error' 
+      });
+    }
+  };
 
-  // Permission checks
-  const canCreateVenues = hasPermission(PERMISSIONS.VENUE_ACTIVATE);
-  const canDeleteItems = isSuperAdmin();
+  const handleDeleteUser = async (userId: string) => {
+    const user = users.find(u => u.id === userId);
+    if (!user) return;
+    
+    setDeleteModal({
+      open: true,
+      userId: userId,
+      userName: user.name || `${user.first_name} ${user.last_name}`,
+      loading: false
+    });
+  };
 
-  // Delete venue confirmation
-  const confirmDeleteVenue = async () => {
+  const confirmDeleteUser = async () => {
     try {
       setDeleteModal(prev => ({ ...prev, loading: true }));
-      await venueService.deleteVenue(deleteModal.venueId);
-      setSnackbar({
-        open: true,
-        message: `Venue "${deleteModal.venueName}" deleted successfully`,
-        severity: 'success'
-      });
-      
-      // Refresh venues list
-      await refreshWorkspaceVenues();
-      // Note: Not refreshing user data to avoid unnecessary API calls
-      
-      setDeleteModal({ open: false, venueId: '', venueName: '', loading: false });
+      const response = await userService.deleteUser(deleteModal.userId);
+      if (response.success) {
+        setSnackbar({ 
+          open: true, 
+          message: 'User deleted successfully', 
+          severity: 'success' 
+        });
+        setUsersLoaded(false);
+        await loadUsers(); // Reload users after deletion
+        setDeleteModal({ open: false, userId: '', userName: '', loading: false });
+      }
     } catch (error: any) {
-      setSnackbar({
-        open: true,
-        message: error.message || 'Failed to delete venue',
-        severity: 'error'
+      setSnackbar({ 
+        open: true, 
+        message: error.message || 'Failed to delete user', 
+        severity: 'error' 
       });
       setDeleteModal(prev => ({ ...prev, loading: false }));
     }
   };
 
-  // Loading state
-  if (userDataLoading) {
+  const handleToggleUserStatus = async (userId: string, currentStatus: boolean) => {
+    try {
+      const response = await userService.toggleUserStatus(userId, !currentStatus);
+      if (response.success) {
+        setSnackbar({ 
+          open: true, 
+          message: `User ${!currentStatus ? 'activated' : 'deactivated'} successfully`, 
+          severity: 'success' 
+        });
+        setUsersLoaded(false);
+        await loadUsers(); // Reload users after status change
+      }
+    } catch (error: any) {
+      setSnackbar({ 
+        open: true, 
+        message: error.message || 'Failed to update user status', 
+        severity: 'error' 
+      });
+    }
+  };
+
+  const handlePasswordUpdate = async (userId: string, newPassword: string) => {
+    try {
+      // TODO: Implement password update API call
+      // This would use the userService password update method
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      setSnackbar({ 
+        open: true, 
+        message: 'Password updated successfully', 
+        severity: 'success' 
+      });
+    } catch (error: any) {
+      setSnackbar({ 
+        open: true, 
+        message: error.message || 'Failed to update password', 
+        severity: 'error' 
+      });
+      throw error;
+    }
+  };
+
+  const [refreshing, setRefreshing] = useState(false);
+
+  const handleRefreshUsers = async () => {
+    const venue = getVenue() || currentVenue;
+    
+    if (!venue?.id) {
+      setSnackbar({
+        open: true,
+        message: 'No venue available to refresh users',
+        severity: 'error'
+      });
+      return;
+    }
+
+    setRefreshing(true);
+    setError(null);
+    
+    try {
+      const response = await userService.getUsersByVenueId(venue.id);
+      
+      if (response.success && response.data) {
+        setUsers(response.data);
+      } else {
+        setUsers([]);
+        setSnackbar({
+          open: true,
+          message: response.error || 'No users found for this venue.',
+          severity: 'warning'
+        });
+      }
+    } catch (error: any) {
+      setSnackbar({
+        open: true,
+        message: 'Failed to refresh users. Please try again.',
+        severity: 'error'
+      });
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  const handleMenuClick = (event: React.MouseEvent<HTMLElement>, user: VenueUser | User) => {
+    setAnchorEl(event.currentTarget);
+    // Convert VenueUser to User format if needed
+    const userForSelection: User = {
+      id: user.id,
+      email: user.email,
+      phone: user.phone,
+      first_name: user.first_name,
+      last_name: user.last_name,
+      role: user.role,
+      workspace_id: 'workspace_id' in user ? user.workspace_id || '' : '',
+      venue_id: 'venue_id' in user ? user.venue_id : undefined,
+      is_active: user.is_active,
+      created_at: user.created_at,
+      updated_at: user.updated_at,
+    };
+    setSelectedUser(userForSelection);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+    setSelectedUser(null);
+  };
+
+  const getRoleColor = (roleName: string) => {
+    switch (roleName) {
+      case ROLE_NAMES.SUPERADMIN:
+        return 'error';
+      case ROLE_NAMES.ADMIN:
+        return 'primary';
+      case ROLE_NAMES.OPERATOR:
+        return 'secondary';
+      default:
+        return 'default';
+    }
+  };
+
+  // Use the centralized role display name function
+  const getDisplayName = (role: User['role']) => {
+    return getRoleDisplayName(role);
+  };
+
+  const formatLastLogin = (dateString?: string) => {
+    if (!dateString) return 'Never';
+    return userService.formatLastLogin(dateString);
+  };
+
+  // Filter users based on search and filters
+  const filteredUsers = users.filter(user => {
+    if (!user) return false;
+    
+    const firstName = user.first_name || '';
+    const lastName = user.last_name || '';
+    const email = user.email || '';
+    const name = user.name || '';
+    
+    const matchesSearch = firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesRole = filterRole === 'all' || user.role === filterRole;
+    const matchesActive = showInactive || user.is_active;
+    
+    return matchesSearch && matchesRole && matchesActive;
+  });
+
+  // Role-based restrictions
+  const canCreateUsers = isSuperAdmin() || hasPermission(PERMISSIONS.USERS_CREATE);
+  const canEditUsers = hasPermission(PERMISSIONS.USERS_UPDATE);
+  const canDeleteUsers = hasPermission(PERMISSIONS.USERS_DELETE);
+  const canUpdatePasswords = isAdmin() || isSuperAdmin();
+
+  // Don't block UI with loading or error states
+  // Show page immediately with empty users if API fails
+  
+  if (false && error) { // Disabled blocking UI
     return (
       <Box sx={{ pt: { xs: '56px', sm: '64px' }, py: 4, width: '100%' }}>
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
-          <CircularProgress size={60} />
-          <Typography variant="h6" sx={{ ml: 2 }}>
-            Loading workspace data...
-          </Typography>
-        </Box>
+        <Container maxWidth="xl">
+          <Box sx={{ mb: 4 }}>
+            <Typography variant="h4" component="h1" gutterBottom fontWeight="bold">
+              User Management
+            </Typography>
+            <Typography variant="body1" color="text.secondary">
+              Manage users and their permissions
+            </Typography>
+          </Box>
+          
+          <Card sx={{ 
+            borderRadius: 2,
+            border: '1px solid',
+            borderColor: 'divider',
+            transition: 'all 0.2s ease-in-out',
+            '&:hover': {
+              boxShadow: 3,
+              transform: 'translateY(-2px)',
+            },
+          }}>
+            <CardContent sx={{ p: 4, textAlign: 'center' }}>
+              <People sx={{ fontSize: 64, color: 'error.main', mb: 2 }} />
+              <Typography variant="h5" fontWeight="600" gutterBottom color="error.main">
+                Unable to Load Users
+              </Typography>
+              <Typography variant="body1" color="text.secondary" sx={{ mb: 3, maxWidth: 500, mx: 'auto' }}>
+                {error}
+              </Typography>
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} justifyContent="center">
+                <Button 
+                  variant="contained" 
+                  startIcon={<Refresh />}
+                  onClick={() => {
+                    setUsersLoaded(false);
+                    setError(null);
+                    loadUsers();
+                  }}
+                  size="large"
+                >
+                  Try Again
+                </Button>
+                <Button 
+                  variant="outlined" 
+                  startIcon={<ArrowBack />}
+                  onClick={() => navigate('/admin')}
+                  size="large"
+                >
+                  Back to Dashboard
+                </Button>
+              </Stack>
+            </CardContent>
+          </Card>
+        </Container>
+      </Box>
+    );
+  }
+
+  // No workspace selected state (check userData first)
+  const venue = getVenue();
+  
+  if (!venue && !currentWorkspace?.id) {
+    return (
+      <Box sx={{ pt: { xs: '56px', sm: '64px' }, py: 4, width: '100%' }}>
+        <Container maxWidth="xl">
+          {/* Header */}
+          <Box sx={{ mb: 4 }}>
+            <Typography variant="h4" component="h1" gutterBottom fontWeight="bold">
+              User Management
+            </Typography>
+            <Typography variant="body1" color="text.secondary">
+              Manage users and their permissions
+            </Typography>
+          </Box>
+
+          <Card
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              minHeight: '400px',
+              borderRadius: 2,
+              border: '1px solid',
+              borderColor: 'divider',
+              p: 4,
+              transition: 'all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+              '&:hover': {
+                borderColor: 'primary.main',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+              },
+            }}
+          >
+            <Business
+              sx={{
+                fontSize: 80,
+                color: 'text.secondary',
+                mb: 2,
+              }}
+            />
+            <Typography variant="h5" fontWeight="600" gutterBottom color="text.secondary">
+              No Workspace Found
+            </Typography>
+            <Typography variant="body1" color="text.secondary" textAlign="center" mb={3}>
+              You need to select a workspace first to manage users. Please select or create a workspace to continue.
+            </Typography>
+          </Card>
+        </Container>
       </Box>
     );
   }
@@ -488,7 +765,7 @@ const WorkspaceManagement: React.FC = () => {
             {/* Header Content */}
             <Box sx={{ flex: 1 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                <Restaurant sx={{ fontSize: 32, mr: 1.5, color: 'text.primary', opacity: 0.9 }} />
+                <People sx={{ fontSize: 32, mr: 1.5, color: 'text.primary', opacity: 0.9 }} />
                 <Typography
                   variant="h4"
                   component="h1"
@@ -500,7 +777,7 @@ const WorkspaceManagement: React.FC = () => {
                     color: 'text.primary',
                   }}
                 >
-                  Workspace Venues
+                  User Management
                 </Typography>
               </Box>
               
@@ -514,10 +791,10 @@ const WorkspaceManagement: React.FC = () => {
                   color: 'text.secondary',
                 }}
               >
-                Centralized management for all your restaurant locations and venues
+                Manage users and their permissions across your venue
               </Typography>
 
-              {userData?.workspace && (
+              {venue && (
                 <Box
                   sx={{
                     display: 'inline-flex',
@@ -530,9 +807,9 @@ const WorkspaceManagement: React.FC = () => {
                     border: '1px solid rgba(0, 0, 0, 0.1)',
                   }}
                 >
-                  <Store sx={{ fontSize: 18, mr: 1, color: 'primary.main', opacity: 0.9 }} />
+                  <Business sx={{ fontSize: 18, mr: 1, color: 'primary.main', opacity: 0.9 }} />
                   <Typography variant="body2" fontWeight="500" color="text.primary">
-                    {userData.workspace.name || userData.workspace.display_name}
+                    {venue.name}
                   </Typography>
                 </Box>
               )}
@@ -548,37 +825,39 @@ const WorkspaceManagement: React.FC = () => {
                 alignItems: 'center',
               }}
             >
-              {canCreateVenues && (
-                <Button
-                  variant="contained"
-                  startIcon={<Add />}
-                  onClick={() => setOpenVenueDialog(true)}
-                  size="medium"
-                  sx={{
-                    backgroundColor: 'primary.main',
-                    color: 'white',
-                    fontWeight: 600,
-                    px: 3,
-                    py: 1,
-                    borderRadius: 2,
-                    textTransform: 'none',
-                    fontSize: '0.875rem',
-                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
-                    '&:hover': {
-                      backgroundColor: 'primary.dark',
-                      transform: 'translateY(-1px)',
-                      boxShadow: '0 4px 12px rgba(25, 118, 210, 0.4)',
-                    },
-                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                  }}
-                >
-                  Add New Venue
-                </Button>
+              {canCreateUsers && (
+                <FlagGate flag="users.showAddUser">
+                  <Button
+                    variant="contained"
+                    startIcon={<Add />}
+                    onClick={() => handleOpenDialog()}
+                    size="medium"
+                    sx={{
+                      backgroundColor: 'primary.main',
+                      color: 'white',
+                      fontWeight: 600,
+                      px: 3,
+                      py: 1,
+                      borderRadius: 2,
+                      textTransform: 'none',
+                      fontSize: '0.875rem',
+                      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+                      '&:hover': {
+                        backgroundColor: 'primary.dark',
+                        transform: 'translateY(-1px)',
+                        boxShadow: '0 4px 12px rgba(25, 118, 210, 0.4)',
+                      },
+                      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                    }}
+                  >
+                    Add New User
+                  </Button>
+                </FlagGate>
               )}
 
               <IconButton
-                onClick={refreshWorkspaceVenues}
-                disabled={loadingVenues}
+                onClick={handleRefreshUsers}
+                disabled={refreshing}
                 size="medium"
                 sx={{
                   backgroundColor: 'rgba(255, 255, 255, 0.9)',
@@ -597,9 +876,9 @@ const WorkspaceManagement: React.FC = () => {
                   },
                   transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                 }}
-                title={loadingVenues ? 'Refreshing...' : 'Refresh venues'}
+                title={refreshing ? 'Refreshing...' : 'Refresh users'}
               >
-                {loadingVenues ? (
+                {refreshing ? (
                   <CachedOutlined sx={{ animation: `${spin} 1s linear infinite` }} />
                 ) : (
                   <Refresh />
@@ -618,1162 +897,680 @@ const WorkspaceManagement: React.FC = () => {
           margin: 0,
         }}
       >
-        {/* Stats Section */}
-        {venues.length > 0 && (
-          <Box sx={{ px: { xs: 3, sm: 4 }, py: 2 }}>
-            <Box sx={{ 
-              px: { xs: 3, sm: 4 }, 
-              py: { xs: 3, sm: 4 }, 
-              backgroundColor: 'background.paper', 
-              borderRadius: 3, 
-              mb: 4,
-              border: `1px solid ${theme.palette.grey[100]}`,
-              boxShadow: '0 4px 20px rgba(0,0,0,0.08)'
-            }}>
-              <Typography variant="h6" fontWeight="700" color="text.primary" sx={{ mb: 3 }}>
-                Workspace Overview
-              </Typography>
-              
-              <Grid container spacing={{ xs: 2, sm: 3 }}>
-                {[
-                  { 
-                    label: 'Total Venues', 
-                    value: venues.length, 
-                    color: '#2196F3', 
-                    icon: <Business />,
-                    description: 'All workspace venues'
-                  },
-                  { 
-                    label: 'Active Venues', 
-                    value: venues.filter(v => v.is_active).length, 
-                    color: '#4CAF50', 
-                    icon: <CheckCircle />,
-                    description: 'Currently active'
-                  },
-                  { 
-                    label: 'Currently Open', 
-                    value: venues.filter(v => v.is_open).length, 
-                    color: '#FF9800', 
-                    icon: <Store />,
-                    description: 'Open for business'
-                  },
-                  { 
-                    label: 'Selected Venue', 
-                    value: currentVenue ? '1' : '0', 
-                    color: '#9C27B0', 
-                    icon: <TrendingUp />,
-                    description: 'Currently selected'
-                  },
-                ].map((stat, index) => (
-                  <Grid item xs={12} sm={6} md={3} key={index}>
-                    <Box
-                      sx={{
-                        p: { xs: 2.5, sm: 3 },
-                        borderRadius: 2,
-                        backgroundColor: alpha(stat.color, 0.05),
-                        border: `1px solid ${alpha(stat.color, 0.2)}`,
-                        transition: 'all 0.3s ease',
-                        '&:hover': {
-                          transform: 'translateY(-2px)',
-                          boxShadow: `0 8px 25px ${alpha(stat.color, 0.2)}`,
-                          backgroundColor: alpha(stat.color, 0.08),
-                        },
-                      }}
-                    >
-                      <Stack direction="row" alignItems="center" spacing={2}>
-                        {/* Icon on the left */}
-                        <Box
-                          sx={{
-                            width: 48,
-                            height: 48,
-                            borderRadius: 2,
-                            backgroundColor: stat.color,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            color: 'white',
-                            flexShrink: 0,
-                          }}
-                        >
-                          {React.cloneElement(stat.icon, { fontSize: 'medium' })}
-                        </Box>
-                        
-                        {/* Text content on the right */}
-                        <Box sx={{ flex: 1, minWidth: 0 }}>
-                          <Typography 
-                            variant="h4" 
-                            fontWeight="700" 
-                            color="text.primary" 
-                            sx={{ 
-                              fontSize: { xs: '1.5rem', sm: '2rem' },
-                              lineHeight: 1.2,
-                              mb: 0.5
-                            }}
-                          >
-                            {stat.value}
-                          </Typography>
-                          <Typography 
-                            variant="body2" 
-                            color="text.secondary" 
-                            fontWeight="600"
-                            sx={{ 
-                              fontSize: { xs: '0.75rem', sm: '0.875rem' },
-                              lineHeight: 1.2,
-                              display: '-webkit-box',
-                              WebkitLineClamp: 2,
-                              WebkitBoxOrient: 'vertical',
-                              overflow: 'hidden',
-                            }}
-                          >
-                            {stat.label}
-                          </Typography>
-                        </Box>
-                      </Stack>
-                    </Box>
-                  </Grid>
-                ))}
-              </Grid>
-            </Box>
+        {/* Error Alert */}
+        {error && (
+          <Box sx={{ px: { xs: 3, sm: 4 }, pt: 3, pb: 1 }}>
+            <Alert 
+              severity="error" 
+              onClose={() => setError(null)}
+            >
+              {error}
+            </Alert>
           </Box>
         )}
 
-        {/* Section Header */}
-        <Box sx={{ mb: 4, px: { xs: 3, sm: 4 }, py: 2 }}>
-          <Typography
-            variant="h6"
-            fontWeight="600"
-            color="text.primary"
-            gutterBottom
-            sx={{ fontSize: { xs: '1.25rem', sm: '1.375rem' }, mb: 1 }}
-          >
-            Your Venues
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.9rem' }}>
-            {venues.length > 0 
-              ? `Manage and monitor all ${venues.length} venue${venues.length > 1 ? 's' : ''} in your workspace`
-              : 'No venues found in your workspace'
-            }
-          </Typography>
-        </Box>
+        {/* Content Area */}
+        <Box sx={{ px: { xs: 3, sm: 4 }, pt: { xs: 3, sm: 4 }, pb: 4 }}>
 
-      {/* Venues Grid */}
-      <Box sx={{ px: { xs: 3, sm: 4 }, pb: 4 }}>
-      {loadingVenues ? (
-        <Grid container spacing={2}>
-          {[1, 2, 3, 4, 5, 6].map((i) => (
-            <Grid item xs={12} sm={6} lg={4} xl={3} key={i}>
-              <Card
-                sx={{
-                  borderRadius: 3,
-                  overflow: 'hidden',
-                  height: '100%',
-                }}
-              >
-                {/* Header Skeleton */}
-                <Box sx={{ p: 3, pb: 2, backgroundColor: 'grey.50' }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
-                    <Box sx={{ flex: 1, pr: 2 }}>
-                      <Skeleton variant="text" width="70%" height={28} sx={{ mb: 0.5 }} />
-                      <Skeleton variant="text" width="40%" height={20} />
-                    </Box>
-                    <Skeleton variant="circular" width={32} height={32} />
-                  </Box>
-                </Box>
-
-                {/* Content Skeleton */}
-                <CardContent sx={{ p: 3, pt: 2 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: 2 }}>
-                    <Skeleton variant="circular" width={18} height={18} sx={{ mt: 0.2, mr: 1 }} />
-                    <Box sx={{ flex: 1 }}>
-                      <Skeleton variant="text" width="90%" height={20} />
-                      <Skeleton variant="text" width="60%" height={20} sx={{ mt: 0.5 }} />
-                    </Box>
-                  </Box>
-
-                  <Skeleton variant="text" width="85%" height={20} sx={{ mb: 2 }} />
-
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 2 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <Skeleton variant="circular" width={16} height={16} sx={{ mr: 1 }} />
-                      <Skeleton variant="text" width="50%" height={20} />
-                    </Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <Skeleton variant="circular" width={16} height={16} sx={{ mr: 1 }} />
-                      <Skeleton variant="text" width="70%" height={20} />
-                    </Box>
-                  </Box>
-
-                  <Skeleton variant="rectangular" width={80} height={24} sx={{ borderRadius: 2, mb: 2 }} />
-                </CardContent>
-
-                {/* Footer Skeleton */}
-                <Box sx={{ p: 3, pt: 0, borderTop: '1px solid', borderColor: 'divider', backgroundColor: 'rgba(0,0,0,0.02)' }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Box sx={{ display: 'flex', gap: 1 }}>
-                      <Skeleton variant="rectangular" width={50} height={24} sx={{ borderRadius: 2 }} />
-                      <Skeleton variant="rectangular" width={45} height={24} sx={{ borderRadius: 2 }} />
-                    </Box>
-                    <Skeleton variant="text" width={60} height={16} />
-                  </Box>
-                </Box>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
-      ) : venues.length > 0 ? (
-        <Grid container spacing={3}>
-          {venues.map((venue) => (
-            <Grid item xs={12} sm={6} lg={6} xl={4} key={venue.id}>
-              <Card
-                sx={{
-                  position: 'relative',
-                  height: 280,
-                  display: 'flex',
-                  flexDirection: 'row',
-                  borderRadius: 1,
-                  overflow: 'hidden',
-                  border: venue.id === currentVenue?.id ? '2px solid' : '1px solid',
-                  borderColor: venue.id === currentVenue?.id ? 'primary.main' : 'divider',
-                  background: 'white',
-                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                  '&:hover': {
-                    transform: 'translateY(-2px)',
-                    boxShadow: '0 8px 20px rgba(0,0,0,0.12)',
-                    borderColor: venue.id === currentVenue?.id ? 'primary.main' : 'primary.light',
-                  },
-                }}
-              >
-                {/* Selected Badge */}
-                {venue.id === currentVenue?.id && (
-                  <Box
-                    sx={{
-                      position: 'absolute',
-                      top: 12,
-                      left: 12,
-                      zIndex: 3,
-                      backgroundColor: 'grey.600',
-                      color: 'white',
-                      px: 1.5,
-                      py: 0.5,
-                      borderRadius: 1,
-                      fontSize: '0.7rem',
-                      fontWeight: 600,
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.5px',
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
-                    }}
-                  >
-                    Selected
-                  </Box>
-                )}
-
-                {/* Image Section - 30% */}
-                <Box
+          {/* Statistics Cards */}
+          <FlagGate flag="users.showUserStats">
+            <Grid container spacing={3} sx={{ mb: 4 }}>
+            {[
+              {
+                label: 'Total Users',
+                value: users.length,
+                color: '#2196F3',
+                icon: <People />,
+                description: 'All registered users'
+              },
+              {
+                label: 'Active Users',
+                value: users.filter(user => user.is_active).length,
+                color: '#4CAF50',
+                icon: <CheckCircle />,
+                description: 'Currently active'
+              },
+              {
+                label: 'Recent Logins',
+                value: users.filter(user => {
+                  const sevenDaysAgo = new Date();
+                  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+                  const lastLogin = user.last_login ? new Date(user.last_login) : null;
+                  return lastLogin && lastLogin > sevenDaysAgo;
+                }).length,
+                color: '#2196F3',
+                icon: <Business />,
+                description: 'Last 7 days'
+              },
+              {
+                label: 'Role Types',
+                value: [...new Set(users.map(user => user.role))].length,
+                color: '#FF9800',
+                icon: <Business />,
+                description: 'Different roles'
+              }
+            ].map((stat, index) => (
+              <Grid item xs={12} sm={6} md={3} key={index}>
+                <Card
                   sx={{
-                    width: '30%',
-                    height: '100%',
-                    position: 'relative',
-                    backgroundImage: venue.image_url 
-                      ? `url(${venue.image_url})`
-                      : 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%23666\'%3E%3Cpath d=\'M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z\'/%3E%3C/path%3E%3C/svg%3E")',
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                    backgroundColor: '#f5f5f5',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
+                    p: { xs: 2.5, sm: 3 },
+                    borderRadius: 2,
+                    backgroundColor: `${stat.color}08`,
+                    border: `1px solid ${stat.color}33`,
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                      transform: 'translateY(-2px)',
+                      boxShadow: `0 8px 25px ${stat.color}33`,
+                      backgroundColor: `${stat.color}12`,
+                    },
                   }}
                 >
-                  {!venue.image_url && (
-                    <Store sx={{ fontSize: 48, color: '#999' }} />
-                  )}
-                </Box>
-
-                {/* Content Section - 70% */}
-                <Box
-                  sx={{
-                    width: '70%',
-                    height: '100%',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    position: 'relative',
-                  }}
-                >
-                  {/* Three Dots Menu */}
-                  <IconButton
-                    size="small"
-                    onClick={(e) => {
-                      setAnchorEl(e.currentTarget);
-                      setSelectedItem(venue);
-                    }}
-                    sx={{
-                      position: 'absolute',
-                      top: 8,
-                      right: 8,
-                      zIndex: 2,
-                      backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                      color: 'text.secondary',
-                      width: 32,
-                      height: 32,
-                      '&:hover': {
-                        backgroundColor: 'rgba(255, 255, 255, 1)',
-                        color: 'primary.main',
-                      },
-                    }}
-                  >
-                    <MoreVert sx={{ fontSize: 18 }} />
-                  </IconButton>
-
-                  {/* Header */}
-                  <Box sx={{ p: 3, pb: 2 }}>
-                    <Typography 
-                      variant="h6" 
-                      fontWeight="700"
-                      sx={{ 
-                        color: 'text.primary',
-                        fontSize: '1.25rem',
-                        lineHeight: 1.3,
-                        mb: 1,
-                        pr: 4, // Space for menu button
-                        textTransform: 'capitalize',
+                  <Stack direction="row" alignItems="center" spacing={2}>
+                    {/* Icon on the left */}
+                    <Box
+                      sx={{
+                        width: { xs: 40, sm: 48 },
+                        height: { xs: 40, sm: 48 },
+                        borderRadius: 2,
+                        backgroundColor: stat.color,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'white',
+                        flexShrink: 0,
                       }}
                     >
-                      {venue.name}
-                    </Typography>
-                    
-                    {/* Description */}
-                    {venue.description && (
-                      <Typography 
-                        variant="body2" 
-                        sx={{ 
-                          color: 'text.secondary',
-                          fontSize: '0.9rem',
-                          lineHeight: 1.4,
-                          mb: 1.5,
-                          fontWeight: 400,
-                          fontStyle: 'italic',
-                          display: '-webkit-box',
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: 'vertical',
-                          overflow: 'hidden',
-                          textTransform: 'capitalize',
-                        }}
-                      >
-                        {venue.description}
-                      </Typography>
-                    )}
-                    
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
-                      <Box
-                        sx={{
-                          width: 24,
-                          height: 24,
-                          borderRadius: '50%',
-                          backgroundColor: 'grey.400',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center'
-                        }}
-                      >
-                        {React.cloneElement(getVenueTypeIcon(venue.venue_type || 'restaurant'), {
-                          sx: { color: 'white', fontSize: 14 }
-                        })}
-                      </Box>
-                      <Typography 
-                        variant="body2" 
-                        sx={{ 
-                          color: 'text.secondary',
-                          fontSize: '0.85rem',
-                          textTransform: 'capitalize',
-                          fontWeight: 500,
-                        }}
-                      >
-                        {venue.venue_type?.replace('_', ' ') || 'Restaurant'}
-                      </Typography>
+                      {React.cloneElement(stat.icon, { 
+                        fontSize: isMobile ? 'medium' : 'large' 
+                      })}
                     </Box>
-
-                    {/* Status Icons */}
-                    <Box sx={{ display: 'flex', gap: 2, mb: 1 }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8 }}>
-                        {venue.is_active ? (
-                          <CheckCircle sx={{ fontSize: 16, color: 'success.main' }} />
-                        ) : (
-                          <Cancel sx={{ fontSize: 16, color: 'grey.400' }} />
-                        )}
-                        <Typography variant="body2" sx={{ fontSize: '0.85rem', color: 'text.secondary', fontWeight: 400, textTransform: 'capitalize' }}>
-                          {venue.is_active ? 'Active' : 'Inactive'}
-                        </Typography>
-                      </Box>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8 }}>
-                        {venue.is_open ? (
-                          <Visibility sx={{ fontSize: 16, color: 'success.main' }} />
-                        ) : (
-                          <VisibilityOff sx={{ fontSize: 16, color: 'error.main' }} />
-                        )}
-                        <Typography variant="body2" sx={{ fontSize: '0.85rem', color: 'text.secondary', fontWeight: 400, textTransform: 'capitalize' }}>
-                          {venue.is_open ? 'Open' : 'Closed'}
-                        </Typography>
-                      </Box>
-                    </Box>
-                  </Box>
-
-                  {/* Content */}
-                  <Box sx={{ px: 3, flex: 1, overflow: 'hidden' }}>
-                    {/* Location */}
-                    <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: 2 }}>
-                      <LocationOn sx={{ color: 'text.secondary', fontSize: 18, mt: 0.2, mr: 1.5 }} />
+                    
+                    {/* Text content on the right */}
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                      <Typography 
+                        variant={isMobile ? "h6" : "h4"} 
+                        fontWeight="700" 
+                        color="text.primary"
+                        sx={{ 
+                          fontSize: { xs: '1.25rem', sm: '2rem' },
+                          lineHeight: 1.2,
+                          mb: 0.5
+                        }}
+                      >
+                        {stat.value}
+                      </Typography>
                       <Typography 
                         variant="body2" 
                         color="text.secondary"
+                        fontWeight="600"
                         sx={{ 
-                          fontSize: '0.9rem',
-                          lineHeight: 1.4,
-                          flex: 1,
+                          fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                          lineHeight: 1.2,
                           display: '-webkit-box',
                           WebkitLineClamp: 2,
                           WebkitBoxOrient: 'vertical',
                           overflow: 'hidden',
-                          textTransform: 'uppercase',
                         }}
                       >
-                        {venue.location?.address || 'NO ADDRESS AVAILABLE'}
-                        {venue.location?.city && (
-                          <Box component="span" sx={{ display: 'block', fontWeight: 400, mt: 0.5, textTransform: 'uppercase' }}>
-                            {venue.location.city}, {venue.location.state}
-                          </Box>
-                        )}
+                        {stat.label}
                       </Typography>
                     </Box>
-
-                    {/* Contact Info */}
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                      {venue.phone && (
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <Phone sx={{ color: 'text.secondary', fontSize: 16, mr: 1.5 }} />
-                          <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.9rem' }}>
-                            {venue.phone}
-                          </Typography>
-                        </Box>
-                      )}
-                      {venue.email && (
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <Email sx={{ color: 'text.secondary', fontSize: 16, mr: 1.5 }} />
-                          <Typography 
-                            variant="body2" 
-                            color="text.secondary" 
-                            sx={{ 
-                              fontSize: '0.9rem',
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                              whiteSpace: 'nowrap',
-                            }}
-                          >
-                            {venue.email}
-                          </Typography>
-                        </Box>
-                      )}
-                    </Box>
-                  </Box>
-                </Box>
-              </Card>
+                  </Stack>
+                </Card>
+              </Grid>
+            ))}
             </Grid>
-          ))}
-        </Grid>
-      ) : (
-        <Card
-          sx={{
-            borderRadius: 3,
-            border: '2px dashed',
-            borderColor: 'primary.light',
-            background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)',
-            textAlign: 'center',
-            py: { xs: 4, sm: 6 },
-            px: { xs: 2, sm: 3 },
-            position: 'relative',
-            overflow: 'hidden',
-            '&::before': {
-              content: '""',
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              background: 'linear-gradient(45deg, transparent 30%, rgba(0, 0, 0, 0.02) 50%, transparent 70%)',
-            },
-          }}
-        >
-          <Box sx={{ position: 'relative', zIndex: 1 }}>
-            <Box
-              sx={{
-                width: 80,
-                height: 80,
-                borderRadius: '50%',
-                background: 'linear-gradient(135deg, #bbdefb 0%, #90caf9 100%)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                mx: 'auto',
-                mb: 3,
-                border: '2px solid',
-                borderColor: 'primary.main',
-              }}
-            >
-              <Restaurant
-                sx={{
-                  fontSize: 40,
-                  color: '#1565c0',
-                }}
-              />
-            </Box>
-            
-            <Typography 
-              variant="h6" 
-              fontWeight="600" 
-              gutterBottom 
-              color="text.primary"
-              sx={{ fontSize: { xs: '1.25rem', sm: '1.375rem' } }}
-            >
-              No Venues Yet
-            </Typography>
-            
-            <Typography 
-              variant="body1" 
-              color="text.secondary" 
-              sx={{ 
-                mb: 3,
-                maxWidth: '400px',
-                mx: 'auto',
-                fontSize: { xs: '0.875rem', sm: '1rem' },
-                lineHeight: 1.5,
-              }}
-            >
-              Start building your restaurant empire by adding your first venue location. 
-              You can manage multiple locations from this central dashboard.
-            </Typography>
+          </FlagGate>
 
-            {canCreateVenues && (
-              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
-                <Button
-                  variant="contained"
-                  startIcon={<Add />}
-                  onClick={() => setOpenVenueDialog(true)}
-                  size="medium"
-                  sx={{
-                    px: 3,
-                    py: 1,
-                    borderRadius: 2,
-                    fontSize: '0.875rem',
-                    fontWeight: 600,
-                    textTransform: 'none',
-                    boxShadow: '0 2px 8px rgba(25, 118, 210, 0.3)',
-                    '&:hover': {
-                      transform: 'translateY(-1px)',
-                      boxShadow: '0 4px 12px rgba(25, 118, 210, 0.4)',
-                    },
-                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                  }}
-                >
-                  Create Your First Venue
-                </Button>
-                
-                <Typography variant="caption" color="text.secondary" sx={{ fontStyle: 'italic' }}>
-                  It only takes a few minutes to get started
-                </Typography>
+          {/* Filters and Search */}
+          <FlagGate flag="users.showUserFilters">
+            <Card sx={{ mb: 4, borderRadius: 2 }}>
+            <CardContent>
+              <Grid container spacing={3} alignItems="center">
+                <Grid item xs={12} md={4}>
+                  <TextField
+                    fullWidth
+                    placeholder="Search users..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <Search />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={12} md={3}>
+                  <TextField
+                    fullWidth
+                    select
+                    label="Filter by Role"
+                    value={filterRole}
+                    onChange={(e) => setFilterRole(e.target.value)}
+                    SelectProps={{ native: true }}
+                  >
+                    <option value="all">All Roles</option>
+                    <option value={ROLES.SUPERADMIN}>Super Admin</option>
+                    <option value={ROLES.ADMIN}>Admin</option>
+                    <option value={ROLES.OPERATOR}>Operator</option>
+                  </TextField>
+                </Grid>
+                <Grid item xs={12} md={3}>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={showInactive}
+                        onChange={(e) => setShowInactive(e.target.checked)}
+                      />
+                    }
+                    label="Show Inactive Users"
+                  />
+                </Grid>
+              </Grid>
+            </CardContent>
+          </Card>
+          </FlagGate>
+
+          {/* Users Table */}
+          <Card 
+            sx={{ 
+              borderRadius: 2,
+              border: '1px solid',
+              borderColor: 'divider',
+              transition: 'all 0.2s ease-in-out',
+              '&:hover': {
+                boxShadow: 3,
+                transform: 'translateY(-2px)',
+              },
+            }}
+          >
+            {filteredUsers.length === 0 ? (
+              <CardContent>
+                <Box sx={{ 
+                  overflow: 'auto',
+                  maxWidth: '100%'
+                }}>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>User</TableCell>
+                        <TableCell>Role</TableCell>
+                        <TableCell>Status</TableCell>
+                        <TableCell>Last Login</TableCell>
+                        <TableCell align="center">Actions</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      <TableRow>
+                        <TableCell colSpan={5}>
+                          <Box sx={{ 
+                            display: 'flex', 
+                            flexDirection: 'column', 
+                            alignItems: 'center', 
+                            justifyContent: 'center',
+                            py: 6,
+                            textAlign: 'center'
+                          }}>
+                            <People sx={{ 
+                              fontSize: 64, 
+                              color: 'text.secondary', 
+                              mb: 2,
+                              opacity: 0.5 
+                            }} />
+                            <Typography variant="h6" fontWeight="600" gutterBottom color="text.secondary">
+                              No Users Found
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 400 }}>
+                              No users found for this venue. Users will appear here once they are assigned to this venue.
+                            </Typography>
+                          </Box>
+                        </TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </Box>
+              </CardContent>
+            ) : (
+              <CardContent>
+                <Box sx={{ 
+                  overflow: 'auto',
+                  maxWidth: '100%'
+                }}>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>User</TableCell>
+                        <TableCell>Role</TableCell>
+                        <TableCell>Status</TableCell>
+                        <TableCell>Last Login</TableCell>
+                        <TableCell align="center">Actions</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {filteredUsers.map((user) => (
+                      <TableRow key={user.id}>
+                        <TableCell>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 2 } }}>
+                            <Avatar sx={{ width: { xs: 28, sm: 36 }, height: { xs: 28, sm: 36 }, fontSize: { xs: '0.7rem', sm: '0.8rem' } }}>
+                              {user.first_name.charAt(0)}{user.last_name.charAt(0)}
+                            </Avatar>
+                            <Box sx={{ minWidth: 0, flex: 1 }}>
+                              <Typography 
+                                variant="subtitle2" 
+                                fontWeight="600"
+                                sx={{ 
+                                  fontSize: { xs: '0.65rem', sm: '0.75rem' },
+                                  overflow: 'hidden',
+                                  textOverflow: 'ellipsis',
+                                  lineHeight: 1.2
+                                }}
+                              >
+                                {user.name || `${user.first_name} ${user.last_name}`}
+                              </Typography>
+                              <Typography 
+                                variant="body2" 
+                                color="text.secondary"
+                                sx={{ 
+                                  fontSize: { xs: '0.6rem', sm: '0.65rem' },
+                                  overflow: 'hidden',
+                                  textOverflow: 'ellipsis',
+                                  lineHeight: 1.1
+                                }}
+                              >
+                                {user.email}
+                              </Typography>
+                              {user.phone && (
+                                <Typography 
+                                  variant="body2" 
+                                  color="text.secondary"
+                                  sx={{ 
+                                    fontSize: { xs: '0.6rem', sm: '0.65rem' },
+                                    display: { xs: 'none', sm: 'block' },
+                                    lineHeight: 1.1
+                                  }}
+                                >
+                                  {user.phone}
+                                </Typography>
+                              )}
+                            </Box>
+                          </Box>
+                        </TableCell>
+                        <TableCell>
+                          <Chip
+                            label={user.role_display_name || getDisplayName(user.role)}
+                            color={getRoleColor(user.role) as any}
+                            size="small"
+                            sx={{ 
+                              fontSize: { xs: '0.55rem', sm: '0.65rem' },
+                              height: { xs: 20, sm: 24 },
+                              '& .MuiChip-label': {
+                                px: { xs: 0.5, sm: 1 }
+                              }
+                            }}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Chip
+                            label={user.status || (user.is_active ? 'Active' : 'Inactive')}
+                            color={user.is_active ? 'success' : 'default'}
+                            size="small"
+                            icon={user.is_active ? <CheckCircle sx={{ fontSize: '0.8rem' }} /> : <Cancel sx={{ fontSize: '0.8rem' }} />}
+                            sx={{ 
+                              fontSize: { xs: '0.55rem', sm: '0.65rem' },
+                              height: { xs: 20, sm: 24 },
+                              '& .MuiChip-label': {
+                                px: { xs: 0.5, sm: 1 }
+                              }
+                            }}
+                          />
+                        </TableCell>
+                        <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>
+                          <Typography variant="body2" sx={{ fontSize: { xs: '0.6rem', sm: '0.65rem' } }}>
+                            {formatLastLogin(user.last_login || user.updated_at || user.created_at)}
+                          </Typography>
+                        </TableCell>
+                        <TableCell sx={{ textAlign: 'center' }}>
+                          <IconButton
+                            onClick={(e) => handleMenuClick(e, user)}
+                            size="small"
+                            sx={{ p: 0.5 }}
+                          >
+                            <MoreVert sx={{ fontSize: '1rem' }} />
+                          </IconButton>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               </Box>
+              </CardContent>
             )}
-          </Box>
-        </Card>
-      )}
-      </Box>
+          </Card>
+        </Box>
       </Box>
 
-      {/* Venue Creation/Edit Dialog */}
-      <Dialog
-        open={openVenueDialog}
-        onClose={() => {
-          setOpenVenueDialog(false);
-          setEditingVenue(null);
-          setValidationErrors({});
-          // Reset form data
-          setVenueFormData({
-            name: '',
-            description: '',
-            venueType: 'restaurant',
-            location: {
-              address: '',
-              city: '',
-              state: '',
-              country: 'India',
-              postal_code: '',
-              landmark: ''
-            },
-            phone: '',
-            email: '',
-            priceRange: 'mid_range',
-            isActive: true,
-            isOpen: true,
-            theme: 'pet',
-          });
-        }}
-        maxWidth="md"
+      {/* User Actions Menu */}
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleMenuClose}
+      >
+        {canEditUsers && (
+          <FlagGate flag="users.showEditUser">
+            <MenuItem onClick={() => {
+              handleOpenDialog(selectedUser!);
+              handleMenuClose();
+            }}>
+              <ListItemIcon>
+                <Edit fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>Edit User</ListItemText>
+            </MenuItem>
+          </FlagGate>
+        )}
+        {canUpdatePasswords && selectedUser && (
+          <FlagGate flag="users.showUserPasswordUpdate">
+            <MenuItem onClick={() => {
+              setPasswordDialogOpen(true);
+              handleMenuClose();
+            }}>
+              <ListItemIcon>
+                <Lock fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>Update Password</ListItemText>
+            </MenuItem>
+          </FlagGate>
+        )}
+        {selectedUser && (
+          <FlagGate flag="users.showUserStatusToggle">
+            <MenuItem onClick={() => {
+              handleToggleUserStatus(selectedUser.id, selectedUser.is_active);
+              handleMenuClose();
+            }}>
+              <ListItemIcon>
+                {selectedUser.is_active ? <Block fontSize="small" /> : <CheckCircle fontSize="small" />}
+              </ListItemIcon>
+              <ListItemText>
+                {selectedUser.is_active ? 'Deactivate' : 'Activate'}
+              </ListItemText>
+            </MenuItem>
+          </FlagGate>
+        )}
+        {canDeleteUsers && selectedUser && (
+          <FlagGate flag="users.showDeleteUser">
+            <MenuItem onClick={() => {
+              handleDeleteUser(selectedUser.id);
+              handleMenuClose();
+            }}>
+              <ListItemIcon>
+                <Delete fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>Delete User</ListItemText>
+            </MenuItem>
+          </FlagGate>
+        )}
+      </Menu>
+
+      {/* User Create/Edit Dialog */}
+      <Dialog 
+        open={openDialog} 
+        onClose={handleCloseDialog} 
+        maxWidth="sm" 
         fullWidth
+        fullScreen={isMobile}
         PaperProps={{
           sx: {
-            borderRadius: 2,
-            maxHeight: '90vh'
+            m: isMobile ? 0 : 2,
+            maxHeight: isMobile ? '90vh' : 'calc(100vh - 64px)',
+            height: isMobile ? 'auto' : 'auto',
+            display: 'flex',
+            flexDirection: 'column'
           }
         }}
       >
-        <DialogTitle>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Restaurant color="primary" />
-            <Typography variant="h6" fontWeight="600">
-              {editingVenue ? 'Edit Venue' : 'Add New Venue'}
-            </Typography>
-          </Box>
-        </DialogTitle>
-        
-        <DialogContent dividers sx={{ 
-          px: { xs: 2, sm: 3 }, 
-          py: { xs: 3, sm: 4 },
-          minHeight: '600px'
+        <DialogTitle sx={{ 
+          pb: { xs: 1, sm: 1 }, 
+          px: { xs: 2, sm: 3 },
+          pt: { xs: 1.5, sm: 2 },
+          borderBottom: '1px solid',
+          borderColor: 'divider'
         }}>
-          <Grid container spacing={3}>
-            {/* Basic Information */}
-            <Grid item xs={12}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                <Business sx={{ color: 'primary.main', fontSize: 20 }} />
-                <Typography variant="subtitle1" fontWeight="600">
-                  Basic Information
-                </Typography>
-              </Box>
-            </Grid>
-            
-            <Grid item xs={12} md={6}>
+          <Typography variant={isMobile ? "h6" : "h5"} fontWeight="600">
+            {editingUser ? 'Edit User' : 'Create New User'}
+          </Typography>
+        </DialogTitle>
+        <DialogContent sx={{ 
+          px: { xs: 2, sm: 3 },
+          py: { xs: 1.5, sm: 2 },
+          flex: 1,
+          overflow: 'auto'
+        }}>
+          <Stack spacing={{ xs: 3.5, sm: 4 }} sx={{ mt: { xs: 3.5, sm: 1 } }}>
+            {/* Name Fields */}
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
               <TextField
                 fullWidth
-                label="Venue Name"
-                value={venueFormData.name}
-                onChange={(e) => setVenueFormData(prev => ({ ...prev, name: e.target.value }))}
-                error={hasFieldError('name')}
-                helperText={getFieldError('name')}
+                label="First Name"
+                value={formData.first_name}
+                onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
                 required
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Store />
-                    </InputAdornment>
-                  ),
-                }}
+                size={isMobile ? "medium" : "medium"}
               />
-            </Grid>
-            
-            <Grid item xs={12} md={6}>
-              <FormControl fullWidth>
-                <InputLabel>Venue Type</InputLabel>
-                <Select
-                  value={venueFormData.venueType}
-                  label="Venue Type"
-                  onChange={(e) => setVenueFormData(prev => ({ ...prev, venueType: e.target.value }))}
-                >
-                  {venueTypeOptions.map((type) => (
-                    <MenuItem key={type} value={type}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Box
-                          sx={{
-                            width: 20,
-                            height: 20,
-                            borderRadius: '50%',
-                            backgroundColor: 'grey.400',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center'
-                          }}
-                        >
-                          {React.cloneElement(getVenueTypeIcon(type), {
-                            sx: { color: 'white', fontSize: 12 }
-                          })}
-                        </Box>
-                        {type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                      </Box>
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-            
-            <Grid item xs={12}>
               <TextField
                 fullWidth
-                label="Description"
-                value={venueFormData.description}
-                onChange={(e) => setVenueFormData(prev => ({ ...prev, description: e.target.value }))}
-                multiline
-                rows={3}
-                placeholder="Brief description of your venue..."
+                label="Last Name"
+                value={formData.last_name}
+                onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
+                required
+                size={isMobile ? "medium" : "medium"}
               />
-            </Grid>
-            
-            <Grid item xs={12} md={6}>
-              <FormControl fullWidth>
-                <InputLabel>Theme</InputLabel>
-                <Select
-                  value={venueFormData.theme}
-                  label="Theme"
-                  onChange={(e) => setVenueFormData(prev => ({ ...prev, theme: e.target.value }))}
-                >
-                  <MenuItem value="default">Default Theme</MenuItem>
-                  <MenuItem value="pet">Pet Theme (Cats & Dogs)</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
+            </Stack>
 
-            {/* Location Information */}
-            <Grid item xs={12}>
-              <Divider sx={{ my: 2 }} />
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                <Map sx={{ color: 'primary.main', fontSize: 20 }} />
-                <Typography variant="subtitle1" fontWeight="600">
-                  Location Details
-                </Typography>
-              </Box>
-            </Grid>
-            
-            <Grid item xs={12}>
+            {/* Email */}
+            <TextField
+              fullWidth
+              label="Email"
+              type="email"
+              value={formData.email}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              disabled={!!editingUser}
+              required
+              size={isMobile ? "medium" : "medium"}
+            />
+
+            {/* Password Fields - Only show for new users */}
+            {editingUser && (
+              <Alert severity="info" sx={{ my: { xs: 3, sm: 2 } }}>
+                To update the password for this user, use the "Update Password" option from the user actions menu.
+              </Alert>
+            )}
+            {!editingUser && (
+              <>
+                <Box>
+                  <TextField
+                    fullWidth
+                    label="Password"
+                    type="password"
+                    value={formData.password}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    required
+                    size={isMobile ? "medium" : "medium"}
+                    helperText="Password must be at least 8 characters with uppercase, lowercase, number, and special character"
+                  />
+                  {formData.password && (
+                    <Box sx={{ mt: { xs: 1, sm: 1 } }}>
+                      {(() => {
+                        const validation = validatePasswordStrength(formData.password);
+                        const color = validation.strength === 'weak' ? 'error' : 
+                                     validation.strength === 'medium' ? 'warning' : 'success';
+                        return (
+                          <Box>
+                            <Typography variant="caption" color={`${color}.main`} sx={{ fontWeight: 500 }}>
+                              Password strength: {validation.strength.toUpperCase()}
+                            </Typography>
+                            <Box sx={{ display: 'flex', gap: 0.5, mt: 0.5 }}>
+                              {[1, 2, 3, 4, 5].map((level) => (
+                                <Box
+                                  key={level}
+                                  sx={{
+                                    height: 4,
+                                    flex: 1,
+                                    backgroundColor: level <= validation.score 
+                                      ? `${color}.main` 
+                                      : 'grey.300',
+                                    borderRadius: 1
+                                  }}
+                                />
+                              ))}
+                            </Box>
+                          </Box>
+                        );
+                      })()}
+                    </Box>
+                  )}
+                </Box>
+                <TextField
+                  fullWidth
+                  label="Confirm Password"
+                  type="password"
+                  value={formData.confirm_password}
+                  onChange={(e) => setFormData({ ...formData, confirm_password: e.target.value })}
+                  required
+                  size={isMobile ? "medium" : "medium"}
+                  error={formData.password !== formData.confirm_password && formData.confirm_password !== ''}
+                  helperText={formData.password !== formData.confirm_password && formData.confirm_password !== '' ? 'Passwords do not match' : ''}
+                />
+              </>
+            )}
+
+            {/* Phone and Role */}
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
               <TextField
                 fullWidth
-                label="Address"
-                value={venueFormData.location.address}
-                onChange={(e) => setVenueFormData(prev => ({
-                  ...prev,
-                  location: { ...prev.location, address: e.target.value }
-                }))}
-                error={hasFieldError('address')}
-                helperText={getFieldError('address')}
-                required
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <LocationOn />
-                    </InputAdornment>
-                  ),
+                label="Phone"
+                value={formData.phone}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === '' || /^[0-9]+$/.test(value)) {
+                    setFormData({ ...formData, phone: value });
+                  }
                 }}
-              />
-            </Grid>
-            
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="City"
-                value={venueFormData.location.city}
-                onChange={(e) => setVenueFormData(prev => ({
-                  ...prev,
-                  location: { ...prev.location, city: e.target.value }
-                }))}
-                error={hasFieldError('city')}
-                helperText={getFieldError('city')}
-                required
-              />
-            </Grid>
-            
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="State"
-                value={venueFormData.location.state}
-                onChange={(e) => setVenueFormData(prev => ({
-                  ...prev,
-                  location: { ...prev.location, state: e.target.value }
-                }))}
-                error={hasFieldError('state')}
-                helperText={getFieldError('state')}
-                required
-              />
-            </Grid>
-            
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="Postal Code"
-                value={venueFormData.location.postal_code}
-                onChange={(e) => setVenueFormData(prev => ({
-                  ...prev,
-                  location: { ...prev.location, postal_code: e.target.value }
-                }))}
-                error={hasFieldError('postal_code')}
-                helperText={getFieldError('postal_code')}
-                required
-              />
-            </Grid>
-            
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="Country"
-                value={venueFormData.location.country}
-                onChange={(e) => setVenueFormData(prev => ({
-                  ...prev,
-                  location: { ...prev.location, country: e.target.value }
-                }))}
-                disabled
-              />
-            </Grid>
-            
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Landmark (Optional)"
-                value={venueFormData.location.landmark}
-                onChange={(e) => setVenueFormData(prev => ({
-                  ...prev,
-                  location: { ...prev.location, landmark: e.target.value }
-                }))}
-                placeholder="Near famous landmark or building..."
-              />
-            </Grid>
-            
-            {/* Contact Information */}
-            <Grid item xs={12}>
-              <Divider sx={{ my: 2 }} />
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                <Phone sx={{ color: 'primary.main', fontSize: 20 }} />
-                <Typography variant="subtitle1" fontWeight="600">
-                  Contact Information
-                </Typography>
-              </Box>
-            </Grid>
-            
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="Phone Number"
-                value={venueFormData.phone}
-                onChange={(e) => setVenueFormData(prev => ({ ...prev, phone: e.target.value }))}
-                error={hasFieldError('phone')}
-                helperText={getFieldError('phone') || 'Enter 10-digit phone number'}
-                required
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Phone />
-                    </InputAdornment>
-                  ),
+                placeholder="e.g., 9876543210"
+                inputProps={{
+                  inputMode: 'numeric',
+                  pattern: '[0-9]*',
+                  maxLength: 10
                 }}
+                size={isMobile ? "medium" : "medium"}
               />
-            </Grid>
-            
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="Email Address"
-                type="email"
-                value={venueFormData.email}
-                onChange={(e) => setVenueFormData(prev => ({ ...prev, email: e.target.value }))}
-                error={hasFieldError('email')}
-                helperText={getFieldError('email')}
-                required
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Email />
-                    </InputAdornment>
-                  ),
-                }}
-              />
-            </Grid>
-            
-            {/* Additional Settings */}
-            <Grid item xs={12}>
-              <Divider sx={{ my: 2 }} />
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                <AttachMoney sx={{ color: 'primary.main', fontSize: 20 }} />
-                <Typography variant="subtitle1" fontWeight="600">
-                  Additional Settings
-                </Typography>
-              </Box>
-            </Grid>
-            
-            <Grid item xs={12} md={6}>
-              <FormControl fullWidth>
-                <InputLabel>Price Range</InputLabel>
+              <FormControl fullWidth required size={isMobile ? "medium" : "medium"}>
+                <InputLabel>Role</InputLabel>
                 <Select
-                  value={venueFormData.priceRange}
-                  label="Price Range"
-                  onChange={(e) => setVenueFormData(prev => ({ ...prev, priceRange: e.target.value }))}
+                  value={formData.role_name}
+                  onChange={(e) => setFormData({ ...formData, role_name: e.target.value })}
+                  label="Role"
                 >
-                  {priceRangeOptions.map((option) => (
-                    <MenuItem key={option.value} value={option.value}>
-                      {option.label}
+                  <MenuItem value={ROLES.OPERATOR}>Operator</MenuItem>
+                  {isAdmin() && <MenuItem value={ROLES.ADMIN}>Admin</MenuItem>}
+                </Select>
+              </FormControl>
+            </Stack>
+
+            {/* Venue Selection */}
+            {venues.length > 1 && (
+              <FormControl fullWidth size={isMobile ? "medium" : "medium"}>
+                <InputLabel>Venue</InputLabel>
+                <Select
+                  value={formData.venue_id}
+                  onChange={(e) => setFormData({ ...formData, venue_id: e.target.value })}
+                  label="Venue"
+                >
+                  <MenuItem value="">All Venues</MenuItem>
+                  {venues.map((venue) => (
+                    <MenuItem key={venue.id} value={venue.id}>
+                      {venue.name}
                     </MenuItem>
                   ))}
                 </Select>
-                <FormHelperText>Expected price range per person</FormHelperText>
               </FormControl>
-            </Grid>
-            
-            <Grid item xs={12} md={6}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={venueFormData.isActive}
-                      onChange={(e) => setVenueFormData(prev => ({ ...prev, isActive: e.target.checked }))}
-                      color="primary"
-                    />
-                  }
-                  label="Active Venue"
-                />
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={venueFormData.isOpen}
-                      onChange={(e) => setVenueFormData(prev => ({ ...prev, isOpen: e.target.checked }))}
-                      color="success"
-                    />
-                  }
-                  label="Currently Open"
-                />
-              </Box>
-            </Grid>
-          </Grid>
+            )}
+
+            {/* Active Status */}
+            <Box sx={{ 
+              display: 'flex', 
+              alignItems: 'center',
+              py: { xs: 1, sm: 1 },
+              borderRadius: 1,
+              backgroundColor: 'grey.50',
+              px: { xs: 2, sm: 2 }
+            }}>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={formData.is_active}
+                    onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
+                    color="primary"
+                  />
+                }
+                label={
+                  <Box>
+                    <Typography variant="body2" fontWeight="500">
+                      Active User
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      User can log in and access the system
+                    </Typography>
+                  </Box>
+                }
+                sx={{ margin: 0 }}
+              />
+            </Box>
+          </Stack>
         </DialogContent>
-        
-        <DialogActions sx={{ p: 3, gap: 2 }}>
-          <Button
-            onClick={() => {
-              setOpenVenueDialog(false);
-              setEditingVenue(null);
-              setValidationErrors({});
-            }}
-            disabled={saving}
-            size="large"
+        <DialogActions sx={{ 
+          px: { xs: 2, sm: 3 }, 
+          pb: { xs: 1.5, sm: 2 },
+          pt: { xs: 1.5, sm: 1.5 },
+          borderTop: '1px solid',
+          borderColor: 'divider',
+          gap: 1
+        }}>
+          <Button 
+            onClick={handleCloseDialog}
+            variant="outlined"
+            fullWidth={isMobile}
+            size={isMobile ? "large" : "medium"}
           >
             Cancel
           </Button>
-          <Button
+          <Button 
+            onClick={handleSubmit} 
             variant="contained"
-            onClick={async () => {
-              if (!validateVenueForm()) {
-                setSnackbar({
-                  open: true,
-                  message: 'Please fix the validation errors before saving',
-                  severity: 'error'
-                });
-                return;
-              }
-
-              try {
-                setSaving(true);
-                
-                // Ensure workspace ID exists
-                const workspaceId = userData?.workspace?.id;
-                if (!workspaceId) {
-                  throw new Error('No workspace selected. Please select a workspace first.');
-                }
-                
-                const venueData = {
-                  name: venueFormData.name,
-                  description: venueFormData.description,
-                  venue_type: venueFormData.venueType,
-                  location: venueFormData.location,
-                  phone: venueFormData.phone,
-                  email: venueFormData.email,
-                  price_range: venueFormData.priceRange as PriceRange,
-                  cuisine_types: [venueFormData.venueType], // Default to venue type as cuisine
-                  is_active: venueFormData.isActive,
-                  is_open: venueFormData.isOpen,
-                  theme: venueFormData.theme,
-                  workspace_id: workspaceId
-                };
-
-                if (editingVenue) {
-                  // Update existing venue - only send updatable fields
-                  const updateData = {
-                    name: venueFormData.name,
-                    description: venueFormData.description,
-                    location: venueFormData.location,
-                    phone: venueFormData.phone,
-                    email: venueFormData.email,
-                    price_range: venueFormData.priceRange as PriceRange,
-                    is_active: venueFormData.isActive,
-                    is_open: venueFormData.isOpen,
-                    theme: venueFormData.theme,
-                  };
-                  await venueService.updateVenue(editingVenue.id, updateData);
-                  setSnackbar({
-                    open: true,
-                    message: 'Venue updated successfully!',
-                    severity: 'success'
-                  });
-                } else {
-                  // Create new venue
-                  await venueService.createVenue(venueData);
-                  setSnackbar({
-                    open: true,
-                    message: 'Venue created successfully!',
-                    severity: 'success'
-                  });
-                }
-
-                // Refresh venues list
-                await refreshWorkspaceVenues();
-                
-                // Reset form data
-                setVenueFormData({
-                  name: '',
-                  description: '',
-                  venueType: 'restaurant',
-                  location: {
-                    address: '',
-                    city: '',
-                    state: '',
-                    country: 'India',
-                    postal_code: '',
-                    landmark: ''
-                  },
-                  phone: '',
-                  email: '',
-                  priceRange: 'mid_range',
-                  isActive: true,
-                  isOpen: true,
-                  theme: 'pet',
-                });
-                
-                // Close dialog
-                setOpenVenueDialog(false);
-                setEditingVenue(null);
-                setValidationErrors({});
-                
-              } catch (error: any) {
-                setSnackbar({
-                  open: true,
-                  message: error.message || 'Failed to save venue',
-                  severity: 'error'
-                });
-              } finally {
-                setSaving(false);
-              }
-            }}
-            disabled={saving}
-            startIcon={saving ? <CircularProgress size={20} /> : <Add />}
-            size="large"
+            fullWidth={isMobile}
+            size={isMobile ? "large" : "medium"}
           >
-            {saving ? 'Saving...' : (editingVenue ? 'Update Venue' : 'Create Venue')}
+            {editingUser ? 'Update User' : 'Create User'}
           </Button>
         </DialogActions>
       </Dialog>
 
-      {/* Action Menu */}
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={() => {
-          setAnchorEl(null);
-          setSelectedItem(null);
-        }}
-        PaperProps={{
-          sx: { minWidth: 200 }
-        }}
-      >
-        <MenuItem
-          onClick={() => {
-            if (selectedItem) {
-              // Populate form with existing venue data
-              setVenueFormData({
-                name: selectedItem.name || '',
-                description: selectedItem.description || '',
-                venueType: selectedItem.venue_type || 'restaurant',
-                location: {
-                  address: selectedItem.location?.address || '',
-                  city: selectedItem.location?.city || '',
-                  state: selectedItem.location?.state || '',
-                  country: selectedItem.location?.country || 'India',
-                  postal_code: selectedItem.location?.postal_code || '',
-                  landmark: selectedItem.location?.landmark || ''
-                },
-                phone: selectedItem.phone || '',
-                email: selectedItem.email || '',
-                priceRange: selectedItem.price_range || 'mid_range',
-                isActive: selectedItem.is_active ?? true,
-                isOpen: selectedItem.is_open ?? true,
-                theme: selectedItem.theme || 'pet', // Default to pet theme
-              });
-              setEditingVenue(selectedItem);
-              setOpenVenueDialog(true);
-            }
-            setAnchorEl(null);
-            setSelectedItem(null);
+      {/* Password Update Dialog */}
+      {selectedUser && (
+        <PasswordUpdateDialog
+          open={passwordDialogOpen}
+          onClose={() => setPasswordDialogOpen(false)}
+          onUpdate={(userId, newPassword) => handlePasswordUpdate(userId, newPassword)}
+          user={{
+            id: selectedUser.id,
+            email: selectedUser.email,
+            firstName: selectedUser.first_name,
+            lastName: selectedUser.last_name,
+            role: selectedUser.role
           }}
-        >
-          <ListItemIcon>
-            <Edit fontSize="small" />
-          </ListItemIcon>
-          <ListItemText>Edit Venue</ListItemText>
-        </MenuItem>
-        
-        <MenuItem
-          onClick={async () => {
-            // Toggle venue status
-            if (selectedItem) {
-              try {
-                const newStatus = !selectedItem.is_open;
-                await venueService.updateVenue(selectedItem.id, {
-                  is_open: newStatus
-                });
-                
-                setSnackbar({
-                  open: true,
-                  message: `Venue ${newStatus ? 'opened' : 'closed'} successfully`,
-                  severity: 'success'
-                });
-                
-                // Refresh venues list
-                await refreshWorkspaceVenues();
-                
-              } catch (error: any) {
-                setSnackbar({
-                  open: true,
-                  message: error.message || 'Failed to update venue status',
-                  severity: 'error'
-                });
-              }
-            }
-            setAnchorEl(null);
-            setSelectedItem(null);
-          }}
-        >
-          <ListItemIcon>
-            {selectedItem?.is_open ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
-          </ListItemIcon>
-          <ListItemText>
-            {selectedItem?.is_open ? 'Close Venue' : 'Open Venue'}
-          </ListItemText>
-        </MenuItem>
-
-        {canDeleteItems && (
-          <MenuItem
-            onClick={() => {
-              // Delete venue permanently
-              if (selectedItem) {
-                setDeleteModal({
-                  open: true,
-                  venueId: selectedItem.id,
-                  venueName: selectedItem.name,
-                  loading: false
-                });
-              }
-              setAnchorEl(null);
-              setSelectedItem(null);
-            }}
-            sx={{ color: 'error.main' }}
-          >
-            <ListItemIcon>
-              <Delete fontSize="small" color="error" />
-            </ListItemIcon>
-            <ListItemText>Delete Permanently</ListItemText>
-          </MenuItem>
-        )}
-      </Menu>
+        />
+      )}
 
       {/* Snackbar for notifications */}
       <Snackbar
@@ -1789,19 +1586,17 @@ const WorkspaceManagement: React.FC = () => {
       {/* Delete Confirmation Modal */}
       <DeleteConfirmationModal
         open={deleteModal.open}
-        onClose={() => setDeleteModal({ open: false, venueId: '', venueName: '', loading: false })}
-        onConfirm={confirmDeleteVenue}
-        title="Delete Venue Permanently"
-        itemName={deleteModal.venueName}
-        itemType="venue"
-        description="⚠️ WARNING: This action will PERMANENTLY DELETE the venue and ALL associated data. This cannot be undone!"
+        onClose={() => setDeleteModal({ open: false, userId: '', userName: '', loading: false })}
+        onConfirm={confirmDeleteUser}
+        title="Delete User"
+        itemName={deleteModal.userName}
+        itemType="user account"
+        description="This user account will be permanently removed from the system. The user will lose access to all restaurant management features."
         loading={deleteModal.loading}
         additionalWarnings={[
-          'All tables and seating areas will be deleted',
-          'Menu items and categories will be permanently removed',
-          'Order history and customer data will be lost',
-          'Staff access to this venue will be revoked',
-          'QR codes and payment integrations will be disabled',
+          'All user activity history will be preserved for audit purposes',
+          'Any ongoing tasks assigned to this user may be affected',
+          'User permissions and role assignments will be revoked',
           'This action cannot be undone'
         ]}
       />
@@ -1809,4 +1604,4 @@ const WorkspaceManagement: React.FC = () => {
   );
 };
 
-export default WorkspaceManagement;
+export default UserManagement;

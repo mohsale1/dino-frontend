@@ -523,7 +523,7 @@ class TableService {
    */
   async getAreas(venueId: string): Promise<any[]> {
     try {
-      const response = await apiService.get<any[]>(`/table-areas/venues/${venueId}/areas`);
+      const response = await apiService.get<any[]>(`/tables/venues/${venueId}/areas`);
       return response.data || [];
     } catch (error) {
       return [];
@@ -535,7 +535,7 @@ class TableService {
    */
   async createArea(areaData: any, venueId?: string): Promise<any> {
     try {
-      const response = await apiService.post<any>('/table-areas/areas', {
+      const response = await apiService.post<any>('/tables/areas', {
         ...areaData,
         venue_id: venueId || areaData.venue_id
       });
@@ -550,7 +550,7 @@ class TableService {
    */
   async updateArea(areaData: any): Promise<any> {
     try {
-      const response = await apiService.put<any>(`/table-areas/areas/${areaData.id}`, areaData);
+      const response = await apiService.put<any>(`/tables/areas/${areaData.id}`, areaData);
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.detail || error.message || 'Failed to update area');
@@ -562,7 +562,7 @@ class TableService {
    */
   async deleteArea(areaId: string): Promise<any> {
     try {
-      const response = await apiService.delete<any>(`/table-areas/areas/${areaId}`);
+      const response = await apiService.delete<any>(`/tables/areas/${areaId}`);
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.detail || error.message || 'Failed to delete area');

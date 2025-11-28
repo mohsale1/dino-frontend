@@ -245,10 +245,17 @@ const CheckoutPage: React.FC = () => {
       
       // Check for successful response
       if (response && (response.success || response.data)) {
-        const orderResponseData = response.data;
-        const orderIdValue = orderResponseData?.order_number || orderResponseData?.id || orderResponseData?.order_id || 'ORDER_' + Date.now();
+        // Handle nested data structure - backend might return {success: true, data: {order_id, ...}}
+        const orderResponseData = response.data?.data || response.data;
+        console.log('🔍 DEBUG: Full response object:', response);
+        console.log('🔍 DEBUG: orderResponseData:', orderResponseData);
+        console.log('🔍 DEBUG: order_id field:', orderResponseData?.order_id);
+        console.log('🔍 DEBUG: id field:', orderResponseData?.id);
+        console.log('🔍 DEBUG: order_number field:', orderResponseData?.order_number);
+        
+        const orderIdValue = orderResponseData?.order_id || orderResponseData?.id || orderResponseData?.order_number || 'ORDER_' + Date.now();
         console.log('✅ Order placed successfully! Full response:', orderResponseData);
-        console.log('✅ Order ID:', orderIdValue);
+        console.log('✅ Order ID (final):', orderIdValue);
         
         // Store the complete order response data
         const completeOrderData = {

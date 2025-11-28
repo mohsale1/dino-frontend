@@ -75,7 +75,7 @@ const TableManagement = () => {
     message: '', 
     severity: 'success' as 'success' | 'error' 
   });
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
   // Delete confirmation modal state
@@ -142,7 +142,9 @@ const TableManagement = () => {
       const venue = getVenue();
       
       if (!venue?.id) {
-        setError('No venue assigned to your account. Please contact support.');
+        // No venue - just keep empty data, don't show error
+        setAreas([]);
+        setTables([]);
         setLoading(false);
         return;
       }
@@ -175,12 +177,9 @@ const TableManagement = () => {
         setAreas(areasData);
         setTables(initialTables);
       } catch (error) {
-        setError('Failed to load table data. Please try again.');
-        setSnackbar({ 
-          open: true, 
-          message: 'Failed to load table data. Please check your connection.', 
-          severity: 'error' 
-        });
+        // API failed - show error alert but keep UI visible
+        console.error('Failed to load table data:', error);
+        setError('Network error. Please check your connection.');
       } finally {
         setLoading(false);
       }
@@ -471,49 +470,8 @@ const TableManagement = () => {
     setOpenQRManager(true);
   };
 
-  if (loading) {
-    return (
-      <Box sx={{ 
-        minHeight: '100vh',
-        backgroundColor: '#f8f9fa',
-        display: 'flex', 
-        flexDirection: 'column',
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        textAlign: 'center',
-        gap: 2,
-        py: { xs: 2, sm: 4 }
-      }}>
-        <CircularProgress size={isMobile ? 48 : 60} />
-        <Typography variant={isMobile ? "body1" : "h6"}>
-          Loading Table Management...
-        </Typography>
-      </Box>
-    );
-  }
-
-  if (error) {
-    return (
-      <Box sx={{ 
-        minHeight: '100vh',
-        backgroundColor: '#f8f9fa',
-        py: { xs: 2, sm: 4 },
-        px: { xs: 2, sm: 4 }
-      }}>
-        <Alert severity="error" sx={{ mb: 4 }}>
-          <Typography variant={isMobile ? "body2" : "body1"}>
-            {error}
-          </Typography>
-        </Alert>
-        <Button 
-          variant="contained" 
-          onClick={() => window.location.reload()}
-        >
-          Retry
-        </Button>
-      </Box>
-    );
-  }
+  // Don't block UI with loading or error states
+  // Show page immediately with empty data if API fails
 
   return (
     <Box
@@ -697,6 +655,18 @@ const TableManagement = () => {
           margin: 0,
         }}
       >
+        {/* Error Alert */}
+        {error && (
+          <Box sx={{ px: { xs: 3, sm: 4 }, pt: 3, pb: 1 }}>
+            <Alert 
+              severity="error" 
+              onClose={() => setError(null)}
+            >
+              {error}
+            </Alert>
+          </Box>
+        )}
+
         <FlagGate flag="tables.showTableStats">
           <Box sx={{ px: { xs: 3, sm: 4 }, py: 2 }}>
             <TableStats tables={tables} areas={areas} />

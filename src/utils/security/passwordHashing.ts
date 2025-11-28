@@ -84,29 +84,29 @@ export async function loginWithHashedPassword(email: string, password: string): 
   try {
     console.log('🔐 Starting login with client-side hashing');
     
-    // Validate input password is plain text (not already hashed)
-    if (isValidHashedPassword(password)) {
-      throw new Error('Password appears to be already hashed. Please provide plain text password.');
-    }
+    // // Validate input password is plain text (not already hashed)
+    // if (isValidHashedPassword(password)) {
+    //   throw new Error('Password appears to be already hashed. Please provide plain text password.');
+    // }
     
-    // Get fixed salt from environment
-    const salt = getFixedSalt();
+    // // Get fixed salt from environment
+    // const salt = getFixedSalt();
     
-    // Hash password with fixed salt
-    const hashedPassword = await hashPassword(password, salt);
+    // // Hash password with fixed salt
+    // const hashedPassword = await hashPassword(password, salt);
     
-    // Validate the hash was created correctly
-    if (!isValidHashedPassword(hashedPassword)) {
-      throw new Error('Password hashing failed - invalid hash format generated');
-    }
+    // // Validate the hash was created correctly
+    // if (!isValidHashedPassword(hashedPassword)) {
+    //   throw new Error('Password hashing failed - invalid hash format generated');
+    // }
     
-    console.log('✅ Password successfully hashed - sending to backend');
-    console.log('   Hash length:', hashedPassword.length);
+    // console.log('✅ Password successfully hashed - sending to backend');
+    // console.log('   Hash length:', hashedPassword.length);
     
     // Use regular login endpoint with hashed password
     const response = await apiService.post('/auth/login', {
       email,
-      password: hashedPassword,
+      password: password,
     });
     
     if (!response.success) {
@@ -243,9 +243,10 @@ export async function changePasswordWithHashing(
  * @returns boolean - True if crypto.subtle is available
  */
 export function isPasswordHashingSupported(): boolean {
-  return typeof crypto !== 'undefined' && 
-         typeof crypto.subtle !== 'undefined' && 
-         typeof crypto.subtle.digest === 'function';
+  // return typeof crypto !== 'undefined' && 
+  //        typeof crypto.subtle !== 'undefined' && 
+  //        typeof crypto.subtle.digest === 'function';
+  return false;
 }
 
 /**

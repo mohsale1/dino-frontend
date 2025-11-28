@@ -180,6 +180,8 @@ export interface Venue {
   operating_hours?: OperatingHours[];
   subscription_status?: string;
   theme?: string; // Venue theme (e.g., 'pet', 'default')
+  menu_template?: string; // Menu template name (e.g., 'modern', 'classic', 'elegant')
+  menu_template_config?: any; // Full template configuration JSON
   created_at: string;
   updated_at?: string;
   createdAt?: string; // Legacy compatibility
@@ -240,6 +242,8 @@ export interface VenueUpdate {
   is_open?: boolean;
   status?: string;
   theme?: string;
+  menu_template?: string; // Menu template name (e.g., 'modern', 'classic', 'elegant')
+  menu_template_config?: any; // Full template configuration JSON
 }
 
 export interface VenueAnalytics {
@@ -620,20 +624,24 @@ export interface User {
 
 export interface VenueUser {
   id: string;
+  name: string; // Combined first_name + last_name from API
   email: string;
   phone?: string;
-  user_name: string; // Combined first_name + last_name
-  first_name: string;
-  last_name: string;
+  first_name: string; // Required - always returned from API
+  last_name: string; // Required - always returned from API
   role: UserRole;
   role_display_name: string; // Human readable role name
-  last_logged_in?: string; // ISO date string
-  status: 'active' | 'inactive'; // User status
+  last_login?: string; // ISO date string
+  status?: string; // User status text ("Active" or "Inactive")
   is_active: boolean;
-  venue_id: string;
-  workspace_id: string;
+  workspace_id: string; // Required - users always belong to a workspace
+  venue_id?: string;
+  role_id?: string;
   created_at: string;
   updated_at?: string;
+  // Legacy compatibility
+  user_name?: string;
+  last_logged_in?: string;
 }
 
 export interface UserCreate {

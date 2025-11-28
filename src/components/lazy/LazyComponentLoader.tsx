@@ -360,6 +360,12 @@ export const LazyComponents = {
     { skeleton: PageSkeleton }
   ),
   
+  MenuTemplateSettings: lazyManager.createLazyComponent(
+    () => import('../../pages/admin/MenuTemplateSettings'),
+    'MenuTemplateSettings',
+    { skeleton: PageSkeleton }
+  ),
+  
   UserPermissionsDashboard: lazyManager.createLazyComponent(
     () => import('../../pages/admin/UserPermissionsDashboard'),
     'UserPermissionsDashboard',

@@ -95,6 +95,12 @@ export const PERMISSIONS = {
   VENUE_DEACTIVATE: 'venue.update',
   VENUE_VIEW_ALL: 'venue.read',
   VENUE_SWITCH: 'venue.manage',
+  
+  // Template permissions (separate from menu)
+  TEMPLATE_VIEW: 'template.read',
+  TEMPLATE_UPDATE: 'template.update',
+  TEMPLATE_CREATE: 'template.create',
+  TEMPLATE_DELETE: 'template.delete',
 } as const;
 
 // Role definitions
@@ -156,4 +162,3 @@ export interface VenueSettings {
   allowOnlineOrders: boolean;
   requireCustomerInfo: boolean;
 }
-

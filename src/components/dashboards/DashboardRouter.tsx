@@ -18,15 +18,8 @@ const DashboardRouter: React.FC<DashboardRouterProps> = ({ className }) => {
   const { userData, loading: userDataLoading } = useUserData();
   const { isSuperAdmin, isAdmin, isOperator } = usePermissions();
 
-  // Show loading state while authentication is being determined
-  if (isLoading || userDataLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <LoadingSpinner size="large" />
-        <span className="ml-3 text-gray-600">Loading dashboard...</span>
-      </div>
-    );
-  }
+  // Don't block UI with loading state
+  // Show dashboard immediately even if loading
 
   // Redirect to login if not authenticated
   if (!isAuthenticated || !user) {

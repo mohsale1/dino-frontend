@@ -79,7 +79,7 @@ class DashboardService {
     
     try {
       console.log('🔍 Step 1: Getting user data...');
-      const userDataResponse = await apiService.get<any>('/auth/user-data');
+      const userDataResponse = await apiService.get<any>('/users/me/data');
       console.log('✅ Step 1 complete - User data response:', userDataResponse);
       
       // Check different possible paths for venue ID
@@ -96,7 +96,7 @@ class DashboardService {
       console.log('✅ Step 1 complete - Using venue ID:', venueId);
       
       console.log('🔍 Step 2: Making dashboard API call...');
-      const response = await apiService.get<SuperAdminDashboardResponse>(`/dashboard/venue/${venueId}`);
+      const response = await apiService.get<SuperAdminDashboardResponse>(`/dashboard?venue_id=${venueId}`);
       console.log('✅ Step 2 complete - API response received:', {
         success: response.success,
         hasData: !!response.data,
@@ -141,80 +141,76 @@ class DashboardService {
    * This endpoint returns all dashboard data based on real database records for the user's venue
    */
   async getAdminDashboard(): Promise<AdminDashboardResponse | SuperAdminDashboardResponse> {
-    return dashboardCache.getOrSet(
-      CacheKeys.dashboardData('admin'),
-      async () => {
-        try {
-          // Get user's venue ID from auth context
-          const userDataResponse = await apiService.get<any>('/auth/user-data');
-          
-          if (!userDataResponse.success || !userDataResponse.data?.venue?.id) {
-            throw new Error('No venue assigned to your account. Please contact your administrator.');
-          }
-          
-          const venueId = userDataResponse.data.venue.id;
-          console.log('🏢 Using venue ID for dashboard:', venueId);
-          
-          // Use venue-specific endpoint that returns all dashboard data
-          const response = await apiService.get<AdminDashboardResponse | SuperAdminDashboardResponse>(`/dashboard/venue/${venueId}`);
-          
-          console.log('🔍 Response analysis:', {
-            responseExists: !!response,
-            hasSuccess: 'success' in response,
-            successValue: response?.success,
-            hasData: 'data' in response,
-            dataValue: response?.data,
-            dataType: typeof response?.data,
-            isDataNull: response?.data === null,
-            isDataUndefined: response?.data === undefined,
-            responseKeys: response ? Object.keys(response) : [],
-            dataKeys: response?.data ? Object.keys(response.data) : []
-          });
-          
-          if (response.success && response.data) {
-            // Check if this is a SuperAdmin response format (from venue endpoint)
-            if ('system_stats' in response.data && 'workspaces' in response.data && 'venue_performance' in response.data) {
-              const superAdminData = response.data as SuperAdminDashboardResponse;
-              console.log('✅ Admin dashboard data loaded (SuperAdmin format):', {
-                venueId: venueId,
-                todayOrders: superAdminData.system_stats?.total_orders_today,
-                todayRevenue: superAdminData.system_stats?.total_revenue_today,
-                totalTables: superAdminData.system_stats?.total_tables,
-                occupiedTables: superAdminData.system_stats?.occupied_tables
-              });
-              return superAdminData;
-            }
-            // Check for standard Admin response format
-            else if ('venue_name' in response.data && 'stats' in response.data) {
-              const adminData = response.data as AdminDashboardResponse;
-              console.log('✅ Admin dashboard data loaded (standard format):', {
-                venue: adminData.venue_name,
-                todayOrders: adminData.stats.today.orders_count,
-                todayRevenue: adminData.stats.today.revenue,
-                recentOrdersCount: adminData.recent_orders.length
-              });
-              return adminData;
-            }
-          }
-          
-          throw new Error('Invalid dashboard response format');
-        } catch (error: any) {
-          console.error('❌ Dashboard API failed:', error);
-          
-          // Check for specific error types
-          if (error.response?.status === 404) {
-            throw new Error('Dashboard endpoint not found. Please ensure the backend API is properly configured.');
-          } else if (error.response?.status === 403) {
-            throw new Error('Access denied. You may not have permission to view dashboard data.');
-          } else if (error.response?.status === 400 && error.response?.data?.detail?.includes('venue')) {
-            throw new Error('No venue assigned to your account. Please contact your administrator.');
-          }
-          
-          throw new Error(error.message || 'Failed to load dashboard data. Please try again.');
+    console.log('🔄 getAdminDashboard called');
+    
+    try {
+      // Get user's venue ID from auth context
+      const userDataResponse = await apiService.get<any>('/users/me/data');
+      
+      if (!userDataResponse.success || !userDataResponse.data?.venue?.id) {
+        throw new Error('No venue assigned to your account. Please contact your administrator.');
+      }
+      
+      const venueId = userDataResponse.data.venue.id;
+      console.log('🏢 Using venue ID for dashboard:', venueId);
+      
+      // Use venue-specific endpoint that returns all dashboard data
+      const response = await apiService.get<any>(`/dashboard?venue_id=${venueId}`);
+      
+      console.log('🔍 Full API Response:', response);
+      console.log('🔍 Response.data:', response.data);
+      console.log('🔍 Response.data type:', typeof response.data);
+      console.log('🔍 Response.data keys:', response.data ? Object.keys(response.data) : 'NO DATA');
+      console.log('🔍 Has venue?', response.data && 'venue' in response.data);
+      console.log('🔍 Has summary?', response.data && 'summary' in response.data);
+      console.log('🔍 Has recent_orders?', response.data && 'recent_orders' in response.data);
+      console.log('🔍 Has recentOrders?', response.data && 'recentOrders' in response.data);
+      
+      if (response.success && response.data) {
+        console.log('✅ Dashboard API response received:', {
+          dataKeys: Object.keys(response.data),
+          hasVenue: 'venue' in response.data,
+          hasSummary: 'summary' in response.data,
+          hasRecentOrders: 'recent_orders' in response.data,
+          summaryData: response.data.summary
+        });
+
+        // Check if this is a SuperAdmin response format (from venue endpoint)
+        if ('system_stats' in response.data && 'workspaces' in response.data && 'venue_performance' in response.data) {
+          const superAdminData = response.data as SuperAdminDashboardResponse;
+          console.log('✅ Admin dashboard data loaded (SuperAdmin format)');
+          return superAdminData;
         }
-      },
-      2 * 60 * 1000 // 2 minutes cache
-    );
+        // Check for venue dashboard format (venue + summary + recent_orders)
+        else if ('venue' in response.data && 'summary' in response.data) {
+          console.log('✅ Admin dashboard data loaded (Venue format) - Returning data');
+          // Return as-is, the UnifiedDashboard will handle this format
+          return response.data;
+        }
+        // Check for standard Admin response format
+        else if ('venue_name' in response.data && 'stats' in response.data) {
+          const adminData = response.data as AdminDashboardResponse;
+          console.log('✅ Admin dashboard data loaded (standard format)');
+          return adminData;
+        }
+      }
+      
+      console.error('❌ Invalid dashboard response format. Response:', response);
+      throw new Error('Invalid dashboard response format');
+    } catch (error: any) {
+      console.error('❌ Dashboard API failed:', error);
+      
+      // Check for specific error types
+      if (error.response?.status === 404) {
+        throw new Error('Dashboard endpoint not found. Please ensure the backend API is properly configured.');
+      } else if (error.response?.status === 403) {
+        throw new Error('Access denied. You may not have permission to view dashboard data.');
+      } else if (error.response?.status === 400 && error.response?.data?.detail?.includes('venue')) {
+        throw new Error('No venue assigned to your account. Please contact your administrator.');
+      }
+      
+      throw new Error(error.message || 'Failed to load dashboard data. Please try again.');
+    }
   }
 
   async getOperatorDashboard(): Promise<OperatorDashboardResponse> {
@@ -222,7 +218,7 @@ class DashboardService {
       CacheKeys.dashboardData('operator'),
       async () => {
         try {
-          const response = await apiService.get<OperatorDashboardResponse>('/dashboard/operator/comprehensive');
+          const response = await apiService.get<OperatorDashboardResponse>('/dashboard');
           
           console.log('🔍 Response analysis:', {
             responseExists: !!response,
@@ -259,7 +255,7 @@ class DashboardService {
 
   async getDashboardStats(): Promise<DashboardStats> {
     try {
-      const response = await apiService.get<DashboardStats>('/dashboard/stats');
+      const response = await apiService.get<DashboardStats>('/dashboard');
       
       if (response.success && response.data) {
         return response.data;
@@ -278,7 +274,7 @@ class DashboardService {
 
   async getVenueDashboard(venueId: string): Promise<any> {
     try {
-      const response = await apiService.get<any>(`/dashboard/venue/${venueId}`);
+      const response = await apiService.get<any>(`/dashboard?venue_id=${venueId}`);
       
       if (response.success && response.data) {
         return response.data;
@@ -295,7 +291,7 @@ class DashboardService {
 
   async getLiveOrderStatus(venueId: string): Promise<any> {
     try {
-      const response = await apiService.get<any>(`/dashboard/live-orders/${venueId}`);
+      const response = await apiService.get<any>(`/dashboard/live?venue_id=${venueId}`);
       
       if (response.success && response.data) {
         return response.data;
@@ -311,7 +307,7 @@ class DashboardService {
 
   async getLiveTableStatus(venueId: string): Promise<any> {
     try {
-      const response = await apiService.get<any>(`/dashboard/live-tables/${venueId}`);
+      const response = await apiService.get<any>(`/dashboard/live?venue_id=${venueId}`);
       
       if (response.success && response.data) {
         return response.data;

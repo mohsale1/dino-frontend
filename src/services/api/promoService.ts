@@ -207,7 +207,7 @@ class PromoService {
   // Get active promo codes for public use
   async getActivePromoCodes(venueId: string): Promise<PromoCode[]> {
     try {
-      const response = await apiService.get<PromoCode[]>(`/promo-codes/public/active?venue_id=${venueId}`);
+      const response = await apiService.get<PromoCode[]>(`/coupons/venue/${venueId}/active`);
       return response.data || [];
     } catch (error) {
       return [];

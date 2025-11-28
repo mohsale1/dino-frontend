@@ -86,7 +86,7 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({ className }) => {
   } = usePermissions();
 
   // State management
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [stats, setStats] = useState<VenueDashboardStats | null>(null);
   const [menuPerformance, setMenuPerformance] = useState<MenuItemPerformance[]>([]);
@@ -127,13 +127,23 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({ className }) => {
         }
       }
       
+      console.log('🎯 Dashboard data received:', data);
+      
       if (data) {
-        setDashboardData(data);
-        
         // Process stats based on role and data format
+        console.log('📊 Processing dashboard data:', {
+          hasSystemStats: 'system_stats' in data,
+          hasStats: 'stats' in data,
+          hasSummary: 'summary' in data,
+          hasVenue: 'venue' in data,
+          dataKeys: Object.keys(data),
+          fullData: data
+        });
+
         if ('system_stats' in data) {
           // SuperAdmin format
           const superAdminData = data as SuperAdminDashboardResponse;
+          setDashboardData(data);
           setStats({
             total_orders: superAdminData.system_stats?.total_orders || 0,
             total_revenue: superAdminData.system_stats?.total_revenue || 0,
@@ -151,10 +161,47 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({ className }) => {
             occupied_tables: superAdminData.system_stats?.occupied_tables || 0,
             active_menu_items: superAdminData.system_stats?.active_menu_items || 0,
           });
+        } else if ('summary' in data && 'venue' in data) {
+          // Venue dashboard format (from backend get_venue_dashboard)
+          const venueData = data as any;
+          const summary = venueData.summary;
+          console.log('📊 Using venue dashboard format:', summary);
+          console.log('📊 Full venueData keys:', Object.keys(venueData));
+          console.log('📊 Summary keys:', summary ? Object.keys(summary) : 'NO SUMMARY');
+          
+          // Handle both snake_case and camelCase (API service converts to camelCase)
+          setStats({
+            total_orders: summary?.total_orders || summary?.totalOrders || 0,
+            total_revenue: summary?.total_revenue || summary?.totalRevenue || 0,
+            active_orders: summary?.active_orders || summary?.activeOrders || 0,
+            total_tables: summary?.total_tables || summary?.totalTables || 0,
+            total_menu_items: summary?.total_menu_items || summary?.totalMenuItems || 0,
+            todays_revenue: summary?.today_revenue || summary?.todayRevenue || 0,
+            todays_orders: summary?.today_orders || summary?.todayOrders || 0,
+            avg_order_value: summary?.average_order_value || summary?.averageOrderValue || 0,
+            table_occupancy_rate: summary?.table_occupancy_rate || summary?.tableOccupancyRate || 0,
+            popular_items_count: 0,
+            pending_orders: 0,
+            preparing_orders: 0,
+            ready_orders: 0,
+            occupied_tables: summary?.occupied_tables || summary?.occupiedTables || 0,
+            active_menu_items: summary?.active_menu_items || summary?.activeMenuItems || 0,
+          });
+          
+          // Map recent_orders/recentOrders to recent_activity for compatibility with tabs
+          const recentOrders = venueData.recent_orders || venueData.recentOrders || [];
+          console.log('📋 Mapping recent orders:', recentOrders.length);
+          console.log('📋 Recent orders data:', recentOrders);
+          setDashboardData({
+            ...data,
+            recent_activity: recentOrders,
+            recentActivity: recentOrders
+          } as any);
         } else if ('stats' in data && 'venue_name' in data) {
           // Admin format
           const adminData = data as AdminDashboardResponse;
           const adminStats = adminData.stats;
+          setDashboardData(data);
           setStats({
             total_orders: adminStats?.today.orders_count || 0,
             total_revenue: adminStats?.today.revenue || 0,
@@ -175,6 +222,7 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({ className }) => {
         } else {
           // Operator format
           const operatorData = data as OperatorDashboardResponse;
+          setDashboardData(data);
           setStats({
             total_orders: 0,
             total_revenue: 0,
@@ -250,15 +298,10 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({ className }) => {
         setTableStatuses([]);
       }
     } catch (err: any) {
-      const errorMessage = err.message || 'Failed to load dashboard data';
-      
-      if (errorMessage.includes('No venue assigned')) {
-        setError(null);
-        setDashboardData(null);
-      } else {
-        setError(errorMessage);
-        setDashboardData(null);
-      }
+      // API failed - show error alert but keep UI visible
+      console.error('Failed to load dashboard data:', err);
+      setError('Network error. Please check your connection.');
+      setDashboardData(null);
     } finally {
       setLoading(false);
     }
@@ -291,20 +334,10 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({ className }) => {
     };
   }, [currentVenue?.id, user, loadDashboardData, isSuperAdmin]);
 
-  // Render loading state
-  if (loading) {
-    return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
-        <CircularProgress size={60} />
-        <Typography variant="h6" sx={{ ml: 2 }}>
-          Loading Dashboard...
-        </Typography>
-      </Box>
-    );
-  }
-
-  // Render error state
-  if (error) {
+  // Don't block UI with loading or error states
+  // Show dashboard immediately with empty/default data
+  
+  if (false && error) { // Disabled blocking UI
     return (
       <Alert severity="error" sx={{ mb: 3 }}>
         {error}
@@ -352,6 +385,18 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({ className }) => {
           refreshing={refreshing}
           onRefresh={refreshDashboard}
         />
+
+        {/* Error Alert */}
+        {error && (
+          <Box sx={{ px: { xs: 3, sm: 4 }, pt: 3, pb: 1 }}>
+            <Alert 
+              severity="error" 
+              onClose={() => setError(null)}
+            >
+              {error}
+            </Alert>
+          </Box>
+        )}
 
         {/* Main Content */}
         <Box

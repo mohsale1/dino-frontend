@@ -66,7 +66,6 @@ import { userService, User, UserCreate, UserUpdate } from '../../services/auth';
 import { VenueUser } from '../../types/api';
 import { ROLE_NAMES, getRoleDisplayName } from '../../constants/roles';
 import { PageLoadingSkeleton, EmptyState } from '../../components/ui/LoadingStates';
-import { hashPassword, getFixedSalt, isValidHashedPassword } from '../../utils/security';
 import { DeleteConfirmationModal } from '../../components/modals';
 import AnimatedBackground from '../../components/ui/AnimatedBackground';
 import { useUserFlags } from '../../flags/FlagContext';
@@ -118,7 +117,7 @@ const UserManagement: React.FC = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   
   const [users, setUsers] = useState<VenueUser[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
@@ -163,8 +162,8 @@ const UserManagement: React.FC = () => {
     if (!venue?.id) {
       setUsers([]);
       setLoading(false);
-      setError('No venue selected. Please select a venue to view users.');
-      setUsersLoaded(true); // Mark as loaded even if no venue
+      // No venue - keep empty users, don't show error
+      setUsersLoaded(true);
       return;
     }
 
@@ -179,32 +178,15 @@ const UserManagement: React.FC = () => {
         setUsers(response.data);
       } else {
         setUsers([]);
-        setError(response.error || 'No users found for this venue.');
       }
     } catch (error: any) {
-      // Use the error handler to analyze and handle the error
-      const errorInfo = handleError(error, { 
-        logError: true,
-        showToast: false // We'll handle the error display ourselves
-      });
-      
-      // Set appropriate error message based on error type
-      if (errorInfo.type === 'network') {
-        setError('Unable to connect to the server. Please check your internet connection and try again.');
-      } else if (errorInfo.code === 404 || errorInfo.code === '404') {
-        setError('User management is not available for this venue. Please contact your administrator.');
-      } else if (errorInfo.type === 'auth') {
-        setError('Your session has expired. Please log in again.');
-      } else if (errorInfo.type === 'permission') {
-        setError('You don\'t have permission to view users for this venue.');
-      } else {
-        setError(errorInfo.userFriendlyMessage);
-      }
-      
+      // API failed - show error alert but keep UI visible
+      console.error('Failed to load users:', error);
       setUsers([]);
+      setError('Network error. Please check your connection.');
     } finally {
       setLoading(false);
-      setUsersLoaded(true); // Mark as loaded after API call completes
+      setUsersLoaded(true);
     }
   }, [getVenue, handleError, currentVenue]);
 
@@ -365,16 +347,6 @@ const UserManagement: React.FC = () => {
           return;
         }
         
-        // Validate password is plain text (not already hashed)
-        if (isValidHashedPassword(formData.password)) {
-          setSnackbar({ 
-            open: true, 
-            message: 'Password appears to be already hashed. Please provide plain text password.', 
-            severity: 'error' 
-          });
-          return;
-        }
-        
         if (formData.password !== formData.confirm_password) {
           setSnackbar({ 
             open: true, 
@@ -403,13 +375,11 @@ const UserManagement: React.FC = () => {
           });
         }
       } else {
-        // Create new user
-        const salt = getFixedSalt();
-        const hashedPassword = await hashPassword(formData.password, salt);
+        // Create new user - send plain password to backend
         const createData: UserCreate = {
           email: formData.email,
-          password: hashedPassword,
-          confirm_password: hashedPassword,
+          password: formData.password,
+          confirm_password: formData.confirm_password,
           first_name: formData.first_name,
           last_name: formData.last_name,
           phone: formData.phone,
@@ -447,7 +417,7 @@ const UserManagement: React.FC = () => {
     setDeleteModal({
       open: true,
       userId: userId,
-      userName: user.user_name || `${user.first_name} ${user.last_name}`,
+      userName: user.name || `${user.first_name} ${user.last_name}`,
       loading: false
     });
   };
@@ -498,24 +468,23 @@ const UserManagement: React.FC = () => {
   };
 
   const handlePasswordUpdate = async (userId: string, newPassword: string) => {
-    try {
-      // TODO: Implement password update API call
-      // This would use the userService password update method
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      setSnackbar({ 
-        open: true, 
-        message: 'Password updated successfully', 
-        severity: 'success' 
-      });
-    } catch (error: any) {
-      setSnackbar({ 
-        open: true, 
-        message: error.message || 'Failed to update password', 
-        severity: 'error' 
-      });
-      throw error;
+    // Send plain password to backend - backend handles hashing
+    // Don't catch errors here - let them bubble up to PasswordUpdateDialog
+    const response = await userService.updateUser(userId, {
+      password: newPassword
+    } as any);
+    
+    if (!response.success) {
+      // Throw error to be caught and displayed by PasswordUpdateDialog
+      throw new Error(response.message || 'Failed to update password');
     }
+    
+    // Only show success message in snackbar after dialog closes
+    setSnackbar({ 
+      open: true, 
+      message: 'Password updated successfully', 
+      severity: 'success' 
+    });
   };
 
   const [refreshing, setRefreshing] = useState(false);
@@ -559,9 +528,23 @@ const UserManagement: React.FC = () => {
     }
   };
 
-  const handleMenuClick = (event: React.MouseEvent<HTMLElement>, user: User) => {
+  const handleMenuClick = (event: React.MouseEvent<HTMLElement>, user: VenueUser | User) => {
     setAnchorEl(event.currentTarget);
-    setSelectedUser(user);
+    // Convert VenueUser to User format if needed
+    const userForSelection: User = {
+      id: user.id,
+      email: user.email,
+      phone: user.phone,
+      first_name: user.first_name,
+      last_name: user.last_name,
+      role: user.role,
+      workspace_id: user.workspace_id,
+      venue_id: user.venue_id,
+      is_active: user.is_active,
+      created_at: user.created_at,
+      updated_at: user.updated_at,
+    };
+    setSelectedUser(userForSelection);
   };
 
   const handleMenuClose = () => {
@@ -569,16 +552,16 @@ const UserManagement: React.FC = () => {
     setSelectedUser(null);
   };
 
-  const getRoleColor = (roleName: string) => {
+  const getRoleColor = (roleName: string): string => {
     switch (roleName) {
       case ROLE_NAMES.SUPERADMIN:
-        return 'error';
+        return '#0D47A1'; // Dark blue
       case ROLE_NAMES.ADMIN:
-        return 'primary';
+        return '#1976D2'; // Medium blue
       case ROLE_NAMES.OPERATOR:
-        return 'secondary';
+        return '#64B5F6'; // Light blue
       default:
-        return 'default';
+        return '#1565C0'; // Default blue
     }
   };
 
@@ -599,14 +582,14 @@ const UserManagement: React.FC = () => {
     const firstName = user.first_name || '';
     const lastName = user.last_name || '';
     const email = user.email || '';
-    const userName = user.user_name || '';
+    const name = user.name || '';
     
     const matchesSearch = firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         userName.toLowerCase().includes(searchTerm.toLowerCase());
+                         name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesRole = filterRole === 'all' || user.role === filterRole;
-    const matchesActive = showInactive || user.status === 'active';
+    const matchesActive = showInactive || user.is_active;
     
     return matchesSearch && matchesRole && matchesActive;
   });
@@ -617,20 +600,10 @@ const UserManagement: React.FC = () => {
   const canDeleteUsers = hasPermission(PERMISSIONS.USERS_DELETE);
   const canUpdatePasswords = isAdmin() || isSuperAdmin();
 
-  if (loading) {
-    return (
-      <Box sx={{ pt: { xs: '56px', sm: '64px' }, py: 4, width: '100%' }}>
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
-          <CircularProgress size={60} />
-          <Typography variant="h6" sx={{ ml: 2 }}>
-            Loading users...
-          </Typography>
-        </Box>
-      </Box>
-    );
-  }
-
-  if (error) {
+  // Don't block UI with loading or error states
+  // Show page immediately with empty users if API fails
+  
+  if (false && error) { // Disabled blocking UI
     return (
       <Box sx={{ pt: { xs: '56px', sm: '64px' }, py: 4, width: '100%' }}>
         <Container maxWidth="xl">
@@ -923,6 +896,18 @@ const UserManagement: React.FC = () => {
           margin: 0,
         }}
       >
+        {/* Error Alert */}
+        {error && (
+          <Box sx={{ px: { xs: 3, sm: 4 }, pt: 3, pb: 1 }}>
+            <Alert 
+              severity="error" 
+              onClose={() => setError(null)}
+            >
+              {error}
+            </Alert>
+          </Box>
+        )}
+
         {/* Content Area */}
         <Box sx={{ px: { xs: 3, sm: 4 }, pt: { xs: 3, sm: 4 }, pb: 4 }}>
 
@@ -939,7 +924,7 @@ const UserManagement: React.FC = () => {
               },
               {
                 label: 'Active Users',
-                value: users.filter(user => user.status === 'active').length,
+                value: users.filter(user => user.is_active).length,
                 color: '#4CAF50',
                 icon: <CheckCircle />,
                 description: 'Currently active'
@@ -949,7 +934,7 @@ const UserManagement: React.FC = () => {
                 value: users.filter(user => {
                   const sevenDaysAgo = new Date();
                   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-                  const lastLogin = user.last_logged_in ? new Date(user.last_logged_in) : null;
+                  const lastLogin = user.last_login ? new Date(user.last_login) : null;
                   return lastLogin && lastLogin > sevenDaysAgo;
                 }).length,
                 color: '#2196F3',
@@ -1109,11 +1094,47 @@ const UserManagement: React.FC = () => {
                   <Table>
                     <TableHead>
                       <TableRow>
-                        <TableCell>User</TableCell>
-                        <TableCell>Role</TableCell>
-                        <TableCell>Status</TableCell>
-                        <TableCell>Last Login</TableCell>
-                        <TableCell align="center">Actions</TableCell>
+                        <TableCell sx={{ 
+                          fontWeight: 600, 
+                          fontSize: '0.875rem',
+                          color: 'text.primary',
+                          py: 2
+                        }}>
+                          User
+                        </TableCell>
+                        <TableCell sx={{ 
+                          fontWeight: 600, 
+                          fontSize: '0.875rem',
+                          color: 'text.primary',
+                          py: 2
+                        }}>
+                          Role
+                        </TableCell>
+                        <TableCell sx={{ 
+                          fontWeight: 600, 
+                          fontSize: '0.875rem',
+                          color: 'text.primary',
+                          py: 2
+                        }}>
+                          Status
+                        </TableCell>
+                        <TableCell sx={{ 
+                          fontWeight: 600, 
+                          fontSize: '0.875rem',
+                          color: 'text.primary',
+                          py: 2,
+                          display: { xs: 'none', md: 'table-cell' }
+                        }}>
+                          Last Login
+                        </TableCell>
+                        <TableCell align="center" sx={{ 
+                          fontWeight: 600, 
+                          fontSize: '0.875rem',
+                          color: 'text.primary',
+                          py: 2
+                        }}>
+                          Actions
+                        </TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
@@ -1155,19 +1176,71 @@ const UserManagement: React.FC = () => {
                   <Table>
                     <TableHead>
                       <TableRow>
-                        <TableCell>User</TableCell>
-                        <TableCell>Role</TableCell>
-                        <TableCell>Status</TableCell>
-                        <TableCell>Last Login</TableCell>
-                        <TableCell align="center">Actions</TableCell>
+                        <TableCell sx={{ 
+                          fontWeight: 600, 
+                          fontSize: '0.875rem',
+                          color: 'text.primary',
+                          py: 2
+                        }}>
+                          User
+                        </TableCell>
+                        <TableCell sx={{ 
+                          fontWeight: 600, 
+                          fontSize: '0.875rem',
+                          color: 'text.primary',
+                          py: 2
+                        }}>
+                          Role
+                        </TableCell>
+                        <TableCell sx={{ 
+                          fontWeight: 600, 
+                          fontSize: '0.875rem',
+                          color: 'text.primary',
+                          py: 2
+                        }}>
+                          Status
+                        </TableCell>
+                        <TableCell sx={{ 
+                          fontWeight: 600, 
+                          fontSize: '0.875rem',
+                          color: 'text.primary',
+                          py: 2,
+                          display: { xs: 'none', md: 'table-cell' }
+                        }}>
+                          Last Login
+                        </TableCell>
+                        <TableCell align="center" sx={{ 
+                          fontWeight: 600, 
+                          fontSize: '0.875rem',
+                          color: 'text.primary',
+                          py: 2
+                        }}>
+                          Actions
+                        </TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
                       {filteredUsers.map((user) => (
-                      <TableRow key={user.id}>
-                        <TableCell>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 2 } }}>
-                            <Avatar sx={{ width: { xs: 28, sm: 36 }, height: { xs: 28, sm: 36 }, fontSize: { xs: '0.7rem', sm: '0.8rem' } }}>
+                      <TableRow 
+                        key={user.id}
+                        sx={{
+                          '&:hover': {
+                            backgroundColor: 'action.hover',
+                          },
+                          transition: 'background-color 0.2s'
+                        }}
+                      >
+                        <TableCell sx={{ py: 2.5 }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                            <Avatar 
+                              sx={{ 
+                                width: 44, 
+                                height: 44, 
+                                fontSize: '1rem',
+                                fontWeight: 600,
+                                bgcolor: 'primary.main'
+                              }}
+                            >
                               {user.first_name.charAt(0)}{user.last_name.charAt(0)}
                             </Avatar>
                             <Box sx={{ minWidth: 0, flex: 1 }}>
@@ -1175,22 +1248,21 @@ const UserManagement: React.FC = () => {
                                 variant="subtitle2" 
                                 fontWeight="600"
                                 sx={{ 
-                                  fontSize: { xs: '0.65rem', sm: '0.75rem' },
-                                  overflow: 'hidden',
-                                  textOverflow: 'ellipsis',
-                                  lineHeight: 1.2
+                                  fontSize: '0.9375rem',
+                                  color: 'text.primary',
+                                  mb: 0.5,
+                                  lineHeight: 1.3
                                 }}
                               >
-                                {user.user_name || `${user.first_name} ${user.last_name}`}
+                                {user.name || `${user.first_name} ${user.last_name}`}
                               </Typography>
                               <Typography 
                                 variant="body2" 
                                 color="text.secondary"
                                 sx={{ 
-                                  fontSize: { xs: '0.6rem', sm: '0.65rem' },
-                                  overflow: 'hidden',
-                                  textOverflow: 'ellipsis',
-                                  lineHeight: 1.1
+                                  fontSize: '0.8125rem',
+                                  lineHeight: 1.4,
+                                  mb: user.phone ? 0.25 : 0
                                 }}
                               >
                                 {user.email}
@@ -1200,9 +1272,9 @@ const UserManagement: React.FC = () => {
                                   variant="body2" 
                                   color="text.secondary"
                                   sx={{ 
-                                    fontSize: { xs: '0.6rem', sm: '0.65rem' },
-                                    display: { xs: 'none', sm: 'block' },
-                                    lineHeight: 1.1
+                                    fontSize: '0.8125rem',
+                                    lineHeight: 1.4,
+                                    display: { xs: 'none', lg: 'block' }
                                   }}
                                 >
                                   {user.phone}
@@ -1211,47 +1283,57 @@ const UserManagement: React.FC = () => {
                             </Box>
                           </Box>
                         </TableCell>
-                        <TableCell>
-                          <Chip
-                            label={user.role_display_name || getDisplayName(user.role)}
-                            color={getRoleColor(user.role) as any}
-                            size="small"
+                        <TableCell sx={{ py: 2.5 }}>
+                          <Typography 
+                            variant="body2" 
                             sx={{ 
-                              fontSize: { xs: '0.55rem', sm: '0.65rem' },
-                              height: { xs: 20, sm: 24 },
-                              '& .MuiChip-label': {
-                                px: { xs: 0.5, sm: 1 }
-                              }
+                              fontSize: '0.8125rem',
+                              fontWeight: 600,
+                              color: getRoleColor(user.role)
                             }}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Chip
-                            label={user.status === 'active' ? 'Active' : 'Inactive'}
-                            color={user.status === 'active' ? 'success' : 'default'}
-                            size="small"
-                            icon={user.status === 'active' ? <CheckCircle sx={{ fontSize: '0.8rem' }} /> : <Cancel sx={{ fontSize: '0.8rem' }} />}
-                            sx={{ 
-                              fontSize: { xs: '0.55rem', sm: '0.65rem' },
-                              height: { xs: 20, sm: 24 },
-                              '& .MuiChip-label': {
-                                px: { xs: 0.5, sm: 1 }
-                              }
-                            }}
-                          />
-                        </TableCell>
-                        <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>
-                          <Typography variant="body2" sx={{ fontSize: { xs: '0.6rem', sm: '0.65rem' } }}>
-                            {formatLastLogin(user.last_logged_in || user.updated_at || user.created_at)}
+                          >
+                            {user.role_display_name || getDisplayName(user.role)}
                           </Typography>
                         </TableCell>
-                        <TableCell sx={{ textAlign: 'center' }}>
+                        <TableCell sx={{ py: 2.5 }}>
+                          <Chip
+                            label={user.status || (user.is_active ? 'Active' : 'Inactive')}
+                            color={user.is_active ? 'success' : 'default'}
+                            size="small"
+                            icon={user.is_active ? <CheckCircle sx={{ fontSize: '1rem' }} /> : <Cancel sx={{ fontSize: '1rem' }} />}
+                            sx={{ 
+                              fontSize: '0.8125rem',
+                              height: 28,
+                              fontWeight: 500,
+                              '& .MuiChip-label': {
+                                px: 1.5
+                              }
+                            }}
+                          />
+                        </TableCell>
+                        <TableCell sx={{ py: 2.5, display: { xs: 'none', md: 'table-cell' } }}>
+                          <Typography 
+                            variant="body2" 
+                            sx={{ 
+                              fontSize: '0.8125rem',
+                              color: 'text.secondary'
+                            }}
+                          >
+                            {formatLastLogin(user.last_login || user.updated_at || user.created_at)}
+                          </Typography>
+                        </TableCell>
+                        <TableCell sx={{ textAlign: 'center', py: 2.5 }}>
                           <IconButton
                             onClick={(e) => handleMenuClick(e, user)}
                             size="small"
-                            sx={{ p: 0.5 }}
+                            sx={{ 
+                              p: 1,
+                              '&:hover': {
+                                backgroundColor: 'action.hover'
+                              }
+                            }}
                           >
-                            <MoreVert sx={{ fontSize: '1rem' }} />
+                            <MoreVert sx={{ fontSize: '1.25rem' }} />
                           </IconButton>
                         </TableCell>
                       </TableRow>

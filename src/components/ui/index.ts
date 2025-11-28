@@ -53,6 +53,7 @@ export {
   type ToastMessage
 } from './ToastNotification';
 export { default as ToastNotification } from './ToastNotification';
+export { default as FragmentNavigation } from './FragmentNavigation';
 export { default as ToastNotificationComponent } from './ToastNotification';
 
 // ===================================================================

@@ -650,6 +650,43 @@ class VenueService {
       is_24_hours: false
     }));
   }
+
+  // =============================================================================
+  // MENU TEMPLATE MANAGEMENT
+  // =============================================================================
+
+  /**
+   * Update venue menu template
+   */
+  async updateMenuTemplate(venueId: string, templateName: string, templateConfig?: any): Promise<ApiResponse<Venue>> {
+    try {
+      console.log('🎨 VenueService: Updating menu template:', { venueId, templateName, hasConfig: !!templateConfig });
+      
+      const response = await this.updateVenue(venueId, { 
+        menu_template: templateName,
+        menu_template_config: templateConfig 
+      });
+      
+      console.log('✅ VenueService: Menu template updated successfully');
+      return response;
+    } catch (error: any) {
+      console.error('❌ VenueService: Error updating menu template:', error);
+      throw new Error(error.response?.data?.detail || error.message || 'Failed to update menu template');
+    }
+  }
+
+  /**
+   * Get venue menu template
+   */
+  async getMenuTemplate(venueId: string): Promise<string | null> {
+    try {
+      const venue = await this.getVenue(venueId);
+      return venue?.menu_template || null;
+    } catch (error) {
+      console.error('Error fetching menu template:', error);
+      return null;
+    }
+  }
 }
 
 export const venueService = new VenueService();

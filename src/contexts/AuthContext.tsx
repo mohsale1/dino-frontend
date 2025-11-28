@@ -10,7 +10,6 @@ import { USER_ROLES as ROLE_NAMES } from '../constants/app';
 import { tokenRefreshScheduler } from '../utils/tokenRefreshScheduler';
 
 import { apiService } from '../utils/api';
-// Password hashing is now handled by authService
 
 interface AuthContextType {
   user: UserProfile | null;
@@ -123,6 +122,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     initializeAuth();
   }, []);
 
+
+
   const login = async (email: string, password: string): Promise<void> => {
     try {
       setLoading(true);
@@ -138,7 +139,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         apiService.debugConfiguration();
       }
       
-      // authService now handles client-side hashing automatically
+      // authService sends plain password to backend
       const response = await authService.login(email, password);
       
       // Store token

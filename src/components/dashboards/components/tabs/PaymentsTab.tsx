@@ -50,12 +50,35 @@ interface PaymentsTabProps {
 const PaymentsTab: React.FC<PaymentsTabProps> = ({ stats }) => {
   const theme = useTheme();
 
-  // Mock payment method data (in real app, this would come from API)
+  // Show empty state if no stats available
+  if (!stats || stats.todays_revenue === 0) {
+    return (
+      <Box sx={{ 
+        textAlign: 'center', 
+        py: 8,
+        px: 3
+      }}>
+        <Payment sx={{ fontSize: 80, color: 'text.disabled', mb: 2 }} />
+        <Typography variant="h6" color="text.secondary" gutterBottom>
+          No Payment Data Available
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          Payment analytics will appear here once transactions are processed
+        </Typography>
+      </Box>
+    );
+  }
+
+  // Calculate payment method distribution from actual data (if available)
+  // For now, show only total revenue without fake percentages
   const paymentMethods = [
-    { method: 'Credit Card', percentage: 45, amount: (stats?.todays_revenue || 0) * 0.45, color: '#2196F3', icon: <CreditCard /> },
-    { method: 'Digital Wallet', percentage: 30, amount: (stats?.todays_revenue || 0) * 0.30, color: '#4CAF50', icon: <Payment /> },
-    { method: 'Cash', percentage: 20, amount: (stats?.todays_revenue || 0) * 0.20, color: '#FF9800', icon: <MonetizationOn /> },
-    { method: 'Bank Transfer', percentage: 5, amount: (stats?.todays_revenue || 0) * 0.05, color: '#9C27B0', icon: <AccountBalance /> },
+    { 
+      method: 'Total Revenue', 
+      percentage: 100, 
+      amount: stats?.todays_revenue || 0, 
+      color: '#2196F3', 
+      icon: <MonetizationOn /> 
+    },
   ];
 
   const paymentStats = [
@@ -65,47 +88,33 @@ const PaymentsTab: React.FC<PaymentsTabProps> = ({ stats }) => {
       icon: <MonetizationOn />,
       color: 'success.main',
       bgColor: 'success.50',
-      change: '+15.3%',
+      change: null, // Remove fake percentage
       changeType: 'positive'
     },
     {
-      title: 'Successful Payments',
-      value: '98.5%',
+      title: 'Total Orders',
+      value: stats?.todays_orders || 0,
       icon: <CheckCircle />,
       color: 'success.main',
       bgColor: 'success.50',
-      change: '+0.2%',
+      change: null, // Remove fake percentage
       changeType: 'positive'
     },
     {
-      title: 'Failed Payments',
-      value: '1.5%',
-      icon: <Error />,
-      color: 'error.main',
-      bgColor: 'error.50',
-      change: '-0.2%',
-      changeType: 'positive'
-    },
-    {
-      title: 'Average Transaction',
+      title: 'Average Order Value',
       value: `₹${stats?.avg_order_value || 0}`,
       icon: <TrendingUp />,
       color: 'primary.main',
       bgColor: 'primary.50',
-      change: '+8.7%',
+      change: null, // Remove fake percentage
       changeType: 'positive'
     }
   ];
 
-  const transactionTrends = [
-    { time: '9:00 AM', amount: 12500, transactions: 15 },
-    { time: '12:00 PM', amount: 28000, transactions: 32 },
-    { time: '3:00 PM', amount: 18500, transactions: 22 },
-    { time: '6:00 PM', amount: 35000, transactions: 45 },
-    { time: '9:00 PM', amount: 42000, transactions: 38 },
-  ];
+  // Remove fake transaction trends - will be empty until API provides real data
+  const transactionTrends: any[] = [];
 
-  const maxAmount = Math.max(...transactionTrends.map(t => t.amount));
+  const maxAmount = 1;
 
   return (
     <Grid container spacing={3}>
@@ -148,22 +157,24 @@ const PaymentsTab: React.FC<PaymentsTabProps> = ({ stats }) => {
                       }}>
                         {React.cloneElement(stat.icon, { fontSize: 'medium' })}
                       </Avatar>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                        {stat.changeType === 'positive' ? (
-                          <TrendingUp sx={{ fontSize: 16, color: 'success.main' }} />
-                        ) : (
-                          <TrendingDown sx={{ fontSize: 16, color: 'error.main' }} />
-                        )}
-                        <Typography 
-                          variant="caption" 
-                          sx={{ 
-                            color: stat.changeType === 'positive' ? 'success.main' : 'error.main',
-                            fontWeight: 600
-                          }}
-                        >
-                          {stat.change}
-                        </Typography>
-                      </Box>
+                       {stat.change && (
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                          {stat.changeType === 'positive' ? (
+                            <TrendingUp sx={{ fontSize: 16, color: 'success.main' }} />
+                          ) : (
+                            <TrendingDown sx={{ fontSize: 16, color: 'error.main' }} />
+                          )}
+                          <Typography 
+                            variant="caption" 
+                            sx={{ 
+                              color: stat.changeType === 'positive' ? 'success.main' : 'error.main',
+                              fontWeight: 600
+                            }}
+                          >
+                            {stat.change}
+                          </Typography>
+                        </Box>
+                      )}
                     </Box>
                     
                     <Typography variant="h5" sx={{ fontWeight: 700, color: 'text.primary', mb: 0.5 }}>
@@ -261,8 +272,16 @@ const PaymentsTab: React.FC<PaymentsTabProps> = ({ stats }) => {
               Hourly Transaction Trends
             </Typography>
             
-            <Stack spacing={2}>
-              {transactionTrends.map((trend, index) => (
+            {transactionTrends.length === 0 ? (
+              <Box sx={{ textAlign: 'center', py: 4 }}>
+                <Schedule sx={{ fontSize: 60, color: 'text.disabled', mb: 2 }} />
+                <Typography variant="body2" color="text.secondary">
+                  Hourly trends will appear here once more data is available
+                </Typography>
+              </Box>
+            ) : (
+              <Stack spacing={2}>
+                {transactionTrends.map((trend, index) => (
                 <Box key={trend.time} sx={{ 
                   p: 2, 
                   backgroundColor: 'grey.50',
@@ -301,8 +320,9 @@ const PaymentsTab: React.FC<PaymentsTabProps> = ({ stats }) => {
                     }}
                   />
                 </Box>
-              ))}
-            </Stack>
+                ))}
+              </Stack>
+            )}
           </CardContent>
         </Card>
       </Grid>

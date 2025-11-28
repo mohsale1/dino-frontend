@@ -89,7 +89,7 @@ const UserPermissionsDashboard: React.FC = () => {
       
 
     } catch (error: any) {
-      setError(error.message || 'Failed to load users. Please try again.');
+      setError('Network error. Please check your connection.');
     } finally {
       setLoading(false);
     }
@@ -110,7 +110,7 @@ const UserPermissionsDashboard: React.FC = () => {
         
 
       } catch (error: any) {
-        setError(error.message || 'Failed to load users. Please try again.');
+        setError('Network error. Please check your connection.');
         setUsers([]);
       } finally {
         setLoading(false);

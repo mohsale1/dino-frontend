@@ -1,11 +1,5 @@
 import { AuthToken, UserProfile, UserRegistration, WorkspaceRegistration, ApiResponse } from '../../types/api';
 import { apiService } from '../../utils/api';
-import { 
-  loginWithHashedPassword, 
-  isPasswordHashingSupported,
-  changePasswordWithHashing,
-  registerWithHashedPassword
-} from '../../utils/security';
 import { logger } from '../../utils/logger';
 import StorageManager from '../../utils/storage';
 
@@ -17,16 +11,19 @@ class AuthService {
 
   async login(email: string, password: string, rememberMe: boolean = false): Promise<AuthToken> {
     try {
-      // Check if password hashing is supported
-      if (!isPasswordHashingSupported()) {
-        throw new Error('Password hashing is not supported in this browser. Please use a modern browser with crypto.subtle support.');
+      logger.authEvent("Starting login");
+      
+      // Send plain password to backend - backend handles hashing
+      const response = await apiService.post<AuthToken>('/auth/login', {
+        email,
+        password
+      });
+      
+      if (!response.success || !response.data) {
+        throw new Error(response.message || 'Login failed');
       }
-
-      logger.authEvent("Starting client-side password hashing for login");
       
-      // Hash password before sending
-      const authToken = await loginWithHashedPassword(email, password);
-      
+      const authToken = response.data;
       this.setTokens(authToken);
       return authToken;
     } catch (error: any) {
@@ -51,18 +48,18 @@ class AuthService {
 
   async registerWorkspace(workspaceData: WorkspaceRegistration): Promise<ApiResponse<any>> {
     try {
-      // Check if password hashing is supported
-      if (!isPasswordHashingSupported()) {
-        throw new Error('Password hashing is not supported in this browser. Please use a modern browser with crypto.subtle support.');
-      }
-
-      logger.authEvent("Starting client-side password hashing for registration");
+      logger.authEvent("Starting workspace registration");
       
-      // Hash password before sending
-      const hashedResponse = await registerWithHashedPassword(workspaceData);
+      // Send plain password to backend - backend handles hashing
+      const response = await apiService.post<any>('/auth/register', workspaceData);
+      
+      if (!response.success) {
+        throw new Error(response.message || 'Registration failed');
+      }
+      
       return {
         success: true,
-        data: hashedResponse,
+        data: response.data,
         message: 'Registration successful'
       };
     } catch (error: any) {
@@ -171,20 +168,22 @@ class AuthService {
 
   async changePassword(currentPassword: string, newPassword: string): Promise<void> {
     try {
-      // Check if password hashing is supported
-      if (!isPasswordHashingSupported()) {
-        throw new Error('Password hashing is not supported in this browser. Please use a modern browser with crypto.subtle support.');
-      }
-
-      logger.authEvent("Starting client-side password hashing for password change");
+      logger.authEvent("Starting password change");
       
       const token = this.getToken();
       if (!token) {
         throw new Error('No authentication token found');
       }
       
-      // Hash passwords before sending
-      await changePasswordWithHashing(currentPassword, newPassword, token);
+      // Send plain passwords to backend - backend handles hashing
+      const response = await apiService.post('/auth/change-password', {
+        current_password: currentPassword,
+        new_password: newPassword
+      });
+      
+      if (!response.success) {
+        throw new Error(response.message || 'Password change failed');
+      }
     } catch (error: any) {
       logger.error('Password change failed:', error);
       throw new Error(error.response?.data?.detail || error.message || 'Failed to change password');

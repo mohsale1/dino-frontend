@@ -186,7 +186,7 @@ class TrackingService {
   // Get order tracking information
   async getOrderTracking(orderId: string): Promise<OrderTracking | null> {
     try {
-      const response = await apiService.get<OrderTracking>(`/tracking/orders/${orderId}`);
+      const response = await apiService.get<OrderTracking>(`/orders/public/${orderId}/status`);
       return response.data || null;
     } catch (error) {
       return null;
@@ -196,7 +196,7 @@ class TrackingService {
   // Get order tracking by order number (public endpoint)
   async getOrderTrackingByNumber(orderNumber: string): Promise<OrderTracking | null> {
     try {
-      const response = await apiService.get<OrderTracking>(`/tracking/public/orders/${orderNumber}`);
+      const response = await apiService.get<OrderTracking>(`/orders/public/${orderNumber}/status`);
       return response.data || null;
     } catch (error) {
       return null;
@@ -241,15 +241,24 @@ class TrackingService {
   async subscribeToOrderUpdates(orderId: string, callback: (update: LiveOrderUpdate) => void): Promise<() => void> {
     try {
       // In a real implementation, this would establish a WebSocket connection
-      // For now, we'll simulate with polling
+      // For now, we'll simulate with polling using the public status endpoint
       const pollInterval = setInterval(async () => {
         try {
-          const response = await apiService.get<LiveOrderUpdate>(`/tracking/orders/${orderId}/live-updates`);
+          const response = await apiService.get<any>(`/orders/public/${orderId}/status`);
           if (response.data) {
-            callback(response.data);
+            // Convert the status response to LiveOrderUpdate format
+            const update: LiveOrderUpdate = {
+              order_id: response.data.order_id || orderId,
+              status: response.data.status || 'pending',
+              estimated_ready_time: response.data.estimated_ready_time,
+              message: `Order status: ${response.data.status}`,
+              timestamp: new Date().toISOString()
+            };
+            callback(update);
           }
         } catch (error) {
-          }
+          // Silently fail - endpoint might not exist or order not found
+        }
       }, 30000); // Poll every 30 seconds
 
       // Return unsubscribe function

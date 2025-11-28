@@ -674,7 +674,7 @@ const UserDataDashboard: React.FC<UserDataDashboardProps> = ({ className }) => {
                             fontSize: { xs: '0.75rem', sm: '0.875rem' },
                             display: { xs: 'none', sm: 'table-cell' }
                           }}>
-                            {order.customer_name || 'Guest'}
+                            {order.customer_name || 'walk-in'}
                           </TableCell>
                           <TableCell sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
                             Table {order.table_number || 'N/A'}
