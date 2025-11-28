@@ -95,8 +95,8 @@ class DashboardService {
       
       console.log('✅ Step 1 complete - Using venue ID:', venueId);
       
-      console.log('🔍 Step 2: Making dashboard API call...');
-      const response = await apiService.get<SuperAdminDashboardResponse>(`/dashboard?venue_id=${venueId}`);
+      console.log('🔍 Step 2: Making dashboard API call for venue...');
+      const response = await apiService.get<any>(`/dashboard?venue_id=${venueId}`);
       console.log('✅ Step 2 complete - API response received:', {
         success: response.success,
         hasData: !!response.data,
@@ -110,6 +110,10 @@ class DashboardService {
       if (response.success && response.data) {
         console.log('✅ Step 3 complete - Response validation passed');
         console.log('🎯 Returning dashboard data with keys:', Object.keys(response.data));
+        console.log('🎯 Full dashboard data:', response.data);
+        console.log('🎯 Summary data:', response.data.summary);
+        console.log('🎯 Venue data:', response.data.venue);
+        console.log('🎯 Recent orders count:', response.data.recent_orders?.length || response.data.recentOrders?.length || 0);
         return response.data;
       }
       
@@ -124,7 +128,7 @@ class DashboardService {
       throw new Error('No dashboard data received from API');
       
     } catch (error: any) {
-      console.error('❌ getSuperAdminDashboard failed at some step:', error);
+      console.error('❌ getSuperAdminDashboard failed:', error);
       console.error('Error details:', {
         message: error.message,
         stack: error.stack,
@@ -343,3 +347,4 @@ class DashboardService {
 }
 
 export const dashboardService = new DashboardService();
+

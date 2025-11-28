@@ -82,6 +82,61 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ dashboardData, stats }) => {
       </FlagGate>
 
 
+      {/* Popular Items */}
+      <FlagGate flag="dashboard.showRecentActivity">
+        <Grid item xs={12} md={6}>
+          <Card sx={{ 
+            borderRadius: 3,
+            boxShadow: theme.shadows[2],
+            border: '1px solid',
+            borderColor: 'divider',
+            height: '100%'
+          }}>
+            <CardContent sx={{ p: 3 }}>
+              <Typography variant="h6" sx={{ fontWeight: 700, mb: 3, color: 'text.primary' }}>
+                Top Menu Items
+              </Typography>
+              
+              {dashboardData?.analytics?.popular_items && dashboardData.analytics.popular_items.length > 0 ? (
+                <List>
+                  {dashboardData.analytics.popular_items.slice(0, 5).map((item: any, index: number) => (
+                    <ListItem key={item.id || index} divider={index < 4}>
+                      <ListItemIcon>
+                        <Avatar sx={{ backgroundColor: 'primary.main' }}>
+                          <Restaurant />
+                        </Avatar>
+                      </ListItemIcon>
+                      <ListItemText
+                        primary={item.name}
+                        secondary={`${item.category} • ${item.orders} orders`}
+                      />
+                      <Typography variant="body2" sx={{ fontWeight: 600, color: 'success.main' }}>
+                        ₹{item.revenue}
+                      </Typography>
+                    </ListItem>
+                  ))}
+                </List>
+              ) : (
+                <Box sx={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  flexDirection: 'column', 
+                  py: 6,
+                  backgroundColor: 'grey.50',
+                  borderRadius: 2,
+                  border: '2px dashed',
+                  borderColor: 'grey.300'
+                }}>
+                  <Restaurant sx={{ fontSize: 48, color: 'grey.400', mb: 2 }} />
+                  <Typography variant="h6" color="text.secondary">No Menu Data</Typography>
+                </Box>
+              )}
+            </CardContent>
+          </Card>
+        </Grid>
+      </FlagGate>
+
       {/* Recent Activity */}
       <FlagGate flag="dashboard.showRecentActivity">
         <Grid item xs={12} md={6}>
@@ -134,8 +189,8 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ dashboardData, stats }) => {
                       </ListItemIcon>
                       <ListItemText
                         primary={
-                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                          <Box component="div" sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <Typography component="span" variant="subtitle2" sx={{ fontWeight: 600 }}>
                               Order #{activity.order_number}
                             </Typography>
                             <Chip 
@@ -151,17 +206,17 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ dashboardData, stats }) => {
                           </Box>
                         }
                         secondary={
-                          <Box sx={{ mt: 0.5 }}>
-                            <Typography variant="caption" display="block" color="text.secondary">
+                          <Box component="span" sx={{ mt: 0.5, display: 'block' }}>
+                            <Typography component="span" variant="caption" display="block" color="text.secondary">
                               {activity.venue_name} {activity.table_number ? `• Table ${activity.table_number}` : ''}
                             </Typography>
-                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 0.5 }}>
-                              <Typography variant="body2" sx={{ fontWeight: 600, color: 'success.main' }}>
+                            <Box component="span" sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 0.5 }}>
+                              <Typography component="span" variant="body2" sx={{ fontWeight: 600, color: 'success.main' }}>
                                 ₹{activity.total_amount}
                               </Typography>
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                              <Box component="span" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                                 <AccessTime sx={{ fontSize: 14, color: 'text.secondary' }} />
-                                <Typography variant="caption" color="text.secondary">
+                                <Typography component="span" variant="caption" color="text.secondary">
                                   {new Date(activity.created_at).toLocaleTimeString()}
                                 </Typography>
                               </Box>

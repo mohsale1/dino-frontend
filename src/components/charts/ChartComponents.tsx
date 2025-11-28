@@ -481,10 +481,15 @@ export const EnhancedRevenueChart: React.FC<EnhancedRevenueChartProps> = ({ data
   const theme = useTheme();
   const dashboardFlags = useDashboardFlags();
 
-  const revenueData = data?.venue_performance?.map((venue: any) => ({
-    day: venue.name,
-    revenue: venue.total_revenue,
-    orders: venue.total_orders
+  console.log('📊 EnhancedRevenueChart - data:', data);
+  console.log('📊 EnhancedRevenueChart - analytics:', data?.analytics);
+  console.log('📊 EnhancedRevenueChart - revenue_trend:', data?.analytics?.revenue_trend);
+
+  // Use revenue_trend from analytics
+  const revenueData = data?.analytics?.revenue_trend?.map((item: any) => ({
+    day: item.period || item.date || 'N/A',
+    revenue: item.revenue || 0,
+    orders: item.orders || 0
   })) || [];
 
   const totalRevenue = revenueData.reduce((sum: number, item: any) => sum + item.revenue, 0);
@@ -582,6 +587,9 @@ export const EnhancedRevenueChart: React.FC<EnhancedRevenueChartProps> = ({ data
 export const EnhancedOrderStatusChart: React.FC<EnhancedOrderStatusChartProps> = ({ data, stats }) => {
   const theme = useTheme();
 
+  console.log('📊 EnhancedOrderStatusChart - data:', data);
+  console.log('📊 EnhancedOrderStatusChart - order_status_breakdown:', data?.analytics?.order_status_breakdown);
+
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case 'pending': return '#FFF176';
@@ -597,12 +605,18 @@ export const EnhancedOrderStatusChart: React.FC<EnhancedOrderStatusChartProps> =
 
   const orderStatusData = data?.analytics?.order_status_breakdown ? 
     Object.entries(data.analytics.order_status_breakdown)
-      .filter(([_, count]) => (count as number) > 0)
-      .map(([status, count]) => ({
-        name: status.charAt(0).toUpperCase() + status.slice(1),
-        value: count as number,
-        color: getStatusColor(status)
-      })) : [];
+      .filter(([_, statusData]) => {
+        const count = typeof statusData === 'object' ? (statusData as any).count : statusData;
+        return count > 0;
+      })
+      .map(([status, statusData]) => {
+        const count = typeof statusData === 'object' ? (statusData as any).count : statusData;
+        return {
+          name: status.charAt(0).toUpperCase() + status.slice(1),
+          value: count as number,
+          color: getStatusColor(status)
+        };
+      }) : [];
 
   const totalOrders = orderStatusData.reduce((sum, item) => sum + item.value, 0);
 

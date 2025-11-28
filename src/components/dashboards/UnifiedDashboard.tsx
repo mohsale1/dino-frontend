@@ -1,3 +1,6 @@
+
+
+
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
@@ -128,6 +131,8 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({ className }) => {
       }
       
       console.log('🎯 Dashboard data received:', data);
+      console.log('🎯 Data type:', typeof data);
+      console.log('🎯 Data keys:', data ? Object.keys(data) : 'NO DATA');
       
       if (data) {
         // Process stats based on role and data format
@@ -136,8 +141,10 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({ className }) => {
           hasStats: 'stats' in data,
           hasSummary: 'summary' in data,
           hasVenue: 'venue' in data,
+          hasWorkspaces: 'workspaces' in data,
+          hasTopVenues: 'top_venues' in data,
           dataKeys: Object.keys(data),
-          fullData: data
+          summaryKeys: ('summary' in data && (data as any).summary) ? Object.keys((data as any).summary) : 'NO SUMMARY'
         });
 
         if ('system_stats' in data) {
@@ -161,16 +168,52 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({ className }) => {
             occupied_tables: superAdminData.system_stats?.occupied_tables || 0,
             active_menu_items: superAdminData.system_stats?.active_menu_items || 0,
           });
+        } else if ('summary' in data && 'workspaces' in data && 'top_venues' in data) {
+          // SuperAdmin system-wide summary (from get_superadmin_dashboard)
+          const superAdminSummary = data as any;
+          const summary = superAdminSummary.summary;
+          console.log('📊 Using SuperAdmin system-wide format:', summary);
+          setDashboardData(data as any);
+          setStats({
+            total_orders: summary?.total_orders || summary?.totalOrders || 0,
+            total_revenue: summary?.total_revenue || summary?.totalRevenue || 0,
+            active_orders: 0,
+            total_tables: 0,
+            total_menu_items: 0,
+            todays_revenue: summary?.today_revenue || summary?.todayRevenue || 0,
+            todays_orders: summary?.today_orders || summary?.todayOrders || 0,
+            avg_order_value: 0,
+            table_occupancy_rate: 0,
+            popular_items_count: 0,
+            pending_orders: 0,
+            preparing_orders: 0,
+            ready_orders: 0,
+            occupied_tables: 0,
+            active_menu_items: 0,
+          });
         } else if ('summary' in data && 'venue' in data) {
           // Venue dashboard format (from backend get_venue_dashboard)
           const venueData = data as any;
           const summary = venueData.summary;
-          console.log('📊 Using venue dashboard format:', summary);
+          console.log('📊 Using venue dashboard format');
           console.log('📊 Full venueData keys:', Object.keys(venueData));
+          console.log('📊 Summary object:', summary);
           console.log('📊 Summary keys:', summary ? Object.keys(summary) : 'NO SUMMARY');
           
+          // Log each field we're trying to access
+          console.log('📊 Field mapping check:', {
+            total_orders: summary?.total_orders,
+            totalOrders: summary?.totalOrders,
+            today_orders: summary?.today_orders,
+            todayOrders: summary?.todayOrders,
+            today_revenue: summary?.today_revenue,
+            todayRevenue: summary?.todayRevenue,
+            total_revenue: summary?.total_revenue,
+            totalRevenue: summary?.totalRevenue,
+          });
+          
           // Handle both snake_case and camelCase (API service converts to camelCase)
-          setStats({
+          const mappedStats = {
             total_orders: summary?.total_orders || summary?.totalOrders || 0,
             total_revenue: summary?.total_revenue || summary?.totalRevenue || 0,
             active_orders: summary?.active_orders || summary?.activeOrders || 0,
@@ -186,12 +229,15 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({ className }) => {
             ready_orders: 0,
             occupied_tables: summary?.occupied_tables || summary?.occupiedTables || 0,
             active_menu_items: summary?.active_menu_items || summary?.activeMenuItems || 0,
-          });
+          };
+          
+          console.log('📊 Mapped stats:', mappedStats);
+          setStats(mappedStats);
           
           // Map recent_orders/recentOrders to recent_activity for compatibility with tabs
           const recentOrders = venueData.recent_orders || venueData.recentOrders || [];
           console.log('📋 Mapping recent orders:', recentOrders.length);
-          console.log('📋 Recent orders data:', recentOrders);
+          console.log('📋 Recent orders sample:', recentOrders[0]);
           setDashboardData({
             ...data,
             recent_activity: recentOrders,
