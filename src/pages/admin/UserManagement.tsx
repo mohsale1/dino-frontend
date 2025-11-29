@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Box,
   Container,
@@ -63,6 +63,7 @@ import { useNavigate } from 'react-router-dom';
 import { ROLES, PERMISSIONS } from '../../types/auth';
 import { PasswordUpdateDialog } from '../../components/auth';
 import { userService, User, UserCreate, UserUpdate } from '../../services/auth';
+import { roleService, Role } from '../../services/auth/roleService';
 import { VenueUser } from '../../types/api';
 import { ROLE_NAMES, getRoleDisplayName } from '../../constants/roles';
 import { PageLoadingSkeleton, EmptyState } from '../../components/ui/LoadingStates';
@@ -117,7 +118,19 @@ const UserManagement: React.FC = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   
   const [users, setUsers] = useState<VenueUser[]>([]);
+  const [roles, setRoles] = useState<Role[]>([]);
+  const [loadingRoles, setLoadingRoles] = useState(false);
   const [loading, setLoading] = useState(false);
+  
+  // Use ref to store roles immediately without waiting for state update
+  const rolesRef = useRef<Role[]>([]);
+
+  // Debug: Monitor roles state changes
+  useEffect(() => {
+    console.log('🔔 Roles state changed:', roles);
+    console.log('🔔 Roles count:', roles.length);
+    rolesRef.current = roles; // Keep ref in sync
+  }, [roles]);
   const [error, setError] = useState<string | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
@@ -146,6 +159,7 @@ const UserManagement: React.FC = () => {
     phone: '',
     password: '',
     confirm_password: '',
+    role_id: '',
     role_name: ROLES.OPERATOR as string,
     workspace_id: '',
     venue_id: '',
@@ -211,9 +225,76 @@ const UserManagement: React.FC = () => {
     }
   }, [userData, userDataLoading, usersLoaded, loadUsers]);
 
-  const handleOpenDialog = (user?: User) => {
+  const loadRoles = async () => {
+    console.log('🚀 loadRoles called');
+    setLoadingRoles(true);
+    try {
+      const response = await roleService.getRoles({ page: 1, page_size: 100 });
+      console.log('📥 Roles API response:', response);
+      
+      if (response) {
+        // Handle both direct array and paginated response
+        let rolesArray: Role[] = [];
+        
+        if (Array.isArray(response)) {
+          // Direct array response
+          rolesArray = response;
+        } 
+        
+        // Filter out superadmin role from the list
+        rolesArray = rolesArray.filter(role => role.name.toLowerCase() !== 'superadmin');
+        
+        console.log('✅ Extracted roles array (superadmin filtered):', rolesArray);
+        console.log('✅ Roles count:', rolesArray.length);
+        
+        if (rolesArray.length > 0) {
+          setRoles(rolesArray);
+          rolesRef.current = rolesArray; // Update ref immediately
+          console.log('✅ Roles state and ref updated');
+          return rolesArray;
+        } else {
+          console.warn('⚠️ No roles found in response');
+          setRoles([]);
+          rolesRef.current = [];
+          return [];
+        }
+      } else {
+        console.warn('⚠️ Response not successful or no data');
+        setRoles([]);
+        rolesRef.current = [];
+        return [];
+      }
+    } catch (error) {
+      console.error('❌ Failed to load roles:', error);
+      return [];
+    } finally {
+      setLoadingRoles(false);
+      console.log('🏁 loadRoles finished');
+    }
+  };
+
+  const handleOpenDialog = async (user?: User) => {
+    console.log('🚪 handleOpenDialog called');
+    
+    // Load roles when opening dialog
+    const loadedRoles = await loadRoles();
+    console.log('🚪 Loaded roles returned:', loadedRoles);
+    console.log('🚪 Loaded roles length:', loadedRoles.length);
+    
+    // IMPORTANT: Use loadedRoles (the returned value) instead of roles state
+    // because state updates are async and won't be available immediately
+    
     if (user) {
       setEditingUser(user);
+      
+      // Find role_id from role name if not available
+      let userRoleId = '';
+      if (loadedRoles.length > 0) {
+        const userRole = loadedRoles.find(r => r.name.toLowerCase() === (user.role as string).toLowerCase());
+        userRoleId = userRole?.id || '';
+        console.log('🚪 Found user role_id:', userRoleId);
+      }
+      
       setFormData({
         email: user.email,
         first_name: user.first_name,
@@ -221,6 +302,7 @@ const UserManagement: React.FC = () => {
         phone: user.phone || '',
         password: '', // Don't populate password for editing
         confirm_password: '', // Don't populate password for editing
+        role_id: userRoleId,
         role_name: user.role as string,
         workspace_id: user.workspace_id,
         venue_id: user.venue_id || '',
@@ -228,6 +310,10 @@ const UserManagement: React.FC = () => {
       });
     } else {
       setEditingUser(null);
+      // Find operator role ID from loaded roles
+      const operatorRole = loadedRoles.find(r => r.name.toLowerCase() === 'operator');
+      console.log('🚪 Found operator role:', operatorRole);
+      
       setFormData({
         email: '',
         first_name: '',
@@ -235,13 +321,22 @@ const UserManagement: React.FC = () => {
         phone: '',
         password: '',
         confirm_password: '',
+        role_id: operatorRole?.id || '',
         role_name: ROLES.OPERATOR as string,
         workspace_id: getWorkspace()?.id || currentWorkspace?.id || '',
         venue_id: getVenue()?.id || currentVenue?.id || '',
         is_active: true,
       });
     }
+    
+    console.log('🚪 Opening dialog now');
+    console.log('🚪 Current roles state before opening:', roles);
+    
+    // Wait a tick for state to update before opening dialog
+    await new Promise(resolve => setTimeout(resolve, 50));
+    
     setOpenDialog(true);
+    console.log('🚪 Dialog opened, roles state:', roles);
   };
 
   const handleCloseDialog = () => {
@@ -375,7 +470,17 @@ const UserManagement: React.FC = () => {
           });
         }
       } else {
-        // Create new user - send plain password to backend
+        // Validate role_id is selected
+        if (!formData.role_id) {
+          setSnackbar({ 
+            open: true, 
+            message: 'Please select a role', 
+            severity: 'error' 
+          });
+          return;
+        }
+        
+        // Create new user - send plain password to backend with role_id
         const createData: UserCreate = {
           email: formData.email,
           password: formData.password,
@@ -383,8 +488,9 @@ const UserManagement: React.FC = () => {
           first_name: formData.first_name,
           last_name: formData.last_name,
           phone: formData.phone,
+          role_id: formData.role_id,
           workspace_id: formData.workspace_id,
-          venue_id: formData.venue_id,
+          venue_ids: formData.venue_id ? [formData.venue_id] : [], // Pass venue_id as array
         };
         
         const response = await userService.createUser(createData);
@@ -470,9 +576,7 @@ const UserManagement: React.FC = () => {
   const handlePasswordUpdate = async (userId: string, newPassword: string) => {
     // Send plain password to backend - backend handles hashing
     // Don't catch errors here - let them bubble up to PasswordUpdateDialog
-    const response = await userService.updateUser(userId, {
-      password: newPassword
-    } as any);
+    const response = await userService.updateUserPassword(userId, newPassword);
     
     if (!response.success) {
       // Throw error to be caught and displayed by PasswordUpdateDialog
@@ -575,8 +679,27 @@ const UserManagement: React.FC = () => {
     return userService.formatLastLogin(dateString);
   };
 
+  // Sort users by role hierarchy: superadmin -> admin -> operator
+  const sortUsersByRole = (users: VenueUser[]) => {
+    const roleOrder: { [key: string]: number } = {
+      'superadmin': 1,
+      'admin': 2,
+      'operator': 3
+    };
+
+    return [...users].sort((a, b) => {
+      const roleA = typeof a.role === 'string' ? a.role.toLowerCase() : 'operator';
+      const roleB = typeof b.role === 'string' ? b.role.toLowerCase() : 'operator';
+      
+      const orderA = roleOrder[roleA] || 999;
+      const orderB = roleOrder[roleB] || 999;
+      
+      return orderA - orderB;
+    });
+  };
+
   // Filter users based on search and filters
-  const filteredUsers = users.filter(user => {
+  const filteredUsers = sortUsersByRole(users.filter(user => {
     if (!user) return false;
     
     const firstName = user.first_name || '';
@@ -592,7 +715,7 @@ const UserManagement: React.FC = () => {
     const matchesActive = showInactive || user.is_active;
     
     return matchesSearch && matchesRole && matchesActive;
-  });
+  }));
 
   // Role-based restrictions
   const canCreateUsers = isSuperAdmin() || hasPermission(PERMISSIONS.USERS_CREATE);
@@ -1419,7 +1542,8 @@ const UserManagement: React.FC = () => {
         PaperProps={{
           sx: {
             m: isMobile ? 0 : 2,
-            maxHeight: isMobile ? '90vh' : 'calc(100vh - 64px)',
+            maxHeight: isMobile ? '95vh' : 'calc(100vh - 100px)',
+            minHeight: isMobile ? 'auto' : '600px',
             height: isMobile ? 'auto' : 'auto',
             display: 'flex',
             flexDirection: 'column'
@@ -1427,9 +1551,9 @@ const UserManagement: React.FC = () => {
         }}
       >
         <DialogTitle sx={{ 
-          pb: { xs: 1, sm: 1 }, 
-          px: { xs: 2, sm: 3 },
-          pt: { xs: 1.5, sm: 2 },
+          pb: { xs: 2, sm: 2 }, 
+          px: { xs: 3, sm: 3 },
+          pt: { xs: 2.5, sm: 3 },
           borderBottom: '1px solid',
           borderColor: 'divider'
         }}>
@@ -1438,12 +1562,13 @@ const UserManagement: React.FC = () => {
           </Typography>
         </DialogTitle>
         <DialogContent sx={{ 
-          px: { xs: 2, sm: 3 },
-          py: { xs: 1.5, sm: 2 },
+          px: { xs: 3, sm: 4 },
+          pt: { xs: 4, sm: 5 },
+          pb: { xs: 3, sm: 4 },
           flex: 1,
           overflow: 'auto'
         }}>
-          <Stack spacing={{ xs: 3.5, sm: 4 }} sx={{ mt: { xs: 3.5, sm: 1 } }}>
+          <Stack spacing={{ xs: 2.5, sm: 3 }} sx={{ mt: { xs: 2, sm: 2.5 } }}>
             {/* Name Fields */}
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
               <TextField
@@ -1561,15 +1686,57 @@ const UserManagement: React.FC = () => {
                 }}
                 size={isMobile ? "medium" : "medium"}
               />
-              <FormControl fullWidth required size={isMobile ? "medium" : "medium"}>
+              <FormControl fullWidth required size={isMobile ? "medium" : "medium"} disabled={loadingRoles}>
                 <InputLabel>Role</InputLabel>
                 <Select
-                  value={formData.role_name}
-                  onChange={(e) => setFormData({ ...formData, role_name: e.target.value })}
+                  value={formData.role_id}
+                  onChange={(e) => {
+                    const selectedRole = roles.find(r => r.id === e.target.value);
+                    setFormData({ 
+                      ...formData, 
+                      role_id: e.target.value,
+                      role_name: selectedRole?.name || ''
+                    });
+                  }}
                   label="Role"
+                  onOpen={() => {
+                    console.log('🎯 Dropdown opened');
+                    console.log('🎯 Current roles state:', roles);
+                    console.log('🎯 Roles length:', roles.length);
+                    console.log('🎯 Loading roles?', loadingRoles);
+                    console.log('🎯 Is SuperAdmin?', isSuperAdmin());
+                    console.log('🎯 Is Admin?', isAdmin());
+                  }}
                 >
-                  <MenuItem value={ROLES.OPERATOR}>Operator</MenuItem>
-                  {isAdmin() && <MenuItem value={ROLES.ADMIN}>Admin</MenuItem>}
+                  {(() => {
+                    console.log('🔄 Rendering dropdown options');
+                    console.log('🔄 loadingRoles:', loadingRoles);
+                    console.log('🔄 roles.length:', roles.length);
+                    console.log('🔄 roles:', roles);
+                    
+                    if (loadingRoles) {
+                      return <MenuItem value="">Loading roles...</MenuItem>;
+                    }
+                    
+                    if (roles.length === 0) {
+                      return <MenuItem value="">No roles available</MenuItem>;
+                    }
+                    
+                    const filteredRoles = roles.filter(role => {
+                      // Filter roles based on current user permissions
+                      if (isSuperAdmin()) return true;
+                      if (isAdmin()) return role.name.toLowerCase() !== 'superadmin';
+                      return role.name.toLowerCase() === 'operator';
+                    });
+                    
+                    console.log('🔄 Filtered roles:', filteredRoles);
+                    
+                    return filteredRoles.map(role => (
+                      <MenuItem key={role.id} value={role.id}>
+                        {roleService.getRoleDisplayName(role.name)}
+                      </MenuItem>
+                    ));
+                  })()}
                 </Select>
               </FormControl>
             </Stack>
@@ -1626,9 +1793,9 @@ const UserManagement: React.FC = () => {
           </Stack>
         </DialogContent>
         <DialogActions sx={{ 
-          px: { xs: 2, sm: 3 }, 
-          pb: { xs: 1.5, sm: 2 },
-          pt: { xs: 1.5, sm: 1.5 },
+          px: { xs: 3, sm: 4 }, 
+          pb: { xs: 2.5, sm: 3 },
+          pt: { xs: 2, sm: 2 },
           borderTop: '1px solid',
           borderColor: 'divider',
           gap: 1

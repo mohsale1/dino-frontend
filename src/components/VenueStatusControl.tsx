@@ -26,7 +26,7 @@ import StorageManager from '../utils/storage';
 interface VenueStatusControlProps {}
 
 const VenueStatusControl: React.FC<VenueStatusControlProps> = () => {
-  const { hasPermission, hasBackendPermission } = useAuth();
+  const { hasPermission, hasBackendPermission, isOperator } = useAuth();
   const { userData, refreshUserData } = useUserData();
   const theme = useTheme();
   const currentVenue = userData?.venue;
@@ -75,18 +75,20 @@ const VenueStatusControl: React.FC<VenueStatusControlProps> = () => {
       setStatusLoading(true);
       const newStatus = !venueOpen;
       
-      console.log('Updating venue status:', {
+      console.log('VenueStatusControl: Updating venue status:', {
         venueId: currentVenue.id,
         currentStatus: venueOpen,
         newStatus: newStatus,
         updateData: { is_open: newStatus }
       });
       
-      const updateResponse = newStatus 
-        ? await venueService.openVenue(currentVenue.id)
-        : await venueService.closeVenue(currentVenue.id);
+      // Update venue status directly using updateVenue - more efficient than openVenue/closeVenue
+      // which try non-existent endpoints first before falling back to updateVenue
+      const updateResponse = await venueService.updateVenue(currentVenue.id, { 
+        is_open: newStatus 
+      });
 
-      console.log('Venue status updated successfully, response:', updateResponse);
+      console.log('VenueStatusControl: Venue status updated successfully, response:', updateResponse);
 
       // Verify the update was successful by checking the response
       if (updateResponse.success && updateResponse.data) {
@@ -182,7 +184,7 @@ const VenueStatusControl: React.FC<VenueStatusControlProps> = () => {
               <Switch
                 checked={venueOpen}
                 onChange={handleToggleVenueOpen}
-                disabled={statusLoading || !venueActive}
+                disabled={statusLoading || !venueActive || isOperator()}
                 color="success"
                 size="medium"
               />
@@ -241,6 +243,22 @@ const VenueStatusControl: React.FC<VenueStatusControlProps> = () => {
                 }}
               >
                 Venue is inactive. Contact administrator to activate.
+              </Alert>
+            )}
+
+            {isOperator() && (
+              <Alert 
+                severity="info" 
+                sx={{ 
+                  mb: 2, 
+                  fontSize: '0.75rem',
+                  borderRadius: 0,
+                  '& .MuiAlert-message': {
+                    fontSize: '0.75rem'
+                  }
+                }}
+              >
+                Only admins can change venue open/close status.
               </Alert>
             )}
 

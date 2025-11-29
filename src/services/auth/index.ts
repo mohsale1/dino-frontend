@@ -6,7 +6,9 @@
 export { authService } from './authService';
 export { default as PermissionService, default } from './permissionService';
 export { userService } from './userService';
+export { roleService } from './roleService';
 export { userDataService, type UserData } from './userDataService';
 
 // Export types for components
 export type { User, UserCreate, UserUpdate } from './userService';
+export type { Role } from './roleService';

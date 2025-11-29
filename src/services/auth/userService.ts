@@ -124,7 +124,18 @@ class UserService {
   }
 
   /**
-   * Deactivate user
+   * Deactivate user (set is_active to False)
+   */
+  async deactivateUser(userId: string): Promise<ApiResponse<void>> {
+    try {
+      return await apiService.put<void>(`/users/${userId}/deactivate`, {});
+    } catch (error: any) {
+      throw new Error(error.response?.data?.detail || error.message || 'Failed to deactivate user');
+    }
+  }
+
+  /**
+   * Delete user (soft delete - set is_active to False and is_deleted to True)
    */
   async deleteUser(userId: string): Promise<ApiResponse<void>> {
     try {
@@ -139,9 +150,22 @@ class UserService {
    */
   async activateUser(userId: string): Promise<ApiResponse<void>> {
     try {
-      return await apiService.post<void>(`/users/${userId}/activate`);
+      return await apiService.put<void>(`/users/${userId}/activate`, {});
     } catch (error: any) {
       throw new Error(error.response?.data?.detail || error.message || 'Failed to activate user');
+    }
+  }
+
+  /**
+   * Update user password
+   */
+  async updateUserPassword(userId: string, newPassword: string): Promise<ApiResponse<void>> {
+    try {
+      return await apiService.put<void>(`/users/${userId}/password`, {
+        password: newPassword
+      });
+    } catch (error: any) {
+      throw new Error(error.response?.data?.detail || error.message || 'Failed to update password');
     }
   }
 
@@ -549,14 +573,14 @@ class UserService {
   }
 
   /**
-   * Toggle user status (for backward compatibility)
+   * Toggle user status (activate/deactivate)
    */
   async toggleUserStatus(userId: string, newStatus: boolean): Promise<ApiResponse<void>> {
     try {
       if (newStatus) {
         return await this.activateUser(userId);
       } else {
-        return await this.deleteUser(userId);
+        return await this.deactivateUser(userId);
       }
     } catch (error: any) {
       throw new Error(error.message || 'Failed to toggle user status');

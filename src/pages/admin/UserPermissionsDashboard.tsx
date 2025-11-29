@@ -54,6 +54,7 @@ import { useUserData } from '../../contexts/UserDataContext';
 import PermissionService from '../../services/auth';
 import { PERMISSIONS, ROLES } from '../../types/auth';
 import AnimatedBackground from '../../components/ui/AnimatedBackground';
+import { userService } from '../../services/auth/userService';
 
 const UserPermissionsDashboard: React.FC = () => {
   const { user, getUserWithRole, hasPermission, isSuperAdmin } = useAuth();
@@ -78,13 +79,35 @@ const UserPermissionsDashboard: React.FC = () => {
 
   // Function to refresh users data
   const refreshUsers = async () => {
+    if (!userData?.venue?.id) {
+      setError('No venue selected. Please select a venue to view users.');
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
-      const usersData = await PermissionService.getVenueUsers(userData?.venue?.id);
+      
+      // Get users for the current venue with their permissions using userService
+      const response = await userService.getUsersByVenueId(userData.venue.id);
+      
+      if (response.success && response.data) {
+        // Map API response to match expected format
+        const mappedUsers = response.data.map((user: any) => ({
+          ...user,
+          firstName: user.first_name,
+          lastName: user.last_name,
+          lastLogin: user.last_login,
+          isActive: user.is_active,
+        }));
+        setUsers(mappedUsers);
+      } else {
+        setUsers([]);
+      }
+      
       // Get updated user statistics
-      const stats = await PermissionService.getUserStatistics(userData?.venue?.id);
-      setUsers(usersData);
+      const stats = await PermissionService.getUserStatistics(userData.venue.id);
       setUserStats(stats);
       
 
@@ -98,14 +121,34 @@ const UserPermissionsDashboard: React.FC = () => {
   // Load users from API
   useEffect(() => {
     const loadUsers = async () => {
+      if (!userData?.venue?.id) {
+        setLoading(false);
+        setError('No venue selected. Please select a venue to view users.');
+        return;
+      }
+
       try {
         setLoading(true);
         setError(null);
-        // Get users for the current venue with their permissions
-        const usersData = await PermissionService.getVenueUsers(userData?.venue?.id);
+        // Get users for the current venue with their permissions using userService
+        const response = await userService.getUsersByVenueId(userData.venue.id);
+        
+        if (response.success && response.data) {
+          // Map API response to match expected format
+          const mappedUsers = response.data.map((user: any) => ({
+            ...user,
+            firstName: user.first_name,
+            lastName: user.last_name,
+            lastLogin: user.last_login,
+            isActive: user.is_active,
+          }));
+          setUsers(mappedUsers);
+        } else {
+          setUsers([]);
+        }
+        
         // Get user statistics
-        const stats = await PermissionService.getUserStatistics(userData?.venue?.id);
-        setUsers(usersData);
+        const stats = await PermissionService.getUserStatistics(userData.venue.id);
         setUserStats(stats);
         
 
@@ -177,29 +220,16 @@ const UserPermissionsDashboard: React.FC = () => {
     }
   ];
 
-  const getRoleColor = (role: string | any) => {
-    // Extract role name from object or use string directly
-    let roleName = role;
-    if (typeof role === 'object' && role !== null) {
-      roleName = role.name || role.displayName || 'unknown';
-    }
-    
-    // Convert to lowercase for comparison
-    const roleStr = String(roleName).toLowerCase();
-    
-    switch (roleStr) {
-      case ROLES.SUPERADMIN.toLowerCase():
+  const getRoleColor = (roleName: string): string => {
+    switch (roleName) {
       case 'superadmin':
-        return 'error';
-      case ROLES.ADMIN.toLowerCase():
+        return '#0D47A1'; // Dark blue
       case 'admin':
-        return 'primary';
-      case ROLES.OPERATOR.toLowerCase():
+        return '#1976D2'; // Medium blue
       case 'operator':
-      case 'staff':
-        return 'secondary';
+        return '#64B5F6'; // Light blue
       default:
-        return 'default';
+        return '#1565C0'; // Default blue
     }
   };
 
@@ -221,6 +251,30 @@ const UserPermissionsDashboard: React.FC = () => {
     }
     
     return 'Unknown Role';
+  };
+
+  const formatLastLogin = (dateString?: string) => {
+    if (!dateString) return 'Never';
+    return userService.formatLastLogin(dateString);
+  };
+
+  // Sort users by role hierarchy: superadmin -> admin -> operator
+  const sortUsersByRole = (users: any[]) => {
+    const roleOrder: { [key: string]: number } = {
+      'superadmin': 1,
+      'admin': 2,
+      'operator': 3
+    };
+
+    return [...users].sort((a, b) => {
+      const roleA = typeof a.role === 'string' ? a.role.toLowerCase() : 'operator';
+      const roleB = typeof b.role === 'string' ? b.role.toLowerCase() : 'operator';
+      
+      const orderA = roleOrder[roleA] || 999;
+      const orderB = roleOrder[roleB] || 999;
+      
+      return orderA - orderB;
+    });
   };
 
   const getActionIcon = (action: string) => {
@@ -308,21 +362,23 @@ const UserPermissionsDashboard: React.FC = () => {
     return descriptions[permissionName] || permissionName.replace(/[_:]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
   };
 
-  const filteredUsers = users.filter(user => {
+  const filteredUsers = sortUsersByRole(users.filter(user => {
     if (!user) return false;
     
-    const firstName = user.firstName || '';
-    const lastName = user.lastName || '';
+    const firstName = user.firstName || user.first_name || '';
+    const lastName = user.lastName || user.last_name || '';
     const email = user.email || '';
+    const name = user.name || '';
     
     const matchesSearch = firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         email.toLowerCase().includes(searchTerm.toLowerCase());
+                         email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesRole = filterRole === 'all' || user.role === filterRole;
-    const matchesActive = showInactive || user.isActive;
+    const matchesActive = showInactive || (user.isActive !== undefined ? user.isActive : user.is_active);
     
     return matchesSearch && matchesRole && matchesActive;
-  });
+  }));
 
   const handleViewPermissions = (user: any) => {
     setSelectedUser(user);
@@ -749,62 +805,151 @@ const UserPermissionsDashboard: React.FC = () => {
                 <Table>
                   <TableHead>
                     <TableRow>
-                      <TableCell>User</TableCell>
-                      <TableCell>Role</TableCell>
-                      <TableCell>Status</TableCell>
-                      <TableCell>Last Login</TableCell>
-                      <TableCell align="center">Actions</TableCell>
+                      <TableCell sx={{ 
+                        fontWeight: 600, 
+                        fontSize: '0.875rem',
+                        color: 'text.primary',
+                        py: 2
+                      }}>
+                        User
+                      </TableCell>
+                      <TableCell sx={{ 
+                        fontWeight: 600, 
+                        fontSize: '0.875rem',
+                        color: 'text.primary',
+                        py: 2
+                      }}>
+                        Role
+                      </TableCell>
+                      <TableCell sx={{ 
+                        fontWeight: 600, 
+                        fontSize: '0.875rem',
+                        color: 'text.primary',
+                        py: 2
+                      }}>
+                        Status
+                      </TableCell>
+                      <TableCell sx={{ 
+                        fontWeight: 600, 
+                        fontSize: '0.875rem',
+                        color: 'text.primary',
+                        py: 2
+                      }}>
+                        Last Login
+                      </TableCell>
+                      <TableCell align="center" sx={{ 
+                        fontWeight: 600, 
+                        fontSize: '0.875rem',
+                        color: 'text.primary',
+                        py: 2
+                      }}>
+                        Actions
+                      </TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
                     {filteredUsers.length > 0 ? (
                       filteredUsers.map((user) => (
-                        <TableRow key={user.id || Math.random()}>
-                          <TableCell>
+                        <TableRow 
+                          key={user.id || Math.random()}
+                          sx={{
+                            '&:hover': {
+                              backgroundColor: 'action.hover',
+                            },
+                            transition: 'background-color 0.2s'
+                          }}
+                        >
+                          <TableCell sx={{ py: 2.5 }}>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                              <Avatar sx={{ width: 40, height: 40 }}>
-                                {(user.firstName?.[0] || '?')}{(user.lastName?.[0] || '')}
+                              <Avatar 
+                                sx={{ 
+                                  width: 44, 
+                                  height: 44,
+                                  fontSize: '1rem',
+                                  fontWeight: 600,
+                                  bgcolor: 'primary.main'
+                                }}
+                              >
+                                {((user.firstName || user.first_name)?.[0] || '?')}{((user.lastName || user.last_name)?.[0] || '')}
                               </Avatar>
-                              <Box>
-                                <Typography variant="body2" fontWeight="500">
-                                  {user.firstName || 'Unknown'} {user.lastName || 'User'}
+                              <Box sx={{ minWidth: 0, flex: 1 }}>
+                                <Typography 
+                                  variant="subtitle2" 
+                                  fontWeight="600"
+                                  sx={{ 
+                                    fontSize: '0.9375rem',
+                                    color: 'text.primary',
+                                    mb: 0.5,
+                                    lineHeight: 1.3
+                                  }}
+                                >
+                                  {user.name || `${user.firstName || user.first_name || 'Unknown'} ${user.lastName || user.last_name || 'User'}`}
                                 </Typography>
-                                <Typography variant="caption" color="text.secondary">
+                                <Typography 
+                                  variant="body2" 
+                                  color="text.secondary"
+                                  sx={{ 
+                                    fontSize: '0.8125rem',
+                                    lineHeight: 1.4
+                                  }}
+                                >
                                   {user.email || 'No email'}
                                 </Typography>
                               </Box>
                             </Box>
                           </TableCell>
-                          <TableCell>
-                            <Chip
-                              label={getRoleDisplayName(user.role || 'unknown')}
-                              color={getRoleColor(user.role || 'unknown') as any}
-                              size="small"
-                            />
+                          <TableCell sx={{ py: 2.5 }}>
+                            <Typography 
+                              variant="body2" 
+                              sx={{ 
+                                fontSize: '0.8125rem',
+                                fontWeight: 600,
+                                color: getRoleColor(typeof user.role === 'string' ? user.role : 'operator')
+                              }}
+                            >
+                              {getRoleDisplayName(user.role || 'unknown')}
+                            </Typography>
                           </TableCell>
-                          <TableCell>
+                          <TableCell sx={{ py: 2.5 }}>
                             <Chip
                               label={user.isActive ? 'Active' : 'Inactive'}
                               color={user.isActive ? 'success' : 'default'}
                               size="small"
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <Typography variant="body2">
-                              {user.lastLogin ? user.lastLogin.toLocaleDateString() : 'Never'}
-                            </Typography>
-                          </TableCell>
-                          <TableCell align="center">
-                            <Visibility 
+                              icon={user.isActive ? <CheckCircle sx={{ fontSize: '1rem' }} /> : <Cancel sx={{ fontSize: '1rem' }} />}
                               sx={{ 
-                                cursor: 'pointer',
-                                color: 'primary.main',
-                                '&:hover': {
-                                  color: 'primary.dark'
+                                fontSize: '0.8125rem',
+                                height: 28,
+                                fontWeight: 500,
+                                '& .MuiChip-label': {
+                                  px: 1.5
                                 }
                               }}
-                              onClick={() => handleViewPermissions(user)}
                             />
+                          </TableCell>
+                          <TableCell sx={{ py: 2.5 }}>
+                            <Typography 
+                              variant="body2" 
+                              sx={{ 
+                                fontSize: '0.8125rem',
+                                color: 'text.secondary'
+                              }}
+                            >
+                              {formatLastLogin(user.lastLogin || user.updated_at || user.created_at)}
+                            </Typography>
+                          </TableCell>
+                          <TableCell sx={{ textAlign: 'center', py: 2.5 }}>
+                            <IconButton
+                              onClick={() => handleViewPermissions(user)}
+                              size="small"
+                              sx={{ 
+                                p: 1,
+                                '&:hover': {
+                                  backgroundColor: 'action.hover'
+                                }
+                              }}
+                            >
+                              <Visibility sx={{ fontSize: '1.25rem' }} />
+                            </IconButton>
                           </TableCell>
                         </TableRow>
                       ))

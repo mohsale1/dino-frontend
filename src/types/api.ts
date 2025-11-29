@@ -422,6 +422,7 @@ export interface Order {
   order_number: string;
   venue_id: string;
   table_id?: string;
+  table_number?: string;
   customer_id?: string;
   order_type: OrderType;
   items: OrderItem[];
@@ -653,7 +654,7 @@ export interface UserCreate {
   confirm_password: string;
   role_id?: string;
   workspace_id: string;
-  venue_id?: string;
+  venue_ids?: string[];
 }
 
 export interface UserUpdate {

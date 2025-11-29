@@ -13,7 +13,7 @@ import { apiService } from '../utils/api';
 
 interface AuthContextType {
   user: UserProfile | null;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<{ user: UserProfile }>;
   register: (userData: UserRegistration) => Promise<void>;
   logout: () => void;
   updateUser: (userData: Partial<UserProfile>) => Promise<void>;
@@ -124,7 +124,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
 
 
-  const login = async (email: string, password: string): Promise<void> => {
+  const login = async (email: string, password: string): Promise<{ user: UserProfile }> => {
     try {
       setLoading(true);
       
@@ -207,6 +207,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         preloadCriticalComponents();
         cacheUtils.preloadCriticalData(localUser.id, localUser.venue_id || localUser.venueId);
       }, 100);
+      
+      // Return user data for routing decisions
+      return { user: localUser };
     } catch (error: any) {
       // Enhanced error handling
       // Clear any partial authentication state

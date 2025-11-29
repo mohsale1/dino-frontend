@@ -80,6 +80,10 @@ interface VenueSettings {
   name: string;
   description: string;
   address: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  landmark: string;
   phone: string;
   email: string;
 
@@ -156,9 +160,13 @@ const VenueSettings: React.FC = () => {
   const [settings, setSettings] = useState<VenueSettings>({
     name: 'Dino Venue',
     description: 'Authentic Indian flavors with modern digital ordering experience',
-    address: 'Hyderabad, Telangana, India',
-    phone: '+91 98765 43210',
-    email: 'info@dinovenue.com',
+    address: '',
+    city: '',
+    state: '',
+    postalCode: '',
+    landmark: '',
+    phone: '',
+    email: '',
 
     operatingHours: {
       monday: { open: '09:00', close: '22:00', closed: false },
@@ -207,6 +215,7 @@ const VenueSettings: React.FC = () => {
   const [hasChanges, setHasChanges] = useState(false);
   const [venueActive, setVenueActive] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [validationErrors, setValidationErrors] = useState<{[key: string]: string}>({});
 
   // Load venue settings from API
   useEffect(() => {
@@ -249,6 +258,10 @@ const VenueSettings: React.FC = () => {
             name: venueData.name || '',
             description: venueData.description || '',
             address: venueData.location?.address || venueData.address || '',
+            city: venueData.location?.city || '',
+            state: venueData.location?.state || '',
+            postalCode: venueData.location?.postal_code || '',
+            landmark: venueData.location?.landmark || '',
             phone: venueData.phone || '',
             email: venueData.email || '',
  
@@ -293,6 +306,79 @@ const VenueSettings: React.FC = () => {
       [field]: value,
     }));
     setHasChanges(true);
+    
+    // Clear validation error for this field
+    if (validationErrors[field]) {
+      setValidationErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      });
+    }
+  };
+
+  const validateSettings = (): boolean => {
+    const errors: {[key: string]: string} = {};
+    
+    // Name validation
+    if (!settings.name || settings.name.trim().length === 0) {
+      errors.name = 'Venue name is required';
+    } else if (settings.name.length > 100) {
+      errors.name = 'Venue name must be less than 100 characters';
+    }
+    
+    // Description validation
+    if (!settings.description || settings.description.trim().length === 0) {
+      errors.description = 'Description is required';
+    } else if (settings.description.length > 1000) {
+      errors.description = 'Description must be less than 1000 characters';
+    }
+    
+    // Address validation
+    if (!settings.address || settings.address.trim().length < 5) {
+      errors.address = 'Address must be at least 5 characters';
+    } else if (settings.address.length > 500) {
+      errors.address = 'Address must be less than 500 characters';
+    }
+    
+    // City validation
+    if (!settings.city || settings.city.trim().length < 2) {
+      errors.city = 'City must be at least 2 characters';
+    } else if (settings.city.length > 100) {
+      errors.city = 'City must be less than 100 characters';
+    }
+    
+    // State validation
+    if (!settings.state || settings.state.trim().length < 2) {
+      errors.state = 'State must be at least 2 characters';
+    } else if (settings.state.length > 100) {
+      errors.state = 'State must be less than 100 characters';
+    }
+    
+    // Postal code validation
+    if (!settings.postalCode || settings.postalCode.trim().length < 3) {
+      errors.postalCode = 'Postal code must be at least 3 characters';
+    } else if (settings.postalCode.length > 20) {
+      errors.postalCode = 'Postal code must be less than 20 characters';
+    }
+    
+    // Landmark validation (optional)
+    if (settings.landmark && settings.landmark.length > 200) {
+      errors.landmark = 'Landmark must be less than 200 characters';
+    }
+    
+    // Phone validation
+    if (!settings.phone || !/^[0-9]{10}$/.test(settings.phone.replace(/\D/g, ''))) {
+      errors.phone = 'Phone must be 10 digits';
+    }
+    
+    // Email validation (optional)
+    if (settings.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(settings.email)) {
+      errors.email = 'Invalid email format';
+    }
+    
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   const handleSave = async () => {
@@ -305,49 +391,56 @@ const VenueSettings: React.FC = () => {
       return;
     }
 
+    // Validate settings before saving
+    if (!validateSettings()) {
+      setSnackbar({ 
+        open: true, 
+        message: 'Please fix validation errors before saving', 
+        severity: 'error' 
+      });
+      return;
+    }
+
     try {
       setSaving(true);
       
-      // Prepare venue update data with proper structure
-      const updateData = {
+      // Debug: Log current settings state
+      console.log('Current settings state:', {
         name: settings.name,
         description: settings.description,
-        location: {
-          address: settings.address,
-          city: venue.location?.city || '',
-          state: venue.location?.state || '',
-          country: venue.location?.country || 'India',
-          postal_code: venue.location?.postal_code || '',
-          landmark: venue.location?.landmark || ''
-        },
+        address: settings.address,
+        city: settings.city,
+        state: settings.state,
+        postalCode: settings.postalCode,
+        landmark: settings.landmark,
         phone: settings.phone,
-        email: settings.email,
-
+        email: settings.email
+      });
+      
+      // Prepare venue update data with proper structure
+      const updateData: any = {
+        name: settings.name.trim(),
+        description: settings.description.trim(),
+        location: {
+          address: settings.address.trim(),
+          city: settings.city.trim(),
+          state: settings.state.trim(),
+          postal_code: settings.postalCode.trim(),
+          landmark: settings.landmark.trim() || null
+        },
+        phone: settings.phone.replace(/\D/g, ''), // Remove non-digits
+        email: settings.email.trim() || null,
       };
 
       console.log('Updating venue with data:', updateData);
 
       // Update venue
-      const updateResponse = await venueService.updateVenue(venue.id, updateData);
-      console.log('Venue update response:', updateResponse);
-
-      // Update operating hours if changed
-      const operatingHours = Object.entries(settings.operatingHours).map(([day, hours], index) => ({
-        day_of_week: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].indexOf(day),
-        is_open: !hours.closed,
-        open_time: hours.closed ? undefined : hours.open + ':00',
-        close_time: hours.closed ? undefined : hours.close + ':00',
-        is_24_hours: false
-      }));
-
-      console.log('Updating operating hours:', operatingHours);
-      
       try {
-        await venueService.updateOperatingHours(venue.id, operatingHours);
-        console.log('Operating hours updated successfully');
-      } catch (hoursError) {
-        console.warn('Failed to update operating hours:', hoursError);
-        // Don't fail the entire save operation for operating hours
+        const updateResponse = await venueService.updateVenue(venue.id, updateData);
+        console.log('Venue update response:', updateResponse);
+      } catch (updateError) {
+        console.error('Error in updateVenue call:', updateError);
+        throw updateError; // Re-throw to be caught by outer catch
       }
       
       // Clear venue cache and refresh user data to get updated venue information
@@ -357,6 +450,7 @@ const VenueSettings: React.FC = () => {
 
       setSnackbar({ open: true, message: 'Settings saved successfully', severity: 'success' });
       setHasChanges(false);
+      setValidationErrors({});
     } catch (error) {
       console.error('Error saving settings:', error);
       setSnackbar({ 
@@ -670,20 +764,22 @@ const VenueSettings: React.FC = () => {
               elevation={2} 
               sx={{ 
                 p: 3, 
-                bgcolor: 'rgba(255, 193, 7, 0.1)',
+                bgcolor: 'rgba(33, 150, 243, 0.08)',
                 display: 'flex',
+                flexDirection: { xs: 'column', sm: 'row' },
                 justifyContent: 'space-between',
-                alignItems: 'center',
+                alignItems: { xs: 'flex-start', sm: 'center' },
+                gap: 2,
                 borderRadius: 2,
                 border: '1px solid',
-                borderColor: 'rgba(255, 193, 7, 0.3)',
-                marginTop:3
+                borderColor: 'rgba(33, 150, 243, 0.2)',
+                marginTop: 3
               }}
             >
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Edit sx={{ color: '#ed6c02' }} />
+                <Edit sx={{ color: 'primary.main' }} />
                 <Box>
-                  <Typography variant="body1" color="#ed6c02" fontWeight="600">
+                  <Typography variant="body1" color="primary.main" fontWeight="600">
                     You have unsaved changes
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
@@ -691,16 +787,17 @@ const VenueSettings: React.FC = () => {
                   </Typography>
                 </Box>
               </Box>
-              <Box sx={{ display: 'flex', gap: 2 }}>
+              <Box sx={{ display: 'flex', gap: 2, width: { xs: '100%', sm: 'auto' } }}>
                 <Button 
                   variant="outlined" 
                   onClick={handleReset}
                   sx={{
-                    borderColor: '#fafafaff',
-                    color: '#eae7e5ff',
+                    borderColor: 'divider',
+                    color: 'text.secondary',
+                    flex: { xs: 1, sm: 'none' },
                     '&:hover': {
-                      borderColor: '#d32f2f',
-                      backgroundColor: 'rgba(255, 193, 7, 0.1)',
+                      borderColor: 'text.secondary',
+                      backgroundColor: 'rgba(0, 0, 0, 0.04)',
                     },
                   }}
                 >
@@ -712,10 +809,11 @@ const VenueSettings: React.FC = () => {
                   onClick={handleSave}
                   disabled={saving}
                   sx={{
-                    backgroundColor: '#1976d2',
+                    backgroundColor: 'primary.main',
                     color: 'white',
+                    flex: { xs: 1, sm: 'none' },
                     '&:hover': {
-                      backgroundColor: '#1565c0',
+                      backgroundColor: 'primary.dark',
                     },
                   }}
                 >
@@ -801,9 +899,12 @@ const VenueSettings: React.FC = () => {
                       <Grid item xs={12}>
                         <TextField
                           fullWidth
+                          required
                           label="Venue Name"
                           value={settings.name}
                           onChange={(e) => handleDirectSettingChange('name', e.target.value)}
+                          error={!!validationErrors.name}
+                          helperText={validationErrors.name}
                           sx={{
                             '& .MuiInputLabel-root': {
                               fontSize: '1rem',
@@ -818,11 +919,14 @@ const VenueSettings: React.FC = () => {
                       <Grid item xs={12}>
                         <TextField
                           fullWidth
+                          required
                           label="Description"
                           multiline
                           rows={3}
                           value={settings.description}
                           onChange={(e) => handleDirectSettingChange('description', e.target.value)}
+                          error={!!validationErrors.description}
+                          helperText={validationErrors.description}
                           sx={{
                             '& .MuiInputLabel-root': {
                               fontSize: '1rem',
@@ -837,9 +941,13 @@ const VenueSettings: React.FC = () => {
                       <Grid item xs={12}>
                         <TextField
                           fullWidth
+                          required
                           label="Address"
+                          placeholder="Street address, building number"
                           value={settings.address}
                           onChange={(e) => handleDirectSettingChange('address', e.target.value)}
+                          error={!!validationErrors.address}
+                          helperText={validationErrors.address || "Enter your complete street address"}
                           sx={{
                             '& .MuiInputLabel-root': {
                               fontSize: '1rem',
@@ -854,9 +962,96 @@ const VenueSettings: React.FC = () => {
                       <Grid item xs={12} md={6}>
                         <TextField
                           fullWidth
+                          required
+                          label="City"
+                          placeholder="e.g., Hyderabad"
+                          value={settings.city}
+                          onChange={(e) => handleDirectSettingChange('city', e.target.value)}
+                          error={!!validationErrors.city}
+                          helperText={validationErrors.city}
+                          sx={{
+                            '& .MuiInputLabel-root': {
+                              fontSize: '1rem',
+                              fontWeight: 500,
+                            },
+                            '& .MuiInputBase-input': {
+                              fontSize: '1rem',
+                            },
+                          }}
+                        />
+                      </Grid>
+                      <Grid item xs={12} md={6}>
+                        <TextField
+                          fullWidth
+                          required
+                          label="State"
+                          placeholder="e.g., Telangana"
+                          value={settings.state}
+                          onChange={(e) => handleDirectSettingChange('state', e.target.value)}
+                          error={!!validationErrors.state}
+                          helperText={validationErrors.state}
+                          sx={{
+                            '& .MuiInputLabel-root': {
+                              fontSize: '1rem',
+                              fontWeight: 500,
+                            },
+                            '& .MuiInputBase-input': {
+                              fontSize: '1rem',
+                            },
+                          }}
+                        />
+                      </Grid>
+                      <Grid item xs={12} md={6}>
+                        <TextField
+                          fullWidth
+                          required
+                          label="Postal Code"
+                          placeholder="e.g., 500001"
+                          value={settings.postalCode}
+                          onChange={(e) => handleDirectSettingChange('postalCode', e.target.value)}
+                          error={!!validationErrors.postalCode}
+                          helperText={validationErrors.postalCode}
+                          sx={{
+                            '& .MuiInputLabel-root': {
+                              fontSize: '1rem',
+                              fontWeight: 500,
+                            },
+                            '& .MuiInputBase-input': {
+                              fontSize: '1rem',
+                            },
+                          }}
+                        />
+                      </Grid>
+                      <Grid item xs={12} md={6}>
+                        <TextField
+                          fullWidth
+                          label="Landmark (Optional)"
+                          placeholder="e.g., Near City Mall"
+                          value={settings.landmark}
+                          onChange={(e) => handleDirectSettingChange('landmark', e.target.value)}
+                          error={!!validationErrors.landmark}
+                          helperText={validationErrors.landmark || "Nearby landmark for easy location"}
+                          sx={{
+                            '& .MuiInputLabel-root': {
+                              fontSize: '1rem',
+                              fontWeight: 500,
+                            },
+                            '& .MuiInputBase-input': {
+                              fontSize: '1rem',
+                            },
+                          }}
+                        />
+                      </Grid>
+                      <Grid item xs={12} md={6}>
+                        <TextField
+                          fullWidth
+                          required
                           label="Phone"
+                          placeholder="10 digit phone number"
                           value={settings.phone}
                           onChange={(e) => handleDirectSettingChange('phone', e.target.value)}
+                          error={!!validationErrors.phone}
+                          helperText={validationErrors.phone}
                           sx={{
                             '& .MuiInputLabel-root': {
                               fontSize: '1rem',
@@ -871,10 +1066,13 @@ const VenueSettings: React.FC = () => {
                       <Grid item xs={12} md={6}>
                         <TextField
                           fullWidth
-                          label="Email"
+                          label="Email (Optional)"
                           type="email"
+                          placeholder="contact@venue.com"
                           value={settings.email}
                           onChange={(e) => handleDirectSettingChange('email', e.target.value)}
+                          error={!!validationErrors.email}
+                          helperText={validationErrors.email || "Optional contact email"}
                           sx={{
                             '& .MuiInputLabel-root': {
                               fontSize: '1rem',

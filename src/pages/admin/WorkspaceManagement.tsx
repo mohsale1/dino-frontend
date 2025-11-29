@@ -1303,20 +1303,6 @@ const WorkspaceManagement: React.FC = () => {
               />
             </Grid>
             
-            <Grid item xs={12} md={6}>
-              <FormControl fullWidth>
-                <InputLabel>Theme</InputLabel>
-                <Select
-                  value={venueFormData.theme}
-                  label="Theme"
-                  onChange={(e) => setVenueFormData(prev => ({ ...prev, theme: e.target.value }))}
-                >
-                  <MenuItem value="default">Default Theme</MenuItem>
-                  <MenuItem value="pet">Pet Theme (Cats & Dogs)</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-
             {/* Location Information */}
             <Grid item xs={12}>
               <Divider sx={{ my: 2 }} />

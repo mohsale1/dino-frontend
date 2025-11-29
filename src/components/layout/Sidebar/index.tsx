@@ -99,14 +99,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
       flagKey: 'showMenuNav'
     },
     { 
-      label: 'Menu Template', 
-      path: '/admin/menu-template', 
-      icon: <Palette />, 
-      permission: PERMISSIONS.TEMPLATE_VIEW,
-      roles: ['admin'],
-      flagKey: 'showMenuNav'
-    },
-    { 
       label: 'Tables', 
       path: '/admin/tables', 
       icon: <TableRestaurant />, 
@@ -121,6 +113,14 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
       permission: PERMISSIONS.TABLES_VIEW,
       roles: ['admin', 'superadmin'],
       flagKey: 'showCouponsNav'
+    },
+    { 
+      label: 'Menu Template', 
+      path: '/admin/menu-template', 
+      icon: <Palette />, 
+      permission: PERMISSIONS.TEMPLATE_VIEW,
+      roles: ['admin'],
+      flagKey: 'showMenuNav'
     },
     { 
       label: 'Users', 
@@ -197,13 +197,25 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
       setStatusLoading(true);
       const newStatus = !venueStatus.isOpen;
       
-      // Update venue status using the correct API call
-      await venueService.updateVenue(userData.venue.id, { 
-        status: newStatus ? 'active' : 'closed'
+      console.log('Sidebar: Updating venue order status:', {
+        venueId: userData.venue.id,
+        currentStatus: venueStatus.isOpen,
+        newStatus: newStatus,
+        updateData: { is_open: newStatus }
       });
+      
+      // Update venue status directly using updateVenue - more efficient than openVenue/closeVenue
+      // which try non-existent endpoints first before falling back to updateVenue
+      const response = await venueService.updateVenue(userData.venue.id, { 
+        is_open: newStatus 
+      });
+
+      console.log('Sidebar: Venue status updated successfully:', response);
 
       // Refresh user data to get updated venue status
       await refreshUserData();
+      
+      console.log('Sidebar: User data refreshed after venue status update');
     } catch (error) {
       console.error('Failed to update venue status:', error);
       // Show error message to user
@@ -655,7 +667,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          p: showExpanded ? 2 : 1,
+          p: showExpanded ? 1 : 0.5,
           borderTop: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
           mt: 'auto',
         }}
@@ -665,13 +677,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
           src="/img/dino_victory.png"
           alt="Dino Victory"
           sx={{
-            width: showExpanded ? (isTablet ? 120 : 160) : 48,
-            height: showExpanded ? (isTablet ? 120 : 160) : 48,
+            width: showExpanded ? (isTablet ? 60 : 80) : 40,
+            height: showExpanded ? (isTablet ? 60 : 80) : 40,
             objectFit: 'contain',
             transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
             filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.1))',
             '&:hover': {
-              transform: 'scale(1.15) rotate(8deg)',
+              transform: 'scale(1.1) rotate(5deg)',
               filter: 'drop-shadow(0 4px 16px rgba(0,0,0,0.2)) brightness(1.1)',
             },
           }}

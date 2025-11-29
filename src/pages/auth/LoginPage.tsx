@@ -33,7 +33,6 @@ const LoginPage: React.FC = () => {
     password: '',
   });
 
-  const from = location.state?.from?.pathname || '/admin';
   const successMessage = location.state?.message;
 
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -70,8 +69,23 @@ const LoginPage: React.FC = () => {
     setError('');
 
     try {
-      await login(formData.email, formData.password);
-      navigate(from, { replace: true });
+      const response = await login(formData.email, formData.password);
+      
+      // Determine redirect path based on user role
+      const user = response?.user;
+      let redirectPath = location.state?.from?.pathname || '/admin';
+      
+      if (user?.role) {
+        const userRole = user.role.toLowerCase();
+        console.log(user)
+        if (userRole === 'operator') {
+          redirectPath = '/admin/orders';
+        } else if (userRole === 'admin' || userRole === 'superadmin' || userRole === 'super_admin') {
+          redirectPath = '/admin';
+        }
+      }
+      
+      navigate(redirectPath, { replace: true });
     } catch (err: any) {
       setError(err.response?.data?.detail || err.message || 'Invalid username or password');
     } finally {

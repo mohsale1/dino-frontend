@@ -569,6 +569,9 @@ const MenuPage: React.FC = () => {
         backgroundColor: theme.palette.background.default,
         pb: { xs: 9, sm: 10 },
         position: 'relative',
+        width: '100%',
+        overflowX: 'hidden', // Prevent horizontal scroll
+        maxWidth: '100vw', // Ensure it doesn't exceed viewport width
       }}>
       {/* Fragment Content */}
       {activeFragment === 'home' && (

@@ -3,18 +3,6 @@
  * Centralized exports for all security-related utilities
  */
 
-// Export password hashing utilities
-export { 
-  hashPassword,
-  getFixedSalt,
-  isPasswordHashingSupported,
-  loginWithHashedPassword,
-  registerWithHashedPassword,
-  changePasswordWithHashing,
-  isValidHashedPassword,
-  getClientHashInfo
-} from './passwordHashing';
-
 // Export security utilities
 export { 
   validatePasswordStrength,
