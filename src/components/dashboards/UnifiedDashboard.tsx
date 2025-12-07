@@ -62,9 +62,11 @@ interface MenuItemPerformance {
 interface TableStatus {
   id: string;
   table_number: string;
-  status: 'available' | 'occupied' | 'reserved' | 'cleaning';
+  status: 'available' | 'occupied' | 'reserved' | 'maintenance';
   current_order_id?: string;
   occupancy_time?: number;
+  capacity?: number;
+  area_id?: string;
 }
 
 const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({ className }) => {
@@ -296,8 +298,21 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({ className }) => {
           setAnalyticsData((data as any).analytics);
         }
         
-        // Set table status data
-        if ('venue_performance' in data && (data as any).venue_performance && (data as any).venue_performance.length > 0) {
+        // Set table status data - use real table data from backend
+        if ('tables' in data && (data as any).tables && (data as any).tables.length > 0) {
+          // Real table data from backend
+          const realTables = (data as any).tables.map((table: any) => ({
+            id: table.id,
+            table_number: table.table_number,
+            status: table.status,
+            current_order_id: table.current_order_id,
+            occupancy_time: table.occupancy_time,
+            capacity: table.capacity,
+            area_id: table.area_id,
+          }));
+          setTableStatuses(realTables);
+        } else if ('venue_performance' in data && (data as any).venue_performance && (data as any).venue_performance.length > 0) {
+          // Fallback to mock data for SuperAdmin view
           const formattedTables: TableStatus[] = [];
           (data as any).venue_performance.forEach((venue: any, index: number) => {
             const totalTables = venue.total_tables || 0;

@@ -43,43 +43,65 @@ interface MenuItemPerformance {
   rating: number;
 }
 
-interface MenuPerformanceTabProps {
+export interface MenuPerformanceTabProps {
   menuPerformance: MenuItemPerformance[];
+  analyticsData?: any;
 }
 
-const MenuPerformanceTab: React.FC<MenuPerformanceTabProps> = ({ menuPerformance }) => {
+const MenuPerformanceTab: React.FC<MenuPerformanceTabProps> = ({ menuPerformance, analyticsData }) => {
   const theme = useTheme();
   const navigate = useNavigate();
   const { canManageMenu } = usePermissions();
 
+  // Use analytics data if available, otherwise use menuPerformance prop
+  const popularItems = analyticsData?.popular_items || menuPerformance;
+  const categoryData = analyticsData?.category_performance || [];
+
   // Calculate analytics
-  const totalRevenue = menuPerformance.reduce((sum, item) => sum + item.revenue, 0);
-  const totalOrders = menuPerformance.reduce((sum, item) => sum + item.orders, 0);
-  const avgRating = menuPerformance.length > 0 
-    ? menuPerformance.reduce((sum, item) => sum + item.rating, 0) / menuPerformance.length 
+  const totalRevenue = popularItems.reduce((sum: number, item: any) => sum + (item.revenue || 0), 0);
+  const totalOrders = popularItems.reduce((sum: number, item: any) => sum + (item.orders || 0), 0);
+  const avgRating = popularItems.length > 0 
+    ? popularItems.reduce((sum: number, item: any) => sum + (item.rating || 4.0), 0) / popularItems.length 
     : 0;
-  const topPerformer = menuPerformance.length > 0 
-    ? menuPerformance.reduce((prev, current) => prev.revenue > current.revenue ? prev : current)
+  const topPerformer = popularItems.length > 0 
+    ? popularItems.reduce((prev: any, current: any) => (prev.revenue || 0) > (current.revenue || 0) ? prev : current)
     : null;
 
-  // Category performance
-  const categoryStats = menuPerformance.reduce((acc, item) => {
-    if (!acc[item.category]) {
-      acc[item.category] = { orders: 0, revenue: 0, items: 0 };
-    }
-    acc[item.category].orders += item.orders;
-    acc[item.category].revenue += item.revenue;
-    acc[item.category].items += 1;
-    return acc;
-  }, {} as Record<string, { orders: number; revenue: number; items: number }>);
+  // Category performance - use analytics data or calculate from items
+  let categoryPerformance: any[] = [];
+  
+  if (categoryData.length > 0) {
+    // Use analytics category performance
+    categoryPerformance = categoryData.map((cat: any) => ({
+      category: cat.category,
+      orders: cat.orders,
+      revenue: cat.revenue,
+      items: 1, // Not provided by analytics
+      avgRevenue: cat.revenue
+    }));
+  } else {
+    // Calculate from menu items
+    const categoryStats = popularItems.reduce((acc: any, item: any) => {
+      const category = item.category || 'Unknown';
+      if (!acc[category]) {
+        acc[category] = { orders: 0, revenue: 0, items: 0 };
+      }
+      acc[category].orders += item.orders || 0;
+      acc[category].revenue += item.revenue || 0;
+      acc[category].items += 1;
+      return acc;
+    }, {} as Record<string, { orders: number; revenue: number; items: number }>);
 
-  const categoryPerformance = Object.entries(categoryStats)
-    .map(([category, stats]) => ({
-      category,
-      ...stats,
-      avgRevenue: stats.revenue / stats.items
-    }))
-    .sort((a, b) => b.revenue - a.revenue);
+    categoryPerformance = (Object.entries(categoryStats) as [string, { orders: number; revenue: number; items: number }][])
+      .map(([category, stats]) => ({
+        category,
+        orders: stats.orders,
+        revenue: stats.revenue,
+        items: stats.items,
+        avgRevenue: stats.revenue / stats.items
+      }))
+      .sort((a, b) => b.revenue - a.revenue);
+  }
 
   return (
     <Grid container spacing={3}>
@@ -175,7 +197,7 @@ const MenuPerformanceTab: React.FC<MenuPerformanceTabProps> = ({ menuPerformance
                   textAlign: 'center'
                 }}>
                   <Typography variant="h5" sx={{ fontWeight: 700, color: 'info.main' }}>
-                    {menuPerformance.length}
+                    {popularItems.length}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">Menu Items</Typography>
                 </Box>
@@ -272,7 +294,7 @@ const MenuPerformanceTab: React.FC<MenuPerformanceTabProps> = ({ menuPerformance
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {menuPerformance.length === 0 ? (
+                  {popularItems.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={7} align="center" sx={{ py: 8 }}>
                         <Box sx={{ 
@@ -295,8 +317,8 @@ const MenuPerformanceTab: React.FC<MenuPerformanceTabProps> = ({ menuPerformance
                       </TableCell>
                     </TableRow>
                   ) : (
-                    menuPerformance.map((item, index) => {
-                      const performanceScore = (item.revenue / totalRevenue) * 100;
+                    popularItems.map((item: any, index: number) => {
+                      const performanceScore = totalRevenue > 0 ? (item.revenue / totalRevenue) * 100 : 0;
                       const isTopPerformer = item.id === topPerformer?.id;
                       
                       return (
@@ -355,7 +377,7 @@ const MenuPerformanceTab: React.FC<MenuPerformanceTabProps> = ({ menuPerformance
                             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
                               <Star sx={{ fontSize: 16, color: 'warning.main' }} />
                               <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                                {item.rating}
+                                {item.rating || 4.0}
                               </Typography>
                             </Box>
                           </TableCell>

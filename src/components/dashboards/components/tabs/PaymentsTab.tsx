@@ -45,10 +45,15 @@ interface VenueDashboardStats {
 
 interface PaymentsTabProps {
   stats: VenueDashboardStats | null;
+  analyticsData?: any;
 }
 
-const PaymentsTab: React.FC<PaymentsTabProps> = ({ stats }) => {
+const PaymentsTab: React.FC<PaymentsTabProps> = ({ stats, analyticsData }) => {
   const theme = useTheme();
+  
+  // Get payment methods from analytics
+  const paymentMethodsData = analyticsData?.payment_methods || [];
+  const peakHoursData = analyticsData?.peak_hours || [];
 
   // Show empty state if no stats available
   if (!stats || stats.todays_revenue === 0) {
@@ -69,17 +74,44 @@ const PaymentsTab: React.FC<PaymentsTabProps> = ({ stats }) => {
     );
   }
 
-  // Calculate payment method distribution from actual data (if available)
-  // For now, show only total revenue without fake percentages
-  const paymentMethods = [
-    { 
-      method: 'Total Revenue', 
-      percentage: 100, 
-      amount: stats?.todays_revenue || 0, 
-      color: '#2196F3', 
-      icon: <MonetizationOn /> 
-    },
-  ];
+  // Calculate payment method distribution from analytics data
+  const paymentMethods = paymentMethodsData.length > 0 
+    ? paymentMethodsData.map((pm: any) => {
+        const methodIcons: any = {
+          'cash': <MonetizationOn />,
+          'card': <CreditCard />,
+          'upi': <Payment />,
+          'online': <AccountBalance />,
+        };
+        
+        const methodColors: any = {
+          'cash': '#4CAF50',
+          'card': '#2196F3',
+          'upi': '#FF9800',
+          'online': '#9C27B0',
+        };
+        
+        const methodKey = pm.method.toLowerCase();
+        
+        return {
+          method: pm.method,
+          percentage: pm.percentage || 0,
+          amount: pm.revenue || 0,
+          count: pm.count || 0,
+          color: methodColors[methodKey] || '#2196F3',
+          icon: methodIcons[methodKey] || <Payment />
+        };
+      })
+    : [
+        { 
+          method: 'Total Revenue', 
+          percentage: 100, 
+          amount: stats?.todays_revenue || 0, 
+          count: stats?.todays_orders || 0,
+          color: '#2196F3', 
+          icon: <MonetizationOn /> 
+        },
+      ];
 
   const paymentStats = [
     {
@@ -111,10 +143,21 @@ const PaymentsTab: React.FC<PaymentsTabProps> = ({ stats }) => {
     }
   ];
 
-  // Remove fake transaction trends - will be empty until API provides real data
-  const transactionTrends: any[] = [];
+  // Use peak hours data for transaction trends
+  const transactionTrends = peakHoursData.length > 0 
+    ? peakHoursData
+        .filter((ph: any) => ph.orders > 0)
+        .slice(0, 6)
+        .map((ph: any) => ({
+          time: ph.hour,
+          amount: ph.revenue || (ph.orders * (stats?.avg_order_value || 0)),
+          transactions: ph.orders
+        }))
+    : [];
 
-  const maxAmount = 1;
+  const maxAmount = transactionTrends.length > 0 
+    ? Math.max(...transactionTrends.map((t: any) => t.amount))
+    : 1;
 
   return (
     <Grid container spacing={3}>
@@ -207,7 +250,7 @@ const PaymentsTab: React.FC<PaymentsTabProps> = ({ stats }) => {
             </Typography>
             
             <Stack spacing={2.5}>
-              {paymentMethods.map((method, index) => (
+              {paymentMethods.map((method: any, index: number) => (
                 <Box key={method.method} sx={{ 
                   p: 2.5, 
                   backgroundColor: `${method.color}15`,
@@ -281,7 +324,7 @@ const PaymentsTab: React.FC<PaymentsTabProps> = ({ stats }) => {
               </Box>
             ) : (
               <Stack spacing={2}>
-                {transactionTrends.map((trend, index) => (
+                {transactionTrends.map((trend: any, index: number) => (
                 <Box key={trend.time} sx={{ 
                   p: 2, 
                   backgroundColor: 'grey.50',
