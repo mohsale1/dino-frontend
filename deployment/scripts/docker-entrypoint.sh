@@ -34,7 +34,7 @@ echo ""
 echo "🔧 Processing nginx configuration template..."
 
 # Set default backend URL if not provided
-export BACKEND_URL="${BACKEND_URL:-https://dino-backend-api-867506203789.us-central1.run.app}"
+export BACKEND_URL="${BACKEND_URL:-https://dino-backend-prod-781503667260.us-central1.run.app}"
 echo "🔗 Using Backend URL: ${BACKEND_URL}"
 
 if [ -f "/etc/nginx/nginx.conf.template" ]; then
@@ -283,7 +283,7 @@ echo ""
 echo "📋 Key Configuration"
 echo "$(printf '─%.0s' {1..40})"
 echo "🌍 Environment: ${APP_ENV:-production}"
-echo "🔗 Backend URL: ${BACKEND_URL:-https://dino-backend-api-867506203789.us-central1.run.app}"
+echo "🔗 Backend URL: ${BACKEND_URL:-https://dino-backend-prod-781503667260.us-central1.run.app}"
 echo "🐛 Debug Mode: ${DEBUG_MODE:-false}"
 echo "📊 Console Logging: ${ENABLE_CONSOLE_LOGGING:-false}"
 
