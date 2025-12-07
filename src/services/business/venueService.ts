@@ -158,8 +158,6 @@ class VenueService {
               email: venue.email,
               is_active: venue.is_active,
               is_open: venue.is_open,
-              status: venue.status || (venue.is_active ? 'active' : 'inactive'),
-              subscription_status: venue.subscription_status || 'active',
               created_at: venue.created_at,
               updated_at: venue.updated_at || venue.created_at
             } as WorkspaceVenue));          return workspaceVenues;

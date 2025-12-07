@@ -174,11 +174,9 @@ export interface Venue {
   total_reviews?: number;
   is_active: boolean;
   is_open: boolean; // Required for venue status
-  status?: string;
   workspace_id: string;
   owner_id?: string; // Added for compatibility
   operating_hours?: OperatingHours[];
-  subscription_status?: string;
   theme?: string; // Venue theme (e.g., 'pet', 'default')
   menu_template?: string; // Menu template name (e.g., 'modern', 'classic', 'elegant')
   menu_template_config?: any; // Full template configuration JSON

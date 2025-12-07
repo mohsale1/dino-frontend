@@ -213,7 +213,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ dashboardData, stats, analyti
                             </Typography>
                             <Box component="span" sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 0.5 }}>
                               <Typography component="span" variant="body2" sx={{ fontWeight: 600, color: 'success.main' }}>
-                                ₹{activity.total_amount}
+                                ₹{((activity.subtotal || 0) + (activity.tax_amount || 0) - (activity.discount_amount || 0)).toFixed(2)}
                               </Typography>
                               <Box component="span" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                                 <AccessTime sx={{ fontSize: 14, color: 'text.secondary' }} />

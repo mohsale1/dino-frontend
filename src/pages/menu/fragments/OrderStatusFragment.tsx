@@ -497,7 +497,7 @@ const OrderStatusFragment: React.FC<OrderStatusFragmentProps> = ({ venueId, tabl
                           minWidth: 'fit-content',
                         }}
                       >
-                        {formatPrice(item.total_price)}
+                        {formatPrice(item.unit_price * item.quantity)}
                       </Typography>
                     </ListItem>
                   ))}
@@ -536,7 +536,7 @@ const OrderStatusFragment: React.FC<OrderStatusFragmentProps> = ({ venueId, tabl
                     color="primary.main"
                     sx={{ fontSize: { xs: '1.1rem', sm: '1.2rem', md: '1.25rem' } }}
                   >
-                    {formatPrice(order.pricing.total_amount)}
+                    {formatPrice((order.pricing.subtotal || 0) + (order.pricing.tax_amount || 0) - (order.pricing.discount_amount || 0))}
                   </Typography>
                 </Stack>
               </CardContent>

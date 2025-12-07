@@ -45,7 +45,9 @@ export interface RecentOrder {
   order_number: string;
   table_number: string;
   customer_name?: string;
-  total_amount: number;
+  subtotal: number;
+  tax_amount: number;
+  discount_amount: number;
   status: 'pending' | 'confirmed' | 'preparing' | 'ready' | 'served' | 'cancelled';
   items_count: number;
   created_at: string;
@@ -229,7 +231,9 @@ export interface SuperAdminDashboardResponse {
     order_number: string;
     venue_name: string;
     table_number?: string;
-    total_amount: number;
+    subtotal: number;
+    tax_amount: number;
+    discount_amount: number;
     status: string;
     payment_status: string;
     created_at: string;

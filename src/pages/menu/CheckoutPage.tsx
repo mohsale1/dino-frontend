@@ -272,7 +272,7 @@ const CheckoutPage: React.FC = () => {
         const completeOrderData = {
           orderId: orderIdValue,
           orderNumber: orderResponseData?.order_number || orderIdValue,
-          total: orderResponseData?.total_amount || orderResponseData?.total || total,
+          total: orderResponseData?.total || ((orderResponseData?.subtotal || 0) + (orderResponseData?.tax_amount || 0) - (orderResponseData?.discount_amount || 0)) || total,
           subtotal: orderResponseData?.subtotal || subtotal,
           tax: orderResponseData?.tax_amount || tax,
           deliveryFee: orderResponseData?.delivery_fee || deliveryFee,

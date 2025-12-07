@@ -158,10 +158,7 @@ export const convertApiOrderToLegacy = (apiOrder: ApiOrder): LegacyOrder => {
     venueId: apiOrder.venue_id,
     tableId: apiOrder.table_id || '',
     customerId: apiOrder.customer_id,
-    customerPhone: undefined, // Not in API response
-    customerName: undefined, // Not in API response
     items: apiOrder.items.map(convertApiOrderItemToLegacy),
-    totalAmount: apiOrder.total_amount,
     status: apiOrder.status as LegacyOrderStatus,
     paymentStatus: apiOrder.payment_status as LegacyPaymentStatus,
     specialInstructions: apiOrder.special_instructions,
@@ -181,7 +178,6 @@ export const convertApiOrderItemToLegacy = (apiItem: ApiOrderItem): LegacyOrderI
     variantName: apiItem.variant_name,
     quantity: apiItem.quantity,
     price: apiItem.unit_price,
-    totalPrice: apiItem.total_price,
     specialInstructions: apiItem.special_instructions
   };
 };

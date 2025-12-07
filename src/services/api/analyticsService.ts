@@ -89,7 +89,9 @@ export interface RecentOrder {
   table_number: string;
   table_id: string;
   items_count: number;
-  total_amount: number;
+  subtotal: number;
+  tax_amount: number;
+  discount_amount: number;
   status: string;
   created_at: string;
   time_ago: string;

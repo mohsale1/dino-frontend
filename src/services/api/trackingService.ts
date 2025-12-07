@@ -22,7 +22,6 @@ export interface OrderTracking {
     tax_amount: number;
     discount_amount: number;
     delivery_fee: number;
-    total_amount: number;
   };
   timeline: OrderStatusTimeline[];
   estimated_ready_time?: string;
@@ -37,7 +36,6 @@ export interface OrderTrackingItem {
   name: string;
   quantity: number;
   unit_price: number;
-  total_price: number;
   image_url?: string;
   special_instructions?: string;
   is_veg: boolean;

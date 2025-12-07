@@ -79,7 +79,6 @@ const defaultOrder: OrderTracking = {
     tax_amount: 0,
     discount_amount: 0,
     delivery_fee: 0,
-    total_amount: 0,
   },
   timeline: [],
   created_at: '',
@@ -413,7 +412,7 @@ const OrderTrackingPage: React.FC = () => {
                     color: 'primary.main'
                   }}
                 >
-                  {formatPrice(order.pricing.total_amount)}
+                  {formatPrice((order.pricing.subtotal || 0) + (order.pricing.tax_amount || 0) - (order.pricing.discount_amount || 0))}
                 </Typography>
               </Grid>
             </Grid>
@@ -624,7 +623,7 @@ const OrderTrackingPage: React.FC = () => {
                                   color: 'primary.main'
                                 }}
                               >
-                                {formatPrice(item.total_price)}
+                                {formatPrice(item.unit_price * item.quantity)}
                               </Typography>
                             </Box>
                           }
@@ -684,7 +683,7 @@ const OrderTrackingPage: React.FC = () => {
                       color: 'primary.main'
                     }}
                   >
-                    {formatPrice(order.pricing.total_amount)}
+                    {formatPrice((order.pricing.subtotal || 0) + (order.pricing.tax_amount || 0) - (order.pricing.discount_amount || 0))}
                   </Typography>
                 </Box>
               </CardContent>

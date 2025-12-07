@@ -44,7 +44,9 @@ interface AdminDashboard {
     id: string;
     order_number: string;
     table_number: number;
-    total_amount: number;
+    subtotal: number;
+    tax_amount: number;
+    discount_amount: number;
     status: string;
     created_at: string;
   }>;
@@ -63,7 +65,9 @@ interface OperatorDashboard {
     id: string;
     order_number: string;
     table_number: number;
-    total_amount: number;
+    subtotal: number;
+    tax_amount: number;
+    discount_amount: number;
     status: string;
     created_at: string;
     estimated_ready_time?: string;
