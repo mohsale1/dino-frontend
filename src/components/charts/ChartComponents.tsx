@@ -480,11 +480,6 @@ interface EnhancedPerformanceChartProps {
 export const EnhancedRevenueChart: React.FC<EnhancedRevenueChartProps> = ({ data, stats }) => {
   const theme = useTheme();
   const dashboardFlags = useDashboardFlags();
-
-  console.log('📊 EnhancedRevenueChart - data:', data);
-  console.log('📊 EnhancedRevenueChart - analytics:', data?.analytics);
-  console.log('📊 EnhancedRevenueChart - revenue_trend:', data?.analytics?.revenue_trend);
-
   // Use revenue_trend from analytics
   const revenueData = data?.analytics?.revenue_trend?.map((item: any) => ({
     day: item.period || item.date || 'N/A',
@@ -586,10 +581,6 @@ export const EnhancedRevenueChart: React.FC<EnhancedRevenueChartProps> = ({ data
 
 export const EnhancedOrderStatusChart: React.FC<EnhancedOrderStatusChartProps> = ({ data, stats }) => {
   const theme = useTheme();
-
-  console.log('📊 EnhancedOrderStatusChart - data:', data);
-  console.log('📊 EnhancedOrderStatusChart - order_status_breakdown:', data?.analytics?.order_status_breakdown);
-
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case 'pending': return '#FFF176';

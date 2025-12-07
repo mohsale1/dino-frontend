@@ -49,3 +49,18 @@ export * from './templates';
 
 // Lazy components
 export * from './lazy';
+
+// Error components (selective exports to avoid conflicts)
+export {
+  GenericErrorPage,
+  NotFoundPage,
+  ServerErrorPage,
+  NetworkErrorPage,
+  VenueNotAcceptingOrdersPage,
+  VenueClosedPage,
+  NoVenuePage,
+  NoUserPage,
+  AccessDeniedPage,
+  ErrorPage,
+  GlobalErrorBoundary,
+} from './errors';

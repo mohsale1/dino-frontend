@@ -73,9 +73,7 @@ const CouponCard: React.FC<CouponCardProps> = ({
       await navigator.clipboard.writeText(coupon.code);
       setCopySuccess(true);
       setTimeout(() => setCopySuccess(false), 2000);
-    } catch (error) {
-      console.error('Failed to copy coupon code:', error);
-    }
+    } catch (error) {    }
     handleMenuClose();
   };
 

@@ -51,9 +51,9 @@ import { useVenueTheme } from '../../contexts/VenueThemeContext';
 
 // MenuItem type is handled by the cart context
 import CustomerNavbar from '../../components/CustomerNavbar';
-import VenueNotAcceptingOrdersPage from '../../components/VenueNotAcceptingOrdersPage';
+import { VenueNotAcceptingOrdersPage } from '../../components/errors';
 import { SmartLoading } from '../../components/ui/LoadingStates';
-import { MenuError } from '../../components/ErrorStates';
+import { GenericErrorPage } from '../../components/errors';
 import { useMenuData as useMenuData, type MenuItemType } from '../../hooks/useMenuData';
 import DynamicMenuRenderer from '../../components/menu/DynamicMenuRenderer';
 import { getTemplateConfig } from '../../config/menuTemplates';
@@ -216,9 +216,7 @@ const MenuPage: React.FC = () => {
     }
     
     // Check if venue has a menu template configured
-    if (restaurant?.menu_template) {
-      console.log('📋 Loading menu template:', restaurant.menu_template);
-      const config = getTemplateConfig(restaurant.menu_template);
+    if (restaurant?.menu_template) {      const config = getTemplateConfig(restaurant.menu_template);
       setTemplateConfig(config);
       setUseTemplateRenderer(true);
     } else {
@@ -392,13 +390,6 @@ const MenuPage: React.FC = () => {
     .filter(group => group.items.length > 0);
 
   // Debug the grouping
-  console.log('🔍 Grouping Debug:', {
-    categories: categories.map(c => ({ id: c.id, name: c.name })),
-    menuItems: menuItems.map(m => ({ id: m.id, name: m.name, category: m.category })),
-    filteredItems: filteredItems.map(m => ({ id: m.id, name: m.name, category: m.category })),
-    groupedMenuItems: groupedMenuItems.map(g => ({ id: g.id, name: g.name, itemsCount: g.items.length }))
-  });
-
   // Set initial active category
   useEffect(() => {
     if (groupedMenuItems.length > 0 && !activeCategory) {
@@ -465,17 +456,6 @@ const MenuPage: React.FC = () => {
   };
 
   // Debug info (remove in production)
-  console.log('🔍 MenuPage Debug:', {
-    loading,
-    venueId,
-    tableId,
-    restaurant: !!restaurant,
-    categoriesCount: categories.length,
-    menuItemsCount: menuItems.length,
-    error,
-    venueNotAcceptingOrders
-  });
-
   // Loading state
   if (loading) {
     return (
@@ -546,12 +526,10 @@ const MenuPage: React.FC = () => {
             justifyContent: 'center',
             minHeight: '60vh',
           }}>
-            <MenuError
-              venueId={venueId}
-              tableId={tableId}
-              message={error}
+            <GenericErrorPage
+              type="no-venue"
+              message={error || 'Unable to load menu. Please try again.'}
               onRetry={refetch}
-              onGoHome={() => navigate('/')}
               showRetry={true}
               showGoHome={true}
             />

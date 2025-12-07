@@ -265,7 +265,6 @@ const CouponFiltersComponent: React.FC<CouponFiltersProps> = ({
             alignItems="center"
           >
 
-            
             <FlagGate flag="coupons.showAddCoupon">
               <Button
                 variant="contained"
@@ -371,9 +370,7 @@ const CouponFiltersComponent: React.FC<CouponFiltersProps> = ({
       )}
     </Box>
     );
-  } catch (error) {
-    console.error('Error in CouponFiltersComponent:', error);
-    return (
+  } catch (error) {    return (
       <Box sx={{ p: 3, backgroundColor: 'error.light', borderRadius: 2 }}>
         <Typography color="error">
           Error loading filters. Please refresh the page.

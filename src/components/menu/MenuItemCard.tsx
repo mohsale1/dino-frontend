@@ -76,25 +76,33 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
         flexDirection: 'column',
         backgroundColor: 'background.paper',
         border: '1px solid', 
-        borderColor: 'grey.100',
-        borderRadius: 3,
-        borderLeft: `4px solid ${item.isVeg ? '#4CAF50' : '#F44336'}`,
+        borderColor: 'divider',
+        borderRadius: 2,
         opacity: (item.available ?? item.isAvailable) ? 1 : 0.7,
         transition: 'all 0.3s ease-in-out',
         overflow: 'hidden',
-        boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
+        position: 'relative',
         '&:hover': { 
           borderColor: 'primary.main',
-          boxShadow: '0 8px 25px rgba(0, 0, 0, 0.15)',
+          boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
           transform: 'translateY(-4px)'
         },
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '4px',
+          background: item.isVeg ? '#4CAF50' : '#F44336',
+        }
       }}
     >
       {/* Image Section - Top Half */}
       <Box sx={{ 
         position: 'relative', 
         overflow: 'hidden',
-        height: { xs: 200, sm: 220 }, // Fixed height for top half - increased for better proportion
+        height: { xs: 120, sm: 140 }, // More compact height
         backgroundColor: 'grey.50'
       }}>
         {(item.image || (item.image_urls && item.image_urls.length > 0)) ? (
@@ -119,15 +127,15 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
               justifyContent: 'center',
             }}
           >
-            <Restaurant sx={{ fontSize: { xs: 48, sm: 56 }, color: 'grey.400' }} />
+            <Restaurant sx={{ fontSize: { xs: 40, sm: 48 }, color: 'grey.400' }} />
           </Box>
         )}
 
         {/* Status Badges */}
         <Box sx={{ 
           position: 'absolute', 
-          top: 12, 
-          left: 12, 
+          top: 8, 
+          left: 8, 
           display: 'flex', 
           flexDirection: 'column',
           gap: 0.5,
@@ -138,8 +146,9 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
               size="small" 
               color="primary" 
               sx={{ 
-                fontSize: '0.7rem',
+                fontSize: '0.65rem',
                 fontWeight: 600,
+                height: 20,
                 boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
               }}
             />
@@ -150,8 +159,9 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
               size="small" 
               variant="filled"
               sx={{ 
-                fontSize: '0.7rem',
+                fontSize: '0.65rem',
                 fontWeight: 600,
+                height: 20,
                 boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
                 backgroundColor: '#9E9E9E',
                 color: 'white',
@@ -164,8 +174,8 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
         <FlagGate flag="menu.showQuickImageUpload">
           <Box sx={{
             position: 'absolute',
-            top: 12,
-            right: 12,
+            top: 8,
+            right: 8,
             display: 'flex',
             flexDirection: 'column',
             gap: 0.5,
@@ -205,21 +215,21 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
         <Box
           sx={{
             position: 'absolute',
-            bottom: 12,
-            left: 12,
+            bottom: 8,
+            left: 8,
             backgroundColor: alpha(theme.palette.common.black, 0.8),
             color: 'white',
-            px: 1.5,
-            py: 0.75,
-            borderRadius: 2,
+            px: 1.25,
+            py: 0.5,
+            borderRadius: 1.5,
             display: 'flex',
             alignItems: 'center',
             gap: 0.5,
             backdropFilter: 'blur(8px)',
           }}
         >
-          <Schedule sx={{ fontSize: 14 }} />
-          <Typography variant="caption" fontWeight="600" sx={{ fontSize: '0.75rem' }}>
+          <Schedule sx={{ fontSize: 12 }} />
+          <Typography variant="caption" fontWeight="600" sx={{ fontSize: '0.7rem' }}>
             {item.preparationTime} min
           </Typography>
         </Box>
@@ -230,18 +240,18 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
         flex: 1, 
         display: 'flex', 
         flexDirection: 'column', 
-        p: { xs: 2, sm: 2.5 },
+        p: { xs: 1.25, sm: 1.5 },
         backgroundColor: 'background.paper'
       }}>
         {/* Header with Veg/Non-Veg and Name */}
-        <Box sx={{ mb: 1.5 }}>
-          <Stack direction="row" spacing={1} alignItems="flex-start" sx={{ mb: 1 }}>
+        <Box sx={{ mb: 1 }}>
+          <Stack direction="row" spacing={0.75} alignItems="flex-start" sx={{ mb: 0.75 }}>
             <VegNonVegIcon isVeg={item.isVeg} />
             <Typography 
               variant="h6" 
               sx={{ 
                 fontWeight: 700, 
-                fontSize: { xs: '1rem', sm: '1.1rem' },
+                fontSize: { xs: '0.95rem', sm: '1rem' },
                 lineHeight: 1.2,
                 flex: 1,
                 color: 'text.primary',
@@ -257,25 +267,26 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
 
           {/* Price */}
           <Typography 
-            variant="h5" 
+            variant="h6" 
             color="primary.main" 
             fontWeight="700"
-            sx={{ mb: 1 }}
+            sx={{ mb: 0.75, fontSize: { xs: '1.1rem', sm: '1.25rem' } }}
           >
             {formatCurrency(item.price)}
           </Typography>
         </Box>
 
         {/* Category */}
-        <Box sx={{ mb: 1.5 }}>
+        <Box sx={{ mb: 1 }}>
           <Chip 
             label={getCategoryName(item.category)} 
             size="small" 
             variant="outlined"
             color="primary"
             sx={{ 
-              fontSize: '0.7rem',
+              fontSize: '0.65rem',
               fontWeight: 500,
+              height: 20,
             }}
           />
         </Box>
@@ -285,11 +296,11 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
           variant="body2" 
           color="text.secondary" 
           sx={{ 
-            mb: 2,
-            lineHeight: 1.5,
-            fontSize: '0.85rem',
+            mb: 1.5,
+            lineHeight: 1.4,
+            fontSize: '0.8rem',
             display: '-webkit-box',
-            WebkitLineClamp: 3,
+            WebkitLineClamp: 2,
             WebkitBoxOrient: 'vertical',
             overflow: 'hidden',
             flex: 1,
@@ -297,10 +308,8 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
         >
           {item.description}
         </Typography>
-        
 
-        
-        <Divider sx={{ mb: 2 }} />
+        <Divider sx={{ mb: 1.5 }} />
         
         {/* Actions */}
         <Box sx={{ 

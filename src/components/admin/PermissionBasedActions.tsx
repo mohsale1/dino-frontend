@@ -2,7 +2,6 @@ import React from 'react';
 import { Button } from '../ui/Button';
 import PermissionGate from '../auth/PermissionGate';
 
-
 interface ActionButtonProps {
   permission?: string;
   roles?: string[];

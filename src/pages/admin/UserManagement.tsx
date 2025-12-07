@@ -127,8 +127,6 @@ const UserManagement: React.FC = () => {
 
   // Debug: Monitor roles state changes
   useEffect(() => {
-    console.log('🔔 Roles state changed:', roles);
-    console.log('🔔 Roles count:', roles.length);
     rolesRef.current = roles; // Keep ref in sync
   }, [roles]);
   const [error, setError] = useState<string | null>(null);
@@ -194,9 +192,7 @@ const UserManagement: React.FC = () => {
         setUsers([]);
       }
     } catch (error: any) {
-      // API failed - show error alert but keep UI visible
-      console.error('Failed to load users:', error);
-      setUsers([]);
+      // API failed - show error alert but keep UI visible      setUsers([]);
       setError('Network error. Please check your connection.');
     } finally {
       setLoading(false);
@@ -225,12 +221,10 @@ const UserManagement: React.FC = () => {
     }
   }, [userData, userDataLoading, usersLoaded, loadUsers]);
 
-  const loadRoles = async () => {
-    console.log('🚀 loadRoles called');
+  const loadRoles = async (): Promise<Role[]> => {
     setLoadingRoles(true);
     try {
       const response = await roleService.getRoles({ page: 1, page_size: 100 });
-      console.log('📥 Roles API response:', response);
       
       if (response) {
         // Handle both direct array and paginated response
@@ -239,47 +233,37 @@ const UserManagement: React.FC = () => {
         if (Array.isArray(response)) {
           // Direct array response
           rolesArray = response;
-        } 
+        }
         
         // Filter out superadmin role from the list
         rolesArray = rolesArray.filter(role => role.name.toLowerCase() !== 'superadmin');
         
-        console.log('✅ Extracted roles array (superadmin filtered):', rolesArray);
-        console.log('✅ Roles count:', rolesArray.length);
-        
         if (rolesArray.length > 0) {
           setRoles(rolesArray);
           rolesRef.current = rolesArray; // Update ref immediately
-          console.log('✅ Roles state and ref updated');
           return rolesArray;
         } else {
-          console.warn('⚠️ No roles found in response');
           setRoles([]);
           rolesRef.current = [];
           return [];
         }
       } else {
-        console.warn('⚠️ Response not successful or no data');
         setRoles([]);
         rolesRef.current = [];
         return [];
       }
     } catch (error) {
-      console.error('❌ Failed to load roles:', error);
+      setRoles([]);
+      rolesRef.current = [];
       return [];
     } finally {
       setLoadingRoles(false);
-      console.log('🏁 loadRoles finished');
     }
   };
 
   const handleOpenDialog = async (user?: User) => {
-    console.log('🚪 handleOpenDialog called');
-    
     // Load roles when opening dialog
     const loadedRoles = await loadRoles();
-    console.log('🚪 Loaded roles returned:', loadedRoles);
-    console.log('🚪 Loaded roles length:', loadedRoles.length);
     
     // IMPORTANT: Use loadedRoles (the returned value) instead of roles state
     // because state updates are async and won't be available immediately
@@ -289,10 +273,9 @@ const UserManagement: React.FC = () => {
       
       // Find role_id from role name if not available
       let userRoleId = '';
-      if (loadedRoles.length > 0) {
+      if (loadedRoles && loadedRoles.length > 0) {
         const userRole = loadedRoles.find(r => r.name.toLowerCase() === (user.role as string).toLowerCase());
         userRoleId = userRole?.id || '';
-        console.log('🚪 Found user role_id:', userRoleId);
       }
       
       setFormData({
@@ -311,8 +294,9 @@ const UserManagement: React.FC = () => {
     } else {
       setEditingUser(null);
       // Find operator role ID from loaded roles
-      const operatorRole = loadedRoles.find(r => r.name.toLowerCase() === 'operator');
-      console.log('🚪 Found operator role:', operatorRole);
+      const operatorRole = loadedRoles && loadedRoles.length > 0 
+        ? loadedRoles.find(r => r.name.toLowerCase() === 'operator')
+        : undefined;
       
       setFormData({
         email: '',
@@ -329,14 +313,10 @@ const UserManagement: React.FC = () => {
       });
     }
     
-    console.log('🚪 Opening dialog now');
-    console.log('🚪 Current roles state before opening:', roles);
-    
     // Wait a tick for state to update before opening dialog
     await new Promise(resolve => setTimeout(resolve, 50));
     
     setOpenDialog(true);
-    console.log('🚪 Dialog opened, roles state:', roles);
   };
 
   const handleCloseDialog = () => {
@@ -1412,7 +1392,7 @@ const UserManagement: React.FC = () => {
                             sx={{ 
                               fontSize: '0.8125rem',
                               fontWeight: 600,
-                              color: getRoleColor(user.role)
+                              color: 'text.primary'
                             }}
                           >
                             {user.role_display_name || getDisplayName(user.role)}
@@ -1700,20 +1680,10 @@ const UserManagement: React.FC = () => {
                   }}
                   label="Role"
                   onOpen={() => {
-                    console.log('🎯 Dropdown opened');
-                    console.log('🎯 Current roles state:', roles);
-                    console.log('🎯 Roles length:', roles.length);
-                    console.log('🎯 Loading roles?', loadingRoles);
-                    console.log('🎯 Is SuperAdmin?', isSuperAdmin());
-                    console.log('🎯 Is Admin?', isAdmin());
+                    // Roles are already loaded when dialog opens
                   }}
                 >
                   {(() => {
-                    console.log('🔄 Rendering dropdown options');
-                    console.log('🔄 loadingRoles:', loadingRoles);
-                    console.log('🔄 roles.length:', roles.length);
-                    console.log('🔄 roles:', roles);
-                    
                     if (loadingRoles) {
                       return <MenuItem value="">Loading roles...</MenuItem>;
                     }
@@ -1728,8 +1698,6 @@ const UserManagement: React.FC = () => {
                       if (isAdmin()) return role.name.toLowerCase() !== 'superadmin';
                       return role.name.toLowerCase() === 'operator';
                     });
-                    
-                    console.log('🔄 Filtered roles:', filteredRoles);
                     
                     return filteredRoles.map(role => (
                       <MenuItem key={role.id} value={role.id}>

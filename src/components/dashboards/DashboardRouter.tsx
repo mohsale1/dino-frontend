@@ -38,8 +38,6 @@ const DashboardRouter: React.FC<DashboardRouterProps> = ({ className }) => {
     );
   }
 
-
-
   // For now, let's allow all authenticated users to access the dashboard
   // The UnifiedDashboard will handle role-based content rendering
   return <UnifiedDashboard className={className} />;

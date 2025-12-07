@@ -5,8 +5,7 @@
  */
 
 import { apiService } from '../../../utils/api';
-import { 
-  Coupon, 
+import { Coupon, 
   CouponCreate, 
   CouponUpdate, 
   CouponFilters,
@@ -44,9 +43,7 @@ class CouponService {
         data: response.data || { coupons: [], total: 0, page: 1, limit: 10 },
         message: response.message
       };
-    } catch (error: any) {
-      console.error('Failed to fetch coupons:', error);
-      throw new Error(error.message || 'Failed to fetch coupons');
+    } catch (error: any) {      throw new Error(error.message || 'Failed to fetch coupons');
     }
   }
 
@@ -62,9 +59,7 @@ class CouponService {
         data: response.data!,
         message: response.message
       };
-    } catch (error: any) {
-      console.error('Failed to fetch coupon:', error);
-      throw new Error(error.message || 'Failed to fetch coupon');
+    } catch (error: any) {      throw new Error(error.message || 'Failed to fetch coupon');
     }
   }
 
@@ -80,9 +75,7 @@ class CouponService {
         data: response.data!,
         message: response.message || 'Coupon created successfully'
       };
-    } catch (error: any) {
-      console.error('Failed to create coupon:', error);
-      throw new Error(error.message || 'Failed to create coupon');
+    } catch (error: any) {      throw new Error(error.message || 'Failed to create coupon');
     }
   }
 
@@ -98,9 +91,7 @@ class CouponService {
         data: response.data!,
         message: response.message || 'Coupon updated successfully'
       };
-    } catch (error: any) {
-      console.error('Failed to update coupon:', error);
-      throw new Error(error.message || 'Failed to update coupon');
+    } catch (error: any) {      throw new Error(error.message || 'Failed to update coupon');
     }
   }
 
@@ -115,9 +106,7 @@ class CouponService {
         success: response.success,
         message: response.message || 'Coupon deleted successfully'
       };
-    } catch (error: any) {
-      console.error('Failed to delete coupon:', error);
-      throw new Error(error.message || 'Failed to delete coupon');
+    } catch (error: any) {      throw new Error(error.message || 'Failed to delete coupon');
     }
   }
 
@@ -135,9 +124,7 @@ class CouponService {
         data: response.data!,
         message: response.message || `Coupon ${isActive ? 'activated' : 'deactivated'} successfully`
       };
-    } catch (error: any) {
-      console.error('Failed to toggle coupon status:', error);
-      throw new Error(error.message || 'Failed to update coupon status');
+    } catch (error: any) {      throw new Error(error.message || 'Failed to update coupon status');
     }
   }
 
@@ -157,9 +144,7 @@ class CouponService {
       );
       
       return response.data || { isValid: false, message: 'Validation failed' };
-    } catch (error: any) {
-      console.error('Failed to validate coupon code:', error);
-      return { isValid: false, message: error.message || 'Failed to validate coupon code' };
+    } catch (error: any) {      return { isValid: false, message: error.message || 'Failed to validate coupon code' };
     }
   }
 
@@ -176,9 +161,7 @@ class CouponService {
         data: response.data!,
         message: response.message
       };
-    } catch (error: any) {
-      console.error('Failed to fetch coupon stats:', error);
-      throw new Error(error.message || 'Failed to fetch coupon statistics');
+    } catch (error: any) {      throw new Error(error.message || 'Failed to fetch coupon statistics');
     }
   }
 
@@ -200,9 +183,7 @@ class CouponService {
         data: response.data || { usage: [], total: 0, page: 1, limit: 10 },
         message: response.message
       };
-    } catch (error: any) {
-      console.error('Failed to fetch coupon usage:', error);
-      throw new Error(error.message || 'Failed to fetch coupon usage');
+    } catch (error: any) {      throw new Error(error.message || 'Failed to fetch coupon usage');
     }
   }
 
@@ -225,9 +206,7 @@ class CouponService {
         message: response.message || 'Coupons updated successfully',
         updated: response.data?.updated || 0
       };
-    } catch (error: any) {
-      console.error('Failed to bulk update coupons:', error);
-      throw new Error(error.message || 'Failed to update coupons');
+    } catch (error: any) {      throw new Error(error.message || 'Failed to update coupons');
     }
   }
 
@@ -251,9 +230,7 @@ class CouponService {
       });
 
       return response.data as Blob;
-    } catch (error: any) {
-      console.error('Failed to export coupons:', error);
-      throw new Error(error.message || 'Failed to export coupons');
+    } catch (error: any) {      throw new Error(error.message || 'Failed to export coupons');
     }
   }
 }

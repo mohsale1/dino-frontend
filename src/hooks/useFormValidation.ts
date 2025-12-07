@@ -216,9 +216,7 @@ export const useFormValidation = <T extends Record<string, any>>(
           reset();
         }
       }
-    } catch (error) {
-      console.error('Form submission error:', error);
-      throw error;
+    } catch (error) {      throw error;
     } finally {
       setIsSubmitting(false);
     }

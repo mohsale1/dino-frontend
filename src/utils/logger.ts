@@ -46,12 +46,9 @@ class Logger {
   }
 
   private shouldLog(level: LogLevel): boolean {
-    // Always allow errors
-    if (level === LogLevel.ERROR) return true;
-    
-    // In production, only log if explicitly enabled
-    if (isProduction() && !this.enableConsoleLogging) {
-      return level <= LogLevel.WARN;
+    // In production, disable all logging unless explicitly enabled
+    if (isProduction()) {
+      return this.enableConsoleLogging && level <= LogLevel.ERROR;
     }
     
     // In development, respect log level

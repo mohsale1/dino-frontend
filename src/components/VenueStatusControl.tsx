@@ -46,23 +46,7 @@ const VenueStatusControl: React.FC<VenueStatusControlProps> = () => {
   useEffect(() => {
     if (currentVenue) {
       const newActive = currentVenue.is_active || false;
-      const newOpen = currentVenue.is_open || false;
-      
-      console.log('VenueStatusControl: Updating venue status from UserDataContext:', {
-        venueId: currentVenue.id,
-        venueName: currentVenue.name,
-        previousActive: venueActive,
-        newActive: newActive,
-        previousOpen: venueOpen,
-        newOpen: newOpen,
-        rawVenueData: {
-          is_active: currentVenue.is_active,
-          is_open: currentVenue.is_open,
-          isActive: (currentVenue as any).isActive,
-          isOpen: (currentVenue as any).isOpen
-        }
-      });
-      
+      const newOpen = currentVenue.is_open || false;      
       setVenueActive(newActive);
       setVenueOpen(newOpen);
     }
@@ -73,42 +57,18 @@ const VenueStatusControl: React.FC<VenueStatusControlProps> = () => {
 
     try {
       setStatusLoading(true);
-      const newStatus = !venueOpen;
-      
-      console.log('VenueStatusControl: Updating venue status:', {
-        venueId: currentVenue.id,
-        currentStatus: venueOpen,
-        newStatus: newStatus,
-        updateData: { is_open: newStatus }
-      });
-      
+      const newStatus = !venueOpen;      
       // Update venue status directly using updateVenue - more efficient than openVenue/closeVenue
       // which try non-existent endpoints first before falling back to updateVenue
       const updateResponse = await venueService.updateVenue(currentVenue.id, { 
         is_open: newStatus 
       });
-
-      console.log('VenueStatusControl: Venue status updated successfully, response:', updateResponse);
-
       // Verify the update was successful by checking the response
       if (updateResponse.success && updateResponse.data) {
-        console.log('✅ Backend confirmed venue status update:', {
-          venueId: updateResponse.data.id,
-          is_open: updateResponse.data.is_open,
-          is_active: updateResponse.data.is_active,
-          expectedStatus: newStatus
-        });
-        
         // Double-check: fetch the venue directly to verify persistence
-        console.log('🔍 Verifying venue status persistence...');
         const verificationVenue = await venueService.getVenue(currentVenue.id);
         if (verificationVenue) {
-          console.log('🔍 Verification result:', {
-            venueId: verificationVenue.id,
-            is_open: verificationVenue.is_open,
-            is_active: verificationVenue.is_active,
-            matchesExpected: verificationVenue.is_open === newStatus
-          });
+          // Venue verified
         }
       }
 
@@ -117,18 +77,13 @@ const VenueStatusControl: React.FC<VenueStatusControlProps> = () => {
       await refreshUserData();
 
       // Add a small delay to ensure the UI updates
-      await new Promise(resolve => setTimeout(resolve, 100));
-
-      console.log('User data refreshed, venue status should now be updated in UI');
-      
+      await new Promise(resolve => setTimeout(resolve, 100));      
       setSnackbar({ 
         open: true, 
         message: `Venue ${newStatus ? 'opened' : 'closed'} for orders`, 
         severity: 'success' 
       });
-    } catch (error) {
-      console.error('Error toggling venue open status:', error);
-      setSnackbar({ 
+    } catch (error) {      setSnackbar({ 
         open: true, 
         message: 'Failed to update venue status', 
         severity: 'error' 

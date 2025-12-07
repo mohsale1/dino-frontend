@@ -17,18 +17,10 @@ export function clearWorkspaceVenueCache(): void {
     
     // Remove all matching keys
     keysToRemove.forEach(key => {
-      localStorage.removeItem(key);
-      console.log(`🧹 Removed workspace venue cache entry: ${key}`);
-    });
+      localStorage.removeItem(key);    });
     
-    if (keysToRemove.length > 0) {
-      console.log(`✅ Cleared ${keysToRemove.length} workspace venue cache entries`);
-    } else {
-      console.log('ℹ️ No workspace venue cache entries found to clear');
-    }
-  } catch (error) {
-    console.error('❌ Error clearing workspace venue cache:', error);
-  }
+    if (keysToRemove.length > 0) {    } else {    }
+  } catch (error) {  }
 }
 
 export default clearWorkspaceVenueCache;

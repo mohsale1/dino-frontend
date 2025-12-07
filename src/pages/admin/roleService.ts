@@ -28,26 +28,14 @@ class RoleService {
       
       if (filters?.page) params.append('page', filters.page.toString());
       if (filters?.page_size) params.append('page_size', filters.page_size.toString());
-      if (filters?.search) params.append('search', filters.search);
-
-      console.log('🔍 Fetching roles from API:', `/roles?${params.toString()}`);
-      const response = await apiService.get<any>(`/roles?${params.toString()}`);
-      console.log('📦 Full API response:', response);
-      
+      if (filters?.search) params.append('search', filters.search);      const response = await apiService.get<any>(`/roles?${params.toString()}`);      
       // Based on your actual response, the structure is:
       // response.data = { success: true, data: [...roles], total: 2, page: 1, ... }
       
-      if (response && response.data) {
-        console.log('✅ Response.data exists');
-        console.log('📊 Response.data.data:', response.data.data);
-        console.log('📊 Is array?', Array.isArray(response.data.data));
-        
+      if (response && response.data) {        
         // The response.data contains the paginated response
         if (Array.isArray(response.data.data)) {
-          const rolesArray = response.data.data;
-          console.log('👥 Roles count:', rolesArray.length);
-          console.log('👥 First role:', rolesArray[0]);
-          
+          const rolesArray = response.data.data;          
           return {
             success: true,
             data: rolesArray,
@@ -61,9 +49,7 @@ class RoleService {
         }
         
         // Fallback: if data is directly an array (shouldn't happen based on your response)
-        if (Array.isArray(response.data)) {
-          console.log('⚠️ Unexpected: response.data is directly an array');
-          return {
+        if (Array.isArray(response.data)) {          return {
             success: true,
             data: response.data,
             total: response.data.length,
@@ -74,10 +60,7 @@ class RoleService {
             has_prev: false
           };
         }
-      }
-      
-      console.warn('⚠️ No valid data in response');
-      return {
+      }      return {
         success: false,
         data: [],
         total: 0,
@@ -87,9 +70,7 @@ class RoleService {
         has_next: false,
         has_prev: false
       };
-    } catch (error) {
-      console.error('❌ Error fetching roles:', error);
-      return {
+    } catch (error) {      return {
         success: false,
         data: [],
         total: 0,
@@ -109,9 +90,7 @@ class RoleService {
     try {
       const response = await apiService.get<Role>(`/roles/${roleId}`);
       return response.data || null;
-    } catch (error) {
-      console.error('Error fetching role:', error);
-      return null;
+    } catch (error) {      return null;
     }
   }
 

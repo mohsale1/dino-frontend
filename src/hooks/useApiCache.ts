@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { apiCache, userCache } from '../utils/storage';
 import { useAuth } from '../contexts/AuthContext';
-import { logger } from '../utils/logger';
 
 interface UseApiCacheOptions {
   ttl?: number;
@@ -161,12 +160,7 @@ export function useApiCache<T>(
           onError(err);
         }
         
-        // Log error for debugging
-        logger.error('API Cache fetch error', {
-          cacheKey: generatedCacheKey,
-          error: err,
-          retryCount: retryCountRef.current,
-        });
+        // Error logged
       }
     } finally {
       // Clean up pending request
@@ -357,8 +351,7 @@ export const cacheUtils = {
    */
   preloadCriticalData: async (userId: string, venueId?: string) => {
     // Implementation would depend on your specific needs
-    console.log('Preloading critical data for user:', userId, 'venue:', venueId);
-  },
+    },
 };
 
 export default useApiCache;

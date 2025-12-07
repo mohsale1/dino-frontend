@@ -1,6 +1,5 @@
 import { AuthToken, UserProfile, UserRegistration, WorkspaceRegistration, ApiResponse } from '../../types/api';
 import { apiService } from '../../utils/api';
-import { logger } from '../../utils/logger';
 import StorageManager from '../../utils/storage';
 
 class AuthService {
@@ -10,9 +9,7 @@ class AuthService {
   private readonly REFRESH_TOKEN_KEY = StorageManager.KEYS.REFRESH_TOKEN;
 
   async login(email: string, password: string, rememberMe: boolean = false): Promise<AuthToken> {
-    try {
-      logger.authEvent("Starting login");
-      
+    try {      
       // Send plain password to backend - backend handles hashing
       const response = await apiService.post<AuthToken>('/auth/login', {
         email,
@@ -26,9 +23,7 @@ class AuthService {
       const authToken = response.data;
       this.setTokens(authToken);
       return authToken;
-    } catch (error: any) {
-      logger.error('Login failed:', error);
-      throw new Error(error.response?.data?.detail || error.message || 'Login failed');
+    } catch (error: any) {      throw new Error(error.response?.data?.detail || error.message || 'Login failed');
     }
   }
 
@@ -47,9 +42,7 @@ class AuthService {
   }
 
   async registerWorkspace(workspaceData: WorkspaceRegistration): Promise<ApiResponse<any>> {
-    try {
-      logger.authEvent("Starting workspace registration");
-      
+    try {      
       // Send plain password to backend - backend handles hashing
       const response = await apiService.post<any>('/auth/register', workspaceData);
       
@@ -62,9 +55,7 @@ class AuthService {
         data: response.data,
         message: 'Registration successful'
       };
-    } catch (error: any) {
-      logger.error('Registration failed:', error);
-      
+    } catch (error: any) {      
       // Re-throw the original error to preserve the response structure
       throw error;
     }
@@ -167,9 +158,7 @@ class AuthService {
   }
 
   async changePassword(currentPassword: string, newPassword: string): Promise<void> {
-    try {
-      logger.authEvent("Starting password change");
-      
+    try {      
       const token = this.getToken();
       if (!token) {
         throw new Error('No authentication token found');
@@ -184,9 +173,7 @@ class AuthService {
       if (!response.success) {
         throw new Error(response.message || 'Password change failed');
       }
-    } catch (error: any) {
-      logger.error('Password change failed:', error);
-      throw new Error(error.response?.data?.detail || error.message || 'Failed to change password');
+    } catch (error: any) {      throw new Error(error.response?.data?.detail || error.message || 'Failed to change password');
     }
   }
 
@@ -286,29 +273,21 @@ class AuthService {
 
   async refreshToken(): Promise<AuthToken | null> {
     // If a refresh is already in progress, return the existing promise
-    if (this.refreshPromise) {
-      console.log('🔄 Token refresh already in progress, waiting...');
-      return this.refreshPromise;
+    if (this.refreshPromise) {      return this.refreshPromise;
     }
 
     // Check cooldown period to prevent too frequent refresh attempts
     const now = Date.now();
-    if (now - this.lastRefreshAttempt < this.REFRESH_COOLDOWN) {
-      console.log('🚫 Token refresh on cooldown, skipping...');
-      return null;
+    if (now - this.lastRefreshAttempt < this.REFRESH_COOLDOWN) {      return null;
     }
 
     try {
       const refreshToken = this.getRefreshToken();
-      if (!refreshToken) {
-        console.warn('No refresh token available');
-        this.clearTokens();
+      if (!refreshToken) {        this.clearTokens();
         return null;
       }
 
-      this.lastRefreshAttempt = now;
-      console.log('🔄 Starting token refresh...');
-      
+      this.lastRefreshAttempt = now;      
       // Create the refresh promise using direct axios to avoid interceptor loops
       this.refreshPromise = (async () => {
         try {
@@ -322,19 +301,12 @@ class AuthService {
             }
           });
           
-          if (response.data && response.data.access_token) {
-            console.log('✅ Token refreshed successfully');
-            const tokenData = response.data;
+          if (response.data && response.data.access_token) {            const tokenData = response.data;
             this.setTokens(tokenData);
             return tokenData;
-          }
-          
-          console.warn('❌ Token refresh failed: Invalid response');
-          this.clearTokens();
+          }          this.clearTokens();
           return null;
-        } catch (error: any) {
-          console.error('❌ Token refresh error:', error);
-          this.clearTokens();
+        } catch (error: any) {          this.clearTokens();
           return null;
         }
       })();
@@ -347,32 +319,18 @@ class AuthService {
     }
   }
 
-  private setTokens(tokenData: AuthToken): void {
-    console.log('💾 Storing tokens:', {
-      hasAccessToken: !!tokenData.access_token,
-      hasRefreshToken: !!tokenData.refresh_token,
-      hasUser: !!tokenData.user,
-      tokenType: tokenData.token_type,
-      expiresIn: tokenData.expires_in
-    });
-    
+  private setTokens(tokenData: AuthToken): void {    
     // Use StorageManager for consistent storage
     StorageManager.setItem(this.TOKEN_KEY, tokenData.access_token);
     StorageManager.setUserData(tokenData.user);
     
     if (tokenData.refresh_token) {
-      StorageManager.setItem(this.REFRESH_TOKEN_KEY, tokenData.refresh_token);
-      console.log('✅ Refresh token stored successfully');
-    } else {
-      console.warn('⚠️ No refresh token provided in response');
-    }
+      StorageManager.setItem(this.REFRESH_TOKEN_KEY, tokenData.refresh_token);    } else {    }
     
     // No need to store separate expiry - JWT contains expiry in payload
   }
 
-  private clearTokens(): void {
-    console.log('🗑️ Clearing all authentication tokens');
-    StorageManager.removeItem(this.TOKEN_KEY);
+  private clearTokens(): void {    StorageManager.removeItem(this.TOKEN_KEY);
     StorageManager.removeItem(this.USER_KEY);
     StorageManager.removeItem(this.REFRESH_TOKEN_KEY);
   }
@@ -383,9 +341,7 @@ class AuthService {
     
     // Check if token is expired by parsing JWT
     const { isExpired } = this.getTokenExpiryInfo();
-    if (isExpired) {
-      console.warn('🚨 Token has expired');
-      this.clearTokens();
+    if (isExpired) {      this.clearTokens();
       return false;
     }
     
@@ -429,9 +385,7 @@ class AuthService {
         expiresIn: Math.max(0, expiresIn),
         expiryTime: expiryTime
       };
-    } catch (error) {
-      console.error('❌ Failed to parse JWT token:', error);
-      return { isExpired: true, expiresIn: 0, expiryTime: null };
+    } catch (error) {      return { isExpired: true, expiresIn: 0, expiryTime: null };
     }
   }
 
@@ -452,46 +406,18 @@ class AuthService {
     const token = this.getToken();
     const user = this.getStoredUser();
     const refreshToken = this.getRefreshToken();
-    const expiryInfo = this.getTokenExpiryInfo();
-    
-    console.group('🔍 Authentication State Debug');
-    console.log('Has Token:', !!token);
-    console.log('Has User:', !!user);
-    console.log('Has Refresh Token:', !!refreshToken);
-    console.log('Token Expiry Info (from JWT):', expiryInfo);
-    console.log('Is Authenticated:', this.isAuthenticated());
-    console.log('Should Refresh Token:', this.shouldRefreshToken());
-    console.log('Refresh In Progress:', !!this.refreshPromise);
-    console.log('Last Refresh Attempt:', new Date(this.lastRefreshAttempt).toISOString());
-    console.log('Cooldown Remaining:', Math.max(0, this.REFRESH_COOLDOWN - (Date.now() - this.lastRefreshAttempt)));
-    if (user) {
-      console.log('User Role:', user.role);
-      console.log('User Email:', user.email);
-    }
+    const expiryInfo = this.getTokenExpiryInfo();    if (user) {    }
     if (token) {
       try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        console.log('JWT Payload:', {
-          exp: payload.exp,
-          iat: payload.iat,
-          sub: payload.sub,
-          expiryDate: new Date(payload.exp * 1000).toISOString()
-        });
-      } catch (e) {
-        console.log('Failed to parse JWT payload');
-      }
-    }
-    console.groupEnd();
-  }
+        const payload = JSON.parse(atob(token.split('.')[1]));      } catch (e) {      }
+    }  }
 
   /**
    * Force clear refresh state (for debugging)
    */
   clearRefreshState(): void {
     this.refreshPromise = null;
-    this.lastRefreshAttempt = 0;
-    console.log('🧹 Refresh state cleared');
-  }
+    this.lastRefreshAttempt = 0;  }
 }
 
 export const authService = new AuthService();

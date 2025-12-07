@@ -49,9 +49,7 @@ class SimpleErrorBoundary extends React.Component<
     return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('Lazy component error:', error, errorInfo);
-  }
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {  }
 
   render() {
     if (this.state.hasError && this.state.error) {
@@ -205,9 +203,7 @@ class LazyComponentManager {
                 { component: name }
               );
             }
-          } catch (error) {
-            console.warn('Performance service error:', error);
-          }
+          } catch (error) {          }
           this.loadedComponents.add(name);
           return module;
         }),
@@ -228,12 +224,8 @@ class LazyComponentManager {
 
       const preloadPromise = importFn()
         .then(() => {
-          this.loadedComponents.add(name);
-          console.log(`Preloaded component: ${name}`);
-        })
-        .catch(error => {
-          console.warn(`Failed to preload component ${name}:`, error);
-          throw error;
+          this.loadedComponents.add(name);        })
+        .catch(error => {          throw error;
         });
 
       this.preloadPromises.set(name, preloadPromise);
@@ -422,11 +414,7 @@ export const preloadCriticalComponents = async (): Promise<void> => {
   ];
 
   try {
-    await lazyManager.preloadComponents(criticalComponents);
-    console.log('Critical components preloaded successfully');
-  } catch (error) {
-    console.warn('Some critical components failed to preload:', error);
-  }
+    await lazyManager.preloadComponents(criticalComponents);  } catch (error) {  }
 };
 
 export const preloadAdminComponents = async (): Promise<void> => {
@@ -439,11 +427,7 @@ export const preloadAdminComponents = async (): Promise<void> => {
   ];
 
   try {
-    await lazyManager.preloadComponents(adminComponents);
-    console.log('Admin components preloaded successfully');
-  } catch (error) {
-    console.warn('Some admin components failed to preload:', error);
-  }
+    await lazyManager.preloadComponents(adminComponents);  } catch (error) {  }
 };
 
 export const preloadPublicComponents = async (): Promise<void> => {
@@ -453,11 +437,7 @@ export const preloadPublicComponents = async (): Promise<void> => {
   ];
 
   try {
-    await lazyManager.preloadComponents(publicComponents);
-    console.log('Public components preloaded successfully');
-  } catch (error) {
-    console.warn('Some public components failed to preload:', error);
-  }
+    await lazyManager.preloadComponents(publicComponents);  } catch (error) {  }
 };
 
 // Hook for component preloading
@@ -466,9 +446,7 @@ export const usePreloadComponents = (componentNames: string[]) => {
     const preload = async () => {
       try {
         await lazyManager.preloadComponents(componentNames);
-      } catch (error) {
-        console.warn('Component preloading failed:', error);
-      }
+      } catch (error) {      }
     };
 
     const timer = setTimeout(preload, 500);
@@ -493,7 +471,7 @@ export const useIntersectionPreload = (
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            lazyManager.preloadComponents(componentNames).catch(console.warn);
+            lazyManager.preloadComponents(componentNames).catch(() => {});
             observer.unobserve(element);
           }
         });

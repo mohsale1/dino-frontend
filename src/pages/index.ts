@@ -4,7 +4,7 @@
  */
 
 // Public pages
-export * from './public';
+export * from './public/HomePage';
 
 // Authentication pages
 export * from './auth';

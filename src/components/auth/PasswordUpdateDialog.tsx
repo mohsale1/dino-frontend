@@ -60,8 +60,6 @@ const PasswordUpdateDialog: React.FC<PasswordUpdateDialogProps> = ({
     onClose();
   };
 
-
-
   const handleSubmit = async () => {
     setError('');
 

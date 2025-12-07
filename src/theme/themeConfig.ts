@@ -937,6 +937,5 @@ const darkThemeOptions: ThemeOptions = {
 };
 
 export const lightTheme = createTheme(lightThemeOptions);
-export const darkTheme = createTheme(darkThemeOptions);
 
-export type ThemeMode = 'light' | 'dark';
+export type ThemeMode = 'light';

@@ -93,14 +93,20 @@ const UserPermissionsDashboard: React.FC = () => {
       const response = await userService.getUsersByVenueId(userData.venue.id);
       
       if (response.success && response.data) {
-        // Map API response to match expected format
-        const mappedUsers = response.data.map((user: any) => ({
-          ...user,
-          firstName: user.first_name,
-          lastName: user.last_name,
-          lastLogin: user.last_login,
-          isActive: user.is_active,
-        }));
+        // Map API response to match expected format and add permissions based on role
+        const mappedUsers = response.data.map((user: any) => {
+          // Get permissions for the user's role
+          const rolePermissions = PermissionService.getUserPermissionsFromRole(user.role || 'operator');
+          
+          return {
+            ...user,
+            firstName: user.first_name,
+            lastName: user.last_name,
+            lastLogin: user.last_login,
+            isActive: user.is_active,
+            permissions: rolePermissions, // Add permissions based on role
+          };
+        });
         setUsers(mappedUsers);
       } else {
         setUsers([]);
@@ -109,7 +115,6 @@ const UserPermissionsDashboard: React.FC = () => {
       // Get updated user statistics
       const stats = await PermissionService.getUserStatistics(userData.venue.id);
       setUserStats(stats);
-      
 
     } catch (error: any) {
       setError('Network error. Please check your connection.');
@@ -134,14 +139,20 @@ const UserPermissionsDashboard: React.FC = () => {
         const response = await userService.getUsersByVenueId(userData.venue.id);
         
         if (response.success && response.data) {
-          // Map API response to match expected format
-          const mappedUsers = response.data.map((user: any) => ({
-            ...user,
-            firstName: user.first_name,
-            lastName: user.last_name,
-            lastLogin: user.last_login,
-            isActive: user.is_active,
-          }));
+          // Map API response to match expected format and add permissions based on role
+          const mappedUsers = response.data.map((user: any) => {
+            // Get permissions for the user's role
+            const rolePermissions = PermissionService.getUserPermissionsFromRole(user.role || 'operator');
+            
+            return {
+              ...user,
+              firstName: user.first_name,
+              lastName: user.last_name,
+              lastLogin: user.last_login,
+              isActive: user.is_active,
+              permissions: rolePermissions, // Add permissions based on role
+            };
+          });
           setUsers(mappedUsers);
         } else {
           setUsers([]);
@@ -150,7 +161,6 @@ const UserPermissionsDashboard: React.FC = () => {
         // Get user statistics
         const stats = await PermissionService.getUserStatistics(userData.venue.id);
         setUserStats(stats);
-        
 
       } catch (error: any) {
         setError('Network error. Please check your connection.');
@@ -586,8 +596,6 @@ const UserPermissionsDashboard: React.FC = () => {
         {/* Content Area */}
         <Box sx={{ px: { xs: 3, sm: 4 }, pt: { xs: 3, sm: 4 }, pb: 4 }}>
 
-
-
           {/* Statistics Cards */}
           <Box sx={{ 
             px: { xs: 3, sm: 4 }, 
@@ -904,7 +912,7 @@ const UserPermissionsDashboard: React.FC = () => {
                               sx={{ 
                                 fontSize: '0.8125rem',
                                 fontWeight: 600,
-                                color: getRoleColor(typeof user.role === 'string' ? user.role : 'operator')
+                                color: 'text.primary'
                               }}
                             >
                               {getRoleDisplayName(user.role || 'unknown')}
@@ -1149,7 +1157,7 @@ const UserPermissionsDashboard: React.FC = () => {
               Status: {selectedUser?.isActive ? 'Active' : 'Inactive'}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Last Login: {selectedUser?.lastLogin ? selectedUser.lastLogin.toLocaleString() : 'Never'}
+              Last Login: {formatLastLogin(selectedUser?.lastLogin || selectedUser?.updated_at || selectedUser?.created_at)}
             </Typography>
           </Box>
         </DialogContent>

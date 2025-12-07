@@ -39,9 +39,7 @@ class TourService {
       }
       
       throw new Error(response.message || 'Failed to get tour status');
-    } catch (error: any) {
-      console.error('Error getting tour status:', error);
-      throw new Error(error.message || 'Failed to get tour status');
+    } catch (error: any) {      throw new Error(error.message || 'Failed to get tour status');
     }
   }
 
@@ -54,12 +52,7 @@ class TourService {
       
       if (!response.success) {
         throw new Error(response.message || 'Failed to complete tour');
-      }
-      
-      console.log('✅ Tour completed successfully');
-    } catch (error: any) {
-      console.error('Error completing tour:', error);
-      throw new Error(error.message || 'Failed to complete tour');
+      }    } catch (error: any) {      throw new Error(error.message || 'Failed to complete tour');
     }
   }
 
@@ -72,12 +65,7 @@ class TourService {
       
       if (!response.success) {
         throw new Error(response.message || 'Failed to skip tour');
-      }
-      
-      console.log('⏭️ Tour skipped successfully');
-    } catch (error: any) {
-      console.error('Error skipping tour:', error);
-      throw new Error(error.message || 'Failed to skip tour');
+      }    } catch (error: any) {      throw new Error(error.message || 'Failed to skip tour');
     }
   }
 
@@ -90,12 +78,7 @@ class TourService {
       
       if (!response.success) {
         throw new Error(response.message || 'Failed to restart tour');
-      }
-      
-      console.log('🔄 Tour restarted successfully');
-    } catch (error: any) {
-      console.error('Error restarting tour:', error);
-      throw new Error(error.message || 'Failed to restart tour');
+      }    } catch (error: any) {      throw new Error(error.message || 'Failed to restart tour');
     }
   }
 
@@ -108,12 +91,7 @@ class TourService {
       
       if (!response.success) {
         throw new Error(response.message || 'Failed to complete first login');
-      }
-      
-      console.log('✅ First login completed successfully');
-    } catch (error: any) {
-      console.error('Error completing first login:', error);
-      throw new Error(error.message || 'Failed to complete first login');
+      }    } catch (error: any) {      throw new Error(error.message || 'Failed to complete first login');
     }
   }
 
@@ -124,9 +102,7 @@ class TourService {
     try {
       const status = await this.getTourStatus();
       return status.should_show_tour;
-    } catch (error) {
-      console.error('Error checking tour status:', error);
-      return false; // Default to not showing tour on error
+    } catch (error) {      return false; // Default to not showing tour on error
     }
   }
 }

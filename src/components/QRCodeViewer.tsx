@@ -99,8 +99,6 @@ const QRCodeViewer: React.FC<QRCodeViewerProps> = ({
     }
   }, [tableId, actualVenueId, actualVenueName, tableNumber, template]);
 
-
-
   useEffect(() => {
     if (open && !qrData && tableId && actualVenueId && actualVenueName && tableNumber) {
       generateQRCode();

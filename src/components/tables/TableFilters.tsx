@@ -119,7 +119,7 @@ const TableFilters: React.FC<TableFiltersProps> = ({
                         width: 12, 
                         height: 12, 
                         borderRadius: '50%', 
-                        backgroundColor: area.color 
+                        backgroundColor: 'primary.main' 
                       }} 
                     />
                     {area.name}

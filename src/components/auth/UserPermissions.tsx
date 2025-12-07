@@ -91,15 +91,7 @@ const UserPermissions: React.FC = () => {
   ];
 
   // Debug: Log permission structure for troubleshooting
-  if (process.env.NODE_ENV === 'development') {
-    console.log('🔍 UserPermissions Debug:', {
-      permissionsCount: permissions.length,
-      categoriesWithPermissions: permissionCategories.filter(cat => cat.permissions.length > 0).length,
-      role: typeof role === 'string' ? role : role?.name,
-      allPermissions: permissions.map(p => ({ id: p.id, name: p.name, resource: p.resource, action: p.action })),
-      duplicateIds: permissions.map(p => p.id).filter((id, index, arr) => arr.indexOf(id) !== index)
-    });
-  }
+  if (process.env.NODE_ENV === 'development') {  }
 
   const getActionIcon = (action: string) => {
     switch (action) {

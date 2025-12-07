@@ -12,8 +12,7 @@ import {
   IconButton,
   Chip,
 } from '@mui/material';
-import {
-  Close as CloseIcon,
+import { Close as CloseIcon,
   Warning as WarningIcon,
   Delete as DeleteIcon,
 } from '@mui/icons-material';
@@ -65,9 +64,7 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
       setIsDeleting(true);
       await onConfirm();
       onClose();
-    } catch (error) {
-      console.error('Delete operation failed:', error);
-      // Error handling is done by the parent component
+    } catch (error) {      // Error handling is done by the parent component
     } finally {
       setIsDeleting(false);
     }

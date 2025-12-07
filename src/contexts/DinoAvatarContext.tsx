@@ -42,10 +42,7 @@ export const DinoAvatarProvider: React.FC<DinoAvatarProviderProps> = ({ children
       `https://api.dicebear.com/7.x/pixel-art/svg?seed=${randomDino}${randomSeed}${timestamp}&backgroundColor=FF9800&radius=50`
     ];
     
-    const dinoAvatarUrl = avatarStyles[Math.floor(Math.random() * avatarStyles.length)];
-    
-    console.log('🦕 Generated Dino Avatar:', randomDino, dinoAvatarUrl);
-    
+    const dinoAvatarUrl = avatarStyles[Math.floor(Math.random() * avatarStyles.length)];    
     setIsLoading(true);
     setDinoName(randomDino);
     setDinoAvatar(dinoAvatarUrl);

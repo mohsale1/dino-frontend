@@ -93,7 +93,6 @@ const WorkspaceErrorBoundary = ({
                 onChange={(e) => {
                   if (e.target.value) {
                     // This would trigger workspace selection
-                    console.log('Selected workspace:', e.target.value);
                   }
                 }}
               >

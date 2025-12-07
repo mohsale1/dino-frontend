@@ -23,7 +23,6 @@ import {
 interface TableCardProps {
   table: any;
   getAreaName: (areaId: string) => string;
-  getAreaColor: (areaId: string) => string;
   getStatusColor: (status: string) => string;
   getStatusIcon: (status: string) => React.ReactElement;
   onToggleTableStatus: (tableId: string) => void;
@@ -37,7 +36,6 @@ interface TableCardProps {
 const TableCard: React.FC<TableCardProps> = ({
   table,
   getAreaName,
-  getAreaColor,
   getStatusColor,
   getStatusIcon,
   onToggleTableStatus,
@@ -57,7 +55,8 @@ const TableCard: React.FC<TableCardProps> = ({
         borderColor: 'grey.200',
         backgroundColor: 'background.paper',
         borderRadius: 2,
-        borderLeft: `4px solid ${getAreaColor(table.location || '')}`,
+        borderLeft: `4px solid`,
+        borderLeftColor: 'primary.main',
         opacity: table.is_active ? 1 : 0.6,
         transition: 'all 0.2s ease-in-out',
         position: 'relative',

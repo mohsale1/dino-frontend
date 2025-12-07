@@ -54,7 +54,6 @@ interface MobileMenuProps {
   homeNavItems: Array<{
     label: string;
     id: string;
-    icon: React.ReactNode;
   }>;
   activeSection: string;
   onSectionClick: (sectionId: string) => void;
@@ -90,8 +89,6 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-
-
 
   // Load venue status from UserDataContext
   useEffect(() => {
@@ -526,7 +523,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                       }}
                     >
                       <ListItemIcon sx={{ color: activeSection === item.id ? 'primary.main' : 'text.secondary', minWidth: 36 }}>
-                        {item.icon}
+                        {/* Icon removed for simplicity */}
                       </ListItemIcon>
                       <ListItemText
                         primary={item.label}
@@ -843,7 +840,6 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
             </List>
           </Box>
         </Box>
-
 
       </Box>
 

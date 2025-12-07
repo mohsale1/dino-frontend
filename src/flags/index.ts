@@ -74,16 +74,12 @@ export const validateFlags = (flags: Partial<AppFlags>): boolean => {
     ];
     
     for (const section of requiredSections) {
-      if (!(section in flags)) {
-        console.warn(`Missing flag section: ${section}`);
-        return false;
+      if (!(section in flags)) {        return false;
       }
     }
     
     return true;
-  } catch (error) {
-    console.error('Flag validation error:', error);
-    return false;
+  } catch (error) {    return false;
   }
 };
 
@@ -113,9 +109,7 @@ export const getFlagByPath = (path: string): boolean => {
   for (const part of parts) {
     if (current && typeof current === 'object' && part in current) {
       current = current[part];
-    } else {
-      console.warn(`Flag path not found: ${path}`);
-      return false;
+    } else {      return false;
     }
   }
   

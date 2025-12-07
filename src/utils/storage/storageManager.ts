@@ -51,16 +51,12 @@ export class StorageManager {
       };
       
       localStorage.setItem(key, JSON.stringify(item));
-    } catch (error) {
-      console.error('Failed to set storage item:', error);
-      // If storage is full, try to clean up and retry
+    } catch (error) {      // If storage is full, try to clean up and retry
       this.performEmergencyCleanup();
       try {
         const item: StorageItem<T> = { data, timestamp: Date.now(), ttl, version: this.VERSION };
         localStorage.setItem(key, JSON.stringify(item));
-      } catch (retryError) {
-        console.error('Failed to set storage item after cleanup:', retryError);
-      }
+      } catch (retryError) {      }
     }
   }
 
@@ -75,23 +71,17 @@ export class StorageManager {
       const item: StorageItem<T> = JSON.parse(itemStr);
       
       // Check version compatibility
-      if (item.version && item.version !== this.VERSION) {
-        console.warn(`Storage version mismatch for ${key}. Removing outdated item.`);
-        this.removeItem(key);
+      if (item.version && item.version !== this.VERSION) {        this.removeItem(key);
         return null;
       }
 
       // Check expiration
-      if (item.ttl && Date.now() - item.timestamp > item.ttl) {
-        console.log(`Storage item ${key} expired. Removing.`);
-        this.removeItem(key);
+      if (item.ttl && Date.now() - item.timestamp > item.ttl) {        this.removeItem(key);
         return null;
       }
 
       return item.data;
-    } catch (error) {
-      console.error(`Failed to get storage item ${key}:`, error);
-      // Remove corrupted item
+    } catch (error) {      // Remove corrupted item
       this.removeItem(key);
       return null;
     }
@@ -103,9 +93,7 @@ export class StorageManager {
   static removeItem(key: string): void {
     try {
       localStorage.removeItem(key);
-    } catch (error) {
-      console.error(`Failed to remove storage item ${key}:`, error);
-    }
+    } catch (error) {    }
   }
 
   /**
@@ -248,9 +236,7 @@ export class StorageManager {
       }
     }
 
-    keysToRemove.forEach(key => this.removeItem(key));
-    console.log(`Cleared ${keysToRemove.length} cache items`);
-  }
+    keysToRemove.forEach(key => this.removeItem(key));  }
 
   /**
    * Perform comprehensive cleanup
@@ -290,17 +276,13 @@ export class StorageManager {
 
     keysToRemove.forEach(key => this.removeItem(key));
     
-    if (keysToRemove.length > 0) {
-      console.log(`Storage cleanup completed: ${keysToRemove.length} items removed (${expiredCount} expired, ${corruptedCount} corrupted)`);
-    }
+    if (keysToRemove.length > 0) {    }
   }
 
   /**
    * Emergency cleanup when storage is full
    */
-  private static performEmergencyCleanup(): void {
-    console.warn('Storage full, performing emergency cleanup...');
-    
+  private static performEmergencyCleanup(): void {    
     // Remove all cache items first
     this.clearCache();
     
@@ -335,12 +317,7 @@ export class StorageManager {
       if (!item.key.includes('token') && !item.key.includes('user')) {
         this.removeItem(item.key);
       }
-    });
-    
-    console.log(`Emergency cleanup: removed ${itemsToRemove.length} oldest items`);
-  }
-
-
+    });  }
 
   /**
    * Get storage usage statistics
@@ -395,17 +372,11 @@ export class StorageManager {
           // Only migrate if new key doesn't exist
           localStorage.setItem(newKey, oldData);
           localStorage.removeItem(old);
-          migrated++;
-          console.log(`✅ Migrated storage key: ${old} -> ${newKey}`);
-        }
+          migrated++;        }
       });
 
-      if (migrated > 0) {
-        console.log(`🔄 Storage migration completed: ${migrated} keys migrated`);
-      }
-    } catch (error) {
-      console.warn('⚠️ Storage migration failed:', error);
-    }
+      if (migrated > 0) {      }
+    } catch (error) {    }
   }
 
   /**
@@ -421,10 +392,7 @@ export class StorageManager {
     // Set up periodic cleanup (every 5 minutes)
     setInterval(() => {
       this.performCleanup();
-    }, 5 * 60 * 1000);
-
-    console.log('StorageManager initialized');
-  }
+    }, 5 * 60 * 1000);  }
 }
 
 // Auto-initialize when module loads

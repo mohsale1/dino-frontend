@@ -4,7 +4,6 @@
  */
 
 import { apiCache } from '../storage';
-import { logger } from '../logger';
 
 // Request deduplication map
 const pendingRequests = new Map<string, Promise<any>>();
@@ -28,9 +27,7 @@ export function deduplicateRequest<T>(
   requestFn: () => Promise<T>
 ): Promise<T> {
   // Check if there's already a pending request
-  if (pendingRequests.has(key)) {
-    logger.debug('Request deduplicated', { key });
-    return pendingRequests.get(key) as Promise<T>;
+  if (pendingRequests.has(key)) {    return pendingRequests.get(key) as Promise<T>;
   }
 
   // Create new request
@@ -97,18 +94,9 @@ async function executeBatch<T>(
       } else {
         req.rejecter(new Error(`No result for key: ${req.key}`));
       }
-    });
-
-    logger.debug('Batch request executed', { 
-      batchKey, 
-      requestCount: batch.length,
-      resultCount: Object.keys(results).length 
-    });
-  } catch (error) {
+    });  } catch (error) {
     // Reject all requests in batch
-    batch.forEach(req => req.rejecter(error));
-    logger.error('Batch request failed', { batchKey, error });
-  }
+    batch.forEach(req => req.rejecter(error));  }
 }
 
 /**
@@ -132,16 +120,12 @@ export async function optimizedFetch<T>(
   // Try cache first
   if (useCache) {
     const cached = apiCache.get<T>(key);
-    if (cached !== null) {
-      logger.debug('Cache hit', { key });
-      return cached;
+    if (cached !== null) {      return cached;
     }
   }
 
   // Create fetch function
-  const actualFetch = async () => {
-    logger.debug('Cache miss, fetching', { key });
-    const result = await fetchFn();
+  const actualFetch = async () => {    const result = await fetchFn();
     
     // Cache the result
     if (useCache) {
@@ -170,9 +154,7 @@ export function preloadData<T>(
   // Only preload if not already cached
   if (!apiCache.has(key)) {
     optimizedFetch(key, fetchFn, { ttl, useCache: true, deduplicate: true })
-      .catch(error => {
-        logger.warn('Preload failed', { key, error });
-      });
+      .catch(error => {      });
   }
 }
 
@@ -181,9 +163,7 @@ export function preloadData<T>(
  */
 export function invalidateRelatedCache(patterns: string[]): void {
   patterns.forEach(pattern => {
-    apiCache.invalidatePattern(pattern);
-    logger.debug('Cache invalidated', { pattern });
-  });
+    apiCache.invalidatePattern(pattern);  });
 }
 
 /**
@@ -225,14 +205,7 @@ export async function warmCache(
     lowPriority.forEach(config => 
       preloadData(config.key, config.fetchFn, config.ttl)
     );
-  }, 500);
-
-  logger.info('Cache warming initiated', {
-    high: highPriority.length,
-    medium: mediumPriority.length,
-    low: lowPriority.length,
-  });
-}
+  }, 500);}
 
 /**
  * Request retry with exponential backoff
@@ -272,14 +245,6 @@ export async function retryRequest<T>(
 
       // Calculate delay with exponential backoff
       const delay = Math.min(baseDelay * Math.pow(2, attempt), maxDelay);
-      
-      logger.warn('Request failed, retrying', {
-        attempt: attempt + 1,
-        maxRetries,
-        delay,
-        error: error instanceof Error ? error.message : String(error),
-      });
-
       await new Promise(resolve => setTimeout(resolve, delay));
     }
   }

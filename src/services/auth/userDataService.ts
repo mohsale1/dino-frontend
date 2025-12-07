@@ -94,15 +94,11 @@ class UserDataService {
     const now = Date.now();
     
     // If there's already a request in progress, return it
-    if (this.currentRequest) {
-      console.log('🔄 UserDataService: Request already in progress, returning existing promise');
-      return this.currentRequest;
+    if (this.currentRequest) {      return this.currentRequest;
     }
     
     // If called too soon after last call, debounce
-    if (now - this.lastCallTime < this.debounceDelay) {
-      console.log('🔄 UserDataService: Debouncing rapid call');
-      await new Promise(resolve => setTimeout(resolve, this.debounceDelay - (now - this.lastCallTime)));
+    if (now - this.lastCallTime < this.debounceDelay) {      await new Promise(resolve => setTimeout(resolve, this.debounceDelay - (now - this.lastCallTime)));
     }
     
     this.lastCallTime = Date.now();
@@ -123,36 +119,16 @@ class UserDataService {
    * Internal method to actually fetch user data
    */
   private async _fetchUserData(): Promise<UserData | null> {
-    try {
-      console.log('🔄 UserDataService: Fetching user data from /users/me/data...');
-      const response = await apiService.get<{data: UserData, timestamp: string}>('/users/me/data');
+    try {      const response = await apiService.get<{data: UserData, timestamp: string}>('/users/me/data');
       
       if (response.success && response.data) {
         // Extract the actual user data from the response
-        const userData = response.data.data || response.data;
-        console.log('✅ User data received:', {
-          hasUser: !!userData.user,
-          hasVenue: !!userData.venue,
-          hasWorkspace: !!userData.workspace,
-          venueId: userData.venue?.id,
-          venueName: userData.venue?.name
-        });
-        
+        const userData = response.data.data || response.data;        
         // Map venue data properly with comprehensive field mapping
-        if (userData.venue) {
-          console.log('UserDataService: Raw venue data from API:', userData.venue);
-          
+        if (userData.venue) {          
           // Convert backend status field to frontend is_open boolean
           let isOpen = false;
-          let statusField = (userData.venue as any).status;
-          
-          console.log('UserDataService: Status field analysis:', {
-            raw_is_open: userData.venue.is_open,
-            raw_status: statusField,
-            raw_isOpen: (userData.venue as any).isOpen,
-            venue_id: userData.venue.id
-          });
-          
+          let statusField = (userData.venue as any).status;          
           // Priority order for determining is_open:
           // 1. Use existing is_open if it's explicitly set
           // 2. Convert status field ("active"/"open" = true, "closed"/"inactive" = false)
@@ -161,24 +137,12 @@ class UserDataService {
           
           if (userData.venue.is_open !== undefined && userData.venue.is_open !== null) {
             // Use existing is_open if available and not null/undefined
-            isOpen = Boolean(userData.venue.is_open);
-            console.log('UserDataService: Using existing is_open field:', isOpen);
-          } else if (statusField !== undefined && statusField !== null) {
+            isOpen = Boolean(userData.venue.is_open);          } else if (statusField !== undefined && statusField !== null) {
             // Convert status field: "active"/"open" = true, "closed"/"inactive" = false
             const statusStr = String(statusField).toLowerCase();
-            isOpen = statusStr === 'active' || statusStr === 'open';
-            console.log('UserDataService: Converting status to is_open:', {
-              originalStatus: statusField,
-              normalizedStatus: statusStr,
-              convertedIsOpen: isOpen
-            });
-          } else if ((userData.venue as any).isOpen !== undefined) {
+            isOpen = statusStr === 'active' || statusStr === 'open';          } else if ((userData.venue as any).isOpen !== undefined) {
             // Fallback to camelCase version
-            isOpen = Boolean((userData.venue as any).isOpen);
-            console.log('UserDataService: Using camelCase isOpen field:', isOpen);
-          } else {
-            console.log('UserDataService: No status fields found, defaulting to false');
-            isOpen = false;
+            isOpen = Boolean((userData.venue as any).isOpen);          } else {            isOpen = false;
           }
           
           // Ensure both is_open and status fields are properly synchronized
@@ -213,20 +177,7 @@ class UserDataService {
           };
           
           // Set status field separately to avoid TypeScript issues
-          (userData.venue as any).status = finalStatus;
-          
-          console.log('UserDataService: Processed venue data:', {
-            id: userData.venue.id,
-            name: userData.venue.name,
-            original_status: statusField,
-            final_status: (userData.venue as any).status,
-            is_active: userData.venue.is_active,
-            is_open: userData.venue.is_open,
-            isActive: userData.venue.isActive,
-            isOpen: userData.venue.isOpen,
-            fields_synchronized: userData.venue.is_open === isOpen && (userData.venue as any).status === finalStatus
-          });
-        }
+          (userData.venue as any).status = finalStatus;        }
         
         // Map user data properly
         if (userData.user) {
@@ -243,15 +194,7 @@ class UserDataService {
       }
       
       return null;
-    } catch (error: any) {
-      console.error('❌ UserDataService: Error fetching user data:', error);
-      console.error('Error details:', {
-        status: error.response?.status,
-        message: error.message,
-        data: error.response?.data,
-        url: error.config?.url
-      });
-      
+    } catch (error: any) {      
       // Handle specific error cases
       if (error.response?.status === 401) {
         throw new Error('Authentication required. Please log in again.');
@@ -271,6 +214,8 @@ class UserDataService {
 
   /**
    * Get venue-specific data (for superadmin switching venues)
+   * NOTE: This endpoint does not exist in the backend yet - will return 404
+   * TODO: Implement /venues/{venueId}/data endpoint in backend if needed
    */
   async getVenueData(venueId: string): Promise<VenueData | null> {
     try {
@@ -281,9 +226,7 @@ class UserDataService {
       }
       
       return null;
-    } catch (error: any) {
-      console.error('Error fetching venue data:', error);
-      
+    } catch (error: any) {      
       if (error.response?.status === 403) {
         throw new Error('Only superadmin can switch venues.');
       }

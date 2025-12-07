@@ -249,8 +249,6 @@ class PermissionService {
       return false;
     }
 
-
-
     // First check backend role if available
     const backendRole = this.getBackendRole();
     if (backendRole) {

@@ -52,11 +52,15 @@ interface VenueDashboardStats {
 interface OverviewTabProps {
   dashboardData: any;
   stats: VenueDashboardStats | null;
+  analyticsData?: any;
 }
 
-const OverviewTab: React.FC<OverviewTabProps> = ({ dashboardData, stats }) => {
+const OverviewTab: React.FC<OverviewTabProps> = ({ dashboardData, stats, analyticsData }) => {
   const theme = useTheme();
   const dashboardFlags = useDashboardFlags();
+  
+  // Get popular items from analytics or dashboard data
+  const popularItems = analyticsData?.popular_items || dashboardData?.analytics?.popular_items || [];
 
   return (
     <Grid container spacing={3}>
@@ -81,7 +85,6 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ dashboardData, stats }) => {
         </Grid>
       </FlagGate>
 
-
       {/* Popular Items */}
       <FlagGate flag="dashboard.showRecentActivity">
         <Grid item xs={12} md={6}>
@@ -97,9 +100,9 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ dashboardData, stats }) => {
                 Top Menu Items
               </Typography>
               
-              {dashboardData?.analytics?.popular_items && dashboardData.analytics.popular_items.length > 0 ? (
+              {popularItems && popularItems.length > 0 ? (
                 <List>
-                  {dashboardData.analytics.popular_items.slice(0, 5).map((item: any, index: number) => (
+                  {popularItems.slice(0, 5).map((item: any, index: number) => (
                     <ListItem key={item.id || index} divider={index < 4}>
                       <ListItemIcon>
                         <Avatar sx={{ backgroundColor: 'primary.main' }}>
@@ -111,7 +114,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ dashboardData, stats }) => {
                         secondary={`${item.category} • ${item.orders} orders`}
                       />
                       <Typography variant="body2" sx={{ fontWeight: 600, color: 'success.main' }}>
-                        ₹{item.revenue}
+                        ₹{typeof item.revenue === 'number' ? item.revenue.toLocaleString() : item.revenue}
                       </Typography>
                     </ListItem>
                   ))}
@@ -162,9 +165,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ dashboardData, stats }) => {
               
               {(() => {
                 // Check for both snake_case and camelCase versions
-                const recentActivity = dashboardData?.recent_activity || dashboardData?.recentActivity || [];
-                console.log('📋 OverviewTab - Recent activity:', recentActivity);
-                return recentActivity && recentActivity.length > 0 ? (
+                const recentActivity = dashboardData?.recent_activity || dashboardData?.recentActivity || [];                return recentActivity && recentActivity.length > 0 ? (
                 <List sx={{ maxHeight: 400, overflow: 'auto' }}>
                   {recentActivity.slice(0, 6).map((activity: any, index: number) => (
                     <ListItem 

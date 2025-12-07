@@ -167,7 +167,6 @@ const ElegantTemplate: React.FC<TemplateProps> = ({
           Experience dining reimagined
         </Typography>
 
-
       </Paper>
     </Box>
   );

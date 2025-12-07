@@ -265,9 +265,7 @@ export const secureStorage = {
       }
       
       localStorage.setItem(key, serializedValue);
-    } catch (error) {
-      console.error('Failed to store item:', error);
-    }
+    } catch (error) {    }
   },
 
   getItem<T>(key: string, decrypt: boolean = false): T | null {
@@ -281,9 +279,7 @@ export const secureStorage = {
       }
       
       return JSON.parse(item);
-    } catch (error) {
-      console.error('Failed to retrieve item:', error);
-      return null;
+    } catch (error) {      return null;
     }
   },
 

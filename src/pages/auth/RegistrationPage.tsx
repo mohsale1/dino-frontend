@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   Box,
   Container,
@@ -14,9 +14,10 @@ import {
   useTheme,
   useMediaQuery,
   StepConnector,
-  styled
+  styled,
+  alpha
 } from '@mui/material';
-import { Business } from '@mui/icons-material';
+import { Business, CheckCircle, Home } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { authService } from '../../services/auth';
 import { WorkspaceRegistration } from '../../types/api';
@@ -24,9 +25,8 @@ import DinoLogo from '../../components/DinoLogo';
 import { useToast } from '../../contexts/ToastContext';
 import RegistrationResult from '../../components/RegistrationResult';
 
-
 // Import registration components
-import ImageSlider from '../../components/registration/ImageSlider';
+import RegistrationCodeInput from '../../components/registration/RegistrationCodeInput';
 import WorkspaceDetailsStep from '../../components/registration/WorkspaceDetailsStep';
 import VenueInformationStep from '../../components/registration/VenueInformationStep';
 import OwnerAccountStep from '../../components/registration/OwnerAccountStep';
@@ -37,6 +37,7 @@ const steps = [
   'Workspace Details',
   'Venue Information', 
   'Owner Account',
+  'Verify Code',
   'Review & Submit'
 ];
 
@@ -58,7 +59,7 @@ const ResponsiveStepConnector = styled(StepConnector)(({ theme }) => ({
     },
   },
   '& .MuiStepConnector-line': {
-    borderColor: theme.palette.mode === 'dark' ? theme.palette.grey[800] : '#eaeaf0',
+    borderColor: '#eaeaf0',
     borderTopWidth: 3,
     borderRadius: 1,
   },
@@ -87,7 +88,7 @@ const ResponsiveStepLabel = styled(StepLabel)(({ theme }) => ({
     },
     [theme.breakpoints.down('xs')]: {
       fontSize: '0.7rem',
-      display: 'none', // Hide labels on very small screens
+      display: 'none',
     },
   },
   '& .MuiStepLabel-iconContainer': {
@@ -113,6 +114,7 @@ const RegistrationPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [codeVerified, setCodeVerified] = useState(false);
   
   const [formData, setFormData] = useState<RegistrationFormData>(
     location.state?.formData || initialFormData
@@ -127,7 +129,13 @@ const RegistrationPage: React.FC = () => {
   const [registrationErrorCode, setRegistrationErrorCode] = useState<number | undefined>();
   const [registrationData, setRegistrationData] = useState<WorkspaceRegistration | null>(null);
 
-  // Helper function to get error message for a field (backend errors take priority)
+  // Handle code verification
+  const handleCodeVerified = (code: string) => {
+    setCodeVerified(true);
+    showSuccess('Code verified successfully! You can now proceed to submit.');
+  };
+
+  // Helper function to get error message for a field
   const getFieldError = (fieldName: string): string => {
     return backendErrors[fieldName] || validationErrors[fieldName] || '';
   };
@@ -264,6 +272,12 @@ const RegistrationPage: React.FC = () => {
   };
 
   const handleNext = () => {
+    // For code verification step (step 3), check if code is verified
+    if (activeStep === 3 && !codeVerified) {
+      setError('Please verify the registration code before proceeding');
+      return;
+    }
+    
     if (validateStep(activeStep)) {
       setActiveStep((prevStep) => prevStep + 1);
       setError(null);
@@ -334,18 +348,23 @@ const RegistrationPage: React.FC = () => {
     setRegistrationData(null);
     setError(null);
     setBackendErrors({});
-    // Reset to last step to allow user to review and modify
     setActiveStep(steps.length - 1);
   };
 
   const handleSubmit = async () => {
     if (!validateStep(2)) return;
 
+    if (!codeVerified) {
+      showError('Please verify the registration code before submitting');
+      setActiveStep(3); // Go back to code verification step
+      return;
+    }
+
     setLoading(true);
     setError(null);
     setBackendErrors({});
 
-    // Prepare registration data outside try block so it's accessible in catch
+    // Prepare registration data (no code in payload)
     const registrationData: WorkspaceRegistration = {
       workspace_name: formData.workspaceName,
       workspace_description: formData.workspaceDescription,
@@ -367,15 +386,11 @@ const RegistrationPage: React.FC = () => {
     try {
       await authService.registerWorkspace(registrationData);
       
-      // Success - show success result
       setRegistrationData(registrationData);
       setRegistrationSuccess(true);
       setShowResult(true);
-    } catch (err: any) {
-      console.error('Registration error:', err);
-      const errorMessage = err.response?.data?.detail || err.message || 'Registration failed. Please try again.';
+    } catch (err: any) {      const errorMessage = err.response?.data?.detail || err.message || 'Registration failed. Please try again.';
       
-      // Show failure result
       setRegistrationData(registrationData);
       setRegistrationError(errorMessage);
       setRegistrationErrorCode(err.response?.status);
@@ -409,6 +424,8 @@ const RegistrationPage: React.FC = () => {
           />
         );
       case 3:
+        return <RegistrationCodeInput onCodeVerified={handleCodeVerified} />;
+      case 4:
         return <ReviewStep formData={formData} />;
       default:
         return null;
@@ -432,201 +449,200 @@ const RegistrationPage: React.FC = () => {
     <Box
       sx={{
         minHeight: '100vh',
-        height: '100vh',
-        backgroundColor: '#f8f9fa',
+        backgroundColor: alpha(theme.palette.primary.main, 0.02),
         display: 'flex',
-        overflow: 'hidden',
+        flexDirection: 'column',
+        py: { xs: 2, md: 4 },
       }}
     >
-      {/* Left Side - Image Slider (55%) */}
+      {/* Header Section */}
       <Box
         sx={{
-          width: { xs: '0%', lg: '55%' },
-          height: '100vh',
-          display: { xs: 'none', lg: 'block' },
+          backgroundColor: 'background.paper',
+          borderBottom: '1px solid',
+          borderColor: 'divider',
+          py: 3,
+          mb: 3,
         }}
       >
-        <ImageSlider />
-      </Box>
-
-      {/* Right Side - Registration Form (45%) */}
-      <Box
-        sx={{
-          width: { xs: '100%', lg: '45%' },
-          height: '100vh',
-          overflow: 'auto',
-          backgroundColor: '#ffffff',
-          display: 'flex',
-          flexDirection: 'column',
-        }}
-      >
-        {/* Hero Section */}
-        <Box
-          sx={{
-            backgroundColor: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)',
-            borderBottom: '1px solid',
-            borderColor: 'divider',
-            position: 'relative',
-            overflow: 'hidden',
-            color: 'text.primary',
-            minHeight: { xs: '20vh', lg: '22vh' },
-          }}
-        >
-
-          <Container maxWidth="xl" sx={{ position: 'relative', zIndex: 2 }}>
-            <Box
+        <Container maxWidth="lg">
+          <Box
+            sx={{
+              position: 'relative',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: 2,
+            }}
+          >
+            {/* Home Button - Absolute positioned on desktop */}
+            <Button
+              variant="outlined"
+              startIcon={<Home />}
+              onClick={() => navigate('/')}
               sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
-                alignItems: 'center',
-                gap: 2,
-                py: 4,
-                px: 3,
+                position: 'absolute',
+                right: 0,
+                top: 0,
+                borderRadius: 2,
+                textTransform: 'none',
+                fontWeight: 600,
+                display: { xs: 'none', sm: 'flex' },
+              }}
+            >
+              Home
+            </Button>
+
+            {/* Centered Content */}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <DinoLogo size={40} animated={true} />
+              <Typography
+                variant="h4"
+                component="h1"
+                fontWeight="700"
+                sx={{
+                  fontSize: { xs: '1.5rem', sm: '2rem' },
+                  color: 'text.primary',
+                }}
+              >
+                Create Your Workspace
+              </Typography>
+            </Box>
+            
+            <Typography
+              variant="body1"
+              sx={{
+                fontSize: { xs: '0.9rem', sm: '1rem' },
+                color: 'text.secondary',
                 textAlign: 'center',
               }}
             >
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                <DinoLogo size={40} animated={true} sx={{ mr: 2 }} />
-                <Typography
-                  variant="h4"
-                  component="h1"
-                  fontWeight="600"
-                  sx={{
-                    fontSize: { xs: '1.5rem', sm: '2rem' },
-                    letterSpacing: '-0.01em',
-                    lineHeight: 1.2,
-                    color: 'text.primary',
-                  }}
-                >
-                  Create Your Dino Workspace
-                </Typography>
-              </Box>
-              
-              <Typography
-                variant="h6"
-                sx={{
-                  fontSize: { xs: '0.9rem', sm: '1rem' },
-                  fontWeight: 400,
-                  maxWidth: '400px',
-                  color: 'text.secondary',
-                }}
-              >
-                Set up your complete restaurant management workspace
-              </Typography>
+              Set up your complete restaurant management workspace
+            </Typography>
 
+            {/* Code Verified Badge */}
+            {codeVerified && (
               <Box
                 sx={{
                   display: 'inline-flex',
                   alignItems: 'center',
-                  backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                  backdropFilter: 'blur(10px)',
+                  backgroundColor: alpha(theme.palette.success.main, 0.1),
                   px: 2,
-                  py: 1,
+                  py: 0.5,
                   borderRadius: 2,
-                  border: '1px solid rgba(0, 0, 0, 0.1)',
-                  mt: 1,
+                  border: '1px solid',
+                  borderColor: alpha(theme.palette.success.main, 0.3),
                 }}
               >
-                <Business sx={{ fontSize: 16, mr: 1, color: 'primary.main', opacity: 0.9 }} />
-                <Typography variant="body2" fontWeight="500" color="text.primary">
-                  Complete Restaurant Setup
+                <CheckCircle sx={{ fontSize: 16, mr: 1, color: 'success.main' }} />
+                <Typography variant="caption" fontWeight="600" color="success.main">
+                  Code Verified
                 </Typography>
               </Box>
-            </Box>
-          </Container>
-        </Box>
-
-        {/* Form Content */}
-        <Box sx={{ flex: 1, p: { xs: 2, md: 3, lg: 4 } }}>
-          <Paper
-            elevation={12}
-            sx={{
-              p: { xs: 3, md: 4, lg: 5 },
-              borderRadius: { xs: 2, md: 3, lg: 4 },
-              backgroundColor: 'background.paper',
-              border: '1px solid',
-              borderColor: 'divider',
-              boxShadow: '0 12px 48px rgba(0, 0, 0, 0.15)',
-              maxWidth: '100%',
-            }}
-          >
-            {/* Form Header */}
-            <Box sx={{ textAlign: 'center', mb: 3 }}>
-              <Typography
-                variant="h5"
-                component="h2"
-                fontWeight="600"
-                sx={{
-                  fontSize: { xs: '1.25rem', sm: '1.5rem' },
-                  color: 'text.primary',
-                  mb: 1,
-                }}
-              >
-                Workspace Registration
-              </Typography>
-              <Typography
-                variant="body1"
-                sx={{
-                  fontSize: { xs: '0.875rem', sm: '1rem' },
-                  color: 'text.secondary',
-                }}
-              >
-                Complete the setup process to create your restaurant workspace
-              </Typography>
-            </Box>
-
-            {/* Stepper */}
-            <Box sx={{ mb: 3 }}>
-              <Stepper 
-                activeStep={activeStep} 
-                connector={<ResponsiveStepConnector />}
-                alternativeLabel={!isMobile}
-                orientation={isMobile ? "horizontal" : "horizontal"}
-              >
-                {steps.map((label, index) => (
-                  <Step key={label}>
-                    <ResponsiveStepLabel>
-                      {isMobile ? '' : label}
-                    </ResponsiveStepLabel>
-                  </Step>
-                ))}
-              </Stepper>
-              {isMobile && (
-                <Typography 
-                  variant="caption" 
-                  align="center" 
-                  display="block" 
-                  sx={{ 
-                    mt: 2, 
-                    color: 'text.secondary',
-                    fontSize: '0.75rem',
-                    fontWeight: 500
-                  }}
-                >
-                  Step {activeStep + 1} of {steps.length}: {steps[activeStep]}
-                </Typography>
-              )}
-            </Box>
-
-            {error && (
-              <Alert severity="error" sx={{ mb: 3 }}>
-                {error}
-              </Alert>
             )}
+          </Box>
+        </Container>
+      </Box>
 
-            <Box sx={{ mb: 3 }}>
-              {renderStepContent(activeStep)}
-            </Box>
+      {/* Form Content */}
+      <Container maxWidth="md" sx={{ flex: 1 }}>
+        <Paper
+          elevation={12}
+          sx={{
+            p: { xs: 3, md: 4, lg: 5 },
+            borderRadius: 3,
+            backgroundColor: 'background.paper',
+            border: '1px solid',
+            borderColor: 'divider',
+            boxShadow: '0 12px 48px rgba(0, 0, 0, 0.1)',
+          }}
+        >
+          {/* Stepper */}
+          <Box sx={{ mb: 4 }}>
+            <Stepper 
+              activeStep={activeStep} 
+              connector={<ResponsiveStepConnector />}
+              alternativeLabel={!isMobile}
+              orientation={isMobile ? "horizontal" : "horizontal"}
+            >
+              {steps.map((label, index) => (
+                <Step key={label}>
+                  <ResponsiveStepLabel>
+                    {isMobile ? '' : label}
+                  </ResponsiveStepLabel>
+                </Step>
+              ))}
+            </Stepper>
+            {isMobile && (
+              <Typography 
+                variant="caption" 
+                align="center" 
+                display="block" 
+                sx={{ 
+                  mt: 2, 
+                  color: 'text.secondary',
+                  fontSize: '0.75rem',
+                  fontWeight: 500
+                }}
+              >
+                Step {activeStep + 1} of {steps.length}: {steps[activeStep]}
+              </Typography>
+            )}
+          </Box>
 
-            <Divider sx={{ my: 3 }} />
+          {error && (
+            <Alert severity="error" sx={{ mb: 3 }}>
+              {error}
+            </Alert>
+          )}
 
-            {/* Navigation */}
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2 }}>
+          <Box sx={{ mb: 3 }}>
+            {renderStepContent(activeStep)}
+          </Box>
+
+          <Divider sx={{ my: 3 }} />
+
+          {/* Navigation */}
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2 }}>
+            <Button
+              disabled={activeStep === 0}
+              onClick={handleBack}
+              variant="outlined"
+              size="large"
+              sx={{ 
+                minWidth: 100,
+                py: 1.5,
+                borderRadius: 2,
+                fontWeight: 600,
+                textTransform: 'none',
+              }}
+            >
+              Back
+            </Button>
+
+            {activeStep === steps.length - 1 ? (
               <Button
-                disabled={activeStep === 0}
-                onClick={handleBack}
-                variant="outlined"
+                variant="contained"
+                onClick={handleSubmit}
+                disabled={loading || !codeVerified}
+                startIcon={loading ? <CircularProgress size={20} /> : null}
+                size="large"
+                sx={{ 
+                  minWidth: 160,
+                  py: 1.5,
+                  borderRadius: 2,
+                  fontWeight: 600,
+                  textTransform: 'none',
+                  fontSize: '1rem',
+                }}
+              >
+                {loading ? 'Creating...' : 'Create Workspace'}
+              </Button>
+            ) : (
+              <Button
+                variant="contained"
+                onClick={handleNext}
+                disabled={activeStep === 3 && !codeVerified}
                 size="large"
                 sx={{ 
                   minWidth: 100,
@@ -634,72 +650,55 @@ const RegistrationPage: React.FC = () => {
                   borderRadius: 2,
                   fontWeight: 600,
                   textTransform: 'none',
+                  fontSize: '1rem',
                 }}
               >
-                Back
+                Next
               </Button>
+            )}
+          </Box>
 
-              {activeStep === steps.length - 1 ? (
-                <Button
-                  variant="contained"
-                  onClick={handleSubmit}
-                  disabled={loading}
-                  startIcon={loading ? <CircularProgress size={20} /> : null}
-                  size="large"
-                  sx={{ 
-                    minWidth: 160,
-                    py: 1.5,
-                    borderRadius: 2,
-                    fontWeight: 600,
-                    textTransform: 'none',
-                    fontSize: '1rem',
-                  }}
-                >
-                  {loading ? 'Creating...' : 'Create Workspace'}
-                </Button>
-              ) : (
-                <Button
-                  variant="contained"
-                  onClick={handleNext}
-                  size="large"
-                  sx={{ 
-                    minWidth: 100,
-                    py: 1.5,
-                    borderRadius: 2,
-                    fontWeight: 600,
-                    textTransform: 'none',
-                    fontSize: '1rem',
-                  }}
-                >
-                  Next
-                </Button>
-              )}
-            </Box>
-
-            {/* Login Link */}
-            <Box sx={{ mt: 3, textAlign: 'center' }}>
-              <Typography 
-                variant="body2" 
-                color="text.secondary"
-                sx={{ fontSize: '0.875rem' }}
+          {/* Login Link */}
+          <Box sx={{ mt: 3, textAlign: 'center' }}>
+            <Typography 
+              variant="body2" 
+              color="text.secondary"
+              sx={{ fontSize: '0.875rem' }}
+            >
+              Already have an account?{' '}
+              <Button 
+                variant="text" 
+                onClick={() => navigate('/login')}
+                size="small"
+                sx={{
+                  fontSize: '0.875rem',
+                  textTransform: 'none',
+                  fontWeight: 600,
+                }}
               >
-                Already have an account?{' '}
-                <Button 
-                  variant="text" 
-                  onClick={() => navigate('/login')}
-                  size="small"
-                  sx={{
-                    fontSize: '0.875rem',
-                    textTransform: 'none'
-                  }}
-                >
-                  Sign In
-                </Button>
-              </Typography>
-            </Box>
-          </Paper>
-        </Box>
-      </Box>
+                Sign In
+              </Button>
+            </Typography>
+          </Box>
+
+          {/* Home Link - Mobile Only */}
+          <Box sx={{ mt: 2, textAlign: 'center', display: { xs: 'block', sm: 'none' } }}>
+            <Button
+              variant="text"
+              startIcon={<Home />}
+              onClick={() => navigate('/')}
+              size="small"
+              sx={{
+                fontSize: '0.875rem',
+                textTransform: 'none',
+                fontWeight: 600,
+              }}
+            >
+              Back to Home
+            </Button>
+          </Box>
+        </Paper>
+      </Container>
     </Box>
   );
 };

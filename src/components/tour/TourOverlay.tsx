@@ -130,11 +130,7 @@ const TourOverlay: React.FC<TourOverlayProps> = ({ className }) => {
             inline: 'center',
           });
         }, 100);
-      } else {
-        console.warn(`🚫 Tour target element not found: ${currentStepData.target}`);
-        console.log('🔍 Available elements with data-tour attributes:', 
-          Array.from(document.querySelectorAll('[data-tour]')).map(el => el.getAttribute('data-tour')));
-      }
+      } else {      }
     };
 
     // Initial position update with delay to ensure DOM is ready
@@ -187,21 +183,8 @@ const TourOverlay: React.FC<TourOverlayProps> = ({ className }) => {
   }, [isActive, currentStep, nextStep, previousStep, skipTour, completeTour, isLastStep]);
 
   // Don't render if tour is not active or missing data
-  console.log('🎭 TourOverlay render check:', {
-    isActive,
-    hasCurrentStepData: !!currentStepData,
-    currentStep,
-    totalSteps: steps.length,
-    currentStepData
-  });
-
-  if (!isActive || !currentStepData) {
-    console.log('🚫 TourOverlay not rendering:', { isActive, hasCurrentStepData: !!currentStepData });
-    return null;
+  if (!isActive || !currentStepData) {    return null;
   }
-
-  console.log('✅ TourOverlay rendering with step:', currentStepData.title);
-
   const overlayContent = (
     <Box 
       className={className}

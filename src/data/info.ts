@@ -12,7 +12,11 @@ import {
   Restaurant,
   ShoppingCart,
   ThumbUp,
-  CloudDone
+  CloudDone,
+  Home,
+  Star,
+  Reviews,
+  ContactMail
 } from '@mui/icons-material';
 
 // ===================================================================
@@ -532,10 +536,10 @@ export const NAVIGATION = {
   
   // Home page navigation sections
   home: [
-    { id: 'hero', label: 'Home', icon: 'Home' },
-    { id: 'features', label: 'Features', icon: 'Star' },
-    { id: 'testimonials', label: 'Reviews', icon: 'Reviews' },
-    { id: 'contact', label: 'Contact', icon: 'ContactMail' },
+    { id: 'hero', label: 'Home', icon: Home },
+    { id: 'features', label: 'Features', icon: Star },
+    { id: 'testimonials', label: 'Reviews', icon: Reviews },
+    { id: 'contact', label: 'Contact', icon: ContactMail },
   ],
   
   // Footer navigation
@@ -642,4 +646,3 @@ export const TESTIMONIAL_STATS = {
   SATISFACTION: '99%',
   UPTIME: '99.9%',
 } as const;
-

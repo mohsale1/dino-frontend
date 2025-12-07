@@ -38,7 +38,6 @@ import Sidebar from '../layout/Sidebar';
 // import DinoLogo from './DinoLogo'; // Unused
 import { getUserFirstName } from '../../utils/userUtils';
 
-
 interface LayoutProps {
   children: ReactNode;
 }
@@ -212,8 +211,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         const hasPermissionResult = hasPermission(item.permission);
         return hasPermissionResult;
       });
-      
-
 
       return (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }} data-tour="sidebar-navigation">
@@ -362,7 +359,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', minHeight: '100vh', margin: 0, padding: 0, width: '100%', maxWidth: '100%', overflow: 'hidden' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: isAdminRoute ? '100vh' : 'auto', minHeight: '100vh', margin: 0, padding: 0, width: '100%', maxWidth: '100%', overflow: isAdminRoute ? 'hidden' : 'visible' }}>
       {/* Enhanced AppHeader - Hidden for customer facing pages and mobile admin routes */}
       {!isCustomerFacingRoute && !(isAdminRoute && isMobile) && (
         <AppHeader />
@@ -375,8 +372,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           {!isMobile && (
             <Sidebar isTablet={isTablet} />
           )}
-
-
 
           {/* Main Content */}
           <Box
@@ -534,7 +529,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             flexGrow: 1,
             backgroundColor: 'background.default',
             minHeight: '100vh',
-            pt: isCustomerFacingRoute ? 0 : { xs: 8, sm: 9 }, // Responsive top padding for sticky navbar
+            pt: isCustomerFacingRoute ? 0 : 0, // No padding - AppHeader is fixed and content handles its own spacing
             transition: 'padding-top 0.3s ease-in-out',
             // Smooth scrolling
             scrollBehavior: 'smooth',

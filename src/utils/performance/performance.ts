@@ -2,8 +2,6 @@
  * Performance monitoring and optimization utilities
  */
 
-import { logger } from '../logger';
-
 // Performance metrics collection
 export class PerformanceMonitor {
   private static instance: PerformanceMonitor;
@@ -82,9 +80,7 @@ export class PerformanceMonitor {
       fidObserver.observe({ entryTypes: ['first-input'] });
       this.observers.push(fidObserver);
 
-    } catch (error) {
-      logger.warn('Failed to initialize performance observers:', error);
-    }
+    } catch (error) {    }
   }
 
   private recordNavigationMetrics(entry: PerformanceNavigationTiming): void {
@@ -113,9 +109,7 @@ export class PerformanceMonitor {
     this.recordMetric(`resource-${resourceType}`, duration);
     
     // Track slow resources
-    if (duration > 1000) {
-      logger.warn(`Slow resource loading: ${entry.name} (${duration}ms)`);
-    }
+    if (duration > 1000) {    }
   }
 
   private recordPaintMetrics(entry: PerformanceEntry): void {
@@ -182,12 +176,8 @@ export const analyzeBundleSize = (): void => {
       const response = await fetch(url!, { method: 'HEAD' });
       const size = response.headers.get('content-length');
       if (size) {
-        const sizeKB = parseInt(size) / 1024;
-        logger.info(`Resource size: ${url} (${sizeKB.toFixed(2)}KB)`);
-        
-        if (sizeKB > 500) {
-          logger.warn(`Large resource detected: ${url} (${sizeKB.toFixed(2)}KB)`);
-        }
+        const sizeKB = parseInt(size) / 1024;        
+        if (sizeKB > 500) {        }
       }
     } catch (error) {
       // Silently ignore CORS errors
@@ -207,13 +197,8 @@ export const monitorMemoryUsage = (): void => {
     total: Math.round(memory.totalJSHeapSize / 1048576), // MB
     limit: Math.round(memory.jsHeapSizeLimit / 1048576), // MB
   };
-
-  logger.info('Memory usage:', memoryInfo);
-
   // Warn if memory usage is high
-  if (memoryInfo.used > memoryInfo.limit * 0.8) {
-    logger.warn('High memory usage detected:', memoryInfo);
-  }
+  if (memoryInfo.used > memoryInfo.limit * 0.8) {  }
 };
 
 // Debounce utility for performance optimization
@@ -263,9 +248,7 @@ export const initializePerformanceMonitoring = (): void => {
     // Log performance metrics every 30 seconds
     setInterval(() => {
       const metrics = monitor.getMetrics();
-      if (Object.keys(metrics).length > 0) {
-        logger.info('Performance metrics:', metrics);
-      }
+      if (Object.keys(metrics).length > 0) {      }
     }, 30000);
 
     // Monitor memory usage every minute

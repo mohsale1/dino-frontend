@@ -21,7 +21,6 @@ const TemplateCategoryFilter: React.FC<TemplateCategoryFilterProps> = ({
   selectedCategory = 'All',
 }) => {
 
-
   // Category icons mapping
   const categoryIcons: Record<string, React.ReactElement> = {
     All: <Fastfood sx={{ fontSize: 16 }} />,

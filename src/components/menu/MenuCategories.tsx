@@ -1,7 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Box,
-  Grid,
   Typography,
   IconButton,
   Stack,
@@ -9,11 +8,14 @@ import {
   useTheme,
   Button,
   alpha,
+  Tooltip,
+  Badge,
 } from '@mui/material';
 import { 
   Edit, 
   Delete, 
-  Category, 
+  Category,
+  Add,
 } from '@mui/icons-material';
 
 interface MenuCategoriesProps {
@@ -22,6 +24,8 @@ interface MenuCategoriesProps {
   onEditCategory: (category: any) => void;
   onDeleteCategory: (categoryId: string) => void;
   onAddCategory: () => void;
+  selectedCategory?: string;
+  onCategoryClick?: (categoryId: string) => void;
 }
 
 const MenuCategories: React.FC<MenuCategoriesProps> = ({
@@ -29,64 +33,66 @@ const MenuCategories: React.FC<MenuCategoriesProps> = ({
   menuItems,
   onEditCategory,
   onDeleteCategory,
-  onAddCategory
+  onAddCategory,
+  selectedCategory,
+  onCategoryClick
 }) => {
   const theme = useTheme();
+  const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
+
+  const getCategoryItemCount = (categoryId: string) => {
+    return menuItems.filter(item => item.category === categoryId).length;
+  };
 
   return (
     <Box sx={{ 
-      py: { xs: 4, sm: 5 }, 
-      px: { xs: 3, sm: 4 },
+      py: { xs: 2, sm: 2.5 }, 
+      px: { xs: 2, sm: 2.5 },
       backgroundColor: 'background.paper', 
-      borderRadius: 3, 
+      borderRadius: 2.5, 
       border: '1px solid', 
       borderColor: 'grey.100',
-      boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-      mb: { xs: 3, sm: 4 }
+      boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
+      mb: { xs: 2.5, sm: 3 }
     }}>
-      {/* Header with Add Category button on top right */}
+      {/* Header */}
       <Box sx={{ 
         display: 'flex', 
         justifyContent: 'space-between', 
         alignItems: 'center',
-        mb: 4
+        mb: 2
       }}>
         {/* Left side - Categories title */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <Category sx={{ color: 'primary.main', fontSize: 28 }} />
-          <Box>
-            <Typography variant="h5" fontWeight="700" color="text.primary">
-              Menu Categories ({categories.length})
-            </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.9rem', mt: 0.5 }}>
-              Organize your menu items into categories
-            </Typography>
-          </Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Category sx={{ color: 'primary.main', fontSize: 20 }} />
+          <Typography variant="subtitle1" fontWeight="700" color="text.primary" sx={{ fontSize: '0.95rem' }}>
+            Categories ({categories.length})
+          </Typography>
         </Box>
 
         {/* Right side - Add Category Button */}
         <Button
-          variant="contained"
-          startIcon={<Category />}
+          variant="outlined"
+          size="small"
+          startIcon={<Add sx={{ fontSize: 18 }} />}
           onClick={onAddCategory}
           sx={{ 
-            borderRadius: 2,
-            px: 3,
-            py: 1.5,
+            borderRadius: 1.5,
+            px: 1.5,
+            py: 0.5,
             fontWeight: 600,
-            fontSize: '0.875rem',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+            fontSize: '0.75rem',
+            textTransform: 'none',
             '&:hover': {
-              boxShadow: '0 6px 20px rgba(0,0,0,0.2)',
               transform: 'translateY(-1px)',
             }
           }}
         >
-          Add Category
+          Add
         </Button>
       </Box>
       
-      {/* Categories Grid with enhanced spacing */}
+      {/* Categories as Chips/Buttons */}
       {categories.length === 0 ? (
         // Empty state when no categories
         <Box sx={{
@@ -94,147 +100,189 @@ const MenuCategories: React.FC<MenuCategoriesProps> = ({
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          py: 6,
+          py: 4,
           textAlign: 'center'
         }}>
           <Category sx={{ 
-            fontSize: 64, 
+            fontSize: 48, 
             color: 'text.disabled', 
-            mb: 2 
+            mb: 1.5 
           }} />
-          <Typography variant="h6" color="text.secondary" gutterBottom>
-            No Menu Categories Yet
+          <Typography variant="body2" color="text.secondary" gutterBottom sx={{ fontSize: '0.85rem' }}>
+            No categories yet
           </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 3, maxWidth: 400 }}>
-            Create your first menu category to organize your dishes. Categories help customers navigate your menu more easily.
+          <Typography variant="caption" color="text.secondary" sx={{ mb: 2, maxWidth: 300 }}>
+            Create categories to organize your menu items
           </Typography>
           <Button
-            variant="outlined"
-            startIcon={<Category />}
+            variant="text"
+            size="small"
+            startIcon={<Add />}
             onClick={onAddCategory}
             sx={{ 
-              borderRadius: 2,
-              px: 4,
-              py: 1.5,
-              fontWeight: 600,
-              fontSize: '0.875rem',
+              fontSize: '0.75rem',
+              textTransform: 'none'
             }}
           >
             Create First Category
           </Button>
         </Box>
       ) : (
-        <Grid container spacing={{ xs: 3, sm: 4 }}>
-          {categories.map(category => (
-          <Grid item xs={12} sm={6} md={4} lg={3} key={category.id}>
-            <Box 
-              sx={{ 
-                backgroundColor: alpha(theme.palette.grey[50], 0.8),
-                border: '1px solid', 
-                borderColor: 'grey.200',
-                borderRadius: 3,
-                borderLeft: `5px solid ${theme.palette.primary.main}`,
-                p: { xs: 3, sm: 3.5 },
-                transition: 'all 0.3s ease-in-out',
-                '&:hover': { 
-                  borderColor: 'primary.main',
-                  boxShadow: '0 8px 25px rgba(0, 0, 0, 0.12)',
-                  transform: 'translateY(-4px)',
-                  backgroundColor: 'background.paper'
-                },
-                height: '100%',
-                minHeight: 140
-              }}
-            >
-              <Stack 
-                direction="row"
-                justifyContent="space-between" 
-                alignItems="flex-start"
-                spacing={1.5}
-                sx={{ height: '100%' }}
+        <Box sx={{ 
+          display: 'flex', 
+          flexWrap: 'wrap', 
+          gap: 1.5,
+          alignItems: 'center'
+        }}>
+          {categories.map(category => {
+            const itemCount = getCategoryItemCount(category.id);
+            const isHovered = hoveredCategory === category.id;
+            const isSelected = selectedCategory === category.id;
+            
+            return (
+              <Tooltip 
+                key={category.id}
+                title={category.description || ''}
+                placement="top"
+                arrow
+                enterDelay={500}
               >
-                <Box sx={{ flex: 1, minWidth: 0 }}>
-                  <Typography 
-                    variant="h6" 
-                    fontWeight="700" 
-                    color="text.primary"
-                    sx={{ 
-                      mb: 1.5, 
-                      fontSize: '1.1rem',
-                      lineHeight: 1.2,
-                      display: '-webkit-box',
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: 'vertical',
-                      overflow: 'hidden',
-                    }}
-                  >
-                    {category.name}
-                  </Typography>
-                  {category.description && (
-                    <Typography 
-                      variant="body2" 
-                      color="text.secondary"
-                      sx={{ 
-                        display: '-webkit-box',
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: 'vertical',
-                        overflow: 'hidden',
-                        mb: 2,
-                        lineHeight: 1.4,
-                        fontSize: '0.85rem'
-                      }}
-                    >
-                      {category.description}
-                    </Typography>
-                  )}
+                <Box
+                  onMouseEnter={() => setHoveredCategory(category.id)}
+                  onMouseLeave={() => setHoveredCategory(null)}
+                  sx={{ position: 'relative' }}
+                >
                   <Chip
-                    label={`${menuItems.filter(item => item.category === category.id).length} items`}
-                    size="small"
-                    variant="filled"
-                    color="primary"
-                    sx={{ 
-                      fontSize: '0.75rem',
-                      height: 24,
-                      fontWeight: 600,
-                      '& .MuiChip-label': { px: 1.5 }
+                  label={
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Typography 
+                        variant="body2" 
+                        sx={{ 
+                          fontWeight: 600,
+                          fontSize: '0.875rem',
+                          color: isSelected ? 'primary.contrastText' : 'text.primary',
+                          whiteSpace: 'nowrap'
+                        }}
+                      >
+                        {category.name}
+                      </Typography>
+                      <Badge 
+                        badgeContent={itemCount} 
+                        color={isSelected ? "default" : "primary"}
+                        sx={{
+                          '& .MuiBadge-badge': {
+                            fontSize: '0.7rem',
+                            height: 18,
+                            minWidth: 18,
+                            padding: '0 5px',
+                            fontWeight: 700,
+                            backgroundColor: isSelected ? alpha(theme.palette.common.white, 0.9) : undefined,
+                            color: isSelected ? theme.palette.primary.main : undefined,
+                          }
+                        }}
+                      >
+                        <Box sx={{ width: 4 }} />
+                      </Badge>
+                    </Box>
+                  }
+                  onClick={() => onCategoryClick?.(category.id)}
+                  variant={isSelected ? "filled" : "outlined"}
+                  color={isSelected ? "primary" : "default"}
+                  sx={{
+                    height: 38,
+                    borderRadius: 2.5,
+                    cursor: onCategoryClick ? 'pointer' : 'default',
+                    transition: 'all 0.2s ease',
+                    borderColor: isSelected ? 'primary.main' : 'grey.300',
+                    borderWidth: '1.5px',
+                    backgroundColor: isSelected 
+                      ? 'primary.main' 
+                      : isHovered 
+                        ? alpha(theme.palette.primary.main, 0.08) 
+                        : 'transparent',
+                    '&:hover': onCategoryClick ? {
+                      borderColor: 'primary.main',
+                      transform: 'translateY(-1px)',
+                      boxShadow: `0 3px 10px ${alpha(theme.palette.primary.main, 0.25)}`,
+                    } : {},
+                    '& .MuiChip-label': {
+                      px: 2,
+                      py: 0.75,
+                    }
+                  }}
+                />
+                
+                {/* Action buttons on hover */}
+                {isHovered && (
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      top: -10,
+                      right: -10,
+                      display: 'flex',
+                      gap: 0.75,
+                      zIndex: 10,
                     }}
-                  />
+                  >
+                    <Tooltip title="Edit" placement="top">
+                      <IconButton
+                        size="small"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onEditCategory(category);
+                        }}
+                        sx={{
+                          width: 28,
+                          height: 28,
+                          backgroundColor: 'background.paper',
+                          border: '1.5px solid',
+                          borderColor: 'grey.300',
+                          boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
+                          '&:hover': {
+                            backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                            borderColor: 'primary.main',
+                            color: 'primary.main',
+                            transform: 'scale(1.1)',
+                          },
+                          transition: 'all 0.2s ease'
+                        }}
+                      >
+                        <Edit sx={{ fontSize: 15 }} />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Delete" placement="top">
+                      <IconButton
+                        size="small"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onDeleteCategory(category.id);
+                        }}
+                        sx={{
+                          width: 28,
+                          height: 28,
+                          backgroundColor: 'background.paper',
+                          border: '1.5px solid',
+                          borderColor: 'grey.300',
+                          boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
+                          '&:hover': {
+                            backgroundColor: alpha(theme.palette.error.main, 0.1),
+                            borderColor: 'error.main',
+                            color: 'error.main',
+                            transform: 'scale(1.1)',
+                          },
+                          transition: 'all 0.2s ease'
+                        }}
+                      >
+                        <Delete sx={{ fontSize: 15 }} />
+                      </IconButton>
+                    </Tooltip>
+                  </Box>
+                )}
                 </Box>
-                <Stack direction="column" spacing={0.5}>
-                  <IconButton 
-                    size="small" 
-                    onClick={() => onEditCategory(category)}
-                    sx={{ 
-                      color: 'text.secondary',
-                      backgroundColor: alpha(theme.palette.grey[100], 0.8),
-                      '&:hover': { 
-                        backgroundColor: alpha(theme.palette.primary.main, 0.1),
-                        color: 'primary.main'
-                      }
-                    }}
-                  >
-                    <Edit fontSize="small" />
-                  </IconButton>
-                  <IconButton 
-                    size="small" 
-                    onClick={() => onDeleteCategory(category.id)}
-                    sx={{ 
-                      color: 'text.secondary',
-                      backgroundColor: alpha(theme.palette.grey[100], 0.8),
-                      '&:hover': { 
-                        backgroundColor: alpha(theme.palette.error.main, 0.1),
-                        color: 'error.main'
-                      }
-                    }}
-                  >
-                    <Delete fontSize="small" />
-                  </IconButton>
-                </Stack>
-              </Stack>
-            </Box>
-          </Grid>
-          ))}
-        </Grid>
+              </Tooltip>
+            );
+          })}
+        </Box>
       )}
     </Box>
   );

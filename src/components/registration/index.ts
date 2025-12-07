@@ -1,5 +1,5 @@
 // Registration Components Barrel Export
-export { default as ImageSlider } from './ImageSlider';
+export { default as RegistrationCodeInput } from './RegistrationCodeInput';
 export { default as WorkspaceDetailsStep } from './WorkspaceDetailsStep';
 export { default as VenueInformationStep } from './VenueInformationStep';
 export { default as OwnerAccountStep } from './OwnerAccountStep';

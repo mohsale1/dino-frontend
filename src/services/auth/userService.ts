@@ -77,21 +77,14 @@ class UserService {
    * This API is specifically designed for the Users module in admin dashboard
    */
   async getUsersByVenueId(venueId: string): Promise<ApiResponse<VenueUser[]>> {
-    try {
-      console.log('📡 Making API call to get users by venue ID:', venueId);
-      
-      const response = await apiService.get<VenueUser[]>(`/venues/${venueId}/users`);
-      
-      console.log('✅ Users by venue ID API response:', response);
-      
+    try {      
+      const response = await apiService.get<VenueUser[]>(`/venues/${venueId}/users`);      
       return {
         success: true,
         data: response.data || [],
         message: 'Users loaded successfully'
       };
-    } catch (error: any) {
-      console.error('❌ Error fetching users by venue ID:', error);
-      
+    } catch (error: any) {      
       return {
         success: false,
         data: [],

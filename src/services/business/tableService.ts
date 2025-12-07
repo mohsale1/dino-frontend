@@ -1,6 +1,5 @@
 import { apiService } from '../../utils/api';
-import { 
-  Table, 
+import { Table, 
   TableCreate, 
   TableUpdate, 
   TableQRCode,
@@ -29,29 +28,14 @@ class TableService {
       if (filters?.table_status) params.append('table_status', filters.table_status);
       if (filters?.is_active !== undefined) params.append('is_active', filters.is_active.toString());
 
-      const response = await apiService.get<PaginatedResponse<Table>>(`/tables?${params.toString()}`);
-      
-      console.log('🔍 tableService.getTables() - Raw response:', response);
-      console.log('🔍 tableService.getTables() - Response.data:', response.data);
-      console.log('🔍 tableService.getTables() - Response structure:', {
-        hasSuccess: 'success' in response,
-        hasData: 'data' in response,
-        responseKeys: Object.keys(response),
-        dataType: typeof response.data,
-        isDataArray: Array.isArray(response.data)
-      });
-      
+      const response = await apiService.get<PaginatedResponse<Table>>(`/tables?${params.toString()}`);      
       // Handle different response structures from apiService
       if (response.data && typeof response.data === 'object') {
         // Case 1: response.data is already the PaginatedResponse
-        if ('data' in response.data && Array.isArray(response.data.data)) {
-          console.log('✅ Case 1: response.data is PaginatedResponse');
-          return response.data;
+        if ('data' in response.data && Array.isArray(response.data.data)) {          return response.data;
         }
         // Case 2: response.data is the array directly
-        else if (Array.isArray(response.data)) {
-          console.log('✅ Case 2: response.data is array, wrapping in PaginatedResponse');
-          return {
+        else if (Array.isArray(response.data)) {          return {
             success: true,
             data: response.data,
             total: response.data.length,
@@ -62,10 +46,7 @@ class TableService {
             has_prev: false
           };
         }
-      }
-      
-      console.log('⚠️ Fallback: Using empty PaginatedResponse');
-      return {
+      }      return {
         success: true,
         data: [],
         total: 0,
@@ -143,8 +124,25 @@ class TableService {
    */
   async updateTableStatus(tableId: string, newStatus: TableStatus): Promise<ApiResponse<void>> {
     try {
-      return await apiService.put<void>(`/tables/${tableId}/status?new_status=${newStatus}`);
+      console.log('TableService.updateTableStatus called with:', { tableId, newStatus });
+      const payload = { new_status: newStatus };
+      console.log('Sending payload:', payload);
+      
+      const response = await apiService.put<void>(
+        `/tables/${tableId}/status`, 
+        payload,
+        {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      console.log('Response:', response);
+      return response;
     } catch (error: any) {
+      console.error('TableService.updateTableStatus error:', error);
+      console.error('Error response:', error.response);
+      console.error('Error response data:', error.response?.data);
       throw new Error(error.response?.data?.detail || error.message || 'Failed to update table status');
     }
   }

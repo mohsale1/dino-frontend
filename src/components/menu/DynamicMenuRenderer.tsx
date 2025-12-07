@@ -291,8 +291,6 @@ const DynamicMenuRenderer: React.FC<DynamicMenuRendererProps> = ({
   );
 
   // Debug: Log items
-  console.log('🍽️ DynamicMenuRenderer - Items:', items.length, items);
-
   return (
     <Box
       sx={{

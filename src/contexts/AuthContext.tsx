@@ -122,8 +122,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     initializeAuth();
   }, []);
 
-
-
   const login = async (email: string, password: string): Promise<{ user: UserProfile }> => {
     try {
       setLoading(true);
@@ -131,9 +129,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // Ensure API configuration is up to date before login
       apiService.refreshConfiguration();
       
-      // Debug API configuration before login
-      console.log('window.APP_CONFIG:', (window as any).APP_CONFIG);
-      
+      // Debug API configuration before login      
       // Call debug method if available
       if (typeof apiService.debugConfiguration === 'function') {
         apiService.debugConfiguration();
@@ -491,32 +487,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const refreshPermissions = useCallback(async (): Promise<void> => {
     // Circuit breaker: prevent too frequent calls
     const now = Date.now();
-    if (now - lastRefreshAttempt.current < refreshCooldown) {
-      console.log('🚫 Permission refresh on cooldown, skipping...');
-      return;
+    if (now - lastRefreshAttempt.current < refreshCooldown) {      return;
     }
 
     // Prevent multiple simultaneous calls
-    if (refreshPermissionsRef.current) {
-      console.log('🔄 Permission refresh already in progress, waiting...');
-      return refreshPermissionsRef.current;
+    if (refreshPermissionsRef.current) {      return refreshPermissionsRef.current;
     }
 
     try {
-      lastRefreshAttempt.current = now;
-      console.log('🔄 Starting permission refresh...');
-      
+      lastRefreshAttempt.current = now;      
       refreshPermissionsRef.current = (async () => {
         const permissionsData = await authService.refreshUserPermissions();
         setUserPermissions(permissionsData);
-        StorageManager.setPermissions(permissionsData);
-        console.log('✅ Permission refresh completed');
-      })();
+        StorageManager.setPermissions(permissionsData);      })();
       
       await refreshPermissionsRef.current;
-    } catch (error) {
-      console.error('❌ Permission refresh failed:', error);
-      throw error;
+    } catch (error) {      throw error;
     } finally {
       refreshPermissionsRef.current = null;
     }
@@ -546,20 +532,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         if (user && !savedPermissions && !userPermissions) {
           const token = StorageManager.getItem(STORAGE_KEYS.TOKEN);
           if (token && typeof token === 'string' && !isTokenExpired(token)) {
-            try {
-              console.log('🔄 Fetching user permissions (no cache available)');
-              const permissionsData = await authService.getUserPermissions();
+            try {              const permissionsData = await authService.getUserPermissions();
               setUserPermissions(permissionsData);
               StorageManager.setPermissions(permissionsData);
-            } catch (error) {
-              console.warn('⚠️ Failed to fetch permissions:', error);
-              // Don't logout on permission fetch failure
+            } catch (error) {              // Don't logout on permission fetch failure
             }
           }
         }
-      } catch (error) {
-        console.warn('⚠️ Permission initialization error:', error);
-      }
+      } catch (error) {      }
     };
 
     if (!loading) {

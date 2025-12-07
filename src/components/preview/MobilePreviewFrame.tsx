@@ -65,8 +65,6 @@ const MobilePreviewFrame: React.FC<MobilePreviewFrameProps> = ({
   };
 
   // Debug: Log menu items
-  console.log('📱 MobilePreviewFrame - Menu Items:', menuItems.length, menuItems);
-
   return (
     <Box
       sx={{

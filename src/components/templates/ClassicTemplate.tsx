@@ -183,8 +183,6 @@ const ClassicTemplate: React.FC<TemplateProps> = ({
         </Box>
       )}
 
-
-
       {/* Decorative Elements */}
       <Box
         sx={{

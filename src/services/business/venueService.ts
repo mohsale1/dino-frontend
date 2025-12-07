@@ -1,6 +1,5 @@
 import { apiService } from '../../utils/api';
-import { 
-  Venue, 
+import { Venue, 
   VenueCreate, 
   VenueUpdate, 
   VenueAnalytics,
@@ -123,9 +122,7 @@ class VenueService {
       }
       
       return null;
-    } catch (error) {
-      console.error('Error fetching venue:', error);
-      return null;
+    } catch (error) {      return null;
     }
   }
 
@@ -133,26 +130,15 @@ class VenueService {
    * Get venues by workspace ID (Venus API) - SINGLE API CALL ONLY
    */
   async getVenuesByWorkspace(workspaceId: string): Promise<WorkspaceVenue[]> {
-    try {
-      console.log('🏢 VenueService: Making SINGLE API call to get venues for workspace:', workspaceId);
-      
+    try {      
       // PRIMARY API CALL: Try the specific workspace venues endpoint
       const response = await apiService.get<WorkspaceVenue[]>(`/venues/workspace/${workspaceId}/venues`);
       
-      if (response.success && response.data) {
-        console.log('✅ VenueService: Successfully fetched venues from workspace endpoint:', response.data.length);
-        return response.data;
-      }
-      
-      console.log('⚠️ VenueService: Workspace venues endpoint returned no data');
-      return [];
-    } catch (error) {
-      console.error('❌ VenueService: Error fetching workspace venues from primary endpoint:', error);
-      
+      if (response.success && response.data) {        return response.data;
+      }      return [];
+    } catch (error) {      
       // FALLBACK API CALL: Try getting all venues and filter by workspace
-      try {
-        console.log('🔄 VenueService: Trying fallback - getting all venues and filtering by workspace');
-        const allVenuesResponse = await this.getVenues({ page_size: 100 });
+      try {        const allVenuesResponse = await this.getVenues({ page_size: 100 });
         
         if (allVenuesResponse.success && allVenuesResponse.data) {
           // Filter venues by workspace_id and convert to WorkspaceVenue format
@@ -176,17 +162,9 @@ class VenueService {
               subscription_status: venue.subscription_status || 'active',
               created_at: venue.created_at,
               updated_at: venue.updated_at || venue.created_at
-            } as WorkspaceVenue));
-          
-          console.log('✅ VenueService: Fallback successful, found venues:', workspaceVenues.length);
-          return workspaceVenues;
+            } as WorkspaceVenue));          return workspaceVenues;
         }
-      } catch (fallbackError) {
-        console.error('❌ VenueService: Error in fallback venue fetching:', fallbackError);
-      }
-      
-      console.log('❌ VenueService: All venue fetching attempts failed, returning empty array');
-      return [];
+      } catch (fallbackError) {      }      return [];
     }
   }
 
@@ -205,34 +183,10 @@ class VenueService {
    * Update venue information
    */
   async updateVenue(venueId: string, venueData: VenueUpdate): Promise<ApiResponse<Venue>> {
-    try {
-      console.log('🔄 VenueService: Updating venue:', {
-        venueId,
-        updateData: venueData,
-        endpoint: `/venues/${venueId}`
-      });
-      
-      const response = await apiService.put<Venue>(`/venues/${venueId}`, venueData);
-      
-      console.log('✅ VenueService: Venue update response:', {
-        success: response.success,
-        venueData: response.data,
-        venueStatus: response.data ? {
-          is_active: response.data.is_active,
-          is_open: response.data.is_open,
-          status: response.data.status
-        } : null
-      });
-      
+    try {      
+      const response = await apiService.put<Venue>(`/venues/${venueId}`, venueData);      
       return response;
-    } catch (error: any) {
-      console.error('❌ VenueService: Error updating venue:', {
-        venueId,
-        updateData: venueData,
-        error: error.response?.data || error.message,
-        status: error.response?.status
-      });
-      throw new Error(error.response?.data?.detail || error.message || 'Failed to update venue');
+    } catch (error: any) {      throw new Error(error.response?.data?.detail || error.message || 'Failed to update venue');
     }
   }
 
@@ -271,50 +225,18 @@ class VenueService {
 
   /**
    * Open venue for orders
+   * @deprecated Use updateVenue with { is_open: true } instead
+   * This method is kept for backward compatibility but directly calls updateVenue
    */
-  async openVenue(venueId: string): Promise<ApiResponse<Venue>> {
-    try {
-      console.log('🔄 VenueService: Opening venue for orders:', venueId);
-      
-      // Try specific endpoint first
-      try {
-        const response = await apiService.post<Venue>(`/venues/${venueId}/open`);
-        console.log('✅ VenueService: Venue opened via specific endpoint');
-        return response;
-      } catch (specificError) {
-        console.log('⚠️ VenueService: Specific open endpoint not available, using update method');
-        
-        // Fallback to update method
-        return await this.updateVenue(venueId, { is_open: true });
-      }
-    } catch (error: any) {
-      console.error('❌ VenueService: Error opening venue:', error);
-      throw new Error(error.response?.data?.detail || error.message || 'Failed to open venue');
-    }
+  async openVenue(venueId: string): Promise<ApiResponse<Venue>> {    return await this.updateVenue(venueId, { is_open: true });
   }
 
   /**
    * Close venue for orders
+   * @deprecated Use updateVenue with { is_open: false } instead
+   * This method is kept for backward compatibility but directly calls updateVenue
    */
-  async closeVenue(venueId: string): Promise<ApiResponse<Venue>> {
-    try {
-      console.log('🔄 VenueService: Closing venue for orders:', venueId);
-      
-      // Try specific endpoint first
-      try {
-        const response = await apiService.post<Venue>(`/venues/${venueId}/close`);
-        console.log('✅ VenueService: Venue closed via specific endpoint');
-        return response;
-      } catch (specificError) {
-        console.log('⚠️ VenueService: Specific close endpoint not available, using update method');
-        
-        // Fallback to update method
-        return await this.updateVenue(venueId, { is_open: false });
-      }
-    } catch (error: any) {
-      console.error('❌ VenueService: Error closing venue:', error);
-      throw new Error(error.response?.data?.detail || error.message || 'Failed to close venue');
-    }
+  async closeVenue(venueId: string): Promise<ApiResponse<Venue>> {    return await this.updateVenue(venueId, { is_open: false });
   }
 
   /**
@@ -659,19 +581,12 @@ class VenueService {
    * Update venue menu template
    */
   async updateMenuTemplate(venueId: string, templateName: string, templateConfig?: any): Promise<ApiResponse<Venue>> {
-    try {
-      console.log('🎨 VenueService: Updating menu template:', { venueId, templateName, hasConfig: !!templateConfig });
-      
+    try {      
       const response = await this.updateVenue(venueId, { 
         menu_template: templateName,
         menu_template_config: templateConfig 
-      });
-      
-      console.log('✅ VenueService: Menu template updated successfully');
-      return response;
-    } catch (error: any) {
-      console.error('❌ VenueService: Error updating menu template:', error);
-      throw new Error(error.response?.data?.detail || error.message || 'Failed to update menu template');
+      });      return response;
+    } catch (error: any) {      throw new Error(error.response?.data?.detail || error.message || 'Failed to update menu template');
     }
   }
 
@@ -682,9 +597,7 @@ class VenueService {
     try {
       const venue = await this.getVenue(venueId);
       return venue?.menu_template || null;
-    } catch (error) {
-      console.error('Error fetching menu template:', error);
-      return null;
+    } catch (error) {      return null;
     }
   }
 }

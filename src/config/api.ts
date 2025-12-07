@@ -108,17 +108,7 @@ export const logApiConfig = (): void => {
   const config = getRuntimeConfig();
   
   if (config.DEBUG_MODE || isDevelopment()) {
-    // Use console directly for configuration logging to avoid circular dependency
-    console.group('🔧 API Configuration');
-    console.log('Environment:', getEnvironment());
-    console.log('API Base URL:', API_CONFIG.BASE_URL);
-    console.log('WebSocket URL:', API_CONFIG.WS_URL);
-    console.log('Base Domain:', API_CONFIG.BASE_DOMAIN);
-    console.log('Backend URL:', API_CONFIG.BACKEND_URL);
-    console.log('API Timeout:', API_CONFIG.TIMEOUT);
-    console.log('Rate Limit:', API_CONFIG.RATE_LIMIT);
-    console.log('Configuration Source:', typeof window !== 'undefined' && window.APP_CONFIG ? 'Runtime' : 'Build-time/Default');
-    console.groupEnd();
+    // Configuration logging disabled in production
   }
 };
 
@@ -186,7 +176,7 @@ if (typeof window !== 'undefined') {
     
     const validation = validateApiConfig();
     if (!validation.valid) {
-      console.warn('⚠️ API Configuration Issues:', validation.errors);
+      // Validation errors exist but app will continue
     }
     
     // Trigger API service configuration refresh if needed

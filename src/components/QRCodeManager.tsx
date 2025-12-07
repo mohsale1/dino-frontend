@@ -121,9 +121,7 @@ const QRCodeManager: React.FC<QRCodeManagerProps> = ({
       
       setPreviewQRCodes(newQrCodes);
       setCurrentPreviewIndex(0);
-    } catch (error) {
-      console.error('Error generating preview QR codes:', error);
-    } finally {
+    } catch (error) {    } finally {
       setPreviewLoading(false);
     }
   };
@@ -205,8 +203,6 @@ const QRCodeManager: React.FC<QRCodeManagerProps> = ({
     printWindow.print();
     printWindow.close();
   };
-
-
 
   // Removed bulk generation functions - simplified to preview-based approach
 
@@ -1978,8 +1974,6 @@ const QRCodeManager: React.FC<QRCodeManagerProps> = ({
   const currentPreviewQR = previewQRCodes[currentPreviewIndex];
   const currentSelectedTable = tables[currentPreviewIndex];
 
-
-
   return (
     <Dialog
       open={open}
@@ -2036,7 +2030,6 @@ const QRCodeManager: React.FC<QRCodeManagerProps> = ({
             <Grid item xs={12} lg={4}>
               <Stack spacing={{ xs: 2, sm: 3 }}>
 
-                
                 <Paper elevation={1} sx={{ p: { xs: 2, sm: 3 }, border: '1px solid', borderColor: 'divider' }}>
                   <Typography variant="h6" gutterBottom fontWeight="600" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <Settings /> Settings
@@ -2077,9 +2070,7 @@ const QRCodeManager: React.FC<QRCodeManagerProps> = ({
                         </Typography>
                       </Box>
                     </Box>
-                    
 
-                    
                     <FormControlLabel
                       control={
                         <Switch

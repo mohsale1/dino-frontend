@@ -12,6 +12,20 @@ import {
   Stack,
   IconButton,
   keyframes,
+  Paper,
+  Tabs,
+  Tab,
+  Badge,
+  Grid,
+  Card,
+  CardContent,
+  Chip,
+  alpha,
+  List,
+  ListItem,
+  Divider,
+  Avatar,
+  Tooltip,
 } from '@mui/material';
 import {
   Add,
@@ -20,6 +34,9 @@ import {
   Refresh,
   Store,
   CachedOutlined,
+  FilterList,
+  Edit,
+  Delete,
 } from '@mui/icons-material';
 import { menuService } from '../../services/business';
 import { useUserData } from '../../contexts/UserDataContext';
@@ -31,7 +48,6 @@ import { FlagGate } from '../../flags/FlagComponent';
 // Menu Components
 import MenuStats from '../../components/menu/MenuStats';
 import MenuFilters from '../../components/menu/MenuFilters';
-import MenuCategories from '../../components/menu/MenuCategories';
 import MenuItemsGrid from '../../components/menu/MenuItemsGrid';
 import MenuItemDialog from '../../components/menu/MenuItemDialog';
 import CategoryDialog from '../../components/menu/CategoryDialog';
@@ -80,6 +96,20 @@ interface CategoryType {
   updated_at?: string;
 }
 
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: number;
+  value: number;
+}
+
+const TabPanel: React.FC<TabPanelProps> = ({ children, value, index }) => {
+  return (
+    <div hidden={value !== index}>
+      {value === index && <Box sx={{ py: 3 }}>{children}</Box>}
+    </div>
+  );
+};
+
 const MenuManagement: React.FC = () => {
   const { getVenue, getVenueDisplayName, userData, loading: userDataLoading } = useUserData();
   const menuFlags = useMenuFlags();
@@ -100,6 +130,7 @@ const MenuManagement: React.FC = () => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [tabValue, setTabValue] = useState(0);
   
   // Delete confirmation modal state
   const [deleteModal, setDeleteModal] = useState({
@@ -120,7 +151,6 @@ const MenuManagement: React.FC = () => {
 
       const venue = getVenue();
       if (!venue?.id) {
-        // No venue - just keep empty data, don't show error
         setMenuItems([]);
         setCategories([]);
         setLoading(false);
@@ -161,8 +191,6 @@ const MenuManagement: React.FC = () => {
         setMenuItems(processedMenuItems);
         
       } catch (error) {
-        // API failed - show error alert but keep UI visible
-        console.error('Failed to load menu data:', error);
         setError('Network error. Please check your connection.');
       } finally {
         setLoading(false);
@@ -261,7 +289,6 @@ const MenuManagement: React.FC = () => {
   const handleSaveItem = async (itemData: any, imageFile?: File) => {
     try {
       if (editingItem) {
-        // Update existing item
         const updateData = {
           name: itemData.name,
           description: itemData.description,
@@ -295,7 +322,6 @@ const MenuManagement: React.FC = () => {
           throw new Error(response.message || 'Update failed');
         }
       } else {
-        // Create new item
         const venue = getVenue();
         if (!venue?.id) {
           throw new Error('No venue available');
@@ -326,7 +352,6 @@ const MenuManagement: React.FC = () => {
             image_urls: response.data!.image_urls || []
           } as MenuItemType;
 
-          // If there's an image file to upload, upload it now
           if (imageFile) {
             try {
               const uploadResponse = await menuService.uploadMenuItemImage(response.data!.id, imageFile);
@@ -341,7 +366,6 @@ const MenuManagement: React.FC = () => {
                 setSnackbar({ open: true, message: 'Menu item added, but image upload failed', severity: 'warning' });
               }
             } catch (uploadError) {
-              console.error('Image upload failed:', uploadError);
               setSnackbar({ open: true, message: 'Menu item added, but image upload failed', severity: 'warning' });
             }
           } else {
@@ -366,7 +390,6 @@ const MenuManagement: React.FC = () => {
   const handleSaveCategory = async (categoryData: any) => {
     try {
       if (editingCategory) {
-        // Update existing category
         const response = await menuService.updateMenuCategory(editingCategory.id, {
           name: categoryData.name,
           description: categoryData.description,
@@ -384,7 +407,6 @@ const MenuManagement: React.FC = () => {
         }
         setSnackbar({ open: true, message: 'Category updated successfully', severity: 'success' });
       } else {
-        // Create new category
         const venue = getVenue();
         if (!venue?.id) {
           throw new Error('No venue available');
@@ -560,8 +582,13 @@ const MenuManagement: React.FC = () => {
     }).format(amount);
   };
 
-  // Don't block UI with loading or error states
-  // Show page immediately with empty data if API fails
+  const getAvailableItems = () => {
+    return menuItems.filter(item => item.available ?? item.isAvailable);
+  };
+
+  const getUnavailableItems = () => {
+    return menuItems.filter(item => !(item.available ?? item.isAvailable));
+  };
 
   return (
     <Box
@@ -573,11 +600,6 @@ const MenuManagement: React.FC = () => {
         margin: 0,
         width: '100%',
         overflow: 'visible',
-        '& .MuiContainer-root': {
-          padding: '0 !important',
-          margin: '0 !important',
-          maxWidth: 'none !important',
-        },
       }}
     >
       {/* Hero Section */}
@@ -589,9 +611,6 @@ const MenuManagement: React.FC = () => {
           position: 'relative',
           overflow: 'hidden',
           color: 'text.primary',
-          padding: 0,
-          margin: 0,
-          width: '100%',
         }}
       >
         <AnimatedBackground />
@@ -636,7 +655,7 @@ const MenuManagement: React.FC = () => {
                   color: 'text.secondary',
                 }}
               >
-                Create and manage your restaurant's delicious menu offerings for {getVenueDisplayName()}
+                Manage your restaurant's menu items and categories for {getVenueDisplayName()}
               </Typography>
 
               <Box
@@ -658,7 +677,7 @@ const MenuManagement: React.FC = () => {
               </Box>
             </Box>
 
-            {/* Action Buttons - Only Refresh */}
+            {/* Action Buttons */}
             <Box
               sx={{
                 display: 'flex',
@@ -700,13 +719,7 @@ const MenuManagement: React.FC = () => {
       </Box>
 
       {/* Main Content */}
-      <Box
-        sx={{
-          width: '100%',
-          padding: 0,
-          margin: 0,
-        }}
-      >
+      <Box sx={{ width: '100%', padding: 0, margin: 0 }}>
         {/* Error Alert */}
         {error && (
           <Box sx={{ px: { xs: 3, sm: 4 }, pt: 3, pb: 1 }}>
@@ -719,48 +732,358 @@ const MenuManagement: React.FC = () => {
           </Box>
         )}
 
+        {/* Menu Statistics */}
         <FlagGate flag="menu.showMenuStats">
-          <Box sx={{ px: { xs: 3, sm: 4 }, py: 2 }}>
+          <Box sx={{ px: { xs: 3, sm: 4 }, py: 3 }}>
             <MenuStats menuItems={menuItems} categories={categories} />
           </Box>
         </FlagGate>
-        
-        <Box sx={{ px: { xs: 3, sm: 4 }, mb: 4 }}>
-          <MenuCategories
-            categories={categories}
-            menuItems={menuItems}
-            onEditCategory={handleEditCategory}
-            onDeleteCategory={handleDeleteCategory}
-            onAddCategory={handleAddCategory}
-          />
-        </Box>
 
-        {/* Spacing between sections */}
-        <Box sx={{ height: { xs: 16, sm: 20 } }} />
+        {/* Menu Items Section with Tabs */}
+        <Paper sx={{ 
+          border: '1px solid', 
+          borderColor: 'divider',
+          backgroundColor: 'background.paper',
+          mx: { xs: 3, sm: 4 },
+          mb: 4
+        }}>
+          <Tabs 
+            value={tabValue} 
+            onChange={(e, newValue) => setTabValue(newValue)}
+            variant={isMobile ? "fullWidth" : "standard"}
+            sx={{ 
+              borderBottom: '1px solid', 
+              borderColor: 'divider',
+              '& .MuiTab-root': {
+                minHeight: { xs: 48, sm: 48 },
+                fontSize: { xs: '0.875rem', sm: '0.875rem' },
+                fontWeight: 500,
+                textTransform: 'none',
+                minWidth: { xs: 'auto', sm: 160 },
+                px: { xs: 1, sm: 2 }
+              }
+            }}
+          >
+            <Tab 
+              icon={
+                <Badge badgeContent={filteredItems.length} color="primary">
+                  <Restaurant fontSize={isMobile ? "small" : "medium"} />
+                </Badge>
+              } 
+              label={isMobile ? "All Items" : "All Menu Items"}
+              iconPosition={isMobile ? "top" : "start"}
+            />
+            <Tab 
+              icon={
+                <Badge badgeContent={categories.length} color="secondary">
+                  <Category fontSize={isMobile ? "small" : "medium"} />
+                </Badge>
+              } 
+              label={isMobile ? "Categories" : "Manage Categories"}
+              iconPosition={isMobile ? "top" : "start"}
+            />
+          </Tabs>
 
-        <Box sx={{ px: { xs: 3, sm: 4 }, pb: 4 }}>
-          <MenuItemsGrid
-            filteredItems={filteredItems}
-            menuItems={menuItems}
-            categories={categories}
-            getCategoryName={getCategoryName}
-            formatCurrency={formatCurrency}
-            onToggleAvailability={handleToggleAvailability}
-            onQuickImageUpload={handleQuickImageUpload}
-            onEditItem={handleEditItem}
-            onDeleteItem={handleDeleteItem}
-            onAddItem={handleAddItem}
-            onClearFilters={handleClearFilters}
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            selectedCategory={selectedCategory}
-            setSelectedCategory={setSelectedCategory}
-            vegFilter={vegFilter}
-            setVegFilter={setVegFilter}
-            availabilityFilter={availabilityFilter}
-            setAvailabilityFilter={setAvailabilityFilter}
-          />
-        </Box>
+          {/* All Menu Items Tab */}
+          <TabPanel value={tabValue} index={0}>
+            <Box sx={{ p: { xs: 2, sm: 3 } }}>
+              <MenuItemsGrid
+                filteredItems={filteredItems}
+                menuItems={menuItems}
+                categories={categories}
+                getCategoryName={getCategoryName}
+                formatCurrency={formatCurrency}
+                onToggleAvailability={handleToggleAvailability}
+                onQuickImageUpload={handleQuickImageUpload}
+                onEditItem={handleEditItem}
+                onDeleteItem={handleDeleteItem}
+                onAddItem={handleAddItem}
+                onClearFilters={handleClearFilters}
+                searchTerm={searchTerm}
+                setSearchTerm={setSearchTerm}
+                selectedCategory={selectedCategory}
+                setSelectedCategory={setSelectedCategory}
+                vegFilter={vegFilter}
+                setVegFilter={setVegFilter}
+                availabilityFilter={availabilityFilter}
+                setAvailabilityFilter={setAvailabilityFilter}
+              />
+            </Box>
+          </TabPanel>
+
+          {/* Manage Categories Tab */}
+          <TabPanel value={tabValue} index={1}>
+            <Box sx={{ p: { xs: 2, sm: 3 } }}>
+              {/* Categories List - Similar to Tables */}
+              <Box sx={{ 
+                backgroundColor: 'white',
+                borderRadius: 2,
+                border: '1px solid',
+                borderColor: 'grey.200',
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
+                overflow: 'hidden'
+              }}>
+                {/* Header */}
+                <Box sx={{ 
+                  p: 3,
+                  borderBottom: '1px solid',
+                  borderColor: 'grey.200'
+                }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                      <Box
+                        sx={{
+                          width: 48,
+                          height: 48,
+                          borderRadius: '50%',
+                          backgroundColor: 'primary.main',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}
+                      >
+                        <Category sx={{ color: 'white', fontSize: 24 }} />
+                      </Box>
+                      <Box>
+                        <Typography variant="h5" fontWeight="700" sx={{ color: 'text.primary', mb: 0.5 }}>
+                          Categories ({categories.length})
+                        </Typography>
+                        <Typography variant="body1" sx={{ color: 'text.secondary' }}>
+                          Organize your menu items into categories
+                        </Typography>
+                      </Box>
+                    </Box>
+                    
+                    <Button
+                      variant="contained"
+                      startIcon={<Add />}
+                      onClick={handleAddCategory}
+                      size="medium"
+                      sx={{
+                        borderRadius: 2,
+                        backgroundColor: 'primary.main',
+                        color: 'white',
+                        fontWeight: 600,
+                        px: 3,
+                        py: 1,
+                        '&:hover': {
+                          backgroundColor: 'primary.dark',
+                          transform: 'translateY(-1px)',
+                          boxShadow: '0 8px 25px rgba(25, 118, 210, 0.4)'
+                        },
+                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                      }}
+                    >
+                      Add Category
+                    </Button>
+                  </Box>
+                </Box>
+
+                {/* Content */}
+                <Box sx={{ p: 3 }}>
+                  {categories.length === 0 ? (
+                    <Box sx={{ textAlign: 'center', py: 4 }}>
+                      <Box
+                        sx={{
+                          width: 80,
+                          height: 80,
+                          borderRadius: '50%',
+                          backgroundColor: 'grey.100',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          mx: 'auto',
+                          mb: 3
+                        }}
+                      >
+                        <Category sx={{ fontSize: 40, color: 'text.secondary' }} />
+                      </Box>
+                      
+                      <Typography variant="h6" fontWeight="600" gutterBottom color="text.primary">
+                        No Categories Yet
+                      </Typography>
+                      
+                      <Typography variant="body1" sx={{ mb: 4, color: 'text.secondary', maxWidth: '500px', mx: 'auto' }}>
+                        Start organizing your menu by creating your first category. Categories help customers navigate your menu more easily.
+                      </Typography>
+
+                      <Button
+                        variant="contained"
+                        startIcon={<Add />}
+                        onClick={handleAddCategory}
+                        size="large"
+                        sx={{
+                          backgroundColor: 'primary.main',
+                          color: 'white',
+                          borderRadius: 2,
+                          fontWeight: 600,
+                          px: 4,
+                          py: 1.5,
+                          '&:hover': {
+                            backgroundColor: 'primary.dark',
+                            transform: 'translateY(-1px)',
+                            boxShadow: '0 8px 25px rgba(25, 118, 210, 0.4)'
+                          },
+                          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                        }}
+                      >
+                        Create Your First Category
+                      </Button>
+                    </Box>
+                  ) : (
+                    <List sx={{ p: 0, m: 0 }}>
+                      {categories.map((category, index) => {
+                        const itemCount = menuItems.filter(item => item.category === category.id).length;
+                        
+                        return (
+                          <React.Fragment key={category.id}>
+                            <ListItem
+                              sx={{
+                                py: 2.5,
+                                px: 0,
+                                transition: 'all 0.2s ease-in-out',
+                                '&:hover': {
+                                  backgroundColor: 'grey.50',
+                                  transform: 'translateX(4px)',
+                                  borderRadius: 2
+                                }
+                              }}
+                            >
+                              <Stack direction="row" alignItems="center" spacing={3} sx={{ width: '100%' }}>
+                                {/* Category Icon */}
+                                <Box sx={{ position: 'relative' }}>
+                                  <Avatar
+                                    sx={{
+                                      width: 64,
+                                      height: 64,
+                                      backgroundColor: 'primary.main',
+                                      border: '3px solid',
+                                      borderColor: 'grey.100',
+                                      fontSize: '1.5rem',
+                                      fontWeight: 700,
+                                      color: 'white'
+                                    }}
+                                  >
+                                    <Restaurant />
+                                  </Avatar>
+                                  <Box
+                                    sx={{
+                                      position: 'absolute',
+                                      bottom: -2,
+                                      right: -2,
+                                      width: 24,
+                                      height: 24,
+                                      borderRadius: '50%',
+                                      backgroundColor: 'success.main',
+                                      border: '2px solid white',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      fontSize: '0.7rem',
+                                      fontWeight: 700,
+                                      color: 'white'
+                                    }}
+                                  >
+                                    {itemCount}
+                                  </Box>
+                                </Box>
+
+                                {/* Category Info */}
+                                <Box sx={{ flex: 1, minWidth: 0 }}>
+                                  <Typography 
+                                    variant="h6" 
+                                    fontWeight="700" 
+                                    sx={{ color: 'text.primary', mb: 0.5 }}
+                                  >
+                                    {category.name}
+                                  </Typography>
+                                  
+                                  {category.description && (
+                                    <Typography 
+                                      variant="body2" 
+                                      sx={{ 
+                                        color: 'text.secondary',
+                                        fontSize: '0.85rem',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        whiteSpace: 'nowrap',
+                                        mb: 1
+                                      }}
+                                    >
+                                      {category.description}
+                                    </Typography>
+                                  )}
+
+                                  <Chip
+                                    label={`${itemCount} ${itemCount === 1 ? 'item' : 'items'}`}
+                                    size="small"
+                                    color="primary"
+                                    variant="outlined"
+                                    sx={{
+                                      fontWeight: 600,
+                                      fontSize: '0.75rem'
+                                    }}
+                                  />
+                                </Box>
+
+                                {/* Actions */}
+                                <Stack direction="row" spacing={1}>
+                                  <Tooltip title="Edit Category">
+                                    <IconButton 
+                                      size="medium" 
+                                      onClick={() => handleEditCategory(category)}
+                                      sx={{ 
+                                        backgroundColor: 'grey.100',
+                                        color: 'text.secondary',
+                                        '&:hover': { 
+                                          backgroundColor: 'warning.50',
+                                          color: 'warning.main',
+                                          transform: 'scale(1.05)'
+                                        },
+                                        transition: 'all 0.2s ease-in-out'
+                                      }}
+                                    >
+                                      <Edit fontSize="small" />
+                                    </IconButton>
+                                  </Tooltip>
+                                  
+                                  <Tooltip title="Delete Category">
+                                    <IconButton 
+                                      size="medium" 
+                                      onClick={() => handleDeleteCategory(category.id)}
+                                      sx={{ 
+                                        backgroundColor: 'grey.100',
+                                        color: 'text.secondary',
+                                        '&:hover': { 
+                                          backgroundColor: 'error.50',
+                                          color: 'error.main',
+                                          transform: 'scale(1.05)'
+                                        },
+                                        transition: 'all 0.2s ease-in-out'
+                                      }}
+                                    >
+                                      <Delete fontSize="small" />
+                                    </IconButton>
+                                  </Tooltip>
+                                </Stack>
+                              </Stack>
+                            </ListItem>
+                            {index < categories.length - 1 && (
+                              <Divider sx={{ 
+                                borderColor: 'grey.200',
+                                mx: 0
+                              }} />
+                            )}
+                          </React.Fragment>
+                        );
+                      })}
+                    </List>
+                  )}
+                </Box>
+              </Box>
+            </Box>
+          </TabPanel>
+        </Paper>
 
         {/* Snackbar */}
         <Snackbar

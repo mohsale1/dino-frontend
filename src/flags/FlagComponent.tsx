@@ -71,9 +71,7 @@ export const MultiFlagGate: React.FC<MultiFlagGateProps> = ({
         const flagValue = (sectionFlags as Record<string, any>)[flagName];
         return typeof flagValue === 'boolean' ? flagValue : false;
       }
-    } catch (error) {
-      console.warn(`Error accessing flag ${flag}:`, error);
-    }
+    } catch (error) {    }
     
     return false;
   });

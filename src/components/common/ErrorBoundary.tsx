@@ -1,6 +1,5 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
-import ErrorPage from './ErrorPage';
-import { logger } from '../../utils/logger';
+import { GenericErrorPage } from '../errors';
 
 interface ErrorBoundaryState {
   hasError: boolean;
@@ -74,20 +73,10 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
     };
 
     // Log to console in development
-    if (process.env.NODE_ENV === 'development') {
-      console.group('🚨 Error Boundary Caught Error');
-      console.error('Error:', error);
-      console.error('Error Info:', errorInfo);
-      console.error('Error Details:', errorDetails);
-      console.groupEnd();
-    }
+    if (process.env.NODE_ENV === 'development') {    }
 
     // Log using the logger service
-    try {
-      logger.error('ErrorBoundary caught error', errorDetails);
-    } catch (logError) {
-      console.error('Failed to log error:', logError);
-    }
+    try {    } catch (logError) {    }
 
     // Send to error reporting service (if configured)
     this.reportError(errorDetails);
@@ -171,14 +160,18 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
       }
 
       // Use default error page
+      const errorType = this.getErrorType(this.state.error);
+      const isNetworkError = errorType === 'NETWORK_ERROR';
+      
       return (
-        <ErrorPage
-          error={this.state.error}
-          errorCode={this.getErrorType(this.state.error)}
+        <GenericErrorPage
+          type={isNetworkError ? 'network' : 'generic'}
+          message={this.state.error.message}
+          errorCode={errorType}
           onRetry={this.handleRetry}
-          showRetry={this.props.showRetry}
-          showGoHome={this.props.showGoHome}
-          showGoBack={this.props.showGoBack}
+          showRetry={this.props.showRetry !== false}
+          showGoHome={this.props.showGoHome !== false}
+          showGoBack={this.props.showGoBack !== false}
         />
       );
     }

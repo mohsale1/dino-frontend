@@ -189,28 +189,14 @@ export function validateConfig(): { valid: boolean; errors: string[] } {
 
 // Log configuration (only in development or when debug is enabled)
 export function logConfig(): void {
-  if (config.DEBUG_MODE || isDevelopment()) {
-    console.group('🔧 Application Configuration');
-    console.log('Environment:', config.APP_ENV);
-    console.log('Node Environment:', config.NODE_ENV);
-    console.log('API Base URL:', config.API_BASE_URL);
-    console.log('Backend URL:', config.BACKEND_URL);
-    console.log('Debug Mode:', config.DEBUG_MODE);
-    console.log('Console Logging:', config.ENABLE_CONSOLE_LOGGING);
-    console.log('Log Level:', config.LOG_LEVEL);
-    console.groupEnd();
-  }
+  if (config.DEBUG_MODE || isDevelopment()) {  }
 }
 
 // Initialize configuration validation
 if (typeof window !== 'undefined') {
   setTimeout(() => {
     const validation = validateConfig();
-    if (!validation.valid) {
-      console.error('❌ Configuration Validation Failed:', validation.errors);
-    } else if (config.DEBUG_MODE || isDevelopment()) {
-      console.log('✅ Configuration validation passed');
-    }
+    if (!validation.valid) {    } else if (config.DEBUG_MODE || isDevelopment()) {    }
     
     logConfig();
   }, 100);

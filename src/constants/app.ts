@@ -27,8 +27,6 @@ export const API_CONFIG = {
   RETRY_DELAY: CENTRALIZED_API_CONFIG.RETRY_DELAY,
 } as const;
 
-
-
 // Route Paths
 export const ROUTES = {
   HOME: '/',
@@ -46,8 +44,6 @@ export const ROUTES = {
   ORDER_TRACKING: '/order-tracking/:orderId',
 } as const;
 
-
-
 // Default Values
 export const DEFAULTS = {
   VENUE_ID: 'dino-venue-1',
@@ -63,8 +59,6 @@ export const DEFAULTS = {
   SESSION_TIMEOUT: 30 * 60 * 1000, // 30 minutes
 } as const;
 
-
-
 // Feature Flags
 export const FEATURES = {
   QR_CODE_GENERATION: true,
@@ -74,8 +68,6 @@ export const FEATURES = {
   MULTI_LANGUAGE: false,
   DARK_MODE: false,
 } as const;
-
-
 
 // Business Rules (Indian Market)
 export const BUSINESS_RULES = {
@@ -91,8 +83,6 @@ export const BUSINESS_RULES = {
   PHONE_COUNTRY_CODE: '+91',
 } as const;
 
-
-
 // Time Formats
 export const TIME_FORMATS = {
   DATE: 'DD/MM/YYYY',
@@ -100,8 +90,6 @@ export const TIME_FORMATS = {
   DATETIME: 'DD/MM/YYYY HH:mm',
   TIMESTAMP: 'DD/MM/YYYY HH:mm:ss',
 } as const;
-
-
 
 // Validation Rules (Indian Context)
 export const VALIDATION = {
@@ -502,4 +490,3 @@ export const ROLE_PERMISSIONS = {
     PERMISSIONS.CREATE_ORDERS,
   ],
 } as const;
-

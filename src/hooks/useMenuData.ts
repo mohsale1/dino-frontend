@@ -5,7 +5,6 @@ import { tableService } from '../services/business';
 import { useAuth } from '../contexts/AuthContext';
 import { useUserData } from '../contexts/UserDataContext';
 import { canUserAccessVenue, debugVenueAssignment } from '../utils/venueUtils';
-import { logger } from '../utils/logger';
 import { Venue } from '../types/api';
 
 export interface MenuItemType {
@@ -111,9 +110,6 @@ export function useMenuData(options: UseMenuDataOptions = {}): UseMenuDataResult
     venueStatus?: string;
     message?: string;
   }>({ show: false });
-
-  console.log('🔍 useMenuDataSimple called with:', { venueId, tableId, enableAutoRefresh });
-
   // Helper function to get category icon
   const getCategoryIcon = (categoryName: string): string => {
     const name = categoryName.toLowerCase();
@@ -193,9 +189,7 @@ export function useMenuData(options: UseMenuDataOptions = {}): UseMenuDataResult
   }, [venueId]);
 
   // Handle menu loading errors
-  const handleMenuError = useCallback((err: any) => {
-    console.log('⚠️ API failed, loading mock data for demo...');
-    
+  const handleMenuError = useCallback((err: any) => {    
     // Load mock data instead of showing error
     const { mockCategories, mockMenuItems, mockRestaurant } = getMockData();
     setCategories(mockCategories);
@@ -209,25 +203,15 @@ export function useMenuData(options: UseMenuDataOptions = {}): UseMenuDataResult
 
   // Load restaurant data
   const loadRestaurant = useCallback(async () => {
-    if (!venueId) return;
-    
-    console.log('🔍 Loading restaurant data for venueId:', venueId);
-    setRestaurantLoading(true);
+    if (!venueId) return;    setRestaurantLoading(true);
     
     try {
-      const venueData = await venueService.getPublicVenue(venueId);
-      console.log('🏪 Restaurant data loaded:', venueData);
-      
+      const venueData = await venueService.getPublicVenue(venueId);      
       if (venueData) {
-        setRestaurant(venueData);
-        logger.info('Restaurant data loaded successfully', { venueName: venueData.name });
-      } else {
+        setRestaurant(venueData);      } else {
         setError('Restaurant not found. Please check the QR code or link.');
       }
-    } catch (err: any) {
-      console.error('❌ Restaurant loading error:', err);
-      logger.error('Failed to load restaurant data', { venueId, error: err });
-      setError('Restaurant not found. Please check the QR code or link.');
+    } catch (err: any) {      setError('Restaurant not found. Please check the QR code or link.');
     } finally {
       setRestaurantLoading(false);
     }
@@ -235,15 +219,10 @@ export function useMenuData(options: UseMenuDataOptions = {}): UseMenuDataResult
 
   // Load categories data
   const loadCategories = useCallback(async () => {
-    if (!venueId) return;
-    
-    console.log('🔍 Loading categories data for venueId:', venueId, 'tableId:', tableId);
-    setCategoriesLoading(true);
+    if (!venueId) return;    setCategoriesLoading(true);
     
     try {
-      const categoriesData = await menuService.getVenueCategories(venueId, tableId);
-      console.log('📂 Categories data loaded:', categoriesData);
-      
+      const categoriesData = await menuService.getVenueCategories(venueId, tableId);      
       const mappedCategories: CategoryType[] = categoriesData.map((cat: any, index: number) => ({
         id: cat.id,
         name: cat.name,
@@ -254,12 +233,7 @@ export function useMenuData(options: UseMenuDataOptions = {}): UseMenuDataResult
         itemCount: 0, // Will be calculated after menu items are loaded
       }));
       
-      setCategories(mappedCategories);
-      logger.info('Categories loaded successfully', { count: mappedCategories.length });
-    } catch (err: any) {
-      console.error('❌ Categories loading error:', err);
-      logger.error('Failed to load categories', { venueId, error: err });
-      
+      setCategories(mappedCategories);    } catch (err: any) {      
       // Handle specific error types
       if (err.type === 'venue_not_accepting_orders') {
         setVenueNotAcceptingOrders({
@@ -277,15 +251,10 @@ export function useMenuData(options: UseMenuDataOptions = {}): UseMenuDataResult
 
   // Load menu items data
   const loadMenuItems = useCallback(async () => {
-    if (!venueId) return;
-    
-    console.log('🔍 Loading menu items data for venueId:', venueId, 'tableId:', tableId);
-    setMenuLoading(true);
+    if (!venueId) return;    setMenuLoading(true);
     
     try {
-      const menuData = await menuService.getVenueMenuItems(venueId, undefined, tableId);
-      console.log('🍽️ Menu items data loaded:', menuData);
-      
+      const menuData = await menuService.getVenueMenuItems(venueId, undefined, tableId);      
       const mappedMenuItems: MenuItemType[] = menuData.map((item: any) => ({
         id: item.id,
         name: item.name,
@@ -320,13 +289,7 @@ export function useMenuData(options: UseMenuDataOptions = {}): UseMenuDataResult
       setCategories(prev => prev.map(category => ({
         ...category,
         itemCount: mappedMenuItems.filter(item => item.category === category.id).length,
-      })));
-      
-      logger.info('Menu items loaded successfully', { count: mappedMenuItems.length });
-    } catch (err: any) {
-      console.error('❌ Menu items loading error:', err);
-      logger.error('Failed to load menu items', { venueId, error: err });
-      
+      })));    } catch (err: any) {      
       // Handle specific error types
       if (err.type === 'venue_not_accepting_orders') {
         setVenueNotAcceptingOrders({
@@ -353,9 +316,7 @@ export function useMenuData(options: UseMenuDataOptions = {}): UseMenuDataResult
       } else {
         setTableName(tableId);
       }
-    } catch (tableError) {
-      logger.warn('Failed to load table data', { tableId, error: tableError });
-      setTableName(tableId);
+    } catch (tableError) {      setTableName(tableId);
     }
   }, [tableId]);
 
@@ -374,9 +335,7 @@ export function useMenuData(options: UseMenuDataOptions = {}): UseMenuDataResult
         loadMenuItems(),
         loadTable(),
       ]);
-    } catch (err) {
-      console.error('Error loading menu data:', err);
-    } finally {
+    } catch (err) {    } finally {
       setLoading(false);
     }
   }, [venueId, loadRestaurant, loadCategories, loadMenuItems, loadTable]);
@@ -393,12 +352,7 @@ export function useMenuData(options: UseMenuDataOptions = {}): UseMenuDataResult
     if (venueId && user && userData) {
       debugVenueAssignment(userData, user, 'useMenuDataSimple');
       
-      if (!canUserAccessVenue(userData, user, venueId)) {
-        logger.warn('User may not have access to this venue, but continuing with public access', {
-          userId: user.id,
-          venueId,
-        });
-      }
+      if (!canUserAccessVenue(userData, user, venueId)) {      }
     }
   }, [venueId, user, userData]);
 
@@ -406,9 +360,7 @@ export function useMenuData(options: UseMenuDataOptions = {}): UseMenuDataResult
   useEffect(() => {
     if (!enableAutoRefresh || !venueId) return;
 
-    const interval = setInterval(() => {
-      logger.debug('Auto-refreshing menu data');
-      loadMenuItems();
+    const interval = setInterval(() => {      loadMenuItems();
     }, refreshInterval);
 
     return () => clearInterval(interval);
@@ -416,19 +368,7 @@ export function useMenuData(options: UseMenuDataOptions = {}): UseMenuDataResult
 
   // Update overall loading state
   useEffect(() => {
-    const isLoading = restaurantLoading || categoriesLoading || menuLoading;
-    console.log('🔍 Loading state update:', {
-      restaurantLoading,
-      categoriesLoading,
-      menuLoading,
-      combinedLoading: isLoading,
-      venueId,
-      tableId,
-      hasRestaurant: !!restaurant,
-      categoriesCount: categories.length,
-      menuItemsCount: menuItems.length
-    });
-    setLoading(isLoading);
+    const isLoading = restaurantLoading || categoriesLoading || menuLoading;    setLoading(isLoading);
   }, [restaurantLoading, categoriesLoading, menuLoading, venueId, tableId, restaurant, categories.length, menuItems.length]);
 
   // Refetch functions

@@ -16,9 +16,7 @@ export const useUserDataInitializer = () => {
   useEffect(() => {
     const initializeUserData = async () => {
       // Only attempt if user is authenticated and we haven't tried yet
-      if (!isAuthenticated || !user) {
-        console.log('🔄 UserDataInitializer: User not authenticated, skipping');
-        initAttempted.current = false;
+      if (!isAuthenticated || !user) {        initAttempted.current = false;
         retryCount.current = 0;
         return;
       }
@@ -26,9 +24,7 @@ export const useUserDataInitializer = () => {
       // If we already have data, no need to retry
       if (userData) {
         // Reduced logging to prevent spam
-        if (!initAttempted.current) {
-          console.log('✅ UserDataInitializer: User data already available');
-        }
+        if (!initAttempted.current) {        }
         initAttempted.current = true;
         retryCount.current = 0;
         return;
@@ -42,28 +38,19 @@ export const useUserDataInitializer = () => {
 
       // FIXED: Only trigger refresh if UserDataContext hasn't already initialized
       // This prevents duplicate API calls to /auth/user-data
-      if (!initAttempted.current && retryCount.current === 0) {
-        console.log('🔄 UserDataInitializer: UserDataContext should handle initial load, monitoring...');
-        initAttempted.current = true;
+      if (!initAttempted.current && retryCount.current === 0) {        initAttempted.current = true;
         
         // Wait a bit longer for UserDataContext to complete its initialization
         setTimeout(() => {
           // Only retry if we still don't have data after UserDataContext had time to load
-          if (!userData && !loading && retryCount.current < maxRetries) {
-            console.log(`🔄 UserDataInitializer: UserDataContext didn't load data, attempting manual refresh (attempt ${retryCount.current + 1})`);
-            retryCount.current++;
+          if (!userData && !loading && retryCount.current < maxRetries) {            retryCount.current++;
             
-            refreshUserData().catch(error => {
-              console.error('❌ UserDataInitializer: Failed to load user data:', error);
-              
+            refreshUserData().catch(error => {              
               if (retryCount.current < maxRetries) {
-                console.log(`🔄 UserDataInitializer: Retrying in 2 seconds (${retryCount.current}/${maxRetries})`);
                 setTimeout(() => {
                   initializeUserData();
                 }, 2000);
-              } else {
-                console.error('❌ UserDataInitializer: Max retries reached, giving up');
-              }
+              } else {              }
             });
           }
         }, 2000); // Give UserDataContext 2 seconds to complete

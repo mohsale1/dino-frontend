@@ -152,22 +152,15 @@ const OrderStatusUpdate: React.FC<OrderStatusUpdateProps> = ({
     setLoading(true);
     setError(null);
 
-    try {
-      console.log(`🔍 Updating order ${orderId} status from ${currentStatus} to ${selectedStatus}`);
-      
-      await orderService.updateOrderStatus(orderId, selectedStatus);
-      
-      console.log('✅ Order status updated successfully');
-      
+    try {      
+      await orderService.updateOrderStatus(orderId, selectedStatus);      
       // Call the callback if provided
       if (onStatusUpdated) {
         onStatusUpdated(selectedStatus);
       }
       
       handleClose();
-    } catch (error: any) {
-      console.error('❌ Failed to update order status:', error);
-      const errorMessage = error.message || 'Failed to update order status';
+    } catch (error: any) {      const errorMessage = error.message || 'Failed to update order status';
       setError(errorMessage);
       
       if (onError) {

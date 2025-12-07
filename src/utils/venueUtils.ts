@@ -36,8 +36,8 @@ export const validateVenueAccess = (
   }
   
   // Priority 2: Check auth user context (fallback)
-  if (authUser?.venueId || authUser?.venueId) {
-    const venueId = authUser.venueId || null;
+  if (authUser?.venue_id || authUser?.venueId) {
+    const venueId = authUser.venue_id || authUser.venueId || null;
     return {
       hasVenue: true,
       venueId,
@@ -114,18 +114,7 @@ export const debugVenueAssignment = (
   authUser: UserProfile | null,
   context: string = 'unknown'
 ): void => {
-  const validation = validateVenueAccess(userData, authUser);
-  
-  console.group(`🏢 Venue Assignment Debug - ${context}`);
-  console.log('Has Venue:', validation.hasVenue);
-  console.log('Venue ID:', validation.venueId);
-  console.log('Source:', validation.source);
-  console.log('User Role:', authUser?.role);
-  console.log('UserData Venue:', userData?.venue?.id);
-  console.log('AuthUser Venue:', authUser?.venueId);
-  console.log('Requires Assignment:', requiresVenueAssignment(userData, authUser));
-  console.groupEnd();
-};
+  const validation = validateVenueAccess(userData, authUser);};
 
 /**
  * Format venue display name

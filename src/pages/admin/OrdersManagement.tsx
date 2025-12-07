@@ -170,9 +170,7 @@ const OrdersManagement: React.FC = () => {
         // Filter to show only today's orders
         const todaysOrders = ordersData.filter(order => isToday(order.created_at));
         setOrders(todaysOrders);
-      } catch (error) {
-        console.error('Failed to load orders:', error);
-        setError('Network error. Please check your connection.');
+      } catch (error) {        setError('Network error. Please check your connection.');
       } finally {
         setLoading(false);
       }
@@ -290,7 +288,12 @@ const OrdersManagement: React.FC = () => {
     if (order.table_id) {
       return order.table_id.replace(/^table-/, 'T-').replace(/^dt-/, 'DT-');
     }
-    return order.order_number || order.id;
+    return 'N/A';
+  };
+
+  const getTrimmedOrderId = (orderId: string) => {
+    // Return first 8 characters of order ID
+    return orderId.substring(0, 8);
   };
 
   const getTimeSinceOrder = (orderTime: string) => {
@@ -326,7 +329,7 @@ const OrdersManagement: React.FC = () => {
       
       setSnackbar({ 
         open: true, 
-        message: `Order ${orderId} status updated to ${orderService.formatOrderStatus(newStatus)}`, 
+        message: `Order #${getTrimmedOrderId(orderId)} status updated to ${orderService.formatOrderStatus(newStatus)}`, 
         severity: 'success' 
       });
     } catch (error) {
@@ -377,41 +380,61 @@ const OrdersManagement: React.FC = () => {
       <Card 
         key={order.id}
         sx={{ 
-          mb: 1.5,
-          border: '1px solid', 
-          borderColor: isUrgent ? 'error.main' : 'divider',
-          borderLeft: `4px solid ${getStatusColor(order.status)}`,
-          transition: 'all 0.2s ease-in-out',
+          borderRadius:0,
+          border: '1px solid',
+          borderColor: isUrgent ? 'error.light' : 'divider',
+          background: 'linear-gradient(135deg, #ffffff 0%, #fafafa 100%)',
+          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
           animation: isUrgent ? `${pulse} 2s infinite` : 'none',
           height: '100%',
-          minHeight: { xs: 280, sm: 300 },
           display: 'flex',
           flexDirection: 'column',
+          position: 'relative',
+          overflow: 'hidden',
           '&:hover': { 
             borderColor: 'primary.main',
-            boxShadow: 2,
-            transform: 'translateY(-2px)'
+            boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+            transform: 'translateY(-4px)'
+          },
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '4px',
+            background: `linear-gradient(90deg, ${getStatusColor(order.status)}, ${getStatusColor(order.status)}dd)`,
           }
         }}
       >
         <CardContent sx={{ 
-          p: 2, 
-          '&:last-child': { pb: 2 },
+          p: 2.5, 
+          '&:last-child': { pb: 2.5 },
           display: 'flex',
           flexDirection: 'column',
           height: '100%',
           flex: 1
         }}>
           {/* Header Row */}
-          <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1.5}>
-            <Stack direction="row" alignItems="center" spacing={1}>
-              <Typography variant="subtitle2" fontWeight="600">
-                {order.order_number || order.id}
+          <Stack direction="row" justifyContent="space-between" alignItems="flex-start" mb={2}>
+            <Box>
+              <Typography variant="h6" fontWeight="700" color="text.primary" sx={{ mb: 0.5 }}>
+                #{getTrimmedOrderId(order.id)}
               </Typography>
               {isUrgent && !isServed && (
-                <Chip label="URGENT" size="small" color="error" sx={{ height: 18, fontSize: '0.65rem' }} />
+                <Chip 
+                  label="URGENT" 
+                  size="small" 
+                  color="error" 
+                  sx={{ 
+                    height: 20, 
+                    fontSize: '0.65rem',
+                    fontWeight: 700,
+                    animation: `${pulse} 2s infinite`
+                  }} 
+                />
               )}
-            </Stack>
+            </Box>
             <Chip 
               icon={getStatusIcon(order.status)}
               label={orderService.formatOrderStatus(order.status)}
@@ -420,124 +443,215 @@ const OrdersManagement: React.FC = () => {
                 backgroundColor: getStatusColor(order.status),
                 color: 'white',
                 '& .MuiChip-icon': { color: 'white' },
-                fontSize: '0.7rem',
-                height: 22
+                fontSize: '0.75rem',
+                height: 26,
+                fontWeight: 600,
+                borderRadius: 2,
+                px: 1
               }}
             />
           </Stack>
 
           {/* Table and Time Info */}
-          <Stack direction="row" spacing={2} mb={1.5} flexWrap="wrap">
-            <Stack direction="row" alignItems="center" spacing={0.5}>
-              <TableRestaurant fontSize="small" sx={{ fontSize: 16, color: 'text.secondary' }} />
-              <Typography variant="body2" color="text.secondary" fontSize="0.875rem">
-                Table {getTableNumber(order)}
-              </Typography>
+          <Box 
+            sx={{ 
+              mb: 2, 
+              p: 1.5, 
+              backgroundColor: 'rgba(0,0,0,0.02)',
+              borderRadius: 2,
+              border: '1px solid',
+              borderColor: 'divider'
+            }}
+          >
+            <Stack spacing={1}>
+              <Stack direction="row" alignItems="center" spacing={1}>
+                <Box
+                  sx={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: 1.5,
+                    backgroundColor: 'primary.main',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'white'
+                  }}
+                >
+                  <TableRestaurant fontSize="small" />
+                </Box>
+                <Box flex={1}>
+                  <Typography variant="caption" color="text.secondary" display="block" sx={{ lineHeight: 1.2 }}>
+                    Table Number
+                  </Typography>
+                  <Typography variant="body1" fontWeight="700" color="primary.main">
+                    {getTableNumber(order)}
+                  </Typography>
+                </Box>
+              </Stack>
+              
+              <Divider />
+              
+              <Stack direction="row" justifyContent="space-between" alignItems="center">
+                <Stack direction="row" alignItems="center" spacing={0.5}>
+                  <AccessTime fontSize="small" sx={{ fontSize: 16, color: 'text.secondary' }} />
+                  <Typography variant="body2" color="text.secondary" fontSize="0.8rem">
+                    {formatTime(order.created_at)}
+                  </Typography>
+                </Stack>
+                <Typography 
+                  variant="caption" 
+                  color={isUrgent ? "error.main" : "text.secondary"}
+                  fontWeight={isUrgent ? 700 : 500}
+                  fontSize="0.75rem"
+                  sx={{
+                    px: 1,
+                    py: 0.5,
+                    borderRadius: 1,
+                    backgroundColor: isUrgent ? 'error.lighter' : 'transparent'
+                  }}
+                >
+                  {getTimeSinceOrder(order.created_at)}
+                </Typography>
+              </Stack>
             </Stack>
-            <Stack direction="row" alignItems="center" spacing={0.5}>
-              <AccessTime fontSize="small" sx={{ fontSize: 16, color: 'text.secondary' }} />
-              <Typography variant="body2" color="text.secondary" fontSize="0.875rem">
-                {formatTime(order.created_at)}
-              </Typography>
-            </Stack>
-            <Typography 
-              variant="body2" 
-              color={isUrgent ? "error.main" : "text.secondary"}
-              fontWeight={isUrgent ? 600 : 400}
-              fontSize="0.875rem"
-            >
-              {getTimeSinceOrder(order.created_at)}
-            </Typography>
-          </Stack>
-
-          {/* Items Summary */}
-          <Box mb={1.5}>
-            <Typography variant="caption" color="text.secondary" fontWeight="600" display="block" mb={0.5}>
-              Items ({order.items.length})
-            </Typography>
-            {order.items.slice(0, 2).map((item, index) => (
-              <Typography 
-                key={index}
-                variant="body2" 
-                color="text.secondary"
-                fontSize="0.8rem"
-                sx={{ 
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap'
-                }}
-              >
-                {item.quantity}x {item.menu_item_name}
-              </Typography>
-            ))}
-            {order.items.length > 2 && (
-              <Typography 
-                variant="caption" 
-                color="primary.main" 
-                sx={{ cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}
-                onClick={() => handleViewOrder(order)}
-              >
-                +{order.items.length - 2} more
-              </Typography>
-            )}
           </Box>
 
-          {/* Total and Actions */}
-          <Stack direction="column" spacing={1.5} sx={{ mt: 'auto' }}>
-            <Typography variant="h6" fontWeight="700" color="primary.main">
-              {formatCurrency(order.total_amount)}
+          {/* Items Summary */}
+          <Box mb={2} flex={1}>
+            <Typography 
+              variant="caption" 
+              color="text.secondary" 
+              fontWeight="700" 
+              display="block" 
+              mb={1}
+              sx={{ textTransform: 'uppercase', letterSpacing: 0.5 }}
+            >
+              Order Items ({order.items.length})
             </Typography>
-            <Stack direction="row" spacing={1} justifyContent="space-between">
-              <Button
-                size="small"
-                variant="outlined"
-                onClick={() => handleViewOrder(order)}
-                startIcon={<Visibility />}
-                sx={{ fontSize: '0.75rem', py: 0.75, px: 2, flex: 1 }}
-              >
-                View
-              </Button>
-              {!isServed && (
-                <FormControl size="small" sx={{ flex: 1 }}>
-                  <Select
-                    value={order.status}
-                    onChange={(e) => handleStatusUpdate(order.id, e.target.value as OrderStatus)}
+            <Stack spacing={0.75}>
+              {order.items.slice(0, 3).map((item, index) => (
+                <Box
+                  key={index}
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
+                    p: 1,
+                    borderRadius: 1.5,
+                    backgroundColor: 'background.paper',
+                    border: '1px solid',
+                    borderColor: 'divider'
+                  }}
+                >
+                  <Chip
+                    label={item.quantity}
                     size="small"
-                    disabled={!hasPermission(PERMISSIONS.ORDERS_UPDATE)}
                     sx={{
-                      fontSize: '0.75rem',
-                      borderRadius: 1.5,
-                      boxShadow: `0 2px 8px ${getStatusColor(order.status)}40`,
-                      '& .MuiSelect-select': {
-                        py: 0.75,
-                        backgroundColor: getStatusColor(order.status),
-                        color: 'white',
-                        fontWeight: 700,
-                        borderRadius: 1.5,
-                      },
-                      '& .MuiOutlinedInput-notchedOutline': {
-                        border: `2px solid ${getStatusColor(order.status)}`,
-                      },
-                      '&:hover .MuiOutlinedInput-notchedOutline': {
-                        border: `2px solid ${getStatusColor(order.status)}`,
-                      },
-                      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                        border: `2px solid ${getStatusColor(order.status)}`,
-                      },
-                      '& .MuiSvgIcon-root': {
-                        color: 'white',
-                      }
+                      minWidth: 32,
+                      height: 24,
+                      backgroundColor: 'primary.main',
+                      color: 'white',
+                      fontWeight: 700,
+                      fontSize: '0.75rem'
+                    }}
+                  />
+                  <Typography 
+                    variant="body2" 
+                    color="text.primary"
+                    fontWeight="500"
+                    fontSize="0.85rem"
+                    sx={{ 
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                      flex: 1
                     }}
                   >
-                    <MenuItem value="pending">Pending</MenuItem>
-                    <MenuItem value="confirmed">Confirmed</MenuItem>
-                    <MenuItem value="preparing">Preparing</MenuItem>
-                    <MenuItem value="ready">Ready</MenuItem>
-                    <MenuItem value="served">Served</MenuItem>
-                  </Select>
-                </FormControl>
+                    {item.menu_item_name}
+                  </Typography>
+                </Box>
+              ))}
+              {order.items.length > 3 && (
+                <Button
+                  variant="text"
+                  size="small"
+                  onClick={() => handleViewOrder(order)}
+                  sx={{ 
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    justifyContent: 'flex-start',
+                    pl: 1,
+                    color: 'primary.main',
+                    '&:hover': {
+                      backgroundColor: 'primary.lighter'
+                    }
+                  }}
+                >
+                  +{order.items.length - 3} more items
+                </Button>
               )}
             </Stack>
+          </Box>
+
+          {/* Actions */}
+          <Stack direction="column" spacing={1.5} sx={{ mt: 'auto' }}>
+            <Button
+              fullWidth
+              variant="outlined"
+              onClick={() => handleViewOrder(order)}
+              startIcon={<Visibility />}
+              sx={{ 
+                fontSize: '0.875rem', 
+                py: 1, 
+                borderRadius: 2,
+                fontWeight: 600,
+                borderWidth: 2,
+                '&:hover': {
+                  borderWidth: 2,
+                  transform: 'translateY(-1px)',
+                  boxShadow: 2
+                }
+              }}
+            >
+              View Details
+            </Button>
+            {!isServed && (
+              <FormControl fullWidth size="small">
+                <Select
+                  value={order.status}
+                  onChange={(e) => handleStatusUpdate(order.id, e.target.value as OrderStatus)}
+                  size="small"
+                  disabled={!hasPermission(PERMISSIONS.ORDERS_UPDATE)}
+                  sx={{
+                    fontSize: '0.875rem',
+                    borderRadius: 2,
+                    fontWeight: 600,
+                    '& .MuiSelect-select': {
+                      py: 1,
+                      backgroundColor: getStatusColor(order.status),
+                      color: 'white',
+                      fontWeight: 700,
+                      borderRadius: 2,
+                    },
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      border: 'none',
+                    },
+                    '&:hover': {
+                      boxShadow: `0 4px 12px ${getStatusColor(order.status)}40`,
+                    },
+                    '& .MuiSvgIcon-root': {
+                      color: 'white',
+                    }
+                  }}
+                >
+                  <MenuItem value="pending">Pending</MenuItem>
+                  <MenuItem value="confirmed">Confirmed</MenuItem>
+                  <MenuItem value="preparing">Preparing</MenuItem>
+                  <MenuItem value="ready">Ready</MenuItem>
+                  <MenuItem value="served">Served</MenuItem>
+                </Select>
+              </FormControl>
+            )}
           </Stack>
         </CardContent>
       </Card>
@@ -1061,12 +1175,14 @@ const OrdersManagement: React.FC = () => {
                 {/* Bill Header */}
                 <Box sx={{ mb: 3, pb: 2, borderBottom: '1px dashed', borderColor: 'divider' }}>
                   <Stack direction="row" justifyContent="space-between" mb={1}>
-                    <Typography variant="body2" color="text.secondary">Order Number:</Typography>
-                    <Typography variant="body2" fontWeight="600">{selectedOrder.order_number || selectedOrder.id}</Typography>
+                    <Typography variant="body2" color="text.secondary">Order ID:</Typography>
+                    <Typography variant="body2" fontWeight="600">#{getTrimmedOrderId(selectedOrder.id)}</Typography>
                   </Stack>
                   <Stack direction="row" justifyContent="space-between" mb={1}>
-                    <Typography variant="body2" color="text.secondary">Table:</Typography>
-                    <Typography variant="body2" fontWeight="600">{getTableNumber(selectedOrder)}</Typography>
+                    <Typography variant="body2" color="text.secondary">Table Number:</Typography>
+                    <Typography variant="body2" fontWeight="700" color="primary.main" fontSize="1rem">
+                      {getTableNumber(selectedOrder)}
+                    </Typography>
                   </Stack>
                   <Stack direction="row" justifyContent="space-between" mb={1}>
                     <Typography variant="body2" color="text.secondary">Date:</Typography>
@@ -1091,37 +1207,49 @@ const OrdersManagement: React.FC = () => {
                   </Stack>
                 </Box>
 
-                {/* Items List */}
+                {/* Items Table */}
                 <Box sx={{ mb: 3 }}>
                   <Typography variant="subtitle2" fontWeight="700" mb={2}>
                     Order Items
                   </Typography>
-                  <List sx={{ p: 0 }}>
-                    {selectedOrder.items.map((item, index) => (
-                      <ListItem 
-                        key={index}
-                        sx={{ 
-                          px: 0, 
-                          py: 1.5,
-                          borderBottom: index < selectedOrder.items.length - 1 ? '1px solid' : 'none',
-                          borderColor: 'divider'
-                        }}
-                      >
-                        <ListItemText
-                          primary={
-                            <Typography variant="body1" fontWeight="600" sx={{ mb: 0.5 }}>
-                              {item.menu_item_name}
-                            </Typography>
-                          }
-                          secondary={
-                            <Typography variant="body2" color="text.secondary">
-                              Quantity: {item.quantity}
-                            </Typography>
-                          }
-                        />
-                      </ListItem>
-                    ))}
-                  </List>
+                  <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 1 }}>
+                    <Table size="small">
+                      <TableHead>
+                        <TableRow sx={{ backgroundColor: 'grey.50' }}>
+                          <TableCell sx={{ fontWeight: 700, fontSize: '0.875rem' }}>Item Name</TableCell>
+                          <TableCell align="center" sx={{ fontWeight: 700, fontSize: '0.875rem' }}>Quantity</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {selectedOrder.items.map((item, index) => (
+                          <TableRow 
+                            key={index}
+                            sx={{ 
+                              '&:last-child td, &:last-child th': { border: 0 },
+                              '&:hover': { backgroundColor: 'grey.50' }
+                            }}
+                          >
+                            <TableCell>
+                              <Typography variant="body2" fontWeight="600">
+                                {item.menu_item_name}
+                              </Typography>
+                            </TableCell>
+                            <TableCell align="center">
+                              <Chip 
+                                label={item.quantity}
+                                size="small"
+                                color="primary"
+                                sx={{ 
+                                  fontWeight: 700,
+                                  minWidth: 40
+                                }}
+                              />
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
                 </Box>
 
                 {/* Footer */}
@@ -1133,7 +1261,15 @@ const OrdersManagement: React.FC = () => {
               </DialogContent>
               
               <DialogActions sx={{ px: 3, pb: 3, pt: 1, borderTop: '1px solid', borderColor: 'divider' }}>
-                <Stack direction="row" spacing={1} width="100%" justifyContent="flex-end">
+                <Stack direction="row" spacing={1} width="100%" justifyContent="space-between" alignItems="center">
+                  <Button
+                    onClick={() => setOpenOrderDialog(false)}
+                    variant="outlined"
+                    color="inherit"
+                    size="medium"
+                  >
+                    Close
+                  </Button>
                   {selectedOrder.status !== 'served' && (
                     <FormControl size="small" sx={{ minWidth: 120 }}>
                       <Select

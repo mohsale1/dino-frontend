@@ -200,7 +200,6 @@ const parseBooleanEnvVar = (value: string | undefined, defaultValue: boolean): b
   }
   
   // If value is not recognized, use default
-  console.warn(`Invalid boolean value for environment variable: "${value}". Using default: ${defaultValue}`);
   return defaultValue;
 };
 
@@ -300,18 +299,11 @@ export const getFeatureFlagGroup = (groupName: keyof typeof FEATURE_FLAG_GROUPS)
 export const logFeatureFlags = (): void => {
   if (isFeatureEnabled('debugMode')) {
     const flags = getCachedFeatureFlags();
-    console.group('🚩 Feature Flags Status');
-    
     for (const [groupName, flagNames] of Object.entries(FEATURE_FLAG_GROUPS)) {
-      console.group(`${groupName} Features`);
       for (const flagName of flagNames) {
         const isEnabled = flags[flagName];
-        console.log(`${flagName}: ${isEnabled ? '✅ Enabled' : '❌ Disabled'}`);
       }
-      console.groupEnd();
     }
-    
-    console.groupEnd();
   }
 };
 
@@ -352,7 +344,7 @@ if (typeof window !== 'undefined') {
     const validation = validateFeatureFlags();
     
     if (validation.warnings.length > 0) {
-      console.warn('⚠️ Feature Flag Warnings:', validation.warnings);
+      // Warnings exist but app will continue
     }
     
     logFeatureFlags();

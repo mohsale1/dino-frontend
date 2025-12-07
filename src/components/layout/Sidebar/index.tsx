@@ -38,7 +38,6 @@ import { venueService } from '../../../services/business';
 import PermissionService from '../../../services/auth';
 import { PERMISSIONS } from '../../../types/auth';
 
-
 import { getUserFirstName } from '../../../utils/userUtils';
 import { useSidebarFlags } from '../../../flags/FlagContext';
 import { FlagGate } from '../../../flags/FlagComponent';
@@ -195,30 +194,14 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
 
     try {
       setStatusLoading(true);
-      const newStatus = !venueStatus.isOpen;
-      
-      console.log('Sidebar: Updating venue order status:', {
-        venueId: userData.venue.id,
-        currentStatus: venueStatus.isOpen,
-        newStatus: newStatus,
-        updateData: { is_open: newStatus }
-      });
-      
+      const newStatus = !venueStatus.isOpen;      
       // Update venue status directly using updateVenue - more efficient than openVenue/closeVenue
       // which try non-existent endpoints first before falling back to updateVenue
       const response = await venueService.updateVenue(userData.venue.id, { 
         is_open: newStatus 
       });
-
-      console.log('Sidebar: Venue status updated successfully:', response);
-
       // Refresh user data to get updated venue status
-      await refreshUserData();
-      
-      console.log('Sidebar: User data refreshed after venue status update');
-    } catch (error) {
-      console.error('Failed to update venue status:', error);
-      // Show error message to user
+      await refreshUserData();    } catch (error) {      // Show error message to user
       alert('Failed to update venue status. Please try again.');
     } finally {
       setStatusLoading(false);

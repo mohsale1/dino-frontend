@@ -12,6 +12,10 @@ import {
   Stack,
   IconButton,
   keyframes,
+  Paper,
+  Tabs,
+  Tab,
+  Badge,
 } from '@mui/material';
 import {
   Add,
@@ -48,12 +52,26 @@ const spin = keyframes`
   to { transform: rotate(360deg); }
 `;
 
+// TabPanel component
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: number;
+  value: number;
+}
+
+const TabPanel: React.FC<TabPanelProps> = ({ children, value, index }) => {
+  return (
+    <div hidden={value !== index}>
+      {value === index && <Box>{children}</Box>}
+    </div>
+  );
+};
+
 // Local interface for table areas
 interface TableArea {
   id: string;
   name: string;
   description?: string;
-  color: string;
   active: boolean;
 }
 
@@ -63,6 +81,7 @@ const TableManagement = () => {
   const [tables, setTables] = useState<Table[]>([]);
   const [areas, setAreas] = useState<TableArea[]>([]);
   const [selectedArea, setSelectedArea] = useState<string>('all');
+  const [tabValue, setTabValue] = useState(0);
   const [openTableDialog, setOpenTableDialog] = useState(false);
   const [openAreaDialog, setOpenAreaDialog] = useState(false);
   const [openQRViewer, setOpenQRViewer] = useState(false);
@@ -93,22 +112,14 @@ const TableManagement = () => {
   // Function to refresh both areas and tables data
   const refreshData = async () => {
     const venue = getVenue();
-    if (!venue?.id) {
-      console.log('No venue ID available for refresh');
-      return;
+    if (!venue?.id) {      return;
     }
 
     try {
-      console.log('Refreshing table data for venue:', venue.id);
-
       const [areasData, tablesData] = await Promise.all([
         tableService.getAreas(venue.id),
         tableService.getTables({ venue_id: venue.id })
-      ]);
-
-      console.log('Areas refreshed:', areasData?.length || 0);
-      console.log('Tables refreshed:', tablesData?.data?.length || 0);
-      
+      ]);      
       let validTables: Table[] = [];
       if (tablesData && tablesData.data && Array.isArray(tablesData.data)) {
         validTables = tablesData.data;
@@ -119,12 +130,7 @@ const TableManagement = () => {
       const validAreas = Array.isArray(areasData) ? areasData : [];
 
       setAreas(validAreas);
-      setTables(validTables);
-
-      console.log('State updated - Areas:', validAreas.length, 'Tables:', validTables.length);
-    } catch (error) {
-      console.error('Error refreshing data:', error);
-      setSnackbar({ 
+      setTables(validTables);    } catch (error) {      setSnackbar({ 
         open: true, 
         message: 'Failed to refresh data. Please check your connection.', 
         severity: 'error' 
@@ -134,9 +140,7 @@ const TableManagement = () => {
 
   useEffect(() => {
     const loadData = async () => {
-      if (userDataLoading) {
-        console.log('UserDataContext still loading, waiting...');
-        return;
+      if (userDataLoading) {        return;
       }
 
       const venue = getVenue();
@@ -152,17 +156,10 @@ const TableManagement = () => {
       try {
         setLoading(true);
         setError(null);
-
-        console.log('Loading table data for venue:', venue.id);
-
         const [areasData, tablesData] = await Promise.all([
           tableService.getAreas(venue.id),
           tableService.getTables({ venue_id: venue.id })
         ]);
-
-        console.log('Initial load - Areas:', areasData?.length || 0);
-        console.log('Initial load - Tables response:', tablesData);
-
         let initialTables: Table[] = [];
         if (Array.isArray(tablesData?.data)) {
           initialTables = tablesData.data;
@@ -171,15 +168,10 @@ const TableManagement = () => {
         } else {
           initialTables = [];
         }
-
-        console.log('Initial load - Final tables:', initialTables.length, initialTables);
-
         setAreas(areasData);
         setTables(initialTables);
       } catch (error) {
-        // API failed - show error alert but keep UI visible
-        console.error('Failed to load table data:', error);
-        setError('Network error. Please check your connection.');
+        // API failed - show error alert but keep UI visible        setError('Network error. Please check your connection.');
       } finally {
         setLoading(false);
       }
@@ -214,19 +206,11 @@ const TableManagement = () => {
 
   const confirmDeleteTable = async () => {
     try {
-      setDeleteModal(prev => ({ ...prev, loading: true }));
-      console.log('Deleting table:', deleteModal.id);
-      const response = await tableService.deleteTable(deleteModal.id);
-      if (response.success) {
-        console.log('Table deleted, refreshing data...');
-        await refreshData();
-        console.log('Data refreshed after table deletion');
-        setSnackbar({ open: true, message: 'Table deleted successfully', severity: 'success' });
+      setDeleteModal(prev => ({ ...prev, loading: true }));      const response = await tableService.deleteTable(deleteModal.id);
+      if (response.success) {        await refreshData();        setSnackbar({ open: true, message: 'Table deleted successfully', severity: 'success' });
         setDeleteModal({ open: false, type: 'table', id: '', name: '', loading: false });
       }
-    } catch (error: any) {
-      console.error('Error deleting table:', error);
-      setSnackbar({ 
+    } catch (error: any) {      setSnackbar({ 
         open: true, 
         message: error.message || 'Failed to delete table', 
         severity: 'error' 
@@ -273,10 +257,7 @@ const TableManagement = () => {
         }
         if (!createData.venue_id) {
           throw new Error('Venue ID is required');
-        }
-        
-        console.log('Creating table with data:', createData);
-        
+        }        
         const response = await tableService.createTable(createData);
         if (response.success && response.data) {
           await refreshData();
@@ -284,9 +265,7 @@ const TableManagement = () => {
         }
       }
       setOpenTableDialog(false);
-    } catch (error: any) {
-      console.error('Error saving table:', error);
-      setSnackbar({ 
+    } catch (error: any) {      setSnackbar({ 
         open: true, 
         message: error.message || 'Failed to save table', 
         severity: 'error' 
@@ -312,9 +291,7 @@ const TableManagement = () => {
           severity: 'success' 
         });
       }
-    } catch (error: any) {
-      console.error('Error updating table status:', error);
-      setSnackbar({ 
+    } catch (error: any) {      setSnackbar({ 
         open: true, 
         message: error.message || 'Failed to update table status', 
         severity: 'error' 
@@ -357,19 +334,11 @@ const TableManagement = () => {
 
   const confirmDeleteArea = async () => {
     try {
-      setDeleteModal(prev => ({ ...prev, loading: true }));
-      console.log('Deleting area:', deleteModal.id);
-      await tableService.deleteArea(deleteModal.id);
-      console.log('Area deleted, refreshing data...');
-      
-      await refreshData();
-      console.log('Data refreshed after area deletion');
-      
+      setDeleteModal(prev => ({ ...prev, loading: true }));      await tableService.deleteArea(deleteModal.id);      
+      await refreshData();      
       setSnackbar({ open: true, message: `Area "${deleteModal.name}" deleted successfully`, severity: 'success' });
       setDeleteModal({ open: false, type: 'area', id: '', name: '', loading: false });
-    } catch (error: any) {
-      console.error('Error deleting area:', error);
-      setSnackbar({ 
+    } catch (error: any) {      setSnackbar({ 
         open: true, 
         message: error.message || 'Failed to delete area', 
         severity: 'error' 
@@ -385,32 +354,20 @@ const TableManagement = () => {
         throw new Error('No venue available');
       }
 
-      if (editingArea) {
-        console.log('Updating area:', editingArea.id, areaData);
-        await tableService.updateArea({
+      if (editingArea) {        await tableService.updateArea({
           id: editingArea.id,
           ...areaData,
         });
         setSnackbar({ open: true, message: 'Area updated successfully', severity: 'success' });
-      } else {
-        console.log('Creating new area:', areaData);
-        await tableService.createArea({
+      } else {        await tableService.createArea({
           name: areaData.name || '',
           description: areaData.description || '',
-          color: areaData.color || '#2196F3',
           active: areaData.active ?? true,
         }, venue.id);
         setSnackbar({ open: true, message: 'Area added successfully', severity: 'success' });
-      }
-      
-      console.log('Area operation completed, refreshing data...');
-      await refreshData();
-      console.log('Data refreshed after area save');
-      
+      }      await refreshData();      
       setOpenAreaDialog(false);
-    } catch (error: any) {
-      console.error('Error saving area:', error);
-      setSnackbar({ 
+    } catch (error: any) {      setSnackbar({ 
         open: true, 
         message: error.message || 'Failed to save area', 
         severity: 'error' 
@@ -424,10 +381,6 @@ const TableManagement = () => {
 
   const getAreaName = (areaId: string) => {
     return areas.find(area => area.id === areaId)?.name || 'Unknown';
-  };
-
-  const getAreaColor = (areaId: string) => {
-    return areas.find(area => area.id === areaId)?.color || '#2196F3';
   };
 
   const getStatusColor = (status: string) => {
@@ -611,8 +564,6 @@ const TableManagement = () => {
                 </Button>
               </FlagGate>
 
-
-
               <IconButton
                 onClick={refreshData}
                 disabled={loading}
@@ -668,48 +619,94 @@ const TableManagement = () => {
         )}
 
         <FlagGate flag="tables.showTableStats">
-          <Box sx={{ px: { xs: 3, sm: 4 }, py: 2 }}>
+          <Box sx={{ px: { xs: 3, sm: 4 }, py: 3 }}>
             <TableStats tables={tables} areas={areas} />
           </Box>
         </FlagGate>
-        
 
-
-        {/* Spacing between sections */}
-        <Box sx={{ height: { xs: 16, sm: 24 } }} />
-
-        <FlagGate flag="tables.showTableAreas">
-          <Box sx={{ px: { xs: 3, sm: 4 }, mb: 4 }}>
-            <TableAreas
-              areas={areas}
-              tables={tables}
-              onEditArea={handleEditArea}
-              onDeleteArea={handleDeleteArea}
-              onAddArea={handleAddArea}
+        {/* Tables Section with Tabs */}
+        <Paper sx={{ 
+          border: '1px solid', 
+          borderColor: 'divider',
+          backgroundColor: 'background.paper',
+          mx: { xs: 3, sm: 4 },
+          mb: 4
+        }}>
+          <Tabs 
+            value={tabValue} 
+            onChange={(e, newValue) => setTabValue(newValue)}
+            variant={isMobile ? "fullWidth" : "standard"}
+            sx={{ 
+              borderBottom: '1px solid', 
+              borderColor: 'divider',
+              '& .MuiTab-root': {
+                minHeight: { xs: 48, sm: 48 },
+                fontSize: { xs: '0.875rem', sm: '0.875rem' },
+                fontWeight: 500,
+                textTransform: 'none',
+                minWidth: { xs: 'auto', sm: 160 },
+                px: { xs: 1, sm: 2 }
+              }
+            }}
+          >
+            <Tab 
+              icon={
+                <Badge badgeContent={filteredTables.length} color="primary">
+                  <TableRestaurant fontSize={isMobile ? "small" : "medium"} />
+                </Badge>
+              } 
+              label={isMobile ? "All Tables" : "All Tables"}
+              iconPosition={isMobile ? "top" : "start"}
             />
-          </Box>
-        </FlagGate>
+            <Tab 
+              icon={
+                <Badge badgeContent={areas.length} color="secondary">
+                  <People fontSize={isMobile ? "small" : "medium"} />
+                </Badge>
+              } 
+              label={isMobile ? "Areas" : "Manage Areas"}
+              iconPosition={isMobile ? "top" : "start"}
+            />
+          </Tabs>
 
-        <Box sx={{ px: { xs: 3, sm: 4 }, pb: 4 }}>
-          <TablesGrid
-            filteredTables={filteredTables}
-            tables={tables}
-            areas={areas}
-            selectedArea={selectedArea}
-            setSelectedArea={setSelectedArea}
-            getAreaName={getAreaName}
-            getAreaColor={getAreaColor}
-            getStatusColor={getStatusColor}
-            getStatusIcon={getStatusIcon}
-            onToggleTableStatus={handleToggleTableStatus}
-            onGenerateQR={generateQRCode}
-            onPrintQR={printQRCode}
-            onEditTable={handleEditTable}
-            onDeleteTable={handleDeleteTable}
-            onAddTable={handleAddTable}
-            isMobile={isMobile}
-          />
-        </Box>
+          {/* All Tables Tab */}
+          <TabPanel value={tabValue} index={0}>
+            <Box sx={{ p: { xs: 2, sm: 3 } }}>
+              <TablesGrid
+                filteredTables={filteredTables}
+                tables={tables}
+                areas={areas}
+                selectedArea={selectedArea}
+                setSelectedArea={setSelectedArea}
+                getAreaName={getAreaName}
+                getStatusColor={getStatusColor}
+                getStatusIcon={getStatusIcon}
+                onToggleTableStatus={handleToggleTableStatus}
+                onGenerateQR={generateQRCode}
+                onPrintQR={printQRCode}
+                onEditTable={handleEditTable}
+                onDeleteTable={handleDeleteTable}
+                onAddTable={handleAddTable}
+                isMobile={isMobile}
+              />
+            </Box>
+          </TabPanel>
+
+          {/* Manage Areas Tab */}
+          <TabPanel value={tabValue} index={1}>
+            <Box sx={{ p: { xs: 2, sm: 3 } }}>
+              <FlagGate flag="tables.showTableAreas">
+                <TableAreas
+                  areas={areas}
+                  tables={tables}
+                  onEditArea={handleEditArea}
+                  onDeleteArea={handleDeleteArea}
+                  onAddArea={handleAddArea}
+                />
+              </FlagGate>
+            </Box>
+          </TabPanel>
+        </Paper>
 
         {/* Dialogs */}
         <TableDialog

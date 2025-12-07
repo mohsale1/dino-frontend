@@ -1,6 +1,5 @@
 import { apiService } from '../../utils/api';
-import { 
-  Order,
+import { Order,
   OrderCreate,
   OrderUpdate,
   OrderItem,
@@ -93,30 +92,16 @@ class OrderService {
 
   // Create public order (from QR scan)
   async createPublicOrder(orderData: PublicOrderCreate): Promise<ApiResponse<any>> {
-    try {
-      console.log('🔍 OrderService: Creating public order with data:', orderData);
-      const response = await apiService.post<any>('/orders/public/create-order', orderData);
-      console.log('🔍 OrderService: Raw API response:', response);
-      
+    try {      const response = await apiService.post<any>('/orders/public/create-order', orderData);      
       // Handle different response formats
-      if (response && (response.success || response.data)) {
-        console.log('✅ OrderService: Order created successfully');
-        return response;
-      } else {
-        console.error('❌ OrderService: Invalid response format:', response);
-        throw new Error('Invalid response format from server');
+      if (response && (response.success || response.data)) {        return response;
+      } else {        throw new Error('Invalid response format from server');
       }
-    } catch (error: any) {
-      console.error('❌ OrderService: Error creating order:', error);
-      
+    } catch (error: any) {      
       // Check if it's actually a successful response with different format
-      if (error.response?.status === 200 || error.response?.status === 201) {
-        console.log('🔍 OrderService: Checking if error is actually success...');
-        const responseData = error.response?.data;
+      if (error.response?.status === 200 || error.response?.status === 201) {        const responseData = error.response?.data;
         
-        if (responseData && (responseData.id || responseData.order_number || responseData.order_id)) {
-          console.log('✅ OrderService: Order actually succeeded despite error format');
-          return {
+        if (responseData && (responseData.id || responseData.order_number || responseData.order_id)) {          return {
             success: true,
             data: responseData,
             message: 'Order created successfully'
@@ -155,14 +140,8 @@ class OrderService {
 
   // Update order status
   async updateOrderStatus(orderId: string, status: OrderStatus): Promise<ApiResponse<void>> {
-    try {
-      console.log(`🔍 OrderService: Updating order ${orderId} status to ${status}`);
-      const response = await apiService.put<void>(`/orders/${orderId}/status?new_status=${status}`);
-      console.log('✅ OrderService: Order status updated successfully');
-      return response;
-    } catch (error: any) {
-      console.error('❌ OrderService: Failed to update order status:', error);
-      throw new Error(error.response?.data?.detail || error.message || 'Failed to update order status');
+    try {      const response = await apiService.put<void>(`/orders/${orderId}/status?new_status=${status}`);      return response;
+    } catch (error: any) {      throw new Error(error.response?.data?.detail || error.message || 'Failed to update order status');
     }
   }
 

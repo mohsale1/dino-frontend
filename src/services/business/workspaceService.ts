@@ -1,6 +1,5 @@
 import { apiService } from '../../utils/api';
-import { 
-  Workspace, 
+import { Workspace, 
   WorkspaceCreate,
   WorkspaceUpdate,
   WorkspaceStatistics,
@@ -28,14 +27,9 @@ class WorkspaceService {
       if (filters?.is_active !== undefined) params.append('is_active', filters.is_active.toString());
 
       const queryString = params.toString();
-      const url = queryString ? `/workspaces?${queryString}` : '/workspaces';
+      const url = queryString ? `/workspaces?${queryString}` : '/workspaces';      const response = await apiService.get<PaginatedResponse<Workspace>>(url);
       
-      console.log('Fetching workspaces from:', url);
-      const response = await apiService.get<PaginatedResponse<Workspace>>(url);
-      
-      if (response.success && response.data) {
-        console.log('Workspaces fetched successfully:', response.data);
-        return response.data;
+      if (response.success && response.data) {        return response.data;
       }
       
       return response.data || {
@@ -48,9 +42,7 @@ class WorkspaceService {
         has_next: false,
         has_prev: false
       };
-    } catch (error: any) {
-      console.error('Error fetching workspaces:', error);
-      
+    } catch (error: any) {      
       // If it's an authentication error, don't return empty data
       if (error.response?.status === 401) {
         throw new Error('Authentication required. Please log in again.');
@@ -60,9 +52,7 @@ class WorkspaceService {
         throw new Error('You do not have permission to access workspaces.');
       }
       
-      if (error.response?.status === 404) {
-        console.warn('Workspaces endpoint not found, returning empty data');
-      }
+      if (error.response?.status === 404) {      }
       
       return {
         success: true,
@@ -111,9 +101,7 @@ class WorkspaceService {
   }
 
   // Get workspace venues - DEPRECATED: Use venueService.getVenuesByWorkspace() instead
-  async getWorkspaceVenues(workspaceId: string): Promise<Venue[]> {
-    console.warn('⚠️ WorkspaceService.getWorkspaceVenues() is deprecated. Use venueService.getVenuesByWorkspace() instead.');
-    try {
+  async getWorkspaceVenues(workspaceId: string): Promise<Venue[]> {    try {
       const response = await apiService.get<Venue[]>(`/workspaces/${workspaceId}/venues`);
       return response.data || [];
     } catch (error) {
@@ -195,8 +183,6 @@ class WorkspaceService {
   async getVenues(workspaceId: string): Promise<Venue[]> {
     return this.getWorkspaceVenues(workspaceId);
   }
-
-
 
   // Get workspace statistics
   async getWorkspaceStatistics(workspaceId: string): Promise<WorkspaceStatistics | null> {
@@ -282,16 +268,12 @@ class WorkspaceService {
     return { isValid: errors.length === 0, errors };
   }
 
-
-
   // Debug methods
   async debugWorkspaces(): Promise<any> {
     try {
       const response = await apiService.get<any>('/workspaces/debug');
       return response.data || response;
-    } catch (error: any) {
-      console.error('Debug workspaces error:', error);
-      return {
+    } catch (error: any) {      return {
         success: false,
         error: error.message,
         status: error.response?.status
@@ -303,9 +285,7 @@ class WorkspaceService {
     try {
       const response = await apiService.get<any>('/workspaces/public-debug');
       return response.data || response;
-    } catch (error: any) {
-      console.error('Public debug workspaces error:', error);
-      return {
+    } catch (error: any) {      return {
         success: false,
         error: error.message,
         status: error.response?.status

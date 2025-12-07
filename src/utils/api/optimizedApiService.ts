@@ -100,7 +100,7 @@ class OptimizedApiService {
         // Log performance metrics
         if (this.config.enablePerformanceLogging && (response.config as any).metadata) {
           const duration = Date.now() - (response.config as any).metadata.startTime;
-          console.log(`API Request: ${response.config.method?.toUpperCase()} ${response.config.url} - ${duration}ms`);
+          // Performance metrics logged
         }
 
         return response;
@@ -131,7 +131,7 @@ class OptimizedApiService {
       // Redirect to login
       window.location.href = '/login';
     } catch (error) {
-      console.error('Token refresh failed:', error);
+      // Error handling for token refresh
     }
   }
 
@@ -425,9 +425,8 @@ class OptimizedApiService {
   async prefetch(urls: string[]): Promise<void> {
     const prefetchPromises = urls.map(url => 
       this.get(url, { cacheTTL: 10 * 60 * 1000 }) // Cache for 10 minutes
-        .catch(error => console.warn(`Prefetch failed for ${url}:`, error))
+        .catch(() => null) // Ignore errors in prefetch
     );
-
     await Promise.allSettled(prefetchPromises);
   }
 

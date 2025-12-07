@@ -106,9 +106,7 @@ const VenueStatusManager: React.FC<VenueStatusManagerProps> = ({
       
       setOpenDialog(false);
       setReason('');
-    } catch (error) {
-      console.error('Error updating venue status:', error);
-    } finally {
+    } catch (error) {    } finally {
       setLoading(false);
     }
   };

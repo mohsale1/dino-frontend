@@ -424,6 +424,7 @@ export const VALIDATION_PATTERNS = {
 
 // Re-export specialized validation modules
 export * from './registrationValidation';
+export * from './customerValidation';
 
 /**
  * Common validation limits

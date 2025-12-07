@@ -5,7 +5,6 @@
 
 export { default as AppInitializer } from './AppInitializer';
 export { default as ErrorBoundary } from './ErrorBoundary';
-export { default as ErrorPage } from './ErrorPage';
 export { default as Layout, default } from './Layout';
 export { default as ThemeToggle } from './ThemeToggle';
 export { default as NotificationCenter } from './NotificationCenter';

@@ -131,34 +131,19 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
 
   // Connect to WebSocket when user is authenticated
   const connect = (venueId?: string) => {
-    if (!isAuthenticated || !user) {
-      console.log('🔌 WebSocket: Not connecting - user not authenticated');
-      return;
+    if (!isAuthenticated || !user) {      return;
     }
 
     const token = localStorage.getItem('dino_token');
-    if (!token) {
-      console.log('🔌 WebSocket: Not connecting - no token found');
-      return;
+    if (!token) {      return;
     }
 
     // Determine venue ID
-    const targetVenueId = venueId || user.venueId;
-    
-    console.log('🔌 WebSocket: Attempting to connect...', {
-      userId: user.id,
-      venueId: targetVenueId,
-      hasToken: !!token
-    });
-    
+    const targetVenueId = venueId || user.venue_id || user.venueId;    
     if (targetVenueId) {
-      // Connect to venue WebSocket for venue-specific updates
-      console.log('🔌 WebSocket: Connecting to venue WebSocket');
-      websocketService.connectToVenue(targetVenueId, token, eventHandlers);
+      // Connect to venue WebSocket for venue-specific updates      websocketService.connectToVenue(targetVenueId, token, eventHandlers);
     } else {
-      // Connect to user WebSocket for personal notifications
-      console.log('🔌 WebSocket: Connecting to user WebSocket');
-      websocketService.connectToUser(user.id, token, eventHandlers);
+      // Connect to user WebSocket for personal notifications      websocketService.connectToUser(user.id, token, eventHandlers);
     }
 
     // Update connection state periodically

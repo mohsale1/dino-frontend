@@ -219,13 +219,9 @@ export const OptimizedAppProvider: React.FC<{ children: React.ReactNode }> = ({ 
           }
         }
 
-      } catch (error) {
-        console.error('App initialization error:', error);
-        dispatch({ type: 'SET_ERROR', payload: 'Failed to initialize application' });
+      } catch (error) {        dispatch({ type: 'SET_ERROR', payload: 'Failed to initialize application' });
       } finally {
-        const initTime = performanceService.endMeasure('app_initialization');
-        console.log(`App initialized in ${initTime.toFixed(2)}ms`);
-      }
+        const initTime = performanceService.endMeasure('app_initialization');      }
     };
 
     initializeApp();
@@ -294,9 +290,7 @@ export const OptimizedAppProvider: React.FC<{ children: React.ReactNode }> = ({ 
         StorageManager.setUserData(response.data);
         dispatch({ type: 'SET_USER', payload: response.data });
       }
-    } catch (error) {
-      console.error('Failed to refresh user:', error);
-      // Don't logout on refresh failure, just log the error
+    } catch (error) {      // Don't logout on refresh failure, just log the error
     }
   }, [state.isAuthenticated]);
 
@@ -308,9 +302,7 @@ export const OptimizedAppProvider: React.FC<{ children: React.ReactNode }> = ({ 
         StorageManager.setPermissions(response.data);
         dispatch({ type: 'SET_PERMISSIONS', payload: response.data });
       }
-    } catch (error) {
-      console.warn('Failed to load permissions:', error);
-    }
+    } catch (error) {    }
   }, []);
 
   const loadWorkspaceData = useCallback(async () => {
@@ -322,9 +314,7 @@ export const OptimizedAppProvider: React.FC<{ children: React.ReactNode }> = ({ 
         StorageManager.setWorkspaceData(response.data);
         dispatch({ type: 'SET_WORKSPACE', payload: response.data });
       }
-    } catch (error) {
-      console.warn('Failed to load workspace:', error);
-    }
+    } catch (error) {    }
   }, [state.user?.workspace_id]);
 
   const loadVenueData = useCallback(async () => {
@@ -336,9 +326,7 @@ export const OptimizedAppProvider: React.FC<{ children: React.ReactNode }> = ({ 
         StorageManager.setVenueData(response.data);
         dispatch({ type: 'SET_VENUE', payload: response.data });
       }
-    } catch (error) {
-      console.warn('Failed to load venue:', error);
-    }
+    } catch (error) {    }
   }, [state.user?.venue_id]);
 
   const loadVenues = useCallback(async (): Promise<void> => {
@@ -351,9 +339,7 @@ export const OptimizedAppProvider: React.FC<{ children: React.ReactNode }> = ({ 
       if (response.success && response.data) {
         dispatch({ type: 'SET_VENUES', payload: response.data });
       }
-    } catch (error) {
-      console.error('Failed to load venues:', error);
-      dispatch({ type: 'SET_ERROR', payload: 'Failed to load venues' });
+    } catch (error) {      dispatch({ type: 'SET_ERROR', payload: 'Failed to load venues' });
     }
   }, [state.user?.workspace_id]);
 
@@ -369,9 +355,7 @@ export const OptimizedAppProvider: React.FC<{ children: React.ReactNode }> = ({ 
         dispatch({ type: 'SET_VENUE', payload: venue });
         performanceService.trackUserInteraction('venue_switch');
       }
-    } catch (error) {
-      console.error('Failed to switch venue:', error);
-      dispatch({ type: 'SET_ERROR', payload: 'Failed to switch venue' });
+    } catch (error) {      dispatch({ type: 'SET_ERROR', payload: 'Failed to switch venue' });
     }
   }, [state.venues]);
 

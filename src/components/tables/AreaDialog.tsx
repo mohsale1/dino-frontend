@@ -39,18 +39,20 @@ const AreaDialog: React.FC<AreaDialogProps> = ({
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    color: '#2196F3',
     active: true,
   });
 
   useEffect(() => {
     if (area) {
-      setFormData(area);
+      setFormData({
+        name: area.name || '',
+        description: area.description || '',
+        active: area.active !== undefined ? area.active : true,
+      });
     } else {
       setFormData({
         name: '',
         description: '',
-        color: '#2196F3',
         active: true,
       });
     }
@@ -63,10 +65,6 @@ const AreaDialog: React.FC<AreaDialogProps> = ({
   const handleChange = (field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
-
-  const colorOptions = [
-    '#2196F3', '#4CAF50', '#FF9800', '#9C27B0', '#F44336', '#607D8B', '#795548', '#FF5722'
-  ];
 
   if (isMobile) {
     return (
@@ -106,12 +104,12 @@ const AreaDialog: React.FC<AreaDialogProps> = ({
               </Toolbar>
             </AppBar>
 
-            <Box sx={{ overflow: 'auto', p: { xs: 2, sm: 1.5 } }}>
-              <Stack spacing={{ xs: 2, sm: 1 }}>
+            <Box sx={{ overflow: 'auto', p: { xs: 2, sm: 3 } }}>
+              <Stack spacing={3}>
                 <TextField
                   fullWidth
                   label="Area Name"
-                  value={formData.name || ''}
+                  value={formData.name}
                   onChange={(e) => handleChange('name', e.target.value)}
                   size="medium"
                 />
@@ -119,44 +117,15 @@ const AreaDialog: React.FC<AreaDialogProps> = ({
                   fullWidth
                   label="Description"
                   multiline
-                  rows={2}
-                  value={formData.description || ''}
+                  rows={3}
+                  value={formData.description}
                   onChange={(e) => handleChange('description', e.target.value)}
                   size="medium"
                 />
-                <Box>
-                  <Typography variant="body2" gutterBottom fontWeight="600" sx={{ mb: 0.5 }}>
-                    Color
-                  </Typography>
-                  <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                    {colorOptions.map((color) => (
-                      <Box
-                        key={color}
-                        sx={{
-                          width: 36,
-                          height: 36,
-                          backgroundColor: color,
-                          borderRadius: 1,
-                          cursor: 'pointer',
-                          border: formData.color === color ? '3px solid #000' : '1px solid #ddd',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          transition: 'all 0.2s ease-in-out',
-                          '&:hover': {
-                            transform: 'scale(1.1)',
-                            boxShadow: 2
-                          }
-                        }}
-                        onClick={() => handleChange('color', color)}
-                      />
-                    ))}
-                  </Box>
-                </Box>
                 <FormControlLabel
                   control={
                     <Switch
-                      checked={formData.active !== undefined ? formData.active : true}
+                      checked={formData.active}
                       onChange={(e) => handleChange('active', e.target.checked)}
                     />
                   }
@@ -165,7 +134,7 @@ const AreaDialog: React.FC<AreaDialogProps> = ({
               </Stack>
             </Box>
 
-            <Box sx={{ p: { xs: 2, sm: 1.5 }, borderTop: '1px solid', borderColor: 'divider', bgcolor: 'background.default' }}>
+            <Box sx={{ p: { xs: 2, sm: 3 }, borderTop: '1px solid', borderColor: 'divider', bgcolor: 'background.default' }}>
               <Stack direction="row" spacing={2}>
                 <Button onClick={onClose} fullWidth variant="outlined">
                   Cancel
@@ -208,8 +177,9 @@ const AreaDialog: React.FC<AreaDialogProps> = ({
             <TextField
               fullWidth
               label="Area Name"
-              value={formData.name || ''}
+              value={formData.name}
               onChange={(e) => handleChange('name', e.target.value)}
+              placeholder="e.g., Main Hall, Outdoor Patio, VIP Section"
             />
           </Grid>
           <Grid item xs={12}>
@@ -217,45 +187,17 @@ const AreaDialog: React.FC<AreaDialogProps> = ({
               fullWidth
               label="Description"
               multiline
-              rows={2}
-              value={formData.description || ''}
+              rows={3}
+              value={formData.description}
               onChange={(e) => handleChange('description', e.target.value)}
+              placeholder="Describe this seating area..."
             />
-          </Grid>
-          <Grid item xs={12}>
-            <Typography variant="subtitle1" gutterBottom fontWeight="600" sx={{ mb: 1.5 }}>
-              Color
-            </Typography>
-            <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mt: 1 }}>
-              {colorOptions.map((color) => (
-                <Box
-                  key={color}
-                  sx={{
-                    width: 44,
-                    height: 44,
-                    backgroundColor: color,
-                    borderRadius: 1,
-                    cursor: 'pointer',
-                    border: formData.color === color ? '3px solid #000' : '1px solid #ddd',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    transition: 'all 0.2s ease-in-out',
-                    '&:hover': {
-                      transform: 'scale(1.1)',
-                      boxShadow: 2
-                    }
-                  }}
-                  onClick={() => handleChange('color', color)}
-                />
-              ))}
-            </Box>
           </Grid>
           <Grid item xs={12}>
             <FormControlLabel
               control={
                 <Switch
-                  checked={formData.active !== undefined ? formData.active : true}
+                  checked={formData.active}
                   onChange={(e) => handleChange('active', e.target.checked)}
                 />
               }

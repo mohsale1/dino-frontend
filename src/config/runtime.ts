@@ -19,8 +19,6 @@ export interface RuntimeConfig {
   
   // Feature Flags
   DEBUG_MODE: boolean;
-  ENABLE_THEME_TOGGLE: boolean;
-
   ENABLE_ANALYTICS: boolean;
   ENABLE_QR_CODES: boolean;
   ENABLE_NOTIFICATIONS: boolean;
@@ -78,8 +76,6 @@ const DEFAULT_CONFIG: RuntimeConfig = {
   
   // Feature Flags
   DEBUG_MODE: false,
-  ENABLE_THEME_TOGGLE: false,
-
   ENABLE_ANALYTICS: true,
   ENABLE_QR_CODES: true,
   ENABLE_NOTIFICATIONS: true,
@@ -135,8 +131,6 @@ export const getRuntimeConfig = (): RuntimeConfig => {
       APP_VERSION: process.env.REACT_APP_VERSION || DEFAULT_CONFIG.APP_VERSION,
       APP_ENV: process.env.REACT_APP_ENV || DEFAULT_CONFIG.APP_ENV,
       DEBUG_MODE: process.env.REACT_APP_DEBUG_MODE === 'true',
-      ENABLE_THEME_TOGGLE: process.env.REACT_APP_ENABLE_THEME_TOGGLE === 'true',
-
       ENABLE_ANALYTICS: process.env.REACT_APP_ENABLE_ANALYTICS !== 'false',
       ENABLE_QR_CODES: process.env.REACT_APP_ENABLE_QR_CODES !== 'false',
       ENABLE_NOTIFICATIONS: process.env.REACT_APP_ENABLE_NOTIFICATIONS !== 'false',
@@ -164,7 +158,6 @@ export const getRuntimeConfig = (): RuntimeConfig => {
   
   // In production, try to get from window.APP_CONFIG (runtime)
   if (typeof window !== 'undefined' && window.APP_CONFIG) {
-    console.log('🔧 Using runtime configuration from window.APP_CONFIG');
     return { ...DEFAULT_CONFIG, ...window.APP_CONFIG };
   }
   
@@ -199,40 +192,17 @@ export const isProduction = (): boolean => {
  */
 export const logRuntimeConfig = (): void => {
   const config = getRuntimeConfig();
-  
   if (config.DEBUG_MODE || isDevelopment()) {
-    // Use console directly for configuration logging to avoid circular dependency
-    console.group('🔧 Runtime Configuration');
-    console.log('Environment:', config.APP_ENV);
-    console.log('API Base URL:', config.API_BASE_URL);
-    console.log('WebSocket URL:', config.WS_URL);
-    console.log('Backend URL:', config.BACKEND_URL);
-    console.log('App Name:', config.APP_NAME);
-    console.log('App Version:', config.APP_VERSION);
-    console.log('Debug Mode:', config.DEBUG_MODE);
-    console.log('Feature Flags:', {
-      ENABLE_THEME_TOGGLE: config.ENABLE_THEME_TOGGLE,
-      ENABLE_ANALYTICS: config.ENABLE_ANALYTICS,
-      ENABLE_QR_CODES: config.ENABLE_QR_CODES,
-      ENABLE_NOTIFICATIONS: config.ENABLE_NOTIFICATIONS,
-      ENABLE_I18N: config.ENABLE_I18N,
-      ENABLE_ANIMATIONS: config.ENABLE_ANIMATIONS
-    });
-    console.log('Configuration Source:', window.APP_CONFIG ? 'Runtime' : 'Build-time/Default');
-    console.groupEnd();
+    // Configuration logging disabled in production
   }
 };
 
 // Export the runtime configuration instance
 export const RUNTIME_CONFIG = getRuntimeConfig();
 
-// Log configuration on module load
 if (typeof window !== 'undefined') {
   // Delay logging to ensure window.APP_CONFIG is loaded
   setTimeout(() => {
-    console.log('🔧 Runtime config loading - window.APP_CONFIG:', window.APP_CONFIG);
-    console.log('🔧 Runtime config loading - NODE_ENV:', process.env.NODE_ENV);
-    console.log('🔧 Runtime config loading - REACT_APP_API_BASE_URL:', process.env.REACT_APP_API_BASE_URL);
     logRuntimeConfig();
   }, 100);
 }

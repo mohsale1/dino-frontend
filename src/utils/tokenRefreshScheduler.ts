@@ -20,10 +20,7 @@ class TokenRefreshScheduler {
     // Check every minute
     this.refreshInterval = setInterval(() => {
       this.checkAndRefreshToken();
-    }, 60 * 1000);
-
-    console.log('🔄 Token refresh scheduler started');
-  }
+    }, 60 * 1000);  }
 
   /**
    * Stop the token refresh scheduler
@@ -31,9 +28,7 @@ class TokenRefreshScheduler {
   stop(): void {
     if (this.refreshInterval) {
       clearInterval(this.refreshInterval);
-      this.refreshInterval = null;
-      console.log('⏹️ Token refresh scheduler stopped');
-    }
+      this.refreshInterval = null;    }
   }
 
   /**
@@ -51,12 +46,8 @@ class TokenRefreshScheduler {
 
     const { isExpired, expiresIn } = authService.getTokenExpiryInfo();
 
-    if (isExpired) {
-      console.log('🚨 Token has expired, attempting refresh...');
-      await this.performRefresh();
-    } else if (expiresIn < 10 * 60 * 1000) { // Less than 10 minutes
-      console.log('⏰ Token expires soon, refreshing proactively...');
-      await this.performRefresh();
+    if (isExpired) {      await this.performRefresh();
+    } else if (expiresIn < 10 * 60 * 1000) { // Less than 10 minutes      await this.performRefresh();
     }
   }
 
@@ -72,15 +63,9 @@ class TokenRefreshScheduler {
 
     try {
       const newToken = await authService.refreshToken();
-      if (newToken) {
-        console.log('✅ Token refreshed successfully by scheduler');
-      } else {
-        console.warn('⚠️ Token refresh failed, stopping scheduler');
-        this.stop();
+      if (newToken) {      } else {        this.stop();
       }
-    } catch (error) {
-      console.error('❌ Scheduled token refresh failed:', error);
-      this.stop();
+    } catch (error) {      this.stop();
     } finally {
       this.isRefreshing = false;
     }
@@ -90,9 +75,7 @@ class TokenRefreshScheduler {
    * Force refresh token immediately
    */
   async forceRefresh(): Promise<boolean> {
-    if (this.isRefreshing) {
-      console.log('🔄 Refresh already in progress...');
-      return false;
+    if (this.isRefreshing) {      return false;
     }
 
     await this.performRefresh();

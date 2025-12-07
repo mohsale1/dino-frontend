@@ -1,241 +1,161 @@
+/**
+ * Error Handler Hook
+ * 
+ * Provides centralized error handling with user-friendly messages and toast notifications
+ */
+
 import { useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-import { logger } from '../utils/logger';
+import { useToast } from '../contexts/ToastContext';
+import { 
+  getUserFriendlyErrorMessage, 
+  getErrorDetails,
+  isAuthError,
+  isNetworkError,
+  formatErrorForDisplay 
+} from '../utils/errorMessages';
 
-interface ErrorHandlerOptions {
+export interface UseErrorHandlerOptions {
   showToast?: boolean;
-  redirectTo?: string;
   logError?: boolean;
-  retryAction?: () => void;
+  onAuthError?: () => void;
+  onNetworkError?: () => void;
 }
 
-interface ErrorInfo {
-  message: string;
-  code?: string | number;
-  type: 'network' | 'auth' | 'permission' | 'validation' | 'server' | 'client' | 'unknown';
-  severity: 'low' | 'medium' | 'high' | 'critical';
-  userFriendlyMessage: string;
-  suggestions: string[];
+export interface UseErrorHandlerReturn {
+  handleError: (error: any, customMessage?: string) => void;
+  handleApiError: (error: any, context?: string) => void;
+  handleValidationError: (error: any) => Record<string, string>;
+  clearError: () => void;
 }
 
-export const useErrorHandler = () => {
-  const navigate = useNavigate();
-  const { logout, isAuthenticated } = useAuth();
+/**
+ * Custom hook for error handling
+ */
+export function useErrorHandler(options: UseErrorHandlerOptions = {}): UseErrorHandlerReturn {
+  const {
+    showToast = true,
+    logError = true,
+    onAuthError,
+    onNetworkError,
+  } = options;
 
-  const analyzeError = useCallback((error: any): ErrorInfo => {
-    const errorMessage = error?.message || error?.toString() || 'Unknown error';
-    const errorCode = error?.response?.status || error?.code || error?.status;
+  const toast = useToast();
+
+  /**
+   * Handle generic errors
+   */
+  const handleError = useCallback((error: any, customMessage?: string) => {
+    const errorDetails = getErrorDetails(error);
     
-    // Network errors
-    if (errorMessage.includes('Network') || errorMessage.includes('fetch') || errorCode === 'NETWORK_ERROR') {
-      return {
-        message: errorMessage,
-        code: errorCode,
-        type: 'network',
-        severity: 'medium',
-        userFriendlyMessage: 'Connection problem. Please check your internet connection.',
-        suggestions: [
-          'Check your internet connection',
-          'Try refreshing the page',
-          'Contact support if the problem persists'
-        ]
-      };
+    // Log error if enabled
+    if (logError) {    }
+
+    // Show toast notification if enabled
+    if (showToast) {
+      const message = customMessage || errorDetails.message;
+      toast.showError(message);
     }
 
-    // Authentication errors
-    if (errorCode === 401 || errorMessage.includes('unauthorized') || errorMessage.includes('token')) {
-      return {
-        message: errorMessage,
-        code: errorCode,
-        type: 'auth',
-        severity: 'high',
-        userFriendlyMessage: 'Your session has expired. Please log in again.',
-        suggestions: [
-          'Log in again',
-          'Clear your browser cache',
-          'Contact support if you continue having issues'
-        ]
-      };
+    // Handle specific error types
+    if (isAuthError(error) && onAuthError) {
+      onAuthError();
     }
 
-    // Permission errors
-    if (errorCode === 403 || errorMessage.includes('permission') || errorMessage.includes('forbidden')) {
-      return {
-        message: errorMessage,
-        code: errorCode,
-        type: 'permission',
-        severity: 'medium',
-        userFriendlyMessage: 'You don\'t have permission to perform this action.',
-        suggestions: [
-          'Contact your administrator for access',
-          'Check if you have the required permissions',
-          'Try logging out and back in'
-        ]
-      };
+    if (isNetworkError(error) && onNetworkError) {
+      onNetworkError();
     }
+  }, [showToast, logError, toast, onAuthError, onNetworkError]);
 
-    // Not found errors
-    if (errorCode === 404 || errorMessage.includes('not found')) {
-      return {
-        message: errorMessage,
-        code: errorCode,
-        type: 'client',
-        severity: 'low',
-        userFriendlyMessage: 'The requested resource was not found.',
-        suggestions: [
-          'Check the URL for typos',
-          'Go back to the previous page',
-          'Contact support if the issue persists'
-        ]
-      };
-    }
+  /**
+   * Handle API errors with context
+   */
+  const handleApiError = useCallback((error: any, context?: string) => {
+    const errorDetails = getErrorDetails(error);
+    const formattedError = formatErrorForDisplay(error);
+    
+    // Log error with context
+    if (logError) {    }
 
-    // Validation errors
-    if (errorCode === 400 || errorMessage.includes('validation') || errorMessage.includes('invalid')) {
-      return {
-        message: errorMessage,
-        code: errorCode,
-        type: 'validation',
-        severity: 'low',
-        userFriendlyMessage: 'Please check your input and try again.',
-        suggestions: [
-          'Review the form for errors',
-          'Make sure all required fields are filled',
-          'Check that your input follows the required format'
-        ]
-      };
-    }
-
-    // Server errors
-    if (errorCode >= 500 || errorMessage.includes('server') || errorMessage.includes('internal')) {
-      return {
-        message: errorMessage,
-        code: errorCode,
-        type: 'server',
-        severity: 'high',
-        userFriendlyMessage: 'Something went wrong on our end. Please try again after some time.',
-        suggestions: [
-          'Try again in a few minutes',
-          'Refresh the page',
-          'Contact support if the issue continues'
-        ]
-      };
-    }
-
-    // Component loading errors
-    if (errorMessage.includes('Loading chunk') || errorMessage.includes('ChunkLoadError')) {
-      return {
-        message: errorMessage,
-        code: 'CHUNK_LOAD_ERROR',
-        type: 'client',
-        severity: 'medium',
-        userFriendlyMessage: 'Failed to load page content. This usually happens after an app update.',
-        suggestions: [
-          'Refresh the page',
-          'Clear your browser cache',
-          'Try again in a few moments'
-        ]
-      };
-    }
-
-    // Generic error
-    return {
-      message: errorMessage,
-      code: errorCode,
-      type: 'unknown',
-      severity: 'medium',
-      userFriendlyMessage: 'Something went wrong. Please try again after some time.',
-      suggestions: [
-        'Try refreshing the page',
-        'Check your internet connection',
-        'Contact support if the problem persists'
-      ]
-    };
-  }, []);
-
-  const handleError = useCallback((error: any, options: ErrorHandlerOptions = {}) => {
-    const {
-      showToast = true,
-      redirectTo,
-      logError = true,
-      retryAction
-    } = options;
-
-    const errorInfo = analyzeError(error);
-
-    // Log the error
-    if (logError) {
-      const logData = {
-        error: errorInfo,
-        originalError: error,
-        timestamp: new Date().toISOString(),
-        url: window.location.href,
-        userAgent: navigator.userAgent,
-        isAuthenticated,
-      };
-
-      if (errorInfo.severity === 'critical' || errorInfo.severity === 'high') {
-        logger.error('Error handled by useErrorHandler', logData);
-      } else {
-        logger.warn('Error handled by useErrorHandler', logData);
+    // Show toast with formatted message
+    if (showToast) {
+      const severity = formattedError.severity;
+      const message = context 
+        ? `${context}: ${formattedError.message}`
+        : formattedError.message;
+      
+      switch (severity) {
+        case 'error':
+          toast.showError(message);
+          break;
+        case 'warning':
+          toast.showWarning(message);
+          break;
+        case 'info':
+          toast.showInfo(message);
+          break;
       }
     }
 
-    // Handle authentication errors
-    if (errorInfo.type === 'auth' && isAuthenticated) {
-      logout();
-      navigate('/login', { 
-        state: { 
-          message: 'Your session has expired. Please log in again.',
-          from: window.location.pathname 
-        }
+    // Handle specific error types
+    if (isAuthError(error) && onAuthError) {
+      onAuthError();
+    }
+
+    if (isNetworkError(error) && onNetworkError) {
+      onNetworkError();
+    }
+  }, [showToast, logError, toast, onAuthError, onNetworkError]);
+
+  /**
+   * Handle validation errors and return field errors
+   */
+  const handleValidationError = useCallback((error: any): Record<string, string> => {
+    const fieldErrors: Record<string, string> = {};
+
+    if (error.response?.data?.detail && Array.isArray(error.response.data.detail)) {
+      error.response.data.detail.forEach((err: any) => {
+        const field = err.loc ? err.loc[err.loc.length - 1] : 'general';
+        const message = err.msg || 'Invalid value';
+        fieldErrors[field] = message;
       });
-      return errorInfo;
+
+      // Log validation errors
+      if (logError) {      }
+
+      // Show toast for validation errors
+      if (showToast) {
+        const errorCount = Object.keys(fieldErrors).length;
+        toast.showWarning(
+          `Please fix ${errorCount} validation error${errorCount > 1 ? 's' : ''}`
+        );
+      }
+    } else {
+      // Generic validation error
+      const message = getUserFriendlyErrorMessage(error);
+      fieldErrors.general = message;
+
+      if (showToast) {
+        toast.showWarning(message);
+      }
     }
 
-    // Handle redirects
-    if (redirectTo) {
-      navigate(redirectTo, { 
-        state: { 
-          error: errorInfo,
-          retryAction: retryAction ? 'available' : undefined
-        }
-      });
-      return errorInfo;
-    }
+    return fieldErrors;
+  }, [showToast, logError, toast]);
 
-    // Show toast notification (if toast context is available)
-    if (showToast) {
-      // This would integrate with your toast/notification system
-      console.warn('Error toast:', errorInfo.userFriendlyMessage);
-    }
-
-    return errorInfo;
-  }, [analyzeError, logout, navigate, isAuthenticated]);
-
-  const handleAsyncError = useCallback(async (
-    asyncFn: () => Promise<any>,
-    options: ErrorHandlerOptions = {}
-  ) => {
-    try {
-      return await asyncFn();
-    } catch (error) {
-      const errorInfo = handleError(error, options);
-      throw errorInfo; // Re-throw the processed error info
-    }
-  }, [handleError]);
-
-  const createErrorHandler = useCallback((options: ErrorHandlerOptions = {}) => {
-    return (error: any) => handleError(error, options);
-  }, [handleError]);
+  /**
+   * Clear error state (for manual error clearing)
+   */
+  const clearError = useCallback(() => {
+    // This is a placeholder for future error state management
+    // Currently, toasts auto-dismiss, so no action needed
+  }, []);
 
   return {
     handleError,
-    handleAsyncError,
-    createErrorHandler,
-    analyzeError,
+    handleApiError,
+    handleValidationError,
+    clearError,
   };
-};
+}
 
 export default useErrorHandler;

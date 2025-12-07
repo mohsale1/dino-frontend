@@ -400,9 +400,7 @@ const OrderTrackingPage: React.FC = () => {
                       setOrder(prev => ({ ...prev, status: trackingStatus as any }));
                       handleRefresh(); // Refresh to get updated data
                     }}
-                    onError={(error: string) => {
-                      console.error('Status update error:', error);
-                      // You could show a toast notification here
+                    onError={(error: string) => {                      // You could show a toast notification here
                     }}
                     variant="button"
                   />

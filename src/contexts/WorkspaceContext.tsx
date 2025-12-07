@@ -4,7 +4,6 @@ import { Venue, PriceRange } from '../types/api';
 import { workspaceService } from '../services/business';
 import { useAuth } from './AuthContext';
 
-
 interface WorkspaceContextType {
   // Current workspace and venue
   currentWorkspace: Workspace | null;
@@ -55,21 +54,18 @@ export const WorkspaceProvider: React.FC<WorkspaceProviderProps> = ({ children }
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [venues, setVenues] = useState<Venue[]>([]);
 
-  
   const [loading, setLoading] = useState(false);
   const [workspacesLoading, setWorkspacesLoading] = useState(false);
-
-
 
   // Load venues directly when needed (no caching)
   const [venuesLoading, setVenuesLoadingState] = useState(false);
 
   const loadVenues = useCallback(async () => {
-    if (!user?.workspaceId || !isAuthenticated || venuesLoading) return;
+    if (!user?.workspace_id || !isAuthenticated || venuesLoading) return;
     
     setVenuesLoadingState(true);
     try {
-      const venueList = await workspaceService.getVenues(user.workspaceId);
+      const venueList = await workspaceService.getVenues(user.workspace_id);
       // Convert API venues to Venue format
       const mappedVenues: Venue[] = venueList.map((venue: any) => {
         // Handle location mapping properly
@@ -121,17 +117,15 @@ export const WorkspaceProvider: React.FC<WorkspaceProviderProps> = ({ children }
         const activeVenue = mappedVenues.find((venue: any) => venue.isActive) || mappedVenues[0];
         setCurrentVenue(activeVenue);
       }
-    } catch (error) {
-      console.error('Error loading venues:', error);
-      setVenues([]);
+    } catch (error) {      setVenues([]);
     } finally {
       setVenuesLoadingState(false);
     }
-  }, [user?.workspaceId, isAuthenticated, venuesLoading, currentVenue]);
+  }, [user?.workspace_id, isAuthenticated, venuesLoading, currentVenue]);
 
   // Load current venue directly when needed (no caching)
   const loadCurrentVenue = useCallback(async () => {
-    const venueId = user?.venueId || user?.venueId;
+    const venueId = user?.venueId || user?.venue_id;
     if (!venueId || !isAuthenticated) return;
     
     try {
@@ -180,10 +174,8 @@ export const WorkspaceProvider: React.FC<WorkspaceProviderProps> = ({ children }
         };
         setCurrentVenue(venueData);
       }
-    } catch (error) {
-      console.error('Error loading current venue:', error);
-    }
-  }, [user?.venueId, user?.venueId, user?.id, isAuthenticated]);
+    } catch (error) {    }
+  }, [user?.venueId, user?.venue_id, user?.id, isAuthenticated]);
 
   // Load venues for workspace directly (no caching)
   const loadVenuesForWorkspace = useCallback(async (workspaceId: string) => {
@@ -202,9 +194,9 @@ export const WorkspaceProvider: React.FC<WorkspaceProviderProps> = ({ children }
     setLoading(true);
     try {
       // Set current workspace from user data (no API call needed)
-      if (user?.workspaceId) {
+      if (user?.workspace_id) {
         const localWorkspace = {
-          id: user.workspaceId,
+          id: user.workspace_id,
           name: 'Default Workspace',
           description: '',
           ownerId: user.id,
@@ -217,13 +209,11 @@ export const WorkspaceProvider: React.FC<WorkspaceProviderProps> = ({ children }
       }
 
       // Load venues and current venue
-      if (user?.workspaceId) {
+      if (user?.workspace_id) {
         await loadVenues();
       }
       await loadCurrentVenue();
-    } catch (error) {
-      console.error('Error initializing workspace data:', error);
-    } finally {
+    } catch (error) {    } finally {
       setLoading(false);
     }
   }, [user, isAuthenticated, loadVenues, loadCurrentVenue]);
@@ -243,25 +233,25 @@ export const WorkspaceProvider: React.FC<WorkspaceProviderProps> = ({ children }
 
   // Load venues when user changes
   useEffect(() => {
-    if (isAuthenticated && user?.workspaceId) {
+    if (isAuthenticated && user?.workspace_id) {
       loadVenues();
     }
-  }, [isAuthenticated, user?.workspaceId, loadVenues]);
+  }, [isAuthenticated, user?.workspace_id, loadVenues]);
 
   // Load current venue when user changes
   useEffect(() => {
-    if (isAuthenticated && (user?.venueId || user?.venueId)) {
+    if (isAuthenticated && (user?.venueId || user?.venue_id)) {
       loadCurrentVenue();
     }
-  }, [isAuthenticated, user?.venueId, user?.venueId, loadCurrentVenue]);
+  }, [isAuthenticated, user?.venueId, user?.venue_id, loadCurrentVenue]);
 
   const refreshWorkspaces = async () => {
     setWorkspacesLoading(true);
     try {
       // Create workspace from user data if available
-      if (user?.workspaceId) {
+      if (user?.workspace_id) {
         const localWorkspace = {
-          id: user.workspaceId,
+          id: user.workspace_id,
           name: 'Default Workspace',
           description: '',
           ownerId: user.id,
@@ -275,9 +265,7 @@ export const WorkspaceProvider: React.FC<WorkspaceProviderProps> = ({ children }
       } else {
         setWorkspaces([]);
       }
-    } catch (error: any) {
-      console.error('Error refreshing workspaces:', error);
-      setWorkspaces([]);
+    } catch (error: any) {      setWorkspaces([]);
     } finally {
       setWorkspacesLoading(false);
     }
@@ -287,8 +275,6 @@ export const WorkspaceProvider: React.FC<WorkspaceProviderProps> = ({ children }
     // Refresh venues directly
     await loadVenues();
   };
-
-
 
   const switchWorkspace = async (workspaceId: string) => {
     try {
@@ -491,7 +477,7 @@ export const WorkspaceProvider: React.FC<WorkspaceProviderProps> = ({ children }
 return;
     }
     
-    const venueId = user.venueId || user.venueId;
+    const venueId = user.venueId || user.venue_id;
     if (!venueId) {
 return;
     }
@@ -546,8 +532,6 @@ return;
     } catch (error) {
       }
   };
-
-
 
   const value: WorkspaceContextType = {
     currentWorkspace,

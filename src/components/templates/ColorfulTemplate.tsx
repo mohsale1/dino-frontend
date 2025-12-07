@@ -48,7 +48,6 @@ const ColorfulTemplate: React.FC<TemplateProps> = ({
         }}
       >
 
-
         {/* Header */}
         <Typography
           variant="h2"
@@ -168,7 +167,6 @@ const ColorfulTemplate: React.FC<TemplateProps> = ({
             />
           </Box>
 
-
         </Box>
 
         {/* Colorful Instructions */}
@@ -233,7 +231,6 @@ const ColorfulTemplate: React.FC<TemplateProps> = ({
             </Box>
           </Box>
         )}
-
 
       </Box>
     </Paper>

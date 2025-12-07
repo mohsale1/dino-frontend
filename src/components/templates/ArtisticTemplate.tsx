@@ -47,7 +47,6 @@ const ArtisticTemplate: React.FC<TemplateProps> = ({
         }}
       >
 
-
         {/* Paint Splashes */}
         {[
           { top: '10%', left: '10%', color: '#ff6b6b', size: '20px' },
@@ -240,7 +239,6 @@ const ArtisticTemplate: React.FC<TemplateProps> = ({
             </Box>
           </Box>
         )}
-
 
       </Box>
     </Paper>

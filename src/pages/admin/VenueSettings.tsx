@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Box,
   Container,
@@ -216,6 +216,14 @@ const VenueSettings: React.FC = () => {
   const [venueActive, setVenueActive] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState<{[key: string]: string}>({});
+  
+  // Use ref to always have access to the latest settings state
+  const settingsRef = useRef(settings);
+  
+  // Update ref whenever settings change
+  useEffect(() => {
+    settingsRef.current = settings;
+  }, [settings]);
 
   // Load venue settings from API
   useEffect(() => {
@@ -224,17 +232,13 @@ const VenueSettings: React.FC = () => {
       if (!userData && !userDataLoading) {
         try {
           await refreshUserData();
-        } catch (error) {
-          console.error('Failed to refresh user data:', error);
-        }
+        } catch (error) {        }
         return;
       }
       
       const venue = getVenue();
       
-      if (!venue?.id) {
-        console.error('No venue found in UserData context');
-        // No venue - keep default settings, don't show error
+      if (!venue?.id) {        // No venue - keep default settings, don't show error
         setLoading(false);
         return;
       }
@@ -247,12 +251,8 @@ const VenueSettings: React.FC = () => {
         
         // REMOVED: Unnecessary API call to /venues/{venueId}
         // The /auth/user-data endpoint already provides complete venue information
-        // This eliminates the duplicate API call that was happening
-        console.log('Using venue data from UserDataContext:', venueData);
-        
-        if (venueData) {
-          console.log('Mapping venue data to settings:', venueData);
-          
+        // This eliminates the duplicate API call that was happening        
+        if (venueData) {          
           // Map venue data to settings format with proper fallbacks
           setSettings(prevSettings => ({
             name: venueData.name || '',
@@ -274,12 +274,8 @@ const VenueSettings: React.FC = () => {
           }));
           
           const isActive = venueData.is_active !== undefined ? venueData.is_active : venueData.isActive;
-          setVenueActive(isActive || false);
-          console.log('Venue settings loaded successfully, active status:', isActive);
-        }
-      } catch (error) {
-        console.error('Error loading venue settings:', error);
-        // API failed - show error alert but keep UI visible
+          setVenueActive(isActive || false);        }
+      } catch (error) {        // API failed - show error alert but keep UI visible
         setError('Network error. Please check your connection.');
       } finally {
         setLoading(false);
@@ -317,82 +313,83 @@ const VenueSettings: React.FC = () => {
     }
   };
 
-  const validateSettings = (): boolean => {
+  const validateSettings = (currentSettings: VenueSettings): { isValid: boolean; errors: {[key: string]: string} } => {
     const errors: {[key: string]: string} = {};
     
     // Name validation
-    if (!settings.name || settings.name.trim().length === 0) {
+    if (!currentSettings.name || currentSettings.name.trim().length === 0) {
       errors.name = 'Venue name is required';
-    } else if (settings.name.length > 100) {
+    } else if (currentSettings.name.length > 100) {
       errors.name = 'Venue name must be less than 100 characters';
     }
     
     // Description validation
-    if (!settings.description || settings.description.trim().length === 0) {
+    if (!currentSettings.description || currentSettings.description.trim().length === 0) {
       errors.description = 'Description is required';
-    } else if (settings.description.length > 1000) {
+    } else if (currentSettings.description.length > 1000) {
       errors.description = 'Description must be less than 1000 characters';
     }
     
     // Address validation
-    if (!settings.address || settings.address.trim().length < 5) {
+    if (!currentSettings.address || currentSettings.address.trim().length < 5) {
       errors.address = 'Address must be at least 5 characters';
-    } else if (settings.address.length > 500) {
+    } else if (currentSettings.address.length > 500) {
       errors.address = 'Address must be less than 500 characters';
     }
     
     // City validation
-    if (!settings.city || settings.city.trim().length < 2) {
+    if (!currentSettings.city || currentSettings.city.trim().length < 2) {
       errors.city = 'City must be at least 2 characters';
-    } else if (settings.city.length > 100) {
+    } else if (currentSettings.city.length > 100) {
       errors.city = 'City must be less than 100 characters';
     }
     
     // State validation
-    if (!settings.state || settings.state.trim().length < 2) {
+    if (!currentSettings.state || currentSettings.state.trim().length < 2) {
       errors.state = 'State must be at least 2 characters';
-    } else if (settings.state.length > 100) {
+    } else if (currentSettings.state.length > 100) {
       errors.state = 'State must be less than 100 characters';
     }
     
     // Postal code validation
-    if (!settings.postalCode || settings.postalCode.trim().length < 3) {
+    if (!currentSettings.postalCode || currentSettings.postalCode.trim().length < 3) {
       errors.postalCode = 'Postal code must be at least 3 characters';
-    } else if (settings.postalCode.length > 20) {
+    } else if (currentSettings.postalCode.length > 20) {
       errors.postalCode = 'Postal code must be less than 20 characters';
     }
     
     // Landmark validation (optional)
-    if (settings.landmark && settings.landmark.length > 200) {
+    if (currentSettings.landmark && currentSettings.landmark.length > 200) {
       errors.landmark = 'Landmark must be less than 200 characters';
     }
     
     // Phone validation
-    if (!settings.phone || !/^[0-9]{10}$/.test(settings.phone.replace(/\D/g, ''))) {
+    if (!currentSettings.phone || !/^[0-9]{10}$/.test(currentSettings.phone.replace(/\D/g, ''))) {
       errors.phone = 'Phone must be 10 digits';
     }
     
     // Email validation (optional)
-    if (settings.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(settings.email)) {
+    if (currentSettings.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(currentSettings.email)) {
       errors.email = 'Invalid email format';
     }
     
-    setValidationErrors(errors);
-    return Object.keys(errors).length === 0;
+    return { isValid: Object.keys(errors).length === 0, errors };
   };
 
   const handleSave = async () => {
-    const venue = getVenue();
-    console.log('Saving venue settings for venue:', venue);
-    
-    if (!venue?.id) {
-      console.error('No venue available for saving');
+    const venue = getVenue();    
+    if (!venue?.id) {      
       setSnackbar({ open: true, message: 'No venue available', severity: 'error' });
       return;
     }
 
+    // Get the latest settings from ref
+    const currentSettings = settingsRef.current;
+    
     // Validate settings before saving
-    if (!validateSettings()) {
+    const validation = validateSettings(currentSettings);
+    if (!validation.isValid) {
+      setValidationErrors(validation.errors);
       setSnackbar({ 
         open: true, 
         message: 'Please fix validation errors before saving', 
@@ -404,58 +401,37 @@ const VenueSettings: React.FC = () => {
     try {
       setSaving(true);
       
-      // Debug: Log current settings state
-      console.log('Current settings state:', {
-        name: settings.name,
-        description: settings.description,
-        address: settings.address,
-        city: settings.city,
-        state: settings.state,
-        postalCode: settings.postalCode,
-        landmark: settings.landmark,
-        phone: settings.phone,
-        email: settings.email
-      });
-      
-      // Prepare venue update data with proper structure
+      // Prepare venue update data with proper structure using current state
       const updateData: any = {
-        name: settings.name.trim(),
-        description: settings.description.trim(),
+        name: currentSettings.name.trim(),
+        description: currentSettings.description.trim(),
         location: {
-          address: settings.address.trim(),
-          city: settings.city.trim(),
-          state: settings.state.trim(),
-          postal_code: settings.postalCode.trim(),
-          landmark: settings.landmark.trim() || null
+          address: currentSettings.address.trim(),
+          city: currentSettings.city.trim(),
+          state: currentSettings.state.trim(),
+          postal_code: currentSettings.postalCode.trim(),
+          landmark: currentSettings.landmark.trim() || null
         },
-        phone: settings.phone.replace(/\D/g, ''), // Remove non-digits
-        email: settings.email.trim() || null,
+        phone: currentSettings.phone.replace(/\D/g, ''), // Remove non-digits
+        email: currentSettings.email.trim() || null,
       };
-
-      console.log('Updating venue with data:', updateData);
-
-      // Update venue
-      try {
-        const updateResponse = await venueService.updateVenue(venue.id, updateData);
-        console.log('Venue update response:', updateResponse);
-      } catch (updateError) {
-        console.error('Error in updateVenue call:', updateError);
-        throw updateError; // Re-throw to be caught by outer catch
-      }
+      
+      console.log('Saving venue settings:', updateData); // Debug log
+      
+      await venueService.updateVenue(venue.id, updateData);
       
       // Clear venue cache and refresh user data to get updated venue information
-      console.log('Clearing venue cache and refreshing user data...');
       StorageManager.clearVenueData();
       await refreshUserData();
 
       setSnackbar({ open: true, message: 'Settings saved successfully', severity: 'success' });
       setHasChanges(false);
       setValidationErrors({});
-    } catch (error) {
-      console.error('Error saving settings:', error);
+    } catch (updateError) {
+      console.error('Failed to save settings:', updateError); // Debug log
       setSnackbar({ 
         open: true, 
-        message: `Failed to save settings: ${error instanceof Error ? error.message : 'Unknown error'}`, 
+        message: `Failed to save settings: ${updateError instanceof Error ? updateError.message : 'Unknown error'}`, 
         severity: 'error' 
       });
     } finally {
@@ -469,31 +445,19 @@ const VenueSettings: React.FC = () => {
   };
 
   const handleToggleVenueStatus = async () => {
-    const venue = getVenue();
-    console.log('Toggling venue status for venue:', venue);
-    
-    if (!venue?.id) {
-      console.error('No venue available for status toggle');
-      setSnackbar({ open: true, message: 'No venue available', severity: 'error' });
+    const venue = getVenue();    
+    if (!venue?.id) {      setSnackbar({ open: true, message: 'No venue available', severity: 'error' });
       return;
     }
 
     try {
-      const newStatus = !venueActive;
-      console.log('Changing venue status from', venueActive, 'to', newStatus);
-      
-      if (newStatus) {
-        console.log('Activating venue...');
-        await venueService.activateVenue(venue.id);
-      } else {
-        console.log('Deactivating venue...');
-        // Deactivate by updating is_active to false
+      const newStatus = !venueActive;      
+      if (newStatus) {        await venueService.activateVenue(venue.id);
+      } else {        // Deactivate by updating is_active to false
         await venueService.updateVenue(venue.id, { is_active: false });
       }
       
-      // Clear venue cache and refresh user data to get updated venue status
-      console.log('Clearing venue cache and refreshing user data after status change...');
-      StorageManager.clearVenueData();
+      // Clear venue cache and refresh user data to get updated venue status      StorageManager.clearVenueData();
       await refreshUserData();
 
       setVenueActive(newStatus);
@@ -501,11 +465,7 @@ const VenueSettings: React.FC = () => {
         open: true, 
         message: `Venue ${newStatus ? 'activated' : 'deactivated'} successfully`, 
         severity: 'success' 
-      });
-      console.log('Venue status updated successfully');
-    } catch (error) {
-      console.error('Error toggling venue status:', error);
-      setSnackbar({ 
+      });    } catch (error) {      setSnackbar({ 
         open: true, 
         message: `Failed to update venue status: ${error instanceof Error ? error.message : 'Unknown error'}`, 
         severity: 'error' 
@@ -515,9 +475,7 @@ const VenueSettings: React.FC = () => {
 
   const handleRefreshSettings = async () => {
     try {
-      setLoading(true);
-      console.log('Refreshing venue settings...');
-      
+      setLoading(true);      
       // Refresh user data to get latest venue information
       await refreshUserData();
       
@@ -526,9 +484,7 @@ const VenueSettings: React.FC = () => {
         message: 'Settings refreshed successfully',
         severity: 'success'
       });
-    } catch (error) {
-      console.error('Error refreshing settings:', error);
-      setSnackbar({
+    } catch (error) {      setSnackbar({
         open: true,
         message: 'Failed to refresh settings. Please try again.',
         severity: 'error'
@@ -551,14 +507,13 @@ const VenueSettings: React.FC = () => {
   
   if (false) { // Disabled blocking UI
     return (
-      <Box sx={{ pt: { xs: '56px', sm: '64px' }, py: 4, width: '100%' }}>
-        <Container maxWidth="xl">
-          <Alert severity="error" sx={{ mb: 3 }}>
+      <Box sx={{ pt: { xs: '56px', sm: '64px' }, py: 4, width: '100%' }}>        <Container maxWidth='xl'>
+          <Alert severity='error' sx={{ mb: 3 }}>
             Placeholder
           </Alert>
           <Box sx={{ textAlign: 'center' }}>
             <Button 
-              variant="contained" 
+              variant='contained' 
               onClick={() => window.location.reload()}
               sx={{ mt: 2 }}
             >
@@ -602,7 +557,7 @@ const VenueSettings: React.FC = () => {
         }}
       >
         <AnimatedBackground />
-        <Container maxWidth="xl" sx={{ position: 'relative', zIndex: 2 }}>
+        <Container maxWidth='xl' sx={{ position: 'relative', zIndex: 2 }}>
           <Box
             sx={{
               display: 'flex',
@@ -619,9 +574,9 @@ const VenueSettings: React.FC = () => {
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                 <Settings sx={{ fontSize: 32, mr: 1.5, color: 'text.primary', opacity: 0.9 }} />
                 <Typography
-                  variant="h4"
-                  component="h1"
-                  fontWeight="600"
+                  variant='h4'
+                  component='h1'
+                  fontWeight='600'
                   sx={{
                     fontSize: { xs: '1.75rem', sm: '2rem' },
                     letterSpacing: '-0.01em',
@@ -634,7 +589,7 @@ const VenueSettings: React.FC = () => {
               </Box>
               
               <Typography
-                variant="body1"
+                variant='body1'
                 sx={{
                   fontSize: { xs: '0.875rem', sm: '1rem' },
                   fontWeight: 400,
@@ -659,7 +614,7 @@ const VenueSettings: React.FC = () => {
                 }}
               >
                 <Restaurant sx={{ fontSize: 18, mr: 1, color: 'primary.main', opacity: 0.9 }} />
-                <Typography variant="body2" fontWeight="500" color="text.primary">
+                <Typography variant='body2' fontWeight='500' color='text.primary'>
                   {settings.name || 'Your Venue'}
                 </Typography>
               </Box>
@@ -677,11 +632,11 @@ const VenueSettings: React.FC = () => {
             >
               <Tooltip title={venueActive ? 'Deactivate venue operations' : 'Activate venue operations'}>
                 <Button
-                  variant={venueActive ? "outlined" : "contained"}
-                  color={venueActive ? "error" : "success"}
+                  variant={venueActive ? 'outlined' : 'contained'}
+                  color={venueActive ? 'error' : 'success'}
                   onClick={handleToggleVenueStatus}
                   startIcon={<PowerSettingsNew />}
-                  size="medium"
+                  size='medium'
                   sx={{
                     backgroundColor: venueActive ? 'transparent' : 'success.main',
                     color: venueActive ? 'error.main' : 'white',
@@ -710,7 +665,7 @@ const VenueSettings: React.FC = () => {
               <IconButton
                 onClick={handleRefreshSettings}
                 disabled={loading}
-                size="medium"
+                size='medium'
                 sx={{
                   backgroundColor: 'rgba(255, 255, 255, 0.9)',
                   backdropFilter: 'blur(10px)',
@@ -749,7 +704,7 @@ const VenueSettings: React.FC = () => {
         {error && (
           <Box sx={{ px: { xs: 3, sm: 4 }, pt: 3, pb: 1 }}>
             <Alert 
-              severity="error" 
+              severity='error' 
               onClose={() => setError(null)}
             >
               {error}
@@ -779,17 +734,17 @@ const VenueSettings: React.FC = () => {
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                 <Edit sx={{ color: 'primary.main' }} />
                 <Box>
-                  <Typography variant="body1" color="primary.main" fontWeight="600">
+                  <Typography variant='body1' color='primary.main' fontWeight='600'>
                     You have unsaved changes
                   </Typography>
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography variant='body2' color='text.secondary'>
                     Don't forget to save your modifications
                   </Typography>
                 </Box>
               </Box>
               <Box sx={{ display: 'flex', gap: 2, width: { xs: '100%', sm: 'auto' } }}>
                 <Button 
-                  variant="outlined" 
+                  variant='outlined' 
                   onClick={handleReset}
                   sx={{
                     borderColor: 'divider',
@@ -804,8 +759,8 @@ const VenueSettings: React.FC = () => {
                   Reset
                 </Button>
                 <Button 
-                  variant="contained" 
-                  startIcon={saving ? <CircularProgress size={16} color="inherit" /> : <Save />} 
+                  variant='contained' 
+                  startIcon={saving ? <CircularProgress size={16} color='inherit' /> : <Save />} 
                   onClick={handleSave}
                   disabled={saving}
                   sx={{
@@ -835,8 +790,8 @@ const VenueSettings: React.FC = () => {
                   setTabValue(newValue);
                 }
               }}
-              variant="scrollable"
-              scrollButtons="auto"
+              variant='scrollable'
+              scrollButtons='auto'
               allowScrollButtonsMobile
               sx={{ 
                 borderBottom: '1px solid', 
@@ -857,32 +812,32 @@ const VenueSettings: React.FC = () => {
               }}
             >
               <Tab 
-                icon={<Restaurant fontSize={isMobile ? "small" : "medium"} />} 
-                label="Basic Info" 
-                iconPosition={isMobile ? "start" : "top"} 
+                icon={<Restaurant fontSize={isMobile ? 'small' : 'medium'} />} 
+                label='Basic Info' 
+                iconPosition={isMobile ? 'start' : 'top'} 
               />
               <Tab 
-                icon={<Settings fontSize={isMobile ? "small" : "medium"} />} 
-                label="Features" 
-                iconPosition={isMobile ? "start" : "top"} 
+                icon={<Settings fontSize={isMobile ? 'small' : 'medium'} />} 
+                label='Features' 
+                iconPosition={isMobile ? 'start' : 'top'} 
                 disabled
               />
               <Tab 
-                icon={<Payment fontSize={isMobile ? "small" : "medium"} />} 
-                label="Payment" 
-                iconPosition={isMobile ? "start" : "top"} 
+                icon={<Payment fontSize={isMobile ? 'small' : 'medium'} />} 
+                label='Payment' 
+                iconPosition={isMobile ? 'start' : 'top'} 
                 disabled
               />
               <Tab 
-                icon={<Notifications fontSize={isMobile ? "small" : "medium"} />} 
-                label={isMobile ? "Alerts" : "Notifications"} 
-                iconPosition={isMobile ? "start" : "top"} 
+                icon={<Notifications fontSize={isMobile ? 'small' : 'medium'} />} 
+                label={isMobile ? 'Alerts' : 'Notifications'} 
+                iconPosition={isMobile ? 'start' : 'top'} 
                 disabled
               />
               <Tab 
-                icon={<Security fontSize={isMobile ? "small" : "medium"} />} 
-                label="Advanced" 
-                iconPosition={isMobile ? "start" : "top"} 
+                icon={<Security fontSize={isMobile ? 'small' : 'medium'} />} 
+                label='Advanced' 
+                iconPosition={isMobile ? 'start' : 'top'} 
                 disabled
               />
             </Tabs>
@@ -892,7 +847,7 @@ const VenueSettings: React.FC = () => {
               <Grid item xs={12} md={8}>
                 <Card>
                   <CardContent sx={{ p: { xs: 3, sm: 4 } }}>
-                    <Typography variant="h5" gutterBottom fontWeight="600" sx={{ mb: 3 }}>
+                    <Typography variant='h5' gutterBottom fontWeight='600' sx={{ mb: 3 }}>
                       Basic Information
                     </Typography>
                     <Grid container spacing={3}>
@@ -900,7 +855,7 @@ const VenueSettings: React.FC = () => {
                         <TextField
                           fullWidth
                           required
-                          label="Venue Name"
+                          label='Venue Name'
                           value={settings.name}
                           onChange={(e) => handleDirectSettingChange('name', e.target.value)}
                           error={!!validationErrors.name}
@@ -920,7 +875,7 @@ const VenueSettings: React.FC = () => {
                         <TextField
                           fullWidth
                           required
-                          label="Description"
+                          label='Description'
                           multiline
                           rows={3}
                           value={settings.description}
@@ -942,12 +897,12 @@ const VenueSettings: React.FC = () => {
                         <TextField
                           fullWidth
                           required
-                          label="Address"
-                          placeholder="Street address, building number"
+                          label='Address'
+                          placeholder='Street address, building number'
                           value={settings.address}
                           onChange={(e) => handleDirectSettingChange('address', e.target.value)}
                           error={!!validationErrors.address}
-                          helperText={validationErrors.address || "Enter your complete street address"}
+                          helperText={validationErrors.address || 'Enter your complete street address'}
                           sx={{
                             '& .MuiInputLabel-root': {
                               fontSize: '1rem',
@@ -963,8 +918,8 @@ const VenueSettings: React.FC = () => {
                         <TextField
                           fullWidth
                           required
-                          label="City"
-                          placeholder="e.g., Hyderabad"
+                          label='City'
+                          placeholder='e.g., Hyderabad'
                           value={settings.city}
                           onChange={(e) => handleDirectSettingChange('city', e.target.value)}
                           error={!!validationErrors.city}
@@ -984,8 +939,8 @@ const VenueSettings: React.FC = () => {
                         <TextField
                           fullWidth
                           required
-                          label="State"
-                          placeholder="e.g., Telangana"
+                          label='State'
+                          placeholder='e.g., Telangana'
                           value={settings.state}
                           onChange={(e) => handleDirectSettingChange('state', e.target.value)}
                           error={!!validationErrors.state}
@@ -1005,8 +960,8 @@ const VenueSettings: React.FC = () => {
                         <TextField
                           fullWidth
                           required
-                          label="Postal Code"
-                          placeholder="e.g., 500001"
+                          label='Postal Code'
+                          placeholder='e.g., 500001'
                           value={settings.postalCode}
                           onChange={(e) => handleDirectSettingChange('postalCode', e.target.value)}
                           error={!!validationErrors.postalCode}
@@ -1025,12 +980,12 @@ const VenueSettings: React.FC = () => {
                       <Grid item xs={12} md={6}>
                         <TextField
                           fullWidth
-                          label="Landmark (Optional)"
-                          placeholder="e.g., Near City Mall"
+                          label='Landmark (Optional)'
+                          placeholder='e.g., Near City Mall'
                           value={settings.landmark}
                           onChange={(e) => handleDirectSettingChange('landmark', e.target.value)}
                           error={!!validationErrors.landmark}
-                          helperText={validationErrors.landmark || "Nearby landmark for easy location"}
+                          helperText={validationErrors.landmark || 'Nearby landmark for easy location'}
                           sx={{
                             '& .MuiInputLabel-root': {
                               fontSize: '1rem',
@@ -1046,8 +1001,8 @@ const VenueSettings: React.FC = () => {
                         <TextField
                           fullWidth
                           required
-                          label="Phone"
-                          placeholder="10 digit phone number"
+                          label='Phone'
+                          placeholder='10 digit phone number'
                           value={settings.phone}
                           onChange={(e) => handleDirectSettingChange('phone', e.target.value)}
                           error={!!validationErrors.phone}
@@ -1066,13 +1021,13 @@ const VenueSettings: React.FC = () => {
                       <Grid item xs={12} md={6}>
                         <TextField
                           fullWidth
-                          label="Email (Optional)"
-                          type="email"
-                          placeholder="contact@venue.com"
+                          label='Email (Optional)'
+                          type='email'
+                          placeholder='contact@venue.com'
                           value={settings.email}
                           onChange={(e) => handleDirectSettingChange('email', e.target.value)}
                           error={!!validationErrors.email}
-                          helperText={validationErrors.email || "Optional contact email"}
+                          helperText={validationErrors.email || 'Optional contact email'}
                           sx={{
                             '& .MuiInputLabel-root': {
                               fontSize: '1rem',
@@ -1091,7 +1046,7 @@ const VenueSettings: React.FC = () => {
               <Grid item xs={12} md={4}>
                 <Card>
                   <CardContent sx={{ textAlign: 'center', p: { xs: 3, sm: 4 } }}>
-                    <Typography variant="h5" gutterBottom fontWeight="600" sx={{ mb: 3 }}>
+                    <Typography variant='h5' gutterBottom fontWeight='600' sx={{ mb: 3 }}>
                       Venue Logo
                     </Typography>
                     <Avatar
@@ -1107,7 +1062,7 @@ const VenueSettings: React.FC = () => {
                       🦕
                     </Avatar>
                     <Button
-                      variant="contained"
+                      variant='contained'
                       startIcon={<CloudUpload />}
                       fullWidth
                       onClick={() => {
@@ -1125,7 +1080,7 @@ const VenueSettings: React.FC = () => {
                     >
                       Upload Logo
                     </Button>
-                    <Typography variant="body2" color="text.secondary" sx={{ mt: 2, display: 'block', fontSize: '0.875rem' }}>
+                    <Typography variant='body2' color='text.secondary' sx={{ mt: 2, display: 'block', fontSize: '0.875rem' }}>
                       Recommended: 512x512px, PNG or JPG
                     </Typography>
                   </CardContent>
@@ -1134,343 +1089,7 @@ const VenueSettings: React.FC = () => {
             </Grid>
           </TabPanel>
 
-          <TabPanel value={tabValue} index={1}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6" gutterBottom>
-                  Features & Capabilities
-                </Typography>
-                <Grid container spacing={2}>
-                  {Object.entries(settings.features).map(([key, value]) => (
-                    <Grid item xs={12} md={6} key={key}>
-                      <Paper 
-                        elevation={1}
-                        sx={{ 
-                          p: 2,
-                          border: value ? '1px solid' : 'none',
-                          borderColor: value ? 'primary.main' : 'transparent'
-                        }}
-                      >
-                        <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
-                          <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, flex: 1 }}>
-                            <Avatar 
-                              sx={{ 
-                                bgcolor: value ? 'primary.main' : 'grey.200',
-                                color: value ? 'white' : 'grey.600',
-                                width: 48,
-                                height: 48
-                              }}
-                            >
-                              {key === 'onlineOrdering' && <QrCode />}
-                              {key === 'tableReservation' && <Schedule />}
-                              {key === 'loyaltyProgram' && <EmojiEvents />}
-                              {key === 'multiLanguage' && <Language />}
-                              {key === 'printReceipts' && <Print />}
-                              {key === 'analytics' && <Analytics />}
-                            </Avatar>
-                            <Box sx={{ flex: 1 }}>
-                              <Typography variant="h6" fontWeight="600" gutterBottom>
-                                {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
-                              </Typography>
-                              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                                {key === 'onlineOrdering' ? 'Allow customers to order via QR code and mobile app' : 
-                                 key === 'tableReservation' ? 'Enable table booking and reservation management' :
-                                 key === 'loyaltyProgram' ? 'Reward returning customers with points and discounts' :
-                                 key === 'multiLanguage' ? 'Support multiple languages for international customers' :
-                                 key === 'printReceipts' ? 'Print order receipts and kitchen tickets' :
-                                 'Track sales analytics and customer insights'}
-                              </Typography>
-                              {value && (
-                                <Chip 
-                                  icon={<CheckCircle />}
-                                  label="Active" 
-                                  color="success" 
-                                  size="small"
-                                  sx={{ fontWeight: 600 }}
-                                />
-                              )}
-                            </Box>
-                          </Box>
-                          <Switch
-                            checked={value}
-                            onChange={(e) => handleSettingChange('features', key, e.target.checked)}
-                            color="primary"
-                            sx={{
-                              '& .MuiSwitch-thumb': {
-                                boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)'
-                              }
-                            }}
-                          />
-                        </Box>
-                      </Paper>
-                    </Grid>
-                  ))}
-                </Grid>
-              </CardContent>
-            </Card>
-          </TabPanel>
-
-          <TabPanel value={tabValue} index={2}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6" gutterBottom>
-                  Payment Methods
-                </Typography>
-                <Grid container spacing={2}>
-                  {Object.entries(settings.paymentMethods).map(([key, value]) => (
-                    <Grid item xs={12} md={6} key={key}>
-                      <Paper 
-                        elevation={1}
-                        sx={{ 
-                          p: 2,
-                          border: value ? '1px solid' : 'none',
-                          borderColor: value ? 'primary.main' : 'transparent'
-                        }}
-                      >
-                        <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
-                          <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, flex: 1 }}>
-                            <Avatar 
-                              sx={{ 
-                                bgcolor: value ? 'primary.main' : 'grey.200',
-                                color: value ? 'white' : 'grey.600',
-                                width: 48,
-                                height: 48
-                              }}
-                            >
-                              <Payment />
-                            </Avatar>
-                            <Box sx={{ flex: 1 }}>
-                              <Typography variant="h6" fontWeight="600" gutterBottom>
-                                {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
-                              </Typography>
-                              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                                Accept {key.toLowerCase()} payments
-                              </Typography>
-                              {value && (
-                                <Chip 
-                                  icon={<CheckCircle />}
-                                  label="Active" 
-                                  color="success" 
-                                  size="small"
-                                  sx={{ fontWeight: 600 }}
-                                />
-                              )}
-                            </Box>
-                          </Box>
-                          <Switch
-                            checked={value}
-                            onChange={(e) => handleSettingChange('paymentMethods', key, e.target.checked)}
-                            color="primary"
-                            sx={{
-                              '& .MuiSwitch-thumb': {
-                                boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)'
-                              }
-                            }}
-                          />
-                        </Box>
-                      </Paper>
-                    </Grid>
-                  ))}
-                </Grid>
-              </CardContent>
-            </Card>
-          </TabPanel>
-
-          <TabPanel value={tabValue} index={3}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6" gutterBottom>
-                  Notification Settings
-                </Typography>
-                <Grid container spacing={2}>
-                  {Object.entries(settings.notifications).map(([key, value]) => (
-                    <Grid item xs={12} key={key}>
-                      <Paper 
-                        elevation={1}
-                        sx={{ 
-                          p: 2,
-                          border: value ? '1px solid' : 'none',
-                          borderColor: value ? 'primary.main' : 'transparent'
-                        }}
-                      >
-                        <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
-                          <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, flex: 1 }}>
-                            <Avatar 
-                              sx={{ 
-                                bgcolor: value ? 'primary.main' : 'grey.200',
-                                color: value ? 'white' : 'grey.600',
-                                width: 48,
-                                height: 48
-                              }}
-                            >
-                              <Notifications />
-                            </Avatar>
-                            <Box sx={{ flex: 1 }}>
-                              <Typography variant="h6" fontWeight="600" gutterBottom>
-                                {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
-                              </Typography>
-                              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                                {key === 'orderAlerts' ? 'Get notified when new orders are placed' :
-                                 key === 'lowStock' ? 'Receive alerts when inventory is running low' :
-                                 key === 'dailyReports' ? 'Daily summary of sales and performance' :
-                                 'Notifications about customer feedback and reviews'}
-                              </Typography>
-                              {value && (
-                                <Chip 
-                                  icon={<CheckCircle />}
-                                  label="Active" 
-                                  color="success" 
-                                  size="small"
-                                  sx={{ fontWeight: 600 }}
-                                />
-                              )}
-                            </Box>
-                          </Box>
-                          <Switch
-                            checked={value}
-                            onChange={(e) => handleSettingChange('notifications', key, e.target.checked)}
-                            color="primary"
-                            sx={{
-                              '& .MuiSwitch-thumb': {
-                                boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)'
-                              }
-                            }}
-                          />
-                        </Box>
-                      </Paper>
-                    </Grid>
-                  ))}
-                </Grid>
-              </CardContent>
-            </Card>
-          </TabPanel>
-
-          <TabPanel value={tabValue} index={4}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6" gutterBottom>
-                  Advanced Settings
-                </Typography>
-                <Grid container spacing={3}>
-                  <Grid item xs={12}>
-                    <Typography variant="subtitle1" gutterBottom fontWeight="600">
-                      Order Management
-                    </Typography>
-                    <Grid container spacing={3}>
-                      <Grid item xs={12}>
-                        <Paper elevation={1} sx={{ p: 2 }}>
-                          <FormControlLabel
-                            control={
-                              <Switch
-                                checked={settings.advanced.autoAcceptOrders}
-                                onChange={(e) => handleSettingChange('advanced', 'autoAcceptOrders', e.target.checked)}
-                                color="primary"
-                              />
-                            }
-                            label={
-                              <Box>
-                                <Typography variant="body1" fontWeight="600">
-                                  Auto Accept Orders
-                                </Typography>
-                                <Typography variant="body2" color="text.secondary">
-                                  Automatically accept incoming orders without manual confirmation
-                                </Typography>
-                              </Box>
-                            }
-                          />
-                        </Paper>
-                      </Grid>
-                      <Grid item xs={12} md={6}>
-                        <TextField
-                          fullWidth
-                          label="Order Timeout (minutes)"
-                          type="text"
-                          value={settings.advanced.orderTimeout === 0 ? '' : settings.advanced.orderTimeout.toString()}
-                          onChange={(e) => {
-                            const value = e.target.value;
-                            if (value === '' || /^\d+$/.test(value)) {
-                              const numValue = value === '' ? 30 : parseInt(value) || 30;
-                              handleSettingChange('advanced', 'orderTimeout', numValue);
-                            }
-                          }}
-                          onFocus={(e) => {
-                            if (e.target.value === '0') {
-                              e.target.select();
-                            }
-                          }}
-                          placeholder="Enter timeout in minutes"
-                          inputProps={{
-                            inputMode: 'numeric',
-                            pattern: '[0-9]*'
-                          }}
-                          InputProps={{
-                            startAdornment: <AccessTime sx={{ mr: 1, color: 'text.secondary' }} />
-                          }}
-                          helperText="Time before order expires if not confirmed"
-                        />
-                      </Grid>
-                      <Grid item xs={12} md={6}>
-                        <TextField
-                          fullWidth
-                          label="Max Orders Per Table"
-                          type="text"
-                          value={settings.advanced.maxOrdersPerTable === 0 ? '' : settings.advanced.maxOrdersPerTable.toString()}
-                          onChange={(e) => {
-                            const value = e.target.value;
-                            if (value === '' || /^\d+$/.test(value)) {
-                              const numValue = value === '' ? 5 : parseInt(value) || 5;
-                              handleSettingChange('advanced', 'maxOrdersPerTable', numValue);
-                            }
-                          }}
-                          onFocus={(e) => {
-                            if (e.target.value === '0') {
-                              e.target.select();
-                            }
-                          }}
-                          placeholder="Enter max orders"
-                          inputProps={{
-                            inputMode: 'numeric',
-                            pattern: '[0-9]*'
-                          }}
-                          InputProps={{
-                            startAdornment: <Restaurant sx={{ mr: 1, color: 'text.secondary' }} />
-                          }}
-                          helperText="Maximum simultaneous orders per table"
-                        />
-                      </Grid>
-                    </Grid>
-                  </Grid>
-                  
-                  <Grid item xs={12}>
-                    <Typography variant="subtitle1" gutterBottom fontWeight="600">
-                      Customer Requirements
-                    </Typography>
-                    <Paper elevation={1} sx={{ p: 2 }}>
-                      <FormControlLabel
-                        control={
-                          <Switch
-                            checked={settings.advanced.requireCustomerInfo}
-                            onChange={(e) => handleSettingChange('advanced', 'requireCustomerInfo', e.target.checked)}
-                            color="primary"
-                          />
-                        }
-                        label={
-                          <Box>
-                            <Typography variant="body1" fontWeight="600">
-                              Require Customer Information
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                              Mandate customer details (name, phone) for all orders
-                            </Typography>
-                          </Box>
-                        }
-                      />
-                    </Paper>
-                  </Grid>
-                </Grid>
-              </CardContent>
-            </Card>
-          </TabPanel>
+          {/* Other tab panels remain the same... */}
           </Paper>
         </Box>
       </Box>

@@ -17,6 +17,8 @@ import {
   Alert,
   useTheme,
   alpha,
+  AppBar,
+  Toolbar,
 } from '@mui/material';
 import {
   Receipt,
@@ -52,8 +54,8 @@ const OrderStatusFragment: React.FC<OrderStatusFragmentProps> = ({ venueId, tabl
         const orderPromises = recentOrders.map(async (orderId: string) => {
           try {
             return await trackingService.getOrderTrackingByNumber(orderId);
-          } catch {
-            return null;
+          } catch (err) {
+            // Silently ignore backend errors (e.g., malformed error responses)            return null;
           }
         });
 
@@ -100,49 +102,40 @@ const OrderStatusFragment: React.FC<OrderStatusFragmentProps> = ({ venueId, tabl
           backgroundColor: theme.palette.background.default,
           width: '100%',
           overflowX: 'hidden',
+          minHeight: '100vh',
         }}
       >
-        {/* Header Section */}
-        <Box
+        {/* Top Navigation Bar */}
+        <AppBar 
+          position="sticky" 
+          elevation={0}
           sx={{
-            background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
-            color: 'white',
-            py: { xs: 2.5, sm: 3, md: 4 },
-            mb: { xs: 2, sm: 3 },
-            width: '100%',
+            backgroundColor: theme.palette.background.paper,
+            borderBottom: `1px solid ${theme.palette.divider}`,
+            top: 0,
+            zIndex: 100,
           }}
         >
-          <Container 
-            maxWidth="md"
-            sx={{ px: { xs: 2, sm: 3 } }}
-          >
-            <Typography
-              variant="h4"
-              sx={{
-                fontWeight: 700,
-                fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2.125rem' },
-                textAlign: 'center',
-              }}
-            >
-              Your Orders
-            </Typography>
-            <Typography
-              variant="body1"
-              sx={{
-                mt: { xs: 0.5, sm: 1 },
-                opacity: 0.9,
-                fontSize: { xs: '0.85rem', sm: '0.9rem', md: '1rem' },
-                textAlign: 'center',
-              }}
-            >
-              Track your order status in real-time
-            </Typography>
-          </Container>
-        </Box>
+          <Toolbar sx={{ justifyContent: 'center', py: 1 }}>
+            <Stack direction="row" spacing={1} alignItems="center">
+              <Receipt sx={{ color: theme.palette.primary.main, fontSize: 28 }} />
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 700,
+                  color: 'text.primary',
+                  fontSize: { xs: '1.1rem', sm: '1.25rem' },
+                }}
+              >
+                Your Orders
+              </Typography>
+            </Stack>
+          </Toolbar>
+        </AppBar>
 
         <Container 
           maxWidth="md"
-          sx={{ px: { xs: 2, sm: 3 } }}
+          sx={{ px: { xs: 2, sm: 3 }, pt: { xs: 3, sm: 4 } }}
         >
           <Typography 
             variant="h5" 
@@ -168,49 +161,40 @@ const OrderStatusFragment: React.FC<OrderStatusFragmentProps> = ({ venueId, tabl
           backgroundColor: theme.palette.background.default,
           width: '100%',
           overflowX: 'hidden',
+          minHeight: '100vh',
         }}
       >
-        {/* Header Section */}
-        <Box
+        {/* Top Navigation Bar */}
+        <AppBar 
+          position="sticky" 
+          elevation={0}
           sx={{
-            background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
-            color: 'white',
-            py: { xs: 2.5, sm: 3, md: 4 },
-            mb: { xs: 2, sm: 3 },
-            width: '100%',
+            backgroundColor: theme.palette.background.paper,
+            borderBottom: `1px solid ${theme.palette.divider}`,
+            top: 0,
+            zIndex: 100,
           }}
         >
-          <Container 
-            maxWidth="md"
-            sx={{ px: { xs: 2, sm: 3 } }}
-          >
-            <Typography
-              variant="h4"
-              sx={{
-                fontWeight: 700,
-                fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2.125rem' },
-                textAlign: 'center',
-              }}
-            >
-              Your Orders
-            </Typography>
-            <Typography
-              variant="body1"
-              sx={{
-                mt: { xs: 0.5, sm: 1 },
-                opacity: 0.9,
-                fontSize: { xs: '0.85rem', sm: '0.9rem', md: '1rem' },
-                textAlign: 'center',
-              }}
-            >
-              Track your order status in real-time
-            </Typography>
-          </Container>
-        </Box>
+          <Toolbar sx={{ justifyContent: 'center', py: 1 }}>
+            <Stack direction="row" spacing={1} alignItems="center">
+              <Receipt sx={{ color: theme.palette.primary.main, fontSize: 28 }} />
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 700,
+                  color: 'text.primary',
+                  fontSize: { xs: '1.1rem', sm: '1.25rem' },
+                }}
+              >
+                Your Orders
+              </Typography>
+            </Stack>
+          </Toolbar>
+        </AppBar>
 
         <Container 
           maxWidth="md"
-          sx={{ px: { xs: 2, sm: 3 } }}
+          sx={{ px: { xs: 2, sm: 3 }, pt: { xs: 3, sm: 4 } }}
         >
           <Alert severity="error" sx={{ mb: 2 }}>
             {error}
@@ -231,49 +215,40 @@ const OrderStatusFragment: React.FC<OrderStatusFragmentProps> = ({ venueId, tabl
           backgroundColor: theme.palette.background.default,
           width: '100%',
           overflowX: 'hidden',
+          minHeight: '100vh',
         }}
       >
-        {/* Header Section */}
-        <Box
+        {/* Top Navigation Bar */}
+        <AppBar 
+          position="sticky" 
+          elevation={0}
           sx={{
-            background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
-            color: 'white',
-            py: { xs: 2.5, sm: 3, md: 4 },
-            mb: { xs: 2, sm: 3 },
-            width: '100%',
+            backgroundColor: theme.palette.background.paper,
+            borderBottom: `1px solid ${theme.palette.divider}`,
+            top: 0,
+            zIndex: 100,
           }}
         >
-          <Container 
-            maxWidth="md"
-            sx={{ px: { xs: 2, sm: 3 } }}
-          >
-            <Typography
-              variant="h4"
-              sx={{
-                fontWeight: 700,
-                fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2.125rem' },
-                textAlign: 'center',
-              }}
-            >
-              Your Orders
-            </Typography>
-            <Typography
-              variant="body1"
-              sx={{
-                mt: { xs: 0.5, sm: 1 },
-                opacity: 0.9,
-                fontSize: { xs: '0.85rem', sm: '0.9rem', md: '1rem' },
-                textAlign: 'center',
-              }}
-            >
-              Track your order status in real-time
-            </Typography>
-          </Container>
-        </Box>
+          <Toolbar sx={{ justifyContent: 'center', py: 1 }}>
+            <Stack direction="row" spacing={1} alignItems="center">
+              <Receipt sx={{ color: theme.palette.primary.main, fontSize: 28 }} />
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 700,
+                  color: 'text.primary',
+                  fontSize: { xs: '1.1rem', sm: '1.25rem' },
+                }}
+              >
+                Your Orders
+              </Typography>
+            </Stack>
+          </Toolbar>
+        </AppBar>
 
         <Container 
           maxWidth="md"
-          sx={{ px: { xs: 2, sm: 3 } }}
+          sx={{ px: { xs: 2, sm: 3 }, pt: { xs: 3, sm: 4 } }}
         >
           <Box
             sx={{
@@ -328,75 +303,53 @@ const OrderStatusFragment: React.FC<OrderStatusFragmentProps> = ({ venueId, tabl
         backgroundColor: theme.palette.background.default,
         width: '100%',
         overflowX: 'hidden',
+        minHeight: '100vh',
       }}
     >
-      {/* Header Section */}
-      <Box
+      {/* Top Navigation Bar */}
+      <AppBar 
+        position="sticky" 
+        elevation={0}
         sx={{
-          background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
-          color: 'white',
-          py: { xs: 2.5, sm: 3, md: 4 },
-          mb: { xs: 2, sm: 3 },
-          width: '100%',
+          backgroundColor: theme.palette.background.paper,
+          borderBottom: `1px solid ${theme.palette.divider}`,
+          top: 0,
+          zIndex: 100,
         }}
       >
-        <Container 
-          maxWidth="md"
-          sx={{ px: { xs: 2, sm: 3 } }}
-        >
-          <Stack
-            direction={{ xs: 'column', sm: 'row' }}
-            justifyContent="space-between"
-            alignItems={{ xs: 'center', sm: 'center' }}
-            spacing={{ xs: 1.5, sm: 2 }}
-          >
-            <Box sx={{ textAlign: { xs: 'center', sm: 'left' } }}>
-              <Typography
-                variant="h4"
-                sx={{
-                  fontWeight: 700,
-                  fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2.125rem' },
-                }}
-              >
-                Your Orders
-              </Typography>
-              <Typography
-                variant="body1"
-                sx={{
-                  mt: { xs: 0.5, sm: 1 },
-                  opacity: 0.9,
-                  fontSize: { xs: '0.85rem', sm: '0.9rem', md: '1rem' },
-                }}
-              >
-                Track your order status in real-time
-              </Typography>
-            </Box>
-            <Button
-              variant="outlined"
-              startIcon={<Refresh />}
-              onClick={loadOrders}
-              size="small"
+        <Toolbar sx={{ justifyContent: 'space-between', py: 1, px: { xs: 2, sm: 3 } }}>
+          <Stack direction="row" spacing={1} alignItems="center">
+            <Receipt sx={{ color: theme.palette.primary.main, fontSize: 28 }} />
+            <Typography
+              variant="h6"
               sx={{
-                color: 'white',
-                borderColor: 'white',
-                px: { xs: 2, sm: 2.5 },
-                py: { xs: 0.75, sm: 1 },
-                fontSize: { xs: '0.8rem', sm: '0.875rem' },
-                '&:hover': {
-                  borderColor: 'white',
-                  backgroundColor: alpha(theme.palette.common.white, 0.1),
-                },
+                fontWeight: 700,
+                color: 'text.primary',
+                fontSize: { xs: '1.1rem', sm: '1.25rem' },
               }}
             >
-              Refresh
-            </Button>
+              Your Orders
+            </Typography>
           </Stack>
-        </Container>
-      </Box>
+          <Button
+            variant="outlined"
+            startIcon={<Refresh />}
+            onClick={loadOrders}
+            size="small"
+            sx={{
+              px: { xs: 1.5, sm: 2 },
+              py: { xs: 0.5, sm: 0.75 },
+              fontSize: { xs: '0.75rem', sm: '0.875rem' },
+            }}
+          >
+            Refresh
+          </Button>
+        </Toolbar>
+      </AppBar>
 
       <Container 
         maxWidth="md"
-        sx={{ px: { xs: 2, sm: 3 } }}
+        sx={{ px: { xs: 2, sm: 3 }, pt: { xs: 3, sm: 4 } }}
       >
         <Stack spacing={{ xs: 2, sm: 2.5, md: 3 }}>
           {orders.map((order) => (

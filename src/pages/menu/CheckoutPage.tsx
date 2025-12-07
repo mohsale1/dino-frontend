@@ -56,6 +56,16 @@ import CustomerNavbar from '../../components/CustomerNavbar';
 import { promoService, PromoValidation } from '../../services/api';
 import { orderService } from '../../services/business';
 
+import { useValidation } from '../../hooks/useValidation';
+import { useErrorHandler } from '../../hooks/useErrorHandler';
+import { useToast } from '../../contexts/ToastContext';
+import { 
+  createCustomerValidationRules, 
+  validateCustomerField,
+  sanitizePhoneNumber,
+  type CustomerFormData 
+} from '../../utils/validation';
+
 interface CustomerInfo {
   name: string;
   phone: string;
@@ -78,14 +88,25 @@ const CheckoutPage: React.FC = () => {
   const { cafeId, tableId, venueId } = useParams<{ cafeId?: string; tableId: string; venueId?: string }>();
   const actualCafeId = cafeId || venueId; // Handle both URL patterns
   const { items, updateQuantity, removeItem, clearCart, getTotalAmount, getTotalItems } = useCart();
+  const { handleApiError } = useErrorHandler();
+  const toast = useToast();
   
   const [activeStep, setActiveStep] = useState(0);
-  const [customerInfo, setCustomerInfo] = useState<CustomerInfo>({
-    name: '',
-    phone: '',
-    email: '',
-    specialInstructions: '',
+  
+  // Use validation hook for customer info
+  const customerValidation = useValidation<CustomerFormData>({
+    rules: createCustomerValidationRules(),
+    initialValues: {
+      name: '',
+      phone: '',
+      email: '',
+      specialInstructions: '',
+    },
+    validateOnChange: true,
+    validateOnBlur: true,
   });
+  
+  const customerInfo = customerValidation.values as CustomerInfo;
   
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('card');
   const [promoCode, setPromoCode] = useState('');
@@ -160,15 +181,12 @@ const CheckoutPage: React.FC = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setCustomerInfo(prev => ({
-      ...prev,
-      [name]: value,
-    }));
+    customerValidation.setValue(name as keyof CustomerFormData, value);
   };
 
   const handleApplyPromo = async () => {
     if (!promoCode.trim() || !actualCafeId) {
-      alert('Please enter a valid promo code');
+      toast.showWarning('Please enter a valid promo code');
       return;
     }
 
@@ -190,11 +208,12 @@ const CheckoutPage: React.FC = () => {
         setAppliedPromo(validation);
         setShowPromoDialog(false);
         setPromoCode('');
+        toast.showSuccess(`Promo code ${promoCode.toUpperCase()} applied successfully!`);
       } else {
-        alert(validation.error_message || 'Invalid promo code');
+        toast.showError(validation.error_message || 'Invalid promo code');
       }
     } catch (error) {
-      alert('Failed to validate promo code. Please try again.');
+      handleApiError(error, 'Failed to validate promo code');
     } finally {
       setPromoLoading(false);
     }
@@ -212,23 +231,29 @@ const CheckoutPage: React.FC = () => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
 
-  const handlePlaceOrder = async () => {
-    console.log('🔍 Debug - actualCafeId:', actualCafeId, 'tableId:', tableId);
-    if (!actualCafeId || !tableId) {
-      alert(`Missing venue or table information. CafeId: ${actualCafeId}, TableId: ${tableId}`);
+  const handlePlaceOrder = async () => {    if (!actualCafeId || !tableId) {
+      toast.showError('Missing venue or table information. Please try again.');
       return;
     }
 
     setLoading(true);
     
     try {
+      // Validate customer info before placing order
+      if (!customerValidation.validateAll()) {
+        toast.showWarning('Please fill in all required fields correctly');
+        setActiveStep(1); // Go back to customer info step
+        setLoading(false);
+        return;
+      }
+      
       const orderData = {
         venue_id: actualCafeId,
         table_id: tableId,
         customer: {
-          name: customerInfo.name,
-          phone: customerInfo.phone,
-          email: customerInfo.email,
+          name: customerInfo.name.trim(),
+          phone: sanitizePhoneNumber(customerInfo.phone),
+          email: customerInfo.email?.trim() || undefined,
         },
         items: items.map(item => ({
           menu_item_id: item.menuItem.id,
@@ -237,26 +262,12 @@ const CheckoutPage: React.FC = () => {
         })),
         order_type: 'qr_scan' as const,
         special_instructions: customerInfo.specialInstructions,
-      };
-
-      console.log('🔍 Sending order data:', orderData);
-      const response = await orderService.createPublicOrder(orderData);
-      console.log('🔍 Order response:', response);
-      
+      };      const response = await orderService.createPublicOrder(orderData);      
       // Check for successful response
       if (response && (response.success || response.data)) {
         // Handle nested data structure - backend might return {success: true, data: {order_id, ...}}
-        const orderResponseData = response.data?.data || response.data;
-        console.log('🔍 DEBUG: Full response object:', response);
-        console.log('🔍 DEBUG: orderResponseData:', orderResponseData);
-        console.log('🔍 DEBUG: order_id field:', orderResponseData?.order_id);
-        console.log('🔍 DEBUG: id field:', orderResponseData?.id);
-        console.log('🔍 DEBUG: order_number field:', orderResponseData?.order_number);
-        
-        const orderIdValue = orderResponseData?.order_id || orderResponseData?.id || orderResponseData?.order_number || 'ORDER_' + Date.now();
-        console.log('✅ Order placed successfully! Full response:', orderResponseData);
-        console.log('✅ Order ID (final):', orderIdValue);
-        
+        const orderResponseData = response.data?.data || response.data;        
+        const orderIdValue = orderResponseData?.order_id || orderResponseData?.id || orderResponseData?.order_number || 'ORDER_' + Date.now();        
         // Store the complete order response data
         const completeOrderData = {
           orderId: orderIdValue,
@@ -283,10 +294,7 @@ const CheckoutPage: React.FC = () => {
           createdAt: orderResponseData?.created_at || new Date().toISOString(),
           paymentMethod: selectedPaymentMethod,
           specialInstructions: orderResponseData?.special_instructions || customerInfo.specialInstructions
-        };
-        
-        console.log('📦 Complete order data prepared:', completeOrderData);
-        
+        };        
         // Store in component state and localStorage
         setOrderId(orderIdValue);
         setOrderPlaced(true);
@@ -304,40 +312,25 @@ const CheckoutPage: React.FC = () => {
           });
         }, 1500); // Small delay to show success state briefly
         
-      } else {
-        console.error('❌ Order response indicates failure:', response);
-        throw new Error(response?.message || 'Order creation failed - invalid response');
+      } else {        throw new Error(response?.message || 'Order creation failed - invalid response');
       }
-    } catch (error: any) {
-      console.error('❌ Order placement error:', error);
-      
-      // Better error handling
-      let errorMessage = 'Failed to place order. Please try again.';
-      
-      if (error.response?.data?.detail) {
-        errorMessage = error.response.data.detail;
-      } else if (error.message) {
-        errorMessage = error.message;
-      }
-      
+    } catch (error: any) {      
       // Check if it's actually a success but with different response format
-      if (error.response?.status === 200 || error.response?.status === 201) {
-        console.log('🔍 Order might have succeeded despite error. Checking response data...');
-        const responseData = error.response?.data;
+      if (error.response?.status === 200 || error.response?.status === 201) {        const responseData = error.response?.data;
         
         if (responseData && (responseData.id || responseData.order_number || responseData.order_id)) {
-          const orderIdValue = responseData.order_number || responseData.id || responseData.order_id;
-          console.log('✅ Order actually succeeded! Order ID:', orderIdValue);
-          
+          const orderIdValue = responseData.order_number || responseData.id || responseData.order_id;          
           setOrderId(orderIdValue);
           setOrderPlaced(true);
           clearCart();
           setActiveStep(3);
+          toast.showSuccess('Order placed successfully!');
           return;
         }
       }
       
-      alert(errorMessage);
+      // Handle error with user-friendly message
+      handleApiError(error, 'Failed to place order');
     } finally {
       setLoading(false);
     }
@@ -347,10 +340,17 @@ const CheckoutPage: React.FC = () => {
 
   const isStepValid = (step: number) => {
     switch (step) {
-      case 0: return items.length > 0;
-      case 1: return customerInfo.name && customerInfo.phone;
-      case 2: return selectedPaymentMethod;
-      default: return true;
+      case 0: 
+        return items.length > 0;
+      case 1: 
+        // Validate customer info properly
+        return customerValidation.isValid && 
+               customerInfo.name?.trim() !== '' && 
+               customerInfo.phone?.trim() !== '';
+      case 2: 
+        return !!selectedPaymentMethod;
+      default: 
+        return true;
     }
   };
 
@@ -913,10 +913,13 @@ const CheckoutPage: React.FC = () => {
                         fullWidth
                         label="Full Name"
                         name="name"
-                        value={customerInfo.name}
-                        onChange={handleInputChange}
+                        value={customerInfo.name || ''}
+                        onChange={customerValidation.handleChange('name')}
+                        onBlur={customerValidation.handleBlur('name')}
                         required
                         variant="outlined"
+                        error={customerValidation.touched.name && !!customerValidation.errors.name}
+                        helperText={customerValidation.touched.name && customerValidation.errors.name}
                         InputProps={{
                           startAdornment: <Person sx={{ mr: 1, color: 'text.secondary' }} />
                         }}
@@ -932,12 +935,20 @@ const CheckoutPage: React.FC = () => {
                         fullWidth
                         label="Phone Number"
                         name="phone"
-                        value={customerInfo.phone}
-                        onChange={handleInputChange}
+                        value={customerInfo.phone || ''}
+                        onChange={customerValidation.handleChange('phone')}
+                        onBlur={customerValidation.handleBlur('phone')}
                         required
                         variant="outlined"
+                        error={customerValidation.touched.phone && !!customerValidation.errors.phone}
+                        helperText={customerValidation.touched.phone ? customerValidation.errors.phone || 'Enter 10-digit phone number' : 'Enter 10-digit phone number'}
                         InputProps={{
                           startAdornment: <Phone sx={{ mr: 1, color: 'text.secondary' }} />
+                        }}
+                        inputProps={{
+                          maxLength: 10,
+                          pattern: '[0-9]*',
+                          inputMode: 'numeric'
                         }}
                         sx={{
                           '& .MuiOutlinedInput-root': {
@@ -952,9 +963,12 @@ const CheckoutPage: React.FC = () => {
                         label="Email (Optional)"
                         name="email"
                         type="email"
-                        value={customerInfo.email}
-                        onChange={handleInputChange}
+                        value={customerInfo.email || ''}
+                        onChange={customerValidation.handleChange('email')}
+                        onBlur={customerValidation.handleBlur('email')}
                         variant="outlined"
+                        error={customerValidation.touched.email && !!customerValidation.errors.email}
+                        helperText={customerValidation.touched.email && customerValidation.errors.email}
                         sx={{
                           '& .MuiOutlinedInput-root': {
                             borderRadius: 2
@@ -967,12 +981,19 @@ const CheckoutPage: React.FC = () => {
                         fullWidth
                         label="Special Instructions (Optional)"
                         name="specialInstructions"
-                        value={customerInfo.specialInstructions}
-                        onChange={handleInputChange}
+                        value={customerInfo.specialInstructions || ''}
+                        onChange={customerValidation.handleChange('specialInstructions')}
+                        onBlur={customerValidation.handleBlur('specialInstructions')}
                         multiline
                         rows={3}
                         variant="outlined"
                         placeholder="Any special requests for your order..."
+                        error={customerValidation.touched.specialInstructions && !!customerValidation.errors.specialInstructions}
+                        helperText={
+                          customerValidation.touched.specialInstructions && customerValidation.errors.specialInstructions
+                            ? customerValidation.errors.specialInstructions
+                            : `${(customerInfo.specialInstructions || '').length}/500 characters`
+                        }
                         sx={{
                           '& .MuiOutlinedInput-root': {
                             borderRadius: 2
@@ -1259,7 +1280,6 @@ const CheckoutPage: React.FC = () => {
                   </Typography>
                 </Box>
               </Box>
-
 
             </Paper>
           </Grid>

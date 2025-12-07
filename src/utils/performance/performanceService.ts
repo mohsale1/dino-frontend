@@ -67,9 +67,7 @@ class PerformanceService {
         });
         navObserver.observe({ entryTypes: ['navigation'] });
         this.observers.push(navObserver);
-      } catch (error) {
-        console.warn('Navigation observer not supported:', error);
-      }
+      } catch (error) {      }
 
       // Resource timing observer
       try {
@@ -82,9 +80,7 @@ class PerformanceService {
         });
         resourceObserver.observe({ entryTypes: ['resource'] });
         this.observers.push(resourceObserver);
-      } catch (error) {
-        console.warn('Resource observer not supported:', error);
-      }
+      } catch (error) {      }
 
       // Measure observer for custom metrics
       try {
@@ -97,9 +93,7 @@ class PerformanceService {
         });
         measureObserver.observe({ entryTypes: ['measure'] });
         this.observers.push(measureObserver);
-      } catch (error) {
-        console.warn('Measure observer not supported:', error);
-      }
+      } catch (error) {      }
     }
   }
 
@@ -264,9 +258,7 @@ class PerformanceService {
       
       const measure = performance.getEntriesByName(name, 'measure')[0];
       return measure ? measure.duration : 0;
-    } catch (error) {
-      console.warn(`Failed to measure ${name}:`, error);
-      return 0;
+    } catch (error) {      return 0;
     }
   }
 
@@ -314,12 +306,7 @@ class PerformanceService {
         break;
     }
 
-    if (threshold && metric.value > threshold) {
-      console.warn(
-        `Performance threshold exceeded: ${metric.name} took ${metric.value}ms (threshold: ${threshold}ms)`,
-        metric
-      );
-    }
+    if (threshold && metric.value > threshold) {    }
   }
 
   getMetrics(category?: PerformanceMetric['category']): PerformanceMetric[] {

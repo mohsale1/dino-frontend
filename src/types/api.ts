@@ -422,7 +422,7 @@ export interface Order {
   order_number: string;
   venue_id: string;
   table_id?: string;
-  table_number?: string;
+  table_number?: string; // User-friendly table number from backend
   customer_id?: string;
   order_type: OrderType;
   items: OrderItem[];
@@ -654,7 +654,7 @@ export interface UserCreate {
   confirm_password: string;
   role_id?: string;
   workspace_id: string;
-  venue_ids?: string[];
+  venue_ids?: string[]; // Array of venue IDs
 }
 
 export interface UserUpdate {
@@ -798,3 +798,4 @@ export type NotificationTypeEnum =
   | 'system_alert';
 
 export type NotificationType = NotificationTypeEnum;
+

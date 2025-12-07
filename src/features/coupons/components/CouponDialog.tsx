@@ -88,7 +88,6 @@ const CouponDialog: React.FC<CouponDialogProps> = ({
   const nextMonth = new Date();
   nextMonth.setMonth(nextMonth.getMonth() + 1);
 
-  
   const [formData, setFormData] = useState<CouponFormData>({
     code: '',
     discountType: 'percentage',
@@ -183,14 +182,10 @@ const CouponDialog: React.FC<CouponDialogProps> = ({
 
       await onSave(couponData);
       onClose();
-    } catch (error) {
-      console.error('Failed to save coupon:', error);
-    } finally {
+    } catch (error) {    } finally {
       setLoading(false);
     }
   };
-
-
 
   // Mobile Modal Layout
   if (isMobile) {
@@ -280,7 +275,6 @@ const CouponDialog: React.FC<CouponDialogProps> = ({
                         {codeValidation.isValid ? 'Code is available' : codeValidation.message}
                       </Alert>
                     )}
-
 
                   </Box>
 
@@ -552,7 +546,6 @@ const CouponDialog: React.FC<CouponDialogProps> = ({
                     {codeValidation.isValid ? 'Code is available' : codeValidation.message}
                   </Alert>
                 )}
-
 
               </Box>
             </Grid>

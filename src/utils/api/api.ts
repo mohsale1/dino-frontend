@@ -6,7 +6,6 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { API_CONFIG } from '../../config/api';
 import { authService } from '../../services/auth';
-import { logger } from '../logger';
 
 // Data transformation utilities
 class DataTransformer {
@@ -95,17 +94,9 @@ class ApiService {
   debugConfiguration?: () => void;
 
   constructor() {
-    // Log configuration during initialization
-    console.log('🔧 ApiService constructor - window.APP_CONFIG:', (window as any).APP_CONFIG);
-    console.log('🔧 ApiService constructor - API_CONFIG.BASE_URL:', API_CONFIG.BASE_URL);
-    console.log('🔧 ApiService constructor - NODE_ENV:', process.env.NODE_ENV);
-    
+    // Log configuration during initialization    
     // Force verification of the base URL
-    if (API_CONFIG.BASE_URL.includes('localhost')) {
-      console.error('❌ STILL USING LOCALHOST! API_CONFIG.BASE_URL:', API_CONFIG.BASE_URL);
-    } else {
-      console.log('✅ Using Cloud Run backend:', API_CONFIG.BASE_URL);
-    }
+    if (API_CONFIG.BASE_URL.includes('localhost')) {    } else {    }
     
     this.axiosInstance = axios.create({
       baseURL: API_CONFIG.BASE_URL,
@@ -125,22 +116,14 @@ class ApiService {
         
         // Only check token refresh for non-auth endpoints
         if (!isAuthEndpoint && authService.shouldRefreshToken()) {
-          try {
-            console.log('🔄 Token needs refresh before request');
-            await authService.refreshToken();
-          } catch (error) {
-            console.error('❌ Pre-request token refresh failed:', error);
-          }
+          try {            await authService.refreshToken();
+          } catch (error) {          }
         }
         
         // Add authentication token
         const token = authService.getToken();
         if (token) {
-          config.headers.Authorization = `Bearer ${token}`;
-          console.log('🔐 Added Authorization header for request to:', config.url);
-        } else {
-          console.warn('⚠️ No token available for request to:', config.url);
-        }
+          config.headers.Authorization = `Bearer ${token}`;        } else {        }
 
         // Convert request data to snake_case
         if (config.data && typeof config.data === 'object') {
@@ -149,22 +132,9 @@ class ApiService {
 
         // Log request with detailed URL info for debugging
         const fullUrl = `${config.baseURL}${config.url}`;
-        console.log('🌐 API Request:', config.method?.toUpperCase(), fullUrl);
-        
-        logger.apiRequest(config.method || 'GET', config.url || '', {
-          data: config.data,
-          params: config.params,
-          baseURL: config.baseURL,
-          fullUrl: fullUrl,
-          userAgent: navigator.userAgent,
-          isMobile: /Mobile|Android|iPhone|iPad/.test(navigator.userAgent)
-        });
-
         return config;
       },
-      (error) => {
-        logger.error('Request interceptor error:', error);
-        return Promise.reject(error);
+      (error) => {        return Promise.reject(error);
       }
     );
 
@@ -177,13 +147,6 @@ class ApiService {
         }
 
         // Log response
-        logger.apiResponse(
-          response.config.method || 'GET',
-          response.config.url || '',
-          response.status,
-          response.data
-        );
-
         return response;
       },
       async (error) => {
@@ -193,34 +156,24 @@ class ApiService {
         if (error.response?.status === 401 && !originalRequest._retry) {
           // Skip retry for auth endpoints to prevent infinite loops
           const isAuthEndpoint = originalRequest.url?.includes('/auth/');
-          if (isAuthEndpoint) {
-            console.log('❌ 401 on auth endpoint, not retrying');
-            return Promise.reject(error);
+          if (isAuthEndpoint) {            return Promise.reject(error);
           }
 
           originalRequest._retry = true;
-          console.log('🔄 401 error, attempting token refresh and retry');
-
           try {
             const newToken = await authService.refreshToken();
-            if (newToken && newToken.access_token) {
-              console.log('✅ Token refreshed, retrying original request');
-              // Update the authorization header with new token
+            if (newToken && newToken.access_token) {              // Update the authorization header with new token
               originalRequest.headers.Authorization = `Bearer ${newToken.access_token}`;
               // Also update the default headers for future requests
               this.axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${newToken.access_token}`;
               // Retry the original request
               return this.axiosInstance(originalRequest);
-            } else {
-              console.log('❌ No valid token received, logging out');
-              // No valid token received, logout
+            } else {              // No valid token received, logout
               authService.logout();
               window.location.href = '/login';
               return Promise.reject(new Error('Token refresh failed'));
             }
-          } catch (refreshError) {
-            console.error('❌ Token refresh failed, logging out:', refreshError);
-            // Refresh failed, redirect to login
+          } catch (refreshError) {            // Refresh failed, redirect to login
             authService.logout();
             window.location.href = '/login';
             return Promise.reject(refreshError);
@@ -228,16 +181,6 @@ class ApiService {
         }
 
         // Log error
-        logger.apiError(
-          error.config?.method || 'UNKNOWN',
-          error.config?.url || '',
-          {
-            status: error.response?.status,
-            data: error.response?.data,
-            message: error.message
-          }
-        );
-
         return Promise.reject(error);
       }
     );
@@ -251,9 +194,7 @@ class ApiService {
       const cacheKey = `GET:${url}:${JSON.stringify(config?.params || {})}`;
       
       // Check if request is already in progress
-      if (this.requestQueue.has(cacheKey)) {
-        console.log('🔄 Request deduplication: Using cached promise for', url);
-        return await this.requestQueue.get(cacheKey);
+      if (this.requestQueue.has(cacheKey)) {        return await this.requestQueue.get(cacheKey);
       }
 
       // Make request and process response
@@ -494,9 +435,7 @@ class ApiService {
     try {
       const response = await this.get('/health');
       return response.success;
-    } catch (error) {
-      logger.warn('Health check failed:', error);
-      return false;
+    } catch (error) {      return false;
     }
   }
 }
@@ -510,13 +449,6 @@ if (typeof window !== 'undefined') {
 }
 
 // Add debug method to the instance
-apiService.debugConfiguration = function() {
-  console.group('🔧 API Service Configuration Debug');
-  console.log('Base URL:', (apiService as any).axiosInstance.defaults.baseURL);
-  console.log('Timeout:', (apiService as any).axiosInstance.defaults.timeout);
-  console.log('Headers:', (apiService as any).axiosInstance.defaults.headers);
-  console.log('Is Mobile:', /Mobile|Android|iPhone|iPad/.test(navigator.userAgent));
-  console.groupEnd();
-};
+apiService.debugConfiguration = function() {};
 
 export default apiService;

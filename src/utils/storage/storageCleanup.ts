@@ -13,11 +13,7 @@ class StorageCleanup {
   static removeRedundantTokenExpiry(): void {
     try {
       // Remove the redundant dino_token_expiry item
-      StorageManager.removeItem('dino_token_expiry');
-      console.log('✅ Removed redundant dino_token_expiry from storage');
-    } catch (error) {
-      console.warn('⚠️ Failed to remove dino_token_expiry:', error);
-    }
+      StorageManager.removeItem('dino_token_expiry');    } catch (error) {    }
   }
 
   /**
@@ -28,12 +24,8 @@ class StorageCleanup {
     try {
       // Remove the dino_last_activity item
       if (localStorage.getItem('dino_last_activity')) {
-        localStorage.removeItem('dino_last_activity');
-        console.log('✅ Removed dino_last_activity from storage');
-      }
-    } catch (error) {
-      console.warn('⚠️ Failed to remove dino_last_activity:', error);
-    }
+        localStorage.removeItem('dino_last_activity');      }
+    } catch (error) {    }
   }
 
   /**
@@ -44,15 +36,9 @@ class StorageCleanup {
     try {
       const cacheKeys = Object.keys(localStorage).filter(key => key.startsWith('dino_cache_'));
       cacheKeys.forEach(key => {
-        localStorage.removeItem(key);
-        console.log(`✅ Removed cache storage: ${key}`);
-      });
-      if (cacheKeys.length > 0) {
-        console.log(`✅ Removed ${cacheKeys.length} cache entries from storage`);
-      }
-    } catch (error) {
-      console.warn('⚠️ Failed to remove cache storage:', error);
-    }
+        localStorage.removeItem(key);      });
+      if (cacheKeys.length > 0) {      }
+    } catch (error) {    }
   }
 
   /**
@@ -73,48 +59,32 @@ class StorageCleanup {
     legacyKeys.forEach(key => {
       try {
         if (localStorage.getItem(key)) {
-          localStorage.removeItem(key);
-          console.log(`✅ Removed legacy storage item: ${key}`);
-        }
-      } catch (error) {
-        console.warn(`⚠️ Failed to remove legacy item ${key}:`, error);
-      }
+          localStorage.removeItem(key);        }
+      } catch (error) {      }
     });
 
     // Remove all cache entries with dino_cache_ prefix
     try {
       const cacheKeys = Object.keys(localStorage).filter(key => key.startsWith('dino_cache_'));
       cacheKeys.forEach(key => {
-        localStorage.removeItem(key);
-        console.log(`✅ Removed cache storage item: ${key}`);
-      });
-    } catch (error) {
-      console.warn('⚠️ Failed to remove cache items:', error);
-    }
+        localStorage.removeItem(key);      });
+    } catch (error) {    }
 
     // Remove workspace venue cache entries
     try {
       const workspaceVenueKeys = Object.keys(localStorage).filter(key => key.startsWith('workspace_venues_'));
       workspaceVenueKeys.forEach(key => {
-        localStorage.removeItem(key);
-        console.log(`✅ Removed workspace venue cache: ${key}`);
-      });
-    } catch (error) {
-      console.warn('⚠️ Failed to remove workspace venue cache:', error);
-    }
+        localStorage.removeItem(key);      });
+    } catch (error) {    }
   }
 
   /**
    * Perform complete storage cleanup
    */
-  static performCleanup(): void {
-    console.log('🧹 Starting storage cleanup...');
-    this.removeRedundantTokenExpiry();
+  static performCleanup(): void {    this.removeRedundantTokenExpiry();
     this.removeActivityTracking();
     this.removeCacheStorage();
-    this.cleanupLegacyItems();
-    console.log('✅ Storage cleanup completed');
-  }
+    this.cleanupLegacyItems();  }
 
   /**
    * Get current storage usage info
@@ -155,26 +125,13 @@ class StorageCleanup {
    * Debug storage contents
    */
   static debugStorage(): void {
-    const info = this.getStorageInfo();
-    
-    console.group('🔍 Storage Debug Info');
-    console.log('Total Items:', info.totalItems);
-    console.log('Dino Items:', info.dinoItems);
-    console.log('Storage Size (chars):', info.storageSize);
-    console.log('All Items:', info.items);
-    
+    const info = this.getStorageInfo();    
     // Show dino-specific items
     const dinoItems = info.items.filter(key => key.startsWith('dino_'));
-    if (dinoItems.length > 0) {
-      console.log('Dino Storage Items:');
-      dinoItems.forEach(key => {
+    if (dinoItems.length > 0) {      dinoItems.forEach(key => {
         const value = localStorage.getItem(key);
-        const size = value ? value.length : 0;
-        console.log(`  ${key}: ${size} chars`);
-      });
-    }
-    console.groupEnd();
-  }
+        const size = value ? value.length : 0;      });
+    }  }
 }
 
 // Auto-cleanup on module load
@@ -182,34 +139,22 @@ if (typeof window !== 'undefined') {
   // Force immediate removal of activity tracking, avatar storage, and all cache entries
   try {
     if (localStorage.getItem('dino_last_activity')) {
-      localStorage.removeItem('dino_last_activity');
-      console.log('🗑️ Immediately removed dino_last_activity');
-    }
+      localStorage.removeItem('dino_last_activity');    }
     if (localStorage.getItem('dinoAvatar')) {
-      localStorage.removeItem('dinoAvatar');
-      console.log('🗑️ Immediately removed dinoAvatar');
-    }
+      localStorage.removeItem('dinoAvatar');    }
     if (localStorage.getItem('dinoName')) {
-      localStorage.removeItem('dinoName');
-      console.log('🗑️ Immediately removed dinoName');
-    }
+      localStorage.removeItem('dinoName');    }
     
     // Remove all dino_cache_ entries
     const cacheKeys = Object.keys(localStorage).filter(key => key.startsWith('dino_cache_'));
     cacheKeys.forEach(key => {
-      localStorage.removeItem(key);
-      console.log(`🗑️ Immediately removed cache entry: ${key}`);
-    });
+      localStorage.removeItem(key);    });
     
     // Remove workspace venue cache entries
     const workspaceVenueKeys = Object.keys(localStorage).filter(key => key.startsWith('workspace_venues_'));
     workspaceVenueKeys.forEach(key => {
-      localStorage.removeItem(key);
-      console.log(`🗑️ Immediately removed workspace venue cache: ${key}`);
-    });
-  } catch (error) {
-    console.warn('⚠️ Failed immediate cleanup:', error);
-  }
+      localStorage.removeItem(key);    });
+  } catch (error) {  }
   
   // Run full cleanup immediately and after a short delay
   StorageCleanup.performCleanup();
@@ -226,13 +171,9 @@ if (typeof window !== 'undefined') {
   
   // Add a global function to force cleanup
   (window as any).forceStorageCleanup = () => {
-    StorageCleanup.performCleanup();
-    console.log('🧹 Manual storage cleanup completed');
-  };
+    StorageCleanup.performCleanup();  };
   
   // Add a function to specifically remove activity tracking
   (window as any).removeActivityTracking = () => {
-    StorageCleanup.removeActivityTracking();
-    console.log('🗑️ Activity tracking removed');
-  };
+    StorageCleanup.removeActivityTracking();  };
 }

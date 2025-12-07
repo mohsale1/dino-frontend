@@ -29,24 +29,24 @@ RUN apk add --no-cache curl bash gettext
 COPY --from=build /app/build /usr/share/nginx/html
 
 # Copy nginx configuration template and fallback
-COPY nginx.conf.template /etc/nginx/nginx.conf.template
-COPY nginx.conf /etc/nginx/nginx.conf
+COPY deployment/nginx.conf.template /etc/nginx/nginx.conf.template
+COPY deployment/nginx.conf /etc/nginx/nginx.conf
 
 # Remove default nginx config to avoid conflicts
 RUN rm -f /etc/nginx/conf.d/default.conf
 
 # Copy config generation script
-COPY scripts/generate-config.sh /usr/local/bin/generate-config.sh
+COPY deployment/scripts/generate-config.sh /usr/local/bin/generate-config.sh
 RUN chmod +x /usr/local/bin/generate-config.sh
 
 # Copy debug script
-COPY scripts/debug-container.sh /usr/local/bin/debug-container.sh
+COPY deployment/scripts/debug-container.sh /usr/local/bin/debug-container.sh
 RUN chmod +x /usr/local/bin/debug-container.sh
 
 # Environment validation is handled by generate-config.sh
 
 # Copy startup script
-COPY scripts/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+COPY deployment/scripts/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 # Set proper permissions for nginx

@@ -51,44 +51,21 @@ export const TourProvider: React.FC<TourProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState(false);
 
   // Load tour status when user is authenticated
-  useEffect(() => {
-    console.log('🎯 TourContext useEffect - auth state changed:', {
-      isAuthenticated,
-      hasUser: !!user,
-      userId: user?.id
-    });
-    
-    if (isAuthenticated && user) {
-      console.log('🎯 Loading tour status for authenticated user');
-      refreshTourStatus();
+  useEffect(() => {    
+    if (isAuthenticated && user) {      refreshTourStatus();
     }
   }, [isAuthenticated, user]);
 
   const refreshTourStatus = async () => {
-    try {
-      console.log('🎯 Refreshing tour status...');
-      setLoading(true);
-      const status = await tourService.getTourStatus();
-      console.log('🎯 Tour status received from API:', status);
-      setTourStatus(status);
-      console.log('🎯 Tour status set in context:', status);
-    } catch (error) {
-      console.error('❌ Failed to load tour status:', error);
-      setTourStatus(null);
+    try {      setLoading(true);
+      const status = await tourService.getTourStatus();      setTourStatus(status);    } catch (error) {      setTourStatus(null);
     } finally {
-      setLoading(false);
-      console.log('🎯 Tour status loading completed');
-    }
+      setLoading(false);    }
   };
 
-  const startTour = (tourSteps: TourStep[]) => {
-    console.log('🎬 Starting tour with', tourSteps.length, 'steps');
-    console.log('🎯 Tour steps:', tourSteps.map(step => ({ id: step.id, target: step.target })));
-    setSteps(tourSteps);
+  const startTour = (tourSteps: TourStep[]) => {    setSteps(tourSteps);
     setCurrentStep(0);
-    setIsActive(true);
-    console.log('✅ Tour state updated - isActive:', true);
-  };
+    setIsActive(true);  };
 
   const nextStep = () => {
     if (currentStep < steps.length - 1) {
@@ -117,11 +94,7 @@ export const TourProvider: React.FC<TourProviderProps> = ({ children }) => {
       setIsActive(false);
       setCurrentStep(0);
       setSteps([]);
-      await refreshTourStatus();
-      console.log('⏭️ Tour skipped');
-    } catch (error) {
-      console.error('Failed to skip tour:', error);
-    }
+      await refreshTourStatus();    } catch (error) {    }
   };
 
   const completeTour = async () => {
@@ -130,21 +103,13 @@ export const TourProvider: React.FC<TourProviderProps> = ({ children }) => {
       setIsActive(false);
       setCurrentStep(0);
       setSteps([]);
-      await refreshTourStatus();
-      console.log('✅ Tour completed');
-    } catch (error) {
-      console.error('Failed to complete tour:', error);
-    }
+      await refreshTourStatus();    } catch (error) {    }
   };
 
   const restartTour = async () => {
     try {
       await tourService.restartTour();
-      await refreshTourStatus();
-      console.log('🔄 Tour restarted');
-    } catch (error) {
-      console.error('Failed to restart tour:', error);
-    }
+      await refreshTourStatus();    } catch (error) {    }
   };
 
   const shouldShowTour = tourStatus?.should_show_tour || false;

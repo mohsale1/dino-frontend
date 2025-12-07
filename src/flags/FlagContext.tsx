@@ -39,9 +39,7 @@ export const FlagProvider: React.FC<FlagProviderProps> = ({
           return { ...appFlags, ...parsedFlags };
         }
       }
-    } catch (error) {
-      console.warn('Failed to load flags from localStorage:', error);
-    }
+    } catch (error) {    }
     
     // Fallback to default flags with any initial overrides
     return { ...appFlags, ...initialFlags };
@@ -54,9 +52,7 @@ export const FlagProvider: React.FC<FlagProviderProps> = ({
   const updateFlag = (path: string, value: boolean) => {
     const parts = path.split('.');
     
-    if (parts.length !== 2) {
-      console.error('Invalid flag path. Use format: "section.flagName"');
-      return;
+    if (parts.length !== 2) {      return;
     }
 
     const [section, flagName] = parts;
@@ -74,9 +70,7 @@ export const FlagProvider: React.FC<FlagProviderProps> = ({
       // Save to localStorage
       try {
         localStorage.setItem(FLAG_STORAGE_KEY, JSON.stringify(newFlags));
-      } catch (error) {
-        console.warn('Failed to save flags to localStorage:', error);
-      }
+      } catch (error) {      }
       
       return newFlags;
     });
@@ -89,9 +83,7 @@ export const FlagProvider: React.FC<FlagProviderProps> = ({
     setFlags(appFlags);
     try {
       localStorage.removeItem(FLAG_STORAGE_KEY);
-    } catch (error) {
-      console.warn('Failed to clear flags from localStorage:', error);
-    }
+    } catch (error) {    }
   };
 
   /**
@@ -106,9 +98,7 @@ export const FlagProvider: React.FC<FlagProviderProps> = ({
           setFlags({ ...appFlags, ...parsedFlags });
         }
       }
-    } catch (error) {
-      console.error('Failed to load flags:', error);
-    }
+    } catch (error) {    }
   };
 
   /**
@@ -117,9 +107,7 @@ export const FlagProvider: React.FC<FlagProviderProps> = ({
   const saveFlags = () => {
     try {
       localStorage.setItem(FLAG_STORAGE_KEY, JSON.stringify(flags));
-    } catch (error) {
-      console.error('Failed to save flags:', error);
-    }
+    } catch (error) {    }
   };
 
   // Context value
@@ -162,9 +150,7 @@ export const useFlag = (path: string): boolean => {
   const { flags } = useFlags();
   
   const parts = path.split('.');
-  if (parts.length !== 2) {
-    console.error('Invalid flag path. Use format: "section.flagName"');
-    return false;
+  if (parts.length !== 2) {    return false;
   }
 
   const [section, flagName] = parts;
@@ -176,9 +162,7 @@ export const useFlag = (path: string): boolean => {
       const flagValue = (sectionFlags as Record<string, any>)[flagName];
       return typeof flagValue === 'boolean' ? flagValue : false;
     }
-  } catch (error) {
-    console.warn(`Error accessing flag ${path}:`, error);
-  }
+  } catch (error) {  }
   
   return false;
 };

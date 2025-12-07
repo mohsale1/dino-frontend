@@ -1,8 +1,3 @@
-// Import immediate cleanup to remove workspace venue cache entries FIRST
-import './utils/immediateCleanup';
-// Import debug utilities for authentication testing
-import './utils/debugAuth';
-
 import React, { useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
@@ -25,9 +20,7 @@ import { HomePage } from './pages/public';
 import { LoginPage } from './pages/auth';
 
 // Menu Pages
-import { MenuPage, CheckoutPage, OrderTrackingPage, OrderSuccessPage, OrderStatusDemo } from './pages/menu';
-
-
+import { MenuPage, CheckoutPage, OrderTrackingPage, OrderSuccessPage } from './pages/menu';
 
 // Lazy-loaded components for better performance
 import { LazyComponents } from './components/lazy';
@@ -41,17 +34,11 @@ import { NotFoundPage } from './pages/public';
 import DashboardRouter from './components/dashboards/DashboardRouter';
 import { PERMISSIONS } from './types/auth';
 
-import { logger } from './utils/logger';
-import { RUNTIME_CONFIG as config, isDevelopment } from './config/runtime';
+import { RUNTIME_CONFIG as config } from './config/runtime';
 import { StorageCleanup } from './utils/storage';
 import { tokenRefreshScheduler } from './utils/tokenRefreshScheduler';
 import { apiService } from './utils/api';
 import { initializePerformanceMonitoring } from './utils/performance';
-
-// Debug configuration in development
-if (isDevelopment()) {
-  logger.debug('Development mode enabled');
-}
 
 // Simple loading fallback for lazy components
 const LoadingFallback = () => (
@@ -73,28 +60,22 @@ function App() {
     try {
       // Clean up legacy data from localStorage
       StorageCleanup.performCleanup();
-      logger.info('Storage cleanup completed successfully');
       
       // Refresh API configuration from runtime config
       if (typeof window !== 'undefined') {
         // Wait a bit for config.js to load
         setTimeout(() => {
           apiService.refreshConfiguration();
-          logger.info('API configuration refreshed from runtime config');
         }, 200);
         
         tokenRefreshScheduler.start();
-        logger.info('Token refresh scheduler initialized');
         
         // Initialize performance monitoring
         initializePerformanceMonitoring();
-        logger.info('Performance monitoring initialized');
       }
-    } catch (error) {
-      logger.error('CRITICAL: App initialization failed:', error);
-      // In production, show a user-friendly error message
+    } catch (error) {      // In production, show a user-friendly error message
       if (config.APP_ENV === 'production') {
-        alert('Application initialization failed. Please contact support.');
+        alert('Application initialization failed. Please refresh the page or contact support.');
       }
     }
   }, []);
@@ -144,9 +125,7 @@ function App() {
                 <Route
                   path="/order-success/:orderId"
                   element={<VenueThemeProvider><OrderSuccessPage /></VenueThemeProvider>} />
-                <Route
-                  path="/order-status-demo"
-                  element={<VenueThemeProvider><OrderStatusDemo /></VenueThemeProvider>} />
+
                 
                 {/* Protected User Routes */}
                 <Route path="/profile" element={

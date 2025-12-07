@@ -1,6 +1,3 @@
-
-
-
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
@@ -96,6 +93,8 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({ className }) => {
   const [tableStatuses, setTableStatuses] = useState<TableStatus[]>([]);
   const [currentTab, setCurrentTab] = useState(0);
   const [dashboardData, setDashboardData] = useState<AdminDashboardResponse | SuperAdminDashboardResponse | OperatorDashboardResponse | null>(null);
+  const [analyticsData, setAnalyticsData] = useState<any>(null);
+  const [liveMetrics, setLiveMetrics] = useState<any>(null);
   const [refreshing, setRefreshing] = useState(false);
 
   // Load dashboard data based on user role
@@ -128,25 +127,9 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({ className }) => {
         } else {
           data = await dashboardService.getAdminDashboard();
         }
-      }
-      
-      console.log('🎯 Dashboard data received:', data);
-      console.log('🎯 Data type:', typeof data);
-      console.log('🎯 Data keys:', data ? Object.keys(data) : 'NO DATA');
-      
+      }      
       if (data) {
         // Process stats based on role and data format
-        console.log('📊 Processing dashboard data:', {
-          hasSystemStats: 'system_stats' in data,
-          hasStats: 'stats' in data,
-          hasSummary: 'summary' in data,
-          hasVenue: 'venue' in data,
-          hasWorkspaces: 'workspaces' in data,
-          hasTopVenues: 'top_venues' in data,
-          dataKeys: Object.keys(data),
-          summaryKeys: ('summary' in data && (data as any).summary) ? Object.keys((data as any).summary) : 'NO SUMMARY'
-        });
-
         if ('system_stats' in data) {
           // SuperAdmin format
           const superAdminData = data as SuperAdminDashboardResponse;
@@ -171,9 +154,7 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({ className }) => {
         } else if ('summary' in data && 'workspaces' in data && 'top_venues' in data) {
           // SuperAdmin system-wide summary (from get_superadmin_dashboard)
           const superAdminSummary = data as any;
-          const summary = superAdminSummary.summary;
-          console.log('📊 Using SuperAdmin system-wide format:', summary);
-          setDashboardData(data as any);
+          const summary = superAdminSummary.summary;          setDashboardData(data as any);
           setStats({
             total_orders: summary?.total_orders || summary?.totalOrders || 0,
             total_revenue: summary?.total_revenue || summary?.totalRevenue || 0,
@@ -194,50 +175,32 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({ className }) => {
         } else if ('summary' in data && 'venue' in data) {
           // Venue dashboard format (from backend get_venue_dashboard)
           const venueData = data as any;
-          const summary = venueData.summary;
-          console.log('📊 Using venue dashboard format');
-          console.log('📊 Full venueData keys:', Object.keys(venueData));
-          console.log('📊 Summary object:', summary);
-          console.log('📊 Summary keys:', summary ? Object.keys(summary) : 'NO SUMMARY');
-          
-          // Log each field we're trying to access
-          console.log('📊 Field mapping check:', {
-            total_orders: summary?.total_orders,
-            totalOrders: summary?.totalOrders,
-            today_orders: summary?.today_orders,
-            todayOrders: summary?.todayOrders,
-            today_revenue: summary?.today_revenue,
-            todayRevenue: summary?.todayRevenue,
-            total_revenue: summary?.total_revenue,
-            totalRevenue: summary?.totalRevenue,
-          });
+          const summary = venueData.summary || {};
           
           // Handle both snake_case and camelCase (API service converts to camelCase)
-          const mappedStats = {
-            total_orders: summary?.total_orders || summary?.totalOrders || 0,
-            total_revenue: summary?.total_revenue || summary?.totalRevenue || 0,
-            active_orders: summary?.active_orders || summary?.activeOrders || 0,
-            total_tables: summary?.total_tables || summary?.totalTables || 0,
-            total_menu_items: summary?.total_menu_items || summary?.totalMenuItems || 0,
-            todays_revenue: summary?.today_revenue || summary?.todayRevenue || 0,
-            todays_orders: summary?.today_orders || summary?.todayOrders || 0,
-            avg_order_value: summary?.average_order_value || summary?.averageOrderValue || 0,
-            table_occupancy_rate: summary?.table_occupancy_rate || summary?.tableOccupancyRate || 0,
+          const mappedStats: VenueDashboardStats = {
+            total_orders: summary.total_orders || summary.totalOrders || 0,
+            total_revenue: summary.total_revenue || summary.totalRevenue || 0,
+            active_orders: summary.active_orders || summary.activeOrders || 0,
+            total_tables: summary.total_tables || summary.totalTables || 0,
+            total_menu_items: summary.total_menu_items || summary.totalMenuItems || 0,
+            todays_revenue: summary.today_revenue || summary.todayRevenue || 0,
+            todays_orders: summary.today_orders || summary.todayOrders || 0,
+            avg_order_value: summary.average_order_value || summary.averageOrderValue || 0,
+            table_occupancy_rate: summary.table_occupancy_rate || summary.tableOccupancyRate || 0,
             popular_items_count: 0,
             pending_orders: 0,
             preparing_orders: 0,
             ready_orders: 0,
-            occupied_tables: summary?.occupied_tables || summary?.occupiedTables || 0,
-            active_menu_items: summary?.active_menu_items || summary?.activeMenuItems || 0,
+            occupied_tables: summary.occupied_tables || summary.occupiedTables || 0,
+            active_menu_items: summary.active_menu_items || summary.activeMenuItems || 0,
           };
           
-          console.log('📊 Mapped stats:', mappedStats);
           setStats(mappedStats);
           
           // Map recent_orders/recentOrders to recent_activity for compatibility with tabs
           const recentOrders = venueData.recent_orders || venueData.recentOrders || [];
-          console.log('📋 Mapping recent orders:', recentOrders.length);
-          console.log('📋 Recent orders sample:', recentOrders[0]);
+          
           setDashboardData({
             ...data,
             recent_activity: recentOrders,
@@ -248,54 +211,79 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({ className }) => {
           const adminData = data as AdminDashboardResponse;
           const adminStats = adminData.stats;
           setDashboardData(data);
+          
+          const tablesOccupied = adminStats?.current?.tables_occupied || 0;
+          const tablesTotal = adminStats?.current?.tables_total || 0;
+          const occupancyRate = tablesTotal > 0 
+            ? Math.round((tablesOccupied / tablesTotal) * 100) 
+            : 0;
+          
           setStats({
-            total_orders: adminStats?.today.orders_count || 0,
-            total_revenue: adminStats?.today.revenue || 0,
+            total_orders: adminStats?.today?.orders_count || 0,
+            total_revenue: adminStats?.today?.revenue || 0,
             active_orders: 0,
-            total_tables: adminStats?.current.tables_total || 0,
-            total_menu_items: adminStats?.current.menu_items_total || 0,
-            todays_revenue: adminStats?.today.revenue || 0,
-            todays_orders: adminStats?.today.orders_count || 0,
-            avg_order_value: adminStats?.today.average_order_value || 0,
-            table_occupancy_rate: Math.round((adminStats?.current.tables_occupied / Math.max(adminStats?.current.tables_total, 1)) * 100) || 0,
+            total_tables: tablesTotal,
+            total_menu_items: adminStats?.current?.menu_items_total || 0,
+            todays_revenue: adminStats?.today?.revenue || 0,
+            todays_orders: adminStats?.today?.orders_count || 0,
+            avg_order_value: adminStats?.today?.average_order_value || 0,
+            table_occupancy_rate: occupancyRate,
             popular_items_count: 0,
             pending_orders: 0,
             preparing_orders: 0,
             ready_orders: 0,
-            occupied_tables: adminStats?.current.tables_occupied || 0,
-            active_menu_items: adminStats?.current.menu_items_active || 0,
+            occupied_tables: tablesOccupied,
+            active_menu_items: adminStats?.current?.menu_items_active || 0,
           });
         } else {
           // Operator format
           const operatorData = data as OperatorDashboardResponse;
           setDashboardData(data);
+          
+          const tablesOccupied = operatorData.stats?.tables_occupied || 0;
+          const tablesAvailable = operatorData.stats?.tables_available || 0;
+          const totalTables = tablesOccupied + tablesAvailable;
+          const occupancyRate = totalTables > 0 
+            ? Math.round((tablesOccupied / totalTables) * 100) 
+            : 0;
+          
           setStats({
             total_orders: 0,
             total_revenue: 0,
             active_orders: operatorData.stats?.active_orders || 0,
-            total_tables: (operatorData.stats?.tables_occupied || 0) + (operatorData.stats?.tables_available || 0),
+            total_tables: totalTables,
             total_menu_items: 0,
             todays_revenue: 0,
             todays_orders: 0,
             avg_order_value: 0,
-            table_occupancy_rate: Math.round(((operatorData.stats?.tables_occupied || 0) / Math.max((operatorData.stats?.tables_occupied || 0) + (operatorData.stats?.tables_available || 0), 1)) * 100),
+            table_occupancy_rate: occupancyRate,
             popular_items_count: 0,
             pending_orders: operatorData.stats?.pending_orders || 0,
             preparing_orders: operatorData.stats?.preparing_orders || 0,
             ready_orders: operatorData.stats?.ready_orders || 0,
-            occupied_tables: operatorData.stats?.tables_occupied || 0,
+            occupied_tables: tablesOccupied,
             active_menu_items: 0,
           });
         }
         
-        // Set menu performance data
-        if ('top_menu_items' in data && data.top_menu_items && data.top_menu_items.length > 0) {
-          const formattedMenuItems = data.top_menu_items.map((item: any) => ({
-            id: item.id,
-            name: item.name,
-            orders: item.orders,
-            revenue: item.revenue,
-            category: item.category,
+        // Set menu performance data from analytics or top_menu_items
+        if ((data as any).analytics?.popular_items && (data as any).analytics.popular_items.length > 0) {
+          const formattedMenuItems = (data as any).analytics.popular_items.map((item: any) => ({
+            id: item.id || '',
+            name: item.name || 'Unknown',
+            orders: item.orders || 0,
+            revenue: item.revenue || 0,
+            category: item.category || 'Unknown',
+            rating: item.rating || 4.0,
+          }));
+          setMenuPerformance(formattedMenuItems);
+        } else if ('top_menu_items' in data && (data as any).top_menu_items && (data as any).top_menu_items.length > 0) {
+          const formattedMenuItems = (data as any).top_menu_items.map((item: any) => ({
+            id: item.id || '',
+            name: item.name || 'Unknown',
+            orders: item.orders || 0,
+            revenue: item.revenue || 0,
+            category: item.category || 'Unknown',
             rating: item.rating || 4.0,
           }));
           setMenuPerformance(formattedMenuItems);
@@ -303,17 +291,26 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({ className }) => {
           setMenuPerformance([]);
         }
         
+        // Store analytics data if available
+        if ((data as any).analytics) {
+          setAnalyticsData((data as any).analytics);
+        }
+        
         // Set table status data
-        if ('venue_performance' in data && data.venue_performance && data.venue_performance.length > 0) {
+        if ('venue_performance' in data && (data as any).venue_performance && (data as any).venue_performance.length > 0) {
           const formattedTables: TableStatus[] = [];
-          data.venue_performance.forEach((venue: any, index: number) => {
-            for (let i = 1; i <= Math.min(venue.total_tables, 5); i++) {
+          (data as any).venue_performance.forEach((venue: any, index: number) => {
+            const totalTables = venue.total_tables || 0;
+            const occupiedTables = venue.occupied_tables || 0;
+            const venueName = venue.name || 'VEN';
+            
+            for (let i = 1; i <= Math.min(totalTables, 5); i++) {
               formattedTables.push({
-                id: `${venue.id}-table-${i}`,
-                table_number: `${venue.name.substring(0, 3).toUpperCase()}-${i}`,
-                status: i <= venue.occupied_tables ? 'occupied' : 'available',
-                current_order_id: i <= venue.occupied_tables ? `order-${venue.id}-${i}` : undefined,
-                occupancy_time: i <= venue.occupied_tables ? Math.floor(Math.random() * 120) + 15 : undefined,
+                id: `${venue.id || index}-table-${i}`,
+                table_number: `${venueName.substring(0, 3).toUpperCase()}-${i}`,
+                status: i <= occupiedTables ? 'occupied' : 'available',
+                current_order_id: i <= occupiedTables ? `order-${venue.id || index}-${i}` : undefined,
+                occupancy_time: i <= occupiedTables ? Math.floor(Math.random() * 120) + 15 : undefined,
               });
             }
           });
@@ -345,9 +342,29 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({ className }) => {
       }
     } catch (err: any) {
       // API failed - show error alert but keep UI visible
-      console.error('Failed to load dashboard data:', err);
-      setError('Network error. Please check your connection.');
+      console.error('Dashboard data loading error:', err);
+      setError(err?.message || 'Network error. Please check your connection.');
       setDashboardData(null);
+      setAnalyticsData(null);
+      
+      // Set default empty stats on error
+      setStats({
+        total_orders: 0,
+        total_revenue: 0,
+        active_orders: 0,
+        total_tables: 0,
+        total_menu_items: 0,
+        todays_revenue: 0,
+        todays_orders: 0,
+        avg_order_value: 0,
+        table_occupancy_rate: 0,
+        popular_items_count: 0,
+        pending_orders: 0,
+        preparing_orders: 0,
+        ready_orders: 0,
+        occupied_tables: 0,
+        active_menu_items: 0,
+      });
     } finally {
       setLoading(false);
     }
@@ -402,8 +419,6 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({ className }) => {
       </Alert>
     );
   }
-
-
 
   return (
     <VenueAssignmentCheck showFullPage={!isSuperAdmin()}>
@@ -476,27 +491,44 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({ className }) => {
               <>
                 {/* Overview Tab */}
                 <TabPanel value={currentTab} index={0}>
-                  <OverviewTab dashboardData={dashboardData} stats={stats} />
+                  <OverviewTab 
+                    dashboardData={dashboardData} 
+                    stats={stats} 
+                    analyticsData={analyticsData}
+                  />
                 </TabPanel>
 
                 {/* Sales Analytics Tab */}
                 <TabPanel value={currentTab} index={1}>
-                  <SalesAnalyticsTab dashboardData={dashboardData} stats={stats} />
+                  <SalesAnalyticsTab 
+                    dashboardData={dashboardData} 
+                    stats={stats} 
+                    analyticsData={analyticsData}
+                  />
                 </TabPanel>
 
                 {/* Menu Performance Tab */}
                 <TabPanel value={currentTab} index={2}>
-                  <MenuPerformanceTab menuPerformance={menuPerformance} />
+                  <MenuPerformanceTab 
+                    menuPerformance={menuPerformance} 
+                    analyticsData={analyticsData}
+                  />
                 </TabPanel>
 
                 {/* Tables & Orders Tab */}
                 <TabPanel value={currentTab} index={3}>
-                  <TablesOrdersTab tableStatuses={tableStatuses} />
+                  <TablesOrdersTab 
+                    tableStatuses={tableStatuses} 
+                    analyticsData={analyticsData}
+                  />
                 </TabPanel>
 
                 {/* Payments Tab */}
                 <TabPanel value={currentTab} index={4}>
-                  <PaymentsTab stats={stats} />
+                  <PaymentsTab 
+                    stats={stats} 
+                    analyticsData={analyticsData}
+                  />
                 </TabPanel>
               </>
             )}

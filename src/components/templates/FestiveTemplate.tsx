@@ -2,12 +2,12 @@ import React from 'react';
 import { Box, Typography, Paper } from '@mui/material';
 import { TemplateProps } from './index';
 
-const FestiveTemplate: React.FC<TemplateProps> = ({
+const ElegantTemplate: React.FC<TemplateProps> = ({
   qrCodeBase64,
   venueName,
   tableNumber,
   menuUrl,
-  primaryColor = '#ff6b6b',
+  primaryColor = '#d4af37',
   includeInstructions = true,
   layout = 'standard'
 }) => {
@@ -22,75 +22,69 @@ const FestiveTemplate: React.FC<TemplateProps> = ({
   const { width, padding, qrSize } = getLayoutSize();
 
   return (
-    <Paper
-      elevation={20}
+    <Box
       sx={{
         width,
         margin: '20px auto',
         padding: `${padding}px`,
-        background: 'linear-gradient(45deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3, #54a0ff)',
-        borderRadius: '35px',
-        textAlign: 'center',
-        position: 'relative',
-        overflow: 'hidden'
+        background: '#f8f6f0',
+        color: '#2c2c2c'
       }}
     >
-      {/* Inner Content Container */}
-      <Box
+      <Paper
+        elevation={8}
         sx={{
-          background: 'rgba(255, 255, 255, 0.95)',
-          border: '4px solid #ff6b6b',
-          borderRadius: '30px',
-          padding: `${padding * 0.8}px`,
+          background: 'white',
+          border: `2px solid ${primaryColor}`,
+          padding: `${padding}px`,
+          margin: 0,
+          textAlign: 'center',
           position: 'relative',
-          overflow: 'hidden',
-          backdropFilter: 'blur(10px)',
-          color: '#2c2c54'
+          boxShadow: `0 8px 32px rgba(212, 175, 55, 0.2)`,
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: '15px',
+            left: '15px',
+            right: '15px',
+            bottom: '15px',
+            border: `1px solid ${primaryColor}`,
+            pointerEvents: 'none'
+          }
         }}
       >
-
-
-        {/* Party Banner */}
-        <Box
-          sx={{
-            position: 'absolute',
-            top: '10px',
-            left: '10px',
-            right: '10px',
-            textAlign: 'center',
-            fontSize: '1.2rem'
-          }}
-        >
-          🎉🎊🎈
-        </Box>
-
         <Typography
           variant="h2"
           sx={{
-            background: 'linear-gradient(45deg, #ff6b6b, #feca57, #48dbfb)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            fontWeight: 900,
-            fontSize: layout === 'compact' ? '2.2rem' : layout === 'large' ? '3.2rem' : '2.8rem',
+            color: primaryColor,
+            fontWeight: 'normal',
+            fontSize: layout === 'compact' ? '2rem' : layout === 'large' ? '3rem' : '2.5rem',
             marginBottom: '15px',
-            marginTop: '30px',
-            fontFamily: '"Comic Sans MS", cursive',
-            textShadow: '2px 2px 4px rgba(0,0,0,0.1)',
-
+            fontStyle: 'italic',
+            fontFamily: '"Playfair Display", "Georgia", serif'
           }}
         >
-          🦕 DINO
+          🦕 Dino
         </Typography>
+
+        {/* Elegant Divider */}
+        <Box
+          sx={{
+            height: '1px',
+            background: `linear-gradient(to right, transparent, ${primaryColor}, transparent)`,
+            margin: '20px auto',
+            width: '60%'
+          }}
+        />
 
         <Typography
           variant="h4"
           sx={{
-            color: '#2c2c54',
-            fontWeight: 700,
+            color: '#2c2c2c',
+            fontWeight: 'bold',
             fontSize: layout === 'compact' ? '1.4rem' : layout === 'large' ? '2rem' : '1.7rem',
             marginBottom: '8px',
-            fontFamily: '"Comic Sans MS", cursive',
-            textShadow: '1px 1px 2px rgba(0,0,0,0.1)'
+            fontFamily: '"Playfair Display", serif'
           }}
         >
           {venueName}
@@ -99,91 +93,83 @@ const FestiveTemplate: React.FC<TemplateProps> = ({
         <Typography
           variant="h5"
           sx={{
-            background: 'linear-gradient(45deg, #ff6b6b, #feca57)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            fontWeight: 'bold',
-            fontSize: layout === 'compact' ? '1.2rem' : layout === 'large' ? '1.6rem' : '1.4rem',
+            color: primaryColor,
+            fontSize: layout === 'compact' ? '1.1rem' : layout === 'large' ? '1.5rem' : '1.3rem',
             marginBottom: '25px',
-            fontFamily: '"Comic Sans MS", cursive'
+            fontStyle: 'italic',
+            fontFamily: '"Playfair Display", serif'
           }}
         >
           Table {tableNumber}
         </Typography>
 
-        {/* Celebration Icons */}
         <Box
           sx={{
-            display: 'flex',
-            justifyContent: 'center',
-            gap: '20px',
-            marginBottom: '20px'
+            height: '1px',
+            background: `linear-gradient(to right, transparent, ${primaryColor}, transparent)`,
+            margin: '20px auto',
+            width: '40%'
           }}
-        >
-          {['🎉', '🎊', '🎈', '🎁'].map((icon, index) => (
-            <Typography
-              key={index}
-              sx={{
-                fontSize: '1.5rem',
+        />
 
-              }}
-            >
-              {icon}
-            </Typography>
-          ))}
-        </Box>
-
-        {/* QR Code Container */}
         <Box
           sx={{
-            position: 'relative',
             margin: '25px auto',
+            padding: '20px',
+            background: '#fafafa',
+            border: `1px solid #e0e0e0`,
             width: 'fit-content'
           }}
         >
-          <Box
-            sx={{
-              padding: '30px',
-              background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)',
-              borderRadius: '30px',
-              border: '4px solid #ff6b6b',
-              boxShadow: '0 15px 35px rgba(255, 107, 107, 0.3)'
+          <img
+            src={qrCodeBase64}
+            alt="QR Code"
+            style={{
+              width: qrSize,
+              height: qrSize,
+              display: 'block'
             }}
-          >
-            <img
-              src={qrCodeBase64}
-              alt="QR Code"
-              style={{
-                width: qrSize,
-                height: qrSize,
-                borderRadius: '20px',
-                display: 'block'
-              }}
-            />
-          </Box>
+          />
         </Box>
 
-        {/* Instructions */}
         {includeInstructions && (
           <Typography
-            variant="h6"
             sx={{
-              color: '#2c2c54',
-              fontWeight: 600,
               fontSize: layout === 'compact' ? '1rem' : layout === 'large' ? '1.3rem' : '1.1rem',
+              color: '#555',
               marginTop: '20px',
-              fontFamily: '"Comic Sans MS", cursive',
-              textShadow: '1px 1px 2px rgba(0,0,0,0.1)'
+              fontStyle: 'italic',
+              fontFamily: '"Playfair Display", serif'
             }}
           >
-            Scan for a celebration menu! 🎉
+            Scan to discover our culinary offerings
           </Typography>
         )}
 
+        <Box
+          sx={{
+            height: '1px',
+            background: `linear-gradient(to right, transparent, ${primaryColor}, transparent)`,
+            margin: '20px auto',
+            width: '40%'
+          }}
+        />
 
-      </Box>
-    </Paper>
+        <Typography
+          sx={{
+            fontSize: layout === 'compact' ? '0.8rem' : '0.9rem',
+            color: '#888',
+            marginTop: '20px',
+            fontStyle: 'italic',
+            fontFamily: '"Playfair Display", serif'
+          }}
+        >
+          Experience dining reimagined
+        </Typography>
+
+      </Paper>
+    </Box>
   );
 };
 
-export default FestiveTemplate;
+export default ElegantTemplate;

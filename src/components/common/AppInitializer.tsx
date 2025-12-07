@@ -14,9 +14,7 @@ const AppInitializer: React.FC<AppInitializerProps> = ({ children }) => {
 
   // Log initialization status for debugging (reduced frequency)
   React.useEffect(() => {
-    if (initStatus.retryCount === 0) {
-      console.log('🔄 AppInitializer: Status update', initStatus);
-    }
+    if (initStatus.retryCount === 0) {    }
   }, [initStatus]); // Only log on meaningful changes
 
   return <>{children}</>;

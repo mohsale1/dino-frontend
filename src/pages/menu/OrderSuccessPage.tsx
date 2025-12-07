@@ -66,28 +66,19 @@ const OrderSuccessPage: React.FC = () => {
   
   const [orderData, setOrderData] = useState<OrderSuccessState | null>(null);
 
-  useEffect(() => {
-    console.log('🔍 OrderSuccessPage: Loading order data for orderId:', orderId);
-    console.log('🔍 OrderSuccessPage: Navigation state:', location.state);
-    
+  useEffect(() => {    
     // Get order data from navigation state or localStorage
     const stateData = location.state as OrderSuccessState;
     
-    if (stateData) {
-      console.log('✅ OrderSuccessPage: Using navigation state data:', stateData);
-      setOrderData(stateData);
+    if (stateData) {      setOrderData(stateData);
       // Store in localStorage for page refresh
       localStorage.setItem(`order_${orderId}`, JSON.stringify(stateData));
     } else {
       // Try to get from localStorage
       const storedData = localStorage.getItem(`order_${orderId}`);
       if (storedData) {
-        const parsedData = JSON.parse(storedData);
-        console.log('✅ OrderSuccessPage: Using localStorage data:', parsedData);
-        setOrderData(parsedData);
-      } else {
-        console.log('❌ OrderSuccessPage: No order data found in state or localStorage');
-        // Set a minimal fallback order data
+        const parsedData = JSON.parse(storedData);        setOrderData(parsedData);
+      } else {        // Set a minimal fallback order data
         setOrderData({
           orderId: orderId || 'UNKNOWN',
           orderNumber: orderId || 'UNKNOWN',
@@ -118,9 +109,7 @@ const OrderSuccessPage: React.FC = () => {
     if (navigator.share) {
       try {
         await navigator.share(shareData);
-      } catch (err) {
-        console.log('Error sharing:', err);
-      }
+      } catch (err) {      }
     } else {
       // Fallback: copy to clipboard
       navigator.clipboard.writeText(`${shareData.text} - ${shareData.url}`);
@@ -362,9 +351,7 @@ const OrderSuccessPage: React.FC = () => {
                                 }
                               }
                             }}
-                            onError={(error: string) => {
-                              console.error('Status update error:', error);
-                            }}
+                            onError={(error: string) => {                            }}
                             variant="inline"
                             showCurrentStatus={false}
                           />

@@ -94,8 +94,6 @@ const UserProfile: React.FC = () => {
     }
   }, [user]);
 
-
-
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
   };
@@ -155,8 +153,6 @@ const UserProfile: React.FC = () => {
       setLoading(false);
     }
   };
-
-
 
   return (
     <Box sx={{ 
@@ -218,12 +214,8 @@ const UserProfile: React.FC = () => {
                   backgroundColor: '#4CAF50',
                   fontSize: '2rem'
                 }}
-                onLoad={() => {
-                  console.log('🦕 Avatar loaded successfully');
-                }}
-                onError={() => {
-                  console.log('🦕 Avatar failed to load:', dinoAvatar);
-                  // Don't clear avatar, just show fallback
+                onLoad={() => {                }}
+                onError={() => {                  // Don't clear avatar, just show fallback
                 }}
               >
                 {avatarLoading ? '⏳' : '🦕'}

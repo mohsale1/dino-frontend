@@ -1,4 +1,18 @@
-export { default as ErrorPage } from '../common/ErrorPage';
-export { default as NotFoundPage } from './NotFoundPage';
-export { default as ServerErrorPage } from './ServerErrorPage';
-export { default as NetworkErrorPage } from './NetworkErrorPage';
+/**
+ * Error Pages Barrel Export
+ * 
+ * Re-exports from the standardized errors directory
+ */
+
+export {
+  NotFoundPage,
+  ServerErrorPage,
+  NetworkErrorPage,
+  ErrorPage,
+  VenueNotAcceptingOrdersPage,
+  VenueClosedPage,
+  NoVenuePage,
+  NoUserPage,
+  AccessDeniedPage,
+  GenericErrorPage,
+} from '../errors';

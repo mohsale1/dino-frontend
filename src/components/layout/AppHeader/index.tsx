@@ -11,11 +11,7 @@ import {
   Avatar,
   useTheme,
   useMediaQuery,
-  Paper,
-  Switch,
-  FormControlLabel,
-  CircularProgress,
-  Chip,
+  alpha,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -23,22 +19,17 @@ import {
   ExitToApp,
   Login,
   PersonAdd,
-  Store,
-  CheckCircle,
-  Cancel,
+  Dashboard as DashboardIcon,
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useDinoAvatar } from '../../../contexts/DinoAvatarContext';
 import DinoLogo from '../../DinoLogo';
-import { NotificationCenter, ThemeToggle } from '../../common';
-import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
+import { NotificationCenter } from '../../common';
 import MobileMenu from '../MobileMenu';
-import { NAVIGATION, COMPANY_INFO } from '../../../data/info';
+import { COMPANY_INFO } from '../../../data/info';
 import { getUserFirstName } from '../../../utils/userUtils';
 import { isAdminLevel } from '../../../constants/roles';
-import { useUserData } from '../../../contexts/UserDataContext';
-import { venueService } from '../../../services/business';
 import { LogoutConfirmationModal } from '../../modals';
 
 interface AppHeaderProps {
@@ -50,71 +41,11 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
   const location = useLocation();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const { user, logout, isAdmin, isSuperAdmin } = useAuth();
+  const { user, logout } = useAuth();
   const { dinoAvatar } = useDinoAvatar();
-  const { userData } = useUserData();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('hero');
-  const [venueStatus, setVenueStatus] = useState<{
-    isActive: boolean;
-    isOpen: boolean;
-    venueName: string;
-  } | null>(null);
-  const [statusLoading, setStatusLoading] = useState(false);
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
-  
-  // Feature flags
-  const isThemeToggleEnabled = useFeatureFlag('themeToggle');
-
-
-
-  // REMOVED: Unnecessary API call to load venue status
-  // The venue status is already available in UserDataContext from /auth/user-data
-  useEffect(() => {
-    const userIsAdmin = isAdmin() || isSuperAdmin();
-    
-    if (!user || !userIsAdmin) {
-      setVenueStatus(null);
-      return;
-    }
-
-    if (!userData?.venue) {
-      setVenueStatus({
-        isActive: false,
-        isOpen: false,
-        venueName: 'No Venue Selected'
-      });
-      return;
-    }
-
-    // Use venue data from UserDataContext
-    const statusData = {
-      isActive: userData.venue.is_active || false,
-      isOpen: userData.venue.is_open || false,
-      venueName: userData.venue.name || 'Current Venue'
-    };
-    setVenueStatus(statusData);
-  }, [user, userData?.venue, isAdmin, isSuperAdmin]);
-
-  // Handle venue status toggle
-  const handleToggleVenueOpen = async () => {
-    if (!userData?.venue?.id || statusLoading || !venueStatus) return;
-
-    try {
-      setStatusLoading(true);
-      const newStatus = !venueStatus.isOpen;
-      
-      await venueService.updateVenue(userData.venue.id, { 
-        status: newStatus ? 'active' : 'closed' 
-      });
-
-      setVenueStatus(prev => prev ? { ...prev, isOpen: newStatus } : null);
-    } catch (error) {
-      // Handle error silently or show user notification
-    } finally {
-      setStatusLoading(false);
-    }
-  };
 
   // Scroll trigger for navbar background
   const trigger = useScrollTrigger({
@@ -126,29 +57,67 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
   const isAdminRoute = location.pathname.startsWith('/admin');
 
   // Navigation items for home page
-  const homeNavItems = NAVIGATION.home.map(item => ({
-    label: item.label,
-    id: item.id,
-    icon: React.createElement(item.icon)
-  }));
+  const homeNavItems = [
+    { id: 'hero', label: 'Home' },
+    { id: 'features', label: 'Features' },
+    { id: 'testimonials', label: 'Reviews' },
+    { id: 'faq', label: 'FAQ' },
+    { id: 'contact', label: 'Contact' },
+  ];
 
   // Smooth scroll to section
   const scrollToSection = (sectionId: string) => {
+    console.log('Scrolling to section:', sectionId);
     const element = document.getElementById(sectionId);
+    console.log('Element found:', element);
+    
     if (element) {
-      const headerOffset = 80;
-      const elementPosition = element.offsetTop;
-      const offsetPosition = elementPosition - headerOffset;
+      // Use scrollIntoView for more reliable scrolling
+      const headerOffset = 100;
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.scrollY - headerOffset;
 
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: 'smooth'
-      });
+      console.log('Current scroll position:', window.scrollY);
+      console.log('Element position from top:', elementPosition);
+      console.log('Target scroll position:', offsetPosition);
+      
+      // Try multiple scroll methods for compatibility
+      try {
+        // Method 1: Direct scrollTo
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth'
+        });
+        
+        // Fallback: If smooth scroll doesn't work, use scrollIntoView
+        setTimeout(() => {
+          if (Math.abs(window.scrollY - offsetPosition) > 50) {
+            element.scrollIntoView({ 
+              behavior: 'smooth', 
+              block: 'start',
+              inline: 'nearest'
+            });
+            // Adjust for header after scrollIntoView
+            setTimeout(() => {
+              window.scrollBy({
+                top: -headerOffset,
+                behavior: 'smooth'
+              });
+            }, 100);
+          }
+        }, 500);
+      } catch (error) {
+        console.error('Scroll error:', error);
+        // Final fallback: instant scroll
+        window.scrollTo(0, offsetPosition);
+      }
       
       setActiveSection(sectionId);
       if (onSectionScroll) {
         onSectionScroll(sectionId);
       }
+    } else {
+      console.error('Section not found:', sectionId);
     }
     setMobileMenuOpen(false);
   };
@@ -159,7 +128,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
 
     const handleScroll = () => {
       const sections = homeNavItems.map(item => item.id);
-      const scrollPosition = window.scrollY + 100;
+      const scrollPosition = window.scrollY + 150;
 
       for (let i = sections.length - 1; i >= 0; i--) {
         const section = document.getElementById(sections[i]);
@@ -172,7 +141,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [isHomePage, homeNavItems]);
+  }, [isHomePage]);
 
   const handleLogout = () => {
     setLogoutModalOpen(true);
@@ -192,37 +161,50 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
   const renderDesktopNavigation = () => {
     if (isHomePage) {
       return (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
           {homeNavItems.map((item) => (
             <Button
               key={item.id}
-              onClick={() => scrollToSection(item.id)}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Button clicked:', item.id);
+                scrollToSection(item.id);
+              }}
               sx={{
+                cursor: 'pointer',
+                pointerEvents: 'auto',
                 color: activeSection === item.id ? 'primary.main' : 'text.primary',
-                fontWeight: activeSection === item.id ? 600 : 400,
+                fontWeight: activeSection === item.id ? 700 : 500,
                 textTransform: 'none',
-                px: 2,
+                px: 2.5,
                 py: 1,
                 borderRadius: 2,
+                fontSize: '0.9375rem',
                 position: 'relative',
+                minHeight: 40,
+                backgroundColor: activeSection === item.id 
+                  ? alpha(theme.palette.primary.main, 0.1)
+                  : 'transparent',
                 '&:hover': {
-                  backgroundColor: 'rgba(25, 118, 210, 0.08)',
+                  backgroundColor: alpha(theme.palette.primary.main, 0.12),
                   color: 'primary.main',
-                  transform: 'translateY(-1px)',
+                  cursor: 'pointer',
                 },
                 '&::after': {
                   content: '""',
                   position: 'absolute',
-                  bottom: 0,
+                  bottom: 8,
                   left: '50%',
                   transform: 'translateX(-50%)',
-                  width: activeSection === item.id ? '80%' : '0%',
-                  height: 2,
+                  width: activeSection === item.id ? '60%' : '0%',
+                  height: 3,
                   backgroundColor: 'primary.main',
-                  borderRadius: 1,
-                  transition: 'width 0.3s ease',
+                  borderRadius: 2,
+                  transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                  pointerEvents: 'none',
                 },
-                transition: 'all 0.3s ease',
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
               }}
             >
               {item.label}
@@ -235,133 +217,71 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
     return null;
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const renderVenueStatus = () => {
-    if (!user || !(isAdmin() || isSuperAdmin()) || !venueStatus) return null;
-
-    return (
-      <Paper
-        elevation={1}
-        sx={{
-          p: 1.5,
-          backgroundColor: venueStatus.isOpen ? 'success.50' : 'error.50',
-          border: '1px solid',
-          borderColor: venueStatus.isOpen ? 'success.200' : 'error.200',
-          borderRadius: 2,
-          minWidth: 200,
-          maxWidth: 280,
-        }}
-      >
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-            <Store sx={{ fontSize: 16, color: venueStatus.isOpen ? 'success.main' : 'error.main' }} />
-            <Typography variant="caption" fontWeight={600} color="text.primary">
-              {venueStatus.venueName}
-            </Typography>
-          </Box>
-          <Chip
-            icon={venueStatus.isOpen ? <CheckCircle /> : <Cancel />}
-            label={venueStatus.isOpen ? 'OPEN' : 'CLOSED'}
-            size="small"
-            color={venueStatus.isOpen ? 'success' : 'error'}
-            sx={{ fontSize: '0.65rem', height: 20 }}
-          />
-        </Box>
-        
-        <FormControlLabel
-          control={
-            <Switch
-              checked={venueStatus.isOpen}
-              onChange={handleToggleVenueOpen}
-              disabled={statusLoading || !venueStatus.isActive}
-              color="success"
-              size="small"
-            />
-          }
-          label={
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              {statusLoading && <CircularProgress size={10} />}
-              <Typography variant="caption" fontWeight={500}>
-                {venueStatus.isOpen ? 'Open for Orders' : 'Closed for Orders'}
-              </Typography>
-            </Box>
-          }
-          sx={{ m: 0, alignItems: 'center' }}
-        />
-      </Paper>
-    );
-  };
-
   const renderUserActions = () => {
     if (user) {
       return (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Box data-tour="notifications">
-            <NotificationCenter />
-          </Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <NotificationCenter />
+          
           <Button
-            color="inherit"
+            variant="outlined"
             onClick={() => navigate(isAdminLevel(user.role) ? '/admin' : '/profile')}
             startIcon={
               dinoAvatar ? (
                 <Avatar 
                   src={dinoAvatar} 
                   sx={{ 
-                    width: { xs: 20, sm: 24 }, 
-                    height: { xs: 20, sm: 24 },
-                    border: '1px solid',
-                    borderColor: 'primary.main'
+                    width: 24, 
+                    height: 24,
                   }}
                 >
                   <DinoLogo size={16} animated={false} />
                 </Avatar>
               ) : (
-                <AccountCircle sx={{ fontSize: { xs: 20, sm: 24 } }} />
+                <AccountCircle sx={{ fontSize: 20 }} />
               )
             }
             sx={{
+              textTransform: 'none',
+              fontWeight: 600,
+              px: 2.5,
+              py: 1,
+              borderRadius: 2,
+              fontSize: '0.9375rem',
+              borderColor: 'divider',
               color: 'text.primary',
-              textTransform: 'none',
-              fontWeight: 500,
-              px: { xs: 1.5, sm: 2 },
-              py: { xs: 0.75, sm: 1 },
-              minHeight: { xs: 36, sm: 40 },
-              borderRadius: 2,
-              fontSize: { xs: '0.875rem', sm: '1rem' },
-              transition: 'all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+              minHeight: 40,
               '&:hover': {
-                backgroundColor: 'primary.50',
-                transform: 'translateY(-1px)',
+                borderColor: 'primary.main',
+                backgroundColor: alpha(theme.palette.primary.main, 0.08),
+                color: 'primary.main',
               },
-              '&:active': {
-                transform: 'translateY(0)',
-              },
+              transition: 'all 0.3s ease',
             }}
-            data-tour="user-profile"
           >
-            {getUserFirstName(user) || user.email}
+            {getUserFirstName(user) || 'Profile'}
           </Button>
+          
           <Button
-            color="inherit"
+            variant="outlined"
             onClick={handleLogout}
-            startIcon={<ExitToApp sx={{ fontSize: { xs: 18, sm: 20 } }} />}
+            startIcon={<ExitToApp sx={{ fontSize: 20 }} />}
             sx={{
-              color: 'error.main',
               textTransform: 'none',
-              fontWeight: 500,
-              px: { xs: 1.5, sm: 2 },
-              py: { xs: 0.75, sm: 1 },
-              minHeight: { xs: 36, sm: 40 },
+              fontWeight: 600,
+              px: 2.5,
+              py: 1,
               borderRadius: 2,
-              fontSize: { xs: '0.875rem', sm: '1rem' },
-              transition: 'all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+              fontSize: '0.9375rem',
+              borderColor: alpha(theme.palette.error.main, 0.5),
+              color: 'error.main',
+              minHeight: 40,
               '&:hover': {
-                backgroundColor: 'error.50',
-                transform: 'translateY(-1px)',
+                borderColor: 'error.main',
+                backgroundColor: alpha(theme.palette.error.main, 0.08),
+                color: 'error.main',
               },
-              '&:active': {
-                transform: 'translateY(0)',
-              },
+              transition: 'all 0.3s ease',
             }}
           >
             Logout
@@ -371,54 +291,52 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
     }
 
     return (
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
         <Button
-          color="inherit"
+          variant="outlined"
           onClick={() => navigate('/register')}
-          startIcon={<PersonAdd sx={{ fontSize: { xs: 18, sm: 20 } }} />}
+          startIcon={<PersonAdd sx={{ fontSize: 20 }} />}
           sx={{
-            color: 'text.primary',
             textTransform: 'none',
-            fontWeight: 500,
-            px: { xs: 1.5, sm: 2 },
-            py: { xs: 0.75, sm: 1 },
-            minHeight: { xs: 36, sm: 40 },
+            fontWeight: 600,
+            px: 2.5,
+            py: 1,
             borderRadius: 2,
-            fontSize: { xs: '0.875rem', sm: '1rem' },
-            transition: 'all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+            fontSize: '0.9375rem',
+            borderColor: 'divider',
+            color: 'text.primary',
+            minHeight: 40,
             '&:hover': {
-              backgroundColor: 'action.hover',
-              transform: 'translateY(-1px)',
+              borderColor: 'primary.main',
+              backgroundColor: alpha(theme.palette.primary.main, 0.08),
+              color: 'primary.main',
             },
-            '&:active': {
-              transform: 'translateY(0)',
-            },
+            transition: 'all 0.3s ease',
           }}
         >
-          Create Account
+          Sign Up
         </Button>
+        
         <Button
           variant="contained"
           onClick={() => navigate('/login')}
-          startIcon={<Login sx={{ fontSize: { xs: 18, sm: 20 } }} />}
+          startIcon={<Login sx={{ fontSize: 20 }} />}
           sx={{
-            fontWeight: 600,
+            fontWeight: 700,
             textTransform: 'none',
-            px: { xs: 2, sm: 3 },
-            py: { xs: 0.75, sm: 1 },
-            minHeight: { xs: 36, sm: 40 },
+            px: 3,
+            py: 1,
             borderRadius: 2,
-            fontSize: { xs: '0.875rem', sm: '1rem' },
-            boxShadow: '0 2px 8px rgba(21, 101, 192, 0.25)',
-            transition: 'all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+            fontSize: '0.9375rem',
+            minHeight: 40,
+            background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+            boxShadow: `0 4px 14px ${alpha(theme.palette.primary.main, 0.4)}`,
             '&:hover': {
-              boxShadow: '0 4px 16px rgba(21, 101, 192, 0.35)',
-              transform: 'translateY(-1px)',
+              background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+              boxShadow: `0 6px 20px ${alpha(theme.palette.primary.main, 0.5)}`,
+              transform: 'translateY(-2px)',
             },
-            '&:active': {
-              transform: 'translateY(0)',
-              boxShadow: '0 1px 4px rgba(21, 101, 192, 0.2)',
-            },
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
           }}
         >
           Sign In
@@ -427,145 +345,99 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
     );
   };
 
-  const getPageTitle = () => {
-    if (isHomePage) return COMPANY_INFO.name;
-    return COMPANY_INFO.name;
-  };
-
-
-
   return (
     <>
       <AppBar
         position="fixed"
-        elevation={isAdminRoute ? 0 : (trigger ? 4 : 0)}
+        elevation={2}
         sx={{
-          backgroundColor: trigger || isAdminRoute
-            ? 'rgba(255, 255, 255, 0.95)' 
-            : isHomePage 
-              ? 'rgba(255, 255, 255, 0.1)' 
-              : 'background.paper',
-          backdropFilter: trigger || isHomePage || isAdminRoute ? 'blur(20px)' : 'none',
-          borderBottom: trigger || isAdminRoute ? '1px solid rgba(0, 0, 0, 0.08)' : 'none',
-          color: 'text.primary',
+          backgroundColor: 'background.paper',
+          backdropFilter: 'blur(20px)',
+          borderBottom: `1px solid ${alpha('#000', 0.08)}`,
           transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
           zIndex: 1200,
-          top: 0,
-          left: 0,
-          right: 0,
-          margin: 0,
-          padding: 0,
-          boxShadow: isAdminRoute ? 'none' : undefined,
         }}
       >
-          <Container maxWidth="xl" sx={{ px: { xs: 1, sm: 2 }, pr: { xs: 1, sm: 2 }, mr: 0 }}>
-            <Toolbar sx={{ px: 0, minHeight: { xs: 56, sm: 64, md: 70 } }}>
-              {/* Logo and Title */}
-              <Box
+        <Container maxWidth="xl">
+          <Toolbar sx={{ px: { xs: 0, sm: 1 }, minHeight: { xs: 64, md: 72 } }}>
+            {/* Logo and Title */}
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                flexGrow: 1,
+                cursor: 'pointer',
+                gap: 1.5,
+                '&:hover .logo': {
+                  transform: 'scale(1.05)',
+                },
+                transition: 'all 0.3s ease',
+              }}
+              onClick={() => {
+                if (user) {
+                  navigate('/admin');
+                } else {
+                  navigate('/');
+                }
+              }}
+            >
+              <Box className="logo" sx={{ transition: 'transform 0.3s ease' }}>
+                <DinoLogo size={isMobile ? 40 : 48} animated={true} />
+              </Box>
+              <Box>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    fontWeight: 800,
+                    fontSize: { xs: '1.125rem', md: '1.375rem' },
+                    color: 'text.primary',
+                    letterSpacing: '-0.5px',
+                    lineHeight: 1,
+                  }}
+                >
+                  {COMPANY_INFO.name}
+                </Typography>
+                {!isMobile && (
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: 'text.secondary',
+                      fontSize: '0.75rem',
+                      fontWeight: 500,
+                      letterSpacing: '0.5px',
+                    }}
+                  >
+                    {COMPANY_INFO.tagline}
+                  </Typography>
+                )}
+              </Box>
+            </Box>
+
+            {/* Desktop Navigation */}
+            {!isMobile && (
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+                {renderDesktopNavigation()}
+                {renderUserActions()}
+              </Box>
+            )}
+
+            {/* Mobile Menu Button */}
+            {isMobile && (
+              <IconButton
+                onClick={handleMobileMenuToggle}
                 sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  flexGrow: 1,
-                  cursor: 'pointer',
-                  gap: { xs: 1, sm: 1.5 },
-                  minWidth: 0,
+                  color: 'text.primary',
                   '&:hover': {
-                    opacity: 0.8,
+                    backgroundColor: alpha(theme.palette.primary.main, 0.1),
                   },
-                  transition: 'opacity 0.3s ease',
-                }}
-                onClick={() => {
-                  if (user) {
-                    // Redirect all logged-in users to dashboard page
-                    navigate('/admin');
-                  } else {
-                    // Redirect non-logged-in users to home page
-                    navigate('/');
-                  }
                 }}
               >
-                <DinoLogo size={isMobile ? 35 : 45} animated={true} />
-                <Box sx={{ minWidth: 0, flex: 1 }}>
-                  <Typography
-                    variant="h6"
-                    component="div"
-                    sx={{
-                      fontWeight: 700,
-                      fontSize: { xs: '1rem', sm: '1.1rem', md: '1.3rem' },
-                      color: 'text.primary',
-                      lineHeight: 1.2,
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    {getPageTitle()}
-                  </Typography>
-                  {!isMobile && (
-                    <Typography
-                      variant="caption"
-                      sx={{
-                        color: 'text.secondary',
-                        fontSize: { xs: '0.65rem', sm: '0.75rem' },
-                        fontWeight: 500,
-                        display: 'block',
-                        lineHeight: 1,
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
-                      {COMPANY_INFO.tagline}
-                    </Typography>
-                  )}
-                </Box>
-              </Box>
-
-              {/* Desktop Navigation */}
-              {!isMobile && (
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                  {renderDesktopNavigation()}
-                  
-                  {/* Theme Toggle */}
-                  {isThemeToggleEnabled && (
-                    <Box data-tour="quick-settings">
-                      <ThemeToggle variant="switch" size="small" />
-                    </Box>
-                  )}
-                  
-                  {/* User Actions */}
-                  {renderUserActions()}
-                </Box>
-              )}
-
-              {/* Mobile Menu Button */}
-              {isMobile && (
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  {isThemeToggleEnabled && (
-                    <ThemeToggle variant="icon" size="small" />
-                  )}
-                  <IconButton
-                    color="inherit"
-                    onClick={handleMobileMenuToggle}
-                    sx={{
-                      color: 'text.primary',
-                      minWidth: 44,
-                      minHeight: 44,
-                      '&:hover': {
-                        backgroundColor: 'rgba(25, 118, 210, 0.08)',
-                      },
-                      '&:active': {
-                        backgroundColor: 'rgba(25, 118, 210, 0.12)',
-                      },
-                    }}
-                  >
-                    <MenuIcon sx={{ fontSize: 24 }} />
-                  </IconButton>
-                </Box>
-              )}
-            </Toolbar>
-          </Container>
-        </AppBar>
+                <MenuIcon />
+              </IconButton>
+            )}
+          </Toolbar>
+        </Container>
+      </AppBar>
 
       {/* Mobile Menu */}
       <MobileMenu

@@ -242,9 +242,7 @@ export const useCoupons = (): UseCouponsState & UseCouponsActions => {
       } else {
         setState(prev => ({ ...prev, statsLoading: false }));
       }
-    } catch (error: any) {
-      console.error('Failed to fetch coupon stats:', error);
-      setState(prev => ({ ...prev, statsLoading: false }));
+    } catch (error: any) {      setState(prev => ({ ...prev, statsLoading: false }));
     }
   }, [venueId, user?.role]);
 
