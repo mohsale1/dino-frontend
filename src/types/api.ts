@@ -174,6 +174,7 @@ export interface Venue {
   total_reviews?: number;
   is_active: boolean;
   is_open: boolean; // Required for venue status
+  status?: string; // Venue status (e.g., 'open', 'closed', 'busy')
   workspace_id: string;
   owner_id?: string; // Added for compatibility
   operating_hours?: OperatingHours[];
