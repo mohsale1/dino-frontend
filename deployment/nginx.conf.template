@@ -106,7 +106,8 @@ http {
             error_log /var/log/nginx/error.log debug;
             
             # Forward to backend - CRITICAL: This must proxy, not serve files
-            proxy_pass ${BACKEND_URL}/;
+            # Note: No trailing slash to preserve the /api prefix
+            proxy_pass ${BACKEND_URL};
             
             # Essential proxy headers for proper backend communication
             proxy_set_header Host dino-backend-prod-781503667260.us-central1.run.app;
@@ -161,7 +162,8 @@ http {
         # WebSocket proxy - FIXED
         location /ws/ {
             # Forward WebSocket requests to backend
-            proxy_pass ${BACKEND_URL}/;
+            # Note: No trailing slash to preserve the /ws prefix
+            proxy_pass ${BACKEND_URL};
             
             # WebSocket specific headers
             proxy_http_version 1.1;
