@@ -83,7 +83,7 @@ const RealTimeDashboard: React.FC<RealTimeDashboardProps> = ({ className = '' })
             <ConnectionStatus showLabel={true} />
           </div>
           <div className="text-sm text-gray-500">
-            {user?.venueId ? `Venue: ${user.venueId}` : 'All Venues'}
+            {user?.venue_id ? `Venue: ${user.venue_id}` : 'All Venues'}
           </div>
         </div>
       </Card>
@@ -173,7 +173,7 @@ const RealTimeDashboard: React.FC<RealTimeDashboardProps> = ({ className = '' })
                               </p>
                             </div>
                             <div className="text-right">
-                              <p className="text-sm font-medium">₹{order.total_amount}</p>
+                              <p className="text-sm font-medium">₹{(order.subtotal + order.tax_amount - (order.discount_amount || 0)).toFixed(2)}</p>
                               <p className="text-xs text-gray-500">
                                 {new Date(order.created_at).toLocaleTimeString()}
                               </p>

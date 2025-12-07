@@ -166,11 +166,8 @@ export interface Order {
   orderNumber?: string;
   venueId: string;
   tableId: string;
-  customerId?: string;
-  customerPhone?: string;
-  customerName?: string;
+  customerId: string;
   items: OrderItem[];
-  totalAmount: number;
   status: OrderStatus;
   paymentStatus: PaymentStatus;
   specialInstructions?: string;
@@ -185,7 +182,6 @@ export interface OrderItem {
   variantName?: string;
   quantity: number;
   price: number;
-  totalPrice?: number;
   specialInstructions?: string;
 }
 

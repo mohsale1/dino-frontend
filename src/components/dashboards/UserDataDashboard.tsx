@@ -423,7 +423,7 @@ const UserDataDashboard: React.FC<UserDataDashboardProps> = ({ className }) => {
                               Table {order.table_number || 'N/A'}
                             </TableCell>
                             <TableCell sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
-                              ₹{order.total_amount?.toLocaleString() || 0}
+                              ₹{((order.subtotal || 0) + (order.tax_amount || 0) - (order.discount_amount || 0)).toLocaleString()}
                             </TableCell>
                             <TableCell>
                               <Chip
@@ -674,7 +674,7 @@ const UserDataDashboard: React.FC<UserDataDashboardProps> = ({ className }) => {
                             fontSize: { xs: '0.75rem', sm: '0.875rem' },
                             display: { xs: 'none', sm: 'table-cell' }
                           }}>
-                            {order.customer_name || 'walk-in'}
+                            {order.customer_name || 'Walk-in'}
                           </TableCell>
                           <TableCell sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
                             Table {order.table_number || 'N/A'}
@@ -686,7 +686,7 @@ const UserDataDashboard: React.FC<UserDataDashboardProps> = ({ className }) => {
                             {order.items?.length || 0} items
                           </TableCell>
                           <TableCell sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
-                            ₹{order.total_amount?.toLocaleString() || 0}
+                            ₹{((order.subtotal || 0) + (order.tax_amount || 0) - (order.discount_amount || 0)).toLocaleString()}
                           </TableCell>
                           <TableCell>
                             <Chip

@@ -301,8 +301,18 @@ class OrderService {
 
   // Utility Methods
 
-  // Calculate order total
-  calculateOrderTotal(items: OrderItemCreate[], taxRate: number = 0.18, discountAmount: number = 0): {
+  // Calculate order total from order data
+  calculateOrderTotal(order: Order): number {
+    return order.subtotal + order.tax_amount - (order.discount_amount || 0);
+  }
+
+  // Calculate item total
+  calculateItemTotal(item: OrderItem): number {
+    return item.unit_price * item.quantity;
+  }
+
+  // Calculate order totals from items
+  calculateTotalsFromItems(items: OrderItemCreate[], taxRate: number = 0.18, discountAmount: number = 0): {
     subtotal: number;
     taxAmount: number;
     total: number;

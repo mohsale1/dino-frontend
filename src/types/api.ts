@@ -423,13 +423,12 @@ export interface Order {
   venue_id: string;
   table_id?: string;
   table_number?: string; // User-friendly table number from backend
-  customer_id?: string;
+  customer_id: string;
   order_type: OrderType;
   items: OrderItem[];
   subtotal: number;
   tax_amount: number;
   discount_amount?: number;
-  total_amount: number;
   status: OrderStatus;
   payment_status: PaymentStatus;
   payment_method?: PaymentMethod;
@@ -447,7 +446,6 @@ export interface OrderItem {
   variant_name?: string;
   quantity: number;
   unit_price: number;
-  total_price: number;
   special_instructions?: string;
 }
 
@@ -798,4 +796,3 @@ export type NotificationTypeEnum =
   | 'system_alert';
 
 export type NotificationType = NotificationTypeEnum;
-
