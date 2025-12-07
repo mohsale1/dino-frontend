@@ -64,10 +64,10 @@ declare global {
 
 // Default configuration (fallback)
 const DEFAULT_CONFIG: RuntimeConfig = {
-  // API Configuration - Use full backend URLs for direct connection
-  API_BASE_URL: 'https://dino-frontend-867506203789.us-central1.run.app/api/v1',
-  WS_URL: 'wss://dino-frontend-867506203789.us-central1.run.app/ws',
-  BACKEND_URL: 'https://dino-frontend-867506203789.us-central1.run.app',
+  // API Configuration - Use relative URLs for nginx proxy in production
+  API_BASE_URL: '/api/v1',
+  WS_URL: '/ws',
+  BACKEND_URL: 'https://dino-backend-prod-781503667260.us-central1.run.app',
   
   // App Configuration
   APP_NAME: 'Dino',

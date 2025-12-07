@@ -1,299 +1,111 @@
 #!/bin/bash
 
-# Simplified Docker Entrypoint Script
+# Docker Entrypoint Script for Dino Frontend
 # Generates runtime configuration and starts nginx
 
 set -e
 
-echo "🚀 Starting Dino Frontend Container..."
-echo "📅 Timestamp: $(date -u +"%Y-%m-%dT%H:%M:%SZ")"
-echo "🐳 Container ID: $(hostname)"
-echo "🌍 Environment: ${APP_ENV:-production}"
+echo "========================================"
+echo "🚀 Dino Frontend Container Starting"
+echo "========================================"
 echo ""
 
-# Validate environment variables
-echo "🔍 Validating environment variables..."
-if [ -f "/usr/local/bin/validate-env.sh" ]; then
-    /usr/local/bin/validate-env.sh
-else
-    echo "⚠️ validate-env.sh not found, skipping validation"
-fi
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m'
 
-# Generate runtime configuration
-echo ""
-echo "🔧 Generating runtime configuration..."
-if [ -f "/usr/local/bin/generate-config.sh" ]; then
-    /usr/local/bin/generate-config.sh
+print_status() {
+    echo -e "${BLUE}[INFO]${NC} $1"
+}
+
+print_success() {
+    echo -e "${GREEN}[SUCCESS]${NC} $1"
+}
+
+print_warning() {
+    echo -e "${YELLOW}[WARNING]${NC} $1"
+}
+
+print_error() {
+    echo -e "${RED}[ERROR]${NC} $1"
+}
+
+# Step 1: Generate runtime configuration
+print_status "Step 1: Generating runtime configuration..."
+if /usr/local/bin/generate-config.sh; then
+    print_success "Runtime configuration generated"
 else
-    echo "❌ generate-config.sh not found"
+    print_error "Failed to generate runtime configuration"
     exit 1
 fi
 
-# Process nginx configuration template
 echo ""
-echo "🔧 Processing nginx configuration template..."
 
-# Set default backend URL if not provided
-export BACKEND_URL="${BACKEND_URL:-https://dino-backend-prod-781503667260.us-central1.run.app}"
-echo "🔗 Using Backend URL: ${BACKEND_URL}"
+# Step 2: Process nginx configuration template
+print_status "Step 2: Processing nginx configuration template..."
+print_status "Using Backend URL: ${BACKEND_URL}"
 
-if [ -f "/etc/nginx/nginx.conf.template" ]; then
-    echo "📄 Processing nginx template..."
-    
-    # Substitute environment variables in nginx template
-    envsubst '${BACKEND_URL}' < /etc/nginx/nginx.conf.template > /tmp/nginx.conf.processed
-    
-    # Verify substitution worked
-    if grep -q "\${BACKEND_URL}" /tmp/nginx.conf.processed; then
-        echo "❌ Template substitution failed - variables still present"
-        echo "🔄 Using static configuration instead"
-        cp /etc/nginx/nginx.conf /tmp/nginx.conf.processed
-    else
-        echo "✅ Template substitution successful"
-    fi
-    
-    # Validate the generated configuration
-    if nginx -t -c /tmp/nginx.conf.processed 2>/dev/null; then
-        echo "✅ Generated nginx configuration is valid"
-        cp /tmp/nginx.conf.processed /etc/nginx/nginx.conf
-    else
-        echo "❌ Generated nginx configuration is invalid"
-        echo "🔄 Using static fallback configuration"
-        # Ensure we have a working config
-        if [ ! -f "/etc/nginx/nginx.conf" ] || ! nginx -t -c /etc/nginx/nginx.conf 2>/dev/null; then
-            echo "📝 Creating minimal working configuration"
-            cat > /etc/nginx/nginx.conf << EOF
-events { worker_connections 1024; }
-http {
-    include /etc/nginx/mime.types;
-    default_type application/octet-stream;
-    
-    server {
-        listen 8080;
-        root /usr/share/nginx/html;
-        index index.html;
-        
-        location /health {
-            return 200 '{"status":"healthy"}';
-            add_header Content-Type application/json;
-        }
-        
-        location /config.js {
-            expires 1m;
-            add_header Content-Type application/javascript;
-        }
-        
-        location /nginx-debug {
-            return 200 'Nginx minimal config. Backend: ${BACKEND_URL}';
-            add_header Content-Type text/plain;
-        }
-        
-        location /api/ {
-            proxy_pass ${BACKEND_URL}/;
-            proxy_set_header Host dino-backend-api-867506203789.us-central1.run.app;
-            proxy_set_header X-Real-IP \$remote_addr;
-            proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto \$scheme;
-            proxy_set_header X-Original-URI \$request_uri;
-            proxy_method \$request_method;
-            proxy_pass_request_headers on;
-            proxy_pass_request_body on;
-            proxy_connect_timeout 30s;
-            proxy_send_timeout 30s;
-            proxy_read_timeout 30s;
-            
-            if (\$request_method = 'OPTIONS') {
-                add_header Access-Control-Allow-Origin \$http_origin always;
-                add_header Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS" always;
-                add_header Access-Control-Allow-Headers "Authorization, Content-Type, Accept, X-Requested-With" always;
-                add_header Access-Control-Allow-Credentials true always;
-                add_header Content-Length 0;
-                add_header Content-Type text/plain;
-                return 204;
-            }
-            
-            add_header Access-Control-Allow-Origin \$http_origin always;
-            add_header Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS" always;
-            add_header Access-Control-Allow-Headers "Authorization, Content-Type, Accept, X-Requested-With" always;
-            add_header Access-Control-Allow-Credentials true always;
-            add_header X-Proxy-Backend "${BACKEND_URL}" always;
-            add_header X-Proxy-Method \$request_method always;
-        }
-        
-        location /ws/ {
-            proxy_pass ${BACKEND_URL};
-            proxy_http_version 1.1;
-            proxy_set_header Upgrade \$http_upgrade;
-            proxy_set_header Connection "upgrade";
-            proxy_set_header Host dino-backend-api-867506203789.us-central1.run.app;
-            proxy_set_header X-Real-IP \$remote_addr;
-            proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto \$scheme;
-        }
-        
-        location / {
-            try_files \$uri \$uri/ /index.html;
-        }
-    }
-}
-EOF
-        fi
-    fi
-    
-    # Clean up temp file
-    rm -f /tmp/nginx.conf.processed
+# Substitute environment variables in nginx template
+print_status "Processing nginx template..."
+if envsubst '${BACKEND_URL}' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf; then
+    print_success "Template substitution successful"
 else
-    echo "⚠️ nginx.conf.template not found"
-    echo "🔍 Checking if static nginx.conf exists and is valid..."
-    
-    if [ -f "/etc/nginx/nginx.conf" ]; then
-        if nginx -t -c /etc/nginx/nginx.conf 2>/dev/null; then
-            echo "✅ Using existing static nginx.conf"
-        else
-            echo "❌ Existing nginx.conf is invalid, creating minimal config"
-            # Create minimal working config as fallback
-            cat > /etc/nginx/nginx.conf << EOF
-events { worker_connections 1024; }
-http {
-    include /etc/nginx/mime.types;
-    default_type application/octet-stream;
-    
-    server {
-        listen 8080;
-        root /usr/share/nginx/html;
-        index index.html;
-        
-        location /health {
-            return 200 '{"status":"healthy"}';
-            add_header Content-Type application/json;
-        }
-        
-        location /config.js {
-            expires 1m;
-            add_header Content-Type application/javascript;
-        }
-        
-        location /api/ {
-            proxy_pass ${BACKEND_URL};
-            proxy_set_header Host dino-backend-api-867506203789.us-central1.run.app;
-            proxy_set_header X-Real-IP \$remote_addr;
-            proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto \$scheme;
-            proxy_set_header X-Original-URI \$request_uri;
-            proxy_method \$request_method;
-            proxy_pass_request_headers on;
-            proxy_pass_request_body on;
-            
-            if (\$request_method = 'OPTIONS') {
-                add_header Access-Control-Allow-Origin \$http_origin always;
-                add_header Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS" always;
-                add_header Access-Control-Allow-Headers "Authorization, Content-Type, Accept, X-Requested-With" always;
-                add_header Access-Control-Allow-Credentials true always;
-                add_header Content-Length 0;
-                add_header Content-Type text/plain;
-                return 204;
-            }
-            
-            add_header Access-Control-Allow-Origin \$http_origin always;
-            add_header Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS" always;
-            add_header Access-Control-Allow-Headers "Authorization, Content-Type, Accept, X-Requested-With" always;
-            add_header Access-Control-Allow-Credentials true always;
-        }
-        
-        location / {
-            try_files \$uri \$uri/ /index.html;
-        }
-    }
-}
-EOF
-        fi
-    else
-        echo "❌ No nginx configuration found, creating minimal config"
-        # Create minimal working config
-        cat > /etc/nginx/nginx.conf << EOF
-events { worker_connections 1024; }
-http {
-    include /etc/nginx/mime.types;
-    default_type application/octet-stream;
-    
-    server {
-        listen 8080;
-        root /usr/share/nginx/html;
-        index index.html;
-        
-        location /health {
-            return 200 '{"status":"healthy"}';
-            add_header Content-Type application/json;
-        }
-        
-        location /config.js {
-            expires 1m;
-            add_header Content-Type application/javascript;
-        }
-        
-        location /api/ {
-            proxy_pass ${BACKEND_URL}/;
-            proxy_set_header Host dino-backend-api-867506203789.us-central1.run.app;
-            proxy_set_header X-Real-IP \$remote_addr;
-            proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto \$scheme;
-            proxy_set_header X-Original-URI \$request_uri;
-            proxy_method \$request_method;
-            proxy_pass_request_headers on;
-            proxy_pass_request_body on;
-            
-            if (\$request_method = 'OPTIONS') {
-                add_header Access-Control-Allow-Origin \$http_origin always;
-                add_header Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS" always;
-                add_header Access-Control-Allow-Headers "Authorization, Content-Type, Accept, X-Requested-With" always;
-                add_header Access-Control-Allow-Credentials true always;
-                add_header Content-Length 0;
-                add_header Content-Type text/plain;
-                return 204;
-            }
-            
-            add_header Access-Control-Allow-Origin \$http_origin always;
-            add_header Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS" always;
-            add_header Access-Control-Allow-Headers "Authorization, Content-Type, Accept, X-Requested-With" always;
-            add_header Access-Control-Allow-Credentials true always;
-        }
-        
-        location / {
-            try_files \$uri \$uri/ /index.html;
-        }
-    }
-}
-EOF
-    fi
+    print_error "Template substitution failed"
+    exit 1
 fi
 
-# Final validation
-echo "🔍 Final nginx configuration validation..."
+# Validate nginx configuration
+print_status "Validating nginx configuration..."
+if nginx -t 2>&1; then
+    print_success "Generated nginx configuration is valid"
+else
+    print_error "Nginx configuration validation failed"
+    cat /etc/nginx/nginx.conf
+    exit 1
+fi
+
+echo ""
+
+# Step 3: Final validation
+print_status "Final nginx configuration validation..."
 if nginx -t; then
-    echo "✅ Nginx configuration is ready"
-    echo "📄 Active proxy configuration:"
-    grep -n "proxy_pass" /etc/nginx/nginx.conf || echo "   No proxy_pass directives found"
+    print_success "Nginx configuration is ready"
 else
-    echo "❌ Final nginx configuration is still invalid"
-    echo "🆘 This is a critical error - nginx may not start properly"
+    print_error "Final nginx validation failed"
+    exit 1
 fi
 
-# Log key configuration
+# Step 4: Show active configuration
+print_status "Active proxy configuration:"
+echo "  Backend URL: ${BACKEND_URL}"
+echo "  Proxy Pass: /api/ -> ${BACKEND_URL}/"
+echo "  WebSocket: /ws/ -> ${BACKEND_URL}/"
 echo ""
-echo "📋 Key Configuration"
-echo "$(printf '─%.0s' {1..40})"
-echo "🌍 Environment: ${APP_ENV:-production}"
-echo "🔗 Backend URL: ${BACKEND_URL:-https://dino-backend-prod-781503667260.us-central1.run.app}"
-echo "🐛 Debug Mode: ${DEBUG_MODE:-false}"
-echo "📊 Console Logging: ${ENABLE_CONSOLE_LOGGING:-false}"
 
+# Step 5: Display generated config.js for debugging
+if [ -f "/usr/share/nginx/html/config.js" ]; then
+    print_status "Generated config.js preview:"
+    echo "----------------------------------------"
+    head -30 /usr/share/nginx/html/config.js
+    echo "----------------------------------------"
+    echo ""
+fi
+
+# Step 6: Show nginx proxy configuration
+print_status "Nginx API proxy configuration:"
+echo "----------------------------------------"
+grep -A 20 "location /api/" /etc/nginx/nginx.conf || echo "Could not find /api/ location block"
+echo "----------------------------------------"
 echo ""
-echo "✅ Container startup complete!"
-echo "🌍 Frontend available on port 8080"
-echo "📋 Configuration endpoint: /config.js"
-echo "🏥 Health check endpoint: /health"
+
+print_success "✅ All initialization steps completed successfully!"
+echo ""
+print_status "Starting nginx..."
+echo "========================================"
 echo ""
 
 # Start nginx in foreground
-echo "🌐 Starting nginx..."
-exec nginx -g "daemon off;"
+exec nginx -g 'daemon off;'

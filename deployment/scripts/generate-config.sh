@@ -34,11 +34,19 @@ print_error() {
 
 # Default values
 DEFAULT_BACKEND_URL="https://dino-backend-prod-781503667260.us-central1.run.app"
-DEFAULT_WS_URL="wss://dino-backend-api-867506203789.us-central1.run.app"
+DEFAULT_WS_URL="wss://dino-backend-prod-781503667260.us-central1.run.app"
 
 # Set defaults if not provided
 export BACKEND_URL="${BACKEND_URL:-$DEFAULT_BACKEND_URL}"
-export WS_URL="${WS_URL:-$DEFAULT_WS_URL}"
+
+# Auto-derive WebSocket URL from Backend URL if not explicitly set
+if [ -z "$WS_URL" ]; then
+    # Convert https:// to wss:// and http:// to ws://
+    export WS_URL=$(echo "$BACKEND_URL" | sed 's/^https:/wss:/' | sed 's/^http:/ws:/')
+    print_status "Auto-derived WebSocket URL from Backend URL: $WS_URL"
+else
+    export WS_URL="$WS_URL"
+fi
 export APP_ENV="${APP_ENV:-${NODE_ENV:-production}}"
 export DEBUG_MODE="${DEBUG_MODE:-false}"
 export ENABLE_ANALYTICS="${ENABLE_ANALYTICS:-true}"
@@ -94,9 +102,10 @@ window.DINO_CONFIG = {
   DEBUG_MODE: $DEBUG_MODE,
   
   // API Configuration
-  API_BASE_URL: '$BACKEND_URL',
+  // Use relative URLs for nginx proxy in production
+  API_BASE_URL: '/api/v1',
   BACKEND_URL: '$BACKEND_URL',
-  WS_URL: '$WS_URL',
+  WS_URL: '/ws',
   API_TIMEOUT: $API_TIMEOUT,
   API_RATE_LIMIT: $API_RATE_LIMIT,
   

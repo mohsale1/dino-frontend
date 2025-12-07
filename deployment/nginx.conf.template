@@ -93,16 +93,23 @@ http {
             add_header Content-Type text/plain;
         }
 
+        # API Debug endpoint - shows what nginx will proxy
+        location /api-debug {
+            return 200 'API Proxy Configuration:\nBackend URL: ${BACKEND_URL}\nProxy Pass: ${BACKEND_URL}/\nRequest URI: $request_uri\nRequest Method: $request_method';
+            add_header Content-Type text/plain;
+        }
+
         # API proxy to backend - FIXED FOR 405 ERROR
         location /api/ {
             # Enhanced logging for API requests
             access_log /var/log/nginx/access.log proxy;
+            error_log /var/log/nginx/error.log debug;
             
             # Forward to backend - CRITICAL: This must proxy, not serve files
             proxy_pass ${BACKEND_URL}/;
             
             # Essential proxy headers for proper backend communication
-            proxy_set_header Host dino-backend-api-867506203789.us-central1.run.app;
+            proxy_set_header Host dino-backend-prod-781503667260.us-central1.run.app;
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_set_header X-Forwarded-Proto $scheme;
