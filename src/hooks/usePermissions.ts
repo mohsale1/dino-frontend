@@ -84,11 +84,8 @@ export const usePermissions = (): UsePermissionsReturn => {
       return false;
     }
     
-    // Superadmin has all permissions
-    if (userRole === 'superadmin' || userRole === 'super_admin') {
-      console.log(`[usePermissions] Superadmin access granted for: ${permission}`);
-      return true;
-    }
+    // STRICT PERMISSION ENFORCEMENT - No superadmin bypass
+    // Even superadmins must have explicit permissions
 
     // Check exact match
     if (userPermissions.includes(permission)) {
@@ -115,25 +112,17 @@ export const usePermissions = (): UsePermissionsReturn => {
   const hasAnyPermission = useCallback((permissions: string[]): boolean => {
     if (!user) return false;
     
-    // Superadmin has all permissions
-    if (userRole === 'superadmin' || userRole === 'super_admin') {
-      return true;
-    }
-
+    // STRICT PERMISSION ENFORCEMENT - No superadmin bypass
     return permissions.some(permission => hasPermission(permission));
-  }, [user, userRole, hasPermission]);
+  }, [user, hasPermission]);
 
   // Check if user has all of the specified permissions
   const hasAllPermissions = useCallback((permissions: string[]): boolean => {
     if (!user) return false;
     
-    // Superadmin has all permissions
-    if (userRole === 'superadmin' || userRole === 'super_admin') {
-      return true;
-    }
-
+    // STRICT PERMISSION ENFORCEMENT - No superadmin bypass
     return permissions.every(permission => hasPermission(permission));
-  }, [user, userRole, hasPermission]);
+  }, [user, hasPermission]);
 
   // Check if user has a specific role
   const hasRole = useCallback((role: string): boolean => {
@@ -158,11 +147,9 @@ export const usePermissions = (): UsePermissionsReturn => {
   const canAccessRoute = useCallback((route: string): boolean => {
     if (!user) return false;
     
-    // Superadmin can access all routes
-    if (isSuperAdmin) return true;
-
+    // STRICT PERMISSION ENFORCEMENT - No superadmin bypass
     return PermissionRegistry.canAccessRoute(userPermissions, route, userRole || undefined);
-  }, [user, userPermissions, userRole, isSuperAdmin]);
+  }, [user, userPermissions, userRole]);
 
   // Get all accessible routes
   const getAccessibleRoutes = useCallback((): string[] => {
@@ -175,11 +162,9 @@ export const usePermissions = (): UsePermissionsReturn => {
   const canPerformAction = useCallback((action: string): boolean => {
     if (!user) return false;
     
-    // Superadmin can perform all actions
-    if (isSuperAdmin) return true;
-
+    // STRICT PERMISSION ENFORCEMENT - No superadmin bypass
     return PermissionRegistry.canPerformAction(userPermissions, action);
-  }, [user, userPermissions, isSuperAdmin]);
+  }, [user, userPermissions]);
 
   // Get all actions user can perform
   const getUserActions = useCallback((): string[] => {
