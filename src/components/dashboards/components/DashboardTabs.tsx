@@ -32,7 +32,7 @@ const DashboardTabs: React.FC<DashboardTabsProps> = ({
   const detectedRole = backendRole?.name || user?.role || 'unknown';
   
   // Only show tabs for SuperAdmin and Admin
-  const shouldShowTabs = detectedRole === 'superadmin' || detectedRole === 'super_admin' || detectedRole === 'admin' || isSuperAdmin() || isAdmin();
+  const shouldShowTabs = detectedRole === 'superadmin' || detectedRole === 'super_admin' || detectedRole === 'admin' || isSuperAdmin || isAdmin;
   
   if (!shouldShowTabs) {
     return null;

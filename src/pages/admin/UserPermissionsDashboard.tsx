@@ -415,7 +415,7 @@ const UserPermissionsDashboard: React.FC = () => {
     };
 
   const currentUserAuth = getUserWithRole();
-  const canViewAllUsers = isSuperAdmin() || hasPermission(PERMISSIONS.USERS_VIEW);
+  const canViewAllUsers = isSuperAdmin || hasPermission(PERMISSIONS.USERS_VIEW);
 
   // Add error handling for currentUserAuth
   if (!currentUserAuth && !userDataLoading) {

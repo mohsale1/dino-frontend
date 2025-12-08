@@ -385,7 +385,7 @@ const TablesOrdersTab: React.FC<TablesOrdersTabProps> = ({ tableStatuses: propTa
               <Typography variant="h6" sx={{ fontWeight: 700, color: 'text.primary' }}>
                 Table Status Grid
               </Typography>
-              {canManageTables() && (
+              {canManageTables && (
                 <Chip
                   label="Manage Tables"
                   onClick={() => navigate('/admin/tables')}

@@ -9,221 +9,141 @@ class PermissionService {
   private static permissionsCache: Map<string, { permissions: any[], role: any, timestamp: number }> = new Map();
   private static readonly CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
   
-  // Role definitions - these should be loaded from API in production
-  private static roleDefinitions: Record<string, UserRole> = {
-    [ROLES.SUPERADMIN]: {
-      id: 'superadmin-role',
-      name: ROLES.SUPERADMIN,
-      displayName: 'Super Administrator',
-      description: 'Full system access with workspace management',
-      permissions: [
-        { id: '1', name: PERMISSIONS.DASHBOARD_VIEW, resource: 'dashboard', action: 'read', description: 'View dashboard' },
-        { id: '2', name: PERMISSIONS.ORDERS_VIEW, resource: 'order', action: 'read', description: 'View orders' },
-        { id: '3', name: PERMISSIONS.ORDERS_UPDATE, resource: 'order', action: 'update', description: 'Update orders' },
-        { id: '4', name: PERMISSIONS.ORDERS_CREATE, resource: 'order', action: 'create', description: 'Create orders' },
-        { id: '5', name: PERMISSIONS.ORDERS_DELETE, resource: 'order', action: 'delete', description: 'Delete orders' },
-        { id: '6', name: PERMISSIONS.MENU_VIEW, resource: 'menu', action: 'read', description: 'View menu' },
-        { id: '7', name: PERMISSIONS.MENU_UPDATE, resource: 'menu', action: 'update', description: 'Update menu' },
-        { id: '8', name: PERMISSIONS.MENU_CREATE, resource: 'menu', action: 'create', description: 'Create menu items' },
-        { id: '9', name: PERMISSIONS.MENU_DELETE, resource: 'menu', action: 'delete', description: 'Delete menu items' },
-        { id: '10', name: PERMISSIONS.COUPONS_MANAGE, resource: 'coupon', action: 'manage', description: 'Manage coupons' },
-        { id: '11', name: PERMISSIONS.TABLES_VIEW, resource: 'table', action: 'read', description: 'View tables' },
-        { id: '12', name: PERMISSIONS.TABLES_UPDATE, resource: 'table', action: 'update', description: 'Update tables' },
-        { id: '13', name: PERMISSIONS.TABLES_CREATE, resource: 'table', action: 'create', description: 'Create tables' },
-        { id: '14', name: PERMISSIONS.TABLES_DELETE, resource: 'table', action: 'delete', description: 'Delete tables' },
-        { id: '15', name: PERMISSIONS.SETTINGS_VIEW, resource: 'settings', action: 'read', description: 'View settings' },
-        { id: '16', name: PERMISSIONS.SETTINGS_UPDATE, resource: 'settings', action: 'update', description: 'Update settings' },
-        { id: '17', name: PERMISSIONS.USERS_VIEW, resource: 'user', action: 'read', description: 'View users' },
-        { id: '18', name: PERMISSIONS.USERS_UPDATE, resource: 'user', action: 'update', description: 'Update users' },
-        { id: '19', name: PERMISSIONS.USERS_CREATE, resource: 'user', action: 'create', description: 'Create users' },
-        { id: '20', name: PERMISSIONS.USERS_DELETE, resource: 'user', action: 'delete', description: 'Delete users' },
-        { id: '21', name: PERMISSIONS.WORKSPACE_VIEW, resource: 'workspace', action: 'read', description: 'View workspaces' },
-        { id: '22', name: PERMISSIONS.WORKSPACE_UPDATE, resource: 'workspace', action: 'update', description: 'Update workspaces' },
-        { id: '23', name: PERMISSIONS.WORKSPACE_CREATE, resource: 'workspace', action: 'create', description: 'Create workspaces' },
-        { id: '24', name: PERMISSIONS.WORKSPACE_DELETE, resource: 'workspace', action: 'delete', description: 'Delete workspaces' },
-        { id: '25', name: PERMISSIONS.WORKSPACE_SWITCH, resource: 'workspace', action: 'manage', description: 'Switch workspaces' },
-        { id: '26', name: PERMISSIONS.VENUE_ACTIVATE, resource: 'venue', action: 'update', description: 'Activate venues' },
-        { id: '27', name: PERMISSIONS.VENUE_DEACTIVATE, resource: 'venue', action: 'update', description: 'Deactivate venues' },
-        { id: '28', name: PERMISSIONS.VENUE_VIEW_ALL, resource: 'venue', action: 'read', description: 'View all venues' },
-        { id: '29', name: PERMISSIONS.VENUE_SWITCH, resource: 'venue', action: 'manage', description: 'Switch venues' },
-        { id: '30', name: PERMISSIONS.TEMPLATE_VIEW, resource: 'template', action: 'read', description: 'View templates' },
-        { id: '31', name: PERMISSIONS.TEMPLATE_UPDATE, resource: 'template', action: 'update', description: 'Update templates' },
-        { id: '32', name: PERMISSIONS.TEMPLATE_CREATE, resource: 'template', action: 'create', description: 'Create templates' },
-        { id: '33', name: PERMISSIONS.TEMPLATE_DELETE, resource: 'template', action: 'delete', description: 'Delete templates' },
-      ]
-    },
-    [ROLES.ADMIN]: {
-      id: 'admin-role',
-      name: ROLES.ADMIN,
-      displayName: 'Administrator',
-      description: 'Full access to all features',
-      permissions: [
-        { id: '1', name: PERMISSIONS.DASHBOARD_VIEW, resource: 'dashboard', action: 'read', description: 'View dashboard' },
-        { id: '2', name: PERMISSIONS.ORDERS_VIEW, resource: 'order', action: 'read', description: 'View orders' },
-        { id: '3', name: PERMISSIONS.ORDERS_UPDATE, resource: 'order', action: 'update', description: 'Update orders' },
-        { id: '4', name: PERMISSIONS.ORDERS_CREATE, resource: 'order', action: 'create', description: 'Create orders' },
-        { id: '5', name: PERMISSIONS.ORDERS_DELETE, resource: 'order', action: 'delete', description: 'Delete orders' },
-        { id: '6', name: PERMISSIONS.MENU_VIEW, resource: 'menu', action: 'read', description: 'View menu' },
-        { id: '7', name: PERMISSIONS.MENU_UPDATE, resource: 'menu', action: 'update', description: 'Update menu' },
-        { id: '8', name: PERMISSIONS.MENU_CREATE, resource: 'menu', action: 'create', description: 'Create menu items' },
-        { id: '9', name: PERMISSIONS.MENU_DELETE, resource: 'menu', action: 'delete', description: 'Delete menu items' },
-        { id: '10', name: PERMISSIONS.COUPONS_MANAGE, resource: 'coupon', action: 'manage', description: 'Manage coupons' },
-        { id: '11', name: PERMISSIONS.TABLES_VIEW, resource: 'table', action: 'read', description: 'View tables' },
-        { id: '12', name: PERMISSIONS.TABLES_UPDATE, resource: 'table', action: 'update', description: 'Update tables' },
-        { id: '13', name: PERMISSIONS.TABLES_CREATE, resource: 'table', action: 'create', description: 'Create tables' },
-        { id: '14', name: PERMISSIONS.TABLES_DELETE, resource: 'table', action: 'delete', description: 'Delete tables' },
-        { id: '15', name: PERMISSIONS.SETTINGS_VIEW, resource: 'settings', action: 'read', description: 'View settings' },
-        { id: '16', name: PERMISSIONS.SETTINGS_UPDATE, resource: 'settings', action: 'update', description: 'Update settings' },
-        { id: '17', name: PERMISSIONS.USERS_VIEW, resource: 'user', action: 'read', description: 'View users' },
-        { id: '18', name: PERMISSIONS.USERS_UPDATE, resource: 'user', action: 'update', description: 'Update users' },
-        { id: '19', name: PERMISSIONS.USERS_CREATE, resource: 'user', action: 'create', description: 'Create users' },
-        { id: '20', name: PERMISSIONS.USERS_DELETE, resource: 'user', action: 'delete', description: 'Delete users' },
-        { id: '30', name: PERMISSIONS.TEMPLATE_VIEW, resource: 'template', action: 'read', description: 'View templates' },
-        { id: '31', name: PERMISSIONS.TEMPLATE_UPDATE, resource: 'template', action: 'update', description: 'Update templates' },
-      ]
-    },
-    [ROLES.OPERATOR]: {
-      id: 'operator-role',
-      name: ROLES.OPERATOR,
-      displayName: 'Operator',
-      description: 'Limited access to orders management only',
-      permissions: [
-        { id: '2', name: PERMISSIONS.ORDERS_VIEW, resource: 'order', action: 'read', description: 'View orders' },
-        { id: '3', name: PERMISSIONS.ORDERS_UPDATE, resource: 'order', action: 'update', description: 'Update order status only' },
-      ]
+  /**
+   * Fetch user permissions from backend API
+   */
+  static async fetchUserPermissions(forceRefresh: boolean = false): Promise<{ permissions: any[], role: any } | null> {
+    try {
+      const userId = StorageManager.getUserId();
+      if (!userId) {
+        console.warn('No user ID found, cannot fetch permissions');
+        return null;
+      }
+
+      // Check cache first
+      const cached = this.permissionsCache.get(userId);
+      if (!forceRefresh && cached && (Date.now() - cached.timestamp < this.CACHE_DURATION)) {
+        return { permissions: cached.permissions, role: cached.role };
+      }
+
+      // Fetch from API
+      const response = await apiService.get<{ permissions: any[], role: any }>('/auth/permissions');
+      
+      if (response.success && response.data) {
+        const { permissions, role } = response.data;
+        
+        // Cache the result
+        this.permissionsCache.set(userId, {
+          permissions: permissions || [],
+          role: role || null,
+          timestamp: Date.now()
+        });
+
+        // Store in localStorage for offline access
+        StorageManager.setPermissions({
+          permissions: permissions || [],
+          role: role || null,
+          userId,
+          timestamp: new Date().toISOString()
+        });
+
+        return { permissions: permissions || [], role: role || null };
+      }
+
+      return null;
+    } catch (error) {
+      console.error('Error fetching user permissions:', error);
+      // Fallback to cached/stored permissions
+      return this.getStoredPermissions();
     }
-  };
+  }
 
   /**
-   * Check if user has a specific permission (with backend fallback)
+   * Get stored permissions from localStorage
+   */
+  static getStoredPermissions(): { permissions: any[], role: any } | null {
+    try {
+      const permissionsData = StorageManager.getPermissions();
+      if (permissionsData) {
+        return {
+          permissions: permissionsData.permissions || [],
+          role: permissionsData.role || null
+        };
+      }
+    } catch (error) {
+      console.error('Error getting stored permissions:', error);
+    }
+    return null;
+  }
+
+  /**
+   * Check if user has a specific permission (backend-driven)
    */
   static hasPermission(user: User | null, permission: PermissionName): boolean {
     if (!user) {
       return false;
     }
 
-    // Special case for superadmin emails - grant all permissions
-    if (user.email?.includes('saleem') || user.email?.includes('admin')) {
-      return true;
-    }
-
-    // First check backend permissions if available
-    const backendPermissions = this.getBackendPermissions();
-    const backendRole = this.getBackendRole();
+    // Get backend permissions
+    const stored = this.getStoredPermissions();
+    const backendPermissions = stored?.permissions || [];
+    const backendRole = stored?.role;
     
     // If user is superadmin, grant all permissions
-    if (backendRole && (backendRole.name === 'super_admin' || backendRole.name === ROLES.SUPERADMIN)) {
-      return true;
-    }
-    
-    // Check if user role is superadmin
-    if (user.role && (user.role.name === ROLES.SUPERADMIN)) {
+    if (backendRole && backendRole.name === 'superadmin') {
       return true;
     }
 
-    if (!user.permissions) {
-      return false;
-    }
-    
-    if (backendPermissions && backendPermissions.length > 0) {
-      // Check for exact match first
-      if (backendPermissions.some((p: any) => p.name === permission)) {
+    // Check if permission exists in backend permissions
+    if (backendPermissions.length > 0) {
+      // Check for exact match (e.g., "menu.create")
+      const hasExactMatch = backendPermissions.some((p: any) => p.name === permission);
+      if (hasExactMatch) {
         return true;
       }
-      
-      // Convert colon notation to dot notation for backend compatibility
-      const dotNotationPermission = permission.replace(':', '.');
-      if (backendPermissions.some((p: any) => p.name === dotNotationPermission)) {
-        return true;
-      }
-      
-      // Map frontend permission constants to backend permissions
-      const permissionMapping: Record<string, string[]> = {
-        'dashboard.read': ['dashboard.read', 'workspace.read', 'workspace.manage'],
-        'order.read': ['order.read', 'order.manage'],
-        'order.update': ['order.update', 'order.manage'],
-        'order.create': ['order.create', 'order.manage'],
-        'order.delete': ['order.delete', 'order.manage'],
-        'menu.read': ['menu.read', 'menu.manage'],
-        'menu.update': ['menu.update', 'menu.manage'],
-        'menu.create': ['menu.create', 'menu.manage'],
-        'menu.delete': ['menu.delete', 'menu.manage'],
-        'table.read': ['table.read', 'table.manage'],
-        'table.update': ['table.update', 'table.manage'],
-        'table.create': ['table.create', 'table.manage'],
-        'table.delete': ['table.delete', 'table.manage'],
-        'user.read': ['user.read', 'user.manage'],
-        'user.update': ['user.update', 'user.manage'],
-        'user.create': ['user.create', 'user.manage'],
-        'user.delete': ['user.delete', 'user.manage'],
-        'workspace.read': ['workspace.read', 'workspace.manage'],
-        'workspace.update': ['workspace.update', 'workspace.manage'],
-        'workspace.create': ['workspace.create', 'workspace.manage'],
-        'workspace.delete': ['workspace.delete', 'workspace.manage'],
-        'venue.update': ['venue.update', 'venue.manage'],
-        'venue.manage': ['venue.manage'],
-        'settings.read': ['workspace.read', 'venue.read', 'workspace.manage', 'venue.manage'],
-        'settings.update': ['workspace.update', 'venue.update', 'workspace.manage', 'venue.manage'],
-        'template.read': ['template.read', 'template.manage'],
-        'template.update': ['template.update', 'template.manage'],
-        'template.create': ['template.create', 'template.manage'],
-        'template.delete': ['template.delete', 'template.manage']
-      };
-      
-      // Check mapped permissions
-      const mappedPermissions = permissionMapping[permission] || [permission];
-      if (mappedPermissions.some(mappedPerm => 
-        backendPermissions.some((p: any) => p.name === mappedPerm)
-      )) {
-        return true;
-      }
-      
-      // Check for wildcard permissions
-      const [resource, action] = permission.split(/[:.]/);
-      return backendPermissions.some((p: any) => 
-        p.name === `${resource}.manage` || 
-        p.name === `${resource}:manage` ||
-        (p.resource === resource && p.action === 'manage')
+
+      // Check for manage permission (e.g., "menu.manage" grants all menu permissions)
+      const [resource, action] = permission.split('.');
+      const hasManagePermission = backendPermissions.some((p: any) => 
+        p.resource === resource && p.action === 'manage'
       );
+      if (hasManagePermission) {
+        return true;
+      }
+
+      // Check by resource and action
+      const hasResourceAction = backendPermissions.some((p: any) => 
+        p.resource === resource && p.action === action
+      );
+      if (hasResourceAction) {
+        return true;
+      }
     }
 
-    // Fallback to static permissions
-    return user.permissions.some(p => p.name === permission);
+    return false;
   }
 
   /**
    * Get backend permissions from localStorage
    */
   static getBackendPermissions(): any[] {
-    try {
-      const permissionsData = StorageManager.getPermissions();
-      if (permissionsData) {
-        return permissionsData.permissions || [];
-      }
-    } catch (error) {
-      }
-    return [];
+    const stored = this.getStoredPermissions();
+    return stored?.permissions || [];
   }
 
   /**
    * Get backend role information
    */
   static getBackendRole(): any | null {
-    try {
-      const permissionsData = StorageManager.getPermissions();
-      if (permissionsData) {
-        return permissionsData.role || null;
-      }
-    } catch (error) {
-      }
-    return null;
+    const stored = this.getStoredPermissions();
+    return stored?.role || null;
   }
 
   /**
    * Check if user has any of the specified permissions
    */
   static hasAnyPermission(user: User | null, permissions: PermissionName[]): boolean {
-    if (!user || !user.permissions) {
+    if (!user) {
       return false;
     }
 
@@ -234,7 +154,7 @@ class PermissionService {
    * Check if user has all of the specified permissions
    */
   static hasAllPermissions(user: User | null, permissions: PermissionName[]): boolean {
-    if (!user || !user.permissions) {
+    if (!user) {
       return false;
     }
 
@@ -242,47 +162,47 @@ class PermissionService {
   }
 
   /**
-   * Check if user has a specific role (with backend fallback)
+   * Check if user has a specific role (backend-driven)
    */
   static hasRole(user: User | null, roleName: string | RoleName): boolean {
     if (!user) {
       return false;
     }
 
-    // First check backend role if available
     const backendRole = this.getBackendRole();
     if (backendRole) {
-      return backendRole.name === roleName;
+      return backendRole.name === roleName || backendRole.name === roleName.toLowerCase();
     }
 
-    // Fallback to static role
-    if (!user.role) {
-      return false;
+    return false;
+  }
+
+  /**
+   * Get user's role from backend
+   */
+  static getUserRole(user: User | null): any | null {
+    if (!user) {
+      return null;
     }
 
-    return user.role.name === roleName;
+    return this.getBackendRole();
   }
 
   /**
-   * Get user's role
+   * Get permissions for current user
    */
-  static getUserRole(user: User | null): UserRole | null {
-    return user?.role || null;
-  }
-
-  /**
-   * Get permissions for a role
-   */
-  static getRolePermissions(roleName: string): Permission[] {
-    const role = this.roleDefinitions[roleName];
-    return role ? role.permissions : [];
-  }
-
-  /**
-   * Get role definition
-   */
-  static getRoleDefinition(roleName: string): UserRole | null {
-    return this.roleDefinitions[roleName] || null;
+  static getUserPermissions(): Permission[] {
+    const backendPermissions = this.getBackendPermissions();
+    
+    // Transform backend permissions to frontend Permission format
+    return backendPermissions.map((p: any) => ({
+      id: p.id,
+      name: p.name,
+      resource: p.resource,
+      action: p.action,
+      description: p.description || `${p.action} ${p.resource}`,
+      scope: p.scope
+    }));
   }
 
   /**
@@ -291,13 +211,16 @@ class PermissionService {
   static canAccessRoute(user: User | null, route: string): boolean {
     if (!user) return false;
 
-    // Route-based access control
-    const routePermissions: Record<string, PermissionName[]> = {
-      '/admin': [PERMISSIONS.DASHBOARD_VIEW],
-      '/admin/orders': [PERMISSIONS.ORDERS_VIEW],
-      '/admin/menu': [PERMISSIONS.MENU_VIEW],
-      '/admin/tables': [PERMISSIONS.TABLES_VIEW],
-      '/admin/settings': [PERMISSIONS.SETTINGS_VIEW],
+    // Route-based access control using backend permissions
+    const routePermissions: Record<string, string[]> = {
+      '/admin': ['dashboard.read'],
+      '/admin/orders': ['order.read'],
+      '/admin/menu': ['menu.read'],
+      '/admin/tables': ['table.read'],
+      '/admin/settings': ['settings.read'],
+      '/admin/users': ['user.read'],
+      '/admin/workspace': ['workspace.read'],
+      '/admin/coupons': ['coupon.read'],
     };
 
     const requiredPermissions = routePermissions[route];
@@ -305,7 +228,7 @@ class PermissionService {
       return false;
     }
 
-    return this.hasAnyPermission(user, requiredPermissions);
+    return requiredPermissions.some(perm => this.hasPermission(user, perm as PermissionName));
   }
 
   /**
@@ -320,6 +243,9 @@ class PermissionService {
       '/admin/menu',
       '/admin/tables',
       '/admin/settings',
+      '/admin/users',
+      '/admin/workspace',
+      '/admin/coupons',
     ];
 
     return allRoutes.filter(route => this.canAccessRoute(user, route));
@@ -329,22 +255,24 @@ class PermissionService {
    * Check if user can perform an action on a resource
    */
   static canPerformAction(user: User | null, resource: string, action: string): boolean {
-    if (!user || !user.permissions) {
+    if (!user) {
       return false;
     }
 
-    return user.permissions.some(p => p.resource === resource && p.action === action);
+    const permission = `${resource}.${action}` as PermissionName;
+    return this.hasPermission(user, permission);
   }
 
   /**
    * Get user's permissions for a specific resource
    */
   static getResourcePermissions(user: User | null, resource: string): Permission[] {
-    if (!user || !user.permissions) {
+    if (!user) {
       return [];
     }
 
-    return user.permissions.filter(p => p.resource === resource);
+    const allPermissions = this.getUserPermissions();
+    return allPermissions.filter(p => p.resource === resource);
   }
 
   /**
@@ -372,10 +300,12 @@ class PermissionService {
    * Get user's permissions as readable list
    */
   static getUserPermissionsList(user: User | null): string[] {
-    if (!user || !user.permissions) {
+    if (!user) {
       return [];
     }
-    return user.permissions.map(p => p.description || p.name);
+    
+    const permissions = this.getUserPermissions();
+    return permissions.map(p => p.description || p.name);
   }
 
   /**
@@ -389,16 +319,14 @@ class PermissionService {
    * Check if user can switch cafes
    */
   static canSwitchCafe(user: User | null): boolean {
-    return this.isSuperAdmin(user) || this.hasPermission(user, PERMISSIONS.VENUE_SWITCH);
+    return this.isSuperAdmin(user) || this.hasPermission(user, 'venue.manage' as PermissionName);
   }
 
   /**
    * Check if user can activate/deactivate cafe
    */
   static canManageCafeStatus(user: User | null): boolean {
-    return this.isSuperAdmin(user) || 
-           this.hasPermission(user, PERMISSIONS.VENUE_ACTIVATE) ||
-           this.hasPermission(user, PERMISSIONS.VENUE_DEACTIVATE);
+    return this.isSuperAdmin(user) || this.hasPermission(user, 'venue.update' as PermissionName);
   }
 
   // =============================================================================
@@ -407,15 +335,12 @@ class PermissionService {
 
   /**
    * Get users for the current venue with their roles and permissions
-   * This is specifically for the permissions dashboard
    */
   static async getVenueUsers(venueId?: string): Promise<any[]> {
     try {
-      // Import userService dynamically to avoid circular dependency
       const { userService } = await import('./userService');
       
       if (!venueId) {
-        // Try to get venue ID from storage or context
         const userData = StorageManager.getUserData();
         venueId = userData?.venue?.id;
       }
@@ -427,7 +352,6 @@ class PermissionService {
       const response = await userService.getUsersByVenueId(venueId);
       
       if (response.success && response.data) {
-        // Transform the VenueUser API response to include permission information
         const usersWithPermissions = response.data.map((user: any) => ({
           id: user.id,
           firstName: user.first_name || user.firstName,
@@ -439,7 +363,7 @@ class PermissionService {
           isActive: user.is_active !== undefined ? user.is_active : (user.status === 'active'),
           status: user.status || (user.is_active ? 'active' : 'inactive'),
           lastLogin: user.last_logged_in ? new Date(user.last_logged_in) : null,
-          permissions: this.getUserPermissionsFromRole(user.role),
+          permissions: [], // Permissions are now fetched per user from backend
           venueId: user.venue_id || user.venueId,
           workspaceId: user.workspace_id || user.workspaceId,
           createdAt: user.created_at ? new Date(user.created_at) : new Date(),
@@ -451,6 +375,7 @@ class PermissionService {
         return [];
       }
     } catch (error) {
+      console.error('Error fetching venue users:', error);
       return [];
     }
   }
@@ -472,25 +397,6 @@ class PermissionService {
   }
 
   /**
-   * Get permissions for a user based on their role
-   */
-  static getUserPermissionsFromRole(role: string): Permission[] {
-    if (!role) return [];
-
-    // Map backend role names to frontend role names
-    const roleMapping: Record<string, string> = {
-      'super_admin': ROLES.SUPERADMIN,
-      'superadmin': ROLES.SUPERADMIN,
-      'admin': ROLES.ADMIN,
-      'operator': ROLES.OPERATOR,
-      'staff': ROLES.OPERATOR, // Map staff to operator
-    };
-
-    const mappedRole = roleMapping[role.toLowerCase()] || role;
-    return this.getRolePermissions(mappedRole);
-  }
-
-  /**
    * Get user statistics for permissions dashboard
    */
   static async getUserStatistics(venueId?: string): Promise<{
@@ -503,75 +409,67 @@ class PermissionService {
       const users = await this.getVenueUsers(venueId);
       
       const totalUsers = users.length;
-      const activeUsers = users.filter(user => user.isActive).length;
+      const activeUsers = users.filter(u => u.isActive).length;
       
-      // Count users by role
-      const usersByRole = users.reduce((acc, user) => {
+      const usersByRole: Record<string, number> = {};
+      users.forEach(user => {
         const role = user.role || 'unknown';
-        acc[role] = (acc[role] || 0) + 1;
-        return acc;
-      }, {} as Record<string, number>);
-
-      // Count recent logins (last 7 days)
-      const sevenDaysAgo = new Date();
-      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-      const recentLogins = users.filter(user => 
-        user.lastLogin && user.lastLogin > sevenDaysAgo
+        usersByRole[role] = (usersByRole[role] || 0) + 1;
+      });
+      
+      const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+      const recentLogins = users.filter(u => 
+        u.lastLogin && new Date(u.lastLogin) > oneDayAgo
       ).length;
-
+      
       return {
         totalUsers,
         activeUsers,
         usersByRole,
-        recentLogins,
+        recentLogins
       };
     } catch (error) {
+      console.error('Error getting user statistics:', error);
       return {
         totalUsers: 0,
         activeUsers: 0,
         usersByRole: {},
-        recentLogins: 0,
+        recentLogins: 0
       };
     }
   }
 
   /**
-   * Update user role and permissions
-   * Note: Role updates may need to be handled through a different API endpoint
+   * Get role definition with display name and other metadata
    */
-  static async updateUserRole(userId: string, newRole: string): Promise<boolean> {
-    try {
-      // Import userService dynamically to avoid circular dependency
-      const { userService } = await import('./userService');
-      
-      // For now, we'll use the is_active field update as a placeholder
-      // In the future, this should be replaced with a proper role update endpoint
-      return false;
-    } catch (error) {
-      return false;
-    }
+  static getRoleDefinition(role: string): { id: string; name: string; displayName: string; description: string; permissions: any[] } {
+    const roleDefinitions: Record<string, { id: string; name: string; displayName: string; description: string; permissions: any[] }> = {
+      'superadmin': { id: 'superadmin', name: 'superadmin', displayName: 'Super Administrator', description: 'Full system access', permissions: [] },
+      'admin': { id: 'admin', name: 'admin', displayName: 'Administrator', description: 'Venue administration', permissions: [] },
+      'operator': { id: 'operator', name: 'operator', displayName: 'Operator', description: 'Order management', permissions: [] },
+      'staff': { id: 'staff', name: 'staff', displayName: 'Staff', description: 'Basic staff access', permissions: [] },
+      'customer': { id: 'customer', name: 'customer', displayName: 'Customer', description: 'Customer access', permissions: [] },
+      'manager': { id: 'manager', name: 'manager', displayName: 'Manager', description: 'Manager access', permissions: [] }
+    };
+    
+    const roleName = role?.toLowerCase() || 'unknown';
+    return roleDefinitions[roleName] || { 
+      id: roleName, 
+      name: roleName, 
+      displayName: role || 'Unknown Role', 
+      description: 'Custom role', 
+      permissions: [] 
+    };
   }
-
+  
   /**
-   * Toggle user active status
+   * Get user permissions from role (for backward compatibility)
    */
-  static async toggleUserStatus(userId: string, isActive: boolean): Promise<boolean> {
-    try {
-      // Import userService dynamically to avoid circular dependency
-      const { userService } = await import('./userService');
-      
-      const response = await userService.toggleUserStatus(userId, isActive);
-      
-      if (response.success) {
-        return true;
-      } else {
-        return false;
-      }
-    } catch (error) {
-      return false;
-    }
+  static getUserPermissionsFromRole(role: string): any[] {
+    // This is a placeholder - actual permissions come from backend
+    // Return empty array as permissions are fetched from backend
+    return [];
   }
 }
 
 export default PermissionService;
-export const permissionService = PermissionService;

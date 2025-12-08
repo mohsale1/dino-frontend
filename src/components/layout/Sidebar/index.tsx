@@ -36,7 +36,8 @@ import { useUserData } from '../../../contexts/UserDataContext';
 import { useSidebar } from '../../../contexts/SidebarContext';
 import { venueService } from '../../../services/business';
 import PermissionService from '../../../services/auth';
-import { PERMISSIONS } from '../../../types/auth';
+import { PermissionRegistry } from '../../../services/auth/permissionRegistry';
+import { usePermissions } from '../../../hooks/usePermissions';
 
 import { getUserFirstName } from '../../../utils/userUtils';
 import { useSidebarFlags } from '../../../flags/FlagContext';
@@ -47,8 +48,8 @@ interface NavigationItem {
   label: string;
   path: string;
   icon: React.ReactNode;
-  permission: string;
-  roles: string[];
+  requiredPermissions: string[];
+  requiredRoles?: string[];
   badge?: string | number;
   flagKey?: string;
 }
@@ -61,123 +62,66 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const theme = useTheme();
-  const { user, hasPermission } = useAuth();
+  const { user } = useAuth();
   const { userData, refreshUserData } = useUserData();
   const { isCollapsed, toggleCollapsed, getSidebarWidth } = useSidebar();
   const sidebarFlags = useSidebarFlags();
+  const { getAccessibleModules, userRole } = usePermissions();
   
   const [statusLoading, setStatusLoading] = useState(false);
 
   // Determine if sidebar should show expanded content
   const showExpanded = !isCollapsed;
   
-  // Navigation items with enhanced design
-  const allAdminNavItems: NavigationItem[] = [
-    { 
-      label: 'Dashboard', 
-      path: '/admin', 
-      icon: <Dashboard />, 
-      permission: PERMISSIONS.DASHBOARD_VIEW,
-      roles: ['admin'],
-      flagKey: 'showDashboardNav'
-    },
-    { 
-      label: 'Orders', 
-      path: '/admin/orders', 
-      icon: <Assignment />, 
-      permission: PERMISSIONS.ORDERS_VIEW,
-      roles: ['admin', 'operator'],
-      flagKey: 'showOrdersNav'
-    },
-    { 
-      label: 'Menu', 
-      path: '/admin/menu', 
-      icon: <Restaurant />, 
-      permission: PERMISSIONS.MENU_VIEW,
-      roles: ['admin'],
-      flagKey: 'showMenuNav'
-    },
-    { 
-      label: 'Tables', 
-      path: '/admin/tables', 
-      icon: <TableRestaurant />, 
-      permission: PERMISSIONS.TABLES_VIEW,
-      roles: ['admin'],
-      flagKey: 'showTablesNav'
-    },
-    { 
-      label: 'Coupons', 
-      path: '/admin/coupons', 
-      icon: <LocalOffer />, 
-      permission: PERMISSIONS.TABLES_VIEW,
-      roles: ['admin', 'superadmin'],
-      flagKey: 'showCouponsNav'
-    },
-    { 
-      label: 'Menu Template', 
-      path: '/admin/menu-template', 
-      icon: <Palette />, 
-      permission: PERMISSIONS.TEMPLATE_VIEW,
-      roles: ['admin'],
-      flagKey: 'showMenuNav'
-    },
-    { 
-      label: 'Users', 
-      path: '/admin/users', 
-      icon: <People />, 
-      permission: PERMISSIONS.USERS_VIEW,
-      roles: ['admin', 'superadmin'],
-      flagKey: 'showUsersNav'
-    },
-    { 
-      label: 'Permissions', 
-      path: '/admin/permissions', 
-      icon: <Security />, 
-      permission: PERMISSIONS.USERS_VIEW,
-      roles: ['admin', 'superadmin'],
-      flagKey: 'showPermissionsNav'
-    },
-    { 
-      label: 'Settings', 
-      path: '/admin/settings', 
-      icon: <Settings />, 
-      permission: PERMISSIONS.SETTINGS_VIEW,
-      roles: ['admin'],
-      flagKey: 'showSettingsNav'
-    },
-    { 
-      label: 'Workspace', 
-      path: '/admin/workspace', 
-      icon: <Business />, 
-      permission: PERMISSIONS.WORKSPACE_VIEW,
-      roles: ['superadmin'],
-      flagKey: 'showWorkspaceNav'
-    },
-  ];
+  // Icon mapping for modules
+  const iconMap: Record<string, React.ReactNode> = {
+    'dashboard': <Dashboard />,
+    'orders': <Assignment />,
+    'menu': <Restaurant />,
+    'tables': <TableRestaurant />,
+    'coupons': <LocalOffer />,
+    'menu-template': <Palette />,
+    'users': <People />,
+    'permissions': <Security />,
+    'settings': <Settings />,
+    'workspace': <Business />,
+  };
 
-  // Filter navigation items based on permissions and feature flags
-  const adminNavItems = allAdminNavItems.filter(item => {
-    // Check feature flag first
-    if (item.flagKey && !sidebarFlags[item.flagKey as keyof typeof sidebarFlags]) {
-      return false;
-    }
-    
-    const backendRole = PermissionService.getBackendRole();
-    const userRole = backendRole?.name || user?.role || 'unknown';
-    
-    if (userRole === 'superadmin') {
-      return true;
-    }
-    
-    if (item.roles && item.roles.length > 0) {
-      const hasRequiredRole = item.roles.includes(userRole as string);
-      if (!hasRequiredRole) {
+  // Flag key mapping for modules
+  const flagKeyMap: Record<string, string> = {
+    'dashboard': 'showDashboardNav',
+    'orders': 'showOrdersNav',
+    'menu': 'showMenuNav',
+    'tables': 'showTablesNav',
+    'coupons': 'showCouponsNav',
+    'menu-template': 'showMenuNav',
+    'users': 'showUsersNav',
+    'permissions': 'showPermissionsNav',
+    'settings': 'showSettingsNav',
+    'workspace': 'showWorkspaceNav',
+  };
+
+  // Get accessible modules from registry (dynamic based on stored permissions)
+  const accessibleModules = getAccessibleModules();
+  
+  // Convert to NavigationItem format and add icons
+  const adminNavItems: NavigationItem[] = accessibleModules
+    .filter(module => !module.children) // Only top-level modules for sidebar
+    .map(module => ({
+      label: module.label,
+      path: module.path,
+      icon: iconMap[module.id] || <Dashboard />,
+      requiredPermissions: module.requiredPermissions,
+      requiredRoles: module.requiredRoles,
+      flagKey: flagKeyMap[module.id],
+    }))
+    .filter(item => {
+      // Check feature flag
+      if (item.flagKey && !sidebarFlags[item.flagKey as keyof typeof sidebarFlags]) {
         return false;
       }
-    }
-    
-    return hasPermission(item.permission as any);
-  });
+      return true;
+    });
 
   // Get venue status for display
   const venueStatus = userData?.venue ? {

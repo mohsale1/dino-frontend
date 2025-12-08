@@ -121,7 +121,7 @@ const MenuPerformanceTab: React.FC<MenuPerformanceTabProps> = ({ menuPerformance
                   Menu Performance Overview
                 </Typography>
               </Box>
-              {canManageMenu() && (
+              {canManageMenu && (
                 <Button
                   variant="contained"
                   startIcon={<Add />}

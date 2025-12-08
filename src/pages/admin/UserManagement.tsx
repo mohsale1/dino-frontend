@@ -698,10 +698,10 @@ const UserManagement: React.FC = () => {
   }));
 
   // Role-based restrictions
-  const canCreateUsers = isSuperAdmin() || hasPermission(PERMISSIONS.USERS_CREATE);
+  const canCreateUsers = isSuperAdmin || hasPermission(PERMISSIONS.USERS_CREATE);
   const canEditUsers = hasPermission(PERMISSIONS.USERS_UPDATE);
   const canDeleteUsers = hasPermission(PERMISSIONS.USERS_DELETE);
-  const canUpdatePasswords = isAdmin() || isSuperAdmin();
+  const canUpdatePasswords = isAdmin || isSuperAdmin;
 
   // Don't block UI with loading or error states
   // Show page immediately with empty users if API fails
@@ -927,7 +927,7 @@ const UserManagement: React.FC = () => {
                 alignItems: 'center',
               }}
             >
-              {canCreateUsers && (
+              {canCreateUsers() && (
                 <FlagGate flag="users.showAddUser">
                   <Button
                     variant="contained"
@@ -1469,7 +1469,7 @@ const UserManagement: React.FC = () => {
             </MenuItem>
           </FlagGate>
         )}
-        {canUpdatePasswords && selectedUser && (
+        {canUpdatePasswords() && selectedUser && (
           <FlagGate flag="users.showUserPasswordUpdate">
             <MenuItem onClick={() => {
               setPasswordDialogOpen(true);

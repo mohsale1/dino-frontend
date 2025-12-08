@@ -118,6 +118,14 @@ export class StorageManager {
   }
 
   /**
+   * Get user ID from stored user data
+   */
+  static getUserId(): string | null {
+    const userData = this.getUserData();
+    return userData?.id || null;
+  }
+
+  /**
    * Set user permissions with TTL
    */
   static setPermissions(permissions: any): void {

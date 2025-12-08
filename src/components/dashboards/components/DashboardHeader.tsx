@@ -46,9 +46,9 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
     }
     
     // Fallback to permission hooks
-    if (isSuperAdmin()) return 'SuperAdmin Dashboard';
-    if (isAdmin()) return 'Admin Dashboard';
-    if (isOperator()) return 'Operator Dashboard';
+    if (isSuperAdmin) return 'SuperAdmin Dashboard';
+    if (isAdmin) return 'Admin Dashboard';
+    if (isOperator) return 'Operator Dashboard';
     return 'Dashboard';
   };
 
@@ -67,9 +67,9 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
     }
     
     // Fallback to permission hooks
-    if (isSuperAdmin()) return 'Here\'s your system-wide performance overview and analytics.';
-    if (isAdmin()) return 'Here\'s your comprehensive venue overview and analytics.';
-    if (isOperator()) return 'Here\'s your order management and operations overview.';
+    if (isSuperAdmin) return 'Here\'s your system-wide performance overview and analytics.';
+    if (isAdmin) return 'Here\'s your comprehensive venue overview and analytics.';
+    if (isOperator) return 'Here\'s your order management and operations overview.';
     return 'Here\'s your dashboard overview.';
   };
 
@@ -87,8 +87,8 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
     }
     
     // Fallback to permission hooks
-    if (isSuperAdmin()) return 'System-wide Analytics & Management';
-    if (isAdmin()) return 'Real-time Analytics & Management';
+    if (isSuperAdmin) return 'System-wide Analytics & Management';
+    if (isAdmin) return 'Real-time Analytics & Management';
     return 'Order Management & Operations';
   };
 

@@ -167,9 +167,9 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({ stats }) => {
     }
     
     // Fallback to permission hooks
-    if (isSuperAdmin()) return superAdminStats;
-    if (isAdmin()) return adminStats;
-    if (isOperator()) return operatorStats;
+    if (isSuperAdmin) return superAdminStats;
+    if (isAdmin) return adminStats;
+    if (isOperator) return operatorStats;
     return superAdminStats; // fallback
   };
 

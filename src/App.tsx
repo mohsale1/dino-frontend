@@ -28,11 +28,10 @@ import { Suspense } from 'react';
 import { CircularProgress, Box } from '@mui/material';
 
 // Components
-import { ProtectedRoute, RoleProtectedRoute, UserProfile, PermissionSync } from './components/auth';
+import { ProtectedRoute, RoleProtectedRoute, UserProfile, PermissionSync, DynamicRoute } from './components/auth';
 import { Layout, ErrorBoundary, AppInitializer } from './components/common';
 import { NotFoundPage } from './pages/public';
 import DashboardRouter from './components/dashboards/DashboardRouter';
-import { PERMISSIONS } from './types/auth';
 
 import { RUNTIME_CONFIG as config } from './config/runtime';
 import { StorageCleanup } from './utils/storage';
@@ -136,95 +135,95 @@ function App() {
                   </Layout>
                 } />
                 
-                {/* Admin Routes - Role-based access control */}
+                {/* Admin Routes - Dynamic permission-based access control */}
                 <Route path="/admin" element={
                   <Layout>
-                    <RoleProtectedRoute requiredPermissions={[PERMISSIONS.DASHBOARD_VIEW]}>
+                    <DynamicRoute path="/admin">
                       <DashboardRouter />
-                    </RoleProtectedRoute>
+                    </DynamicRoute>
                   </Layout>
                 } />
                 <Route path="/admin/orders" element={
                   <Layout>
-                    <RoleProtectedRoute requiredPermissions={[PERMISSIONS.ORDERS_VIEW]}>
+                    <DynamicRoute path="/admin/orders">
                       <Suspense fallback={<LoadingFallback />}>
                         {React.createElement(LazyComponents.OrdersManagement.component)}
                       </Suspense>
-                    </RoleProtectedRoute>
+                    </DynamicRoute>
                   </Layout>
                 } />
                 <Route path="/admin/menu" element={
                   <Layout>
-                    <RoleProtectedRoute requiredPermissions={[PERMISSIONS.MENU_VIEW]}>
+                    <DynamicRoute path="/admin/menu">
                       <Suspense fallback={<LoadingFallback />}>
                         {React.createElement(LazyComponents.MenuManagement.component)}
                       </Suspense>
-                    </RoleProtectedRoute>
+                    </DynamicRoute>
                   </Layout>
                 } />
                 <Route path="/admin/tables" element={
                   <Layout>
-                    <RoleProtectedRoute requiredPermissions={[PERMISSIONS.TABLES_VIEW]}>
+                    <DynamicRoute path="/admin/tables">
                       <Suspense fallback={<LoadingFallback />}>
                         {React.createElement(LazyComponents.TableManagement.component)}
                       </Suspense>
-                    </RoleProtectedRoute>
+                    </DynamicRoute>
                   </Layout>
                 } />
                 <Route path="/admin/settings" element={
                   <Layout>
-                    <RoleProtectedRoute requiredPermissions={[PERMISSIONS.SETTINGS_VIEW]}>
+                    <DynamicRoute path="/admin/settings">
                       <Suspense fallback={<LoadingFallback />}>
                         {React.createElement(LazyComponents.VenueSettings.component)}
                       </Suspense>
-                    </RoleProtectedRoute>
+                    </DynamicRoute>
                   </Layout>
                 } />
                 <Route path="/admin/menu-template" element={
                   <Layout>
-                    <RoleProtectedRoute requiredPermissions={[PERMISSIONS.TEMPLATE_VIEW]}>
+                    <DynamicRoute path="/admin/menu-template">
                       <Suspense fallback={<LoadingFallback />}>
                         {React.createElement(LazyComponents.MenuTemplateSettings.component)}
                       </Suspense>
-                    </RoleProtectedRoute>
+                    </DynamicRoute>
                   </Layout>
                 } />
                 <Route path="/admin/users" element={
                   <Layout>
-                    <RoleProtectedRoute requiredPermissions={[PERMISSIONS.USERS_VIEW]}>
+                    <DynamicRoute path="/admin/users">
                       <Suspense fallback={<LoadingFallback />}>
                         {React.createElement(LazyComponents.UserManagement.component)}
                       </Suspense>
-                    </RoleProtectedRoute>
+                    </DynamicRoute>
                   </Layout>
                 } />
                 <Route path="/admin/workspace" element={
                   <VenueThemeProvider>
                     <Layout>
-                      <RoleProtectedRoute requiredPermissions={[PERMISSIONS.WORKSPACE_VIEW]}>
+                      <DynamicRoute path="/admin/workspace">
                         <Suspense fallback={<LoadingFallback />}>
                           {React.createElement(LazyComponents.WorkspaceManagement.component)}
                         </Suspense>
-                      </RoleProtectedRoute>
+                      </DynamicRoute>
                     </Layout>
                   </VenueThemeProvider>
                 } />
                 <Route path="/admin/permissions" element={
                   <Layout>
-                    <RoleProtectedRoute requiredPermissions={[PERMISSIONS.USERS_VIEW]}>
+                    <DynamicRoute path="/admin/permissions">
                       <Suspense fallback={<LoadingFallback />}>
                         {React.createElement(LazyComponents.UserPermissionsDashboard.component)}
                       </Suspense>
-                    </RoleProtectedRoute>
+                    </DynamicRoute>
                   </Layout>
                 } />
                 <Route path="/admin/coupons" element={
                   <Layout>
-                    <RoleProtectedRoute requiredPermissions={[PERMISSIONS.COUPONS_MANAGE]}>
+                    <DynamicRoute path="/admin/coupons">
                       <Suspense fallback={<LoadingFallback />}>
                         {React.createElement(LazyComponents.CouponsManagement.component)}
                       </Suspense>
-                    </RoleProtectedRoute>
+                    </DynamicRoute>
                   </Layout>
                 } />
                 

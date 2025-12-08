@@ -100,7 +100,7 @@ const PermissionWrapper: React.FC<PermissionWrapperProps> = ({
   let hasAccess = true;
 
   // SuperAdmin bypass - SuperAdmins have access to everything
-  if (isSuperAdmin()) {
+  if (isSuperAdmin) {
     hasAccess = true;
   } else {
     // Check single permission
@@ -179,63 +179,63 @@ export default PermissionWrapper;
 
 export const CanViewDashboard: React.FC<Omit<PermissionWrapperProps, 'customCheck'>> = (props) => {
   const { canViewDashboard } = usePermissions();
-  return <PermissionWrapper {...props} customCheck={() => canViewDashboard()} />;
+  return <PermissionWrapper {...props} customCheck={() => canViewDashboard} />;
 };
 
 export const CanManageOrders: React.FC<Omit<PermissionWrapperProps, 'customCheck'>> = (props) => {
   const { canManageOrders } = usePermissions();
-  return <PermissionWrapper {...props} customCheck={() => canManageOrders()} />;
+  return <PermissionWrapper {...props} customCheck={() => canManageOrders} />;
 };
 
 export const CanManageMenu: React.FC<Omit<PermissionWrapperProps, 'customCheck'>> = (props) => {
   const { canManageMenu } = usePermissions();
-  return <PermissionWrapper {...props} customCheck={() => canManageMenu()} />;
+  return <PermissionWrapper {...props} customCheck={() => canManageMenu} />;
 };
 
 export const CanManageTables: React.FC<Omit<PermissionWrapperProps, 'customCheck'>> = (props) => {
   const { canManageTables } = usePermissions();
-  return <PermissionWrapper {...props} customCheck={() => canManageTables()} />;
+  return <PermissionWrapper {...props} customCheck={() => canManageTables} />;
 };
 
 export const CanManageUsers: React.FC<Omit<PermissionWrapperProps, 'customCheck'>> = (props) => {
   const { canManageUsers } = usePermissions();
-  return <PermissionWrapper {...props} customCheck={() => canManageUsers()} />;
+  return <PermissionWrapper {...props} customCheck={() => canManageUsers} />;
 };
 
 export const CanManageVenues: React.FC<Omit<PermissionWrapperProps, 'customCheck'>> = (props) => {
   const { canManageVenues } = usePermissions();
-  return <PermissionWrapper {...props} customCheck={() => canManageVenues()} />;
+  return <PermissionWrapper {...props} customCheck={() => canManageVenues} />;
 };
 
 export const CanViewSettings: React.FC<Omit<PermissionWrapperProps, 'customCheck'>> = (props) => {
   const { canViewSettings } = usePermissions();
-  return <PermissionWrapper {...props} customCheck={() => canViewSettings()} />;
+  return <PermissionWrapper {...props} customCheck={() => canViewSettings} />;
 };
 
 // Role-based convenience components
 export const SuperAdminOnly: React.FC<Omit<PermissionWrapperProps, 'customCheck'>> = (props) => {
   const { isSuperAdmin } = usePermissions();
-  return <PermissionWrapper {...props} customCheck={() => isSuperAdmin()} />;
+  return <PermissionWrapper {...props} customCheck={() => isSuperAdmin} />;
 };
 
 export const AdminOnly: React.FC<Omit<PermissionWrapperProps, 'customCheck'>> = (props) => {
   const { isAdmin } = usePermissions();
-  return <PermissionWrapper {...props} customCheck={() => isAdmin()} />;
+  return <PermissionWrapper {...props} customCheck={() => isAdmin} />;
 };
 
 export const OperatorOnly: React.FC<Omit<PermissionWrapperProps, 'customCheck'>> = (props) => {
   const { isOperator } = usePermissions();
-  return <PermissionWrapper {...props} customCheck={() => isOperator()} />;
+  return <PermissionWrapper {...props} customCheck={() => isOperator} />;
 };
 
 export const AdminOrAbove: React.FC<Omit<PermissionWrapperProps, 'customCheck'>> = (props) => {
   const { isSuperAdmin, isAdmin } = usePermissions();
-  return <PermissionWrapper {...props} customCheck={() => isSuperAdmin() || isAdmin()} />;
+  return <PermissionWrapper {...props} customCheck={() => isSuperAdmin || isAdmin} />;
 };
 
 export const OperatorOrAbove: React.FC<Omit<PermissionWrapperProps, 'customCheck'>> = (props) => {
   const { isSuperAdmin, isAdmin, isOperator } = usePermissions();
-  return <PermissionWrapper {...props} customCheck={() => isSuperAdmin() || isAdmin() || isOperator()} />;
+  return <PermissionWrapper {...props} customCheck={() => isSuperAdmin || isAdmin || isOperator} />;
 };
 
 // Higher-order component for wrapping entire components with permission checks
@@ -268,13 +268,13 @@ export const usePermissionCheck = () => {
 
   const checkPermission = (permission: PermissionName): boolean => {
     if (!isAuthenticated || !user) return false;
-    if (isSuperAdmin()) return true;
+    if (isSuperAdmin) return true;
     return hasPermission(permission) || hasBackendPermission(permission);
   };
 
   const checkPermissions = (permissions: PermissionName[], requireAll = false): boolean => {
     if (!isAuthenticated || !user) return false;
-    if (isSuperAdmin()) return true;
+    if (isSuperAdmin) return true;
     
     return requireAll 
       ? permissions.every(p => hasPermission(p) || hasBackendPermission(p))

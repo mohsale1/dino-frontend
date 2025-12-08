@@ -380,7 +380,7 @@ const OrdersManagement: React.FC = () => {
       <Card 
         key={order.id}
         sx={{ 
-          borderRadius:0,
+          borderRadius: 3,
           border: '1px solid',
           borderColor: isUrgent ? 'error.light' : 'divider',
           background: 'linear-gradient(135deg, #ffffff 0%, #fafafa 100%)',

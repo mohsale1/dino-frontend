@@ -120,11 +120,11 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({ className }) => {
         data = await dashboardService.getOperatorDashboard();
       } else {
         // Fallback based on permission hooks
-        if (isSuperAdmin()) {
+        if (isSuperAdmin) {
           data = await dashboardService.getSuperAdminDashboard();
-        } else if (isAdmin()) {
+        } else if (isAdmin) {
           data = await dashboardService.getAdminDashboard();
-        } else if (isOperator()) {
+        } else if (isOperator) {
           data = await dashboardService.getOperatorDashboard();
         } else {
           data = await dashboardService.getAdminDashboard();
@@ -399,7 +399,7 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({ className }) => {
     }
 
     // Load dashboard data for authenticated users
-    if (currentVenue?.id || isSuperAdmin()) {
+    if (currentVenue?.id || isSuperAdmin) {
       loadDashboardData();
     } else {
       setLoading(false);
@@ -427,7 +427,7 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({ className }) => {
   }
 
   // Check if user has permission to view dashboard
-  if (!canViewDashboard()) {
+  if (!canViewDashboard) {
     return (
       <Alert severity="error" sx={{ m: 3 }}>
         You don't have permission to view the dashboard. Contact your administrator for access.
@@ -436,7 +436,7 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({ className }) => {
   }
 
   return (
-    <VenueAssignmentCheck showFullPage={!isSuperAdmin()}>
+    <VenueAssignmentCheck showFullPage={!isSuperAdmin}>
 
       <Box
         className={className}
@@ -501,7 +501,7 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({ className }) => {
             {(() => {
               const backendRole = PermissionService.getBackendRole();
               const detectedRole = backendRole?.name || user?.role || 'unknown';
-              return detectedRole === 'superadmin' || detectedRole === 'super_admin' || detectedRole === 'admin' || isSuperAdmin() || isAdmin();
+              return detectedRole === 'superadmin' || detectedRole === 'super_admin' || detectedRole === 'admin' || isSuperAdmin || isAdmin;
             })() && (
               <>
                 {/* Overview Tab */}
