@@ -29,6 +29,7 @@ import {
   Cancel,
   LocalOffer,
   Palette,
+  AdminPanelSettings,
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
@@ -66,62 +67,105 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
   const { userData, refreshUserData } = useUserData();
   const { isCollapsed, toggleCollapsed, getSidebarWidth } = useSidebar();
   const sidebarFlags = useSidebarFlags();
-  const { getAccessibleModules, userRole } = usePermissions();
+  const { hasPermission, userRole } = usePermissions();
   
   const [statusLoading, setStatusLoading] = useState(false);
 
   // Determine if sidebar should show expanded content
   const showExpanded = !isCollapsed;
   
-  // Icon mapping for modules
-  const iconMap: Record<string, React.ReactNode> = {
-    'dashboard': <Dashboard />,
-    'orders': <Assignment />,
-    'menu': <Restaurant />,
-    'tables': <TableRestaurant />,
-    'coupons': <LocalOffer />,
-    'menu-template': <Palette />,
-    'users': <People />,
-    'permissions': <Security />,
-    'settings': <Settings />,
-    'workspace': <Business />,
-  };
+  // Static navigation items with improved icons - RESTORED CLASSIC SIDEBAR
+  const allNavItems: NavigationItem[] = [
+    {
+      label: 'Dashboard',
+      path: '/admin',
+      icon: <Dashboard sx={{ fontSize: 24 }} />,
+      requiredPermissions: ['dashboard.read'],
+      flagKey: 'showDashboardNav',
+    },
+    {
+      label: 'Orders',
+      path: '/admin/orders',
+      icon: <Assignment sx={{ fontSize: 24 }} />,
+      requiredPermissions: ['order.read'],
+      flagKey: 'showOrdersNav',
+    },
+    {
+      label: 'Menu',
+      path: '/admin/menu',
+      icon: <Restaurant sx={{ fontSize: 24 }} />,
+      requiredPermissions: ['menu.read'],
+      flagKey: 'showMenuNav',
+    },
+    {
+      label: 'Tables',
+      path: '/admin/tables',
+      icon: <TableRestaurant sx={{ fontSize: 24 }} />,
+      requiredPermissions: ['table.read'],
+      flagKey: 'showTablesNav',
+    },
+    {
+      label: 'Coupons',
+      path: '/admin/coupons',
+      icon: <LocalOffer sx={{ fontSize: 24 }} />,
+      requiredPermissions: ['coupon.manage'],
+      flagKey: 'showCouponsNav',
+    },
+    {
+      label: 'Menu Template',
+      path: '/admin/menu-template',
+      icon: <Palette sx={{ fontSize: 24 }} />,
+      requiredPermissions: ['template.read'],
+      flagKey: 'showMenuNav',
+    },
+    {
+      label: 'Users',
+      path: '/admin/users',
+      icon: <People sx={{ fontSize: 24 }} />,
+      requiredPermissions: ['user.read'],
+      flagKey: 'showUsersNav',
+    },
+    {
+      label: 'Permissions',
+      path: '/admin/permissions',
+      icon: <AdminPanelSettings sx={{ fontSize: 24 }} />,
+      requiredPermissions: ['user.read'],
+      flagKey: 'showPermissionsNav',
+    },
+    {
+      label: 'Settings',
+      path: '/admin/settings',
+      icon: <Settings sx={{ fontSize: 24 }} />,
+      requiredPermissions: ['settings.read'],
+      flagKey: 'showSettingsNav',
+    },
+    {
+      label: 'Workspace',
+      path: '/admin/workspace',
+      icon: <Business sx={{ fontSize: 24 }} />,
+      requiredPermissions: ['workspace.read'],
+      requiredRoles: ['superadmin'],
+      flagKey: 'showWorkspaceNav',
+    },
+  ];
 
-  // Flag key mapping for modules
-  const flagKeyMap: Record<string, string> = {
-    'dashboard': 'showDashboardNav',
-    'orders': 'showOrdersNav',
-    'menu': 'showMenuNav',
-    'tables': 'showTablesNav',
-    'coupons': 'showCouponsNav',
-    'menu-template': 'showMenuNav',
-    'users': 'showUsersNav',
-    'permissions': 'showPermissionsNav',
-    'settings': 'showSettingsNav',
-    'workspace': 'showWorkspaceNav',
-  };
+  // Filter navigation items based on permissions and feature flags
+  const adminNavItems = allNavItems.filter(item => {
+    // Check feature flag
+    if (item.flagKey && !sidebarFlags[item.flagKey as keyof typeof sidebarFlags]) {
+      return false;
+    }
 
-  // Get accessible modules from registry (dynamic based on stored permissions)
-  const accessibleModules = getAccessibleModules();
-  
-  // Convert to NavigationItem format and add icons
-  const adminNavItems: NavigationItem[] = accessibleModules
-    .filter(module => !module.children) // Only top-level modules for sidebar
-    .map(module => ({
-      label: module.label,
-      path: module.path,
-      icon: iconMap[module.id] || <Dashboard />,
-      requiredPermissions: module.requiredPermissions,
-      requiredRoles: module.requiredRoles,
-      flagKey: flagKeyMap[module.id],
-    }))
-    .filter(item => {
-      // Check feature flag
-      if (item.flagKey && !sidebarFlags[item.flagKey as keyof typeof sidebarFlags]) {
+    // Check role requirement
+    if (item.requiredRoles && item.requiredRoles.length > 0) {
+      if (!userRole || !item.requiredRoles.includes(userRole.toLowerCase())) {
         return false;
       }
-      return true;
-    });
+    }
+
+    // Check if user has any of the required permissions
+    return item.requiredPermissions.some(permission => hasPermission(permission));
+  });
 
   // Get venue status for display
   const venueStatus = userData?.venue ? {
