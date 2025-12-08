@@ -73,15 +73,26 @@ export const usePermissions = (): UsePermissionsReturn => {
 
   // Check if user has a specific permission
   const hasPermission = useCallback((permission: string): boolean => {
-    if (!user) return false;
+    if (!user) {
+      console.log(`[usePermissions] No user, denying permission: ${permission}`);
+      return false;
+    }
+    
+    // Ensure we have valid permissions array
+    if (!Array.isArray(userPermissions) || userPermissions.length === 0) {
+      console.log(`[usePermissions] No permissions array for user, denying: ${permission}`);
+      return false;
+    }
     
     // Superadmin has all permissions
     if (userRole === 'superadmin' || userRole === 'super_admin') {
+      console.log(`[usePermissions] Superadmin access granted for: ${permission}`);
       return true;
     }
 
     // Check exact match
     if (userPermissions.includes(permission)) {
+      console.log(`[usePermissions] Exact match found for: ${permission}`);
       return true;
     }
 
@@ -89,9 +100,14 @@ export const usePermissions = (): UsePermissionsReturn => {
     const [resource] = permission.split('.');
     const managePermission = `${resource}.manage`;
     if (userPermissions.includes(managePermission)) {
+      console.log(`[usePermissions] Manage permission found for: ${permission} via ${managePermission}`);
       return true;
     }
 
+    console.log(`[usePermissions] Permission denied: ${permission}`, {
+      userPermissions,
+      userRole,
+    });
     return false;
   }, [user, userPermissions, userRole]);
 

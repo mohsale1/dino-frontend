@@ -67,9 +67,19 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
   const { userData, refreshUserData } = useUserData();
   const { isCollapsed, toggleCollapsed, getSidebarWidth } = useSidebar();
   const sidebarFlags = useSidebarFlags();
-  const { hasPermission, userRole } = usePermissions();
+  const { hasPermission, userRole, userPermissions } = usePermissions();
   
   const [statusLoading, setStatusLoading] = useState(false);
+  const [showDebugPanel, setShowDebugPanel] = useState(false);
+
+  // Debug: Log permissions on mount and when they change
+  React.useEffect(() => {
+    console.log('[Sidebar] Permissions loaded:', {
+      userRole,
+      userPermissions,
+      permissionCount: userPermissions?.length || 0,
+    });
+  }, [userRole, userPermissions]);
 
   // Determine if sidebar should show expanded content
   const showExpanded = !isCollapsed;
@@ -164,7 +174,24 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
     }
 
     // Check if user has any of the required permissions
-    return item.requiredPermissions.some(permission => hasPermission(permission));
+    // Use every() instead of some() to ensure ALL permissions are present
+    const hasRequiredPermissions = item.requiredPermissions.every(permission => {
+      const result = hasPermission(permission);
+      
+      // Debug logging - remove after fixing
+      if (item.label === 'Coupons' || item.label === 'Menu Template') {
+        console.log(`[Sidebar] Checking ${item.label}:`, {
+          permission,
+          hasPermission: result,
+          userRole,
+          allUserPermissions: userPermissions,
+        });
+      }
+      
+      return result;
+    });
+
+    return hasRequiredPermissions;
   });
 
   // Get venue status for display
@@ -631,6 +658,44 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
         </Box>
       </Box>
 
+      {/* Debug Panel - Click to toggle */}
+      {showExpanded && (
+        <Box
+          onClick={() => setShowDebugPanel(!showDebugPanel)}
+          sx={{
+            p: 1,
+            borderTop: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+            cursor: 'pointer',
+            mt: 'auto',
+            '&:hover': {
+              backgroundColor: alpha(theme.palette.primary.main, 0.05),
+            },
+          }}
+        >
+          <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.65rem' }}>
+            {showDebugPanel ? '🔍 Hide Debug Info' : '🔍 Show Debug Info'}
+          </Typography>
+          
+          <Collapse in={showDebugPanel}>
+            <Box sx={{ mt: 1, p: 1, backgroundColor: alpha(theme.palette.background.default, 0.5), borderRadius: 1 }}>
+              <Typography variant="caption" sx={{ display: 'block', fontWeight: 600, mb: 0.5 }}>
+                Role: {userRole || 'None'}
+              </Typography>
+              <Typography variant="caption" sx={{ display: 'block', fontWeight: 600, mb: 0.5 }}>
+                Permissions ({userPermissions?.length || 0}):
+              </Typography>
+              <Box sx={{ maxHeight: 150, overflowY: 'auto', fontSize: '0.6rem' }}>
+                {userPermissions?.map((perm, idx) => (
+                  <Typography key={idx} variant="caption" sx={{ display: 'block', fontSize: '0.6rem' }}>
+                    • {perm}
+                  </Typography>
+                )) || <Typography variant="caption">No permissions</Typography>}
+              </Box>
+            </Box>
+          </Collapse>
+        </Box>
+      )}
+
       {/* Dino Victory Image at Bottom Center */}
       <Box
         sx={{
@@ -640,7 +705,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
           alignItems: 'center',
           p: showExpanded ? 1 : 0.5,
           borderTop: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
-          mt: 'auto',
         }}
       >
         <Box
