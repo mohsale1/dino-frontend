@@ -77,6 +77,9 @@ const UserPermissionsDashboard: React.FC = () => {
     usersByRole: {} as Record<string, number>,
     recentLogins: 0,
   });
+  
+  // Cache for roles with permissions - single API call
+  const [rolesCache, setRolesCache] = useState<Map<string, any>>(new Map());
 
   // Function to refresh users data
   const refreshUsers = async () => {
@@ -90,29 +93,30 @@ const UserPermissionsDashboard: React.FC = () => {
       setLoading(true);
       setError(null);
       
-      // Get users for the current venue with their permissions using userService
+      // OPTIMIZATION: Fetch all roles with permissions once (single API call)
+      const { roleService } = await import('../../services/auth/roleService');
+      const rolesWithPermissions = await roleService.getRolesWithPermissions();
+      
+      // Build roles cache map for quick lookup
+      const rolesMap = new Map();
+      rolesWithPermissions.forEach(role => {
+        rolesMap.set(role.id, role);
+        rolesMap.set(role.name, role); // Also map by name for flexibility
+      });
+      setRolesCache(rolesMap);
+      
+      // Get users for the current venue
       const response = await userService.getUsersByVenueId(userData.venue.id);
       
       if (response.success && response.data) {
-        const mappedUsers = await Promise.all(response.data.map(async (user: any) => {
+        // Map users with permissions from roles cache (no additional API calls needed)
+        const mappedUsers = response.data.map((user: any) => {
           let userPermissions: any[] = [];
           
-          try {
-            // Fetch permissions for each specific user from the backend
-            const permResponse = await apiService.get<{ permissions: any[], role: any }>(`/users/${user.id}/permissions`);
-            if (permResponse.success && permResponse.data && permResponse.data.permissions) {
-              userPermissions = permResponse.data.permissions;
-            }
-          } catch (error) {
-            // If user-specific permissions fail, try to get role-based permissions
-            try {
-              const roleResponse = await apiService.get<{ permissions: any[] }>(`/roles/${user.role}/permissions`);
-              if (roleResponse.success && roleResponse.data && roleResponse.data.permissions) {
-                userPermissions = roleResponse.data.permissions;
-              }
-            } catch (roleError) {
-              userPermissions = [];
-            }
+          // Get permissions from roles cache using role_id or role name
+          const roleData = rolesMap.get(user.role_id) || rolesMap.get(user.role);
+          if (roleData && roleData.permissions) {
+            userPermissions = roleData.permissions;
           }
           
           return {
@@ -123,7 +127,7 @@ const UserPermissionsDashboard: React.FC = () => {
             isActive: user.is_active,
             permissions: userPermissions,
           };
-        }));
+        });
         setUsers(mappedUsers);
       } else {
         setUsers([]);
@@ -152,29 +156,31 @@ const UserPermissionsDashboard: React.FC = () => {
       try {
         setLoading(true);
         setError(null);
-        // Get users for the current venue with their permissions using userService
+        
+        // OPTIMIZATION: Fetch all roles with permissions once (single API call)
+        const { roleService } = await import('../../services/auth/roleService');
+        const rolesWithPermissions = await roleService.getRolesWithPermissions();
+        
+        // Build roles cache map for quick lookup
+        const rolesMap = new Map();
+        rolesWithPermissions.forEach(role => {
+          rolesMap.set(role.id, role);
+          rolesMap.set(role.name, role); // Also map by name for flexibility
+        });
+        setRolesCache(rolesMap);
+        
+        // Get users for the current venue
         const response = await userService.getUsersByVenueId(userData.venue.id);
         
         if (response.success && response.data) {
-          const mappedUsers = await Promise.all(response.data.map(async (user: any) => {
+          // Map users with permissions from roles cache (no additional API calls needed)
+          const mappedUsers = response.data.map((user: any) => {
             let userPermissions: any[] = [];
             
-            try {
-              // Fetch permissions for each specific user from the backend
-              const permResponse = await apiService.get<{ permissions: any[], role: any }>(`/users/${user.id}/permissions`);
-              if (permResponse.success && permResponse.data && permResponse.data.permissions) {
-                userPermissions = permResponse.data.permissions;
-              }
-            } catch (error) {
-              // If user-specific permissions fail, try to get role-based permissions
-              try {
-                const roleResponse = await apiService.get<{ permissions: any[] }>(`/roles/${user.role}/permissions`);
-                if (roleResponse.success && roleResponse.data && roleResponse.data.permissions) {
-                  userPermissions = roleResponse.data.permissions;
-                }
-              } catch (roleError) {
-                userPermissions = [];
-              }
+            // Get permissions from roles cache using role_id or role name
+            const roleData = rolesMap.get(user.role_id) || rolesMap.get(user.role);
+            if (roleData && roleData.permissions) {
+              userPermissions = roleData.permissions;
             }
             
             return {
@@ -185,7 +191,7 @@ const UserPermissionsDashboard: React.FC = () => {
               isActive: user.is_active,
               permissions: userPermissions,
             };
-          }));
+          });
           setUsers(mappedUsers);
         } else {
           setUsers([]);
@@ -663,7 +669,7 @@ const UserPermissionsDashboard: React.FC = () => {
                   value: userStats.recentLogins,
                   color: '#FF9800',
                   icon: <Security />,
-                  description: 'Last 7 days'
+                  description: 'Last 24 hours'
                 },
                 {
                   label: 'Role Types',
@@ -744,8 +750,20 @@ const UserPermissionsDashboard: React.FC = () => {
           </Box>
 
           {/* Filters and Search */}
-          <Card sx={{ mb: 4, borderRadius: 2 }}>
-            <CardContent>
+          <Card 
+            sx={{ 
+              mb: 4, 
+              borderRadius: 2,
+              border: '1px solid',
+              borderColor: 'divider',
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)',
+              transition: 'all 0.3s ease',
+              '&:hover': {
+                boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08)',
+              },
+            }}
+          >
+            <CardContent sx={{ p: 3 }}>
               <Grid container spacing={3} alignItems="center">
                 <Grid item xs={12} md={4}>
                   <TextField
@@ -756,9 +774,31 @@ const UserPermissionsDashboard: React.FC = () => {
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
-                          <Search />
+                          <Search sx={{ color: 'text.secondary' }} />
                         </InputAdornment>
                       ),
+                    }}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        borderRadius: 2,
+                        backgroundColor: 'background.paper',
+                        transition: 'all 0.3s ease',
+                        '&:hover': {
+                          backgroundColor: 'action.hover',
+                        },
+                        '&.Mui-focused': {
+                          backgroundColor: 'background.paper',
+                          boxShadow: '0 0 0 2px rgba(33, 150, 243, 0.2)',
+                        },
+                      },
+                      '& .MuiInputBase-input': {
+                        fontSize: '0.875rem',
+                        py: 1.5,
+                      },
+                      '& .MuiInputBase-input::placeholder': {
+                        color: 'text.secondary',
+                        opacity: 0.7,
+                      },
                     }}
                   />
                 </Grid>
@@ -770,6 +810,28 @@ const UserPermissionsDashboard: React.FC = () => {
                     value={filterRole}
                     onChange={(e) => setFilterRole(e.target.value)}
                     SelectProps={{ native: true }}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        borderRadius: 2,
+                        backgroundColor: 'background.paper',
+                        transition: 'all 0.3s ease',
+                        '&:hover': {
+                          backgroundColor: 'action.hover',
+                        },
+                        '&.Mui-focused': {
+                          backgroundColor: 'background.paper',
+                          boxShadow: '0 0 0 2px rgba(33, 150, 243, 0.2)',
+                        },
+                      },
+                      '& .MuiInputLabel-root': {
+                        fontSize: '0.875rem',
+                        fontWeight: 500,
+                      },
+                      '& .MuiSelect-select': {
+                        fontSize: '0.875rem',
+                        py: 1.5,
+                      },
+                    }}
                   >
                     <option value="all">All Roles</option>
                     <option value={ROLES.SUPERADMIN}>Super Admin</option>
@@ -783,9 +845,25 @@ const UserPermissionsDashboard: React.FC = () => {
                       <Switch
                         checked={showInactive}
                         onChange={(e) => setShowInactive(e.target.checked)}
+                        sx={{
+                          '& .MuiSwitch-switchBase.Mui-checked': {
+                            color: 'primary.main',
+                          },
+                          '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                            backgroundColor: 'primary.main',
+                          },
+                        }}
                       />
                     }
                     label="Show Inactive Users"
+                    sx={{
+                      '& .MuiFormControlLabel-label': {
+                        fontSize: '0.875rem',
+                        fontWeight: 500,
+                        color: 'text.primary',
+                      },
+                      ml: 0,
+                    }}
                   />
                 </Grid>
                 <Grid item xs={12} md={2}>
@@ -818,7 +896,22 @@ const UserPermissionsDashboard: React.FC = () => {
                       }}
                       sx={{ 
                         minWidth: 'auto',
-                        whiteSpace: 'nowrap'
+                        whiteSpace: 'nowrap',
+                        borderRadius: 2,
+                        borderColor: 'divider',
+                        color: 'text.primary',
+                        fontSize: '0.875rem',
+                        fontWeight: 500,
+                        px: 2.5,
+                        py: 1.5,
+                        textTransform: 'none',
+                        transition: 'all 0.3s ease',
+                        '&:hover': {
+                          borderColor: 'primary.main',
+                          backgroundColor: 'rgba(33, 150, 243, 0.04)',
+                          transform: 'translateY(-1px)',
+                          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+                        },
                       }}
                     >
                       My Permissions

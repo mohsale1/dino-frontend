@@ -119,6 +119,43 @@ class RoleService {
     };
     return colors[roleName.toLowerCase()] || '#6b7280';
   }
+
+  /**
+   * Get all roles with their permissions - optimized single API call
+   */
+  async getRolesWithPermissions(): Promise<RoleWithPermissions[]> {
+    try {
+      const response = await apiService.get<RoleWithPermissions[]>('/roles/with-permissions');
+      
+      if (response.success && response.data) {
+        return response.data;
+      }
+      
+      return [];
+    } catch (error) {
+      console.error('Error fetching roles with permissions:', error);
+      return [];
+    }
+  }
+}
+
+export interface RoleWithPermissions {
+  id: string;
+  name: string;
+  displayName: string;
+  description: string;
+  permissions: Permission[];
+  user_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Permission {
+  id: string;
+  name: string;
+  resource: string;
+  action: string;
+  description: string;
 }
 
 export const roleService = new RoleService();
