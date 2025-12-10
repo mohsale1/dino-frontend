@@ -16,7 +16,6 @@ class PermissionService {
     try {
       const userId = StorageManager.getUserId();
       if (!userId) {
-        console.warn('No user ID found, cannot fetch permissions');
         return null;
       }
 
@@ -52,8 +51,6 @@ class PermissionService {
 
       return null;
     } catch (error) {
-      console.error('Error fetching user permissions:', error);
-      // Fallback to cached/stored permissions
       return this.getStoredPermissions();
     }
   }
@@ -71,7 +68,7 @@ class PermissionService {
         };
       }
     } catch (error) {
-      console.error('Error getting stored permissions:', error);
+      
     }
     return null;
   }
@@ -375,7 +372,7 @@ class PermissionService {
         return [];
       }
     } catch (error) {
-      console.error('Error fetching venue users:', error);
+      
       return [];
     }
   }
@@ -429,7 +426,7 @@ class PermissionService {
         recentLogins
       };
     } catch (error) {
-      console.error('Error getting user statistics:', error);
+      
       return {
         totalUsers: 0,
         activeUsers: 0,

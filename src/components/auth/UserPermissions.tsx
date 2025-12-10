@@ -90,8 +90,7 @@ const UserPermissions: React.FC = () => {
     }
   ];
 
-  // Debug: Log permission structure for troubleshooting
-  if (process.env.NODE_ENV === 'development') {  }
+
 
   const getActionIcon = (action: string) => {
     switch (action) {

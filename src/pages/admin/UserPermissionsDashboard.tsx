@@ -93,10 +93,17 @@ const UserPermissionsDashboard: React.FC = () => {
       const response = await userService.getUsersByVenueId(userData.venue.id);
       
       if (response.success && response.data) {
-        // Map API response to match expected format and add permissions based on role
-        const mappedUsers = response.data.map((user: any) => {
-          // Get permissions for the user's role
-          const rolePermissions = PermissionService.getUserPermissionsFromRole(user.role || 'operator');
+        const mappedUsers = await Promise.all(response.data.map(async (user: any) => {
+          let userPermissions: any[] = [];
+          
+          try {
+            const permResponse = await PermissionService.fetchUserPermissions(false);
+            if (permResponse && permResponse.permissions) {
+              userPermissions = permResponse.permissions;
+            }
+          } catch (error) {
+            userPermissions = [];
+          }
           
           return {
             ...user,
@@ -104,9 +111,9 @@ const UserPermissionsDashboard: React.FC = () => {
             lastName: user.last_name,
             lastLogin: user.last_login,
             isActive: user.is_active,
-            permissions: rolePermissions, // Add permissions based on role
+            permissions: userPermissions,
           };
-        });
+        }));
         setUsers(mappedUsers);
       } else {
         setUsers([]);
@@ -139,10 +146,17 @@ const UserPermissionsDashboard: React.FC = () => {
         const response = await userService.getUsersByVenueId(userData.venue.id);
         
         if (response.success && response.data) {
-          // Map API response to match expected format and add permissions based on role
-          const mappedUsers = response.data.map((user: any) => {
-            // Get permissions for the user's role
-            const rolePermissions = PermissionService.getUserPermissionsFromRole(user.role || 'operator');
+          const mappedUsers = await Promise.all(response.data.map(async (user: any) => {
+            let userPermissions: any[] = [];
+            
+            try {
+              const permResponse = await PermissionService.fetchUserPermissions(false);
+              if (permResponse && permResponse.permissions) {
+                userPermissions = permResponse.permissions;
+              }
+            } catch (error) {
+              userPermissions = [];
+            }
             
             return {
               ...user,
@@ -150,9 +164,9 @@ const UserPermissionsDashboard: React.FC = () => {
               lastName: user.last_name,
               lastLogin: user.last_login,
               isActive: user.is_active,
-              permissions: rolePermissions, // Add permissions based on role
+              permissions: userPermissions,
             };
-          });
+          }));
           setUsers(mappedUsers);
         } else {
           setUsers([]);
@@ -430,7 +444,6 @@ const UserPermissionsDashboard: React.FC = () => {
     );
   }
 
-  // Debug logging
   if (!canViewAllUsers) {
     return (
       <Box sx={{ pt: { xs: '56px', sm: '64px' }, py: 4, width: '100%' }}>

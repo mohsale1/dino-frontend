@@ -125,7 +125,6 @@ const UserManagement: React.FC = () => {
   // Use ref to store roles immediately without waiting for state update
   const rolesRef = useRef<Role[]>([]);
 
-  // Debug: Monitor roles state changes
   useEffect(() => {
     rolesRef.current = roles; // Keep ref in sync
   }, [roles]);
@@ -192,7 +191,7 @@ const UserManagement: React.FC = () => {
         setUsers([]);
       }
     } catch (error: any) {
-      // API failed - show error alert but keep UI visible      setUsers([]);
+      setUsers([]);
       setError('Network error. Please check your connection.');
     } finally {
       setLoading(false);
@@ -226,32 +225,27 @@ const UserManagement: React.FC = () => {
     try {
       const response = await roleService.getRoles({ page: 1, page_size: 100 });
       
-      if (response) {
-        // Handle both direct array and paginated response
+      if (response && response.data) {
         let rolesArray: Role[] = [];
         
-        if (Array.isArray(response)) {
-          // Direct array response
+        if (Array.isArray(response.data)) {
+          rolesArray = response.data;
+        } else if (Array.isArray(response)) {
           rolesArray = response;
         }
         
-        // Filter out superadmin role from the list
         rolesArray = rolesArray.filter(role => role.name.toLowerCase() !== 'superadmin');
         
         if (rolesArray.length > 0) {
           setRoles(rolesArray);
-          rolesRef.current = rolesArray; // Update ref immediately
+          rolesRef.current = rolesArray;
           return rolesArray;
-        } else {
-          setRoles([]);
-          rolesRef.current = [];
-          return [];
         }
-      } else {
-        setRoles([]);
-        rolesRef.current = [];
-        return [];
       }
+      
+      setRoles([]);
+      rolesRef.current = [];
+      return [];
     } catch (error) {
       setRoles([]);
       rolesRef.current = [];
@@ -701,7 +695,7 @@ const UserManagement: React.FC = () => {
   const canCreateUsers = isSuperAdmin || hasPermission(PERMISSIONS.USERS_CREATE);
   const canEditUsers = hasPermission(PERMISSIONS.USERS_UPDATE);
   const canDeleteUsers = hasPermission(PERMISSIONS.USERS_DELETE);
-  const canUpdatePasswords = isAdmin || isSuperAdmin;
+  const canUpdatePasswords = isAdmin() || isSuperAdmin();
 
   // Don't block UI with loading or error states
   // Show page immediately with empty users if API fails
@@ -1469,7 +1463,7 @@ const UserManagement: React.FC = () => {
             </MenuItem>
           </FlagGate>
         )}
-        {canUpdatePasswords() && selectedUser && (
+        {canUpdatePasswords && selectedUser && (
           <FlagGate flag="users.showUserPasswordUpdate">
             <MenuItem onClick={() => {
               setPasswordDialogOpen(true);

@@ -215,14 +215,13 @@ const MenuPage: React.FC = () => {
       setVenueTheme(restaurant.theme);
     }
     
-    // Check if venue has a menu template configured
-    if (restaurant?.menu_template) {      const config = getTemplateConfig(restaurant.menu_template);
+    if (restaurant?.menu_template) {
+      const config = getTemplateConfig(restaurant.menu_template);
       setTemplateConfig(config);
       setUseTemplateRenderer(true);
     } else {
       setUseTemplateRenderer(false);
     }
-    // If no theme is in the backend, it will keep the default 'pet' theme from the context.
   }, [restaurant, setVenueTheme]);
 
   const getMenuItemImage = (item: MenuItemType) => {
@@ -389,7 +388,6 @@ const MenuPage: React.FC = () => {
     }))
     .filter(group => group.items.length > 0);
 
-  // Debug the grouping
   // Set initial active category
   useEffect(() => {
     if (groupedMenuItems.length > 0 && !activeCategory) {
@@ -455,7 +453,6 @@ const MenuPage: React.FC = () => {
     setSortBy(SORT_OPTIONS.POPULAR);
   };
 
-  // Debug info (remove in production)
   // Loading state
   if (loading) {
     return (
@@ -477,13 +474,6 @@ const MenuPage: React.FC = () => {
             message="Loading delicious menu items for you..."
           />
           
-          {/* Debug info - remove in production */}
-          <Box sx={{ mt: 4, p: 2, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 1 }}>
-            <Typography variant="caption" color="text.secondary">
-              Debug: venueId={venueId}, tableId={tableId}, restaurant={!!restaurant}, 
-              categories={categories.length}, menuItems={menuItems.length}
-            </Typography>
-          </Box>
         </Container>
       </Box>
     );
