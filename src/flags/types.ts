@@ -179,6 +179,7 @@ export interface SidebarFlags extends BaseFlags {
   showPermissionsNav: boolean;
   showSettingsNav: boolean;
   showWorkspaceNav: boolean;
+  showCodeNav: boolean;
   
   // Sidebar features
   showVenueStatus: boolean;

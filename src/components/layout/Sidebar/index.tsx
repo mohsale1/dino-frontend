@@ -30,6 +30,7 @@ import {
   LocalOffer,
   Palette,
   AdminPanelSettings,
+  Code,
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
@@ -155,6 +156,14 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
       requiredPermissions: ['workspace.read'],
       requiredRoles: ['superadmin'],
       flagKey: 'showWorkspaceNav',
+    },
+    {
+      label: 'Code',
+      path: '/admin/code',
+      icon: <Code sx={{ fontSize: 24 }} />,
+      requiredPermissions: [],
+      requiredRoles: ['dinos'],
+      flagKey: 'showCodeNav',
     },
   ];
 

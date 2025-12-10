@@ -9,6 +9,7 @@ export { tableService } from './tableService';
 export { venueService } from './venueService';
 export { workspaceService } from './workspaceService';
 export { dashboardService } from './dashboardService';
+export { codeService } from './codeService';
 
 // Export types for components
 export type { 

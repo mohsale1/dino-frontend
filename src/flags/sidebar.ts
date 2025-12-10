@@ -23,6 +23,7 @@ export const sidebarFlags: SidebarFlags = {
   showPermissionsNav: true,        // Shows "Permissions" navigation item
   showSettingsNav: true,           // Shows "Settings" navigation item
   showWorkspaceNav: true,          // Shows "Workspace" navigation item (SuperAdmin only)
+  showCodeNav: true,               // Shows "Code" navigation item (Dinos role only)
 
   // Sidebar features - Control sidebar functionality
   showVenueStatus: true,           // Shows venue status toggle and information
@@ -48,6 +49,7 @@ export const sidebarFlags: SidebarFlags = {
  * showPermissionsNav: Advanced permission and role management
  * showSettingsNav: Venue and system settings
  * showWorkspaceNav: Workspace management (SuperAdmin feature)
+ * showCodeNav: Code management (Dinos role only)
  */
 
 /**

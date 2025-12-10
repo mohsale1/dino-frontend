@@ -226,6 +226,15 @@ function App() {
                     </DynamicRoute>
                   </Layout>
                 } />
+                <Route path="/admin/code" element={
+                  <Layout>
+                    <DynamicRoute path="/admin/code">
+                      <Suspense fallback={<LoadingFallback />}>
+                        {React.createElement(LazyComponents.CodeManagement.component)}
+                      </Suspense>
+                    </DynamicRoute>
+                  </Layout>
+                } />
                 
                 {/* Standalone 404 Page - No Layout */}
                 <Route path="*" element={<NotFoundPage />} />

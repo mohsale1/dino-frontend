@@ -369,6 +369,12 @@ export const LazyComponents = {
     'CouponsManagement',
     { skeleton: PageSkeleton }
   ),
+  
+  CodeManagement: lazyManager.createLazyComponent(
+    () => import('../../pages/admin/CodeManagement'),
+    'CodeManagement',
+    { skeleton: PageSkeleton }
+  ),
 
   // Customer Pages
   MenuPage: lazyManager.createLazyComponent(
