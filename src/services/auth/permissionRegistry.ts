@@ -201,6 +201,14 @@ export class PermissionRegistry {
         requiredPermissions: ['workspace.read'],
         requiredRoles: ['superadmin'],
         description: 'Workspace and multi-venue management'
+      },
+      {
+        id: 'code',
+        label: 'Code',
+        path: '/admin/code',
+        requiredPermissions: [], // No permissions required, only role check
+        requiredRoles: ['dinos'],
+        description: 'Code management (Dinos role only)'
       }
     ];
 
@@ -434,9 +442,17 @@ export class PermissionRegistry {
         if (!userRole || !module.requiredRoles.includes(userRole.toLowerCase())) {
           return false;
         }
+        // If role matches and no permissions required, grant access
+        if (module.requiredPermissions.length === 0) {
+          return true;
+        }
       }
 
-      // Check if user has any of the required permissions
+      // Check if user has any of the required permissions (if any are required)
+      if (module.requiredPermissions.length === 0) {
+        return true; // No permissions required
+      }
+      
       return module.requiredPermissions.some(requiredPerm => 
         this.hasPermission(userPermissions, requiredPerm)
       );
@@ -479,9 +495,17 @@ export class PermissionRegistry {
       if (!userRole || !module.requiredRoles.includes(userRole.toLowerCase())) {
         return false;
       }
+      // If role matches and no permissions required, grant access
+      if (module.requiredPermissions.length === 0) {
+        return true;
+      }
     }
 
-    // Check permissions
+    // Check permissions (if any are required)
+    if (module.requiredPermissions.length === 0) {
+      return true; // No permissions required
+    }
+    
     return module.requiredPermissions.some(requiredPerm => 
       this.hasPermission(userPermissions, requiredPerm)
     );
