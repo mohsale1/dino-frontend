@@ -1059,7 +1059,7 @@ const VenueSettings: React.FC = () => {
                         fontSize: '2rem'
                       }}
                     >
-                      🦕
+                      <Restaurant sx={{ fontSize: '2.5rem', color: 'white' }} />
                     </Avatar>
                     <Button
                       variant='contained'

@@ -1,9 +1,9 @@
 import React, { ReactNode } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { Box, CircularProgress, Typography, Button } from '@mui/material';
-import { Lock, ArrowBack } from '@mui/icons-material';
+import { Box, CircularProgress, Typography } from '@mui/material';
 import { useAuth } from '../../contexts/AuthContext';
 import { /* ROLE_NAMES, */ isAdminLevel } from '../../constants/roles';
+import { GenericErrorPage } from '../errors';
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -73,53 +73,13 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   // Show access denied if user doesn't have required permissions
   if (!hasAccess) {
     return (
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          minHeight: '50vh',
-          gap: 3,
-          p: 3,
-          textAlign: 'center'
-        }}
-      >
-        <Lock sx={{ fontSize: 80, color: 'error.main' }} />
-        
-        <Box>
-          <Typography variant="h4" color="error" gutterBottom>
-            Access Denied
-          </Typography>
-          <Typography variant="h6" color="text.secondary" gutterBottom>
-            You don't have permission to access this page
-          </Typography>
-          <Typography variant="body1" color="text.secondary">
-            {accessMessage}
-          </Typography>
-        </Box>
-
-        <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
-          <Button
-            variant="outlined"
-            startIcon={<ArrowBack />}
-            onClick={() => window.history.back()}
-          >
-            Go Back
-          </Button>
-          
-          <Button
-            variant="contained"
-            onClick={() => window.location.href = '/dashboard'}
-          >
-            Go to Dashboard
-          </Button>
-        </Box>
-
-        <Typography variant="caption" color="text.secondary" sx={{ mt: 2 }}>
-          {`Current role: ${user.role}`}
-        </Typography>
-      </Box>
+      <GenericErrorPage
+        type="access-denied"
+        message={accessMessage}
+        showRetry={false}
+        showGoBack={true}
+        showGoHome={true}
+      />
     );
   }
 

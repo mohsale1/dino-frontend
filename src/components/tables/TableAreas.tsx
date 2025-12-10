@@ -316,12 +316,20 @@ const TableAreas: React.FC<TableAreasProps> = ({
                         </Typography>
                       </Box>
                       
-                      {/* Status Chip */}
+                      {/* Status Chip - Show active if area has active tables */}
                       <Box sx={{ textAlign: 'center' }}>
                         <Chip
-                          label={area.active ? 'Active' : 'Inactive'}
+                          label={
+                            tablesInArea.some(t => t.is_active) 
+                              ? 'Active' 
+                              : (area.active ? 'Active' : 'Inactive')
+                          }
                           size="small"
-                          color={area.active ? 'success' : 'default'}
+                          color={
+                            tablesInArea.some(t => t.is_active) 
+                              ? 'success' 
+                              : (area.active ? 'success' : 'default')
+                          }
                           variant="outlined"
                           sx={{
                             fontWeight: 600,

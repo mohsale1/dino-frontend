@@ -125,93 +125,48 @@ export function useMenuData(options: UseMenuDataOptions = {}): UseMenuDataResult
     return '🍽️';
   };
 
-  // Mock data for demo/testing when API fails
-  const getMockData = useCallback(() => {
-    const mockCategories: CategoryType[] = [
-      { id: 'cat-1', name: 'Starters', description: 'Delicious appetizers', order: 1, active: true, icon: '🥗', itemCount: 3 },
-      { id: 'cat-2', name: 'Main Course', description: 'Hearty main dishes', order: 2, active: true, icon: '🍛', itemCount: 4 },
-      { id: 'cat-3', name: 'Desserts', description: 'Sweet treats', order: 3, active: true, icon: '🍰', itemCount: 2 },
-      { id: 'cat-4', name: 'Beverages', description: 'Refreshing drinks', order: 4, active: true, icon: '🥤', itemCount: 3 },
-    ];
-
-    const mockMenuItems: MenuItemType[] = [
-      // Starters
-      { id: '1', name: 'Spring Rolls', description: 'Crispy vegetable spring rolls served with sweet chili sauce', price: 149, category: 'cat-1', image: 'https://images.unsplash.com/photo-1529006557810-274b9b2fc783?w=400', isVeg: true, rating: 4.5, reviewCount: 120, preparationTime: 15, isAvailable: true, isPopular: true },
-      { id: '2', name: 'Chicken Wings', description: 'Spicy buffalo wings with ranch dip', price: 249, category: 'cat-1', image: 'https://images.unsplash.com/photo-1608039829572-78524f79c4c7?w=400', isVeg: false, rating: 4.7, reviewCount: 95, preparationTime: 20, isAvailable: true, spicyLevel: 2 },
-      { id: '3', name: 'Paneer Tikka', description: 'Grilled cottage cheese with Indian spices', price: 199, category: 'cat-1', image: 'https://images.unsplash.com/photo-1567188040759-fb8a883dc6d8?w=400', isVeg: true, rating: 4.6, reviewCount: 150, preparationTime: 18, isAvailable: true, isPopular: true, spicyLevel: 1 },
-      
-      // Main Course
-      { id: '4', name: 'Margherita Pizza', description: 'Classic pizza with fresh mozzarella and basil', price: 299, category: 'cat-2', image: 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=400', isVeg: true, rating: 4.8, reviewCount: 200, preparationTime: 25, isAvailable: true, isPopular: true },
-      { id: '5', name: 'Butter Chicken', description: 'Tender chicken in creamy tomato gravy', price: 349, category: 'cat-2', image: 'https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?w=400', isVeg: false, rating: 4.9, reviewCount: 180, preparationTime: 30, isAvailable: true, isPopular: true, spicyLevel: 1 },
-      { id: '6', name: 'Veg Biryani', description: 'Aromatic basmati rice with mixed vegetables', price: 249, category: 'cat-2', image: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400', isVeg: true, rating: 4.5, reviewCount: 140, preparationTime: 28, isAvailable: true },
-      { id: '7', name: 'Grilled Salmon', description: 'Fresh salmon fillet with lemon butter sauce', price: 499, category: 'cat-2', image: 'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=400', isVeg: false, rating: 4.7, reviewCount: 85, preparationTime: 25, isAvailable: true, isNew: true },
-      
-      // Desserts
-      { id: '8', name: 'Chocolate Lava Cake', description: 'Warm chocolate cake with molten center', price: 149, category: 'cat-3', image: 'https://images.unsplash.com/photo-1624353365286-3f8d62daad51?w=400', isVeg: true, rating: 4.9, reviewCount: 220, preparationTime: 15, isAvailable: true, isPopular: true },
-      { id: '9', name: 'Tiramisu', description: 'Classic Italian coffee-flavored dessert', price: 179, category: 'cat-3', image: 'https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=400', isVeg: true, rating: 4.6, reviewCount: 95, preparationTime: 10, isAvailable: true },
-      
-      // Beverages
-      { id: '10', name: 'Fresh Lime Soda', description: 'Refreshing lime soda with mint', price: 79, category: 'cat-4', image: 'https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=400', isVeg: true, rating: 4.3, reviewCount: 110, preparationTime: 5, isAvailable: true },
-      { id: '11', name: 'Mango Lassi', description: 'Creamy yogurt drink with fresh mango', price: 99, category: 'cat-4', image: 'https://images.unsplash.com/photo-1623065422902-30a2d299bbe4?w=400', isVeg: true, rating: 4.7, reviewCount: 160, preparationTime: 5, isAvailable: true, isPopular: true },
-      { id: '12', name: 'Masala Chai', description: 'Traditional Indian spiced tea', price: 49, category: 'cat-4', image: 'https://images.unsplash.com/photo-1597318130878-aa7d6e0c7b26?w=400', isVeg: true, rating: 4.5, reviewCount: 200, preparationTime: 5, isAvailable: true },
-    ];
-
-    const mockRestaurant: Venue = {
-      id: venueId || 'demo-venue',
-      name: 'Demo Restaurant',
-      description: 'Experience delicious food with our demo menu',
-      location: {
-        address: '123 Demo Street',
-        city: 'Demo City',
-        state: 'Demo State',
-        country: 'India',
-        postal_code: '123456',
-        latitude: 0,
-        longitude: 0,
-      },
-      phone: '+91 98765 43210',
-      email: 'demo@restaurant.com',
-      cuisine_types: ['Indian', 'Continental', 'Italian'],
-      rating: 4.6,
-      total_reviews: 500,
-      price_range: 'mid_range',
-      is_active: true,
-      is_open: true,
-      workspace_id: 'demo-workspace',
-      owner_id: 'demo-owner',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      theme: 'default',
-      menu_template: 'classic',
-    };
-
-    return { mockCategories, mockMenuItems, mockRestaurant };
-  }, [venueId]);
-
   // Handle menu loading errors
-  const handleMenuError = useCallback((err: any) => {    
-    // Load mock data instead of showing error
-    const { mockCategories, mockMenuItems, mockRestaurant } = getMockData();
-    setCategories(mockCategories);
-    setMenuItems(mockMenuItems);
-    setRestaurant(mockRestaurant);
-    setTableName(tableId || 'Demo Table');
-    
-    // Don't set error - just use mock data silently
-    setError(null);
-  }, [getMockData, tableId]);
+  const handleMenuError = useCallback((err: any) => {
+    console.error('Menu loading error:', err);
+    setError(err?.message || 'Failed to load menu data');
+  }, []);
 
-  // Load restaurant data
+  // Load restaurant data and check venue status
   const loadRestaurant = useCallback(async () => {
-    if (!venueId) return;    setRestaurantLoading(true);
+    if (!venueId) return;
+    setRestaurantLoading(true);
     
     try {
-      const venueData = await venueService.getPublicVenue(venueId);      
+      const venueData = await venueService.getPublicVenue(venueId);
+      
       if (venueData) {
-        setRestaurant(venueData);      } else {
+        setRestaurant(venueData);
+        
+        // Check if venue is open and accepting orders
+        if (!venueData.is_open) {
+          setVenueNotAcceptingOrders({
+            show: true,
+            venueName: venueData.name,
+            venueStatus: 'closed',
+            message: 'This venue is not serving at the moment. Please check back during operating hours.'
+          });
+          return;
+        }
+        
+        if (!venueData.is_active) {
+          setVenueNotAcceptingOrders({
+            show: true,
+            venueName: venueData.name,
+            venueStatus: 'inactive',
+            message: 'This venue is currently not accepting orders. Please try again later.'
+          });
+          return;
+        }
+      } else {
         setError('Restaurant not found. Please check the QR code or link.');
       }
-    } catch (err: any) {      setError('Restaurant not found. Please check the QR code or link.');
+    } catch (err: any) {
+      setError('Restaurant not found. Please check the QR code or link.');
     } finally {
       setRestaurantLoading(false);
     }
@@ -320,7 +275,7 @@ export function useMenuData(options: UseMenuDataOptions = {}): UseMenuDataResult
     }
   }, [tableId]);
 
-  // Load all data
+  // Load all data - check venue status first
   const loadAllData = useCallback(async () => {
     if (!venueId) return;
     
@@ -329,16 +284,26 @@ export function useMenuData(options: UseMenuDataOptions = {}): UseMenuDataResult
     setVenueNotAcceptingOrders({ show: false });
     
     try {
+      // First, load restaurant and check status
+      await loadRestaurant();
+      
+      // If venue is not accepting orders, don't load other data
+      if (venueNotAcceptingOrders.show) {
+        return;
+      }
+      
+      // Load other data in parallel
       await Promise.all([
-        loadRestaurant(),
         loadCategories(),
         loadMenuItems(),
         loadTable(),
       ]);
-    } catch (err) {    } finally {
+    } catch (err) {
+      // Error handling
+    } finally {
       setLoading(false);
     }
-  }, [venueId, loadRestaurant, loadCategories, loadMenuItems, loadTable]);
+  }, [venueId, loadRestaurant, loadCategories, loadMenuItems, loadTable, venueNotAcceptingOrders.show]);
 
   // Initial load
   useEffect(() => {

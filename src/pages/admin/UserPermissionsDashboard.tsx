@@ -55,6 +55,7 @@ import PermissionService from '../../services/auth';
 import { PERMISSIONS, ROLES } from '../../types/auth';
 import AnimatedBackground from '../../components/ui/AnimatedBackground';
 import { userService } from '../../services/auth/userService';
+import { apiService } from '../../utils/api';
 
 const UserPermissionsDashboard: React.FC = () => {
   const { user, getUserWithRole, hasPermission, isSuperAdmin } = useAuth();
@@ -97,12 +98,21 @@ const UserPermissionsDashboard: React.FC = () => {
           let userPermissions: any[] = [];
           
           try {
-            const permResponse = await PermissionService.fetchUserPermissions(false);
-            if (permResponse && permResponse.permissions) {
-              userPermissions = permResponse.permissions;
+            // Fetch permissions for each specific user from the backend
+            const permResponse = await apiService.get<{ permissions: any[], role: any }>(`/users/${user.id}/permissions`);
+            if (permResponse.success && permResponse.data && permResponse.data.permissions) {
+              userPermissions = permResponse.data.permissions;
             }
           } catch (error) {
-            userPermissions = [];
+            // If user-specific permissions fail, try to get role-based permissions
+            try {
+              const roleResponse = await apiService.get<{ permissions: any[] }>(`/roles/${user.role}/permissions`);
+              if (roleResponse.success && roleResponse.data && roleResponse.data.permissions) {
+                userPermissions = roleResponse.data.permissions;
+              }
+            } catch (roleError) {
+              userPermissions = [];
+            }
           }
           
           return {
@@ -150,12 +160,21 @@ const UserPermissionsDashboard: React.FC = () => {
             let userPermissions: any[] = [];
             
             try {
-              const permResponse = await PermissionService.fetchUserPermissions(false);
-              if (permResponse && permResponse.permissions) {
-                userPermissions = permResponse.permissions;
+              // Fetch permissions for each specific user from the backend
+              const permResponse = await apiService.get<{ permissions: any[], role: any }>(`/users/${user.id}/permissions`);
+              if (permResponse.success && permResponse.data && permResponse.data.permissions) {
+                userPermissions = permResponse.data.permissions;
               }
             } catch (error) {
-              userPermissions = [];
+              // If user-specific permissions fail, try to get role-based permissions
+              try {
+                const roleResponse = await apiService.get<{ permissions: any[] }>(`/roles/${user.role}/permissions`);
+                if (roleResponse.success && roleResponse.data && roleResponse.data.permissions) {
+                  userPermissions = roleResponse.data.permissions;
+                }
+              } catch (roleError) {
+                userPermissions = [];
+              }
             }
             
             return {
@@ -774,15 +793,29 @@ const UserPermissionsDashboard: React.FC = () => {
                     <Button
                       variant="outlined"
                       startIcon={<Visibility />}
-                      onClick={() => handleViewPermissions({
-                        ...(currentUserAuth || {}),
-                        firstName: user?.first_name || user?.firstName,
-                        lastName: user?.last_name || user?.lastName,
-                        email: user?.email,
-                        isActive: true,
-                        lastLogin: new Date(),
-                        cafeId: userData?.venue?.id,
-                      })}
+                      onClick={async () => {
+                        // Fetch current user's permissions
+                        let currentUserPermissions: any[] = [];
+                        try {
+                          const permResponse = await PermissionService.fetchUserPermissions(true);
+                          if (permResponse && permResponse.permissions) {
+                            currentUserPermissions = permResponse.permissions;
+                          }
+                        } catch (error) {
+                          currentUserPermissions = [];
+                        }
+                        
+                        handleViewPermissions({
+                          ...(currentUserAuth || {}),
+                          firstName: user?.first_name || user?.firstName,
+                          lastName: user?.last_name || user?.lastName,
+                          email: user?.email,
+                          isActive: true,
+                          lastLogin: new Date(),
+                          cafeId: userData?.venue?.id,
+                          permissions: currentUserPermissions,
+                        });
+                      }}
                       sx={{ 
                         minWidth: 'auto',
                         whiteSpace: 'nowrap'

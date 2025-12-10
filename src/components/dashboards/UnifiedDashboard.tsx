@@ -311,26 +311,8 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({ className }) => {
             area_id: table.area_id,
           }));
           setTableStatuses(realTables);
-        } else if ('venue_performance' in data && (data as any).venue_performance && (data as any).venue_performance.length > 0) {
-          // Fallback to mock data for SuperAdmin view
-          const formattedTables: TableStatus[] = [];
-          (data as any).venue_performance.forEach((venue: any, index: number) => {
-            const totalTables = venue.total_tables || 0;
-            const occupiedTables = venue.occupied_tables || 0;
-            const venueName = venue.name || 'VEN';
-            
-            for (let i = 1; i <= Math.min(totalTables, 5); i++) {
-              formattedTables.push({
-                id: `${venue.id || index}-table-${i}`,
-                table_number: `${venueName.substring(0, 3).toUpperCase()}-${i}`,
-                status: i <= occupiedTables ? 'occupied' : 'available',
-                current_order_id: i <= occupiedTables ? `order-${venue.id || index}-${i}` : undefined,
-                occupancy_time: i <= occupiedTables ? Math.floor(Math.random() * 120) + 15 : undefined,
-              });
-            }
-          });
-          setTableStatuses(formattedTables);
         } else {
+          // No table data available
           setTableStatuses([]);
         }
       } else {

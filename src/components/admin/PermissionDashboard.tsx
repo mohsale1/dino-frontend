@@ -19,10 +19,11 @@ const PermissionDashboard: React.FC<PermissionDashboardProps> = ({
 }) => {
   const { userPermissions, isAuthenticated } = useAuth();
   
-  // Mock permission sync functionality
-  const syncPermissions = () => {};
+  // TODO: Implement real permission sync functionality
+  const syncPermissions = () => {
+    console.warn('Permission sync not yet implemented');
+  };
   const isSyncing = false;
-  const lastSync: Date | null = null;
   const syncError = null;
   const permissionCount = userPermissions?.permissions?.length || 0;
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());

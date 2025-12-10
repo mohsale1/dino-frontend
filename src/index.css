@@ -6,6 +6,11 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  /* Prevent text size adjustment on mobile */
+  -webkit-text-size-adjust: 100%;
+  -moz-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 /* Hide scrollbar globally for all elements */
@@ -35,6 +40,13 @@ body {
   /* Hide scrollbar */
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE and Edge */
+  /* Prevent zoom and ensure proper sizing */
+  -webkit-text-size-adjust: 100%;
+  -moz-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  font-size: 16px; /* Base font size */
+  zoom: 1; /* Ensure no zoom */
 }
 
 html {
@@ -42,6 +54,12 @@ html {
   /* Hide scrollbar */
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE and Edge */
+  /* Prevent zoom and ensure proper sizing */
+  -webkit-text-size-adjust: 100%;
+  -moz-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  font-size: 16px; /* Base font size */
 }
 
 /* Fix iOS Safari bounce background */

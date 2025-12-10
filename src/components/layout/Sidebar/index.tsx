@@ -70,7 +70,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
   const { hasPermission, userRole, userPermissions } = usePermissions();
   
   const [statusLoading, setStatusLoading] = useState(false);
-  const [showDebugPanel, setShowDebugPanel] = useState(false);
 
   // Debug: Log permissions on mount and when they change
   React.useEffect(() => {
@@ -658,43 +657,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
         </Box>
       </Box>
 
-      {/* Debug Panel - Click to toggle */}
-      {showExpanded && (
-        <Box
-          onClick={() => setShowDebugPanel(!showDebugPanel)}
-          sx={{
-            p: 1,
-            borderTop: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
-            cursor: 'pointer',
-            mt: 'auto',
-            '&:hover': {
-              backgroundColor: alpha(theme.palette.primary.main, 0.05),
-            },
-          }}
-        >
-          <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.65rem' }}>
-            {showDebugPanel ? '🔍 Hide Debug Info' : '🔍 Show Debug Info'}
-          </Typography>
-          
-          <Collapse in={showDebugPanel}>
-            <Box sx={{ mt: 1, p: 1, backgroundColor: alpha(theme.palette.background.default, 0.5), borderRadius: 1 }}>
-              <Typography variant="caption" sx={{ display: 'block', fontWeight: 600, mb: 0.5 }}>
-                Role: {userRole || 'None'}
-              </Typography>
-              <Typography variant="caption" sx={{ display: 'block', fontWeight: 600, mb: 0.5 }}>
-                Permissions ({userPermissions?.length || 0}):
-              </Typography>
-              <Box sx={{ maxHeight: 150, overflowY: 'auto', fontSize: '0.6rem' }}>
-                {userPermissions?.map((perm, idx) => (
-                  <Typography key={idx} variant="caption" sx={{ display: 'block', fontSize: '0.6rem' }}>
-                    • {perm}
-                  </Typography>
-                )) || <Typography variant="caption">No permissions</Typography>}
-              </Box>
-            </Box>
-          </Collapse>
-        </Box>
-      )}
 
       {/* Dino Victory Image at Bottom Center */}
       <Box

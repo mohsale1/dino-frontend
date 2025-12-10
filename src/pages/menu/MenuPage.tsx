@@ -3,46 +3,30 @@ import {
   Box,
   Container,
   Typography,
-  Grid,
-  Card,
-  CardContent,
   Button,
   Chip,
-  TextField,
   IconButton,
   Paper,
   Rating,
-  Badge,
   useMediaQuery,
   Stack,
   alpha,
   styled,
   CardMedia,
-  InputAdornment,
   Avatar,
-  Divider,
-  Collapse,
-  Fab,
-  Tooltip,
+  Card,
 } from '@mui/material';
 import {
   Add,
   Remove,
-  ShoppingCart,
-  Search,
-  Star,
   Restaurant,
   LocalFireDepartment,
-  LocationOn,
-  Schedule,
   Favorite,
   FavoriteBorder,
   Whatshot,
   NewReleases,
   LocalOffer,
   Timer,
-  FilterList,
-  Clear,
 } from '@mui/icons-material';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useCart } from '../../contexts/CartContext';
@@ -51,14 +35,9 @@ import { useVenueTheme } from '../../contexts/VenueThemeContext';
 
 // MenuItem type is handled by the cart context
 import CustomerNavbar from '../../components/CustomerNavbar';
-import { VenueNotAcceptingOrdersPage } from '../../components/errors';
+import { VenueNotAcceptingOrdersPage, GenericErrorPage } from '../../components/errors';
 import { SmartLoading } from '../../components/ui/LoadingStates';
-import { GenericErrorPage } from '../../components/errors';
 import { useMenuData as useMenuData, type MenuItemType } from '../../hooks/useMenuData';
-import DynamicMenuRenderer from '../../components/menu/DynamicMenuRenderer';
-import { getTemplateConfig } from '../../config/menuTemplates';
-import TemplateHeader from '../../components/preview/TemplateHeader';
-import TemplateCategoryFilter from '../../components/preview/TemplateCategoryFilter';
 
 // Fragment Components
 import HomeFragment from './fragments/HomeFragment';
@@ -67,74 +46,9 @@ import OrderStatusFragment from './fragments/OrderStatusFragment';
 import FloatingCartCard from '../../components/menu/FloatingCartCard';
 import FragmentNavigation, { FragmentType } from '../../components/ui/FragmentNavigation';
 
-// --- Mock Data and Assets for Theming ---
-const petThemeImages = {
-  'Espresso': 'https://images.unsplash.com/photo-1559190394-df57786147c2?q=80&w=1974', // Cat with coffee
-  'Cappuccino': 'https://images.unsplash.com/photo-1580477851693-4623a2d3435a?q=80&w=2070', // Dog with coffee
-  'Croissant': 'https://images.unsplash.com/photo-1622022999054-99349a882476?q=80&w=2070', // Cat looking at food
-  'Avocado Toast': 'https://images.unsplash.com/photo-1548681528-6a5c45b66b42?q=80&w=1974', // Cat with glasses
-};
+ 
 
-const defaultThemeImages = {
-  'Espresso': 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=1974',
-  'Cappuccino': 'https://images.unsplash.com/photo-1572442388796-11668a65343d?q=80&w=1974',
-  'Croissant': 'https://images.unsplash.com/photo-1530610476181-d83430b64dcd?q=80&w=2070',
-};
-
-// Enhanced interfaces - now imported from the hook
-
-// Constants
-const VEG_FILTERS = {
-  ALL: 'all',
-  VEG: 'veg',
-  NON_VEG: 'non-veg',
-};
-
-const SORT_OPTIONS = {
-  POPULAR: 'popular',
-  PRICE_LOW: 'price_low',
-  PRICE_HIGH: 'price_high',
-  RATING: 'rating',
-  NAME: 'name',
-};
-
-// Clean styled components
-const HeroSection = styled(Box)(({ theme }) => ({
-  background: `linear-gradient(180deg, #FAFAFA 0%, #F5F5F5 100%)`,
-  borderBottom: `1px solid ${theme.palette.grey[200]}`,
-  position: 'relative',
-}));
-
-const SearchCard = styled(Card)(({ theme }) => ({
-  background: theme.palette.background.paper,
-  borderRadius: 0,
-  border: `1px solid ${theme.palette.grey[200]}`,
-  boxShadow: theme.shadows[2],
-  transition: 'all 0.2s ease-in-out',
-  '&:hover': {
-    boxShadow: theme.shadows[4],
-  },
-}));
-
-const CategoryChip = styled(Box, {
-  shouldForwardProp: (prop) => prop !== 'active',
-})<{ active?: boolean }>(({ theme, active }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  minWidth: 'fit-content',
-  cursor: 'pointer',
-  transition: 'all 0.2s ease-in-out',
-  padding: theme.spacing(1.5),
-  borderRadius: 0,
-  backgroundColor: active ? alpha(theme.palette.primary.main, 0.08) : 'transparent',
-  border: `1px solid ${active ? theme.palette.primary.main : 'transparent'}`,
-  '&:hover': {
-    backgroundColor: active ? alpha(theme.palette.primary.main, 0.12) : alpha(theme.palette.grey[100], 0.8),
-    transform: 'translateY(-2px)',
-  },
-}));
-
+// Styled component for menu item cards (used in EnhancedMenuItemCard)
 const MenuItemCard = styled(Card)(({ theme }) => ({
   borderRadius: 0,
   border: `1px solid ${theme.palette.grey[200]}`,
@@ -149,19 +63,6 @@ const MenuItemCard = styled(Card)(({ theme }) => ({
     '& .menu-item-image': {
       transform: 'scale(1.02)',
     },
-  },
-}));
-
-const FloatingCartButton = styled(Fab)(({ theme }) => ({
-  position: 'fixed',
-  bottom: 24,
-  right: 24,
-  zIndex: 1000,
-  background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
-  color: 'white',
-  '&:hover': {
-    background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
-    transform: 'scale(1.1)',
   },
 }));
 
@@ -191,12 +92,8 @@ const MenuPage: React.FC = () => {
   });
 
   // UI state
-  const [searchQuery, setSearchQuery] = useState('');
-  const [vegFilter, setVegFilter] = useState<string>(VEG_FILTERS.ALL);
-  const [sortBy, setSortBy] = useState<string>(SORT_OPTIONS.POPULAR);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [activeCategory, setActiveCategory] = useState<string>('');
-  const [showFilters, setShowFilters] = useState(false);
   
   // Fragment state
   const [activeFragment, setActiveFragment] = useState<FragmentType>('home');
@@ -205,32 +102,12 @@ const MenuPage: React.FC = () => {
   const categoryRefs = useRef<Record<string, HTMLElement | null>>({});
   const menuContainerRef = useRef<HTMLDivElement | null>(null);
 
-  // State for template rendering
-  const [useTemplateRenderer, setUseTemplateRenderer] = useState(false);
-  const [templateConfig, setTemplateConfig] = useState<any>(null);
-
   // When restaurant data is available, set the theme from the backend.
   useEffect(() => {
     if (restaurant?.theme) {
       setVenueTheme(restaurant.theme);
     }
-    
-    if (restaurant?.menu_template) {
-      const config = getTemplateConfig(restaurant.menu_template);
-      setTemplateConfig(config);
-      setUseTemplateRenderer(true);
-    } else {
-      setUseTemplateRenderer(false);
-    }
   }, [restaurant, setVenueTheme]);
-
-  const getMenuItemImage = (item: MenuItemType) => {
-    if (venueTheme === 'pet') {
-      // Use pet theme image if available, otherwise fallback to default, then to item's own image
-      return petThemeImages[item.name as keyof typeof petThemeImages] || defaultThemeImages[item.name as keyof typeof defaultThemeImages] || item.image;
-    }
-    return item.image || defaultThemeImages[item.name as keyof typeof defaultThemeImages];
-  };
 
   // Desktop restriction check - more lenient for tablets
   const isDesktopRestricted = useMediaQuery(theme.breakpoints.up('xl')); // Only restrict on very large screens
@@ -348,43 +225,11 @@ const MenuPage: React.FC = () => {
     );
   };
 
-  // Data loading is now handled by the useMenuData hook
-
-  const sortMenuItems = (items: MenuItemType[]) => {
-    return [...items].sort((a, b) => {
-      switch (sortBy) {
-        case SORT_OPTIONS.POPULAR:
-          return (b.isPopular ? 1 : 0) - (a.isPopular ? 1 : 0) || (b.rating || 0) - (a.rating || 0);
-        case SORT_OPTIONS.PRICE_LOW:
-          return a.price - b.price;
-        case SORT_OPTIONS.PRICE_HIGH:
-          return b.price - a.price;
-        case SORT_OPTIONS.RATING:
-          return (b.rating || 0) - (a.rating || 0);
-        case SORT_OPTIONS.NAME:
-          return a.name.localeCompare(b.name);
-        default:
-          return 0;
-      }
-    });
-  };
-
-  // Filter and sort logic
-  const filteredItems = sortMenuItems(
-    menuItems.filter(item => {
-      const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           item.description.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesVeg = vegFilter === VEG_FILTERS.ALL || 
-                        (vegFilter === VEG_FILTERS.VEG && item.isVeg) || 
-                        (vegFilter === VEG_FILTERS.NON_VEG && !item.isVeg);
-      return matchesSearch && matchesVeg && item.isAvailable;
-    })
-  );
-
+  // Group menu items by category
   const groupedMenuItems = categories
     .map(category => ({
       ...category,
-      items: filteredItems.filter(item => item.category === category.id)
+      items: menuItems.filter(item => item.category === category.id && item.isAvailable)
     }))
     .filter(group => group.items.length > 0);
 
@@ -445,12 +290,6 @@ const MenuPage: React.FC = () => {
       }
       return newFavorites;
     });
-  };
-
-  const clearFilters = () => {
-    setSearchQuery('');
-    setVegFilter(VEG_FILTERS.ALL);
-    setSortBy(SORT_OPTIONS.POPULAR);
   };
 
   // Loading state
@@ -559,7 +398,7 @@ const MenuPage: React.FC = () => {
           getItemQuantityInCart={getItemQuantityInCart}
           onToggleFavorite={toggleFavorite}
           isFavorite={(itemId) => favorites.has(itemId)}
-          getMenuItemImage={getMenuItemImage}
+          getMenuItemImage={(item) => item.image || ''}
         />
       )}
 
