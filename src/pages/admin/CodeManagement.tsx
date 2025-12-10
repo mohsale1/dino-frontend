@@ -64,7 +64,13 @@ const CodeManagement: React.FC = () => {
         throw new Error(response.message || 'Failed to load code');
       }
     } catch (err: any) {
-      const errorMessage = err.response?.data?.detail || err.message || 'Failed to load code';
+      let errorMessage = err.response?.data?.detail || err.message || 'Failed to load code';
+      
+      // Check if it's a 403 Forbidden error (access denied)
+      if (err.response?.status === 403) {
+        errorMessage = 'Access Denied: This feature is only accessible to users with the "dinos" role. Please contact your administrator to request access.';
+      }
+      
       setError(errorMessage);
       setSnackbar({
         open: true,
@@ -96,7 +102,13 @@ const CodeManagement: React.FC = () => {
         throw new Error(response.message || 'Failed to refresh code');
       }
     } catch (err: any) {
-      const errorMessage = err.response?.data?.detail || err.message || 'Failed to refresh code';
+      let errorMessage = err.response?.data?.detail || err.message || 'Failed to refresh code';
+      
+      // Check if it's a 403 Forbidden error (access denied)
+      if (err.response?.status === 403) {
+        errorMessage = 'Access Denied: This feature is only accessible to users with the "dinos" role. Please contact your administrator to request access.';
+      }
+      
       setError(errorMessage);
       setSnackbar({
         open: true,

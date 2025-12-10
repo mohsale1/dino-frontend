@@ -182,6 +182,12 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
     }
 
     // Check if user has any of the required permissions
+    // If requiredPermissions is empty but requiredRoles is set, role check is sufficient
+    if (item.requiredPermissions.length === 0 && item.requiredRoles && item.requiredRoles.length > 0) {
+      // Role-only access (already checked above)
+      return true;
+    }
+
     // Use every() instead of some() to ensure ALL permissions are present
     const hasRequiredPermissions = item.requiredPermissions.every(permission => {
       const result = hasPermission(permission);
