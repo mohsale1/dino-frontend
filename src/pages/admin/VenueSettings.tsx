@@ -446,18 +446,23 @@ const VenueSettings: React.FC = () => {
 
   const handleToggleVenueStatus = async () => {
     const venue = getVenue();    
-    if (!venue?.id) {      setSnackbar({ open: true, message: 'No venue available', severity: 'error' });
+    if (!venue?.id) {
+      setSnackbar({ open: true, message: 'No venue available', severity: 'error' });
       return;
     }
 
     try {
       const newStatus = !venueActive;      
-      if (newStatus) {        await venueService.activateVenue(venue.id);
-      } else {        // Deactivate by updating is_active to false
-        await venueService.updateVenue(venue.id, { is_active: false });
+      if (newStatus) {
+        // Use activate API
+        await venueService.activateVenue(venue.id);
+      } else {
+        // Use deactivate API
+        await venueService.deactivateVenue(venue.id);
       }
       
-      // Clear venue cache and refresh user data to get updated venue status      StorageManager.clearVenueData();
+      // Clear venue cache and refresh user data to get updated venue status
+      StorageManager.clearVenueData();
       await refreshUserData();
 
       setVenueActive(newStatus);
@@ -465,7 +470,9 @@ const VenueSettings: React.FC = () => {
         open: true, 
         message: `Venue ${newStatus ? 'activated' : 'deactivated'} successfully`, 
         severity: 'success' 
-      });    } catch (error) {      setSnackbar({ 
+      });
+    } catch (error) {
+      setSnackbar({ 
         open: true, 
         message: `Failed to update venue status: ${error instanceof Error ? error.message : 'Unknown error'}`, 
         severity: 'error' 
