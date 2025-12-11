@@ -206,8 +206,7 @@ export class PermissionRegistry {
         id: 'code',
         label: 'Code',
         path: '/admin/code',
-        requiredPermissions: [], // No permissions required, only role check
-        requiredRoles: ['dinos'],
+        requiredPermissions: ['code.manage'],
         description: 'Code management (Dinos role only)'
       }
     ];
@@ -403,6 +402,12 @@ export class PermissionRegistry {
         modules: ['workspace'],
         routes: ['/admin/workspace'],
         actions: ['switch_venue']
+      },
+      {
+        permission: 'code.manage',
+        modules: ['code'],
+        routes: ['/admin/code'],
+        actions: ['view_code', 'update_code']
       }
     ];
 
@@ -437,20 +442,24 @@ export class PermissionRegistry {
     const allModules = this.getAllModules();
     
     return allModules.filter(module => {
-      // Check role requirement first
+      // Check role requirement first - if module requires specific roles
       if (module.requiredRoles && module.requiredRoles.length > 0) {
+        // User must have one of the required roles
         if (!userRole || !module.requiredRoles.includes(userRole.toLowerCase())) {
           return false;
         }
-        // If role matches and no permissions required, grant access
+        // If role matches and no additional permissions required, grant access
         if (module.requiredPermissions.length === 0) {
           return true;
         }
+        // Role matches, now check permissions below
       }
 
       // Check if user has any of the required permissions (if any are required)
       if (module.requiredPermissions.length === 0) {
-        return true; // No permissions required
+        // No permissions required AND no role requirements (or role already matched above)
+        // Only grant access if there were no role requirements
+        return !module.requiredRoles || module.requiredRoles.length === 0;
       }
       
       return module.requiredPermissions.some(requiredPerm => 

@@ -14,7 +14,7 @@ export interface UserData {
     venueIds: string[];
     isActive: boolean;
     createdAt: string;
-    updated_at?: string;
+    updatedAt?: string;
   };
   venue: {
     id: string;
@@ -25,49 +25,46 @@ export interface UserData {
       address: string;
       state: string;
       city: string;
-      postal_code: string;
+      postalCode: string;
       country: string;
     };
     phone?: string;
     email?: string;
     website?: string;
     isActive: boolean;
-    is_open: boolean;
+    isOpen: boolean;
     theme?: string;
-    menu_template?: string;
-    menu_template_config?: any;
+    menuTemplate?: string;
+    menuTemplateConfig?: any;
     createdAt: string;
-    updated_at?: string;
+    updatedAt?: string;
     workspaceId?: string;
     ownerId?: string;
-    isOpen?: boolean;
-    updatedAt?: string;
-    address?: string;
   } | null;
   workspace: {
     id: string;
     name: string;
-    display_name?: string;
+    displayName?: string;
     description?: string;
     isActive: boolean;
     createdAt: string;
-    updated_at?: string;
+    updatedAt?: string;
   } | null;
 }
 
 export interface VenueData {
   venue: any;
   statistics: {
-    total_orders: number;
-    total_revenue: number;
-    active_tables: number;
-    total_tables: number;
-    total_menu_items: number;
-    total_users: number;
+    totalOrders: number;
+    totalRevenue: number;
+    activeTables: number;
+    totalTables: number;
+    totalMenuItems: number;
+    totalUsers: number;
   };
-  menu_items: any[];
+  menuItems: any[];
   tables: any[];
-  recent_orders: any[];
+  recentOrders: any[];
   users: any[];
 }
 
@@ -106,55 +103,81 @@ class UserDataService {
         const userData: UserData = (response.data as any).data || response.data;
         
         if (userData.venue) {
-          let isOpen = false;
-          let statusField = (userData.venue as any).status;
+          const venueAny = userData.venue as any;
           
-          if (userData.venue.is_open !== undefined && userData.venue.is_open !== null) {
-            isOpen = Boolean(userData.venue.is_open);
-          } else if (statusField !== undefined && statusField !== null) {
-            const statusStr = String(statusField).toLowerCase();
-            isOpen = statusStr === 'active' || statusStr === 'open';
-          } else if ((userData.venue as any).isOpen !== undefined) {
-            isOpen = Boolean((userData.venue as any).isOpen);
-          } else {
-            isOpen = false;
-          }
+          // Normalize isOpen from backend (is_open, isOpen, status)
+          const isOpen = venueAny.is_open !== undefined 
+            ? Boolean(venueAny.is_open)
+            : venueAny.isOpen !== undefined 
+              ? Boolean(venueAny.isOpen)
+              : venueAny.status 
+                ? ['active', 'open'].includes(String(venueAny.status).toLowerCase())
+                : false;
+
+          // Normalize isActive from backend (is_active, isActive)
+          const isActive = venueAny.is_active !== undefined 
+            ? Boolean(venueAny.is_active)
+            : venueAny.isActive !== undefined 
+              ? Boolean(venueAny.isActive)
+              : true;
+
+          // Normalize location
+          const location = venueAny.location || {};
           
-          const finalStatus = isOpen ? 'active' : 'closed';
-          
+          // Standardize venue object - camelCase only
           userData.venue = {
-            ...userData.venue,
-            isActive: userData.venue.isActive !== undefined ? userData.venue.isActive : (userData.venue as any).isActive,
-            isOpen: isOpen,
-            is_open: isOpen,
-            createdAt: userData.venue.createdAt || (userData.venue as any).createdAt,
-            updatedAt: userData.venue.updatedAt || (userData.venue as any).updatedAt,
-            location: userData.venue.location || {
-              landmark: '',
-              address: '',
-              state: '',
-              city: '',
-              postal_code: '',
-              country: ''
+            id: venueAny.id,
+            name: venueAny.name || 'Unknown Venue',
+            description: venueAny.description || '',
+            location: {
+              landmark: location.landmark || '',
+              address: location.address || '',
+              state: location.state || '',
+              city: location.city || '',
+              postalCode: location.postal_code || location.postalCode || '',
+              country: location.country || ''
             },
-            name: userData.venue.name || 'Unknown Venue',
-            description: userData.venue.description || '',
-            phone: userData.venue.phone || '',
-            email: userData.venue.email || '',
-            theme: userData.venue.theme || (userData.venue as any).theme || 'pet',
-            menu_template: userData.venue.menu_template || (userData.venue as any).menu_template || 'classic'
+            phone: venueAny.phone || '',
+            email: venueAny.email || '',
+            website: venueAny.website || '',
+            isActive,
+            isOpen,
+            theme: venueAny.theme || 'pet',
+            menuTemplate: venueAny.menu_template || venueAny.menuTemplate || 'classic',
+            menuTemplateConfig: venueAny.menu_template_config || venueAny.menuTemplateConfig,
+            createdAt: venueAny.created_at || venueAny.createdAt || new Date().toISOString(),
+            updatedAt: venueAny.updated_at || venueAny.updatedAt || venueAny.createdAt,
+            workspaceId: venueAny.workspace_id || venueAny.workspaceId,
+            ownerId: venueAny.owner_id || venueAny.ownerId
           };
-          
-          (userData.venue as any).status = finalStatus;
         }
         
         if (userData.user) {
+          const userAny = userData.user as any;
           userData.user = {
-            ...userData.user,
-            firstName: userData.user.firstName || (userData.user as any).firstName,
-            lastName: userData.user.lastName || (userData.user as any).lastName,
-            isActive: userData.user.isActive !== undefined ? userData.user.isActive : (userData.user as any).isActive,
-            createdAt: userData.user.createdAt || (userData.user as any).createdAt
+            id: userAny.id,
+            email: userAny.email,
+            firstName: userAny.first_name || userAny.firstName || '',
+            lastName: userAny.last_name || userAny.lastName || '',
+            phone: userAny.phone || '',
+            role: userAny.role || 'operator',
+            venueIds: userAny.venue_ids || userAny.venueIds || [],
+            isActive: userAny.is_active !== undefined ? Boolean(userAny.is_active) : Boolean(userAny.isActive),
+            createdAt: userAny.created_at || userAny.createdAt || new Date().toISOString(),
+            updatedAt: userAny.updated_at || userAny.updatedAt
+          };
+        }
+        
+        if (userData.workspace) {
+          const workspaceAny = userData.workspace as any;
+          userData.workspace = {
+            id: workspaceAny.id,
+            name: workspaceAny.name,
+            displayName: workspaceAny.display_name || workspaceAny.displayName,
+            description: workspaceAny.description || '',
+            isActive: workspaceAny.is_active !== undefined ? Boolean(workspaceAny.is_active) : Boolean(workspaceAny.isActive),
+            createdAt: workspaceAny.created_at || workspaceAny.createdAt || new Date().toISOString(),
+            updatedAt: workspaceAny.updated_at || workspaceAny.updatedAt
           };
         }
         
@@ -275,7 +298,7 @@ class UserDataService {
   }
 
   getWorkspaceDisplayName(userData: UserData | null): string {
-    return userData?.workspace?.display_name || userData?.workspace?.name || 'Unknown Workspace';
+    return userData?.workspace?.displayName || userData?.workspace?.name || 'Unknown Workspace';
   }
 
   getUserDisplayName(userData: UserData | null): string {

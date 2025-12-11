@@ -12,6 +12,11 @@ import { Venue,
 } from '../../types/api';
 
 class VenueService {
+  // In-memory cache to prevent duplicate API calls
+  private venueCache: Map<string, { data: Venue | null; timestamp: number }> = new Map();
+  private pendingRequests: Map<string, Promise<Venue | null>> = new Map();
+  private readonly CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
   // =============================================================================
   // PUBLIC VENUE METHODS (No authentication required)
   // =============================================================================
@@ -111,9 +116,42 @@ class VenueService {
   }
 
   /**
-   * Get venue by ID
+   * Get venue by ID with caching and deduplication
    */
-  async getVenue(venueId: string): Promise<Venue | null> {
+  async getVenue(venueId: string, skipCache: boolean = false): Promise<Venue | null> {
+    // Check cache first (unless skipCache is true)
+    if (!skipCache) {
+      const cached = this.venueCache.get(venueId);
+      if (cached && Date.now() - cached.timestamp < this.CACHE_TTL) {
+        return cached.data;
+      }
+    }
+
+    // Check if there's already a pending request for this venue
+    const pending = this.pendingRequests.get(venueId);
+    if (pending) {
+      return pending;
+    }
+
+    // Create new request
+    const request = this._fetchVenue(venueId);
+    this.pendingRequests.set(venueId, request);
+
+    try {
+      const result = await request;
+      // Cache the result
+      this.venueCache.set(venueId, { data: result, timestamp: Date.now() });
+      return result;
+    } finally {
+      // Clean up pending request
+      this.pendingRequests.delete(venueId);
+    }
+  }
+
+  /**
+   * Internal method to fetch venue from API
+   */
+  private async _fetchVenue(venueId: string): Promise<Venue | null> {
     try {
       const response = await apiService.get<Venue>(`/venues/${venueId}`);
       
@@ -122,7 +160,19 @@ class VenueService {
       }
       
       return null;
-    } catch (error) {      return null;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  /**
+   * Clear venue cache
+   */
+  clearVenueCache(venueId?: string): void {
+    if (venueId) {
+      this.venueCache.delete(venueId);
+    } else {
+      this.venueCache.clear();
     }
   }
 

@@ -99,6 +99,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
     'permissions': 'showPermissionsNav',
     'settings': 'showSettingsNav',
     'workspace': 'showWorkspaceNav',
+    'code': 'showCodeNav',
   };
 
   // Get accessible modules from registry (dynamic based on stored permissions)
@@ -123,10 +124,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
       return true;
     });
 
-  // Get venue status for display
+  // Get venue status for display (using standardized camelCase)
   const venueStatus = userData?.venue ? {
     isActive: userData.venue.isActive || false,
-    isOpen: userData.venue.is_open || false,
+    isOpen: userData.venue.isOpen || false,
     venueName: userData.venue.name || 'Current Venue'
   } : null;
 
