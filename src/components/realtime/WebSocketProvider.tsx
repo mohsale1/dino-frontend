@@ -77,8 +77,8 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
         if (user) {
           sendMessage('subscribe', {
             user_id: user.id,
-            venue_id: user.venueId,
-            workspace_id: user.workspaceId,
+            venueId: user.venueId,
+            workspaceId: user.workspaceId,
             role: user.role
           });
         }

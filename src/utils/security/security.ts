@@ -265,7 +265,9 @@ export const secureStorage = {
       }
       
       localStorage.setItem(key, serializedValue);
-    } catch (error) {    }
+    } catch (error) {
+      // Error handled silently
+    }
   },
 
   getItem<T>(key: string, decrypt: boolean = false): T | null {

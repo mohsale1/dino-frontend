@@ -3,7 +3,7 @@ import { ApiResponse } from '../../types/api';
 
 // Analytics-related types
 export interface DashboardAnalytics {
-  venue_id: string;
+  venueId: string;
   period: {
     start_date: string;
     end_date: string;
@@ -93,13 +93,13 @@ export interface RecentOrder {
   tax_amount: number;
   discount_amount: number;
   status: string;
-  created_at: string;
+  createdAt: string;
   time_ago: string;
   customer_name?: string;
 }
 
 export interface LiveMetrics {
-  venue_id: string;
+  venueId: string;
   timestamp: string;
   active_orders: number;
   pending_orders: number;
@@ -114,7 +114,7 @@ export interface LiveMetrics {
 }
 
 export interface SalesReport {
-  venue_id: string;
+  venueId: string;
   period: {
     start_date: string;
     end_date: string;
@@ -163,7 +163,7 @@ export interface CustomerInsights {
 }
 
 export interface InventoryAnalytics {
-  venue_id: string;
+  venueId: string;
   low_stock_items: LowStockItem[];
   top_consuming_items: ConsumptionItem[];
   waste_analysis: WasteAnalysis;

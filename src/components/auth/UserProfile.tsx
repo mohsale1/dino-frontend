@@ -310,8 +310,8 @@ const UserProfile: React.FC = () => {
               <TextField
                 fullWidth
                 label="First Name"
-                value={profileData.first_name || ''}
-                onChange={(e) => setProfileData(prev => ({ ...prev, first_name: e.target.value }))}
+                value={profileData.firstName || ''}
+                onChange={(e) => setProfileData(prev => ({ ...prev, firstName: e.target.value }))}
                 disabled={!editing}
               />
             </Grid>
@@ -320,8 +320,8 @@ const UserProfile: React.FC = () => {
               <TextField
                 fullWidth
                 label="Last Name"
-                value={profileData.last_name || ''}
-                onChange={(e) => setProfileData(prev => ({ ...prev, last_name: e.target.value }))}
+                value={profileData.lastName || ''}
+                onChange={(e) => setProfileData(prev => ({ ...prev, lastName: e.target.value }))}
                 disabled={!editing}
               />
             </Grid>

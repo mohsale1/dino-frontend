@@ -80,7 +80,9 @@ export class PerformanceMonitor {
       fidObserver.observe({ entryTypes: ['first-input'] });
       this.observers.push(fidObserver);
 
-    } catch (error) {    }
+    } catch (error) {
+      // Error handled silently
+    }
   }
 
   private recordNavigationMetrics(entry: PerformanceNavigationTiming): void {

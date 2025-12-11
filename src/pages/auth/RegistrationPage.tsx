@@ -377,8 +377,8 @@ const RegistrationPage: React.FC = () => {
       venue_type: formData.venueType,
       owner_email: formData.ownerEmail,
       owner_phone: formData.ownerPhone,
-      owner_first_name: formData.ownerFirstName,
-      owner_last_name: formData.ownerLastName,
+      owner_firstName: formData.ownerFirstName,
+      owner_lastName: formData.ownerLastName,
       owner_password: formData.ownerPassword,
       confirm_password: formData.confirmPassword
     };

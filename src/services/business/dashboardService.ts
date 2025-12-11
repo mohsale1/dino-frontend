@@ -25,8 +25,8 @@ interface SuperAdminDashboard {
     name: string;
     venue_count: number;
     user_count: number;
-    is_active: boolean;
-    created_at: string;
+    isActive: boolean;
+    createdAt: string;
   }>;
 }
 
@@ -48,7 +48,7 @@ interface AdminDashboard {
     tax_amount: number;
     discount_amount: number;
     status: string;
-    created_at: string;
+    createdAt: string;
   }>;
 }
 
@@ -69,7 +69,7 @@ interface OperatorDashboard {
     tax_amount: number;
     discount_amount: number;
     status: string;
-    created_at: string;
+    createdAt: string;
     estimated_ready_time?: string;
     items_count: number;
   }>;
@@ -77,7 +77,10 @@ interface OperatorDashboard {
 
 class DashboardService {
 
-  async getSuperAdminDashboard(): Promise<SuperAdminDashboardResponse> {    
+  async getSuperAdminDashboard(params?: {
+    startDate?: string;
+    endDate?: string;
+  }): Promise<SuperAdminDashboardResponse> {    
     try {      const userDataResponse = await apiService.get<any>('/users/me/data');      
       // Check different possible paths for venue ID
       const responseData = userDataResponse.data as any;
@@ -86,7 +89,15 @@ class DashboardService {
                      (userDataResponse as any).venue?.id;
       
       if (!venueId) {        throw new Error('No venue assigned to your account. Please contact your administrator.');
-      }      const response = await apiService.get<any>(`/dashboard?venue_id=${venueId}`);      
+      }
+      
+      // Build query parameters
+      const queryParams = new URLSearchParams();
+      queryParams.append('venueId', venueId);
+      if (params?.startDate) queryParams.append('start_date', params.startDate);
+      if (params?.endDate) queryParams.append('end_date', params.endDate);
+      
+      const response = await apiService.get<any>(`/dashboard?${queryParams.toString()}`);      
       // Strict validation - require both success and data
       if (response.success && response.data) {        return response.data;
       }      throw new Error('No dashboard data received from API');
@@ -101,7 +112,10 @@ class DashboardService {
    * Get comprehensive admin dashboard data from venue-specific endpoint
    * This endpoint returns all dashboard data based on real database records for the user's venue
    */
-  async getAdminDashboard(): Promise<AdminDashboardResponse | SuperAdminDashboardResponse> {    
+  async getAdminDashboard(params?: {
+    startDate?: string;
+    endDate?: string;
+  }): Promise<AdminDashboardResponse | SuperAdminDashboardResponse> {    
     try {
       // Get user's venue ID from auth context
       const userDataResponse = await apiService.get<any>('/users/me/data');
@@ -110,9 +124,16 @@ class DashboardService {
         throw new Error('No venue assigned to your account. Please contact your administrator.');
       }
       
-      const venueId = userDataResponse.data.venue.id;      
+      const venueId = userDataResponse.data.venue.id;
+      
+      // Build query parameters
+      const queryParams = new URLSearchParams();
+      queryParams.append('venueId', venueId);
+      if (params?.startDate) queryParams.append('start_date', params.startDate);
+      if (params?.endDate) queryParams.append('end_date', params.endDate);
+      
       // Use venue-specific endpoint that returns all dashboard data
-      const response = await apiService.get<any>(`/dashboard?venue_id=${venueId}`);      
+      const response = await apiService.get<any>(`/dashboard?${queryParams.toString()}`);      
       if (response.success && response.data) {
         // Check if this is a SuperAdmin response format (from venue endpoint)
         if ('system_stats' in response.data && 'workspaces' in response.data && 'venue_performance' in response.data) {
@@ -177,9 +198,18 @@ class DashboardService {
     return this.getDashboardStats();
   }
 
-  async getVenueDashboard(venueId: string): Promise<any> {
+  async getVenueDashboard(venueId: string, params?: {
+    startDate?: string;
+    endDate?: string;
+  }): Promise<any> {
     try {
-      const response = await apiService.get<any>(`/dashboard?venue_id=${venueId}`);
+      // Build query parameters
+      const queryParams = new URLSearchParams();
+      queryParams.append('venueId', venueId);
+      if (params?.startDate) queryParams.append('start_date', params.startDate);
+      if (params?.endDate) queryParams.append('end_date', params.endDate);
+      
+      const response = await apiService.get<any>(`/dashboard?${queryParams.toString()}`);
       
       if (response.success && response.data) {
         return response.data;

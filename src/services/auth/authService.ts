@@ -21,7 +21,23 @@ class AuthService {
       }
       
       const authToken = response.data;
-      this.setTokens(authToken);
+      
+      // Store only tokens (no user data in login response anymore)
+      StorageManager.setItem(this.TOKEN_KEY, authToken.access_token);
+      if (authToken.refresh_token) {
+        StorageManager.setItem(this.REFRESH_TOKEN_KEY, authToken.refresh_token);
+      }
+      
+      // Fetch user data separately after login
+      try {
+        const userProfile = await this.getCurrentUser();
+        authToken.user = userProfile; // Add user to token response for compatibility
+      } catch (error) {
+        // If fetching user fails, clear tokens and throw error
+        this.clearTokens();
+        throw new Error('Failed to fetch user data after login');
+      }
+      
       return authToken;
     } catch (error: any) {      throw new Error(error.response?.data?.detail || error.message || 'Login failed');
     }
@@ -63,6 +79,12 @@ class AuthService {
 
   async getCurrentUser(): Promise<UserProfile> {
     try {
+      // Ensure authorization header is set before making request
+      const token = this.getToken();
+      if (token) {
+        apiService.setAuthorizationHeader(token);
+      }
+      
       const response = await apiService.get<UserProfile>('/auth/me');
       
       if (response.success && response.data) {
@@ -302,7 +324,11 @@ class AuthService {
           });
           
           if (response.data && response.data.access_token) {            const tokenData = response.data;
-            this.setTokens(tokenData);
+            // Store tokens without user data (refresh doesn't return user)
+            StorageManager.setItem(this.TOKEN_KEY, tokenData.access_token);
+            if (tokenData.refresh_token) {
+              StorageManager.setItem(this.REFRESH_TOKEN_KEY, tokenData.refresh_token);
+            }
             return tokenData;
           }          this.clearTokens();
           return null;
@@ -322,7 +348,11 @@ class AuthService {
   private setTokens(tokenData: AuthToken): void {    
     // Use StorageManager for consistent storage
     StorageManager.setItem(this.TOKEN_KEY, tokenData.access_token);
-    StorageManager.setUserData(tokenData.user);
+    
+    // Only store user data if it exists (for backward compatibility)
+    if (tokenData.user) {
+      StorageManager.setUserData(tokenData.user);
+    }
     
     if (tokenData.refresh_token) {
       StorageManager.setItem(this.REFRESH_TOKEN_KEY, tokenData.refresh_token);    } else {    }

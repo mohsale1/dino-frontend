@@ -1,7 +1,6 @@
 import { User, Permission, UserRole, PERMISSIONS, ROLES, PermissionName, RoleName } from '../../types/auth';
-import { STORAGE_KEYS } from '../../constants/storage';
-import { ROLE_NAMES } from '../../constants/roles';
 import StorageManager from '../../utils/storage';
+import { ROLE_NAMES } from '../../constants/roles';
 import { apiService } from '../../utils/api';
 import { authService } from './authService';
 
@@ -351,20 +350,20 @@ class PermissionService {
       if (response.success && response.data) {
         const usersWithPermissions = response.data.map((user: any) => ({
           id: user.id,
-          firstName: user.first_name || user.firstName,
-          lastName: user.last_name || user.lastName,
+          firstName: user.firstName || user.firstName,
+          lastName: user.lastName || user.lastName,
           email: user.email,
           phone: user.phone,
           role: user.role,
           roleDisplayName: user.role_display_name || this.getRoleDisplayName(user.role),
-          isActive: user.is_active !== undefined ? user.is_active : (user.status === 'active'),
-          status: user.status || (user.is_active ? 'active' : 'inactive'),
+          isActive: user.isActive !== undefined ? user.isActive : (user.status === 'active'),
+          status: user.status || (user.isActive ? 'active' : 'inactive'),
           lastLogin: user.last_logged_in ? new Date(user.last_logged_in) : null,
           permissions: [], // Permissions are now fetched per user from backend
-          venueId: user.venue_id || user.venueId,
-          workspaceId: user.workspace_id || user.workspaceId,
-          createdAt: user.created_at ? new Date(user.created_at) : new Date(),
-          updatedAt: user.updated_at ? new Date(user.updated_at) : null,
+          venueId: user.venueId || user.venueId,
+          workspaceId: user.workspaceId || user.workspaceId,
+          createdAt: user.createdAt ? new Date(user.createdAt) : new Date(),
+          updatedAt: user.updatedAt ? new Date(user.updatedAt) : null,
         }));
 
         return usersWithPermissions;

@@ -83,14 +83,14 @@ class Logger {
   info(message: string, data?: any): void {
     if (this.shouldLog(LogLevel.INFO)) {
       const formattedMessage = this.formatMessage('INFO', message, data);
-      console.log(formattedMessage);
+      // console.log(formattedMessage);
     }
   }
 
   debug(message: string, data?: any): void {
     if (this.shouldLog(LogLevel.DEBUG)) {
       const formattedMessage = this.formatMessage('DEBUG', message, data);
-      console.log(formattedMessage);
+      // console.log(formattedMessage);
     }
   }
 

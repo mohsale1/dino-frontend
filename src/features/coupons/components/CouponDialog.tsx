@@ -182,7 +182,9 @@ const CouponDialog: React.FC<CouponDialogProps> = ({
 
       await onSave(couponData);
       onClose();
-    } catch (error) {    } finally {
+    } catch (error) {
+      // Error handled silently
+    } finally {
       setLoading(false);
     }
   };

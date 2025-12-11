@@ -25,7 +25,7 @@ interface Venue {
   name: string;
   description?: string;
   location?: any;
-  is_active: boolean;
+  isActive: boolean;
   is_open: boolean;
 }
 
@@ -33,7 +33,7 @@ interface Workspace {
   id: string;
   name: string;
   display_name: string;
-  is_active: boolean;
+  isActive: boolean;
 }
 
 interface AppState {
@@ -302,7 +302,9 @@ export const OptimizedAppProvider: React.FC<{ children: React.ReactNode }> = ({ 
         StorageManager.setPermissions(response.data);
         dispatch({ type: 'SET_PERMISSIONS', payload: response.data });
       }
-    } catch (error) {    }
+    } catch (error) {
+      // Error handled silently
+    }
   }, []);
 
   const loadWorkspaceData = useCallback(async () => {
@@ -314,7 +316,9 @@ export const OptimizedAppProvider: React.FC<{ children: React.ReactNode }> = ({ 
         StorageManager.setWorkspaceData(response.data);
         dispatch({ type: 'SET_WORKSPACE', payload: response.data });
       }
-    } catch (error) {    }
+    } catch (error) {
+      // Error handled silently
+    }
   }, [state.user?.workspace_id]);
 
   const loadVenueData = useCallback(async () => {
@@ -326,7 +330,9 @@ export const OptimizedAppProvider: React.FC<{ children: React.ReactNode }> = ({ 
         StorageManager.setVenueData(response.data);
         dispatch({ type: 'SET_VENUE', payload: response.data });
       }
-    } catch (error) {    }
+    } catch (error) {
+      // Error handled silently
+    }
   }, [state.user?.venue_id]);
 
   const loadVenues = useCallback(async (): Promise<void> => {

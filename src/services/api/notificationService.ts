@@ -110,13 +110,13 @@ class NotificationService {
       data: payload.data,
       is_read: false,
       priority: payload.priority || 'normal',
-      created_at: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
       // Legacy camelCase properties for compatibility
       recipientId: payload.recipientId || payload.recipient_id || 'unknown',
       recipientType: payload.recipientType || payload.recipient_type || 'user',
       notificationType: payload.notificationType || payload.notification_type || 'system_alert',
       isRead: false,
-      createdAt: new Date(),
+      
     };
 
     this.notifyCallbacks(notification);
@@ -134,13 +134,13 @@ class NotificationService {
       data: payload,
       is_read: false,
       priority: 'high',
-      created_at: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
       // Legacy camelCase properties for compatibility
       recipientId: payload.cafeId,
       recipientType: 'venue',
       notificationType: 'order_placed' as NotificationTypeEnum,
       isRead: false,
-      createdAt: new Date(),
+      
     };
 
     this.notifyCallbacks(notification);
@@ -160,13 +160,13 @@ class NotificationService {
       data: payload,
       is_read: false,
       priority: 'normal',
-      created_at: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
       // Legacy camelCase properties for compatibility
       recipientId: payload.cafeId,
       recipientType: 'venue',
       notificationType: 'system_alert' as NotificationTypeEnum,
       isRead: false,
-      createdAt: new Date(),
+      
     };
 
     this.notifyCallbacks(notification);
@@ -292,13 +292,13 @@ class NotificationService {
       data,
       is_read: false,
       priority: 'normal',
-      created_at: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
       // Legacy camelCase properties for compatibility
       recipientId: 'local',
       recipientType: 'user',
       notificationType: type,
       isRead: false,
-      createdAt: new Date(),
+      
     };
 
     this.notifyCallbacks(notification);

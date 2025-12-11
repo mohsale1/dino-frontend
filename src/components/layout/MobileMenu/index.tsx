@@ -110,7 +110,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
 
     // Use venue data from UserDataContext
     const statusData = {
-      isActive: userData.venue.is_active || false,
+      isActive: userData.venue.isActive || false,
       isOpen: userData.venue.is_open || false,
       venueName: userData.venue.name || 'Current Venue'
     };

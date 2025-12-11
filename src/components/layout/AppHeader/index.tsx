@@ -67,9 +67,9 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
 
   // Smooth scroll to section
   const scrollToSection = (sectionId: string) => {
-    console.log('Scrolling to section:', sectionId);
+    // console.log('Scrolling to section:', sectionId);
     const element = document.getElementById(sectionId);
-    console.log('Element found:', element);
+    // console.log('Element found:', element);
     
     if (element) {
       // Use scrollIntoView for more reliable scrolling
@@ -77,9 +77,9 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
       const elementPosition = element.getBoundingClientRect().top;
       const offsetPosition = elementPosition + window.scrollY - headerOffset;
 
-      console.log('Current scroll position:', window.scrollY);
-      console.log('Element position from top:', elementPosition);
-      console.log('Target scroll position:', offsetPosition);
+      // console.log('Current scroll position:', window.scrollY);
+      // console.log('Element position from top:', elementPosition);
+      // console.log('Target scroll position:', offsetPosition);
       
       // Try multiple scroll methods for compatibility
       try {
@@ -168,7 +168,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                console.log('Button clicked:', item.id);
+                // console.log('Button clicked:', item.id);
                 scrollToSection(item.id);
               }}
               sx={{

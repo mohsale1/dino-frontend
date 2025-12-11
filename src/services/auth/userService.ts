@@ -29,10 +29,10 @@ class UserService {
       
       if (filters?.page) params.append('page', filters.page.toString());
       if (filters?.page_size) params.append('page_size', filters.page_size.toString());
-      if (filters?.workspace_id) params.append('workspace_id', filters.workspace_id);
-      if (filters?.venue_id) params.append('venue_id', filters.venue_id);
+      if (filters?.workspaceId) params.append('workspace_id', filters.workspaceId);
+      if (filters?.venueId) params.append('venueId', filters.venueId);
       if (filters?.role) params.append('role', filters.role);
-      if (filters?.is_active !== undefined) params.append('is_active', filters.is_active.toString());
+      if (filters?.isActive !== undefined) params.append('is_active', filters.isActive.toString());
 
       const response = await apiService.get<PaginatedResponse<User>>(`/users?${params.toString()}`);
       
@@ -265,7 +265,7 @@ class UserService {
 
     // Admin and Operator can access their assigned venue
     if (isAdminLevel(user.role) || user.role === 'operator') {
-      return user.venue_id === venueId;
+      return user.venueId === venueId;
     }
 
     // Customers can access any venue for ordering
@@ -286,7 +286,7 @@ class UserService {
     }
 
     // Other roles can only access their assigned workspace
-    return user.workspace_id === workspaceId;
+    return user.workspaceId === workspaceId;
   }
 
   // =============================================================================
@@ -305,7 +305,7 @@ class UserService {
     try {
       const params = new URLSearchParams();
       if (workspaceId) params.append('workspace_id', workspaceId);
-      if (venueId) params.append('venue_id', venueId);
+      if (venueId) params.append('venueId', venueId);
 
       const response = await apiService.get<any>(`/users/statistics?${params.toString()}`);
       
@@ -337,15 +337,15 @@ class UserService {
    * Format user display name
    */
   formatUserName(user: User): string {
-    return `${user.first_name} ${user.last_name}`.trim() || user.email;
+    return `${user.firstName} ${user.lastName}`.trim() || user.email;
   }
 
   /**
    * Get user initials for avatar
    */
   getUserInitials(user: User): string {
-    const firstName = user.first_name?.charAt(0)?.toUpperCase() || '';
-    const lastName = user.last_name?.charAt(0)?.toUpperCase() || '';
+    const firstName = user.firstName?.charAt(0)?.toUpperCase() || '';
+    const lastName = user.lastName?.charAt(0)?.toUpperCase() || '';
     
     if (firstName && lastName) {
       return firstName + lastName;
@@ -362,7 +362,7 @@ class UserService {
    * Get user status color
    */
   getUserStatusColor(user: User): string {
-    return user.is_active ? '#10b981' : '#6b7280';
+    return user.isActive ? '#10b981' : '#6b7280';
   }
 
   /**
@@ -411,14 +411,14 @@ class UserService {
       }
     }
 
-    if ('first_name' in userData) {
-      if (!userData.first_name || userData.first_name.trim().length < 2) {
+    if ('firstName' in userData) {
+      if (!userData.firstName || userData.firstName.trim().length < 2) {
         errors.push('First name must be at least 2 characters long');
       }
     }
 
-    if ('last_name' in userData) {
-      if (!userData.last_name || userData.last_name.trim().length < 2) {
+    if ('lastName' in userData) {
+      if (!userData.lastName || userData.lastName.trim().length < 2) {
         errors.push('Last name must be at least 2 characters long');
       }
     }
@@ -454,8 +454,8 @@ class UserService {
           bValue = b.role;
           break;
         case 'created_at':
-          aValue = new Date(a.created_at).getTime();
-          bValue = new Date(b.created_at).getTime();
+          aValue = new Date(a.createdAt).getTime();
+          bValue = new Date(b.createdAt).getTime();
           break;
         default:
           aValue = a.email.toLowerCase();
@@ -477,8 +477,8 @@ class UserService {
     const query = searchQuery.toLowerCase();
     return users.filter(user =>
       user.email.toLowerCase().includes(query) ||
-      user.first_name?.toLowerCase().includes(query) ||
-      user.last_name?.toLowerCase().includes(query) ||
+      user.firstName?.toLowerCase().includes(query) ||
+      user.lastName?.toLowerCase().includes(query) ||
       this.formatUserName(user).toLowerCase().includes(query) ||
       user.role.toLowerCase().includes(query)
     );
@@ -502,9 +502,9 @@ class UserService {
    * Get user activity status
    */
   getUserActivityStatus(user: User): 'active' | 'inactive' | 'new' {
-    if (!user.is_active) return 'inactive';
+    if (!user.isActive) return 'inactive';
     
-    const createdAt = new Date(user.created_at);
+    const createdAt = new Date(user.createdAt);
     const now = new Date();
     const daysSinceCreation = (now.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24);
     
@@ -517,7 +517,7 @@ class UserService {
    * Format user creation date
    */
   formatUserCreationDate(user: User): string {
-    const date = new Date(user.created_at);
+    const date = new Date(user.createdAt);
     return date.toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
@@ -540,7 +540,7 @@ class UserService {
     // Admin can delete operators and customers in their workspace
     if (isAdminLevel(currentUser.role)) {
       return (targetUser.role === 'operator' || targetUser.role === 'customer') && 
-             currentUser.workspace_id === targetUser.workspace_id;
+             currentUser.workspaceId === targetUser.workspaceId;
     }
     
     return false;
@@ -559,7 +559,7 @@ class UserService {
     // Admin can edit users in their workspace (except other admins)
     if (isAdminLevel(currentUser.role)) {
       return (targetUser.role === 'operator' || targetUser.role === 'customer') && 
-             currentUser.workspace_id === targetUser.workspace_id;
+             currentUser.workspaceId === targetUser.workspaceId;
     }
     
     return false;

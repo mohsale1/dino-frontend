@@ -59,8 +59,8 @@ const VenueStatusManager: React.FC<VenueStatusManagerProps> = ({
     id: venueData.id,
     name: venueData.name,
     isOpen: venueData.is_open || false,
-    isActive: venueData.is_active,
-    lastStatusChange: venueData.updated_at,
+    isActive: venueData.isActive,
+    lastStatusChange: venueData.updatedAt,
     operatingHours: 'Not set'
   } : null);
   
@@ -90,7 +90,7 @@ const VenueStatusManager: React.FC<VenueStatusManagerProps> = ({
       // Update venue status using venueService
       const updateData = statusType === 'open' 
         ? { is_open: !targetVenue.isOpen }
-        : { is_active: !targetVenue.isActive };
+        : { isActive: !targetVenue.isActive };
       
       await venueService.updateVenue(targetVenue.id, updateData);
       
@@ -106,7 +106,9 @@ const VenueStatusManager: React.FC<VenueStatusManagerProps> = ({
       
       setOpenDialog(false);
       setReason('');
-    } catch (error) {    } finally {
+    } catch (error) {
+      // Error handled silently
+    } finally {
       setLoading(false);
     }
   };

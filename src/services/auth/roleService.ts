@@ -8,8 +8,8 @@ export interface Role {
   permission_ids: string[];
   permissions?: any[];
   user_count?: number;
-  created_at: string;
-  updated_at: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface RoleFilters {
@@ -146,8 +146,8 @@ export interface RoleWithPermissions {
   description: string;
   permissions: Permission[];
   user_count: number;
-  created_at: string;
-  updated_at: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Permission {

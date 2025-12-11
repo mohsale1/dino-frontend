@@ -49,7 +49,7 @@ const TableDialog: React.FC<TableDialogProps> = ({
     capacity: 0,
     location: '',
     table_status: 'available',
-    is_active: true,
+    isActive: true,
   });
 
   useEffect(() => {
@@ -59,7 +59,7 @@ const TableDialog: React.FC<TableDialogProps> = ({
         capacity: table.capacity,
         location: table.location || '',
         table_status: table.table_status,
-        is_active: table.is_active,
+        isActive: table.isActive,
       });
     } else {
       // Suggest next available table number
@@ -77,7 +77,7 @@ const TableDialog: React.FC<TableDialogProps> = ({
         capacity: 0,
         location: '',
         table_status: 'available',
-        is_active: true,
+        isActive: true,
       });
     }
   }, [table, open, tables]);
@@ -95,7 +95,7 @@ const TableDialog: React.FC<TableDialogProps> = ({
     
     // Check for duplicate table numbers (only for new tables)
     if (!table) {
-      const isDuplicate = tables.some((t: any) => t.table_number === formData.table_number.trim() && t.is_active);
+      const isDuplicate = tables.some((t: any) => t.table_number === formData.table_number.trim() && t.isActive);
       if (isDuplicate) {
         alert(`Table number ${formData.table_number} already exists. Please choose a different number.`);
         return;
@@ -165,7 +165,7 @@ const TableDialog: React.FC<TableDialogProps> = ({
                     inputMode: 'numeric',
                     pattern: '[0-9]*'
                   }}
-                  error={!table && tables.some(t => t.table_number === formData.table_number.trim() && t.is_active)}
+                  error={!table && tables.some(t => t.table_number === formData.table_number.trim() && t.isActive)}
                   size="medium"
                 />
                 <FormControl fullWidth size="medium">
@@ -223,7 +223,7 @@ const TableDialog: React.FC<TableDialogProps> = ({
                 <FormControlLabel
                   control={
                     <Switch
-                      checked={formData.is_active !== undefined ? formData.is_active : true}
+                      checked={formData.isActive !== undefined ? formData.isActive : true}
                       onChange={(e) => handleChange('is_active', e.target.checked)}
                     />
                   }
@@ -288,7 +288,7 @@ const TableDialog: React.FC<TableDialogProps> = ({
                 inputMode: 'numeric',
                 pattern: '[0-9]*'
               }}
-              error={!table && tables.some(t => t.table_number === formData.table_number.trim() && t.is_active)}
+              error={!table && tables.some(t => t.table_number === formData.table_number.trim() && t.isActive)}
             />
           </Grid>
           <Grid item xs={12} md={6}>
@@ -350,7 +350,7 @@ const TableDialog: React.FC<TableDialogProps> = ({
             <FormControlLabel
               control={
                 <Switch
-                  checked={formData.is_active !== undefined ? formData.is_active : true}
+                  checked={formData.isActive !== undefined ? formData.isActive : true}
                   onChange={(e) => handleChange('is_active', e.target.checked)}
                 />
               }

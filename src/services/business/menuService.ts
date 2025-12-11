@@ -18,7 +18,7 @@ class MenuService {
       
       if (filters?.page) params.append('page', filters.page.toString());
       if (filters?.page_size) params.append('page_size', filters.page_size.toString());
-      if (filters?.venue_id) params.append('venue_id', filters.venue_id);
+      if (filters?.venueId) params.append('venueId', filters.venueId);
       if (filters?.is_available !== undefined) params.append('is_active', filters.is_available.toString());
 
       const response = await apiService.get<any>(`/menu/categories?${params.toString()}`);      
@@ -128,7 +128,7 @@ class MenuService {
       
       if (filters?.page) params.append('page', filters.page.toString());
       if (filters?.page_size) params.append('page_size', filters.page_size.toString());
-      if (filters?.venue_id) params.append('venue_id', filters.venue_id);
+      if (filters?.venueId) params.append('venueId', filters.venueId);
       if (filters?.category_id) params.append('category_id', filters.category_id);
       if (filters?.is_available !== undefined) params.append('is_available', filters.is_available.toString());
       if (filters?.is_vegetarian !== undefined) params.append('is_vegetarian', filters.is_vegetarian.toString());
@@ -407,7 +407,7 @@ class MenuService {
 
     return items.reduce((groups, item) => {
       const categoryId = item.category_id || 'other';
-      const category = categoryMap[categoryId] || { id: 'other', name: 'Other', venue_id: item.venue_id, is_active: true, created_at: '' };
+      const category = categoryMap[categoryId] || { id: 'other', name: 'Other', venueId: item.venueId, isActive: true, createdAt: '' };
       
       if (!groups[categoryId]) {
         groups[categoryId] = { category, items: [] };

@@ -13,7 +13,9 @@ class StorageCleanup {
   static removeRedundantTokenExpiry(): void {
     try {
       // Remove the redundant dino_token_expiry item
-      StorageManager.removeItem('dino_token_expiry');    } catch (error) {    }
+      StorageManager.removeItem('dino_token_expiry');    } catch (error) {
+      // Error handled silently
+    }
   }
 
   /**
@@ -25,7 +27,9 @@ class StorageCleanup {
       // Remove the dino_last_activity item
       if (localStorage.getItem('dino_last_activity')) {
         localStorage.removeItem('dino_last_activity');      }
-    } catch (error) {    }
+    } catch (error) {
+      // Error handled silently
+    }
   }
 
   /**
@@ -38,7 +42,9 @@ class StorageCleanup {
       cacheKeys.forEach(key => {
         localStorage.removeItem(key);      });
       if (cacheKeys.length > 0) {      }
-    } catch (error) {    }
+    } catch (error) {
+      // Error handled silently
+    }
   }
 
   /**
@@ -60,7 +66,9 @@ class StorageCleanup {
       try {
         if (localStorage.getItem(key)) {
           localStorage.removeItem(key);        }
-      } catch (error) {      }
+      } catch (error) {
+      // Error handled silently
+    }
     });
 
     // Remove all cache entries with dino_cache_ prefix
@@ -68,14 +76,18 @@ class StorageCleanup {
       const cacheKeys = Object.keys(localStorage).filter(key => key.startsWith('dino_cache_'));
       cacheKeys.forEach(key => {
         localStorage.removeItem(key);      });
-    } catch (error) {    }
+    } catch (error) {
+      // Error handled silently
+    }
 
     // Remove workspace venue cache entries
     try {
       const workspaceVenueKeys = Object.keys(localStorage).filter(key => key.startsWith('workspace_venues_'));
       workspaceVenueKeys.forEach(key => {
         localStorage.removeItem(key);      });
-    } catch (error) {    }
+    } catch (error) {
+      // Error handled silently
+    }
   }
 
   /**
@@ -154,7 +166,9 @@ if (typeof window !== 'undefined') {
     const workspaceVenueKeys = Object.keys(localStorage).filter(key => key.startsWith('workspace_venues_'));
     workspaceVenueKeys.forEach(key => {
       localStorage.removeItem(key);    });
-  } catch (error) {  }
+  } catch (error) {
+      // Error handled silently
+    }
   
   // Run full cleanup immediately and after a short delay
   StorageCleanup.performCleanup();

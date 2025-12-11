@@ -193,7 +193,7 @@ const CheckoutPage: React.FC = () => {
     setPromoLoading(true);
     try {
       const orderData = {
-        venue_id: actualCafeId,
+        venueId: actualCafeId,
         items: items.map(item => ({
           menu_item_id: item.menuItem.id,
           quantity: item.quantity,
@@ -248,7 +248,7 @@ const CheckoutPage: React.FC = () => {
       }
       
       const orderData = {
-        venue_id: actualCafeId,
+        venueId: actualCafeId,
         table_id: tableId,
         customer: {
           name: customerInfo.name.trim(),
@@ -282,7 +282,7 @@ const CheckoutPage: React.FC = () => {
             email: orderResponseData?.customer?.email || customerInfo.email,
           },
           tableId: orderResponseData?.table_id || tableId,
-          venueId: orderResponseData?.venue_id || actualCafeId,
+          venueId: orderResponseData?.venueId || actualCafeId,
           status: orderResponseData?.status || 'pending',
           estimatedTime: orderResponseData?.estimated_ready_time || orderResponseData?.estimated_minutes || 30,
           items: orderResponseData?.items || items.map(item => ({
@@ -291,7 +291,7 @@ const CheckoutPage: React.FC = () => {
             price: item.menuItem.price,
             total: item.menuItem.price * item.quantity
           })),
-          createdAt: orderResponseData?.created_at || new Date().toISOString(),
+          createdAt: orderResponseData?.createdAt || new Date().toISOString(),
           paymentMethod: selectedPaymentMethod,
           specialInstructions: orderResponseData?.special_instructions || customerInfo.specialInstructions
         };        

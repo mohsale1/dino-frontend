@@ -75,12 +75,12 @@ const MenuItemsGrid: React.FC<MenuItemsGridProps> = ({
   return (
     <Box sx={{ minHeight: '50vh' }}>
       {/* Title and Filters Row */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 2 }}>
-        <Box>
-          <Typography variant="h6" fontWeight="700" color="text.primary" sx={{ mb: 0.5, fontSize: '1.15rem' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' }, mb: { xs: 2, sm: 3 }, flexWrap: 'wrap', gap: 2, flexDirection: { xs: 'column', sm: 'row' } }}>
+        <Box sx={{ width: { xs: '100%', sm: 'auto' } }}>
+          <Typography variant="h6" fontWeight="700" color="text.primary" sx={{ mb: 0.5, fontSize: { xs: '1rem', sm: '1.15rem' } }}>
             Menu Items ({filteredItems.length})
           </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.85rem' }}>
+          <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '0.8125rem', sm: '0.85rem' }, display: { xs: 'none', sm: 'block' } }}>
             Browse and manage your menu offerings
           </Typography>
         </Box>
@@ -90,13 +90,14 @@ const MenuItemsGrid: React.FC<MenuItemsGridProps> = ({
           <Box sx={{ 
             display: 'flex', 
             flexDirection: { xs: 'column', sm: 'row' },
-            gap: 1.5,
+            gap: { xs: 1, sm: 1.5 },
             alignItems: { xs: 'stretch', sm: 'center' },
+            width: { xs: '100%', sm: 'auto' }
           }}>
             {/* Search Bar */}
             <TextField
               size="small"
-              placeholder="Search menu items..."
+              placeholder={theme.breakpoints.down('sm') ? "Search..." : "Search menu items..."}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               sx={{ 
@@ -104,6 +105,7 @@ const MenuItemsGrid: React.FC<MenuItemsGridProps> = ({
                 '& .MuiOutlinedInput-root': {
                   borderRadius: 1,
                   backgroundColor: alpha(theme.palette.grey[50], 0.8),
+                  fontSize: { xs: '0.875rem', sm: '0.875rem' },
                   '&:hover': {
                     backgroundColor: 'background.paper',
                   }
@@ -112,13 +114,13 @@ const MenuItemsGrid: React.FC<MenuItemsGridProps> = ({
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <Search sx={{ color: 'text.secondary', fontSize: 18 }} />
+                    <Search sx={{ color: 'text.secondary', fontSize: { xs: 16, sm: 18 } }} />
                   </InputAdornment>
                 ),
                 endAdornment: searchTerm && (
                   <InputAdornment position="end">
-                    <IconButton size="small" onClick={() => setSearchTerm('')}>
-                      <Clear sx={{ fontSize: 16 }} />
+                    <IconButton size="small" onClick={() => setSearchTerm('')} sx={{ p: 0.5 }}>
+                      <Clear sx={{ fontSize: { xs: 14, sm: 16 } }} />
                     </IconButton>
                   </InputAdornment>
                 ),
@@ -126,13 +128,16 @@ const MenuItemsGrid: React.FC<MenuItemsGridProps> = ({
             />
 
             {/* Category Filter Dropdown */}
-            <FormControl size="small" sx={{ minWidth: 140 }}>
-              <InputLabel>Category</InputLabel>
+            <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 140 } }}>
+              <InputLabel sx={{ fontSize: { xs: '0.875rem', sm: '0.875rem' } }}>Category</InputLabel>
               <Select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
                 label="Category"
-                sx={{ borderRadius: 1 }}
+                sx={{ 
+                  borderRadius: 1,
+                  fontSize: { xs: '0.875rem', sm: '0.875rem' }
+                }}
               >
                 <MenuItem value="all">All Categories</MenuItem>
                 {categories.filter(cat => cat.active !== false).map(category => (
@@ -144,12 +149,18 @@ const MenuItemsGrid: React.FC<MenuItemsGridProps> = ({
             </FormControl>
             
             {/* Quick filter buttons */}
-            <Stack direction="row" spacing={0.75} sx={{ flexShrink: 0 }}>
+            <Stack direction="row" spacing={0.75} sx={{ flexShrink: 0, width: { xs: '100%', sm: 'auto' }, justifyContent: { xs: 'space-between', sm: 'flex-start' } }}>
               <Button
                 variant={vegFilter === 'all' ? 'contained' : 'outlined'}
                 onClick={() => setVegFilter('all')}
                 size="small"
-                sx={{ minWidth: 50, fontSize: '0.7rem', borderRadius: 1, px: 1.5 }}
+                sx={{ 
+                  minWidth: { xs: 45, sm: 50 }, 
+                  fontSize: { xs: '0.65rem', sm: '0.7rem' }, 
+                  borderRadius: 1, 
+                  px: { xs: 1, sm: 1.5 },
+                  flex: { xs: 1, sm: 'none' }
+                }}
               >
                 All
               </Button>
@@ -160,17 +171,18 @@ const MenuItemsGrid: React.FC<MenuItemsGridProps> = ({
                 size="small"
                 startIcon={
                   <Box sx={{ 
-                    width: 5, 
-                    height: 5, 
+                    width: { xs: 4, sm: 5 }, 
+                    height: { xs: 4, sm: 5 }, 
                     borderRadius: '50%', 
                     backgroundColor: '#4CAF50',
                   }} />
                 }
                 sx={{ 
-                  minWidth: 50,
-                  fontSize: '0.7rem',
+                  minWidth: { xs: 45, sm: 50 },
+                  fontSize: { xs: '0.65rem', sm: '0.7rem' },
                   borderRadius: 1,
-                  px: 1.5,
+                  px: { xs: 1, sm: 1.5 },
+                  flex: { xs: 1, sm: 'none' },
                   color: vegFilter === 'veg' ? 'white' : '#4CAF50',
                   borderColor: '#4CAF50',
                   backgroundColor: vegFilter === 'veg' ? '#4CAF50' : 'transparent',
@@ -189,16 +201,17 @@ const MenuItemsGrid: React.FC<MenuItemsGridProps> = ({
                 size="small"
                 startIcon={
                   <Box sx={{ 
-                    width: 5, 
-                    height: 5, 
+                    width: { xs: 4, sm: 5 }, 
+                    height: { xs: 4, sm: 5 }, 
                     backgroundColor: '#F44336',
                   }} />
                 }
                 sx={{ 
-                  minWidth: 70,
-                  fontSize: '0.7rem',
+                  minWidth: { xs: 60, sm: 70 },
+                  fontSize: { xs: '0.65rem', sm: '0.7rem' },
                   borderRadius: 1,
-                  px: 1.5,
+                  px: { xs: 1, sm: 1.5 },
+                  flex: { xs: 1, sm: 'none' },
                   color: vegFilter === 'non-veg' ? 'white' : '#F44336',
                   borderColor: '#F44336',
                   backgroundColor: vegFilter === 'non-veg' ? '#F44336' : 'transparent',
@@ -216,21 +229,22 @@ const MenuItemsGrid: React.FC<MenuItemsGridProps> = ({
             <FlagGate flag="menu.showAddMenuItem">
               <Button
                 variant="contained"
-                startIcon={<Add />}
+                startIcon={<Add fontSize={theme.breakpoints.down('sm') ? "small" : "medium"} />}
                 onClick={onAddItem}
                 sx={{ 
                   borderRadius: 1,
-                  px: 2.5,
-                  py: 0.75,
+                  px: { xs: 2, sm: 2.5 },
+                  py: { xs: 0.75, sm: 0.75 },
                   fontWeight: 600,
-                  fontSize: '0.8rem',
+                  fontSize: { xs: '0.75rem', sm: '0.8rem' },
                   boxShadow: 'none',
+                  width: { xs: '100%', sm: 'auto' },
                   '&:hover': {
                     boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
                   }
                 }}
               >
-                Add Item
+                {theme.breakpoints.down('sm') ? 'Add' : 'Add Item'}
               </Button>
             </FlagGate>
           </Box>

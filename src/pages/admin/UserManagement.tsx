@@ -151,16 +151,16 @@ const UserManagement: React.FC = () => {
 
   const [formData, setFormData] = useState({
     email: '',
-    first_name: '',
-    last_name: '',
+    firstName: '',
+    lastName: '',
     phone: '',
     password: '',
     confirm_password: '',
     role_id: '',
     role_name: ROLES.OPERATOR as string,
-    workspace_id: '',
-    venue_id: '',
-    is_active: true,
+    workspaceId: '',
+    venueId: '',
+    isActive: true,
   });
 
   // Track if users have been loaded to prevent duplicate API calls
@@ -274,16 +274,16 @@ const UserManagement: React.FC = () => {
       
       setFormData({
         email: user.email,
-        first_name: user.first_name,
-        last_name: user.last_name,
+        firstName: user.firstName,
+        lastName: user.lastName,
         phone: user.phone || '',
         password: '', // Don't populate password for editing
         confirm_password: '', // Don't populate password for editing
         role_id: userRoleId,
         role_name: user.role as string,
-        workspace_id: user.workspace_id,
-        venue_id: user.venue_id || '',
-        is_active: user.is_active,
+        workspaceId: user.workspaceId,
+        venueId: user.venueId || '',
+        isActive: user.isActive,
       });
     } else {
       setEditingUser(null);
@@ -294,16 +294,16 @@ const UserManagement: React.FC = () => {
       
       setFormData({
         email: '',
-        first_name: '',
-        last_name: '',
+        firstName: '',
+        lastName: '',
         phone: '',
         password: '',
         confirm_password: '',
         role_id: operatorRole?.id || '',
         role_name: ROLES.OPERATOR as string,
-        workspace_id: getWorkspace()?.id || currentWorkspace?.id || '',
-        venue_id: getVenue()?.id || currentVenue?.id || '',
-        is_active: true,
+        workspaceId: getWorkspace()?.id || currentWorkspace?.id || '',
+        venueId: getVenue()?.id || currentVenue?.id || '',
+        isActive: true,
       });
     }
     
@@ -321,7 +321,7 @@ const UserManagement: React.FC = () => {
   const handleSubmit = async () => {
     try {
       // Validate form data
-      if (!formData.first_name.trim()) {
+      if (!formData.firstName.trim()) {
         setSnackbar({ 
           open: true, 
           message: 'First name is required', 
@@ -330,7 +330,7 @@ const UserManagement: React.FC = () => {
         return;
       }
       
-      if (!formData.last_name.trim()) {
+      if (!formData.lastName.trim()) {
         setSnackbar({ 
           open: true, 
           message: 'Last name is required', 
@@ -429,10 +429,10 @@ const UserManagement: React.FC = () => {
       if (editingUser) {
         // Update user
         const updateData: UserUpdate = {
-          first_name: formData.first_name,
-          last_name: formData.last_name,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
           phone: formData.phone,
-          is_active: formData.is_active,
+          isActive: formData.isActive,
         };
         
         const response = await userService.updateUser(editingUser.id, updateData);
@@ -459,12 +459,12 @@ const UserManagement: React.FC = () => {
           email: formData.email,
           password: formData.password,
           confirm_password: formData.confirm_password,
-          first_name: formData.first_name,
-          last_name: formData.last_name,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
           phone: formData.phone,
           role_id: formData.role_id,
-          workspace_id: formData.workspace_id,
-          venue_ids: formData.venue_id ? [formData.venue_id] : [], // Pass venue_id as array
+          workspaceId: formData.workspaceId,
+          venue_ids: formData.venueId ? [formData.venueId] : [], // Pass venue_id as array
         };
         
         const response = await userService.createUser(createData);
@@ -497,7 +497,7 @@ const UserManagement: React.FC = () => {
     setDeleteModal({
       open: true,
       userId: userId,
-      userName: user.name || `${user.first_name} ${user.last_name}`,
+      userName: user.name || `${user.firstName} ${user.lastName}`,
       loading: false
     });
   };
@@ -613,14 +613,14 @@ const UserManagement: React.FC = () => {
       id: user.id,
       email: user.email,
       phone: user.phone,
-      first_name: user.first_name,
-      last_name: user.last_name,
+      firstName: user.firstName,
+      lastName: user.lastName,
       role: user.role,
-      workspace_id: user.workspace_id,
-      venue_id: user.venue_id,
-      is_active: user.is_active,
-      created_at: user.created_at,
-      updated_at: user.updated_at,
+      workspaceId: user.workspaceId,
+      venueId: user.venueId,
+      isActive: user.isActive,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
     };
     setSelectedUser(userForSelection);
   };
@@ -676,8 +676,8 @@ const UserManagement: React.FC = () => {
   const filteredUsers = sortUsersByRole(users.filter(user => {
     if (!user) return false;
     
-    const firstName = user.first_name || '';
-    const lastName = user.last_name || '';
+    const firstName = user.firstName || '';
+    const lastName = user.lastName || '';
     const email = user.email || '';
     const name = user.name || '';
     
@@ -686,7 +686,7 @@ const UserManagement: React.FC = () => {
                          email.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesRole = filterRole === 'all' || user.role === filterRole;
-    const matchesActive = showInactive || user.is_active;
+    const matchesActive = showInactive || user.isActive;
     
     return matchesSearch && matchesRole && matchesActive;
   }));
@@ -1021,7 +1021,7 @@ const UserManagement: React.FC = () => {
               },
               {
                 label: 'Active Users',
-                value: users.filter(user => user.is_active).length,
+                value: users.filter(user => user.isActive).length,
                 color: '#4CAF50',
                 icon: <CheckCircle />,
                 description: 'Currently active'
@@ -1178,139 +1178,106 @@ const UserManagement: React.FC = () => {
               transition: 'all 0.2s ease-in-out',
               '&:hover': {
                 boxShadow: 3,
-                transform: 'translateY(-2px)',
+                transform: { xs: 'none', md: 'translateY(-2px)' },
               },
             }}
           >
             {filteredUsers.length === 0 ? (
-              <CardContent>
+              <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
                 <Box sx={{ 
-                  overflow: 'auto',
-                  maxWidth: '100%'
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  alignItems: 'center', 
+                  justifyContent: 'center',
+                  py: { xs: 4, sm: 6 },
+                  textAlign: 'center'
                 }}>
-                  <Table>
-                    <TableHead>
-                      <TableRow>
-                        <TableCell sx={{ 
-                          fontWeight: 600, 
-                          fontSize: '0.875rem',
-                          color: 'text.primary',
-                          py: 2
-                        }}>
-                          User
-                        </TableCell>
-                        <TableCell sx={{ 
-                          fontWeight: 600, 
-                          fontSize: '0.875rem',
-                          color: 'text.primary',
-                          py: 2
-                        }}>
-                          Role
-                        </TableCell>
-                        <TableCell sx={{ 
-                          fontWeight: 600, 
-                          fontSize: '0.875rem',
-                          color: 'text.primary',
-                          py: 2
-                        }}>
-                          Status
-                        </TableCell>
-                        <TableCell sx={{ 
-                          fontWeight: 600, 
-                          fontSize: '0.875rem',
-                          color: 'text.primary',
-                          py: 2,
-                          display: { xs: 'none', md: 'table-cell' }
-                        }}>
-                          Last Login
-                        </TableCell>
-                        <TableCell align="center" sx={{ 
-                          fontWeight: 600, 
-                          fontSize: '0.875rem',
-                          color: 'text.primary',
-                          py: 2
-                        }}>
-                          Actions
-                        </TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      <TableRow>
-                        <TableCell colSpan={5}>
-                          <Box sx={{ 
-                            display: 'flex', 
-                            flexDirection: 'column', 
-                            alignItems: 'center', 
-                            justifyContent: 'center',
-                            py: 6,
-                            textAlign: 'center'
-                          }}>
-                            <People sx={{ 
-                              fontSize: 64, 
-                              color: 'text.secondary', 
-                              mb: 2,
-                              opacity: 0.5 
-                            }} />
-                            <Typography variant="h6" fontWeight="600" gutterBottom color="text.secondary">
-                              No Users Found
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 400 }}>
-                              No users found for this venue. Users will appear here once they are assigned to this venue.
-                            </Typography>
-                          </Box>
-                        </TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
+                  <People sx={{ 
+                    fontSize: { xs: 48, sm: 64 }, 
+                    color: 'text.secondary', 
+                    mb: 2,
+                    opacity: 0.5 
+                  }} />
+                  <Typography variant="h6" fontWeight="600" gutterBottom color="text.secondary" sx={{ fontSize: { xs: '1rem', sm: '1.25rem' } }}>
+                    No Users Found
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 400, fontSize: { xs: '0.875rem', sm: '0.875rem' } }}>
+                    No users found for this venue. Users will appear here once they are assigned to this venue.
+                  </Typography>
                 </Box>
               </CardContent>
             ) : (
-              <CardContent>
+              <CardContent sx={{ p: { xs: 0, sm: 0 } }}>
                 <Box sx={{ 
-                  overflow: 'auto',
-                  maxWidth: '100%'
+                  overflowX: 'auto',
+                  width: '100%',
+                  // Custom scrollbar for better mobile experience
+                  '&::-webkit-scrollbar': {
+                    height: 8,
+                  },
+                  '&::-webkit-scrollbar-track': {
+                    backgroundColor: 'grey.100',
+                  },
+                  '&::-webkit-scrollbar-thumb': {
+                    backgroundColor: 'grey.400',
+                    borderRadius: 4,
+                  },
                 }}>
-                  <Table>
+                  <Table sx={{ minWidth: { xs: 650, sm: 750 } }}>
                     <TableHead>
                       <TableRow>
                         <TableCell sx={{ 
                           fontWeight: 600, 
-                          fontSize: '0.875rem',
+                          fontSize: { xs: '0.8125rem', sm: '0.875rem' },
                           color: 'text.primary',
-                          py: 2
+                          py: { xs: 1.5, sm: 2 },
+                          px: { xs: 2, sm: 2 },
+                          position: { xs: 'sticky', sm: 'static' },
+                          left: 0,
+                          backgroundColor: 'background.paper',
+                          zIndex: 1,
+                          minWidth: { xs: 200, sm: 'auto' }
                         }}>
                           User
                         </TableCell>
                         <TableCell sx={{ 
                           fontWeight: 600, 
-                          fontSize: '0.875rem',
+                          fontSize: { xs: '0.8125rem', sm: '0.875rem' },
                           color: 'text.primary',
-                          py: 2
+                          py: { xs: 1.5, sm: 2 },
+                          px: { xs: 2, sm: 2 },
+                          minWidth: 100
                         }}>
                           Role
                         </TableCell>
                         <TableCell sx={{ 
                           fontWeight: 600, 
-                          fontSize: '0.875rem',
+                          fontSize: { xs: '0.8125rem', sm: '0.875rem' },
                           color: 'text.primary',
-                          py: 2
+                          py: { xs: 1.5, sm: 2 },
+                          px: { xs: 2, sm: 2 },
+                          minWidth: 100
                         }}>
                           Status
                         </TableCell>
                         <TableCell sx={{ 
                           fontWeight: 600, 
-                          fontSize: '0.875rem',
+                          fontSize: { xs: '0.8125rem', sm: '0.875rem' },
                           color: 'text.primary',
-                          py: 2,
-                          display: { xs: 'none', md: 'table-cell' }
+                          py: { xs: 1.5, sm: 2 },
+                          px: { xs: 2, sm: 2 },
+                          display: { xs: 'none', md: 'table-cell' },
+                          minWidth: 120
                         }}>
                           Last Login
                         </TableCell>
                         <TableCell align="center" sx={{ 
                           fontWeight: 600, 
-                          fontSize: '0.875rem',
+                          fontSize: { xs: '0.8125rem', sm: '0.875rem' },
                           color: 'text.primary',
-                          py: 2
+                          py: { xs: 1.5, sm: 2 },
+                          px: { xs: 2, sm: 2 },
+                          minWidth: 80
                         }}>
                           Actions
                         </TableCell>
@@ -1327,39 +1294,47 @@ const UserManagement: React.FC = () => {
                           transition: 'background-color 0.2s'
                         }}
                       >
-                        <TableCell sx={{ py: 2.5 }}>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                        <TableCell sx={{ 
+                          py: { xs: 2, sm: 2.5 },
+                          px: { xs: 2, sm: 2 },
+                          position: { xs: 'sticky', sm: 'static' },
+                          left: 0,
+                          backgroundColor: 'background.paper',
+                          zIndex: 1,
+                        }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1.5, sm: 2 } }}>
                             <Avatar 
                               sx={{ 
-                                width: 44, 
-                                height: 44, 
-                                fontSize: '1rem',
+                                width: { xs: 36, sm: 44 }, 
+                                height: { xs: 36, sm: 44 }, 
+                                fontSize: { xs: '0.875rem', sm: '1rem' },
                                 fontWeight: 600,
                                 bgcolor: 'primary.main'
                               }}
                             >
-                              {user.first_name.charAt(0)}{user.last_name.charAt(0)}
+                              {user.firstName.charAt(0)}{user.lastName.charAt(0)}
                             </Avatar>
                             <Box sx={{ minWidth: 0, flex: 1 }}>
                               <Typography 
                                 variant="subtitle2" 
                                 fontWeight="600"
                                 sx={{ 
-                                  fontSize: '0.9375rem',
+                                  fontSize: { xs: '0.875rem', sm: '0.9375rem' },
                                   color: 'text.primary',
                                   mb: 0.5,
                                   lineHeight: 1.3
                                 }}
                               >
-                                {user.name || `${user.first_name} ${user.last_name}`}
+                                {user.name || `${user.firstName} ${user.lastName}`}
                               </Typography>
                               <Typography 
                                 variant="body2" 
                                 color="text.secondary"
                                 sx={{ 
-                                  fontSize: '0.8125rem',
+                                  fontSize: { xs: '0.75rem', sm: '0.8125rem' },
                                   lineHeight: 1.4,
-                                  mb: user.phone ? 0.25 : 0
+                                  mb: user.phone ? 0.25 : 0,
+                                  wordBreak: 'break-word'
                                 }}
                               >
                                 {user.email}
@@ -1369,7 +1344,7 @@ const UserManagement: React.FC = () => {
                                   variant="body2" 
                                   color="text.secondary"
                                   sx={{ 
-                                    fontSize: '0.8125rem',
+                                    fontSize: { xs: '0.75rem', sm: '0.8125rem' },
                                     lineHeight: 1.4,
                                     display: { xs: 'none', lg: 'block' }
                                   }}
@@ -1380,57 +1355,61 @@ const UserManagement: React.FC = () => {
                             </Box>
                           </Box>
                         </TableCell>
-                        <TableCell sx={{ py: 2.5 }}>
+                        <TableCell sx={{ py: { xs: 2, sm: 2.5 }, px: { xs: 2, sm: 2 } }}>
                           <Typography 
                             variant="body2" 
                             sx={{ 
-                              fontSize: '0.8125rem',
+                              fontSize: { xs: '0.75rem', sm: '0.8125rem' },
                               fontWeight: 600,
-                              color: 'text.primary'
+                              color: 'text.primary',
+                              whiteSpace: 'nowrap'
                             }}
                           >
                             {user.role_display_name || getDisplayName(user.role)}
                           </Typography>
                         </TableCell>
-                        <TableCell sx={{ py: 2.5 }}>
+                        <TableCell sx={{ py: { xs: 2, sm: 2.5 }, px: { xs: 2, sm: 2 } }}>
                           <Chip
-                            label={user.status || (user.is_active ? 'Active' : 'Inactive')}
-                            color={user.is_active ? 'success' : 'default'}
+                            label={user.status || (user.isActive ? 'Active' : 'Inactive')}
+                            color={user.isActive ? 'success' : 'default'}
                             size="small"
-                            icon={user.is_active ? <CheckCircle sx={{ fontSize: '1rem' }} /> : <Cancel sx={{ fontSize: '1rem' }} />}
+                            icon={user.isActive ? <CheckCircle sx={{ fontSize: { xs: '0.875rem', sm: '1rem' } }} /> : <Cancel sx={{ fontSize: { xs: '0.875rem', sm: '1rem' } }} />}
                             sx={{ 
-                              fontSize: '0.8125rem',
-                              height: 28,
+                              fontSize: { xs: '0.75rem', sm: '0.8125rem' },
+                              height: { xs: 24, sm: 28 },
                               fontWeight: 500,
                               '& .MuiChip-label': {
-                                px: 1.5
+                                px: { xs: 1, sm: 1.5 }
                               }
                             }}
                           />
                         </TableCell>
-                        <TableCell sx={{ py: 2.5, display: { xs: 'none', md: 'table-cell' } }}>
+                        <TableCell sx={{ py: { xs: 2, sm: 2.5 }, px: { xs: 2, sm: 2 }, display: { xs: 'none', md: 'table-cell' } }}>
                           <Typography 
                             variant="body2" 
                             sx={{ 
                               fontSize: '0.8125rem',
-                              color: 'text.secondary'
+                              color: 'text.secondary',
+                              whiteSpace: 'nowrap'
                             }}
                           >
-                            {formatLastLogin(user.last_login || user.updated_at || user.created_at)}
+                            {formatLastLogin(user.last_login || user.updatedAt || user.createdAt)}
                           </Typography>
                         </TableCell>
-                        <TableCell sx={{ textAlign: 'center', py: 2.5 }}>
+                        <TableCell sx={{ textAlign: 'center', py: { xs: 2, sm: 2.5 }, px: { xs: 2, sm: 2 } }}>
                           <IconButton
                             onClick={(e) => handleMenuClick(e, user)}
                             size="small"
                             sx={{ 
-                              p: 1,
+                              p: { xs: 0.75, sm: 1 },
+                              minWidth: 44,
+                              minHeight: 44,
                               '&:hover': {
                                 backgroundColor: 'action.hover'
                               }
                             }}
                           >
-                            <MoreVert sx={{ fontSize: '1.25rem' }} />
+                            <MoreVert sx={{ fontSize: { xs: '1.125rem', sm: '1.25rem' } }} />
                           </IconButton>
                         </TableCell>
                       </TableRow>
@@ -1479,14 +1458,14 @@ const UserManagement: React.FC = () => {
         {selectedUser && (
           <FlagGate flag="users.showUserStatusToggle">
             <MenuItem onClick={() => {
-              handleToggleUserStatus(selectedUser.id, selectedUser.is_active);
+              handleToggleUserStatus(selectedUser.id, selectedUser.isActive);
               handleMenuClose();
             }}>
               <ListItemIcon>
-                {selectedUser.is_active ? <Block fontSize="small" /> : <CheckCircle fontSize="small" />}
+                {selectedUser.isActive ? <Block fontSize="small" /> : <CheckCircle fontSize="small" />}
               </ListItemIcon>
               <ListItemText>
-                {selectedUser.is_active ? 'Deactivate' : 'Activate'}
+                {selectedUser.isActive ? 'Deactivate' : 'Activate'}
               </ListItemText>
             </MenuItem>
           </FlagGate>
@@ -1548,16 +1527,16 @@ const UserManagement: React.FC = () => {
               <TextField
                 fullWidth
                 label="First Name"
-                value={formData.first_name}
-                onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
+                value={formData.firstName}
+                onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
                 required
                 size={isMobile ? "medium" : "medium"}
               />
               <TextField
                 fullWidth
                 label="Last Name"
-                value={formData.last_name}
-                onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
+                value={formData.lastName}
+                onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
                 required
                 size={isMobile ? "medium" : "medium"}
               />
@@ -1708,8 +1687,8 @@ const UserManagement: React.FC = () => {
               <FormControl fullWidth size={isMobile ? "medium" : "medium"}>
                 <InputLabel>Venue</InputLabel>
                 <Select
-                  value={formData.venue_id}
-                  onChange={(e) => setFormData({ ...formData, venue_id: e.target.value })}
+                  value={formData.venueId}
+                  onChange={(e) => setFormData({ ...formData, venueId: e.target.value })}
                   label="Venue"
                 >
                   <MenuItem value="">All Venues</MenuItem>
@@ -1734,8 +1713,8 @@ const UserManagement: React.FC = () => {
               <FormControlLabel
                 control={
                   <Switch
-                    checked={formData.is_active}
-                    onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
+                    checked={formData.isActive}
+                    onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
                     color="primary"
                   />
                 }
@@ -1790,8 +1769,8 @@ const UserManagement: React.FC = () => {
           user={{
             id: selectedUser.id,
             email: selectedUser.email,
-            firstName: selectedUser.first_name,
-            lastName: selectedUser.last_name,
+            firstName: selectedUser.firstName,
+            lastName: selectedUser.lastName,
             role: selectedUser.role
           }}
         />

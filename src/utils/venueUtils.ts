@@ -36,8 +36,8 @@ export const validateVenueAccess = (
   }
   
   // Priority 2: Check auth user context (fallback)
-  if (authUser?.venue_id || authUser?.venueId) {
-    const venueId = authUser.venue_id || authUser.venueId || null;
+  if (authUser?.venueId || authUser?.venueId) {
+    const venueId = authUser.venueId || authUser.venueId || null;
     return {
       hasVenue: true,
       venueId,

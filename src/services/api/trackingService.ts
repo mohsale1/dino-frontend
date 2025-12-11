@@ -5,7 +5,7 @@ import { ApiResponse } from '../../types/api';
 export interface OrderTracking {
   order_id: string;
   order_number: string;
-  venue_id: string;
+  venueId: string;
   table_id?: string;
   table_number?: string;
   customer: {
@@ -27,8 +27,8 @@ export interface OrderTracking {
   estimated_ready_time?: string;
   actual_ready_time?: string;
   special_instructions?: string;
-  created_at: string;
-  updated_at: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface OrderTrackingItem {
@@ -95,7 +95,7 @@ export interface EstimationFactor {
 }
 
 export interface KitchenStatus {
-  venue_id: string;
+  venueId: string;
   current_load: 'low' | 'medium' | 'high';
   active_orders: number;
   average_preparation_time: number;

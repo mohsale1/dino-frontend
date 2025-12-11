@@ -61,11 +61,11 @@ export const WorkspaceProvider: React.FC<WorkspaceProviderProps> = ({ children }
   const [venuesLoading, setVenuesLoadingState] = useState(false);
 
   const loadVenues = useCallback(async () => {
-    if (!user?.workspace_id || !isAuthenticated || venuesLoading) return;
+    if (!user?.workspaceId || !isAuthenticated || venuesLoading) return;
     
     setVenuesLoadingState(true);
     try {
-      const venueList = await workspaceService.getVenues(user.workspace_id);
+      const venueList = await workspaceService.getVenues(user.workspaceId);
       // Convert API venues to Venue format
       const mappedVenues: Venue[] = venueList.map((venue: any) => {
         // Handle location mapping properly
@@ -91,21 +91,17 @@ export const WorkspaceProvider: React.FC<WorkspaceProviderProps> = ({ children }
           price_range: venue.price_range || 'mid_range',
           rating: venue.rating,
           total_reviews: venue.total_reviews,
-          is_active: venue.is_active !== undefined ? venue.is_active : true,
-          is_open: venue.is_open !== undefined ? venue.is_open : venue.is_active,
-          workspace_id: venue.workspace_id,
+          isActive: venue.isActive !== undefined ? venue.isActive : true,
+          is_open: venue.is_open !== undefined ? venue.is_open : venue.isActive,
+          workspaceId: venue.workspaceId,
           owner_id: venue.owner_id || '',
           operating_hours: venue.operating_hours,
-          created_at: venue.created_at,
-          updated_at: venue.updated_at,
+          createdAt: venue.createdAt,
+          updatedAt: venue.updatedAt,
           // Legacy compatibility fields
           address: location.address,
           ownerId: venue.owner_id || '',
-          workspaceId: venue.workspace_id,
-          isActive: venue.is_active !== undefined ? venue.is_active : true,
-          isOpen: venue.is_open !== undefined ? venue.is_open : venue.is_active,
-          createdAt: venue.created_at,
-          updatedAt: venue.updated_at
+          isOpen: venue.is_open !== undefined ? venue.is_open : venue.isActive
         } as Venue;
       });
       setVenues(mappedVenues);
@@ -119,11 +115,11 @@ export const WorkspaceProvider: React.FC<WorkspaceProviderProps> = ({ children }
     } finally {
       setVenuesLoadingState(false);
     }
-  }, [user?.workspace_id, isAuthenticated, venuesLoading, currentVenue]);
+  }, [user?.workspaceId, isAuthenticated, venuesLoading, currentVenue]);
 
   // Load current venue directly when needed (no caching)
   const loadCurrentVenue = useCallback(async () => {
-    const venueId = user?.venueId || user?.venue_id;
+    const venueId = user?.venueId || user?.venueId;
     if (!venueId || !isAuthenticated) return;
     
     try {
@@ -152,26 +148,24 @@ export const WorkspaceProvider: React.FC<WorkspaceProviderProps> = ({ children }
           price_range: venue.price_range || 'mid_range' as PriceRange,
           rating: venue.rating,
           total_reviews: venue.total_reviews,
-          is_active: venue.is_active !== undefined ? venue.is_active : true,
-          is_open: venue.is_open !== undefined ? venue.is_open : venue.is_active,
-          workspace_id: venue.workspace_id,
+          isActive: venue.isActive !== undefined ? venue.isActive : true,
+          is_open: venue.is_open !== undefined ? venue.is_open : venue.isActive,
+          workspaceId: venue.workspaceId,
           owner_id: user?.id || '',
           operating_hours: venue.operating_hours,
-          created_at: venue.created_at,
-          updated_at: venue.updated_at,
+          createdAt: venue.createdAt,
+          updatedAt: venue.updatedAt,
           // Legacy compatibility fields
           address: location.address,
           ownerId: user?.id || '',
-          workspaceId: venue.workspace_id,
-          isActive: venue.is_active !== undefined ? venue.is_active : true,
-          isOpen: venue.is_open !== undefined ? venue.is_open : venue.is_active,
-          createdAt: venue.created_at,
-          updatedAt: venue.updated_at
+          isOpen: venue.is_open !== undefined ? venue.is_open : venue.isActive
         };
         setCurrentVenue(venueData);
       }
-    } catch (error) {    }
-  }, [user?.venueId, user?.venue_id, user?.id, isAuthenticated]);
+    } catch (error) {
+      // Error handled silently
+    }
+  }, [user?.venueId, user?.venueId, user?.id, isAuthenticated]);
 
   // Load venues for workspace directly (no caching)
   const loadVenuesForWorkspace = useCallback(async (workspaceId: string) => {
@@ -190,9 +184,9 @@ export const WorkspaceProvider: React.FC<WorkspaceProviderProps> = ({ children }
     setLoading(true);
     try {
       // Set current workspace from user data (no API call needed)
-      if (user?.workspace_id) {
+      if (user?.workspaceId) {
         const localWorkspace = {
-          id: user.workspace_id,
+          id: user.workspaceId,
           name: 'Default Workspace',
           description: '',
           ownerId: user.id,
@@ -205,11 +199,13 @@ export const WorkspaceProvider: React.FC<WorkspaceProviderProps> = ({ children }
       }
 
       // Load venues and current venue
-      if (user?.workspace_id) {
+      if (user?.workspaceId) {
         await loadVenues();
       }
       await loadCurrentVenue();
-    } catch (error) {    } finally {
+    } catch (error) {
+      // Error handled silently
+    } finally {
       setLoading(false);
     }
   }, [user, isAuthenticated, loadVenues, loadCurrentVenue]);
@@ -229,25 +225,25 @@ export const WorkspaceProvider: React.FC<WorkspaceProviderProps> = ({ children }
 
   // Load venues when user changes
   useEffect(() => {
-    if (isAuthenticated && user?.workspace_id) {
+    if (isAuthenticated && user?.workspaceId) {
       loadVenues();
     }
-  }, [isAuthenticated, user?.workspace_id, loadVenues]);
+  }, [isAuthenticated, user?.workspaceId, loadVenues]);
 
   // Load current venue when user changes
   useEffect(() => {
-    if (isAuthenticated && (user?.venueId || user?.venue_id)) {
+    if (isAuthenticated && (user?.venueId || user?.venueId)) {
       loadCurrentVenue();
     }
-  }, [isAuthenticated, user?.venueId, user?.venue_id, loadCurrentVenue]);
+  }, [isAuthenticated, user?.venueId, user?.venueId, loadCurrentVenue]);
 
   const refreshWorkspaces = async () => {
     setWorkspacesLoading(true);
     try {
       // Create workspace from user data if available
-      if (user?.workspace_id) {
+      if (user?.workspaceId) {
         const localWorkspace = {
-          id: user.workspace_id,
+          id: user.workspaceId,
           name: 'Default Workspace',
           description: '',
           ownerId: user.id,
@@ -328,9 +324,9 @@ export const WorkspaceProvider: React.FC<WorkspaceProviderProps> = ({ children }
           const localWorkspace = {
             ...response.data,
             ownerId: response.data.owner_id || '',
-            isActive: response.data.is_active,
-            createdAt: response.data.created_at,
-            updatedAt: response.data.updated_at || response.data.created_at
+            isActive: response.data.isActive,
+            createdAt: response.data.createdAt,
+            updatedAt: response.data.updatedAt || response.data.createdAt
           };
           setCurrentWorkspace(localWorkspace as any);
         }
@@ -473,7 +469,7 @@ export const WorkspaceProvider: React.FC<WorkspaceProviderProps> = ({ children }
 return;
     }
     
-    const venueId = user.venueId || user.venue_id;
+    const venueId = user.venueId || user.venueId;
     if (!venueId) {
 return;
     }
@@ -504,21 +500,17 @@ return;
           price_range: venue.price_range || 'mid_range' as PriceRange,
           rating: venue.rating,
           total_reviews: venue.total_reviews,
-          is_active: venue.is_active !== undefined ? venue.is_active : true,
-          is_open: venue.is_open !== undefined ? venue.is_open : venue.is_active,
-          workspace_id: venue.workspace_id,
+          isActive: venue.isActive !== undefined ? venue.isActive : true,
+          is_open: venue.is_open !== undefined ? venue.is_open : venue.isActive,
+          workspaceId: venue.workspaceId,
           owner_id: user.id,
           operating_hours: venue.operating_hours,
-          created_at: venue.created_at,
-          updated_at: venue.updated_at,
+          createdAt: venue.createdAt,
+          updatedAt: venue.updatedAt,
           // Legacy compatibility fields
           address: location.address,
           ownerId: user.id,
-          workspaceId: venue.workspace_id,
-          isActive: venue.is_active !== undefined ? venue.is_active : true,
-          isOpen: venue.is_open !== undefined ? venue.is_open : venue.is_active,
-          createdAt: venue.created_at,
-          updatedAt: venue.updated_at
+          isOpen: venue.is_open !== undefined ? venue.is_open : venue.isActive
         };
         setCurrentVenue(venueData);
       } else {

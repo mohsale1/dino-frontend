@@ -29,7 +29,7 @@ class OrderService {
       
       if (filters?.page) params.append('page', filters.page.toString());
       if (filters?.page_size) params.append('page_size', filters.page_size.toString());
-      if (filters?.venue_id) params.append('venue_id', filters.venue_id);
+      if (filters?.venueId) params.append('venueId', filters.venueId);
       if (filters?.status) params.append('status', filters.status);
       if (filters?.payment_status) params.append('payment_status', filters.payment_status);
       if (filters?.order_type) params.append('order_type', filters.order_type);
@@ -169,11 +169,19 @@ class OrderService {
   async getVenueOrders(venueId: string, filters?: {
     status?: OrderStatus;
     limit?: number;
+    startDate?: string; // YYYY-MM-DD format
+    endDate?: string;   // YYYY-MM-DD format
+    page?: number;
+    pageSize?: number;
   }): Promise<Order[]> {
     try {
       const params = new URLSearchParams();
       if (filters?.status) params.append('status', filters.status);
       if (filters?.limit) params.append('limit', filters.limit.toString());
+      if (filters?.startDate) params.append('start_date', filters.startDate);
+      if (filters?.endDate) params.append('end_date', filters.endDate);
+      if (filters?.page) params.append('page', filters.page.toString());
+      if (filters?.pageSize) params.append('page_size', filters.pageSize.toString());
 
       const response = await apiService.get<Order[]>(`/orders/venues/${venueId}/orders?${params.toString()}`);
       const orders = response.data || [];

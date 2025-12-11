@@ -57,7 +57,7 @@ const TableCard: React.FC<TableCardProps> = ({
         borderRadius: 2,
         borderLeft: `4px solid`,
         borderLeftColor: 'primary.main',
-        opacity: table.is_active ? 1 : 0.6,
+        opacity: table.isActive ? 1 : 0.6,
         transition: 'all 0.2s ease-in-out',
         position: 'relative',
         overflow: 'hidden',
@@ -107,17 +107,17 @@ const TableCard: React.FC<TableCardProps> = ({
             </Typography>
           </Box>
           
-          <Tooltip title={table.is_active ? 'Deactivate' : 'Activate'}>
+          <Tooltip title={table.isActive ? 'Deactivate' : 'Activate'}>
             <IconButton 
               size="small" 
               onClick={() => onToggleTableStatus(table.id)}
               sx={{ 
-                color: table.is_active ? 'success.main' : 'text.disabled',
+                color: table.isActive ? 'success.main' : 'text.disabled',
                 width: 28,
                 height: 28
               }}
             >
-              {table.is_active ? <Visibility fontSize="small" /> : <VisibilityOff fontSize="small" />}
+              {table.isActive ? <Visibility fontSize="small" /> : <VisibilityOff fontSize="small" />}
             </IconButton>
           </Tooltip>
         </Stack>

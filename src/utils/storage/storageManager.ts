@@ -1,3 +1,4 @@
+
 /**
  * Enhanced Storage Manager
  * Centralized storage management with improved caching, validation, and cleanup
@@ -93,7 +94,9 @@ export class StorageManager {
   static removeItem(key: string): void {
     try {
       localStorage.removeItem(key);
-    } catch (error) {    }
+    } catch (error) {
+      // Error handled silently
+    }
   }
 
   /**
@@ -384,7 +387,9 @@ export class StorageManager {
       });
 
       if (migrated > 0) {      }
-    } catch (error) {    }
+    } catch (error) {
+      // Error handled silently
+    }
   }
 
   /**

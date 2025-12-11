@@ -4,11 +4,9 @@ import { User as AuthUser, ROLES, PermissionName, RoleName } from '../types/auth
 import { authService, PermissionService } from '../services/auth';
 import { userCache, CacheKeys, cacheUtils } from '../utils/storage';
 import { preloadCriticalComponents } from '../components/lazy';
-import { STORAGE_KEYS } from '../constants/app';
 import { StorageManager } from '../utils/storage';
-import { USER_ROLES as ROLE_NAMES } from '../constants/app';
 import { tokenRefreshScheduler } from '../utils/tokenRefreshScheduler';
-
+import { normalizeUserData, getActiveVenueId } from '../utils/userDataNormalizer';
 import { apiService } from '../utils/api';
 
 interface AuthContextType {
@@ -19,7 +17,6 @@ interface AuthContextType {
   updateUser: (userData: Partial<UserProfile>) => Promise<void>;
   refreshUser: () => Promise<void>;
   loading: boolean;
-  isLoading: boolean;
   isAuthenticated: boolean;
   // Role-based access control methods
   hasPermission: (permission: PermissionName) => boolean;
@@ -51,7 +48,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     // Check for existing token on app load
     const initializeAuth = async () => {
       try {
-        const token = StorageManager.getItem<string>(STORAGE_KEYS.TOKEN);
+        const token = StorageManager.getItem<string>(StorageManager.KEYS.TOKEN);
         const savedUser = StorageManager.getUserData();
         const savedPermissions = StorageManager.getPermissions();
         
@@ -62,9 +59,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         if (token && savedUser) {
           // Check if token is expired
           if (typeof token === 'string' && isTokenExpired(token)) {
-            StorageManager.removeItem(STORAGE_KEYS.TOKEN);
-            StorageManager.removeItem(STORAGE_KEYS.USER);
-            StorageManager.removeItem(STORAGE_KEYS.PERMISSIONS);
+            StorageManager.removeItem(StorageManager.KEYS.TOKEN);
+            StorageManager.removeItem(StorageManager.KEYS.USER);
+            StorageManager.removeItem(StorageManager.KEYS.PERMISSIONS);
             setUser(null);
             setUserPermissions(null);
             // Clear API authorization header
@@ -75,15 +72,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           // Set authorization header for API requests
           apiService.setAuthorizationHeader(token);
           try {
-            const savedUserData = savedUser;
-            // Ensure firstName is available for display consistency
-            if (savedUserData && !savedUserData.firstName && savedUserData.first_name) {
-              savedUserData.firstName = savedUserData.first_name;
-            }
-            if (savedUserData && !savedUserData.lastName && savedUserData.last_name) {
-              savedUserData.lastName = savedUserData.last_name;
-            }
-            setUser(savedUserData);
+            setUser(savedUser);
             
             // Also restore permissions if available
             if (savedPermissions) {
@@ -94,9 +83,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             }
           } catch (error) {
             // Invalid user data, clear storage
-            StorageManager.removeItem(STORAGE_KEYS.TOKEN);
-            StorageManager.removeItem(STORAGE_KEYS.USER);
-            StorageManager.removeItem(STORAGE_KEYS.PERMISSIONS);
+            StorageManager.removeItem(StorageManager.KEYS.TOKEN);
+            StorageManager.removeItem(StorageManager.KEYS.USER);
+            StorageManager.removeItem(StorageManager.KEYS.PERMISSIONS);
             setUser(null);
             setUserPermissions(null);
           }
@@ -107,9 +96,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           apiService.setAuthorizationHeader(null);
         }
       } catch (error) {
-        StorageManager.removeItem(STORAGE_KEYS.TOKEN);
-        StorageManager.removeItem(STORAGE_KEYS.USER);
-        StorageManager.removeItem(STORAGE_KEYS.PERMISSIONS);
+        StorageManager.removeItem(StorageManager.KEYS.TOKEN);
+        StorageManager.removeItem(StorageManager.KEYS.USER);
+        StorageManager.removeItem(StorageManager.KEYS.PERMISSIONS);
         setUser(null);
         setUserPermissions(null);
         // Clear authorization header
@@ -135,40 +124,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         apiService.debugConfiguration();
       }
       
-      // authService sends plain password to backend
+      // authService sends plain password to backend and fetches user data
       const response = await authService.login(email, password);
       
       // Store token
-      StorageManager.setItem(STORAGE_KEYS.TOKEN, response.access_token);
+      StorageManager.setItem(StorageManager.KEYS.TOKEN, response.access_token);
       
       // Set authorization header for immediate API requests
       apiService.setAuthorizationHeader(response.access_token);
       
-      // Enhanced user data mapping with proper fallbacks
-      const localUser: UserProfile = {
-        id: response.user.id,
-        email: response.user.email,
-        first_name: response.user.first_name || response.user.firstName || '',
-        last_name: response.user.last_name || response.user.lastName || '',
-        firstName: response.user.first_name || response.user.firstName,
-        lastName: response.user.last_name || response.user.lastName,
-        phone: response.user.phone,
-        role: response.user.role || 'operator', // Ensure role is always set
-        workspace_id: response.user.workspace_id || response.user.workspaceId,
-        workspaceId: response.user.workspace_id || response.user.workspaceId,
-        venue_id: response.user.venue_id || response.user.venueId,
-        venueId: response.user.venue_id || response.user.venueId,
-        is_active: response.user.is_active !== undefined ? response.user.is_active : (response.user.isActive ?? true),
-        isActive: response.user.is_active !== undefined ? response.user.is_active : (response.user.isActive ?? true),
-        isVerified: true,
-        created_at: response.user.created_at,
-        createdAt: new Date(response.user.created_at),
-        updatedAt: new Date(response.user.updated_at || response.user.created_at),
-        permissions: []
-      };
+      // User data is now fetched separately in authService.login()
+      // response.user will be populated by the /auth/me call
+      if (!response.user) {
+        throw new Error('Failed to retrieve user data');
+      }
+      
+      // Normalize user data to camelCase format
+      const localUser = normalizeUserData(response.user);
       
       setUser(localUser);
-      // Store the converted user data
       StorageManager.setUserData(localUser);
       
       // Fetch and store user permissions with enhanced error handling
@@ -195,13 +169,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setUserPermissions(basicPermissions);
       }
 
+      // Fetch venue data after user login
+      try {
+        const { venueService } = await import('../services/venue/venueService');
+        const venueData = await venueService.fetchVenueForLogin();
+        if (venueData) {
+          // Venue data is already cached by venueService
+        }
+      } catch (venueError: any) {
+        // Continue with login even if venue fetch fails
+        console.warn('Failed to fetch venue data during login:', venueError);
+      }
+
       // Start token refresh scheduler
       tokenRefreshScheduler.start();
       
       // Preload critical components and data
       setTimeout(() => {
         preloadCriticalComponents();
-        cacheUtils.preloadCriticalData(localUser.id, localUser.venue_id || localUser.venueId);
+        cacheUtils.preloadCriticalData(localUser.id, localUser.venueId);
       }, 100);
       
       // Return user data for routing decisions
@@ -209,9 +195,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } catch (error: any) {
       // Enhanced error handling
       // Clear any partial authentication state
-      StorageManager.removeItem(STORAGE_KEYS.TOKEN);
-      StorageManager.removeItem(STORAGE_KEYS.USER);
-      StorageManager.removeItem(STORAGE_KEYS.PERMISSIONS);
+      StorageManager.removeItem(StorageManager.KEYS.TOKEN);
+      StorageManager.removeItem(StorageManager.KEYS.USER);
+      StorageManager.removeItem(StorageManager.KEYS.PERMISSIONS);
       setUser(null);
       setUserPermissions(null);
       
@@ -224,27 +210,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const register = async (userData: UserRegistration): Promise<void> => {
     try {
       setLoading(true);
-      
-      // Convert local registration data to API format
-      const apiUserData = {
-        email: userData.email,
-        phone: userData.phone,
-        first_name: userData.first_name,
-        last_name: userData.last_name,
-        password: userData.password,
-        confirm_password: userData.confirm_password,
-        role_id: userData.role_id,
-        workspace_id: userData.workspace_id,
-        venue_id: userData.venue_id,
-        date_of_birth: userData.date_of_birth,
-        gender: userData.gender
-      };
-      
-      await authService.register(apiUserData);
-      
-      // Registration doesn't return tokens, just success
-      // User needs to login after registration
-      
+      await authService.register(userData);
     } catch (error) {
       throw error;
     } finally {
@@ -279,39 +245,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const updateUser = async (userData: Partial<UserProfile>): Promise<void> => {
     try {
-      // Convert local user data to API format
-      const apiUserData = {
-        first_name: userData.first_name || userData.firstName,
-        last_name: userData.last_name || userData.lastName,
+      // Send camelCase to backend (backend will convert internally)
+      const apiUserData: Partial<UserProfile> = {
+        firstName: userData.firstName,
+        lastName: userData.lastName,
         phone: userData.phone,
-        date_of_birth: userData.date_of_birth || (userData.dateOfBirth?.toISOString().split('T')[0]),
-        is_active: userData.is_active ?? userData.isActive
+        dateOfBirth: userData.dateOfBirth,
+        isActive: userData.isActive
       };
       
       const updatedUser = await authService.updateProfile(apiUserData);
-      
-      // Convert API user back to local format
-      const localUser: UserProfile = {
-        id: updatedUser.id,
-        email: updatedUser.email,
-        first_name: updatedUser.first_name,
-        last_name: updatedUser.last_name,
-        firstName: updatedUser.first_name,
-        lastName: updatedUser.last_name,
-        phone: updatedUser.phone,
-        role: updatedUser.role,
-        workspace_id: updatedUser.workspace_id,
-        workspaceId: updatedUser.workspace_id,
-        venue_id: updatedUser.venue_id,
-        venueId: updatedUser.venue_id,
-        is_active: updatedUser.is_active,
-        isActive: updatedUser.is_active,
-        isVerified: true,
-        created_at: updatedUser.created_at,
-        createdAt: new Date(updatedUser.created_at),
-        updatedAt: new Date(updatedUser.updated_at || updatedUser.created_at),
-        permissions: []
-      };
+      const localUser = normalizeUserData(updatedUser);
       
       setUser(localUser);
       StorageManager.setUserData(localUser);
@@ -323,34 +267,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const refreshUser = async (): Promise<void> => {
     try {
       const currentUser = await authService.getCurrentUser();
-      
-      // Convert API user to local format
-      const localUser: UserProfile = {
-        id: currentUser.id,
-        email: currentUser.email,
-        first_name: currentUser.first_name,
-        last_name: currentUser.last_name,
-        firstName: currentUser.first_name,
-        lastName: currentUser.last_name,
-        phone: currentUser.phone,
-        role: currentUser.role,
-        workspace_id: currentUser.workspace_id,
-        workspaceId: currentUser.workspace_id,
-        venue_id: currentUser.venue_id,
-        venueId: currentUser.venue_id,
-        is_active: currentUser.is_active,
-        isActive: currentUser.is_active,
-        isVerified: true,
-        created_at: currentUser.created_at,
-        createdAt: new Date(currentUser.created_at),
-        updatedAt: new Date(currentUser.updated_at || currentUser.created_at),
-        permissions: []
-      };
+      const localUser = normalizeUserData(currentUser);
       
       setUser(localUser);
       StorageManager.setUserData(localUser);
     } catch (error) {
-      // If refresh fails, user might need to login again
       logout();
       throw error;
     }
@@ -400,8 +321,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return {
       id: user.id,
       email: user.email,
-      firstName: user.first_name || user.firstName,
-      lastName: user.last_name || user.lastName,
+      firstName: user.firstName,
+      lastName: user.lastName,
       role: role,
       permissions: role.permissions,
       isActive: true,
@@ -530,7 +451,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         
         // Only fetch permissions if we don't have any cached and user is authenticated
         if (user && !savedPermissions && !userPermissions) {
-          const token = StorageManager.getItem(STORAGE_KEYS.TOKEN);
+          const token = StorageManager.getItem(StorageManager.KEYS.TOKEN);
           if (token && typeof token === 'string' && !isTokenExpired(token)) {
             try {              const permissionsData = await authService.getUserPermissions();
               setUserPermissions(permissionsData);
@@ -539,7 +460,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             }
           }
         }
-      } catch (error) {      }
+      } catch (error) {
+      // Error handled silently
+    }
     };
 
     if (!loading) {
@@ -555,7 +478,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     updateUser,
     refreshUser,
     loading,
-    isLoading: loading,
     isAuthenticated: !!user,
     hasPermission,
     hasRole,

@@ -320,13 +320,13 @@ const TableAreas: React.FC<TableAreasProps> = ({
                       <Box sx={{ textAlign: 'center' }}>
                         <Chip
                           label={
-                            tablesInArea.some(t => t.is_active) 
+                            tablesInArea.some(t => t.isActive) 
                               ? 'Active' 
                               : (area.active ? 'Active' : 'Inactive')
                           }
                           size="small"
                           color={
-                            tablesInArea.some(t => t.is_active) 
+                            tablesInArea.some(t => t.isActive) 
                               ? 'success' 
                               : (area.active ? 'success' : 'default')
                           }

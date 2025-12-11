@@ -66,7 +66,7 @@ const mapOrderStatusToTrackingStatus = (orderStatus: OrderStatus): string => {
 const defaultOrder: OrderTracking = {
   order_id: '',
   order_number: '',
-  venue_id: '',
+  venueId: '',
   customer: {
     name: '',
     phone: '',
@@ -81,8 +81,8 @@ const defaultOrder: OrderTracking = {
     delivery_fee: 0,
   },
   timeline: [],
-  created_at: '',
-  updated_at: '',
+  createdAt: '',
+  updatedAt: '',
 };
 
 const OrderTrackingPage: React.FC = () => {
@@ -353,7 +353,7 @@ const OrderTrackingPage: React.FC = () => {
                   sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
                 >
                   {order.table_number && `Table ${order.table_number} • `}
-                  Ordered at {formatTime(order.created_at)}
+                  Ordered at {formatTime(order.createdAt)}
                 </Typography>
                 <Typography 
                   variant="body2" 

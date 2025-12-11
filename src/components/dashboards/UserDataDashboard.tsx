@@ -437,7 +437,7 @@ const UserDataDashboard: React.FC<UserDataDashboardProps> = ({ className }) => {
                               fontSize: { xs: '0.75rem', sm: '0.875rem' },
                               display: { xs: 'none', sm: 'table-cell' }
                             }}>
-                              {new Date(order.created_at).toLocaleTimeString()}
+                              {new Date(order.createdAt).toLocaleTimeString()}
                             </TableCell>
                           </TableRow>
                         ))}
@@ -704,7 +704,7 @@ const UserDataDashboard: React.FC<UserDataDashboardProps> = ({ className }) => {
                             fontSize: { xs: '0.75rem', sm: '0.875rem' },
                             display: { xs: 'none', lg: 'table-cell' }
                           }}>
-                            {new Date(order.created_at).toLocaleString()}
+                            {new Date(order.createdAt).toLocaleString()}
                           </TableCell>
                           <TableCell>
                             <Stack direction="row" spacing={0.5}>
@@ -820,7 +820,7 @@ const UserDataDashboard: React.FC<UserDataDashboardProps> = ({ className }) => {
                       {users.map((user: any) => (
                         <TableRow key={user.id}>
                           <TableCell sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
-                            {user.first_name} {user.last_name}
+                            {user.firstName} {user.lastName}
                           </TableCell>
                           <TableCell sx={{ 
                             fontSize: { xs: '0.75rem', sm: '0.875rem' },
@@ -841,8 +841,8 @@ const UserDataDashboard: React.FC<UserDataDashboardProps> = ({ className }) => {
                           </TableCell>
                           <TableCell>
                             <Chip
-                              label={user.is_active ? 'Active' : 'Inactive'}
-                              color={user.is_active ? 'success' : 'error'}
+                              label={user.isActive ? 'Active' : 'Inactive'}
+                              color={user.isActive ? 'success' : 'error'}
                               size="small"
                               sx={{ fontSize: { xs: '0.7rem', sm: '0.75rem' } }}
                             />

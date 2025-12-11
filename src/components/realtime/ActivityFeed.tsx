@@ -87,7 +87,7 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({
     // Process venue updates
     venueUpdates.forEach(update => {
       newActivities.push({
-        id: `venue_${update.venue_id}_${Date.now()}`,
+        id: `venue_${update.venueId}_${Date.now()}`,
         type: 'venue',
         title: update.venue_name,
         description: `Venue ${update.is_open ? 'opened' : 'closed'}`,

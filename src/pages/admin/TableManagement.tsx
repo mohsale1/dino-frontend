@@ -118,7 +118,7 @@ const TableManagement = () => {
     try {
       const [areasData, tablesData] = await Promise.all([
         tableService.getAreas(venue.id),
-        tableService.getTables({ venue_id: venue.id })
+        tableService.getTables({ venueId: venue.id })
       ]);      
       let validTables: Table[] = [];
       if (tablesData && tablesData.data && Array.isArray(tablesData.data)) {
@@ -158,7 +158,7 @@ const TableManagement = () => {
         setError(null);
         const [areasData, tablesData] = await Promise.all([
           tableService.getAreas(venue.id),
-          tableService.getTables({ venue_id: venue.id })
+          tableService.getTables({ venueId: venue.id })
         ]);
         let initialTables: Table[] = [];
         if (Array.isArray(tablesData?.data)) {
@@ -228,7 +228,7 @@ const TableManagement = () => {
           capacity: tableData.capacity || editingTable.capacity,
           location: tableData.location || editingTable.location,
           table_status: tableData.table_status || editingTable.table_status,
-          is_active: tableData.is_active !== undefined ? tableData.is_active : editingTable.is_active,
+          isActive: tableData.isActive !== undefined ? tableData.isActive : editingTable.isActive,
         });
         if (response.success && response.data) {
           await refreshData();
@@ -245,7 +245,7 @@ const TableManagement = () => {
           table_number: tableData.table_number || '1',
           capacity: typeof tableData.capacity === 'number' ? tableData.capacity : parseInt(tableData.capacity) || 2,
           location: tableData.location || '',
-          venue_id: venue.id,
+          venueId: venue.id,
         };
         
         // Validate required fields
@@ -255,7 +255,7 @@ const TableManagement = () => {
         if (!createData.capacity || createData.capacity < 1) {
           throw new Error('Table capacity is required and must be at least 1');
         }
-        if (!createData.venue_id) {
+        if (!createData.venueId) {
           throw new Error('Venue ID is required');
         }        
         const response = await tableService.createTable(createData);

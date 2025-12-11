@@ -232,7 +232,9 @@ const VenueSettings: React.FC = () => {
       if (!userData && !userDataLoading) {
         try {
           await refreshUserData();
-        } catch (error) {        }
+        } catch (error) {
+      // Error handled silently
+    }
         return;
       }
       
@@ -273,7 +275,7 @@ const VenueSettings: React.FC = () => {
             advanced: prevSettings.advanced, // Keep existing advanced settings
           }));
           
-          const isActive = venueData.is_active !== undefined ? venueData.is_active : venueData.isActive;
+          const isActive = venueData.isActive !== undefined ? venueData.isActive : venueData.isActive;
           setVenueActive(isActive || false);        }
       } catch (error) {        // API failed - show error alert but keep UI visible
         setError('Network error. Please check your connection.');
@@ -416,7 +418,7 @@ const VenueSettings: React.FC = () => {
         email: currentSettings.email.trim() || null,
       };
       
-      console.log('Saving venue settings:', updateData); // Debug log
+      // console.log('Saving venue settings:', updateData); // Debug log
       
       await venueService.updateVenue(venue.id, updateData);
       

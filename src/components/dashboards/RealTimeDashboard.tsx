@@ -35,7 +35,7 @@ const RealTimeDashboard: React.FC<RealTimeDashboardProps> = ({ className = '' })
   const { 
     data: dashboardData, 
     loading: dashboardLoading, 
-    error: dashboardError 
+    error: _dashboardError 
   } = useRealTimeDashboard();
 
   // Show connection status notifications
@@ -83,7 +83,7 @@ const RealTimeDashboard: React.FC<RealTimeDashboardProps> = ({ className = '' })
             <ConnectionStatus showLabel={true} />
           </div>
           <div className="text-sm text-gray-500">
-            {user?.venue_id ? `Venue: ${user.venue_id}` : 'All Venues'}
+            {user?.venueId ? `Venue: ${user.venueId}` : 'All Venues'}
           </div>
         </div>
       </Card>
@@ -175,7 +175,7 @@ const RealTimeDashboard: React.FC<RealTimeDashboardProps> = ({ className = '' })
                             <div className="text-right">
                               <p className="text-sm font-medium">₹{(order.subtotal + order.tax_amount - (order.discount_amount || 0)).toFixed(2)}</p>
                               <p className="text-xs text-gray-500">
-                                {new Date(order.created_at).toLocaleTimeString()}
+                                {new Date(order.createdAt).toLocaleTimeString()}
                               </p>
                             </div>
                           </div>

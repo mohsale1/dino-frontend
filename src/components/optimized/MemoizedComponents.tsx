@@ -24,14 +24,14 @@ import {
 interface UserCardProps {
   user: {
     id: string;
-    first_name: string;
-    last_name: string;
+    firstName: string;
+    lastName: string;
     email: string;
     phone?: string;
     role: string;
     role_display_name?: string;
     status: string;
-    is_active: boolean;
+    isActive: boolean;
     last_logged_in?: string;
     updated_at?: string;
     created_at?: string;
@@ -73,11 +73,11 @@ export const UserCard = React.memo<UserCardProps>(({
       <CardContent sx={{ p: 2 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
           <Avatar sx={{ width: 40, height: 40, bgcolor: 'primary.main' }}>
-            {user.first_name.charAt(0)}{user.last_name.charAt(0)}
+            {user.firstName.charAt(0)}{user.lastName.charAt(0)}
           </Avatar>
           <Box sx={{ flex: 1, minWidth: 0 }}>
             <Typography variant="subtitle2" fontWeight="600" noWrap>
-              {user.user_name || `${user.first_name} ${user.last_name}`}
+              {user.user_name || `${user.firstName} ${user.lastName}`}
             </Typography>
             <Typography variant="body2" color="text.secondary" noWrap>
               {user.email}
@@ -125,14 +125,14 @@ UserCard.displayName = 'UserCard';
 interface UserTableRowProps {
   user: {
     id: string;
-    first_name: string;
-    last_name: string;
+    firstName: string;
+    lastName: string;
     email: string;
     phone?: string;
     role: string;
     role_display_name?: string;
     status: string;
-    is_active: boolean;
+    isActive: boolean;
     last_logged_in?: string;
     updated_at?: string;
     created_at?: string;
@@ -176,7 +176,7 @@ export const UserTableRow = React.memo<UserTableRowProps>(({
             height: { xs: 32, sm: 40 },
             bgcolor: 'primary.main'
           }}>
-            {user.first_name.charAt(0)}{user.last_name.charAt(0)}
+            {user.firstName.charAt(0)}{user.lastName.charAt(0)}
           </Avatar>
           <Box sx={{ minWidth: 0, flex: 1 }}>
             <Typography 
@@ -188,7 +188,7 @@ export const UserTableRow = React.memo<UserTableRowProps>(({
                 textOverflow: 'ellipsis'
               }}
             >
-              {user.user_name || `${user.first_name} ${user.last_name}`}
+              {user.user_name || `${user.firstName} ${user.lastName}`}
             </Typography>
             <Typography 
               variant="body2" 

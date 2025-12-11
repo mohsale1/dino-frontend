@@ -45,28 +45,18 @@ export interface UserProfile {
   id: string;
   email: string;
   phone?: string;
-  first_name: string;
-  last_name: string;
-  // Legacy camelCase properties for compatibility
-  firstName?: string;
-  lastName?: string;
+  firstName: string;
+  lastName: string;
   role: UserRole;
-  workspace_id?: string;
-  venue_id?: string;
-  // Legacy camelCase properties for compatibility
   workspaceId?: string;
-  venueId?: string;
-  is_active: boolean;
-  isActive?: boolean;
+  venueId?: string; // Current/active venue ID (first from venueIds)
+  venueIds?: string[]; // All venue IDs user has access to
+  isActive: boolean;
   isVerified?: boolean;
-  created_at: string;
-  updated_at?: string;
-  createdAt?: Date;
+  createdAt: Date;
   updatedAt?: Date;
-  date_of_birth?: string;
   dateOfBirth?: Date;
   gender?: 'male' | 'female' | 'other' | 'prefer_not_to_say';
-  // Additional legacy properties
   permissions?: any[];
   name?: string;
   profileImageUrl?: string;
@@ -81,13 +71,13 @@ export interface UserProfile {
 export interface UserRegistration {
   email: string;
   phone?: string;
-  first_name: string;
-  last_name: string;
+  firstName: string;
+  lastName: string;
   password: string;
   confirm_password: string;
   role_id?: string;
-  workspace_id: string;
-  venue_id?: string;
+  workspaceId: string;
+  venueId?: string;
   date_of_birth?: string;
   gender?: 'male' | 'female' | 'other' | 'prefer_not_to_say';
 }
@@ -105,8 +95,8 @@ export interface WorkspaceRegistration {
   venue_type?: string;
   owner_email: string;
   owner_phone?: string;
-  owner_first_name: string;
-  owner_last_name: string;
+  owner_firstName: string;
+  owner_lastName: string;
   owner_password: string;
   confirm_password: string;
 }
@@ -125,10 +115,10 @@ export interface Workspace {
   description?: string;
   business_type: string;
   owner_id: string;
-  venue_ids: string[];
-  is_active: boolean;
-  created_at: string;
-  updated_at?: string;
+  venueIds: string[];
+  isActive: boolean;
+  createdAt: string;
+  updatedAt?: string;
 }
 
 export interface WorkspaceCreate {
@@ -140,11 +130,11 @@ export interface WorkspaceCreate {
 export interface WorkspaceUpdate {
   display_name?: string;
   description?: string;
-  is_active?: boolean;
+  isActive?: boolean;
 }
 
 export interface WorkspaceStatistics {
-  workspace_id: string;
+  workspaceId: string;
   workspace_name: string;
   total_venues: number;
   active_venues: number;
@@ -152,8 +142,8 @@ export interface WorkspaceStatistics {
   active_users: number;
   total_orders: number;
   total_menu_items: number;
-  created_at: string;
-  is_active: boolean;
+  createdAt: string;
+  isActive: boolean;
 }
 
 // =============================================================================
@@ -172,24 +162,20 @@ export interface Venue {
   price_range: PriceRange;
   rating?: number;
   total_reviews?: number;
-  is_active: boolean;
+  isActive: boolean;
   is_open: boolean; // Required for venue status
   status?: string; // Venue status (e.g., 'open', 'closed', 'busy')
-  workspace_id: string;
+  workspaceId: string;
   owner_id?: string; // Added for compatibility
   operating_hours?: OperatingHours[];
   theme?: string; // Venue theme (e.g., 'pet', 'default')
   menu_template?: string; // Menu template name (e.g., 'modern', 'classic', 'elegant')
   menu_template_config?: any; // Full template configuration JSON
-  created_at: string;
-  updated_at?: string;
-  createdAt?: string; // Legacy compatibility
-  updatedAt?: string; // Legacy compatibility
+  createdAt: string;
+  updatedAt?: string;
   // Legacy compatibility fields
   address?: string; // For backward compatibility
   ownerId?: string; // For backward compatibility
-  workspaceId?: string; // For backward compatibility
-  isActive?: boolean; // For backward compatibility
   isOpen?: boolean; // For backward compatibility
 }
 
@@ -224,7 +210,7 @@ export interface VenueCreate {
   cuisine_types: string[];
   price_range: PriceRange;
   operating_hours?: OperatingHours[];
-  workspace_id: string;
+  workspaceId: string;
   is_open?: boolean; // Optional for creation, defaults to false
 }
 
@@ -237,7 +223,7 @@ export interface VenueUpdate {
 
   cuisine_types?: string[];
   price_range?: PriceRange;
-  is_active?: boolean;
+  isActive?: boolean;
   is_open?: boolean;
   status?: string;
   theme?: string;
@@ -246,7 +232,7 @@ export interface VenueUpdate {
 }
 
 export interface VenueAnalytics {
-  venue_id: string;
+  venueId: string;
   total_menu_items: number;
   total_tables: number;
   recent_orders: number;
@@ -254,11 +240,11 @@ export interface VenueAnalytics {
   rating: number;
   total_reviews: number;
   subscription_status: string;
-  is_active: boolean;
+  isActive: boolean;
 }
 
 export interface VenueStatus {
-  venue_id: string;
+  venueId: string;
   is_open: boolean;
   current_status: string;
   next_opening?: string;
@@ -282,12 +268,12 @@ export interface WorkspaceVenue {
   };
   phone?: string;
   email?: string;
-  is_active: boolean;
+  isActive: boolean;
   is_open: boolean;
   status: string;
   subscription_status: string;
-  created_at: string;
-  updated_at: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // =============================================================================
@@ -298,10 +284,10 @@ export interface MenuCategory {
   id: string;
   name: string;
   description?: string;
-  venue_id: string;
-  is_active: boolean;
-  created_at: string;
-  updated_at?: string;
+  venueId: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt?: string;
 }
 
 export interface MenuItem {
@@ -310,7 +296,7 @@ export interface MenuItem {
   description?: string;
   base_price: number;
   category_id: string;
-  venue_id: string;
+  venueId: string;
   is_vegetarian?: boolean;
   is_vegan?: boolean;
   is_gluten_free?: boolean;
@@ -319,20 +305,20 @@ export interface MenuItem {
   nutritional_info?: Record<string, any>;
   image_urls?: string[];
   is_available: boolean;
-  created_at: string;
-  updated_at?: string;
+  createdAt: string;
+  updatedAt?: string;
 }
 
 export interface MenuCategoryCreate {
   name: string;
   description?: string;
-  venue_id: string;
+  venueId: string;
 }
 
 export interface MenuCategoryUpdate {
   name?: string;
   description?: string;
-  is_active?: boolean;
+  isActive?: boolean;
 }
 
 export interface MenuItemCreate {
@@ -340,7 +326,7 @@ export interface MenuItemCreate {
   description?: string;
   base_price: number;
   category_id: string;
-  venue_id: string;
+  venueId: string;
   is_vegetarian?: boolean;
   is_vegan?: boolean;
   is_gluten_free?: boolean;
@@ -372,12 +358,12 @@ export interface Table {
   table_number: string;
   capacity: number;
   location?: string;
-  venue_id: string;
+  venueId: string;
   qr_code: string;
   table_status: TableStatus;
-  is_active: boolean;
-  created_at: string;
-  updated_at?: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt?: string;
 }
 
 export type TableStatus = 'available' | 'reserved' | 'occupied' | 'maintenance' | 'out_of_service';
@@ -386,7 +372,7 @@ export interface TableCreate {
   table_number: string;
   capacity: number;
   location?: string;
-  venue_id: string;
+  venueId: string;
 }
 
 export interface TableUpdate {
@@ -394,20 +380,20 @@ export interface TableUpdate {
   capacity?: number;
   location?: string;
   table_status?: TableStatus;
-  is_active?: boolean;
+  isActive?: boolean;
 }
 
 export interface TableQRCode {
   table_id: string;
   qr_code: string;
   qr_code_url?: string;
-  venue_id: string;
+  venueId: string;
   table_number: string;
 }
 
 export interface QRCodeVerification {
   table_id: string;
-  venue_id: string;
+  venueId: string;
   table_number: string;
   is_valid: boolean;
 }
@@ -419,7 +405,7 @@ export interface QRCodeVerification {
 export interface Order {
   id: string;
   order_number: string;
-  venue_id: string;
+  venueId: string;
   table_id?: string;
   table_number?: string; // User-friendly table number from backend
   customer_id: string;
@@ -434,8 +420,8 @@ export interface Order {
   special_instructions?: string;
   estimated_ready_time?: string;
   actual_ready_time?: string;
-  created_at: string;
-  updated_at?: string;
+  createdAt: string;
+  updatedAt?: string;
 }
 
 export interface OrderItem {
@@ -454,7 +440,7 @@ export type PaymentStatus = 'pending' | 'processing' | 'paid' | 'failed' | 'refu
 export type PaymentMethod = 'cash' | 'card' | 'upi' | 'wallet' | 'net_banking';
 
 export interface OrderCreate {
-  venue_id: string;
+  venueId: string;
   customer_id?: string;
   order_type: OrderType;
   table_id?: string;
@@ -469,7 +455,7 @@ export interface OrderItemCreate {
 }
 
 export interface PublicOrderCreate {
-  venue_id: string;
+  venueId: string;
   table_id?: string;
   customer: CustomerCreate;
   items: OrderItemCreate[];
@@ -529,8 +515,8 @@ export interface OrderReceipt {
 
 export interface DashboardData {
   user_role: UserRole;
-  workspace_id: string;
-  venue_id?: string;
+  workspaceId: string;
+  venueId?: string;
   summary: DashboardSummary;
   [key: string]: any; // Additional role-specific data
 }
@@ -578,7 +564,7 @@ export interface OperatorDashboard extends DashboardData {
 }
 
 export interface LiveOrderData {
-  venue_id: string;
+  venueId: string;
   timestamp: string;
   summary: {
     total_active_orders: number;
@@ -590,7 +576,7 @@ export interface LiveOrderData {
 }
 
 export interface VenueAnalyticsData {
-  venue_id: string;
+  venueId: string;
   period: {
     start_date: string;
     end_date: string;
@@ -610,33 +596,33 @@ export interface User {
   id: string;
   email: string;
   phone?: string;
-  first_name: string;
-  last_name: string;
+  firstName: string;
+  lastName: string;
   role: UserRole;
-  workspace_id: string;
-  venue_id?: string;
-  is_active: boolean;
-  created_at: string;
-  updated_at?: string;
+  workspaceId: string;
+  venueId?: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt?: string;
 }
 
 export interface VenueUser {
   id: string;
-  name: string; // Combined first_name + last_name from API
+  name: string; // Combined firstName + lastName from API
   email: string;
   phone?: string;
-  first_name: string; // Required - always returned from API
-  last_name: string; // Required - always returned from API
+  firstName: string; // Required - always returned from API
+  lastName: string; // Required - always returned from API
   role: UserRole;
   role_display_name: string; // Human readable role name
   last_login?: string; // ISO date string
   status?: string; // User status text ("Active" or "Inactive")
-  is_active: boolean;
-  workspace_id: string; // Required - users always belong to a workspace
-  venue_id?: string;
+  isActive: boolean;
+  workspaceId: string; // Required - users always belong to a workspace
+  venueId?: string;
   role_id?: string;
-  created_at: string;
-  updated_at?: string;
+  createdAt: string;
+  updatedAt?: string;
   // Legacy compatibility
   user_name?: string;
   last_logged_in?: string;
@@ -645,21 +631,21 @@ export interface VenueUser {
 export interface UserCreate {
   email: string;
   phone?: string;
-  first_name: string;
-  last_name: string;
+  firstName: string;
+  lastName: string;
   password: string;
   confirm_password: string;
   role_id?: string;
-  workspace_id: string;
+  workspaceId: string;
   venue_ids?: string[]; // Array of venue IDs
 }
 
 export interface UserUpdate {
-  first_name?: string;
-  last_name?: string;
+  firstName?: string;
+  lastName?: string;
   phone?: string;
   date_of_birth?: string;
-  is_active?: boolean;
+  isActive?: boolean;
 }
 
 // =============================================================================
@@ -702,11 +688,11 @@ export interface VenueFilters extends PaginationParams {
   cuisine_type?: string;
   price_range?: PriceRange;
   subscription_status?: string;
-  is_active?: boolean;
+  isActive?: boolean;
 }
 
 export interface MenuFilters extends PaginationParams {
-  venue_id?: string;
+  venueId?: string;
   category_id?: string;
   is_available?: boolean;
   is_vegetarian?: boolean;
@@ -714,23 +700,23 @@ export interface MenuFilters extends PaginationParams {
 }
 
 export interface OrderFilters extends PaginationParams {
-  venue_id?: string;
+  venueId?: string;
   status?: OrderStatus;
   payment_status?: PaymentStatus;
   order_type?: OrderType;
 }
 
 export interface TableFilters extends PaginationParams {
-  venue_id?: string;
+  venueId?: string;
   table_status?: TableStatus;
-  is_active?: boolean;
+  isActive?: boolean;
 }
 
 export interface UserFilters extends PaginationParams {
-  workspace_id?: string;
-  venue_id?: string;
+  workspaceId?: string;
+  venueId?: string;
   role?: UserRole;
-  is_active?: boolean;
+  isActive?: boolean;
 }
 
 // =============================================================================
@@ -775,14 +761,13 @@ export interface AppNotification {
   data?: Record<string, any>;
   is_read: boolean;
   priority: 'low' | 'normal' | 'high' | 'urgent';
-  created_at: string;
+  createdAt: string;
   read_at?: string;
   // Legacy camelCase properties for compatibility
   recipientId?: string;
   recipientType?: 'user' | 'venue' | 'admin';
   notificationType?: NotificationTypeEnum;
   isRead?: boolean;
-  createdAt?: Date;
   readAt?: Date;
 }
 

@@ -82,7 +82,7 @@ class VenueService {
       if (filters?.page_size) params.append('page_size', filters.page_size.toString());
       if (filters?.search) params.append('search', filters.search);
       if (filters?.subscription_status) params.append('subscription_status', filters.subscription_status);
-      if (filters?.is_active !== undefined) params.append('is_active', filters.is_active.toString());
+      if (filters?.isActive !== undefined) params.append('is_active', filters.isActive.toString());
 
       const response = await apiService.get<PaginatedResponse<Venue>>(`/venues?${params.toString()}`);
       
@@ -143,7 +143,7 @@ class VenueService {
         if (allVenuesResponse.success && allVenuesResponse.data) {
           // Filter venues by workspace_id and convert to WorkspaceVenue format
           const workspaceVenues = allVenuesResponse.data
-            .filter(venue => venue.workspace_id === workspaceId)
+            .filter(venue => venue.workspaceId === workspaceId)
             .map(venue => ({
               id: venue.id,
               name: venue.name,
@@ -156,10 +156,10 @@ class VenueService {
               },
               phone: venue.phone,
               email: venue.email,
-              is_active: venue.is_active,
+              isActive: venue.isActive,
               is_open: venue.is_open,
-              created_at: venue.created_at,
-              updated_at: venue.updated_at || venue.created_at
+              createdAt: venue.createdAt,
+              updatedAt: venue.updatedAt || venue.createdAt
             } as WorkspaceVenue));          return workspaceVenues;
         }
       } catch (fallbackError) {      }      return [];

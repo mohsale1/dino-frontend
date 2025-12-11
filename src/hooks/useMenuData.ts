@@ -153,7 +153,7 @@ export function useMenuData(options: UseMenuDataOptions = {}): UseMenuDataResult
           return;
         }
         
-        if (!venueData.is_active) {
+        if (!venueData.isActive) {
           setVenueNotAcceptingOrders({
             show: true,
             venueName: venueData.name,
@@ -183,7 +183,7 @@ export function useMenuData(options: UseMenuDataOptions = {}): UseMenuDataResult
         name: cat.name,
         description: cat.description || '',
         order: index + 1,
-        active: cat.is_active,
+        active: cat.isActive,
         icon: getCategoryIcon(cat.name),
         itemCount: 0, // Will be calculated after menu items are loaded
       }));

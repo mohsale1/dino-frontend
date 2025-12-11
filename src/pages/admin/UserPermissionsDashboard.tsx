@@ -121,10 +121,10 @@ const UserPermissionsDashboard: React.FC = () => {
           
           return {
             ...user,
-            firstName: user.first_name,
-            lastName: user.last_name,
+            firstName: user.firstName,
+            lastName: user.lastName,
             lastLogin: user.last_login,
-            isActive: user.is_active,
+            isActive: user.isActive,
             permissions: userPermissions,
           };
         });
@@ -185,10 +185,10 @@ const UserPermissionsDashboard: React.FC = () => {
             
             return {
               ...user,
-              firstName: user.first_name,
-              lastName: user.last_name,
+              firstName: user.firstName,
+              lastName: user.lastName,
               lastLogin: user.last_login,
-              isActive: user.is_active,
+              isActive: user.isActive,
               permissions: userPermissions,
             };
           });
@@ -414,8 +414,8 @@ const UserPermissionsDashboard: React.FC = () => {
   const filteredUsers = sortUsersByRole(users.filter(user => {
     if (!user) return false;
     
-    const firstName = user.firstName || user.first_name || '';
-    const lastName = user.lastName || user.last_name || '';
+    const firstName = user.firstName || user.firstName || '';
+    const lastName = user.lastName || user.lastName || '';
     const email = user.email || '';
     const name = user.name || '';
     
@@ -424,7 +424,7 @@ const UserPermissionsDashboard: React.FC = () => {
                          email.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesRole = filterRole === 'all' || user.role === filterRole;
-    const matchesActive = showInactive || (user.isActive !== undefined ? user.isActive : user.is_active);
+    const matchesActive = showInactive || (user.isActive !== undefined ? user.isActive : user.isActive);
     
     return matchesSearch && matchesRole && matchesActive;
   }));
@@ -459,24 +459,135 @@ const UserPermissionsDashboard: React.FC = () => {
   // Add error handling for currentUserAuth
   if (!currentUserAuth && !userDataLoading) {
     return (
-      <Box sx={{ pt: { xs: '56px', sm: '64px' }, py: 4, width: '100%' }}>
-        <Container maxWidth="xl">
-          <Alert severity="error">
-            Unable to load user authentication data. Please try refreshing the page or contact support.
-          </Alert>
-        </Container>
+      <Box
+        sx={{
+          minHeight: '100vh',
+          backgroundColor: '#f8f9fa',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: 3,
+        }}
+      >
+        <Card
+          sx={{
+            maxWidth: 600,
+            width: '100%',
+            borderRadius: 3,
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+            border: '1px solid',
+            borderColor: 'divider',
+          }}
+        >
+          <CardContent sx={{ p: 4, textAlign: 'center' }}>
+            <Box
+              sx={{
+                width: 80,
+                height: 80,
+                borderRadius: '50%',
+                backgroundColor: 'error.light',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 24px',
+              }}
+            >
+              <Cancel sx={{ fontSize: 48, color: 'error.main' }} />
+            </Box>
+            <Typography variant="h5" fontWeight="600" color="text.primary" gutterBottom>
+              Authentication Error
+            </Typography>
+            <Typography variant="body1" color="text.secondary" sx={{ mb: 3, lineHeight: 1.6 }}>
+              Unable to load user authentication data. Please try refreshing the page or contact support if the problem persists.
+            </Typography>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => window.location.reload()}
+              sx={{
+                borderRadius: 2,
+                px: 4,
+                py: 1.5,
+                textTransform: 'none',
+                fontWeight: 600,
+                boxShadow: '0 4px 12px rgba(33, 150, 243, 0.3)',
+                '&:hover': {
+                  boxShadow: '0 6px 16px rgba(33, 150, 243, 0.4)',
+                },
+              }}
+            >
+              Refresh Page
+            </Button>
+          </CardContent>
+        </Card>
       </Box>
     );
   }
 
   if (!canViewAllUsers) {
     return (
-      <Box sx={{ pt: { xs: '56px', sm: '64px' }, py: 4, width: '100%' }}>
-        <Container maxWidth="xl">
-          <Alert severity="warning">
-            You don't have permission to view user permissions. Contact your administrator.
-          </Alert>
-        </Container>
+      <Box
+        sx={{
+          minHeight: '100vh',
+          backgroundColor: '#f8f9fa',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: 3,
+        }}
+      >
+        <Card
+          sx={{
+            maxWidth: 600,
+            width: '100%',
+            borderRadius: 3,
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+            border: '1px solid',
+            borderColor: 'divider',
+          }}
+        >
+          <CardContent sx={{ p: 4, textAlign: 'center' }}>
+            <Box
+              sx={{
+                width: 80,
+                height: 80,
+                borderRadius: '50%',
+                backgroundColor: 'warning.light',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 24px',
+              }}
+            >
+              <Security sx={{ fontSize: 48, color: 'warning.main' }} />
+            </Box>
+            <Typography variant="h5" fontWeight="600" color="text.primary" gutterBottom>
+              Access Denied
+            </Typography>
+            <Typography variant="body1" color="text.secondary" sx={{ mb: 3, lineHeight: 1.6 }}>
+              You don't have permission to view user permissions. Please contact your administrator to request access.
+            </Typography>
+            <Button
+              variant="outlined"
+              color="primary"
+              onClick={() => window.history.back()}
+              sx={{
+                borderRadius: 2,
+                px: 4,
+                py: 1.5,
+                textTransform: 'none',
+                fontWeight: 600,
+                borderWidth: 2,
+                '&:hover': {
+                  borderWidth: 2,
+                  backgroundColor: 'rgba(33, 150, 243, 0.04)',
+                },
+              }}
+            >
+              Go Back
+            </Button>
+          </CardContent>
+        </Card>
       </Box>
     );
   }
@@ -484,10 +595,58 @@ const UserPermissionsDashboard: React.FC = () => {
   // Don't render if currentUserAuth is still loading or null
   if (!currentUserAuth) {
     return (
-      <Box sx={{ pt: { xs: '56px', sm: '64px' }, py: 4, width: '100%' }}>
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-          <Typography>Loading user permissions...</Typography>
-        </Box>
+      <Box
+        sx={{
+          minHeight: '100vh',
+          backgroundColor: '#f8f9fa',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: 3,
+        }}
+      >
+        <Card
+          sx={{
+            maxWidth: 500,
+            width: '100%',
+            borderRadius: 3,
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+            border: '1px solid',
+            borderColor: 'divider',
+          }}
+        >
+          <CardContent sx={{ p: 4, textAlign: 'center' }}>
+            <Box
+              sx={{
+                width: 80,
+                height: 80,
+                borderRadius: '50%',
+                backgroundColor: 'primary.light',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 24px',
+                animation: 'pulse 2s ease-in-out infinite',
+                '@keyframes pulse': {
+                  '0%, 100%': {
+                    opacity: 1,
+                  },
+                  '50%': {
+                    opacity: 0.5,
+                  },
+                },
+              }}
+            >
+              <Security sx={{ fontSize: 48, color: 'primary.main' }} />
+            </Box>
+            <Typography variant="h5" fontWeight="600" color="text.primary" gutterBottom>
+              Loading Permissions
+            </Typography>
+            <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.6 }}>
+              Please wait while we load user permissions...
+            </Typography>
+          </CardContent>
+        </Card>
       </Box>
     );
   }
@@ -885,8 +1044,8 @@ const UserPermissionsDashboard: React.FC = () => {
                         
                         handleViewPermissions({
                           ...(currentUserAuth || {}),
-                          firstName: user?.first_name || user?.firstName,
-                          lastName: user?.last_name || user?.lastName,
+                          firstName: user?.firstName || user?.firstName,
+                          lastName: user?.lastName || user?.lastName,
                           email: user?.email,
                           isActive: true,
                           lastLogin: new Date(),
@@ -1017,7 +1176,7 @@ const UserPermissionsDashboard: React.FC = () => {
                                   bgcolor: 'primary.main'
                                 }}
                               >
-                                {((user.firstName || user.first_name)?.[0] || '?')}{((user.lastName || user.last_name)?.[0] || '')}
+                                {((user.firstName || user.firstName)?.[0] || '?')}{((user.lastName || user.lastName)?.[0] || '')}
                               </Avatar>
                               <Box sx={{ minWidth: 0, flex: 1 }}>
                                 <Typography 
@@ -1030,7 +1189,7 @@ const UserPermissionsDashboard: React.FC = () => {
                                     lineHeight: 1.3
                                   }}
                                 >
-                                  {user.name || `${user.firstName || user.first_name || 'Unknown'} ${user.lastName || user.last_name || 'User'}`}
+                                  {user.name || `${user.firstName || user.firstName || 'Unknown'} ${user.lastName || user.lastName || 'User'}`}
                                 </Typography>
                                 <Typography 
                                   variant="body2" 
@@ -1081,7 +1240,7 @@ const UserPermissionsDashboard: React.FC = () => {
                                 color: 'text.secondary'
                               }}
                             >
-                              {formatLastLogin(user.lastLogin || user.updated_at || user.created_at)}
+                              {formatLastLogin(user.lastLogin || user.updatedAt || user.createdAt)}
                             </Typography>
                           </TableCell>
                           <TableCell sx={{ textAlign: 'center', py: 2.5 }}>
@@ -1296,7 +1455,7 @@ const UserPermissionsDashboard: React.FC = () => {
               Status: {selectedUser?.isActive ? 'Active' : 'Inactive'}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Last Login: {formatLastLogin(selectedUser?.lastLogin || selectedUser?.updated_at || selectedUser?.created_at)}
+              Last Login: {formatLastLogin(selectedUser?.lastLogin || selectedUser?.updatedAt || selectedUser?.createdAt)}
             </Typography>
           </Box>
         </DialogContent>

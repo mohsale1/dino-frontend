@@ -86,8 +86,8 @@ const TablesOrdersTab: React.FC<TablesOrdersTabProps> = ({ tableStatuses: propTa
       
       // Try to get tables directly from the tables API
       const tablesResponse = await tableService.getTables({
-        venue_id: currentVenue?.id,
-        is_active: true
+        venueId: currentVenue?.id,
+        isActive: true
       });
       
       if (tablesResponse && tablesResponse.data && tablesResponse.data.length > 0) {

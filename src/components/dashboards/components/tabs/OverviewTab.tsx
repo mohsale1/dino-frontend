@@ -218,7 +218,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ dashboardData, stats, analyti
                               <Box component="span" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                                 <AccessTime sx={{ fontSize: 14, color: 'text.secondary' }} />
                                 <Typography component="span" variant="caption" color="text.secondary">
-                                  {new Date(activity.created_at).toLocaleTimeString()}
+                                  {new Date(activity.createdAt).toLocaleTimeString()}
                                 </Typography>
                               </Box>
                             </Box>

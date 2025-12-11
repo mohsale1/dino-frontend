@@ -67,7 +67,9 @@ class PerformanceService {
         });
         navObserver.observe({ entryTypes: ['navigation'] });
         this.observers.push(navObserver);
-      } catch (error) {      }
+      } catch (error) {
+      // Error handled silently
+    }
 
       // Resource timing observer
       try {
@@ -80,7 +82,9 @@ class PerformanceService {
         });
         resourceObserver.observe({ entryTypes: ['resource'] });
         this.observers.push(resourceObserver);
-      } catch (error) {      }
+      } catch (error) {
+      // Error handled silently
+    }
 
       // Measure observer for custom metrics
       try {
@@ -93,7 +97,9 @@ class PerformanceService {
         });
         measureObserver.observe({ entryTypes: ['measure'] });
         this.observers.push(measureObserver);
-      } catch (error) {      }
+      } catch (error) {
+      // Error handled silently
+    }
     }
   }
 

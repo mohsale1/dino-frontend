@@ -203,7 +203,9 @@ class LazyComponentManager {
                 { component: name }
               );
             }
-          } catch (error) {          }
+          } catch (error) {
+      // Error handled silently
+    }
           this.loadedComponents.add(name);
           return module;
         }),
@@ -420,7 +422,9 @@ export const preloadCriticalComponents = async (): Promise<void> => {
   ];
 
   try {
-    await lazyManager.preloadComponents(criticalComponents);  } catch (error) {  }
+    await lazyManager.preloadComponents(criticalComponents);  } catch (error) {
+      // Error handled silently
+    }
 };
 
 export const preloadAdminComponents = async (): Promise<void> => {
@@ -433,7 +437,9 @@ export const preloadAdminComponents = async (): Promise<void> => {
   ];
 
   try {
-    await lazyManager.preloadComponents(adminComponents);  } catch (error) {  }
+    await lazyManager.preloadComponents(adminComponents);  } catch (error) {
+      // Error handled silently
+    }
 };
 
 export const preloadPublicComponents = async (): Promise<void> => {
@@ -443,7 +449,9 @@ export const preloadPublicComponents = async (): Promise<void> => {
   ];
 
   try {
-    await lazyManager.preloadComponents(publicComponents);  } catch (error) {  }
+    await lazyManager.preloadComponents(publicComponents);  } catch (error) {
+      // Error handled silently
+    }
 };
 
 // Hook for component preloading
@@ -452,7 +460,9 @@ export const usePreloadComponents = (componentNames: string[]) => {
     const preload = async () => {
       try {
         await lazyManager.preloadComponents(componentNames);
-      } catch (error) {      }
+      } catch (error) {
+      // Error handled silently
+    }
     };
 
     const timer = setTimeout(preload, 500);

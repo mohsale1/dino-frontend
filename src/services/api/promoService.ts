@@ -17,14 +17,14 @@ export interface PromoCode {
   user_usage_limit?: number;
   valid_from: string;
   valid_until: string;
-  is_active: boolean;
-  venue_id: string;
+  isActive: boolean;
+  venueId: string;
   applicable_items?: string[]; // Menu item IDs
   applicable_categories?: string[]; // Category IDs
   excluded_items?: string[]; // Menu item IDs to exclude
   terms_and_conditions?: string;
-  created_at: string;
-  updated_at: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface PromoCodeCreate {
@@ -40,7 +40,7 @@ export interface PromoCodeCreate {
   user_usage_limit?: number;
   valid_from: string;
   valid_until: string;
-  venue_id: string;
+  venueId: string;
   applicable_items?: string[];
   applicable_categories?: string[];
   excluded_items?: string[];
@@ -105,7 +105,7 @@ export interface PromoUsage {
   discount_amount: number;
   order_total: number;
   used_at: string;
-  venue_id: string;
+  venueId: string;
 }
 
 export interface PromoAnalytics {
@@ -158,7 +158,7 @@ export interface BulkPromoCreate {
   user_usage_limit?: number;
   valid_from: string;
   valid_until: string;
-  venue_id: string;
+  venueId: string;
 }
 
 class PromoService {
@@ -179,7 +179,7 @@ class PromoService {
   }> {
     try {
       const params = new URLSearchParams();
-      params.append('venue_id', venueId);
+      params.append('venueId', venueId);
       
       if (filters?.is_active !== undefined) params.append('is_active', filters.is_active.toString());
       if (filters?.type) params.append('type', filters.type);
@@ -264,7 +264,7 @@ class PromoService {
   // Toggle promo code status
   async togglePromoCodeStatus(promoCodeId: string, isActive: boolean): Promise<ApiResponse<void>> {
     try {
-      return await apiService.put<void>(`/promo-codes/${promoCodeId}/status`, { is_active: isActive });
+      return await apiService.put<void>(`/promo-codes/${promoCodeId}/status`, { isActive: isActive });
     } catch (error: any) {
       throw new Error(error.response?.data?.detail || error.message || 'Failed to update promo code status');
     }
@@ -274,7 +274,7 @@ class PromoService {
 
   // Validate promo code for an order
   async validatePromoCode(code: string, orderData: {
-    venue_id: string;
+    venueId: string;
     items: Array<{
       menu_item_id: string;
       quantity: number;
@@ -513,7 +513,7 @@ class PromoService {
     const validFrom = new Date(promoCode.valid_from);
     const validUntil = new Date(promoCode.valid_until);
 
-    if (!promoCode.is_active) {
+    if (!promoCode.isActive) {
       return { isValid: false, reason: 'Promo code is inactive' };
     }
 

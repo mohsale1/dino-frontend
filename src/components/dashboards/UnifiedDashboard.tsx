@@ -16,6 +16,7 @@ import DashboardTour from '../tour/DashboardTour';
 import { usePermissions } from '../auth';
 import PermissionService from '../../services/auth';
 import { useDashboardFlags } from '../../flags/FlagContext';
+import DateRangePicker, { DateRange } from '../common/DateRangePicker';
 
 // Import modular components
 import DashboardHeader from './components/DashboardHeader';
@@ -87,6 +88,16 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({ className }) => {
     canManageTables,
   } = usePermissions();
 
+  // Helper function to get today's date range
+  const getTodayRange = (): DateRange => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    const dateStr = `${year}-${month}-${day}`;
+    return { startDate: dateStr, endDate: dateStr };
+  };
+
   // State management
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -98,6 +109,7 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({ className }) => {
   const [analyticsData, setAnalyticsData] = useState<any>(null);
   const [liveMetrics, setLiveMetrics] = useState<any>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [dateRange, setDateRange] = useState<DateRange>(getTodayRange());
 
   // Load dashboard data based on user role
   const loadDashboardData = useCallback(async () => {
@@ -111,23 +123,29 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({ className }) => {
       
       let data;
       
+      // Prepare date parameters
+      const dateParams = {
+        startDate: dateRange.startDate,
+        endDate: dateRange.endDate,
+      };
+
       // Use backend role for dashboard selection
       if (detectedRole === 'superadmin' || detectedRole === 'super_admin') {
-        data = await dashboardService.getSuperAdminDashboard();
+        data = await dashboardService.getSuperAdminDashboard(dateParams);
       } else if (detectedRole === 'admin') {
-        data = await dashboardService.getAdminDashboard();
+        data = await dashboardService.getAdminDashboard(dateParams);
       } else if (detectedRole === 'operator') {
         data = await dashboardService.getOperatorDashboard();
       } else {
         // Fallback based on permission hooks
         if (isSuperAdmin) {
-          data = await dashboardService.getSuperAdminDashboard();
+          data = await dashboardService.getSuperAdminDashboard(dateParams);
         } else if (isAdmin) {
-          data = await dashboardService.getAdminDashboard();
+          data = await dashboardService.getAdminDashboard(dateParams);
         } else if (isOperator) {
           data = await dashboardService.getOperatorDashboard();
         } else {
-          data = await dashboardService.getAdminDashboard();
+          data = await dashboardService.getAdminDashboard(dateParams);
         }
       }      
       if (data) {
@@ -365,7 +383,7 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({ className }) => {
     } finally {
       setLoading(false);
     }
-  }, [isSuperAdmin, isAdmin, isOperator, user]);
+  }, [isSuperAdmin, isAdmin, isOperator, user, dateRange]);
 
   const refreshDashboard = async () => {
     setRefreshing(true);
@@ -469,6 +487,22 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({ className }) => {
             
             {/* Dashboard Tour */}
             <DashboardTour />
+
+            {/* Date Range Picker - Only for SuperAdmin and Admin */}
+            {(() => {
+              const backendRole = PermissionService.getBackendRole();
+              const detectedRole = backendRole?.name || user?.role || 'unknown';
+              return detectedRole === 'superadmin' || detectedRole === 'super_admin' || detectedRole === 'admin' || isSuperAdmin || isAdmin;
+            })() && (
+              <Box sx={{ mb: 3 }}>
+                <DateRangePicker
+                  value={dateRange}
+                  onChange={setDateRange}
+                  showPresets={true}
+                  label="Filter Dashboard by Date"
+                />
+              </Box>
+            )}
 
             {/* Dashboard Statistics */}
             <DashboardStats stats={stats} />

@@ -121,7 +121,9 @@ const QRCodeManager: React.FC<QRCodeManagerProps> = ({
       
       setPreviewQRCodes(newQrCodes);
       setCurrentPreviewIndex(0);
-    } catch (error) {    } finally {
+    } catch (error) {
+      // Error handled silently
+    } finally {
       setPreviewLoading(false);
     }
   };
@@ -2018,26 +2020,27 @@ const QRCodeManager: React.FC<QRCodeManagerProps> = ({
       <Divider />
 
       <DialogContent sx={{ 
-        pt: 2, 
+        pt: { xs: 1, sm: 2 }, 
         flex: 1, 
         overflow: 'auto',
         display: 'flex',
         flexDirection: 'column',
-        px: { xs: 1, sm: 3 }
+        px: { xs: 1, sm: 3 },
+        pb: { xs: 1, sm: 2 }
       }}>
-        <Grid container spacing={{ xs: 2, sm: 3 }} sx={{ height: '100%' }}>
+        <Grid container spacing={{ xs: 1.5, sm: 3 }} sx={{ height: '100%' }}>
             {/* Configuration Panel */}
             <Grid item xs={12} lg={4}>
-              <Stack spacing={{ xs: 2, sm: 3 }}>
+              <Stack spacing={{ xs: 1.5, sm: 3 }}>
 
-                <Paper elevation={1} sx={{ p: { xs: 2, sm: 3 }, border: '1px solid', borderColor: 'divider' }}>
-                  <Typography variant="h6" gutterBottom fontWeight="600" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Settings /> Settings
+                <Paper elevation={1} sx={{ p: { xs: 1.5, sm: 3 }, border: '1px solid', borderColor: 'divider' }}>
+                  <Typography variant={isMobile ? "subtitle1" : "h6"} gutterBottom fontWeight="600" sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: { xs: 1.5, sm: 2 } }}>
+                    <Settings fontSize={isMobile ? "small" : "medium"} /> Settings
                   </Typography>
                   
-                  <Stack spacing={{ xs: 2, sm: 3 }}>
+                  <Stack spacing={{ xs: 1.5, sm: 3 }}>
                     <Box>
-                      <Typography variant="h6" gutterBottom fontWeight="600">
+                      <Typography variant={isMobile ? "body1" : "h6"} gutterBottom fontWeight="600" sx={{ mb: { xs: 1, sm: 1.5 } }}>
                         Choose Template Style
                       </Typography>
                       
@@ -2045,10 +2048,21 @@ const QRCodeManager: React.FC<QRCodeManagerProps> = ({
                         sx={{
                           display: 'grid',
                           gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)',
-                          gap: 2,
-                          height: 400,
+                          gap: { xs: 1, sm: 2 },
+                          height: { xs: 300, sm: 400 },
                           overflow: 'auto',
-                          p: 1
+                          p: { xs: 0.5, sm: 1 },
+                          // Better scrollbar for mobile
+                          '&::-webkit-scrollbar': {
+                            width: 6,
+                          },
+                          '&::-webkit-scrollbar-track': {
+                            backgroundColor: 'grey.100',
+                          },
+                          '&::-webkit-scrollbar-thumb': {
+                            backgroundColor: 'grey.400',
+                            borderRadius: 3,
+                          },
                         }}
                       >
                         {Object.keys(templateConfigs).map((templateKey) => (
@@ -2061,11 +2075,11 @@ const QRCodeManager: React.FC<QRCodeManagerProps> = ({
                         ))}
                       </Box>
                       
-                      <Box sx={{ mt: 2, p: 2, border: '1px solid', borderColor: 'divider', borderRadius: 1, bgcolor: 'background.paper' }}>
-                        <Typography variant="body2" color="text.secondary" gutterBottom>
+                      <Box sx={{ mt: { xs: 1, sm: 2 }, p: { xs: 1.5, sm: 2 }, border: '1px solid', borderColor: 'divider', borderRadius: 1, bgcolor: 'background.paper' }}>
+                        <Typography variant={isMobile ? "caption" : "body2"} color="text.secondary" gutterBottom sx={{ fontWeight: 600 }}>
                           Selected: {templateConfigs[config.template]?.name || 'Classic'}
                         </Typography>
-                        <Typography variant="caption" color="text.secondary">
+                        <Typography variant="caption" color="text.secondary" sx={{ fontSize: { xs: '0.7rem', sm: '0.75rem' }, lineHeight: 1.4 }}>
                           {templateConfigs[config.template]?.description || 'Traditional design with clean borders and professional styling'}
                         </Typography>
                       </Box>
@@ -2080,47 +2094,54 @@ const QRCodeManager: React.FC<QRCodeManagerProps> = ({
                         />
                       }
                       label={
-                        <Typography variant={isMobile ? "body2" : "body1"}>
+                        <Typography variant={isMobile ? "body2" : "body1"} sx={{ fontSize: { xs: '0.875rem', sm: '1rem' } }}>
                           Include instructions
                         </Typography>
                       }
+                      sx={{ mx: 0 }}
                     />
                     
                     <Button
                       variant="contained"
                       size={isMobile ? "medium" : "large"}
-                      startIcon={previewLoading ? <CircularProgress size={20} color="inherit" /> : <QrCode />}
+                      startIcon={previewLoading ? <CircularProgress size={isMobile ? 16 : 20} color="inherit" /> : <QrCode fontSize={isMobile ? "small" : "medium"} />}
                       onClick={generateSelectedPreviewQRs}
                       disabled={previewLoading || tables.length === 0}
                       fullWidth
-                      sx={{ py: { xs: 1, sm: 1.5 } }}
+                      sx={{ 
+                        py: { xs: 1.25, sm: 1.5 },
+                        fontSize: { xs: '0.875rem', sm: '0.9375rem' },
+                        fontWeight: 600
+                      }}
                     >
-                      {previewLoading ? 'Generating...' : `Generate QR Codes (${tables.length} tables)`}
+                      {previewLoading ? 'Generating...' : isMobile ? `Generate (${tables.length})` : `Generate QR Codes (${tables.length} tables)`}
                     </Button>
 
                     {previewQRCodes.length > 0 && (
-                      <Stack spacing={2}>
+                      <Stack spacing={{ xs: 1.5, sm: 2 }}>
                         <Divider />
-                        <Typography variant={isMobile ? "caption" : "body2"} color="text.secondary">
-                          Generated {previewQRCodes.length} QR codes • Currently viewing: {currentSelectedTable?.number}
+                        <Typography variant={isMobile ? "caption" : "body2"} color="text.secondary" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
+                          Generated {previewQRCodes.length} QR codes{!isMobile && ` • Currently viewing: ${currentSelectedTable?.number}`}
                         </Typography>
                         
                         <Stack direction={isMobile ? "column" : "row"} spacing={1}>
                           <Button
                             variant="outlined"
-                            startIcon={<GetApp />}
+                            startIcon={<GetApp fontSize={isMobile ? "small" : "medium"} />}
                             onClick={downloadAllPreviewQRs}
                             fullWidth={isMobile}
                             size={isMobile ? "small" : "medium"}
+                            sx={{ fontSize: { xs: '0.8125rem', sm: '0.875rem' } }}
                           >
-                            Download All Templates
+                            {isMobile ? 'Download All' : 'Download All Templates'}
                           </Button>
                           <Button
                             variant="outlined"
-                            startIcon={<Print />}
+                            startIcon={<Print fontSize={isMobile ? "small" : "medium"} />}
                             onClick={printAllPreviewQRs}
                             fullWidth={isMobile}
                             size={isMobile ? "small" : "medium"}
+                            sx={{ fontSize: { xs: '0.8125rem', sm: '0.875rem' } }}
                           >
                             Print All
                           </Button>
@@ -2135,26 +2156,34 @@ const QRCodeManager: React.FC<QRCodeManagerProps> = ({
             {/* QR Code Preview Slider */}
             <Grid item xs={12} lg={8}>
               {previewQRCodes.length > 0 ? (
-                <Paper elevation={1} sx={{ p: { xs: 2, sm: 4 }, border: '1px solid', borderColor: 'divider', height: 'fit-content' }}>
-                  <Typography variant={isMobile ? "h6" : "h5"} gutterBottom fontWeight="600" textAlign="center">
-                    QR Code Preview Slider
+                <Paper elevation={1} sx={{ p: { xs: 1.5, sm: 4 }, border: '1px solid', borderColor: 'divider', height: 'fit-content' }}>
+                  <Typography variant={isMobile ? "subtitle1" : "h5"} gutterBottom fontWeight="600" textAlign="center" sx={{ mb: { xs: 2, sm: 3 } }}>
+                    QR Code Preview{!isMobile && ' Slider'}
                   </Typography>
                   
                   {/* Navigation Header */}
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: { xs: 2, sm: 3 } }}>
                     <IconButton 
                       onClick={goToPrevious}
                       disabled={previewQRCodes.length <= 1}
                       size={isMobile ? "small" : "large"}
+                      sx={{ 
+                        minWidth: 44,
+                        minHeight: 44,
+                        backgroundColor: 'action.hover',
+                        '&:hover': {
+                          backgroundColor: 'action.selected'
+                        }
+                      }}
                     >
-                      <NavigateBefore />
+                      <NavigateBefore fontSize={isMobile ? "medium" : "large"} />
                     </IconButton>
                     
-                    <Box sx={{ textAlign: 'center' }}>
-                      <Typography variant={isMobile ? "body1" : "h6"} color="primary">
+                    <Box sx={{ textAlign: 'center', flex: 1, px: { xs: 1, sm: 2 } }}>
+                      <Typography variant={isMobile ? "body1" : "h6"} color="primary" fontWeight="700" sx={{ fontSize: { xs: '1rem', sm: '1.25rem' } }}>
                         Table {currentSelectedTable?.number}
                       </Typography>
-                      <Typography variant={isMobile ? "caption" : "body2"} color="text.secondary">
+                      <Typography variant={isMobile ? "caption" : "body2"} color="text.secondary" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
                         {currentPreviewIndex + 1} of {previewQRCodes.length}
                       </Typography>
                     </Box>
@@ -2163,22 +2192,41 @@ const QRCodeManager: React.FC<QRCodeManagerProps> = ({
                       onClick={goToNext}
                       disabled={previewQRCodes.length <= 1}
                       size={isMobile ? "small" : "large"}
+                      sx={{ 
+                        minWidth: 44,
+                        minHeight: 44,
+                        backgroundColor: 'action.hover',
+                        '&:hover': {
+                          backgroundColor: 'action.selected'
+                        }
+                      }}
                     >
-                      <NavigateNext />
+                      <NavigateNext fontSize={isMobile ? "medium" : "large"} />
                     </IconButton>
                   </Box>
 
                   {/* Live Template Preview */}
                   {currentPreviewQR && (
                     <Box sx={{ 
-                      maxHeight: 600, 
+                      maxHeight: { xs: 400, sm: 600 }, 
                       overflow: 'auto', 
-                      mb: 3,
+                      mb: { xs: 2, sm: 3 },
                       border: '1px solid',
                       borderColor: 'divider',
                       borderRadius: 2,
-                      p: 2,
-                      backgroundColor: 'background.default'
+                      p: { xs: 1, sm: 2 },
+                      backgroundColor: 'background.default',
+                      // Better scrollbar
+                      '&::-webkit-scrollbar': {
+                        width: 8,
+                      },
+                      '&::-webkit-scrollbar-track': {
+                        backgroundColor: 'grey.100',
+                      },
+                      '&::-webkit-scrollbar-thumb': {
+                        backgroundColor: 'grey.400',
+                        borderRadius: 4,
+                      },
                     }}>
                       <TemplateRenderer
                         template={config.template}
@@ -2194,42 +2242,50 @@ const QRCodeManager: React.FC<QRCodeManagerProps> = ({
                   )}
 
                   {/* Template Info */}
-                  <Box sx={{ mb: 3, textAlign: 'center' }}>
-                    <Stack direction={isMobile ? "column" : "row"} spacing={1} justifyContent="center">
+                  <Box sx={{ mb: { xs: 2, sm: 3 }, textAlign: 'center' }}>
+                    <Stack direction={isMobile ? "column" : "row"} spacing={1} justifyContent="center" alignItems="center">
                       <Chip 
-                        label={`Template: ${config.template}`} 
+                        label={isMobile ? config.template : `Template: ${config.template}`} 
                         size="small" 
-                        variant="outlined" 
+                        variant="outlined"
+                        sx={{ fontSize: { xs: '0.75rem', sm: '0.8125rem' } }}
                       />
                       <Chip 
                         label={`Table: ${currentSelectedTable?.number}`} 
                         size="small" 
-                        color="primary" 
+                        color="primary"
+                        sx={{ fontSize: { xs: '0.75rem', sm: '0.8125rem' } }}
                       />
                       <Chip 
-                        label={`Layout: ${config.layout}`} 
+                        label={isMobile ? config.layout : `Layout: ${config.layout}`} 
                         size="small" 
-                        variant="outlined" 
+                        variant="outlined"
+                        sx={{ fontSize: { xs: '0.75rem', sm: '0.8125rem' } }}
                       />
                     </Stack>
                   </Box>
 
                   {/* Slider Navigation */}
                   {previewQRCodes.length > 1 && (
-                    <Box sx={{ px: { xs: 1, sm: 2 }, mb: 3 }}>
+                    <Box sx={{ px: { xs: 0.5, sm: 2 }, mb: { xs: 2, sm: 3 } }}>
                       <Slider
                         value={currentPreviewIndex}
                         onChange={(_, value) => setCurrentPreviewIndex(value as number)}
                         min={0}
                         max={previewQRCodes.length - 1}
                         step={1}
-                        marks={previewQRCodes.map((_, index) => ({
+                        marks={isMobile ? false : previewQRCodes.map((_, index) => ({
                           value: index,
                           label: tables[index]?.number || `${index + 1}`
                         }))}
                         valueLabelDisplay="auto"
                         valueLabelFormat={(value) => tables[value]?.number || `${value + 1}`}
                         size={isMobile ? "small" : "medium"}
+                        sx={{
+                          '& .MuiSlider-markLabel': {
+                            fontSize: { xs: '0.625rem', sm: '0.75rem' }
+                          }
+                        }}
                       />
                     </Box>
                   )}
@@ -2237,26 +2293,34 @@ const QRCodeManager: React.FC<QRCodeManagerProps> = ({
                   {/* Action Buttons */}
                   <Stack 
                     direction={isMobile ? "column" : "row"}
-                    spacing={2} 
+                    spacing={{ xs: 1.5, sm: 2 }} 
                     justifyContent="center"
                   >
                     <Button
                       variant="outlined"
-                      startIcon={<Download />}
+                      startIcon={<Download fontSize={isMobile ? "small" : "medium"} />}
                       onClick={downloadCurrentPreviewQR}
                       size={isMobile ? "medium" : "large"}
                       fullWidth={isMobile}
+                      sx={{ 
+                        fontSize: { xs: '0.875rem', sm: '0.9375rem' },
+                        py: { xs: 1, sm: 1.25 }
+                      }}
                     >
-                      Download Current
+                      {isMobile ? 'Download' : 'Download Current'}
                     </Button>
                     <Button
                       variant="outlined"
-                      startIcon={<Print />}
+                      startIcon={<Print fontSize={isMobile ? "small" : "medium"} />}
                       onClick={printCurrentPreviewQR}
                       size={isMobile ? "medium" : "large"}
                       fullWidth={isMobile}
+                      sx={{ 
+                        fontSize: { xs: '0.875rem', sm: '0.9375rem' },
+                        py: { xs: 1, sm: 1.25 }
+                      }}
                     >
-                      Print Current
+                      {isMobile ? 'Print' : 'Print Current'}
                     </Button>
                   </Stack>
                 </Paper>

@@ -39,7 +39,9 @@ export const FlagProvider: React.FC<FlagProviderProps> = ({
           return { ...appFlags, ...parsedFlags };
         }
       }
-    } catch (error) {    }
+    } catch (error) {
+      // Error handled silently
+    }
     
     // Fallback to default flags with any initial overrides
     return { ...appFlags, ...initialFlags };
@@ -70,7 +72,9 @@ export const FlagProvider: React.FC<FlagProviderProps> = ({
       // Save to localStorage
       try {
         localStorage.setItem(FLAG_STORAGE_KEY, JSON.stringify(newFlags));
-      } catch (error) {      }
+      } catch (error) {
+      // Error handled silently
+    }
       
       return newFlags;
     });
@@ -83,7 +87,9 @@ export const FlagProvider: React.FC<FlagProviderProps> = ({
     setFlags(appFlags);
     try {
       localStorage.removeItem(FLAG_STORAGE_KEY);
-    } catch (error) {    }
+    } catch (error) {
+      // Error handled silently
+    }
   };
 
   /**
@@ -98,7 +104,9 @@ export const FlagProvider: React.FC<FlagProviderProps> = ({
           setFlags({ ...appFlags, ...parsedFlags });
         }
       }
-    } catch (error) {    }
+    } catch (error) {
+      // Error handled silently
+    }
   };
 
   /**
@@ -107,7 +115,9 @@ export const FlagProvider: React.FC<FlagProviderProps> = ({
   const saveFlags = () => {
     try {
       localStorage.setItem(FLAG_STORAGE_KEY, JSON.stringify(flags));
-    } catch (error) {    }
+    } catch (error) {
+      // Error handled silently
+    }
   };
 
   // Context value
@@ -162,7 +172,9 @@ export const useFlag = (path: string): boolean => {
       const flagValue = (sectionFlags as Record<string, any>)[flagName];
       return typeof flagValue === 'boolean' ? flagValue : false;
     }
-  } catch (error) {  }
+  } catch (error) {
+      // Error handled silently
+    }
   
   return false;
 };

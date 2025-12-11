@@ -19,11 +19,8 @@ import {
   Chip,
   IconButton,
   Paper,
-  List,
-  ListItem,
-  ListItemText,
+  Stack,
   Divider,
-  Avatar,
   Tab,
   Tabs,
   Alert,
@@ -32,7 +29,6 @@ import {
   Skeleton,
   useTheme,
   useMediaQuery,
-  Stack,
   keyframes,
   Table,
   TableBody,
@@ -40,6 +36,8 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  ToggleButtonGroup,
+  ToggleButton,
 } from '@mui/material';
 import {
   Restaurant,
@@ -48,35 +46,29 @@ import {
   LocalShipping,
   Assignment,
   Refresh,
-  Edit,
   Visibility,
   Search,
   Timer,
   TableRestaurant,
   Kitchen,
   Notifications,
-  TrendingUp,
   AccessTime,
   Store,
   CachedOutlined,
-  Receipt,
+  ViewModule,
+  ViewKanban,
 } from '@mui/icons-material';
 
 import { useAuth } from '../../contexts/AuthContext';
 import { useUserData } from '../../contexts/UserDataContext';
 import { PERMISSIONS } from '../../types/auth';
 import { orderService, Order, OrderStatus, PaymentStatus, PaymentMethod } from '../../services/business';
-import {
-  ORDER_STATUS,
-  STATUS_COLORS,
-  PAYMENT_STATUS,
-  PAYMENT_METHODS,
-  PAGE_TITLES,
-  PLACEHOLDERS,
-} from '../../constants';
 import AnimatedBackground from '../../components/ui/AnimatedBackground';
 import { useOrderFlags } from '../../flags/FlagContext';
 import { FlagGate } from '../../flags/FlagComponent';
+import DateRangePicker, { DateRange } from '../../components/common/DateRangePicker';
+import PaginationControl, { usePagination } from '../../components/common/PaginationControl';
+import { KanbanBoard } from '../../components/orders';
 
 // Animation for refresh icon
 const spin = keyframes`
@@ -125,7 +117,13 @@ const OrdersManagement: React.FC = () => {
     refreshUserData 
   } = useUserData();
   const orderFlags = useOrderFlags();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const isTablet = useMediaQuery(theme.breakpoints.down('lg'));
+
+  // State
   const [tabValue, setTabValue] = useState(0);
+  const [viewMode, setViewMode] = useState<'tab' | 'kanban'>('tab');
   const [orders, setOrders] = useState<Order[]>([]);
   const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -135,10 +133,21 @@ const OrdersManagement: React.FC = () => {
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const isTablet = useMediaQuery(theme.breakpoints.down('lg'));
+
+  // Date Range State - Default to today
+  const getTodayRange = (): DateRange => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    const dateStr = `${year}-${month}-${day}`;
+    return { startDate: dateStr, endDate: dateStr };
+  };
+
+  const [dateRange, setDateRange] = useState<DateRange>(getTodayRange());
+
+  // Pagination
+  const { pagination, updateTotalItems, setPage, setPageSize } = usePagination(20);
 
   // Helper function to check if order is from today
   const isToday = (dateString: string) => {
@@ -151,42 +160,49 @@ const OrdersManagement: React.FC = () => {
     );
   };
 
-  // Load orders from API
+  // Load orders from API with date filtering
+  const loadOrders = async () => {
+    const venue = getVenue();
+    
+    if (!venue?.id) {
+      setOrders([]);
+      setLoading(false);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Call API with date range filter
+      const ordersData = await orderService.getVenueOrders(venue.id, {
+        startDate: dateRange.startDate,
+        endDate: dateRange.endDate,
+        page: pagination.page,
+        pageSize: pagination.pageSize,
+      });
+
+      setOrders(ordersData);
+      updateTotalItems(ordersData.length);
+    } catch (error) {
+      setError('Network error. Please check your connection.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Load orders when date range or pagination changes
   useEffect(() => {
-    const loadOrders = async () => {
-      const venue = getVenue();
-      
-      if (!venue?.id) {
-        setOrders([]);
-        setLoading(false);
-        return;
-      }
-
-      try {
-        setLoading(true);
-        setError(null);
-
-        const ordersData = await orderService.getVenueOrders(venue.id);
-        // Filter to show only today's orders
-        const todaysOrders = ordersData.filter(order => isToday(order.created_at));
-        setOrders(todaysOrders);
-      } catch (error) {        setError('Network error. Please check your connection.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
     loadOrders();
+  }, [userData?.venue?.id, dateRange, pagination.page, pagination.pageSize]);
 
-    // Auto-refresh orders every 30 seconds
+  // Auto-refresh orders every 30 seconds
+  useEffect(() => {
     const refreshTimer = setInterval(loadOrders, 30000);
+    return () => clearInterval(refreshTimer);
+  }, [dateRange, pagination.page, pagination.pageSize]);
 
-    return () => {
-      clearInterval(refreshTimer);
-    };
-  }, [userData?.venue?.id]);
-
-  // Filter orders based on search and status
+  // Filter orders based on search and status (client-side for current page)
   useEffect(() => {
     let filtered = orders;
 
@@ -224,7 +240,7 @@ const OrdersManagement: React.FC = () => {
   const getUrgentOrders = () => {
     const now = new Date();
     return getActiveOrders().filter(order => {
-      const orderTime = new Date(order.created_at);
+      const orderTime = new Date(order.createdAt);
       const diffInMinutes = Math.floor((now.getTime() - orderTime.getTime()) / (1000 * 60));
       return diffInMinutes > 30;
     });
@@ -281,7 +297,6 @@ const OrdersManagement: React.FC = () => {
   };
 
   const getTableNumber = (order: Order) => {
-    // Return table_number if available, otherwise format table_id
     if (order.table_number) {
       return order.table_number;
     }
@@ -292,7 +307,6 @@ const OrdersManagement: React.FC = () => {
   };
 
   const getTrimmedOrderId = (orderId: string) => {
-    // Return first 8 characters of order ID
     return orderId.substring(0, 8);
   };
 
@@ -342,28 +356,12 @@ const OrdersManagement: React.FC = () => {
   };
 
   const handleRefreshOrders = async () => {
-    const venue = getVenue();
-    if (!venue?.id) return;
-
-    try {
-      setLoading(true);
-      const ordersData = await orderService.getVenueOrders(venue.id);
-      const todaysOrders = ordersData.filter(order => isToday(order.created_at));
-      setOrders(todaysOrders);
-      setSnackbar({ 
-        open: true, 
-        message: 'Orders refreshed successfully', 
-        severity: 'success' 
-      });
-    } catch (error) {
-      setSnackbar({ 
-        open: true, 
-        message: 'Failed to refresh orders. Please try again.', 
-        severity: 'error' 
-      });
-    } finally {
-      setLoading(false);
-    }
+    await loadOrders();
+    setSnackbar({ 
+      open: true, 
+      message: 'Orders refreshed successfully', 
+      severity: 'success' 
+    });
   };
 
   const handleViewOrder = (order: Order) => {
@@ -371,9 +369,14 @@ const OrdersManagement: React.FC = () => {
     setOpenOrderDialog(true);
   };
 
+  const handleDateRangeChange = (newRange: DateRange) => {
+    setDateRange(newRange);
+    setPage(1); // Reset to first page when changing date range
+  };
+
   // Compact order card for active and served orders
   const renderCompactOrderCard = (order: Order) => {
-    const isUrgent = isOrderUrgent(order.created_at);
+    const isUrgent = isOrderUrgent(order.createdAt);
     const isServed = order.status === 'served' || order.status === 'delivered';
     
     return (
@@ -495,7 +498,7 @@ const OrdersManagement: React.FC = () => {
                 <Stack direction="row" alignItems="center" spacing={0.5}>
                   <AccessTime fontSize="small" sx={{ fontSize: 16, color: 'text.secondary' }} />
                   <Typography variant="body2" color="text.secondary" fontSize="0.8rem">
-                    {formatTime(order.created_at)}
+                    {formatTime(order.createdAt)}
                   </Typography>
                 </Stack>
                 <Typography 
@@ -510,7 +513,7 @@ const OrdersManagement: React.FC = () => {
                     backgroundColor: isUrgent ? 'error.lighter' : 'transparent'
                   }}
                 >
-                  {getTimeSinceOrder(order.created_at)}
+                  {getTimeSinceOrder(order.createdAt)}
                 </Typography>
               </Stack>
             </Stack>
@@ -724,8 +727,8 @@ const OrdersManagement: React.FC = () => {
                 }}
               >
                 {isOperator() 
-                  ? `Today's orders for ${getVenueDisplayName()}` 
-                  : `Today's order management for ${getVenueDisplayName()}`
+                  ? `Order management for ${getVenueDisplayName()}` 
+                  : `Order management for ${getVenueDisplayName()}`
                 }
               </Typography>
 
@@ -758,6 +761,48 @@ const OrdersManagement: React.FC = () => {
                 alignItems: 'center',
               }}
             >
+              {/* View Mode Toggle */}
+              <ToggleButtonGroup
+                value={viewMode}
+                exclusive
+                onChange={(e, newMode) => newMode && setViewMode(newMode)}
+                size="small"
+                sx={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                  backdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(0, 0, 0, 0.1)',
+                  borderRadius: 2,
+                  '& .MuiToggleButton-root': {
+                    border: 'none',
+                    px: { xs: 1.5, sm: 2 },
+                    py: 0.75,
+                    fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                    fontWeight: 600,
+                    textTransform: 'none',
+                    color: 'text.secondary',
+                    '&.Mui-selected': {
+                      backgroundColor: 'primary.main',
+                      color: 'white',
+                      '&:hover': {
+                        backgroundColor: 'primary.dark',
+                      },
+                    },
+                    '&:hover': {
+                      backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                    },
+                  },
+                }}
+              >
+                <ToggleButton value="tab" aria-label="tab view">
+                  <ViewModule sx={{ fontSize: { xs: 16, sm: 18 }, mr: { xs: 0.5, sm: 1 } }} />
+                  {!isMobile && 'Tab View'}
+                </ToggleButton>
+                <ToggleButton value="kanban" aria-label="kanban view">
+                  <ViewKanban sx={{ fontSize: { xs: 16, sm: 18 }, mr: { xs: 0.5, sm: 1 } }} />
+                  {!isMobile && 'Kanban'}
+                </ToggleButton>
+              </ToggleButtonGroup>
+
               {getUrgentOrders().length > 0 && (
                 <Button
                   variant="outlined"
@@ -774,6 +819,7 @@ const OrdersManagement: React.FC = () => {
                     borderRadius: 2,
                     textTransform: 'none',
                     fontSize: '0.875rem',
+                    display: { xs: 'none', sm: 'flex' },
                     '&:hover': {
                       backgroundColor: 'rgba(244, 67, 54, 0.2)',
                       borderColor: 'error.main',
@@ -835,17 +881,27 @@ const OrdersManagement: React.FC = () => {
           </Box>
         )}
 
+        {/* Date Range Picker */}
+        <Box sx={{ px: { xs: 3, sm: 4 }, pt: 3, pb: 2 }}>
+          <DateRangePicker
+            value={dateRange}
+            onChange={handleDateRangeChange}
+            showPresets={true}
+            label="Filter Orders by Date"
+          />
+        </Box>
+
         {/* Kitchen Statistics */}
         <FlagGate flag="orders.showOrderStats">
           <Box sx={{ mb: 4, px: { xs: 3, sm: 4 }, py: 2 }}>
             <Grid container spacing={{ xs: 2, sm: 3 }}>
               {[
                 { 
-                  label: 'Total Orders Today', 
+                  label: 'Total Orders', 
                   value: orders.length, 
                   color: '#2196F3', 
                   icon: <Assignment />,
-                  description: 'All orders received'
+                  description: 'Selected period'
                 },
                 { 
                   label: 'Active Orders', 
@@ -940,60 +996,72 @@ const OrdersManagement: React.FC = () => {
           </Box>
         </FlagGate>
 
-        {/* Enhanced Controls */}
-        <FlagGate flag="orders.showOrderFilters">
-          <Paper 
-            sx={{ 
-              p: 3, 
-              mb: 4, 
-              border: '1px solid', 
-              borderColor: 'divider',
-              backgroundColor: 'background.paper',
-              mx: { xs: 3, sm: 4 }
-            }}
-          >
-            <Grid container spacing={{ xs: 2, sm: 3 }} alignItems="center">
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  placeholder={isMobile ? "Search orders..." : "Search orders by ID, table, or items..."}
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  size={isMobile ? "medium" : "medium"}
-                  InputProps={{
-                    startAdornment: <Search sx={{ mr: 1, color: 'text.secondary' }} />,
-                  }}
-                />
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <FormControl fullWidth>
-                  <InputLabel>Filter by Status</InputLabel>
-                  <Select
-                    value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value)}
-                    label="Filter by Status"
+        {/* Enhanced Controls - Only show in Tab View */}
+        {viewMode === 'tab' && (
+          <FlagGate flag="orders.showOrderFilters">
+            <Paper 
+              sx={{ 
+                p: 3, 
+                mb: 4, 
+                border: '1px solid', 
+                borderColor: 'divider',
+                backgroundColor: 'background.paper',
+                mx: { xs: 3, sm: 4 }
+              }}
+            >
+              <Grid container spacing={{ xs: 2, sm: 3 }} alignItems="center">
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    placeholder={isMobile ? "Search orders..." : "Search orders by ID, table, or items..."}
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
                     size={isMobile ? "medium" : "medium"}
-                  >
-                    <MenuItem value="all">All Orders</MenuItem>
-                    <MenuItem value="pending">Pending</MenuItem>
-                    <MenuItem value="confirmed">Confirmed</MenuItem>
-                    <MenuItem value="preparing">Preparing</MenuItem>
-                    <MenuItem value="ready">Ready</MenuItem>
-                    <MenuItem value="served">Served</MenuItem>
-                  </Select>
-                </FormControl>
+                    InputProps={{
+                      startAdornment: <Search sx={{ mr: 1, color: 'text.secondary' }} />,
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <FormControl fullWidth>
+                    <InputLabel>Filter by Status</InputLabel>
+                    <Select
+                      value={statusFilter}
+                      onChange={(e) => setStatusFilter(e.target.value)}
+                      label="Filter by Status"
+                      size={isMobile ? "medium" : "medium"}
+                    >
+                      <MenuItem value="all">All Orders</MenuItem>
+                      <MenuItem value="pending">Pending</MenuItem>
+                      <MenuItem value="confirmed">Confirmed</MenuItem>
+                      <MenuItem value="preparing">Preparing</MenuItem>
+                      <MenuItem value="ready">Ready</MenuItem>
+                      <MenuItem value="served">Served</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
               </Grid>
-            </Grid>
-          </Paper>
-        </FlagGate>
+            </Paper>
+          </FlagGate>
+        )}
 
-        {/* Tabs */}
-        <Paper sx={{ 
-          border: '1px solid', 
-          borderColor: 'divider',
-          backgroundColor: 'background.paper',
-          mx: { xs: 3, sm: 4 }
-        }}>
+        {/* Kanban View */}
+        {viewMode === 'kanban' ? (
+          <Box sx={{ px: { xs: 3, sm: 4 }, mb: 4 }}>
+            <KanbanBoard
+              orders={filteredOrders}
+              onStatusUpdate={handleStatusUpdate}
+              onViewOrder={handleViewOrder}
+            />
+          </Box>
+        ) : (
+          /* Tab View */
+          <Paper sx={{ 
+            border: '1px solid', 
+            borderColor: 'divider',
+            backgroundColor: 'background.paper',
+            mx: { xs: 3, sm: 4 }
+          }}>
           <Tabs 
             value={tabValue} 
             onChange={(e, newValue) => setTabValue(newValue)}
@@ -1069,7 +1137,7 @@ const OrdersManagement: React.FC = () => {
                   </Typography>
                   
                   <Typography variant="body1" color="text.secondary" sx={{ mb: 3, maxWidth: '400px', mx: 'auto' }}>
-                    All orders have been served or there are no new orders today.
+                    All orders have been served or there are no new orders in the selected date range.
                   </Typography>
                 </Card>
               ) : (
@@ -1122,7 +1190,7 @@ const OrdersManagement: React.FC = () => {
                   </Typography>
                   
                   <Typography variant="body1" color="text.secondary" sx={{ mb: 3, maxWidth: '400px', mx: 'auto' }}>
-                    Completed orders for today will appear here.
+                    Completed orders for the selected date range will appear here.
                   </Typography>
                 </Card>
               ) : (
@@ -1136,7 +1204,20 @@ const OrdersManagement: React.FC = () => {
               )}
             </Box>
           </TabPanel>
-        </Paper>
+
+            {/* Pagination */}
+            {filteredOrders.length > 0 && (
+              <Box sx={{ p: 3, borderTop: '1px solid', borderColor: 'divider' }}>
+                <PaginationControl
+                  pagination={pagination}
+                  onPageChange={setPage}
+                  onPageSizeChange={setPageSize}
+                  variant={isMobile ? 'compact' : 'default'}
+                />
+              </Box>
+            )}
+          </Paper>
+        )}
 
         {/* Bill-Style Order Details Dialog */}
         <Dialog 
@@ -1186,11 +1267,11 @@ const OrdersManagement: React.FC = () => {
                   </Stack>
                   <Stack direction="row" justifyContent="space-between" mb={1}>
                     <Typography variant="body2" color="text.secondary">Date:</Typography>
-                    <Typography variant="body2" fontWeight="600">{formatDate(selectedOrder.created_at)}</Typography>
+                    <Typography variant="body2" fontWeight="600">{formatDate(selectedOrder.createdAt)}</Typography>
                   </Stack>
                   <Stack direction="row" justifyContent="space-between" mb={1}>
                     <Typography variant="body2" color="text.secondary">Time:</Typography>
-                    <Typography variant="body2" fontWeight="600">{formatTime(selectedOrder.created_at)}</Typography>
+                    <Typography variant="body2" fontWeight="600">{formatTime(selectedOrder.createdAt)}</Typography>
                   </Stack>
                   <Stack direction="row" justifyContent="space-between">
                     <Typography variant="body2" color="text.secondary">Status:</Typography>

@@ -162,8 +162,8 @@ const MenuManagement: React.FC = () => {
         setError(null);
 
         const [categoriesData, menuItemsData] = await Promise.all([
-          menuService.getMenuCategories({ venue_id: venue.id }),
-          menuService.getMenuItems({ venue_id: venue.id })
+          menuService.getMenuCategories({ venueId: venue.id }),
+          menuService.getMenuItems({ venueId: venue.id })
         ]);
 
         // Process categories
@@ -171,7 +171,7 @@ const MenuManagement: React.FC = () => {
           ...cat,
           active: true,
           order: 0,
-          venueId: cat.venue_id
+          venueId: cat.venueId
         }));
 
         // Process menu items
@@ -332,7 +332,7 @@ const MenuManagement: React.FC = () => {
           description: itemData.description || '',
           base_price: itemData.price || 0,
           category_id: itemData.category || '',
-          venue_id: venue.id,
+          venueId: venue.id,
           is_vegetarian: itemData.isVeg ?? true,
           preparation_time_minutes: itemData.preparationTime || 15,
         };
@@ -401,7 +401,7 @@ const MenuManagement: React.FC = () => {
               ...response.data!,
               active: true,
               order: cat.order || 0,
-              venueId: response.data!.venue_id
+              venueId: response.data!.venueId
             } as CategoryType : cat
           ));
         }
@@ -415,14 +415,14 @@ const MenuManagement: React.FC = () => {
         const response = await menuService.createMenuCategory({
           name: categoryData.name || '',
           description: categoryData.description || '',
-          venue_id: venue.id,
+          venueId: venue.id,
         });
         if (response.data) {
           const newCategory = {
             ...response.data!,
             active: true,
             order: 0,
-            venueId: response.data!.venue_id
+            venueId: response.data!.venueId
           } as CategoryType;
           setCategories(prev => [...prev, newCategory]);
         }
@@ -506,15 +506,15 @@ const MenuManagement: React.FC = () => {
       setError(null);
 
       const [categoriesData, menuItemsData] = await Promise.all([
-        menuService.getMenuCategories({ venue_id: venue.id }),
-        menuService.getMenuItems({ venue_id: venue.id })
+        menuService.getMenuCategories({ venueId: venue.id }),
+        menuService.getMenuItems({ venueId: venue.id })
       ]);
 
       const processedCategories = (categoriesData.data || []).map((cat: any) => ({
         ...cat,
         active: true,
         order: 0,
-        venueId: cat.venue_id
+        venueId: cat.venueId
       }));
 
       const processedMenuItems = (menuItemsData.data || []).map((item: any) => ({

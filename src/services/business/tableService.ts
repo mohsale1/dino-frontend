@@ -24,9 +24,9 @@ class TableService {
       
       if (filters?.page) params.append('page', filters.page.toString());
       if (filters?.page_size) params.append('page_size', filters.page_size.toString());
-      if (filters?.venue_id) params.append('venue_id', filters.venue_id);
+      if (filters?.venueId) params.append('venueId', filters.venueId);
       if (filters?.table_status) params.append('table_status', filters.table_status);
-      if (filters?.is_active !== undefined) params.append('is_active', filters.is_active.toString());
+      if (filters?.isActive !== undefined) params.append('is_active', filters.isActive.toString());
 
       const response = await apiService.get<PaginatedResponse<Table>>(`/tables?${params.toString()}`);      
       // Handle different response structures from apiService
@@ -124,9 +124,9 @@ class TableService {
    */
   async updateTableStatus(tableId: string, newStatus: TableStatus): Promise<ApiResponse<void>> {
     try {
-      console.log('TableService.updateTableStatus called with:', { tableId, newStatus });
+      // console.log('TableService.updateTableStatus called with:', { tableId, newStatus });
       const payload = { new_status: newStatus };
-      console.log('Sending payload:', payload);
+      // console.log('Sending payload:', payload);
       
       const response = await apiService.put<void>(
         `/tables/${tableId}/status`, 
@@ -137,7 +137,7 @@ class TableService {
           }
         }
       );
-      console.log('Response:', response);
+      // console.log('Response:', response);
       return response;
     } catch (error: any) {
       console.error('TableService.updateTableStatus error:', error);
@@ -237,7 +237,7 @@ class TableService {
   ): Promise<ApiResponse<Table[]>> {
     try {
       const params = new URLSearchParams();
-      params.append('venue_id', venueId);
+      params.append('venueId', venueId);
       params.append('start_number', startNumber.toString());
       params.append('count', count.toString());
       params.append('capacity', capacity.toString());
@@ -299,21 +299,21 @@ class TableService {
    * Check if table can be occupied
    */
   canOccupyTable(table: Table): boolean {
-    return table.is_active && ['available'].includes(table.table_status);
+    return table.isActive && ['available'].includes(table.table_status);
   }
 
   /**
    * Check if table can be freed
    */
   canFreeTable(table: Table): boolean {
-    return table.is_active && ['occupied', 'reserved'].includes(table.table_status);
+    return table.isActive && ['occupied', 'reserved'].includes(table.table_status);
   }
 
   /**
    * Check if table can be edited
    */
   canEditTable(table: Table): boolean {
-    return table.is_active && table.table_status !== 'occupied';
+    return table.isActive && table.table_status !== 'occupied';
   }
 
   /**
@@ -442,7 +442,7 @@ class TableService {
     totalCapacity: number;
     averageCapacity: number;
   } {
-    const active = tables.filter(t => t.is_active);
+    const active = tables.filter(t => t.isActive);
     const available = tables.filter(t => t.table_status === 'available');
     const occupied = tables.filter(t => t.table_status === 'occupied');
     const reserved = tables.filter(t => t.table_status === 'reserved');
@@ -472,7 +472,7 @@ class TableService {
     return tables.some(table => 
       table.table_number === tableNumber && 
       table.id !== excludeTableId &&
-      table.is_active
+      table.isActive
     );
   }
 
@@ -480,7 +480,7 @@ class TableService {
    * Suggest next available table number
    */
   suggestNextTableNumber(tables: Table[]): string {
-    const activeTables = tables.filter(t => t.is_active);
+    const activeTables = tables.filter(t => t.isActive);
     const usedNumbers = activeTables.map(t => parseInt(t.table_number) || 0).sort((a, b) => a - b);
     
     // Find the first gap in the sequence
@@ -535,7 +535,7 @@ class TableService {
     try {
       const response = await apiService.post<any>('/tables/areas', {
         ...areaData,
-        venue_id: venueId || areaData.venue_id
+        venueId: venueId || areaData.venueId
       });
       return response.data;
     } catch (error: any) {

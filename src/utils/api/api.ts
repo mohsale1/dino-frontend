@@ -117,7 +117,9 @@ class ApiService {
         // Only check token refresh for non-auth endpoints
         if (!isAuthEndpoint && authService.shouldRefreshToken()) {
           try {            await authService.refreshToken();
-          } catch (error) {          }
+          } catch (error) {
+      // Error handled silently
+    }
         }
         
         // Add authentication token

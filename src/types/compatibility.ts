@@ -44,34 +44,26 @@ export const convertApiUserToLegacy = (apiUser: ApiUserProfile): UserProfile => 
     id: apiUser.id,
     email: apiUser.email,
     phone: apiUser.phone,
-    firstName: apiUser.first_name,
-    lastName: apiUser.last_name,
-    first_name: apiUser.first_name,
-    last_name: apiUser.last_name,
-    name: `${apiUser.first_name} ${apiUser.last_name}`.trim(),
-    dateOfBirth: apiUser.date_of_birth ? new Date(apiUser.date_of_birth) : undefined,
-    date_of_birth: apiUser.date_of_birth,
+    firstName: apiUser.firstName,
+    lastName: apiUser.lastName,
+    name: `${apiUser.firstName} ${apiUser.lastName}`.trim(),
+    dateOfBirth: apiUser.dateOfBirth,
     gender: apiUser.gender,
     role: apiUser.role as any,
     permissions: [], // Would need to be fetched separately
     profileImageUrl: undefined, // Not in API response
-    isActive: apiUser.is_active,
-    is_active: apiUser.is_active,
+    isActive: apiUser.isActive,
     isVerified: true, // Assume verified if in system
     addresses: [], // Would need to be fetched separately
     preferences: undefined, // Would need to be fetched separately
-    createdAt: new Date(apiUser.created_at),
-    created_at: apiUser.created_at,
-    updatedAt: apiUser.updated_at ? new Date(apiUser.updated_at) : new Date(),
-    updated_at: apiUser.updated_at,
+    createdAt: apiUser.createdAt,
+    updatedAt: apiUser.updatedAt,
     lastLogin: undefined, // Not in API response
     loginCount: undefined, // Not in API response
     totalOrders: undefined, // Not in API response
     totalSpent: undefined, // Not in API response
-    workspaceId: apiUser.workspace_id,
-    workspace_id: apiUser.workspace_id,
-    venueId: apiUser.venue_id,
-    venue_id: apiUser.venue_id
+    workspaceId: apiUser.workspaceId,
+    venueId: apiUser.venueId
   };
 };
 
@@ -83,15 +75,15 @@ export const convertLegacyUserToApi = (legacyUser: UserProfile): Partial<ApiUser
     id: legacyUser.id,
     email: legacyUser.email,
     phone: legacyUser.phone,
-    first_name: legacyUser.first_name || legacyUser.firstName,
-    last_name: legacyUser.last_name || legacyUser.lastName,
+    firstName: legacyUser.firstName,
+    lastName: legacyUser.lastName,
     role: legacyUser.role as ApiUserRole,
-    workspace_id: legacyUser.workspace_id || legacyUser.workspaceId,
-    venue_id: legacyUser.venue_id || legacyUser.venueId,
-    is_active: legacyUser.is_active ?? legacyUser.isActive,
-    created_at: legacyUser.created_at || legacyUser.createdAt?.toISOString(),
-    updated_at: legacyUser.updated_at || legacyUser.updatedAt?.toISOString(),
-    date_of_birth: legacyUser.date_of_birth || legacyUser.dateOfBirth?.toISOString().split('T')[0],
+    workspaceId: legacyUser.workspaceId,
+    venueId: legacyUser.venueId,
+    isActive: legacyUser.isActive,
+    createdAt: legacyUser.createdAt,
+    updatedAt: legacyUser.updatedAt,
+    dateOfBirth: legacyUser.dateOfBirth,
     gender: legacyUser.gender
   };
 };
@@ -112,7 +104,7 @@ export const convertApiMenuItemToLegacy = (apiItem: ApiMenuItem): LegacyMenuItem
     preparationTime: apiItem.preparation_time_minutes || 15,
     ingredients: [], // Not in API response
     allergens: [], // Not in API response
-    venueId: apiItem.venue_id,
+    venueId: apiItem.venueId,
     order: 0 // Not in API response
   };
 };
@@ -127,7 +119,7 @@ export const convertLegacyMenuItemToApi = (legacyItem: LegacyMenuItem): Partial<
     description: legacyItem.description,
     base_price: legacyItem.price,
     category_id: legacyItem.category,
-    venue_id: legacyItem.venueId,
+    venueId: legacyItem.venueId,
     is_vegetarian: legacyItem.isVeg,
     is_available: legacyItem.isAvailable,
     preparation_time_minutes: legacyItem.preparationTime,
@@ -144,7 +136,7 @@ export const convertApiMenuCategoryToLegacy = (apiCategory: ApiMenuCategory): Le
     name: apiCategory.name,
     description: apiCategory.description,
     order: 0, // Not in API response
-    venueId: apiCategory.venue_id
+    venueId: apiCategory.venueId
   };
 };
 
@@ -155,7 +147,7 @@ export const convertApiOrderToLegacy = (apiOrder: ApiOrder): LegacyOrder => {
   return {
     id: apiOrder.id,
     orderNumber: apiOrder.order_number,
-    venueId: apiOrder.venue_id,
+    venueId: apiOrder.venueId,
     tableId: apiOrder.table_id || '',
     customerId: apiOrder.customer_id,
     items: apiOrder.items.map(convertApiOrderItemToLegacy),
@@ -163,8 +155,8 @@ export const convertApiOrderToLegacy = (apiOrder: ApiOrder): LegacyOrder => {
     paymentStatus: apiOrder.payment_status as LegacyPaymentStatus,
     specialInstructions: apiOrder.special_instructions,
     estimatedTime: 30, // Default preparation time
-    createdAt: new Date(apiOrder.created_at),
-    updatedAt: new Date(apiOrder.updated_at || apiOrder.created_at)
+    createdAt: new Date(apiOrder.createdAt),
+    updatedAt: new Date(apiOrder.updatedAt || apiOrder.createdAt)
   };
 };
 
@@ -191,9 +183,9 @@ export const convertApiTableToLegacy = (apiTable: ApiTable): LegacyTable => {
     tableNumber: parseInt(apiTable.table_number) || 0,
     qrCode: apiTable.qr_code,
     qrCodeUrl: '', // Would need to be generated
-    venueId: apiTable.venue_id,
-    isActive: apiTable.is_active,
-    createdAt: new Date(apiTable.created_at)
+    venueId: apiTable.venueId,
+    isActive: apiTable.isActive,
+    createdAt: new Date(apiTable.createdAt)
   };
 };
 
@@ -210,9 +202,9 @@ export const convertApiVenueToLegacyCafe = (apiVenue: Venue): LegacyCafe => {
     email: apiVenue.email || '',
     ownerId: '', // Not in API response
     logo: undefined, // Not in API response
-    isActive: apiVenue.is_active,
-    createdAt: new Date(apiVenue.created_at),
-    updatedAt: new Date(apiVenue.updated_at || apiVenue.created_at)
+    isActive: apiVenue.isActive,
+    createdAt: new Date(apiVenue.createdAt),
+    updatedAt: new Date(apiVenue.updatedAt || apiVenue.createdAt)
   };
 };
 
@@ -244,7 +236,7 @@ export const isLegacyUser = (user: any): user is LegacyUserProfile => {
 };
 
 export const isApiUser = (user: any): user is ApiUserProfile => {
-  return user && typeof user.first_name === 'string';
+  return user && typeof user.firstName === 'string';
 };
 
 export const isLegacyMenuItem = (item: any): item is LegacyMenuItem => {
@@ -278,11 +270,11 @@ export class UserAdapter {
   }
 
   get firstName(): string {
-    return this.user.firstName || this.user.first_name || '';
+    return this.user.firstName || this.user.firstName || '';
   }
 
   get lastName(): string {
-    return this.user.lastName || this.user.last_name || '';
+    return this.user.lastName || this.user.lastName || '';
   }
 
   get fullName(): string {
@@ -294,15 +286,15 @@ export class UserAdapter {
   }
 
   get isActive(): boolean {
-    return this.user.isActive ?? this.user.is_active ?? false;
+    return this.user.isActive ?? this.user.isActive ?? false;
   }
 
   get workspaceId(): string | undefined {
-    return this.user.workspaceId || this.user.workspace_id;
+    return this.user.workspaceId || this.user.workspaceId;
   }
 
   get venueId(): string | undefined {
-    return this.user.venueId || this.user.venue_id;
+    return this.user.venueId || this.user.venueId;
   }
 
   toLegacy(): LegacyUserProfile {
@@ -353,7 +345,7 @@ export class MenuItemAdapter {
   }
 
   get venueId(): string {
-    return isLegacyMenuItem(this.item) ? this.item.venueId : this.item.venue_id;
+    return isLegacyMenuItem(this.item) ? this.item.venueId : this.item.venueId;
   }
 
   toLegacy(): LegacyMenuItem {
@@ -391,8 +383,8 @@ export const validateCompatibility = {
   user: (legacyUser: LegacyUserProfile, apiUser: ApiUserProfile): boolean => {
     return legacyUser.id === apiUser.id && 
            legacyUser.email === apiUser.email &&
-           (legacyUser.firstName || legacyUser.first_name) === apiUser.first_name &&
-           (legacyUser.lastName || legacyUser.last_name) === apiUser.last_name;
+           (legacyUser.firstName || legacyUser.firstName) === apiUser.firstName &&
+           (legacyUser.lastName || legacyUser.lastName) === apiUser.lastName;
   },
 
   menuItem: (legacyItem: LegacyMenuItem, apiItem: ApiMenuItem): boolean => {

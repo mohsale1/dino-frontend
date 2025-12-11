@@ -106,7 +106,7 @@ export const useRealTimeOrders = (venueId?: string, status?: string) => {
   const fetchOrders = useCallback(async () => {
     if (!targetVenueId) return [];
     
-    const filters: any = { venue_id: targetVenueId };
+    const filters: any = { venueId: targetVenueId };
     if (status) filters.status = status;
     
     const result = await orderService.getOrders(filters);
@@ -146,7 +146,7 @@ export const useRealTimeTables = (venueId?: string) => {
 
   const fetchTables = useCallback(async () => {
     if (!targetVenueId) return [];
-    const result = await tableService.getTables({ venue_id: targetVenueId });
+    const result = await tableService.getTables({ venueId: targetVenueId });
     return result.data;
   }, [targetVenueId]);
 

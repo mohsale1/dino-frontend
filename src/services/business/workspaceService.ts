@@ -154,7 +154,7 @@ class WorkspaceService {
       },
       phone: venueData.phone,
       email: venueData.email,
-      workspace_id: venueData.workspaceId
+      workspaceId: venueData.workspaceId
     };
     return await apiService.post<Venue>('/venues', apiVenueData);
   }

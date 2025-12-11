@@ -94,7 +94,9 @@ export const TourProvider: React.FC<TourProviderProps> = ({ children }) => {
       setIsActive(false);
       setCurrentStep(0);
       setSteps([]);
-      await refreshTourStatus();    } catch (error) {    }
+      await refreshTourStatus();    } catch (error) {
+      // Error handled silently
+    }
   };
 
   const completeTour = async () => {
@@ -103,13 +105,17 @@ export const TourProvider: React.FC<TourProviderProps> = ({ children }) => {
       setIsActive(false);
       setCurrentStep(0);
       setSteps([]);
-      await refreshTourStatus();    } catch (error) {    }
+      await refreshTourStatus();    } catch (error) {
+      // Error handled silently
+    }
   };
 
   const restartTour = async () => {
     try {
       await tourService.restartTour();
-      await refreshTourStatus();    } catch (error) {    }
+      await refreshTourStatus();    } catch (error) {
+      // Error handled silently
+    }
   };
 
   const shouldShowTour = tourStatus?.should_show_tour || false;

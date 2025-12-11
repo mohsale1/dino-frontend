@@ -584,14 +584,14 @@ const WorkspaceManagement: React.FC = () => {
                   },
                   { 
                     label: 'Active Venues', 
-                    value: venues.filter(v => v.is_active).length, 
+                    value: venues.filter(v => v.isActive).length, 
                     color: '#4CAF50', 
                     icon: <CheckCircle />,
                     description: 'Currently active'
                   },
                   { 
                     label: 'Open Now', 
-                    value: venues.filter(v => v.is_open && v.is_active).length, 
+                    value: venues.filter(v => v.is_open && v.isActive).length, 
                     color: '#FF9800', 
                     icon: <Store />,
                     description: 'Accepting orders'
@@ -934,13 +934,13 @@ const WorkspaceManagement: React.FC = () => {
                     {/* Status Icons */}
                     <Box sx={{ display: 'flex', gap: 2, mb: 1 }}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8 }}>
-                        {venue.is_active ? (
+                        {venue.isActive ? (
                           <CheckCircle sx={{ fontSize: 16, color: 'success.main' }} />
                         ) : (
                           <Cancel sx={{ fontSize: 16, color: 'grey.400' }} />
                         )}
                         <Typography variant="body2" sx={{ fontSize: '0.85rem', color: 'text.secondary', fontWeight: 400, textTransform: 'capitalize' }}>
-                          {venue.is_active ? 'Active' : 'Inactive'}
+                          {venue.isActive ? 'Active' : 'Inactive'}
                         </Typography>
                       </Box>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8 }}>
@@ -1505,10 +1505,10 @@ const WorkspaceManagement: React.FC = () => {
                   email: venueFormData.email,
                   price_range: venueFormData.priceRange as PriceRange,
                   cuisine_types: [venueFormData.venueType], // Default to venue type as cuisine
-                  is_active: venueFormData.isActive,
+                  isActive: venueFormData.isActive,
                   is_open: venueFormData.isOpen, // Explicitly set is_open status
                   theme: venueFormData.theme,
-                  workspace_id: workspaceId
+                  workspaceId: workspaceId
                 };
 
                 if (editingVenue) {
@@ -1520,7 +1520,7 @@ const WorkspaceManagement: React.FC = () => {
                     phone: venueFormData.phone,
                     email: venueFormData.email,
                     price_range: venueFormData.priceRange as PriceRange,
-                    is_active: venueFormData.isActive,
+                    isActive: venueFormData.isActive,
                     is_open: venueFormData.isOpen,
                     theme: venueFormData.theme,
                   };
@@ -1619,9 +1619,9 @@ const WorkspaceManagement: React.FC = () => {
                 phone: selectedItem.phone || '',
                 email: selectedItem.email || '',
                 priceRange: selectedItem.price_range || 'mid_range',
-                isActive: selectedItem.is_active ?? true,
+                isActive: selectedItem.isActive ?? true,
                 isOpen: selectedItem.is_open ?? true,
-                theme: selectedItem.theme || 'pet', // Default to pet theme
+                theme: selectedItem.theme || 'classic', // Default to classic theme
               });
               setEditingVenue(selectedItem);
               setOpenVenueDialog(true);
@@ -1680,9 +1680,9 @@ const WorkspaceManagement: React.FC = () => {
             // Toggle venue active/inactive status
             if (selectedItem) {
               try {
-                const newActiveStatus = !selectedItem.is_active;
+                const newActiveStatus = !selectedItem.isActive;
                 await venueService.updateVenue(selectedItem.id, {
-                  is_active: newActiveStatus
+                  isActive: newActiveStatus
                 });
                 
                 setSnackbar({
@@ -1707,10 +1707,10 @@ const WorkspaceManagement: React.FC = () => {
           }}
         >
           <ListItemIcon>
-            {selectedItem?.is_active ? <Cancel fontSize="small" /> : <CheckCircle fontSize="small" />}
+            {selectedItem?.isActive ? <Cancel fontSize="small" /> : <CheckCircle fontSize="small" />}
           </ListItemIcon>
           <ListItemText>
-            {selectedItem?.is_active ? 'Deactivate Venue' : 'Activate Venue'}
+            {selectedItem?.isActive ? 'Deactivate Venue' : 'Activate Venue'}
           </ListItemText>
         </MenuItem>
 

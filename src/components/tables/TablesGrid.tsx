@@ -78,39 +78,40 @@ const TablesGrid: React.FC<TablesGridProps> = ({
     }}>
       {/* Header */}
       <Box sx={{ 
-        p: 3,
+        p: { xs: 2, sm: 3 },
         borderBottom: '1px solid',
         borderColor: 'grey.200'
       }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' }, flexWrap: 'wrap', gap: 2, flexDirection: { xs: 'column', sm: 'row' } }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1.5, sm: 2 }, width: { xs: '100%', sm: 'auto' } }}>
             <Box
               sx={{
-                width: 48,
-                height: 48,
+                width: { xs: 40, sm: 48 },
+                height: { xs: 40, sm: 48 },
                 borderRadius: '50%',
                 backgroundColor: 'primary.main',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center'
+                justifyContent: 'center',
+                flexShrink: 0
               }}
             >
-              <TableRestaurant sx={{ color: 'white', fontSize: 24 }} />
+              <TableRestaurant sx={{ color: 'white', fontSize: { xs: 20, sm: 24 } }} />
             </Box>
-            <Box>
-              <Typography variant="h5" fontWeight="700" sx={{ color: 'text.primary', mb: 0.5 }}>
+            <Box sx={{ flex: 1, minWidth: 0 }}>
+              <Typography variant="h5" fontWeight="700" sx={{ color: 'text.primary', mb: 0.5, fontSize: { xs: '1.125rem', sm: '1.5rem' } }}>
                 Tables ({filteredTables.length})
               </Typography>
-              <Typography variant="body1" sx={{ color: 'text.secondary' }}>
+              <Typography variant="body1" sx={{ color: 'text.secondary', fontSize: { xs: '0.875rem', sm: '1rem' }, display: { xs: 'none', sm: 'block' } }}>
                 Manage your restaurant seating layout
               </Typography>
             </Box>
           </Box>
           
           {/* Filters and Add Button */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, width: { xs: '100%', sm: 'auto' }, flexWrap: { xs: 'wrap', sm: 'nowrap' } }}>
             {/* Area Filter */}
-            <FormControl size="small" sx={{ minWidth: 140 }}>
+            <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 140 }, flex: { xs: 1, sm: 'none' } }}>
               <InputLabel>Filter Area</InputLabel>
               <Select
                 value={selectedArea}
@@ -146,18 +147,20 @@ const TablesGrid: React.FC<TablesGridProps> = ({
             <FlagGate flag="tables.showAddTable">
               <Button
                 variant="contained"
-                startIcon={<Add />}
+                startIcon={<Add fontSize={isMobile ? "small" : "medium"} />}
                 onClick={onAddTable}
-                size="medium"
+                size={isMobile ? "small" : "medium"}
                 sx={{
                   borderRadius: 1,
                   backgroundColor: 'primary.main',
                   color: 'white',
                   fontWeight: 600,
-                  px: 2.5,
-                  py: 0.75,
-                  fontSize: '0.8rem',
+                  px: { xs: 2, sm: 2.5 },
+                  py: { xs: 0.75, sm: 0.75 },
+                  fontSize: { xs: '0.75rem', sm: '0.8rem' },
                   boxShadow: 'none',
+                  flex: { xs: 1, sm: 'none' },
+                  minWidth: { xs: 'auto', sm: 120 },
                   '&:hover': {
                     backgroundColor: 'primary.dark',
                     boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
@@ -165,7 +168,7 @@ const TablesGrid: React.FC<TablesGridProps> = ({
                   transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                 }}
               >
-                Add Table
+                {isMobile ? 'Add' : 'Add Table'}
               </Button>
             </FlagGate>
           </Box>
@@ -173,30 +176,30 @@ const TablesGrid: React.FC<TablesGridProps> = ({
       </Box>
 
       {/* Content */}
-      <Box sx={{ p: 3 }}>
+      <Box sx={{ p: { xs: 2, sm: 3 } }}>
         {filteredTables.length === 0 ? (
-          <Box sx={{ textAlign: 'center', py: 4 }}>
+          <Box sx={{ textAlign: 'center', py: { xs: 3, sm: 4 } }}>
             <Box
               sx={{
-                width: 80,
-                height: 80,
+                width: { xs: 64, sm: 80 },
+                height: { xs: 64, sm: 80 },
                 borderRadius: '50%',
                 backgroundColor: 'grey.100',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 mx: 'auto',
-                mb: 3
+                mb: { xs: 2, sm: 3 }
               }}
             >
-              <TableRestaurant sx={{ fontSize: 40, color: 'text.secondary' }} />
+              <TableRestaurant sx={{ fontSize: { xs: 32, sm: 40 }, color: 'text.secondary' }} />
             </Box>
             
-            <Typography variant="h6" fontWeight="600" gutterBottom color="text.primary">
+            <Typography variant="h6" fontWeight="600" gutterBottom color="text.primary" sx={{ fontSize: { xs: '1rem', sm: '1.25rem' } }}>
               {selectedArea === 'all' ? 'No Tables Yet' : 'No Tables in This Area'}
             </Typography>
             
-            <Typography variant="body1" sx={{ mb: 4, color: 'text.secondary', maxWidth: '500px', mx: 'auto' }}>
+            <Typography variant="body1" sx={{ mb: { xs: 3, sm: 4 }, color: 'text.secondary', maxWidth: '500px', mx: 'auto', fontSize: { xs: '0.875rem', sm: '1rem' }, px: { xs: 2, sm: 0 } }}>
               {selectedArea === 'all' 
                 ? 'Start building your restaurant layout by adding your first table. You can organize tables into different seating areas for better management.'
                 : `No tables found in "${areas.find(a => a.id === selectedArea)?.name || 'this area'}". Add tables to this area or select a different area to view existing tables.`
@@ -205,16 +208,17 @@ const TablesGrid: React.FC<TablesGridProps> = ({
 
             <Button
               variant="contained"
-              startIcon={<Add />}
+              startIcon={<Add fontSize={isMobile ? "small" : "medium"} />}
               onClick={onAddTable}
-              size="large"
+              size={isMobile ? "medium" : "large"}
               sx={{
                 backgroundColor: 'primary.main',
                 color: 'white',
                 borderRadius: 2,
                 fontWeight: 600,
-                px: 4,
-                py: 1.5,
+                px: { xs: 3, sm: 4 },
+                py: { xs: 1.25, sm: 1.5 },
+                fontSize: { xs: '0.875rem', sm: '1rem' },
                 '&:hover': {
                   backgroundColor: 'primary.dark',
                   transform: 'translateY(-1px)',
@@ -223,7 +227,7 @@ const TablesGrid: React.FC<TablesGridProps> = ({
                 transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
               }}
             >
-              {selectedArea === 'all' ? 'Create Your First Table' : 'Add Table to Area'}
+              {selectedArea === 'all' ? (isMobile ? 'Add First Table' : 'Create Your First Table') : (isMobile ? 'Add Table' : 'Add Table to Area')}
             </Button>
           </Box>
         ) : (
@@ -232,28 +236,28 @@ const TablesGrid: React.FC<TablesGridProps> = ({
               <React.Fragment key={table.id}>
                 <ListItem
                   sx={{
-                    py: 2.5,
+                    py: { xs: 2, sm: 2.5 },
                     px: 0,
                     transition: 'all 0.2s ease-in-out',
-                    opacity: table.is_active ? 1 : 0.7,
+                    opacity: table.isActive ? 1 : 0.7,
                     '&:hover': {
                       backgroundColor: 'grey.50',
-                      transform: 'translateX(4px)',
+                      transform: { xs: 'none', sm: 'translateX(4px)' },
                       borderRadius: 2
                     }
                   }}
                 >
-                  <Stack direction="row" alignItems="center" spacing={3} sx={{ width: '100%' }}>
+                  <Stack direction="row" alignItems="center" spacing={{ xs: 2, sm: 3 }} sx={{ width: '100%' }}>
                     {/* Table Avatar with Status */}
-                    <Box sx={{ position: 'relative' }}>
+                    <Box sx={{ position: 'relative', flexShrink: 0 }}>
                       <Avatar
                         sx={{
-                          width: 64,
-                          height: 64,
+                          width: { xs: 48, sm: 64 },
+                          height: { xs: 48, sm: 64 },
                           backgroundColor: 'primary.main',
-                          border: '3px solid',
+                          border: { xs: '2px solid', sm: '3px solid' },
                           borderColor: 'grey.100',
-                          fontSize: '1.2rem',
+                          fontSize: { xs: '1rem', sm: '1.2rem' },
                           fontWeight: 700,
                           color: 'white'
                         }}
@@ -265,8 +269,8 @@ const TablesGrid: React.FC<TablesGridProps> = ({
                           position: 'absolute',
                           bottom: -2,
                           right: -2,
-                          width: 20,
-                          height: 20,
+                          width: { xs: 16, sm: 20 },
+                          height: { xs: 16, sm: 20 },
                           borderRadius: '50%',
                           backgroundColor: 'primary.main',
                           border: '2px solid white',
@@ -275,17 +279,17 @@ const TablesGrid: React.FC<TablesGridProps> = ({
                           justifyContent: 'center'
                         }}
                       >
-                        <Box sx={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: 'white' }} />
+                        <Box sx={{ width: { xs: 6, sm: 8 }, height: { xs: 6, sm: 8 }, borderRadius: '50%', backgroundColor: 'white' }} />
                       </Box>
                     </Box>
 
                     {/* Table Info */}
                     <Box sx={{ flex: 1, minWidth: 0 }}>
-                      <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 1 }}>
+                      <Stack direction={{ xs: 'column', sm: 'row' }} alignItems={{ xs: 'flex-start', sm: 'center' }} spacing={{ xs: 0.5, sm: 2 }} sx={{ mb: { xs: 0.75, sm: 1 } }}>
                         <Typography 
                           variant="h6" 
                           fontWeight="700" 
-                          sx={{ color: 'text.primary' }}
+                          sx={{ color: 'text.primary', fontSize: { xs: '1rem', sm: '1.25rem' } }}
                         >
                           Table {table.table_number}
                         </Typography>
@@ -296,21 +300,23 @@ const TablesGrid: React.FC<TablesGridProps> = ({
                           sx={{
                             borderColor: 'primary.main',
                             color: 'primary.main',
-                            fontWeight: 600
+                            fontWeight: 600,
+                            fontSize: { xs: '0.7rem', sm: '0.75rem' },
+                            height: { xs: 20, sm: 24 }
                           }}
                         />
                       </Stack>
                       
-                      <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 1 }}>
+                      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={{ xs: 0.75, sm: 2 }} alignItems={{ xs: 'flex-start', sm: 'center' }} sx={{ mb: { xs: 0.5, sm: 1 } }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                          <People sx={{ fontSize: 16, color: 'text.secondary' }} />
-                          <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
+                          <People sx={{ fontSize: { xs: 14, sm: 16 }, color: 'text.secondary' }} />
+                          <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500, fontSize: { xs: '0.8125rem', sm: '0.875rem' } }}>
                             {table.capacity} people
                           </Typography>
                         </Box>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                           {React.cloneElement(getStatusIcon(table.table_status || table.status), { 
-                            sx: { fontSize: 16, color: 'text.secondary' }
+                            sx: { fontSize: { xs: 14, sm: 16 }, color: 'text.secondary' }
                           })}
                           <Chip 
                             label={(table.table_status || table.status).charAt(0).toUpperCase() + (table.table_status || table.status).slice(1)}
@@ -319,7 +325,9 @@ const TablesGrid: React.FC<TablesGridProps> = ({
                             variant="outlined"
                             sx={{
                               fontWeight: 600,
-                              textTransform: 'capitalize'
+                              textTransform: 'capitalize',
+                              fontSize: { xs: '0.7rem', sm: '0.75rem' },
+                              height: { xs: 20, sm: 24 }
                             }}
                           />
                         </Box>
@@ -330,10 +338,11 @@ const TablesGrid: React.FC<TablesGridProps> = ({
                           variant="body2" 
                           sx={{ 
                             color: 'text.secondary',
-                            fontSize: '0.85rem',
+                            fontSize: { xs: '0.75rem', sm: '0.85rem' },
                             overflow: 'hidden',
                             textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap'
+                            whiteSpace: 'nowrap',
+                            display: { xs: 'none', sm: 'block' }
                           }}
                         >
                           {table.description}
@@ -342,32 +351,37 @@ const TablesGrid: React.FC<TablesGridProps> = ({
                     </Box>
 
                     {/* Actions */}
-                    <Stack direction="row" spacing={1}>
-                      <Tooltip title={table.is_active ? 'Deactivate' : 'Activate'}>
+                    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={{ xs: 0.75, sm: 1 }} sx={{ flexShrink: 0 }}>
+                      <Tooltip title={table.isActive ? 'Deactivate' : 'Activate'}>
                         <IconButton 
-                          size="medium" 
+                          size={isMobile ? "small" : "medium"} 
                           onClick={() => onToggleTableStatus(table.id)}
                           sx={{ 
                             backgroundColor: 'grey.100',
-                            color: table.is_active ? 'success.main' : 'text.disabled',
+                            color: table.isActive ? 'success.main' : 'text.disabled',
+                            minWidth: 44,
+                            minHeight: 44,
                             '&:hover': { 
-                              backgroundColor: table.is_active ? 'success.50' : 'grey.200',
-                              transform: 'scale(1.05)'
+                              backgroundColor: table.isActive ? 'success.50' : 'grey.200',
+                              transform: { xs: 'none', sm: 'scale(1.05)' }
                             },
                             transition: 'all 0.2s ease-in-out'
                           }}
                         >
-                          {table.is_active ? <Visibility fontSize="small" /> : <VisibilityOff fontSize="small" />}
+                          {table.isActive ? <Visibility fontSize="small" /> : <VisibilityOff fontSize="small" />}
                         </IconButton>
                       </Tooltip>
                       
                       <Tooltip title="Generate QR Code">
                         <IconButton 
-                          size="medium" 
+                          size={isMobile ? "small" : "medium"} 
                           onClick={() => onGenerateQR(table.id)}
                           sx={{ 
                             backgroundColor: 'grey.100',
                             color: 'text.secondary',
+                            minWidth: 44,
+                            minHeight: 44,
+                            display: { xs: 'none', sm: 'inline-flex' },
                             '&:hover': { 
                               backgroundColor: 'primary.50',
                               color: 'primary.main',
@@ -382,11 +396,14 @@ const TablesGrid: React.FC<TablesGridProps> = ({
                       
                       <Tooltip title="Print QR Code">
                         <IconButton 
-                          size="medium" 
+                          size={isMobile ? "small" : "medium"} 
                           onClick={() => onPrintQR(table.id)}
                           sx={{ 
                             backgroundColor: 'grey.100',
                             color: 'text.secondary',
+                            minWidth: 44,
+                            minHeight: 44,
+                            display: { xs: 'none', sm: 'inline-flex' },
                             '&:hover': { 
                               backgroundColor: 'secondary.50',
                               color: 'secondary.main',
@@ -402,15 +419,17 @@ const TablesGrid: React.FC<TablesGridProps> = ({
                       <FlagGate flag="tables.showEditTable">
                         <Tooltip title="Edit Table">
                           <IconButton 
-                            size="medium" 
+                            size={isMobile ? "small" : "medium"} 
                             onClick={() => onEditTable(table)}
                             sx={{ 
                               backgroundColor: 'grey.100',
                               color: 'text.secondary',
+                              minWidth: 44,
+                              minHeight: 44,
                               '&:hover': { 
                                 backgroundColor: 'warning.50',
                                 color: 'warning.main',
-                                transform: 'scale(1.05)'
+                                transform: { xs: 'none', sm: 'scale(1.05)' }
                               },
                               transition: 'all 0.2s ease-in-out'
                             }}
@@ -423,11 +442,14 @@ const TablesGrid: React.FC<TablesGridProps> = ({
                       <FlagGate flag="tables.showDeleteTable">
                         <Tooltip title="Delete Table">
                           <IconButton 
-                            size="medium" 
+                            size={isMobile ? "small" : "medium"} 
                             onClick={() => onDeleteTable(table.id)}
                             sx={{ 
                               backgroundColor: 'grey.100',
                               color: 'text.secondary',
+                              minWidth: 44,
+                              minHeight: 44,
+                              display: { xs: 'none', sm: 'inline-flex' },
                               '&:hover': { 
                                 backgroundColor: 'error.50',
                                 color: 'error.main',

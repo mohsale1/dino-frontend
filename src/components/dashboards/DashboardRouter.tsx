@@ -14,7 +14,7 @@ interface DashboardRouterProps {
  * based on the user's role and permissions
  */
 const DashboardRouter: React.FC<DashboardRouterProps> = ({ className }) => {
-  const { user, isAuthenticated, isLoading } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const { userData, loading: userDataLoading } = useUserData();
   const { isSuperAdmin, isAdmin, isOperator } = usePermissions();
 

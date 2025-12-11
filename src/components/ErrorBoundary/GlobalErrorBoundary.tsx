@@ -74,6 +74,7 @@ class GlobalErrorBoundary extends Component<Props, State> {
       timestamp: new Date().toISOString(),
       retryCount: this.retryCount,
     };
+    
     // Call custom error handler if provided
     if (this.props.onError) {
       this.props.onError(error, errorInfo);
@@ -91,14 +92,20 @@ class GlobalErrorBoundary extends Component<Props, State> {
   private reportError = async (errorData: any) => {
     try {
       // Here you would integrate with your error reporting service
-      // For example: Sentry, LogRocket, Bugsnag, etc.      
+      // For example: Sentry, LogRocket, Bugsnag, etc.
+      
       // You could also send to your own error reporting endpoint
       // await fetch('/api/errors', {
       //   method: 'POST',
       //   headers: { 'Content-Type': 'application/json' },
       //   body: JSON.stringify(errorData),
       // });
-    } catch (reportingError) {    }
+    } catch (reportingError) {
+      // Error reporting failed, log to console in development
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to report error:', reportingError);
+      }
+    }
   };
 
   private handleRetry = () => {

@@ -387,7 +387,7 @@ const OrderStatusFragment: React.FC<OrderStatusFragmentProps> = ({ venueId, tabl
                       color="text.secondary"
                       sx={{ fontSize: { xs: '0.8rem', sm: '0.875rem' } }}
                     >
-                      {formatTime(order.created_at)}
+                      {formatTime(order.createdAt)}
                     </Typography>
                   </Box>
                   <Chip
