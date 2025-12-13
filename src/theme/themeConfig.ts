@@ -22,6 +22,15 @@ const shadows = {
 
 // Common theme configuration with enhanced professional design
 const commonTheme = {
+  breakpoints: {
+    values: {
+      xs: 0,
+      sm: 600,
+      md: 900,
+      lg: 1140, // Reduced from default 1200
+      xl: 1320, // Reduced from default 1536
+    },
+  },
   typography: {
     fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif',
     fontWeightLight: 300,
@@ -393,6 +402,11 @@ const commonTheme = {
         paper: {
           borderRadius: 0,
         },
+      },
+    },
+    MuiContainer: {
+      defaultProps: {
+        maxWidth: 'lg' as 'lg', // Default to lg instead of xl for better content density
       },
     },
     MuiAppBar: {
@@ -939,3 +953,4 @@ const darkThemeOptions: ThemeOptions = {
 export const lightTheme = createTheme(lightThemeOptions);
 
 export type ThemeMode = 'light';
+

@@ -36,6 +36,7 @@ import {
   Store,
   CheckCircle,
   Cancel,
+  Code,
 } from '@mui/icons-material';
 import DinoLogo from '../../DinoLogo';
 import { getUserFirstName } from '../../../utils/userUtils';
@@ -772,6 +773,38 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                         </ListItemIcon>
                         <ListItemText
                           primary="Workspace"
+                          primaryTypographyProps={{
+                            fontWeight: 500,
+                            color: 'text.primary',
+                            fontSize: '0.875rem',
+                          }}
+                        />
+                      </ListItemButton>
+                    </ListItem>
+                  )}
+
+                  {/* Code Management - Only for dino/dinos role */}
+                  {(() => {
+                    const backendRole = PermissionService.getBackendRole();
+                    const userRole = backendRole?.name || user?.role || '';
+                    return userRole.toLowerCase() === 'dino' || userRole.toLowerCase() === 'dinos';
+                  })() && (
+                    <ListItem disablePadding sx={{ mb: 0.5 }}>
+                      <ListItemButton
+                        onClick={() => handleNavigate('/admin/code')}
+                        sx={{
+                          borderRadius: 1,
+                          minHeight: 44,
+                          '&:hover': {
+                            backgroundColor: 'action.hover',
+                          },
+                        }}
+                      >
+                        <ListItemIcon sx={{ color: 'text.secondary', minWidth: 36 }}>
+                          <Code />
+                        </ListItemIcon>
+                        <ListItemText
+                          primary="Code Management"
                           primaryTypographyProps={{
                             fontWeight: 500,
                             color: 'text.primary',

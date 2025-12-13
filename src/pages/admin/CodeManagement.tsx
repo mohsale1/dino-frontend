@@ -144,7 +144,7 @@ const CodeManagement: React.FC = () => {
         }}
       >
         <AnimatedBackground />
-        <Container maxWidth="xl" sx={{ position: 'relative', zIndex: 2 }}>
+        <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 2 }}>
           <Box
             sx={{
               display: 'flex',
@@ -152,8 +152,8 @@ const CodeManagement: React.FC = () => {
               justifyContent: 'space-between',
               alignItems: { xs: 'flex-start', md: 'center' },
               gap: { xs: 2, md: 3 },
-              py: { xs: 3, sm: 4 },
-              px: { xs: 3, sm: 4 },
+              py: { xs: 2, sm: 3 },
+              px: { xs: 2, sm: 3 },
             }}
           >
             {/* Header Content */}
@@ -234,7 +234,7 @@ const CodeManagement: React.FC = () => {
       <Box sx={{ width: '100%', padding: 0, margin: 0 }}>
         {/* Error Alert */}
         {error && (
-          <Box sx={{ px: { xs: 3, sm: 4 }, pt: 3, pb: 1 }}>
+          <Box sx={{ px: { xs: 2, sm: 3 }, pt: 3, pb: 1 }}>
             <Alert 
               severity="error" 
               onClose={() => setError(null)}
@@ -245,7 +245,7 @@ const CodeManagement: React.FC = () => {
         )}
 
         {/* Code Display Section */}
-        <Box sx={{ px: { xs: 3, sm: 4 }, py: 4 }}>
+        <Box sx={{ px: { xs: 2, sm: 3 }, py: 4 }}>
           <Container maxWidth="sm">
             <Paper
               sx={{

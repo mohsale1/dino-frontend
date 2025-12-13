@@ -321,11 +321,11 @@ select:focus-visible {
   --spacing-xl: 32px;
   --spacing-xxl: 48px;
   
-  /* Container max-widths */
+  /* Container max-widths - Optimized for better content density */
   --container-sm: 600px;
   --container-md: 900px;
-  --container-lg: 1200px;
-  --container-xl: 1536px;
+  --container-lg: 1140px;
+  --container-xl: 1320px;
 }
 
 /* Responsive visibility utilities */
@@ -709,8 +709,8 @@ select:focus-visible {
   
   /* Mobile-friendly spacing */
   .MuiContainer-root {
-    padding-left: 16px !important;
-    padding-right: 16px !important;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
   }
   
   /* Mobile card adjustments */
@@ -738,8 +738,8 @@ select:focus-visible {
 /* Tablet optimizations */
 @media (min-width: 600px) and (max-width: 899px) {
   .MuiContainer-root {
-    padding-left: 24px !important;
-    padding-right: 24px !important;
+    padding-left: 20px !important;
+    padding-right: 20px !important;
   }
   
   .MuiCard-root {
@@ -750,8 +750,8 @@ select:focus-visible {
 /* Desktop optimizations */
 @media (min-width: 900px) {
   .MuiContainer-root {
-    padding-left: 32px !important;
-    padding-right: 32px !important;
+    padding-left: 24px !important;
+    padding-right: 24px !important;
   }
   
   .MuiCard-root {

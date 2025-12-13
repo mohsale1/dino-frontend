@@ -685,7 +685,7 @@ const OrdersManagement: React.FC = () => {
         }}
       >
         <AnimatedBackground />
-        <Container maxWidth="xl" sx={{ position: 'relative', zIndex: 2 }}>
+        <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 2 }}>
           <Box
             sx={{
               display: 'flex',
@@ -693,8 +693,8 @@ const OrdersManagement: React.FC = () => {
               justifyContent: 'space-between',
               alignItems: { xs: 'flex-start', md: 'center' },
               gap: { xs: 2, md: 3 },
-              py: { xs: 3, sm: 4 },
-              px: { xs: 3, sm: 4 },
+              py: { xs: 2, sm: 3 },
+              px: { xs: 2, sm: 3 },
             }}
           >
             {/* Header Content */}
@@ -871,7 +871,7 @@ const OrdersManagement: React.FC = () => {
       <Box sx={{ width: '100%', padding: 0, margin: 0 }}>
         {/* Error Alert */}
         {error && (
-          <Box sx={{ px: { xs: 3, sm: 4 }, pt: 3, pb: 1 }}>
+          <Box sx={{ px: { xs: 2, sm: 3 }, pt: 3, pb: 1 }}>
             <Alert 
               severity="error" 
               onClose={() => setError(null)}
@@ -882,7 +882,7 @@ const OrdersManagement: React.FC = () => {
         )}
 
         {/* Date Range Picker */}
-        <Box sx={{ px: { xs: 3, sm: 4 }, pt: 3, pb: 2 }}>
+        <Box sx={{ px: { xs: 2, sm: 3 }, pt: 3, pb: 2 }}>
           <DateRangePicker
             value={dateRange}
             onChange={handleDateRangeChange}
@@ -893,7 +893,7 @@ const OrdersManagement: React.FC = () => {
 
         {/* Kitchen Statistics */}
         <FlagGate flag="orders.showOrderStats">
-          <Box sx={{ mb: 4, px: { xs: 3, sm: 4 }, py: 2 }}>
+          <Box sx={{ mb: 4, px: { xs: 2, sm: 3 }, py: 2 }}>
             <Grid container spacing={{ xs: 2, sm: 3 }}>
               {[
                 { 
@@ -1047,7 +1047,7 @@ const OrdersManagement: React.FC = () => {
 
         {/* Kanban View */}
         {viewMode === 'kanban' ? (
-          <Box sx={{ px: { xs: 3, sm: 4 }, mb: 4 }}>
+          <Box sx={{ px: { xs: 2, sm: 3 }, mb: 4 }}>
             <KanbanBoard
               orders={filteredOrders}
               onStatusUpdate={handleStatusUpdate}
