@@ -73,10 +73,12 @@ const LoginPage: React.FC = () => {
       
       if (user?.role) {
         const userRole = user.role.toLowerCase();
-        if (userRole === 'operator') {
-          redirectPath = '/admin';
+        if (userRole === 'dino' || userRole === 'dinos') {
+          redirectPath = '/admin/code';
+        } else if (userRole === 'operator') {
+          redirectPath = '/admin/orders';
         } else if (userRole === 'admin' || userRole === 'superadmin' || userRole === 'super_admin') {
-          redirectPath = '/admin';
+          redirectPath = '/admin/orders';
         }
       }
       
