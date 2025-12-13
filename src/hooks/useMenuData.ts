@@ -143,7 +143,9 @@ export function useMenuData(options: UseMenuDataOptions = {}): UseMenuDataResult
         setRestaurant(venueData);
         
         // Check if venue is open and accepting orders
-        if (!venueData.is_open) {
+        // Handle both is_open (from API) and isOpen (normalized)
+        const isOpen = (venueData as any).is_open ?? (venueData as any).isOpen ?? false;
+        if (!isOpen) {
           setVenueNotAcceptingOrders({
             show: true,
             venueName: venueData.name,

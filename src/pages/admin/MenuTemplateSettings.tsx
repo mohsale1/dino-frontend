@@ -152,7 +152,7 @@ const MenuTemplateSettings: React.FC = () => {
 
       try {
         setLoading(true);
-        const currentTemplate = venue.menu_template || 'classic';
+        const currentTemplate = venue.menuTemplate || 'classic';
         setSelectedTemplate(currentTemplate);      } catch (error) {        setSnackbar({
           open: true,
           message: 'Failed to load current template',

@@ -471,7 +471,7 @@ const WorkspaceManagement: React.FC = () => {
                 >
                   <Store sx={{ fontSize: 18, mr: 1, color: 'primary.main', opacity: 0.9 }} />
                   <Typography variant="body2" fontWeight="500" color="text.primary">
-                    {userData.workspace.name || userData.workspace.display_name}
+                    {userData.workspace.displayName || userData.workspace.name}
                   </Typography>
                 </Box>
               )}

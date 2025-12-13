@@ -259,10 +259,10 @@ const VenueSettings: React.FC = () => {
           setSettings(prevSettings => ({
             name: venueData.name || '',
             description: venueData.description || '',
-            address: venueData.location?.address || venueData.address || '',
+            address: venueData.location?.address || '',
             city: venueData.location?.city || '',
             state: venueData.location?.state || '',
-            postalCode: venueData.location?.postal_code || '',
+            postalCode: venueData.location?.postalCode || '',
             landmark: venueData.location?.landmark || '',
             phone: venueData.phone || '',
             email: venueData.email || '',

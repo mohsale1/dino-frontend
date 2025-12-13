@@ -46,7 +46,7 @@ const VenueStatusControl: React.FC<VenueStatusControlProps> = () => {
   useEffect(() => {
     if (currentVenue) {
       const newActive = currentVenue.isActive || false;
-      const newOpen = currentVenue.is_open || false;      
+      const newOpen = currentVenue.isOpen || false;      
       setVenueActive(newActive);
       setVenueOpen(newOpen);
     }

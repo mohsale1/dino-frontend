@@ -58,7 +58,7 @@ const VenueStatusManager: React.FC<VenueStatusManagerProps> = ({
   const targetVenue = venue || (venueData ? {
     id: venueData.id,
     name: venueData.name,
-    isOpen: venueData.is_open || false,
+    isOpen: venueData.isOpen || false,
     isActive: venueData.isActive,
     lastStatusChange: venueData.updatedAt,
     operatingHours: 'Not set'
