@@ -15,6 +15,7 @@ class VenueService {
   // In-memory cache to prevent duplicate API calls
   private venueCache: Map<string, { data: Venue | null; timestamp: number }> = new Map();
   private pendingRequests: Map<string, Promise<Venue | null>> = new Map();
+  private pendingVenuesRequests: Map<string, Promise<any>> = new Map();
   private readonly CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
   // =============================================================================
@@ -180,15 +181,49 @@ class VenueService {
    * Get venues by workspace ID (Venus API) - SINGLE API CALL ONLY
    */
   async getVenuesByWorkspace(workspaceId: string): Promise<WorkspaceVenue[]> {
+    // Check if there's already a pending request for this workspace
+    const cacheKey = `workspace_${workspaceId}`;
+    const pending = this.pendingVenuesRequests.get(cacheKey);
+    if (pending) {
+      return pending;
+    }
+
+    // Create new request
+    const request = this._fetchVenuesByWorkspace(workspaceId);
+    this.pendingVenuesRequests.set(cacheKey, request);
+
+    try {
+      const result = await request;
+      return result;
+    } finally {
+      // Clean up pending request
+      this.pendingVenuesRequests.delete(cacheKey);
+    }
+  }
+
+  /**
+   * Internal method to fetch venues by workspace
+   */
+  private async _fetchVenuesByWorkspace(workspaceId: string): Promise<WorkspaceVenue[]> {
+    console.log(`[VenueService] Fetching venues for workspace: ${workspaceId}`);
     try {      
       // PRIMARY API CALL: Try the specific workspace venues endpoint
+      console.log(`[VenueService] Calling /venues/workspace/${workspaceId}/venues`);
       const response = await apiService.get<WorkspaceVenue[]>(`/venues/workspace/${workspaceId}/venues`);
       
-      if (response.success && response.data) {        return response.data;
-      }      return [];
-    } catch (error) {      
+      if (response.success && response.data) {
+        console.log(`[VenueService] Successfully fetched ${response.data.length} venues`);
+        return response.data;
+      }
+      console.log('[VenueService] No venues returned from primary endpoint');
+      return [];
+    } catch (error) {
+      console.log('[VenueService] Primary endpoint failed, trying fallback');
+      
       // FALLBACK API CALL: Try getting all venues and filter by workspace
-      try {        const allVenuesResponse = await this.getVenues({ page_size: 100 });
+      try {
+        console.log('[VenueService] Calling /venues with page_size=100');
+        const allVenuesResponse = await this.getVenues({ page_size: 100 });
         
         if (allVenuesResponse.success && allVenuesResponse.data) {
           // Filter venues by workspace_id and convert to WorkspaceVenue format
@@ -210,9 +245,15 @@ class VenueService {
               is_open: venue.is_open,
               createdAt: venue.createdAt,
               updatedAt: venue.updatedAt || venue.createdAt
-            } as WorkspaceVenue));          return workspaceVenues;
+            } as WorkspaceVenue));
+          console.log(`[VenueService] Fallback successful, found ${workspaceVenues.length} venues for workspace`);
+          return workspaceVenues;
         }
-      } catch (fallbackError) {      }      return [];
+      } catch (fallbackError) {
+        console.error('[VenueService] Fallback also failed:', fallbackError);
+      }
+      console.log('[VenueService] All attempts failed, returning empty array');
+      return [];
     }
   }
 

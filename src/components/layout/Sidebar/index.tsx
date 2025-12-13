@@ -105,6 +105,21 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
   // Get accessible modules from registry (dynamic based on stored permissions)
   const accessibleModules = getAccessibleModules();
   
+  // Debug logging for sidebar modules
+  React.useEffect(() => {
+    if (accessibleModules.length > 0) {
+      console.log('[Sidebar] Accessible modules:', accessibleModules.map(m => ({
+        id: m.id,
+        label: m.label,
+        path: m.path,
+        requiredPermissions: m.requiredPermissions,
+        requiredRoles: m.requiredRoles
+      })));
+      console.log('[Sidebar] User role:', userRole);
+      console.log('[Sidebar] Sidebar flags:', sidebarFlags);
+    }
+  }, [accessibleModules.length, userRole]);
+  
   // Convert to NavigationItem format and add icons
   const adminNavItems: NavigationItem[] = accessibleModules
     .filter(module => !module.children) // Only top-level modules for sidebar
@@ -119,6 +134,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
     .filter(item => {
       // Check feature flag
       if (item.flagKey && !sidebarFlags[item.flagKey as keyof typeof sidebarFlags]) {
+        console.log(`[Sidebar] Filtering out ${item.label} due to feature flag: ${item.flagKey}`);
         return false;
       }
       return true;

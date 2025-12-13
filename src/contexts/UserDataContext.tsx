@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback, useRef } from 'react';
 import { userDataService, UserData } from '../services/auth';
 import { useAuth } from './AuthContext';
 import { validateVenueAccess, getVenueDisplayName as getVenueDisplayNameUtil } from '../utils/venueUtils';
@@ -50,12 +50,14 @@ export const UserDataProvider: React.FC<UserDataProviderProps> = ({ children }) 
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(false);
   const [initialized, setInitialized] = useState(false);
+  const loadingRef = useRef(false);
 
   // Load user data when authenticated
   const loadUserData = useCallback(async (force: boolean = false) => {
     if (!isAuthenticated) {
       setUserData(null);
       setInitialized(true);
+      loadingRef.current = false;
       return;
     }
 
@@ -64,43 +66,40 @@ export const UserDataProvider: React.FC<UserDataProviderProps> = ({ children }) 
     if (!token) {
       setUserData(null);
       setInitialized(true);
+      loadingRef.current = false;
       return;
     }
 
     // Prevent duplicate calls - only load if forced or not already loading/loaded
-    if (!force && (loading || (userData && initialized))) {
+    if (!force && (loadingRef.current || (userData && initialized))) {
       return;
     }
 
+    loadingRef.current = true;
     setLoading(true);
     try {
       const data = await userDataService.getUserData();
       setUserData(data);
       setInitialized(true);
-      } catch (error: any) {
+    } catch (error: any) {
       setUserData(null);
       setInitialized(true);
     } finally {
       setLoading(false);
+      loadingRef.current = false;
     }
-  }, [isAuthenticated, loading, userData, initialized]);
+  }, [isAuthenticated, userData, initialized]);
 
-  // Initialize user data when authentication changes
+  // Initialize user data when authentication changes - SINGLE EFFECT ONLY
   useEffect(() => {
-    if (isAuthenticated && !initialized) {
+    if (isAuthenticated && !initialized && !loadingRef.current) {
       loadUserData(true);
-    } else if (!isAuthenticated && initialized) {
+    } else if (!isAuthenticated) {
       setUserData(null);
       setInitialized(false);
+      loadingRef.current = false;
     }
-  }, [isAuthenticated, initialized, loadUserData]);
-
-  // Additional effect to ensure data is loaded after login - with better conditions
-  useEffect(() => {
-    if (isAuthenticated && user && !userData && !loading && initialized) {
-      loadUserData(true);
-    }
-  }, [isAuthenticated, user, userData, loading, initialized, loadUserData]);
+  }, [isAuthenticated, initialized]);
 
   // Refresh user data
   const refreshUserData = async () => {

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback, useRef } from 'react';
 import { Workspace } from '../types/auth';
 import { Venue, PriceRange } from '../types/api';
 import { workspaceService } from '../services/business';
@@ -59,10 +59,24 @@ export const WorkspaceProvider: React.FC<WorkspaceProviderProps> = ({ children }
 
   // Load venues directly when needed (no caching)
   const [venuesLoading, setVenuesLoadingState] = useState(false);
+  const venuesLoadedRef = useRef(false);
 
-  const loadVenues = useCallback(async () => {
-    if (!user?.workspaceId || !isAuthenticated || venuesLoading) return;
+  const loadVenues = useCallback(async (force: boolean = false) => {
+    // Prevent duplicate calls - check loading state and if already loaded
+    if (!user?.workspaceId || !isAuthenticated) {
+      console.log('[WorkspaceContext] loadVenues: No workspace ID or not authenticated');
+      return;
+    }
+    if (venuesLoading) {
+      console.log('[WorkspaceContext] loadVenues: Already loading, skipping');
+      return;
+    }
+    if (!force && venuesLoadedRef.current) {
+      console.log('[WorkspaceContext] loadVenues: Already loaded, skipping (use force=true to reload)');
+      return;
+    }
     
+    console.log(`[WorkspaceContext] loadVenues: Loading venues for workspace ${user.workspaceId} (force=${force})`);
     setVenuesLoadingState(true);
     try {
       const venueList = await workspaceService.getVenues(user.workspaceId);
@@ -105,22 +119,30 @@ export const WorkspaceProvider: React.FC<WorkspaceProviderProps> = ({ children }
         } as Venue;
       });
       setVenues(mappedVenues);
+      venuesLoadedRef.current = true;
+      console.log(`[WorkspaceContext] loadVenues: Successfully loaded ${mappedVenues.length} venues`);
       
       // Auto-select first active venue if none selected
       if (!currentVenue && mappedVenues.length > 0) {
         const activeVenue = mappedVenues.find((venue: any) => venue.isActive) || mappedVenues[0];
         setCurrentVenue(activeVenue);
+        console.log(`[WorkspaceContext] loadVenues: Auto-selected venue: ${activeVenue.name}`);
       }
-    } catch (error) {      setVenues([]);
+    } catch (error) {
+      console.error('[WorkspaceContext] loadVenues: Error loading venues:', error);
+      setVenues([]);
+      venuesLoadedRef.current = false;
     } finally {
       setVenuesLoadingState(false);
     }
   }, [user?.workspaceId, isAuthenticated, venuesLoading, currentVenue]);
 
   // Load current venue directly when needed (no caching)
-  const loadCurrentVenue = useCallback(async () => {
+  const currentVenueLoadedRef = useRef(false);
+  const loadCurrentVenue = useCallback(async (force: boolean = false) => {
     const venueId = user?.venueId || user?.venueId;
     if (!venueId || !isAuthenticated) return;
+    if (!force && currentVenueLoadedRef.current) return;
     
     try {
       const venue = await workspaceService.getVenue(venueId);
@@ -161,11 +183,12 @@ export const WorkspaceProvider: React.FC<WorkspaceProviderProps> = ({ children }
           isOpen: venue.is_open !== undefined ? venue.is_open : venue.isActive
         };
         setCurrentVenue(venueData);
+        currentVenueLoadedRef.current = true;
       }
     } catch (error) {
-      // Error handled silently
+      currentVenueLoadedRef.current = false;
     }
-  }, [user?.venueId, user?.venueId, user?.id, isAuthenticated]);
+  }, [user?.venueId, user?.id, isAuthenticated]);
 
   // Load venues for workspace directly (no caching)
   const loadVenuesForWorkspace = useCallback(async (workspaceId: string) => {
@@ -175,11 +198,19 @@ export const WorkspaceProvider: React.FC<WorkspaceProviderProps> = ({ children }
   }, [loadVenues]);
 
   // Optimized initialization - now uses cached data
+  const initializationRef = useRef(false);
   const initializeWorkspaceData = useCallback(async () => {
     if (!isAuthenticated || !user) {
       setLoading(false);
+      initializationRef.current = false;
+      venuesLoadedRef.current = false;
+      currentVenueLoadedRef.current = false;
       return;
     }
+
+    // Prevent duplicate initialization
+    if (initializationRef.current) return;
+    initializationRef.current = true;
 
     setLoading(true);
     try {
@@ -198,19 +229,19 @@ export const WorkspaceProvider: React.FC<WorkspaceProviderProps> = ({ children }
         setWorkspaces([localWorkspace as any]);
       }
 
-      // Load venues and current venue
-      if (user?.workspaceId) {
-        await loadVenues();
-      }
-      await loadCurrentVenue();
+      // Load venues and current venue in parallel
+      await Promise.all([
+        user?.workspaceId ? loadVenues(false) : Promise.resolve(),
+        loadCurrentVenue(false)
+      ]);
     } catch (error) {
       // Error handled silently
     } finally {
       setLoading(false);
     }
-  }, [user, isAuthenticated, loadVenues, loadCurrentVenue]);
+  }, [user?.workspaceId, user?.id, isAuthenticated]);
 
-  // Initialize workspace data when user is authenticated
+  // Initialize workspace data when user is authenticated - SINGLE EFFECT ONLY
   useEffect(() => {
     if (isAuthenticated && user) {
       initializeWorkspaceData();
@@ -220,22 +251,11 @@ export const WorkspaceProvider: React.FC<WorkspaceProviderProps> = ({ children }
       setCurrentVenue(null);
       setWorkspaces([]);
       setVenues([]);
+      initializationRef.current = false;
+      venuesLoadedRef.current = false;
+      currentVenueLoadedRef.current = false;
     }
-  }, [isAuthenticated, user, initializeWorkspaceData]);
-
-  // Load venues when user changes
-  useEffect(() => {
-    if (isAuthenticated && user?.workspaceId) {
-      loadVenues();
-    }
-  }, [isAuthenticated, user?.workspaceId, loadVenues]);
-
-  // Load current venue when user changes
-  useEffect(() => {
-    if (isAuthenticated && (user?.venueId || user?.venueId)) {
-      loadCurrentVenue();
-    }
-  }, [isAuthenticated, user?.venueId, user?.venueId, loadCurrentVenue]);
+  }, [isAuthenticated, user?.id]); // Only depend on user.id to prevent loops
 
   const refreshWorkspaces = async () => {
     setWorkspacesLoading(true);
@@ -264,8 +284,9 @@ export const WorkspaceProvider: React.FC<WorkspaceProviderProps> = ({ children }
   };
 
   const refreshVenues = async () => {
-    // Refresh venues directly
-    await loadVenues();
+    // Refresh venues directly - force reload
+    venuesLoadedRef.current = false;
+    await loadVenues(true);
   };
 
   const switchWorkspace = async (workspaceId: string) => {
@@ -385,9 +406,12 @@ export const WorkspaceProvider: React.FC<WorkspaceProviderProps> = ({ children }
     try {
       const response = await workspaceService.updateVenue(venueId, venueData);
       if (response.success) {
-        // Refresh venues and current venue directly
-        await refreshVenues();
-        await loadCurrentVenue();
+        // Refresh venues and current venue directly - force reload
+        currentVenueLoadedRef.current = false;
+        await Promise.all([
+          refreshVenues(),
+          loadCurrentVenue(true)
+        ]);
       } else {
         throw new Error(response.message || 'Failed to update venue');
       }
@@ -423,9 +447,12 @@ export const WorkspaceProvider: React.FC<WorkspaceProviderProps> = ({ children }
     try {
       const response = await workspaceService.activateVenue(venueId);
       if (response.success) {
-        // Refresh venues and current venue directly
-        await refreshVenues();
-        await loadCurrentVenue();
+        // Refresh venues and current venue directly - force reload
+        currentVenueLoadedRef.current = false;
+        await Promise.all([
+          refreshVenues(),
+          loadCurrentVenue(true)
+        ]);
       } else {
         throw new Error(response.message || 'Failed to activate venue');
       }
@@ -438,9 +465,12 @@ export const WorkspaceProvider: React.FC<WorkspaceProviderProps> = ({ children }
     try {
       const response = await workspaceService.deactivateVenue(venueId);
       if (response.success) {
-        // Refresh venues and current venue directly
-        await refreshVenues();
-        await loadCurrentVenue();
+        // Refresh venues and current venue directly - force reload
+        currentVenueLoadedRef.current = false;
+        await Promise.all([
+          refreshVenues(),
+          loadCurrentVenue(true)
+        ]);
       } else {
         throw new Error(response.message || 'Failed to deactivate venue');
       }
@@ -453,9 +483,12 @@ export const WorkspaceProvider: React.FC<WorkspaceProviderProps> = ({ children }
     try {
       const response = await workspaceService.toggleVenueStatus(venueId, isOpen);
       if (response.success) {
-        // Refresh venues and current venue directly
-        await refreshVenues();
-        await loadCurrentVenue();
+        // Refresh venues and current venue directly - force reload
+        currentVenueLoadedRef.current = false;
+        await Promise.all([
+          refreshVenues(),
+          loadCurrentVenue(true)
+        ]);
       } else {
         throw new Error(response.message || 'Failed to toggle venue status');
       }
