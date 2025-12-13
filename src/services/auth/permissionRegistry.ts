@@ -426,6 +426,28 @@ export class PermissionRegistry {
   }
 
   /**
+   * Get only top-level modules (excluding children)
+   */
+  static getTopLevelModules(): UIModule[] {
+    this.initialize();
+    const allModules = this.getAllModules();
+    
+    // Filter to only include modules that are NOT children of other modules
+    return allModules.filter(module => {
+      // Check if this module is a child of any parent module
+      for (const parentModule of allModules) {
+        if (parentModule.children) {
+          const isChild = parentModule.children.some(child => child.id === module.id);
+          if (isChild) {
+            return false; // Exclude child modules
+          }
+        }
+      }
+      return true; // Include top-level modules
+    });
+  }
+
+  /**
    * Get module by ID
    */
   static getModule(moduleId: string): UIModule | undefined {
@@ -435,13 +457,17 @@ export class PermissionRegistry {
 
   /**
    * Get modules accessible with given permissions
+   * @param userPermissions - Array of user permission names
+   * @param userRole - User's role name
+   * @param includeChildren - Whether to include child modules (default: false)
    */
-  static getAccessibleModules(userPermissions: string[], userRole?: string): UIModule[] {
+  static getAccessibleModules(userPermissions: string[], userRole?: string, includeChildren: boolean = false): UIModule[] {
     this.initialize();
     
     const allModules = this.getAllModules();
     
-    return allModules.filter(module => {
+    // Filter modules based on permissions and roles
+    const accessibleModules = allModules.filter(module => {
       // Check role requirement first - if module requires specific roles
       if (module.requiredRoles && module.requiredRoles.length > 0) {
         // User must have one of the required roles
@@ -466,6 +492,37 @@ export class PermissionRegistry {
         this.hasPermission(userPermissions, requiredPerm)
       );
     });
+
+    // If includeChildren is false, filter out child modules
+    if (!includeChildren) {
+      // Get all parent module IDs
+      const parentModuleIds = new Set<string>();
+      allModules.forEach(module => {
+        if (module.children && module.children.length > 0) {
+          parentModuleIds.add(module.id);
+          // Also track child IDs to exclude them
+          module.children.forEach(child => {
+            // Mark this as a child by checking if it exists in any parent's children
+          });
+        }
+      });
+
+      // Filter to only include modules that are NOT children of other modules
+      return accessibleModules.filter(module => {
+        // Check if this module is a child of any parent module
+        for (const parentModule of allModules) {
+          if (parentModule.children) {
+            const isChild = parentModule.children.some(child => child.id === module.id);
+            if (isChild) {
+              return false; // Exclude child modules
+            }
+          }
+        }
+        return true; // Include top-level modules
+      });
+    }
+
+    return accessibleModules;
   }
 
   /**

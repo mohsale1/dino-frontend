@@ -103,17 +103,19 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
   };
 
   // Get accessible modules from registry (dynamic based on stored permissions)
+  // includeChildren=false ensures only top-level modules are returned
   const accessibleModules = getAccessibleModules();
   
   // Debug logging for sidebar modules
   React.useEffect(() => {
     if (accessibleModules.length > 0) {
-      console.log('[Sidebar] Accessible modules:', accessibleModules.map(m => ({
+      console.log('[Sidebar] Accessible modules (top-level only):', accessibleModules.map(m => ({
         id: m.id,
         label: m.label,
         path: m.path,
         requiredPermissions: m.requiredPermissions,
-        requiredRoles: m.requiredRoles
+        requiredRoles: m.requiredRoles,
+        hasChildren: !!m.children
       })));
       console.log('[Sidebar] User role:', userRole);
       console.log('[Sidebar] Sidebar flags:', sidebarFlags);
@@ -121,8 +123,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
   }, [accessibleModules.length, userRole]);
   
   // Convert to NavigationItem format and add icons
+  // Note: accessibleModules already excludes child modules, no need to filter again
   const adminNavItems: NavigationItem[] = accessibleModules
-    .filter(module => !module.children) // Only top-level modules for sidebar
     .map(module => ({
       label: module.label,
       path: module.path,
