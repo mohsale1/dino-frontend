@@ -213,9 +213,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
       {/* Header Section */}
       <Box
         sx={{
-          p: 1.5,
+          p: 1.25,
           borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
-          minHeight: 64,
+          minHeight: 56,
           display: 'flex',
           alignItems: 'center',
           justifyContent: showExpanded ? 'space-between' : 'center',
@@ -227,7 +227,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
               variant="h6"
               sx={{
                 fontWeight: 700,
-                fontSize: '1.1rem',
+                fontSize: '1rem',
                 background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
                 backgroundClip: 'text',
                 WebkitBackgroundClip: 'text',
@@ -241,7 +241,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
               variant="caption"
               sx={{
                 color: 'text.secondary',
-                fontSize: '0.7rem',
+                fontSize: '0.65rem',
                 fontWeight: 500,
                 display: 'block',
                 lineHeight: 1,
@@ -259,11 +259,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
               onClick={toggleCollapsed}
               sx={{
                 justifyContent: 'center',
-                minWidth: showExpanded ? 48 : '100%',
-                width: showExpanded ? 48 : '100%',
-                height: 48,
+                minWidth: showExpanded ? 40 : '100%',
+                width: showExpanded ? 40 : '100%',
+                height: 40,
                 borderRadius: 2,
-                fontSize: '0.875rem',
+                fontSize: '0.8125rem',
                 fontWeight: 500,
                 color: 'text.primary',
                 backgroundColor: 'transparent',
@@ -281,7 +281,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
                 '& .MuiButton-startIcon': {
                   mr: 0,
                   color: 'inherit',
-                  fontSize: '1.25rem',
+                  fontSize: '1.125rem',
                 },
               }}
               startIcon={isCollapsed ? <ChevronRight /> : <ChevronLeft />}
@@ -294,7 +294,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
       {user && sidebarFlags.showUserProfile && (
         <Box
           sx={{
-            p: 2,
+            p: 1.5,
             borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
           }}
         >
@@ -302,8 +302,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
             sx={{
               display: 'flex',
               alignItems: 'center',
-              gap: 1.5,
-              p: 1.5,
+              gap: 1.25,
+              p: 1.25,
               borderRadius: 2,
               backgroundColor: alpha(theme.palette.primary.main, 0.05),
               border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
@@ -311,10 +311,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
           >
             <Avatar
               sx={{
-                width: 36,
-                height: 36,
+                width: 32,
+                height: 32,
                 backgroundColor: 'primary.main',
-                fontSize: '0.875rem',
+                fontSize: '0.8125rem',
                 fontWeight: 600,
               }}
             >
@@ -328,7 +328,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
                   sx={{
                     fontWeight: 600,
                     color: 'text.primary',
-                    fontSize: '0.875rem',
+                    fontSize: '0.8125rem',
                     lineHeight: 1.2,
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
@@ -348,13 +348,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
                   })()}
                   size="small"
                   sx={{
-                    height: 18,
-                    fontSize: '0.65rem',
+                    height: 16,
+                    fontSize: '0.625rem',
                     fontWeight: 500,
                     backgroundColor: alpha(theme.palette.primary.main, 0.1),
                     color: 'primary.main',
                     border: 'none',
-                    mt: 0.5,
+                    mt: 0.375,
                   }}
                 />
               </Box>
@@ -367,49 +367,49 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
       {venueStatus && showExpanded && sidebarFlags.showVenueStatus && (
         <Box
           sx={{
-            p: 2,
+            p: 1.5,
             borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
           }}
           data-tour="venue-status"
         >
           <Box
             sx={{
-              p: 2,
+              p: 1.5,
               borderRadius: 2,
               backgroundColor: alpha(theme.palette.background.default, 0.8),
               border: `1px solid ${alpha(theme.palette.divider, 0.2)}`,
             }}
           >
             {/* Order Status */}
-            <Box sx={{ mb: 2 }}>
+            <Box sx={{ mb: 1.5 }}>
               <Typography
                 variant="body2"
                 sx={{
                   color: 'text.secondary',
-                  fontSize: '0.875rem',
+                  fontSize: '0.75rem',
                   fontWeight: 500,
-                  mb: 1,
+                  mb: 0.75,
                 }}
               >
                 Order Status
               </Typography>
-              <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mb: 1.5 }}>
+              <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 0.75, mb: 1 }}>
                 {venueStatus.isOpen ? (
-                  <CheckCircle sx={{ fontSize: 16, color: 'success.main', mt: 0.1 }} />
+                  <CheckCircle sx={{ fontSize: 14, color: 'success.main', mt: 0.1 }} />
                 ) : (
-                  <Cancel sx={{ fontSize: 16, color: 'error.main', mt: 0.1 }} />
+                  <Cancel sx={{ fontSize: 14, color: 'error.main', mt: 0.1 }} />
                 )}
                 <Typography
                   variant="body2"
                   sx={{
                     color: 'text.primary',
-                    fontSize: '0.875rem',
+                    fontSize: '0.75rem',
                     lineHeight: 1.4,
                   }}
                 >
                   {venueStatus.isOpen 
-                    ? 'Currently accepting new orders from customers'
-                    : 'Not accepting orders at the moment'
+                    ? 'Accepting new orders'
+                    : 'Not accepting orders'
                   }
                 </Typography>
               </Box>
@@ -536,11 +536,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
                   sx={{
                     justifyContent: showExpanded ? 'flex-start' : 'center',
                     textAlign: 'left',
-                    py: 1.5,
-                    px: showExpanded ? 2 : 1,
+                    py: 1.25,
+                    px: showExpanded ? 1.5 : 1,
                     borderRadius: 2,
-                    minHeight: 48,
-                    fontSize: '0.875rem',
+                    minHeight: 42,
+                    fontSize: '0.8125rem',
                     fontWeight: isActive ? 600 : 500,
                     color: isActive ? 'primary.main' : 'text.primary',
                     backgroundColor: isActive 
@@ -579,9 +579,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
                       borderRadius: '0 2px 2px 0',
                     } : {},
                     '& .MuiButton-startIcon': {
-                      mr: showExpanded ? 1.5 : 0,
+                      mr: showExpanded ? 1 : 0,
                       color: isActive ? 'primary.main' : 'text.secondary',
-                      fontSize: '1.25rem',
+                      fontSize: '1.125rem',
                       transition: 'color 0.2s ease',
                     },
                   }}
@@ -623,8 +623,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
           src="/img/dino_victory.png"
           alt="Dino Victory"
           sx={{
-            width: showExpanded ? (isTablet ? 60 : 80) : 40,
-            height: showExpanded ? (isTablet ? 60 : 80) : 40,
+            width: showExpanded ? (isTablet ? 50 : 60) : 36,
+            height: showExpanded ? (isTablet ? 50 : 60) : 36,
             objectFit: 'contain',
             transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
             filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.1))',

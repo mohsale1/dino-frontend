@@ -29,7 +29,7 @@ export const SidebarProvider: React.FC<SidebarProviderProps> = ({
   };
 
   const getSidebarWidth = (isTablet: boolean = false) => {
-    return isCollapsed ? 72 : (isTablet ? 200 : 280);
+    return isCollapsed ? 64 : (isTablet ? 180 : 240);
   };
 
   const value: SidebarContextType = {

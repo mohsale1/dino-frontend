@@ -23,6 +23,7 @@ import {
 import { usePermissions } from '../../auth';
 import PermissionService from '../../../services/auth';
 import { useDashboardFlags } from '../../../flags/FlagContext';
+import { ROLE_NAMES, isSuperAdmin as isSuperAdminRole, isAdmin as isAdminRole, isOperator as isOperatorRole } from '../../../constants/roles';
 
 interface VenueDashboardStats {
   total_orders: number;
@@ -154,60 +155,54 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({ stats }) => {
   ];
 
   const getStatsToRender = () => {
-    // Use the same role detection as control panel
-    const backendRole = PermissionService.getBackendRole();
-    const detectedRole = backendRole?.name || user?.role || 'unknown';
-    
-    if (detectedRole === 'superadmin' || detectedRole === 'super_admin') {
-      return superAdminStats;
-    } else if (detectedRole === 'admin') {
-      return adminStats;
-    } else if (detectedRole === 'operator') {
-      return operatorStats;
-    }
-    
-    // Fallback to permission hooks
+    // Use permission hooks first (most reliable)
     if (isSuperAdmin) return superAdminStats;
     if (isAdmin) return adminStats;
     if (isOperator) return operatorStats;
-    return superAdminStats; // fallback
+    
+    // Fallback to role detection using constants
+    const backendRole = PermissionService.getBackendRole();
+    const detectedRole = backendRole?.name || user?.role;
+    
+    if (isSuperAdminRole(detectedRole)) return superAdminStats;
+    if (isAdminRole(detectedRole)) return adminStats;
+    if (isOperatorRole(detectedRole)) return operatorStats;
+    
+    // Default fallback
+    return adminStats;
   };
 
   const statsToRender = getStatsToRender();
 
   return (
-    <Box sx={{ mb: 4 }}>
-      <Grid container spacing={{ xs: 2, sm: 3 }}>
+    <Box sx={{ mb: 3 }}>
+      <Grid container spacing={2}>
         {statsToRender.map((stat, index) => (
           <Grid item xs={6} md={3} key={index}>
             <Card
               sx={{
-                p: { xs: 2.5, sm: 3 },
+                p: 2,
                 borderRadius: 2,
                 backgroundColor: `${stat.color}08`,
                 border: `1px solid ${stat.color}33`,
                 transition: 'all 0.3s ease',
                 '&:hover': {
                   transform: 'translateY(-2px)',
-                  boxShadow: `0 8px 25px ${stat.color}33`,
+                  boxShadow: `0 4px 12px ${stat.color}33`,
                   backgroundColor: `${stat.color}12`,
                 },
               }}
               data-tour="stats-cards"
             >
-              <Stack direction="row" alignItems="center" spacing={2}>
+              <Stack direction="row" alignItems="center" spacing={1.5}>
                 {/* Icon with Badge for Operator */}
-                {(() => {
-                  const backendRole = PermissionService.getBackendRole();
-                  const detectedRole = backendRole?.name || user?.role || 'unknown';
-                  return detectedRole === 'operator' && detectedRole !== 'admin' && detectedRole !== 'superadmin' && detectedRole !== 'super_admin';
-                })() ? (
+                {isOperator ? (
                   <Badge badgeContent={stat.value} color={index === 0 ? 'warning' : index === 1 ? 'primary' : 'success'}>
                     <Box
                       sx={{
-                        width: { xs: 40, sm: 48 },
-                        height: { xs: 40, sm: 48 },
-                        borderRadius: 2,
+                        width: 36,
+                        height: 36,
+                        borderRadius: 1.5,
                         backgroundColor: stat.color,
                         display: 'flex',
                         alignItems: 'center',
@@ -217,16 +212,16 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({ stats }) => {
                       }}
                     >
                       {React.cloneElement(stat.icon, { 
-                        fontSize: 'large' 
+                        fontSize: 'small' 
                       })}
                     </Box>
                   </Badge>
                 ) : (
                   <Box
                     sx={{
-                      width: { xs: 40, sm: 48 },
-                      height: { xs: 40, sm: 48 },
-                      borderRadius: 2,
+                      width: 36,
+                      height: 36,
+                      borderRadius: 1.5,
                       backgroundColor: stat.color,
                       display: 'flex',
                       alignItems: 'center',
@@ -236,20 +231,20 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({ stats }) => {
                     }}
                   >
                     {React.cloneElement(stat.icon, { 
-                      fontSize: 'large' 
+                      fontSize: 'small' 
                     })}
                   </Box>
                 )}
                 
                 <Box sx={{ flex: 1, minWidth: 0 }}>
                   <Typography 
-                    variant="h4" 
+                    variant="h5" 
                     fontWeight="700" 
                     color="text.primary"
                     sx={{ 
-                      fontSize: { xs: '1.25rem', sm: '2rem' },
+                      fontSize: { xs: '1.125rem', sm: '1.375rem' },
                       lineHeight: 1.2,
-                      mb: 0.5
+                      mb: 0.25
                     }}
                   >
                     {stat.value}
@@ -259,8 +254,8 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({ stats }) => {
                     color="text.secondary"
                     fontWeight="600"
                     sx={{ 
-                      fontSize: { xs: '0.75rem', sm: '0.875rem' },
-                      lineHeight: 1.2,
+                      fontSize: '0.75rem',
+                      lineHeight: 1.3,
                       display: '-webkit-box',
                       WebkitLineClamp: 2,
                       WebkitBoxOrient: 'vertical',
@@ -276,12 +271,12 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({ stats }) => {
                       variant="determinate" 
                       value={(stat as any).progress} 
                       sx={{ 
-                        height: 4,
-                        borderRadius: 2,
+                        height: 3,
+                        borderRadius: 1.5,
                         backgroundColor: 'rgba(255,255,255,0.3)',
-                        mt: 1,
+                        mt: 0.75,
                         '& .MuiLinearProgress-bar': {
-                          borderRadius: 2,
+                          borderRadius: 1.5,
                           backgroundColor: stat.color
                         }
                       }}
@@ -292,8 +287,10 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({ stats }) => {
                     variant="caption" 
                     color="text.secondary"
                     sx={{ 
-                      fontSize: { xs: '0.7rem', sm: '0.75rem' },
-                      lineHeight: 1.2,
+                      fontSize: '0.6875rem',
+                      lineHeight: 1.3,
+                      mt: 0.25,
+                      display: 'block'
                     }}
                   >
                     {stat.description}

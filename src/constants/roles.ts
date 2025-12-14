@@ -1,130 +1,191 @@
 /**
  * Role Constants and Utilities
  * 
- * Centralized role definitions and helper functions
+ * Centralized role definitions matching backend (create-roles.sh)
+ * ONLY 4 roles: superadmin, admin, operator, dinos
  */
 
-// Role Names (matching backend)
+// Role Names - Matches create-roles.sh exactly
 export const ROLE_NAMES = {
-  SUPERADMIN: 'super_admin',
-  ADMIN: 'admin', 
-  MANAGER: 'manager',
+  SUPERADMIN: 'superadmin',
+  ADMIN: 'admin',
   OPERATOR: 'operator',
-  STAFF: 'staff',
-  CUSTOMER: 'customer',
-  CAFE_OWNER: 'cafe_owner', // Legacy support
+  DINOS: 'dinos',
 } as const;
 
+// Type for role names
+export type RoleName = typeof ROLE_NAMES[keyof typeof ROLE_NAMES];
+
 // Role Hierarchy (higher number = more permissions)
-export const ROLE_HIERARCHY = {
-  [ROLE_NAMES.CUSTOMER]: 1,
-  [ROLE_NAMES.STAFF]: 2,
-  [ROLE_NAMES.OPERATOR]: 3,
-  [ROLE_NAMES.MANAGER]: 4,
-  [ROLE_NAMES.ADMIN]: 5,
-  [ROLE_NAMES.CAFE_OWNER]: 5, // Same level as admin
-  [ROLE_NAMES.SUPERADMIN]: 6,
+export const ROLE_HIERARCHY: Record<RoleName, number> = {
+  [ROLE_NAMES.OPERATOR]: 1,
+  [ROLE_NAMES.ADMIN]: 2,
+  [ROLE_NAMES.SUPERADMIN]: 3,
+  [ROLE_NAMES.DINOS]: 4, // Highest - platform access
 } as const;
 
 // Role Display Names
-export const ROLE_DISPLAY_NAMES = {
+export const ROLE_DISPLAY_NAMES: Record<RoleName, string> = {
   [ROLE_NAMES.SUPERADMIN]: 'Super Administrator',
   [ROLE_NAMES.ADMIN]: 'Administrator',
-  [ROLE_NAMES.MANAGER]: 'Manager',
   [ROLE_NAMES.OPERATOR]: 'Operator',
-  [ROLE_NAMES.STAFF]: 'Staff',
-  [ROLE_NAMES.CUSTOMER]: 'Customer',
-  [ROLE_NAMES.CAFE_OWNER]: 'Cafe Owner',
+  [ROLE_NAMES.DINOS]: 'Dinos Platform',
 } as const;
 
-// Helper Functions
-export const isAdminLevel = (role: string): boolean => {
-  const adminRoles = [
-    ROLE_NAMES.ADMIN,
-    ROLE_NAMES.SUPERADMIN,
-    ROLE_NAMES.CAFE_OWNER
-  ];
-  return adminRoles.includes(role as any);
+// ============================================================================
+// ROLE CHECKING FUNCTIONS
+// ============================================================================
+
+/**
+ * Check if role is SuperAdmin
+ */
+export const isSuperAdmin = (role?: string | null): boolean => {
+  if (!role) return false;
+  return role.toLowerCase().trim() === ROLE_NAMES.SUPERADMIN;
 };
 
-export const isSuperAdmin = (role: string): boolean => {
-  return role === ROLE_NAMES.SUPERADMIN;
+/**
+ * Check if role is Admin
+ */
+export const isAdmin = (role?: string | null): boolean => {
+  if (!role) return false;
+  return role.toLowerCase().trim() === ROLE_NAMES.ADMIN;
 };
 
-export const isManager = (role: string): boolean => {
-  return role === ROLE_NAMES.MANAGER;
+/**
+ * Check if role is Operator
+ */
+export const isOperator = (role?: string | null): boolean => {
+  if (!role) return false;
+  return role.toLowerCase().trim() === ROLE_NAMES.OPERATOR;
 };
 
-export const isOperator = (role: string): boolean => {
-  return role === ROLE_NAMES.OPERATOR;
+/**
+ * Check if role is Dinos platform role
+ */
+export const isDinos = (role?: string | null): boolean => {
+  if (!role) return false;
+  return role.toLowerCase().trim() === ROLE_NAMES.DINOS;
 };
 
-export const isStaff = (role: string): boolean => {
-  return role === ROLE_NAMES.STAFF;
+/**
+ * Check if role has admin-level access (Admin, SuperAdmin, or Dinos)
+ */
+export const isAdminLevel = (role?: string | null): boolean => {
+  if (!role) return false;
+  return isAdmin(role) || isSuperAdmin(role) || isDinos(role);
 };
 
-export const isCustomer = (role: string): boolean => {
-  return role === ROLE_NAMES.CUSTOMER;
+// ============================================================================
+// UTILITY FUNCTIONS
+// ============================================================================
+
+/**
+ * Get display name for a role
+ */
+export const getRoleDisplayName = (role?: string | null): string => {
+  if (!role) return 'Unknown';
+  const normalized = role.toLowerCase().trim() as RoleName;
+  return ROLE_DISPLAY_NAMES[normalized] || role;
 };
 
-export const getRoleDisplayName = (role: string): string => {
-  return ROLE_DISPLAY_NAMES[role as keyof typeof ROLE_DISPLAY_NAMES] || role;
+/**
+ * Get hierarchy level for a role
+ */
+export const getRoleHierarchy = (role?: string | null): number => {
+  if (!role) return 0;
+  const normalized = role.toLowerCase().trim() as RoleName;
+  return ROLE_HIERARCHY[normalized] || 0;
 };
 
-export const getRoleHierarchy = (role: string): number => {
-  return ROLE_HIERARCHY[role as keyof typeof ROLE_HIERARCHY] || 0;
-};
-
-export const hasHigherRole = (userRole: string, requiredRole: string): boolean => {
+/**
+ * Check if user role has higher or equal hierarchy than required role
+ */
+export const hasHigherOrEqualRole = (userRole?: string | null, requiredRole?: string | null): boolean => {
+  if (!userRole || !requiredRole) return false;
   return getRoleHierarchy(userRole) >= getRoleHierarchy(requiredRole);
 };
 
-export const canAccessAdminFeatures = (role: string): boolean => {
-  return isAdminLevel(role) || isSuperAdmin(role);
+/**
+ * Check if role can access admin features
+ */
+export const canAccessAdminFeatures = (role?: string | null): boolean => {
+  return isAdminLevel(role);
 };
 
-export const canManageUsers = (role: string): boolean => {
-  return isAdminLevel(role) || isSuperAdmin(role);
+/**
+ * Check if role can manage users
+ */
+export const canManageUsers = (role?: string | null): boolean => {
+  return isSuperAdmin(role) || isAdmin(role) || isDinos(role);
 };
 
-export const canManageMenu = (role: string): boolean => {
-  return hasHigherRole(role, ROLE_NAMES.MANAGER);
+/**
+ * Check if role can manage menu
+ */
+export const canManageMenu = (role?: string | null): boolean => {
+  return isAdminLevel(role);
 };
 
-export const canManageOrders = (role: string): boolean => {
-  return hasHigherRole(role, ROLE_NAMES.OPERATOR);
+/**
+ * Check if role can manage orders
+ */
+export const canManageOrders = (role?: string | null): boolean => {
+  return isOperator(role) || isAdminLevel(role);
 };
 
-export const canViewAnalytics = (role: string): boolean => {
-  return hasHigherRole(role, ROLE_NAMES.MANAGER);
+/**
+ * Check if role can view analytics
+ */
+export const canViewAnalytics = (role?: string | null): boolean => {
+  return isAdminLevel(role);
 };
 
-// Default role for new users
-export const DEFAULT_ROLE = ROLE_NAMES.CUSTOMER;
+// ============================================================================
+// ROLE ASSIGNMENT
+// ============================================================================
 
-// Available roles for user creation (excluding customer)
-export const ASSIGNABLE_ROLES = [
-  ROLE_NAMES.STAFF,
+// Available roles for assignment
+export const ASSIGNABLE_ROLES: readonly RoleName[] = [
   ROLE_NAMES.OPERATOR,
-  ROLE_NAMES.MANAGER,
   ROLE_NAMES.ADMIN,
+  ROLE_NAMES.SUPERADMIN,
 ] as const;
 
 // Roles that can be assigned by different user levels
-export const ROLE_ASSIGNMENT_PERMISSIONS = {
-  [ROLE_NAMES.SUPERADMIN]: Object.values(ROLE_NAMES),
-  [ROLE_NAMES.ADMIN]: [
-    ROLE_NAMES.STAFF,
-    ROLE_NAMES.OPERATOR,
-    ROLE_NAMES.MANAGER,
-  ],
-  [ROLE_NAMES.MANAGER]: [
-    ROLE_NAMES.STAFF,
-    ROLE_NAMES.OPERATOR,
-  ],
+export const ROLE_ASSIGNMENT_PERMISSIONS: Record<RoleName, readonly RoleName[]> = {
+  [ROLE_NAMES.DINOS]: [ROLE_NAMES.SUPERADMIN, ROLE_NAMES.ADMIN, ROLE_NAMES.OPERATOR, ROLE_NAMES.DINOS],
+  [ROLE_NAMES.SUPERADMIN]: [ROLE_NAMES.ADMIN, ROLE_NAMES.OPERATOR],
+  [ROLE_NAMES.ADMIN]: [ROLE_NAMES.OPERATOR],
+  [ROLE_NAMES.OPERATOR]: [],
 } as const;
 
-export const canAssignRole = (assignerRole: string, targetRole: string): boolean => {
-  const permissions = ROLE_ASSIGNMENT_PERMISSIONS[assignerRole as keyof typeof ROLE_ASSIGNMENT_PERMISSIONS];
-  return permissions ? permissions.includes(targetRole as any) : false;
+/**
+ * Check if assigner can assign target role
+ */
+export const canAssignRole = (assignerRole?: string | null, targetRole?: string | null): boolean => {
+  if (!assignerRole || !targetRole) return false;
+  const normalized = assignerRole.toLowerCase().trim() as RoleName;
+  const permissions = ROLE_ASSIGNMENT_PERMISSIONS[normalized];
+  return permissions ? permissions.includes(targetRole.toLowerCase().trim() as RoleName) : false;
+};
+
+// ============================================================================
+// ROLE VALIDATION
+// ============================================================================
+
+/**
+ * Check if a string is a valid role
+ */
+export const isValidRole = (role?: string | null): role is RoleName => {
+  if (!role) return false;
+  const normalized = role.toLowerCase().trim();
+  return Object.values(ROLE_NAMES).includes(normalized as RoleName);
+};
+
+/**
+ * Get all available roles
+ */
+export const getAllRoles = (): readonly RoleName[] => {
+  return Object.values(ROLE_NAMES);
 };

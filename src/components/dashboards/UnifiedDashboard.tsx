@@ -14,9 +14,9 @@ import { AdminDashboardResponse, SuperAdminDashboardResponse, OperatorDashboardR
 import VenueAssignmentCheck from '../common/VenueAssignmentCheck';
 import DashboardTour from '../tour/DashboardTour';
 import { usePermissions } from '../auth';
-import PermissionService from '../../services/auth';
 import { useDashboardFlags } from '../../flags/FlagContext';
 import DateRangePicker, { DateRange } from '../common/DateRangePicker';
+import { ROLE_NAMES } from '../../constants/roles';
 
 // Import modular components
 import DashboardHeader from './components/DashboardHeader';
@@ -117,10 +117,6 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({ className }) => {
       setLoading(true);
       setError(null);
       
-      // Get role using the same approach as control panel
-      const backendRole = PermissionService.getBackendRole();
-      const detectedRole = backendRole?.name || user?.role || 'unknown';
-      
       let data;
       
       // Prepare date parameters
@@ -129,24 +125,16 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({ className }) => {
         endDate: dateRange.endDate,
       };
 
-      // Use backend role for dashboard selection
-      if (detectedRole === 'superadmin' || detectedRole === 'super_admin') {
+      // Use permission hooks to determine which dashboard to load
+      if (isSuperAdmin) {
         data = await dashboardService.getSuperAdminDashboard(dateParams);
-      } else if (detectedRole === 'admin') {
+      } else if (isAdmin) {
         data = await dashboardService.getAdminDashboard(dateParams);
-      } else if (detectedRole === 'operator') {
+      } else if (isOperator) {
         data = await dashboardService.getOperatorDashboard();
       } else {
-        // Fallback based on permission hooks
-        if (isSuperAdmin) {
-          data = await dashboardService.getSuperAdminDashboard(dateParams);
-        } else if (isAdmin) {
-          data = await dashboardService.getAdminDashboard(dateParams);
-        } else if (isOperator) {
-          data = await dashboardService.getOperatorDashboard();
-        } else {
-          data = await dashboardService.getAdminDashboard(dateParams);
-        }
+        // Default to admin dashboard
+        data = await dashboardService.getAdminDashboard(dateParams);
       }      
       if (data) {
         // Process stats based on role and data format
@@ -464,10 +452,11 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({ className }) => {
 
         {/* Error Alert */}
         {error && (
-          <Box sx={{ px: { xs: 3, sm: 4 }, pt: 3, pb: 1 }}>
+          <Box sx={{ px: { xs: 2, sm: 2.5 }, pt: 2, pb: 1 }}>
             <Alert 
               severity="error" 
               onClose={() => setError(null)}
+              sx={{ fontSize: '0.875rem' }}
             >
               {error}
             </Alert>
@@ -483,18 +472,14 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({ className }) => {
           }}
         >
           {/* Dashboard Content Container */}
-          <Box sx={{ px: { xs: 3, sm: 4 }, py: 2, pb: { xs: 6, sm: 8 } }}>
+          <Box sx={{ px: { xs: 2, sm: 2.5 }, py: 2, pb: { xs: 4, sm: 6 } }}>
             
             {/* Dashboard Tour */}
             <DashboardTour />
 
             {/* Date Range Picker - Only for SuperAdmin and Admin */}
-            {(() => {
-              const backendRole = PermissionService.getBackendRole();
-              const detectedRole = backendRole?.name || user?.role || 'unknown';
-              return detectedRole === 'superadmin' || detectedRole === 'super_admin' || detectedRole === 'admin' || isSuperAdmin || isAdmin;
-            })() && (
-              <Box sx={{ mb: 3 }}>
+            {(isSuperAdmin || isAdmin) && (
+              <Box sx={{ mb: 2.5 }}>
                 <DateRangePicker
                   value={dateRange}
                   onChange={setDateRange}
@@ -514,11 +499,7 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({ className }) => {
             />
 
             {/* Tab Content (only for SuperAdmin and Admin) */}
-            {(() => {
-              const backendRole = PermissionService.getBackendRole();
-              const detectedRole = backendRole?.name || user?.role || 'unknown';
-              return detectedRole === 'superadmin' || detectedRole === 'super_admin' || detectedRole === 'admin' || isSuperAdmin || isAdmin;
-            })() && (
+            {(isSuperAdmin || isAdmin) && (
               <>
                 {/* Overview Tab */}
                 <TabPanel value={currentTab} index={0}>
