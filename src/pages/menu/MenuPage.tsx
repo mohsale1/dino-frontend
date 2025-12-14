@@ -87,8 +87,8 @@ const MenuPage: React.FC = () => {
   } = useMenuData({
     venueId,
     tableId,
-    enableAutoRefresh: true,
-    refreshInterval: 60000, // 1 minute auto-refresh
+    enableAutoRefresh: false, // Disabled to prevent infinite loops
+    refreshInterval: 60000, // 1 minute auto-refresh (when enabled)
   });
 
   // UI state
@@ -139,7 +139,7 @@ const MenuPage: React.FC = () => {
         <Paper
           sx={{
             maxWidth: { xs: '100%', sm: 480 },
-            p: { xs: 3, sm: 4 },
+            p: { xs: 2, sm: 3 },
             textAlign: 'center',
             borderRadius: 2,
             background: theme.palette.background.paper,

@@ -176,10 +176,13 @@ export function useMenuData(options: UseMenuDataOptions = {}): UseMenuDataResult
 
   // Load categories data
   const loadCategories = useCallback(async () => {
-    if (!venueId) return;    setCategoriesLoading(true);
+    if (!venueId) return;
+    
+    setCategoriesLoading(true);
     
     try {
-      const categoriesData = await menuService.getVenueCategories(venueId, tableId);      
+      const categoriesData = await menuService.getVenueCategories(venueId, tableId);
+      
       const mappedCategories: CategoryType[] = categoriesData.map((cat: any, index: number) => ({
         id: cat.id,
         name: cat.name,
@@ -190,7 +193,8 @@ export function useMenuData(options: UseMenuDataOptions = {}): UseMenuDataResult
         itemCount: 0, // Will be calculated after menu items are loaded
       }));
       
-      setCategories(mappedCategories);    } catch (err: any) {      
+      setCategories(mappedCategories);
+    } catch (err: any) {
       // Handle specific error types
       if (err.type === 'venue_not_accepting_orders') {
         setVenueNotAcceptingOrders({
@@ -208,10 +212,13 @@ export function useMenuData(options: UseMenuDataOptions = {}): UseMenuDataResult
 
   // Load menu items data
   const loadMenuItems = useCallback(async () => {
-    if (!venueId) return;    setMenuLoading(true);
+    if (!venueId) return;
+    
+    setMenuLoading(true);
     
     try {
-      const menuData = await menuService.getVenueMenuItems(venueId, undefined, tableId);      
+      const menuData = await menuService.getVenueMenuItems(venueId, undefined, tableId);
+      
       const mappedMenuItems: MenuItemType[] = menuData.map((item: any) => ({
         id: item.id,
         name: item.name,
@@ -246,7 +253,8 @@ export function useMenuData(options: UseMenuDataOptions = {}): UseMenuDataResult
       setCategories(prev => prev.map(category => ({
         ...category,
         itemCount: mappedMenuItems.filter(item => item.category === category.id).length,
-      })));    } catch (err: any) {      
+      })));
+    } catch (err: any) {
       // Handle specific error types
       if (err.type === 'venue_not_accepting_orders') {
         setVenueNotAcceptingOrders({
@@ -273,7 +281,9 @@ export function useMenuData(options: UseMenuDataOptions = {}): UseMenuDataResult
       } else {
         setTableName(tableId);
       }
-    } catch (tableError) {      setTableName(tableId);
+    } catch (tableError) {
+      console.error('Error loading table:', tableError);
+      setTableName(tableId);
     }
   }, [tableId]);
 
@@ -289,37 +299,36 @@ export function useMenuData(options: UseMenuDataOptions = {}): UseMenuDataResult
       // First, load restaurant and check status
       await loadRestaurant();
       
-      // If venue is not accepting orders, don't load other data
-      if (venueNotAcceptingOrders.show) {
-        return;
-      }
-      
-      // Load other data in parallel
+      // Load other data in parallel (venue status check is inside loadCategories/loadMenuItems)
       await Promise.all([
         loadCategories(),
         loadMenuItems(),
         loadTable(),
       ]);
     } catch (err) {
-      // Error handling
+      // Error handling is done in individual load functions
+      console.error('Error loading menu data:', err);
     } finally {
       setLoading(false);
     }
-  }, [venueId, loadRestaurant, loadCategories, loadMenuItems, loadTable, venueNotAcceptingOrders.show]);
+  }, [venueId, loadRestaurant, loadCategories, loadMenuItems, loadTable]);
 
-  // Initial load
+  // Initial load - only trigger on venueId change
   useEffect(() => {
     if (venueId) {
       loadAllData();
     }
-  }, [venueId, loadAllData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [venueId]); // Only re-run when venueId changes
 
   // Validate venue access
   useEffect(() => {
     if (venueId && user && userData) {
       debugVenueAssignment(userData, user, 'useMenuDataSimple');
       
-      if (!canUserAccessVenue(userData, user, venueId)) {      }
+      if (!canUserAccessVenue(userData, user, venueId)) {
+        console.warn('User does not have access to this venue');
+      }
     }
   }, [venueId, user, userData]);
 
@@ -327,16 +336,19 @@ export function useMenuData(options: UseMenuDataOptions = {}): UseMenuDataResult
   useEffect(() => {
     if (!enableAutoRefresh || !venueId) return;
 
-    const interval = setInterval(() => {      loadMenuItems();
+    const interval = setInterval(() => {
+      loadMenuItems();
     }, refreshInterval);
 
     return () => clearInterval(interval);
-  }, [enableAutoRefresh, venueId, refreshInterval, loadMenuItems]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [enableAutoRefresh, venueId, refreshInterval]); // Don't include loadMenuItems to prevent re-creating interval
 
   // Update overall loading state
   useEffect(() => {
-    const isLoading = restaurantLoading || categoriesLoading || menuLoading;    setLoading(isLoading);
-  }, [restaurantLoading, categoriesLoading, menuLoading, venueId, tableId, restaurant, categories.length, menuItems.length]);
+    const isLoading = restaurantLoading || categoriesLoading || menuLoading;
+    setLoading(isLoading);
+  }, [restaurantLoading, categoriesLoading, menuLoading]); // Only depend on loading states
 
   // Refetch functions
   const refetch = useCallback(async () => {
