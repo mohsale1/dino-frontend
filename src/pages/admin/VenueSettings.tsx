@@ -142,7 +142,7 @@ const TabPanel: React.FC<TabPanelProps> = ({ children, value, index }) => {
   return (
     <div hidden={value !== index}>
       {value === index && (
-        <Box sx={{ p: { xs: 2, sm: 3 } }}>{children}</Box>
+        <Box sx={{ p: { xs: 1.5, sm: 2 } }}>{children}</Box>
       )}
     </div>
   );
@@ -516,15 +516,15 @@ const VenueSettings: React.FC = () => {
   
   if (false) { // Disabled blocking UI
     return (
-      <Box sx={{ pt: { xs: '56px', sm: '64px' }, py: 4, width: '100%' }}>        <Container maxWidth='xl'>
-          <Alert severity='error' sx={{ mb: 1 }}>
+      <Box sx={{ pt: { xs: '56px', sm: '64px' }, py: 2.5, width: '100%' }}>        <Container maxWidth='lg'>
+          <Alert severity='error' sx={{ mb: 3 }}>
             Placeholder
           </Alert>
           <Box sx={{ textAlign: 'center' }}>
             <Button 
               variant='contained' 
               onClick={() => window.location.reload()}
-              sx={{ mt: 1 }}
+              sx={{ mt: 2 }}
             >
               Reload Page
             </Button>
@@ -551,7 +551,7 @@ const VenueSettings: React.FC = () => {
         },
       }}
     >
-      {/* Hero Section */}
+      {/* Hero Section - Compact */}
       <Box
         sx={{
           backgroundColor: 'grey.100',
@@ -560,34 +560,33 @@ const VenueSettings: React.FC = () => {
           position: 'relative',
           overflow: 'hidden',
           color: 'text.primary',
-          padding: 0,
+          py: { xs: 2.5, sm: 3 },
+          px: { xs: 2, sm: 3 },
           margin: 0,
           width: '100%',
         }}
       >
         <AnimatedBackground />
-        <Container maxWidth='xl' sx={{ position: 'relative', zIndex: 2 }}>
+        <Container maxWidth='lg' sx={{ position: 'relative', zIndex: 2, pl: { xs: 3, sm: 4, md: 5 } }}>
           <Box
             sx={{
               display: 'flex',
               flexDirection: { xs: 'column', md: 'row' },
               justifyContent: 'space-between',
               alignItems: { xs: 'flex-start', md: 'center' },
-              gap: { xs: 1, md: 1.5 },
-              py: { xs: 1, sm: 4 },
-              px: { xs: 3, sm: 4 },
+              gap: { xs: 1.5, md: 2 },
             }}
           >
             {/* Header Content */}
             <Box sx={{ flex: 1 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                <Settings sx={{ fontSize: 26, mr: 1.5, color: 'text.primary', opacity: 0.9 }} />
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
+                <Settings sx={{ fontSize: 24, mr: 1.25, color: 'text.primary', opacity: 0.9 }} />
                 <Typography
                   variant='h4'
                   component='h1'
                   fontWeight='600'
                   sx={{
-                    fontSize: { xs: '1.75rem', sm: '2rem' },
+                    fontSize: { xs: '1.375rem', sm: '1.625rem' },
                     letterSpacing: '-0.01em',
                     lineHeight: 1.2,
                     color: 'text.primary',
@@ -600,33 +599,14 @@ const VenueSettings: React.FC = () => {
               <Typography
                 variant='body1'
                 sx={{
-                  fontSize: { xs: '0.8rem', sm: '1rem' },
+                  fontSize: { xs: '0.8125rem', sm: '0.875rem' },
                   fontWeight: 400,
-                  mb: 1,
                   maxWidth: '500px',
                   color: 'text.secondary',
                 }}
               >
                 Configure your venue's information, features, and operational preferences
               </Typography>
-
-              <Box
-                sx={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                  backdropFilter: 'blur(10px)',
-                  px: 1,
-                  py: 1,
-                  borderRadius: 1,
-                  border: '1px solid rgba(0, 0, 0, 0.1)',
-                }}
-              >
-                <Restaurant sx={{ fontSize: 12, mr: 1, color: 'primary.main', opacity: 0.9 }} />
-                <Typography variant='body2' fontWeight='500' color='text.primary'>
-                  {settings.name || 'Your Venue'}
-                </Typography>
-              </Box>
             </Box>
 
             {/* Action Buttons */}
@@ -634,28 +614,56 @@ const VenueSettings: React.FC = () => {
               sx={{
                 display: 'flex',
                 gap: 1,
-                flexDirection: { xs: 'row', sm: 'row' },
-                flexWrap: 'wrap',
-                alignItems: 'center',
+                flexDirection: 'column',
+                alignItems: { xs: 'flex-start', md: 'flex-end' },
               }}
             >
+              {/* Venue Name Badge - Moved to top right */}
+              <Box
+                sx={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                  backdropFilter: 'blur(10px)',
+                  px: 1.25,
+                  py: 0.5,
+                  borderRadius: 1.25,
+                  border: '1px solid rgba(0, 0, 0, 0.1)',
+                }}
+              >
+                <Restaurant sx={{ fontSize: 14, mr: 0.5, color: 'primary.main', opacity: 0.9 }} />
+                <Typography variant='body2' fontWeight='500' color='text.primary' sx={{ fontSize: '0.8125rem' }}>
+                  {settings.name || 'Your Venue'}
+                </Typography>
+              </Box>
+
+              {/* Buttons Row */}
+              <Box
+                sx={{
+                  display: 'flex',
+                  gap: 1,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                }}
+              >
               <Tooltip title={venueActive ? 'Deactivate venue operations' : 'Activate venue operations'}>
                 <Button
                   variant={venueActive ? 'outlined' : 'contained'}
                   color={venueActive ? 'error' : 'success'}
                   onClick={handleToggleVenueStatus}
-                  startIcon={<PowerSettingsNew />}
-                  size='medium'
+                  startIcon={<PowerSettingsNew sx={{ fontSize: 16 }} />}
+                  size='small'
                   sx={{
                     backgroundColor: venueActive ? 'transparent' : 'success.main',
                     color: venueActive ? 'error.main' : 'white',
                     borderColor: venueActive ? 'error.main' : 'success.main',
                     fontWeight: 600,
-                    px: 3,
-                    py: 1,
-                    borderRadius: 1,
+                    px: 1.5,
+                    py: 0.5,
+                    borderRadius: 1.5,
                     textTransform: 'none',
-                    fontSize: '0.8rem',
+                    fontSize: '0.75rem',
+                    minHeight: 28,
                     boxShadow: venueActive ? 'none' : '0 2px 8px rgba(0, 0, 0, 0.15)',
                     '&:hover': {
                       backgroundColor: venueActive ? 'rgba(211, 47, 47, 0.1)' : 'success.dark',
@@ -667,21 +675,21 @@ const VenueSettings: React.FC = () => {
                     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                   }}
                 >
-                  {venueActive ? 'Deactivate Venue' : 'Activate Venue'}
+                  {venueActive ? 'Deactivate' : 'Activate'}
                 </Button>
               </Tooltip>
 
               <IconButton
                 onClick={handleRefreshSettings}
                 disabled={loading}
-                size='medium'
+                size='small'
                 sx={{
                   backgroundColor: 'rgba(255, 255, 255, 0.9)',
                   backdropFilter: 'blur(10px)',
                   border: '1px solid rgba(0, 0, 0, 0.1)',
                   color: 'text.secondary',
-                  width: 40,
-                  height: 40,
+                  width: 28,
+                  height: 28,
                   '&:hover': {
                     backgroundColor: 'rgba(255, 255, 255, 1)',
                     color: 'primary.main',
@@ -694,8 +702,9 @@ const VenueSettings: React.FC = () => {
                 }}
                 title={loading ? 'Refreshing...' : 'Refresh settings'}
               >
-                <Refresh />
+                <Refresh sx={{ fontSize: 16 }} />
               </IconButton>
+              </Box>
             </Box>
           </Box>
         </Container>
@@ -711,10 +720,11 @@ const VenueSettings: React.FC = () => {
       >
         {/* Error Alert */}
         {error && (
-          <Box sx={{ px: { xs: 3, sm: 4 }, pt: 3, pb: 1 }}>
+          <Box sx={{ px: { xs: 2, sm: 3 }, pt: 2, pb: 0.5 }}>
             <Alert 
               severity='error' 
               onClose={() => setError(null)}
+              sx={{ fontSize: '0.8125rem', py: 0.5 }}
             >
               {error}
             </Alert>
@@ -723,7 +733,7 @@ const VenueSettings: React.FC = () => {
 
         {/* Unsaved Changes Banner */}
         {hasChanges && (
-          <Box sx={{ px: { xs: 3, sm: 4 }, mb: 1 }}>
+          <Box sx={{ px: { xs: 2, sm: 3 }, mb: 2 }}>
             <Paper 
               elevation={2} 
               sx={{ 
@@ -733,32 +743,36 @@ const VenueSettings: React.FC = () => {
                 flexDirection: { xs: 'column', sm: 'row' },
                 justifyContent: 'space-between',
                 alignItems: { xs: 'flex-start', sm: 'center' },
-                gap: 1,
-                borderRadius: 1,
+                gap: 1.5,
+                borderRadius: 1.5,
                 border: '1px solid',
                 borderColor: 'rgba(33, 150, 243, 0.2)',
-                marginTop: 3
+                marginTop: 1.5
               }}
             >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Edit sx={{ color: 'primary.main' }} />
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                <Edit sx={{ color: 'primary.main', fontSize: 18 }} />
                 <Box>
-                  <Typography variant='body1' color='primary.main' fontWeight='600'>
+                  <Typography variant='body1' color='primary.main' fontWeight='600' sx={{ fontSize: '0.8125rem' }}>
                     You have unsaved changes
                   </Typography>
-                  <Typography variant='body2' color='text.secondary'>
+                  <Typography variant='body2' color='text.secondary' sx={{ fontSize: '0.75rem' }}>
                     Don't forget to save your modifications
                   </Typography>
                 </Box>
               </Box>
-              <Box sx={{ display: 'flex', gap: 1, width: { xs: '100%', sm: 'auto' } }}>
+              <Box sx={{ display: 'flex', gap: 1.5, width: { xs: '100%', sm: 'auto' } }}>
                 <Button 
                   variant='outlined' 
                   onClick={handleReset}
+                  size='small'
                   sx={{
                     borderColor: 'divider',
                     color: 'text.secondary',
                     flex: { xs: 1, sm: 'none' },
+                    fontSize: '0.75rem',
+                    py: 0.5,
+                    px: 1.5,
                     '&:hover': {
                       borderColor: 'text.secondary',
                       backgroundColor: 'rgba(0, 0, 0, 0.04)',
@@ -769,13 +783,17 @@ const VenueSettings: React.FC = () => {
                 </Button>
                 <Button 
                   variant='contained' 
-                  startIcon={saving ? <CircularProgress size={16} color='inherit' /> : <Save />} 
+                  startIcon={saving ? <CircularProgress size={14} color='inherit' /> : <Save sx={{ fontSize: 16 }} />} 
                   onClick={handleSave}
                   disabled={saving}
+                  size='small'
                   sx={{
                     backgroundColor: 'primary.main',
                     color: 'white',
                     flex: { xs: 1, sm: 'none' },
+                    fontSize: '0.75rem',
+                    py: 0.5,
+                    px: 1.5,
                     '&:hover': {
                       backgroundColor: 'primary.dark',
                     },
@@ -789,8 +807,8 @@ const VenueSettings: React.FC = () => {
         )}
 
         {/* Settings Tabs */}
-        <Box sx={{ px: { xs: 3, sm: 4 }, pt: { xs: 3, sm: 4 }, pb: 4 }}>
-          <Paper elevation={2} sx={{ borderRadius: 1, overflow: 'hidden' }}>
+        <Box sx={{ px: { xs: 2, sm: 3 }, pt: { xs: 2.5, sm: 3 }, pb: 4 }}>
+          <Paper elevation={2} sx={{ borderRadius: 1.5, overflow: 'hidden' }}>
             <Tabs 
               value={tabValue} 
               onChange={(e, newValue) => {
@@ -806,17 +824,22 @@ const VenueSettings: React.FC = () => {
                 borderBottom: '1px solid', 
                 borderColor: 'divider',
                 backgroundColor: 'grey.50',
+                minHeight: { xs: 40, sm: 56 },
                 '& .MuiTab-root': {
-                  minHeight: { xs: 48, sm: 72 },
-                  fontSize: { xs: '0.75rem', sm: '0.8rem' },
+                  minHeight: { xs: 40, sm: 56 },
+                  fontSize: { xs: '0.6875rem', sm: '0.8125rem' },
                   fontWeight: 500,
                   textTransform: 'none',
-                  minWidth: { xs: 'auto', sm: 120 },
-                  px: { xs: 1, sm: 1 },
+                  minWidth: { xs: 'auto', sm: 100 },
+                  px: { xs: 1, sm: 1.5 },
+                  py: { xs: 0.75, sm: 1 },
                   '&.Mui-selected': {
                     backgroundColor: 'white',
                     fontWeight: 600,
                   },
+                },
+                '& .MuiSvgIcon-root': {
+                  fontSize: { xs: 16, sm: 18 },
                 }
               }}
             >
@@ -852,14 +875,14 @@ const VenueSettings: React.FC = () => {
             </Tabs>
 
           <TabPanel value={tabValue} index={0}>
-            <Grid container spacing={1}>
+            <Grid container spacing={2}>
               <Grid item xs={12} md={8}>
-                <Card>
-                  <CardContent sx={{ p: { xs: 3, sm: 4 } }}>
-                    <Typography variant='h5' gutterBottom fontWeight='600' sx={{ mb: 1 }}>
+                <Card sx={{ boxShadow: 1 }}>
+                  <CardContent sx={{ p: { xs: 2, sm: 2.5 }, '&:last-child': { pb: { xs: 2, sm: 2.5 } } }}>
+                    <Typography variant='h6' gutterBottom fontWeight='600' sx={{ mb: 2.5, fontSize: { xs: '1rem', sm: '1.125rem' } }}>
                       Basic Information
                     </Typography>
-                    <Grid container spacing={1}>
+                    <Grid container spacing={2}>
                       <Grid item xs={12}>
                         <TextField
                           fullWidth
@@ -869,14 +892,20 @@ const VenueSettings: React.FC = () => {
                           onChange={(e) => handleDirectSettingChange('name', e.target.value)}
                           error={!!validationErrors.name}
                           helperText={validationErrors.name}
+                          size='small'
                           sx={{
                             '& .MuiInputLabel-root': {
-                              fontSize: '1rem',
+                              fontSize: '0.875rem',
                               fontWeight: 500,
                             },
                             '& .MuiInputBase-input': {
-                              fontSize: '1rem',
+                              fontSize: '0.875rem',
+                              py: 1.25,
                             },
+                            '& .MuiFormHelperText-root': {
+                              fontSize: '0.6875rem',
+                              mt: 0.5,
+                            }
                           }}
                         />
                       </Grid>
@@ -886,19 +915,25 @@ const VenueSettings: React.FC = () => {
                           required
                           label='Description'
                           multiline
-                          rows={3}
+                          rows={2.5}
                           value={settings.description}
                           onChange={(e) => handleDirectSettingChange('description', e.target.value)}
                           error={!!validationErrors.description}
                           helperText={validationErrors.description}
+                          size='small'
                           sx={{
                             '& .MuiInputLabel-root': {
-                              fontSize: '1rem',
+                              fontSize: '0.875rem',
                               fontWeight: 500,
                             },
                             '& .MuiInputBase-input': {
-                              fontSize: '1rem',
+                              fontSize: '0.875rem',
+                              py: 1.25,
                             },
+                            '& .MuiFormHelperText-root': {
+                              fontSize: '0.6875rem',
+                              mt: 0.5,
+                            }
                           }}
                         />
                       </Grid>
@@ -912,14 +947,20 @@ const VenueSettings: React.FC = () => {
                           onChange={(e) => handleDirectSettingChange('address', e.target.value)}
                           error={!!validationErrors.address}
                           helperText={validationErrors.address || 'Enter your complete street address'}
+                          size='small'
                           sx={{
                             '& .MuiInputLabel-root': {
-                              fontSize: '1rem',
+                              fontSize: '0.875rem',
                               fontWeight: 500,
                             },
                             '& .MuiInputBase-input': {
-                              fontSize: '1rem',
+                              fontSize: '0.875rem',
+                              py: 1.25,
                             },
+                            '& .MuiFormHelperText-root': {
+                              fontSize: '0.6875rem',
+                              mt: 0.5,
+                            }
                           }}
                         />
                       </Grid>
@@ -933,14 +974,20 @@ const VenueSettings: React.FC = () => {
                           onChange={(e) => handleDirectSettingChange('city', e.target.value)}
                           error={!!validationErrors.city}
                           helperText={validationErrors.city}
+                          size='small'
                           sx={{
                             '& .MuiInputLabel-root': {
-                              fontSize: '1rem',
+                              fontSize: '0.875rem',
                               fontWeight: 500,
                             },
                             '& .MuiInputBase-input': {
-                              fontSize: '1rem',
+                              fontSize: '0.875rem',
+                              py: 1.25,
                             },
+                            '& .MuiFormHelperText-root': {
+                              fontSize: '0.6875rem',
+                              mt: 0.5,
+                            }
                           }}
                         />
                       </Grid>
@@ -954,14 +1001,20 @@ const VenueSettings: React.FC = () => {
                           onChange={(e) => handleDirectSettingChange('state', e.target.value)}
                           error={!!validationErrors.state}
                           helperText={validationErrors.state}
+                          size='small'
                           sx={{
                             '& .MuiInputLabel-root': {
-                              fontSize: '1rem',
+                              fontSize: '0.875rem',
                               fontWeight: 500,
                             },
                             '& .MuiInputBase-input': {
-                              fontSize: '1rem',
+                              fontSize: '0.875rem',
+                              py: 1.25,
                             },
+                            '& .MuiFormHelperText-root': {
+                              fontSize: '0.6875rem',
+                              mt: 0.5,
+                            }
                           }}
                         />
                       </Grid>
@@ -975,14 +1028,20 @@ const VenueSettings: React.FC = () => {
                           onChange={(e) => handleDirectSettingChange('postalCode', e.target.value)}
                           error={!!validationErrors.postalCode}
                           helperText={validationErrors.postalCode}
+                          size='small'
                           sx={{
                             '& .MuiInputLabel-root': {
-                              fontSize: '1rem',
+                              fontSize: '0.875rem',
                               fontWeight: 500,
                             },
                             '& .MuiInputBase-input': {
-                              fontSize: '1rem',
+                              fontSize: '0.875rem',
+                              py: 1.25,
                             },
+                            '& .MuiFormHelperText-root': {
+                              fontSize: '0.6875rem',
+                              mt: 0.5,
+                            }
                           }}
                         />
                       </Grid>
@@ -995,14 +1054,20 @@ const VenueSettings: React.FC = () => {
                           onChange={(e) => handleDirectSettingChange('landmark', e.target.value)}
                           error={!!validationErrors.landmark}
                           helperText={validationErrors.landmark || 'Nearby landmark for easy location'}
+                          size='small'
                           sx={{
                             '& .MuiInputLabel-root': {
-                              fontSize: '1rem',
+                              fontSize: '0.875rem',
                               fontWeight: 500,
                             },
                             '& .MuiInputBase-input': {
-                              fontSize: '1rem',
+                              fontSize: '0.875rem',
+                              py: 1.25,
                             },
+                            '& .MuiFormHelperText-root': {
+                              fontSize: '0.6875rem',
+                              mt: 0.5,
+                            }
                           }}
                         />
                       </Grid>
@@ -1016,14 +1081,20 @@ const VenueSettings: React.FC = () => {
                           onChange={(e) => handleDirectSettingChange('phone', e.target.value)}
                           error={!!validationErrors.phone}
                           helperText={validationErrors.phone}
+                          size='small'
                           sx={{
                             '& .MuiInputLabel-root': {
-                              fontSize: '1rem',
+                              fontSize: '0.875rem',
                               fontWeight: 500,
                             },
                             '& .MuiInputBase-input': {
-                              fontSize: '1rem',
+                              fontSize: '0.875rem',
+                              py: 1.25,
                             },
+                            '& .MuiFormHelperText-root': {
+                              fontSize: '0.6875rem',
+                              mt: 0.5,
+                            }
                           }}
                         />
                       </Grid>
@@ -1037,14 +1108,20 @@ const VenueSettings: React.FC = () => {
                           onChange={(e) => handleDirectSettingChange('email', e.target.value)}
                           error={!!validationErrors.email}
                           helperText={validationErrors.email || 'Optional contact email'}
+                          size='small'
                           sx={{
                             '& .MuiInputLabel-root': {
-                              fontSize: '1rem',
+                              fontSize: '0.875rem',
                               fontWeight: 500,
                             },
                             '& .MuiInputBase-input': {
-                              fontSize: '1rem',
+                              fontSize: '0.875rem',
+                              py: 1.25,
                             },
+                            '& .MuiFormHelperText-root': {
+                              fontSize: '0.6875rem',
+                              mt: 0.5,
+                            }
                           }}
                         />
                       </Grid>
@@ -1053,27 +1130,28 @@ const VenueSettings: React.FC = () => {
                 </Card>
               </Grid>
               <Grid item xs={12} md={4}>
-                <Card>
-                  <CardContent sx={{ textAlign: 'center', p: { xs: 3, sm: 4 } }}>
-                    <Typography variant='h5' gutterBottom fontWeight='600' sx={{ mb: 1 }}>
+                <Card sx={{ boxShadow: 1 }}>
+                  <CardContent sx={{ textAlign: 'center', p: { xs: 2, sm: 2.5 }, '&:last-child': { pb: { xs: 2, sm: 2.5 } } }}>
+                    <Typography variant='h6' gutterBottom fontWeight='600' sx={{ mb: 2, fontSize: { xs: '1rem', sm: '1.125rem' } }}>
                       Venue Logo
                     </Typography>
                     <Avatar
                       sx={{ 
-                        width: 80, 
-                        height: 80, 
+                        width: 64, 
+                        height: 64, 
                         mx: 'auto', 
-                        mb: 1,
+                        mb: 1.5,
                         bgcolor: 'primary.main',
-                        fontSize: '1rem'
+                        fontSize: '1.75rem'
                       }}
                     >
-                      <Restaurant sx={{ fontSize: '1rem', color: 'white' }} />
+                      <Restaurant sx={{ fontSize: '2rem', color: 'white' }} />
                     </Avatar>
                     <Button
                       variant='contained'
-                      startIcon={<CloudUpload />}
+                      startIcon={<CloudUpload sx={{ fontSize: 16 }} />}
                       fullWidth
+                      size='small'
                       onClick={() => {
                         setSnackbar({ 
                           open: true, 
@@ -1082,14 +1160,14 @@ const VenueSettings: React.FC = () => {
                         });
                       }}
                       sx={{
-                        fontSize: '1rem',
+                        fontSize: '0.8125rem',
                         fontWeight: 500,
-                        py: 1,
+                        py: 0.75,
                       }}
                     >
                       Upload Logo
                     </Button>
-                    <Typography variant='body2' color='text.secondary' sx={{ mt: 1, display: 'block', fontSize: '0.8rem' }}>
+                    <Typography variant='body2' color='text.secondary' sx={{ mt: 1.5, display: 'block', fontSize: '0.75rem' }}>
                       Recommended: 512x512px, PNG or JPG
                     </Typography>
                   </CardContent>
@@ -1116,10 +1194,11 @@ const VenueSettings: React.FC = () => {
               severity={snackbar.severity} 
               onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
               sx={{
-                borderRadius: 1,
+                borderRadius: 1.5,
                 boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15)',
+                fontSize: '0.8125rem',
                 '& .MuiAlert-icon': {
-                  fontSize: '1rem'
+                  fontSize: '1.25rem'
                 },
                 width: { xs: '90vw', sm: 'auto' },
                 maxWidth: { xs: '400px', sm: 'none' }

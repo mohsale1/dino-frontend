@@ -31,6 +31,11 @@ import {
   FormControlLabel,
   TextField,
   InputAdornment,
+  Stack,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
 } from '@mui/material';
 import {
   Security,
@@ -97,13 +102,20 @@ const UserPermissionsDashboard: React.FC = () => {
       const { roleService } = await import('../../services/auth/roleService');
       const rolesWithPermissions = await roleService.getRolesWithPermissions();
       
+      console.log('Loaded roles with permissions:', rolesWithPermissions);
+      
       // Build roles cache map for quick lookup
       const rolesMap = new Map();
       rolesWithPermissions.forEach(role => {
         rolesMap.set(role.id, role);
         rolesMap.set(role.name, role); // Also map by name for flexibility
+        if (role.name) {
+          rolesMap.set(role.name.toLowerCase(), role); // Also map lowercase name
+        }
       });
       setRolesCache(rolesMap);
+      
+      console.log('Roles cache built with', rolesMap.size, 'entries');
       
       // Get users for the current venue
       const response = await userService.getUsersByVenueId(userData.venue.id);
@@ -113,11 +125,20 @@ const UserPermissionsDashboard: React.FC = () => {
         const mappedUsers = response.data.map((user: any) => {
           let userPermissions: any[] = [];
           
-          // Get permissions from roles cache using role_id or role name
-          const roleData = rolesMap.get(user.role_id) || rolesMap.get(user.role);
+          // Try multiple ways to find the role data
+          const roleName = typeof user.role === 'string' ? user.role.toLowerCase() : '';
+          const roleData = rolesMap.get(user.role_id) || 
+                          rolesMap.get(user.role) || 
+                          rolesMap.get(roleName) ||
+                          Array.from(rolesMap.values()).find(r => 
+                            r.name?.toLowerCase() === roleName
+                          );
+          
           if (roleData && roleData.permissions) {
             userPermissions = roleData.permissions;
           }
+          
+          console.log('User:', user.email, 'Role:', user.role, 'Permissions:', userPermissions.length);
           
           return {
             ...user,
@@ -161,13 +182,20 @@ const UserPermissionsDashboard: React.FC = () => {
         const { roleService } = await import('../../services/auth/roleService');
         const rolesWithPermissions = await roleService.getRolesWithPermissions();
         
+        console.log('Loaded roles with permissions:', rolesWithPermissions);
+        
         // Build roles cache map for quick lookup
         const rolesMap = new Map();
         rolesWithPermissions.forEach(role => {
           rolesMap.set(role.id, role);
           rolesMap.set(role.name, role); // Also map by name for flexibility
+          if (role.name) {
+            rolesMap.set(role.name.toLowerCase(), role); // Also map lowercase name
+          }
         });
         setRolesCache(rolesMap);
+        
+        console.log('Roles cache built with', rolesMap.size, 'entries');
         
         // Get users for the current venue
         const response = await userService.getUsersByVenueId(userData.venue.id);
@@ -177,11 +205,20 @@ const UserPermissionsDashboard: React.FC = () => {
           const mappedUsers = response.data.map((user: any) => {
             let userPermissions: any[] = [];
             
-            // Get permissions from roles cache using role_id or role name
-            const roleData = rolesMap.get(user.role_id) || rolesMap.get(user.role);
+            // Try multiple ways to find the role data
+            const roleName = typeof user.role === 'string' ? user.role.toLowerCase() : '';
+            const roleData = rolesMap.get(user.role_id) || 
+                            rolesMap.get(user.role) || 
+                            rolesMap.get(roleName) ||
+                            Array.from(rolesMap.values()).find(r => 
+                              r.name?.toLowerCase() === roleName
+                            );
+            
             if (roleData && roleData.permissions) {
               userPermissions = roleData.permissions;
             }
+            
+            console.log('User:', user.email, 'Role:', user.role, 'Permissions:', userPermissions.length);
             
             return {
               ...user,
@@ -479,7 +516,7 @@ const UserPermissionsDashboard: React.FC = () => {
             borderColor: 'divider',
           }}
         >
-          <CardContent sx={{ p: 1, textAlign: 'center' }}>
+          <CardContent sx={{ p: 2.5, textAlign: 'center' }}>
             <Box
               sx={{
                 width: 80,
@@ -492,12 +529,12 @@ const UserPermissionsDashboard: React.FC = () => {
                 margin: '0 auto 24px',
               }}
             >
-              <Cancel sx={{ fontSize: 12, color: 'error.main' }} />
+              <Cancel sx={{ fontSize: 48, color: 'error.main' }} />
             </Box>
             <Typography variant="h5" fontWeight="600" color="text.primary" gutterBottom>
               Authentication Error
             </Typography>
-            <Typography variant="body1" color="text.secondary" sx={{ mb: 1, lineHeight: 1.6 }}>
+            <Typography variant="body1" color="text.secondary" sx={{ mb: 3, lineHeight: 1.6 }}>
               Unable to load user authentication data. Please try refreshing the page or contact support if the problem persists.
             </Typography>
             <Button
@@ -505,9 +542,9 @@ const UserPermissionsDashboard: React.FC = () => {
               color="primary"
               onClick={() => window.location.reload()}
               sx={{
-                borderRadius: 1,
-                px: 4,
-                py: 1,
+                borderRadius: 2,
+                px: 2.5,
+                py: 1.5,
                 textTransform: 'none',
                 fontWeight: 600,
                 boxShadow: '0 4px 12px rgba(33, 150, 243, 0.3)',
@@ -546,7 +583,7 @@ const UserPermissionsDashboard: React.FC = () => {
             borderColor: 'divider',
           }}
         >
-          <CardContent sx={{ p: 1, textAlign: 'center' }}>
+          <CardContent sx={{ p: 2.5, textAlign: 'center' }}>
             <Box
               sx={{
                 width: 80,
@@ -559,12 +596,12 @@ const UserPermissionsDashboard: React.FC = () => {
                 margin: '0 auto 24px',
               }}
             >
-              <Security sx={{ fontSize: 12, color: 'warning.main' }} />
+              <Security sx={{ fontSize: 48, color: 'warning.main' }} />
             </Box>
             <Typography variant="h5" fontWeight="600" color="text.primary" gutterBottom>
               Access Denied
             </Typography>
-            <Typography variant="body1" color="text.secondary" sx={{ mb: 1, lineHeight: 1.6 }}>
+            <Typography variant="body1" color="text.secondary" sx={{ mb: 3, lineHeight: 1.6 }}>
               You don't have permission to view user permissions. Please contact your administrator to request access.
             </Typography>
             <Button
@@ -572,9 +609,9 @@ const UserPermissionsDashboard: React.FC = () => {
               color="primary"
               onClick={() => window.history.back()}
               sx={{
-                borderRadius: 1,
-                px: 4,
-                py: 1,
+                borderRadius: 2,
+                px: 2.5,
+                py: 1.5,
                 textTransform: 'none',
                 fontWeight: 600,
                 borderWidth: 2,
@@ -615,7 +652,7 @@ const UserPermissionsDashboard: React.FC = () => {
             borderColor: 'divider',
           }}
         >
-          <CardContent sx={{ p: 1, textAlign: 'center' }}>
+          <CardContent sx={{ p: 2.5, textAlign: 'center' }}>
             <Box
               sx={{
                 width: 80,
@@ -637,7 +674,7 @@ const UserPermissionsDashboard: React.FC = () => {
                 },
               }}
             >
-              <Security sx={{ fontSize: 12, color: 'primary.main' }} />
+              <Security sx={{ fontSize: 48, color: 'primary.main' }} />
             </Box>
             <Typography variant="h5" fontWeight="600" color="text.primary" gutterBottom>
               Loading Permissions
@@ -677,34 +714,33 @@ const UserPermissionsDashboard: React.FC = () => {
           position: 'relative',
           overflow: 'hidden',
           color: 'text.primary',
-          padding: 0,
+          py: { xs: 2.5, sm: 3 },
+          px: { xs: 2, sm: 3 },
           margin: 0,
           width: '100%',
         }}
       >
         <AnimatedBackground />
-        <Container maxWidth="xl" sx={{ position: 'relative', zIndex: 2 }}>
+        <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 2, pl: { xs: 3, sm: 4, md: 5 } }}>
           <Box
             sx={{
               display: 'flex',
               flexDirection: { xs: 'column', md: 'row' },
               justifyContent: 'space-between',
               alignItems: { xs: 'flex-start', md: 'center' },
-              gap: { xs: 1, md: 1.5 },
-              py: { xs: 1, sm: 4 },
-              px: { xs: 3, sm: 4 },
+              gap: { xs: 1.5, md: 2 },
             }}
           >
             {/* Header Content */}
             <Box sx={{ flex: 1 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                <Security sx={{ fontSize: 26, mr: 1.5, color: 'text.primary', opacity: 0.9 }} />
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
+                <Security sx={{ fontSize: 24, mr: 1.25, color: 'text.primary', opacity: 0.9 }} />
                 <Typography
                   variant="h4"
                   component="h1"
                   fontWeight="600"
                   sx={{
-                    fontSize: { xs: '1.75rem', sm: '2rem' },
+                    fontSize: { xs: '1.375rem', sm: '1.625rem' },
                     letterSpacing: '-0.01em',
                     lineHeight: 1.2,
                     color: 'text.primary',
@@ -717,33 +753,14 @@ const UserPermissionsDashboard: React.FC = () => {
               <Typography
                 variant="body1"
                 sx={{
-                  fontSize: { xs: '0.8rem', sm: '1rem' },
+                  fontSize: { xs: '0.8125rem', sm: '0.875rem' },
                   fontWeight: 400,
-                  mb: 1,
                   maxWidth: '500px',
                   color: 'text.secondary',
                 }}
               >
                 Monitor and manage user permissions across your organization
               </Typography>
-
-              <Box
-                sx={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                  backdropFilter: 'blur(10px)',
-                  px: 1,
-                  py: 1,
-                  borderRadius: 1,
-                  border: '1px solid rgba(0, 0, 0, 0.1)',
-                }}
-              >
-                <Person sx={{ fontSize: 12, mr: 1, color: 'primary.main', opacity: 0.9 }} />
-                <Typography variant="body2" fontWeight="500" color="text.primary">
-                  {userData?.venue?.name || 'All Venues'}
-                </Typography>
-              </Box>
             </Box>
 
             {/* Action Buttons */}
@@ -751,21 +768,40 @@ const UserPermissionsDashboard: React.FC = () => {
               sx={{
                 display: 'flex',
                 gap: 1,
-                flexDirection: { xs: 'row', sm: 'row' },
-                flexWrap: 'wrap',
-                alignItems: 'center',
+                flexDirection: 'column',
+                alignItems: { xs: 'flex-start', md: 'flex-end' },
               }}
             >
+              {/* Venue Name Badge */}
+              <Box
+                sx={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                  backdropFilter: 'blur(10px)',
+                  px: 1.25,
+                  py: 0.5,
+                  borderRadius: 1.25,
+                  border: '1px solid rgba(0, 0, 0, 0.1)',
+                }}
+              >
+                <Person sx={{ fontSize: 14, mr: 0.5, color: 'primary.main', opacity: 0.9 }} />
+                <Typography variant="body2" fontWeight="500" color="text.primary" sx={{ fontSize: '0.8125rem' }}>
+                  {userData?.venue?.name || 'All Venues'}
+                </Typography>
+              </Box>
+
+              {/* Refresh Button */}
               <IconButton
                 onClick={refreshUsers}
-                size="medium"
+                size="small"
                 sx={{
                   backgroundColor: 'rgba(255, 255, 255, 0.9)',
                   backdropFilter: 'blur(10px)',
                   border: '1px solid rgba(0, 0, 0, 0.1)',
                   color: 'text.secondary',
-                  width: 40,
-                  height: 40,
+                  width: 28,
+                  height: 28,
                   '&:hover': {
                     backgroundColor: 'rgba(255, 255, 255, 1)',
                     color: 'primary.main',
@@ -775,7 +811,7 @@ const UserPermissionsDashboard: React.FC = () => {
                 }}
                 title="Refresh permissions"
               >
-                <Refresh />
+                <Refresh sx={{ fontSize: 16 }} />
               </IconButton>
             </Box>
           </Box>
@@ -791,128 +827,114 @@ const UserPermissionsDashboard: React.FC = () => {
         }}
       >
         {/* Content Area */}
-        <Box sx={{ px: { xs: 3, sm: 4 }, pt: { xs: 3, sm: 4 }, pb: 4 }}>
+        <Box sx={{ px: { xs: 2, sm: 3 }, pt: { xs: 2.5, sm: 3 }, pb: 4 }}>
 
           {/* Statistics Cards */}
-          <Box sx={{ 
-            px: { xs: 3, sm: 4 }, 
-            py: { xs: 1, sm: 4 }, 
-            backgroundColor: 'background.paper', 
-            borderRadius: 3, 
-            mb: 4,
-            border: '1px solid #e0e0e0',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.08)'
-          }}>
-            <Typography variant="h6" fontWeight="700" color="text.primary" sx={{ mb: 1 }}>
-              User Overview
-            </Typography>
-            
-            <Grid container spacing={{ xs: 2, sm: 3 }}>
-              {[
-                {
-                  label: 'Total Users',
-                  value: userStats.totalUsers,
-                  color: '#2196F3',
-                  icon: <People />,
-                  description: 'All registered users'
-                },
-                {
-                  label: 'Active Users',
-                  value: userStats.activeUsers,
-                  color: '#4CAF50',
-                  icon: <CheckCircle />,
-                  description: 'Currently active'
-                },
-                {
-                  label: 'Recent Logins',
-                  value: userStats.recentLogins,
-                  color: '#FF9800',
-                  icon: <Security />,
-                  description: 'Last 24 hours'
-                },
-                {
-                  label: 'Role Types',
-                  value: Object.keys(userStats.usersByRole).length,
-                  color: '#9C27B0',
-                  icon: <Business />,
-                  description: 'Different roles'
-                }
-              ].map((stat, index) => (
-                <Grid item xs={12} sm={6} md={3} key={index}>
-                  <Box
-                    sx={{
-                      p: { xs: 2.5, sm: 3 },
-                      borderRadius: 1,
-                      backgroundColor: `${stat.color}08`,
-                      border: `1px solid ${stat.color}33`,
-                      transition: 'all 0.3s ease',
-                      '&:hover': {
-                        transform: 'translateY(-2px)',
-                        boxShadow: `0 8px 25px ${stat.color}33`,
-                        backgroundColor: `${stat.color}12`,
-                      },
-                    }}
-                  >
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      {/* Icon on the left */}
-                      <Box
-                        sx={{
-                          width: 48,
-                          height: 48,
-                          borderRadius: 1,
-                          backgroundColor: stat.color,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          color: 'white',
-                          flexShrink: 0,
+          <Grid container spacing={2} sx={{ mb: 2.5 }}>
+            {[
+              {
+                label: 'Total Users',
+                value: userStats.totalUsers,
+                color: '#2196F3',
+                icon: <People />,
+                description: 'All registered users'
+              },
+              {
+                label: 'Active Users',
+                value: userStats.activeUsers,
+                color: '#4CAF50',
+                icon: <CheckCircle />,
+                description: 'Currently active'
+              },
+              {
+                label: 'Recent Logins',
+                value: userStats.recentLogins,
+                color: '#FF9800',
+                icon: <Security />,
+                description: 'Last 24 hours'
+              },
+              {
+                label: 'Role Types',
+                value: Object.keys(userStats.usersByRole).length,
+                color: '#9C27B0',
+                icon: <Business />,
+                description: 'Different roles'
+              }
+            ].map((stat, index) => (
+              <Grid item xs={12} sm={6} md={3} key={index}>
+                <Card
+                  sx={{
+                    p: { xs: 2, sm: 2.5 },
+                    borderRadius: 1.5,
+                    backgroundColor: `${stat.color}08`,
+                    border: `1px solid ${stat.color}33`,
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                      transform: 'translateY(-2px)',
+                      boxShadow: `0 6px 20px ${stat.color}33`,
+                      backgroundColor: `${stat.color}12`,
+                    },
+                  }}
+                >
+                  <Stack direction="row" alignItems="center" spacing={2}>
+                    {/* Icon on the left */}
+                    <Box
+                      sx={{
+                        width: { xs: 40, sm: 48 },
+                        height: { xs: 40, sm: 48 },
+                        borderRadius: 1.5,
+                        backgroundColor: stat.color,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'white',
+                        flexShrink: 0,
+                      }}
+                    >
+                      {React.cloneElement(stat.icon, { fontSize: 'medium' })}
+                    </Box>
+                    
+                    {/* Text content on the right */}
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                      <Typography 
+                        variant="h4" 
+                        fontWeight="700" 
+                        color="text.primary" 
+                        sx={{ 
+                          fontSize: { xs: '1.25rem', sm: '2rem' },
+                          lineHeight: 1.2,
+                          mb: 0.5
                         }}
                       >
-                        {React.cloneElement(stat.icon, { fontSize: 'medium' })}
-                      </Box>
-                      
-                      {/* Text content on the right */}
-                      <Box sx={{ flex: 1, minWidth: 0 }}>
-                        <Typography 
-                          variant="h4" 
-                          fontWeight="700" 
-                          color="text.primary" 
-                          sx={{ 
-                            fontSize: { xs: '1.25rem', sm: '2rem' },
-                            lineHeight: 1.2,
-                            mb: 0.5
-                          }}
-                        >
-                          {stat.value}
-                        </Typography>
-                        <Typography 
-                          variant="body2" 
-                          color="text.secondary" 
-                          fontWeight="600"
-                          sx={{ 
-                            fontSize: { xs: '0.75rem', sm: '0.8rem' },
-                            lineHeight: 1.2,
-                            display: '-webkit-box',
-                            WebkitLineClamp: 2,
-                            WebkitBoxOrient: 'vertical',
-                            overflow: 'hidden',
-                          }}
-                        >
-                          {stat.label}
-                        </Typography>
-                      </Box>
+                        {stat.value}
+                      </Typography>
+                      <Typography 
+                        variant="body2" 
+                        color="text.secondary" 
+                        fontWeight="600"
+                        sx={{ 
+                          fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                          lineHeight: 1.2,
+                          display: '-webkit-box',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden',
+                        }}
+                      >
+                        {stat.label}
+                      </Typography>
                     </Box>
-                  </Box>
-                </Grid>
-              ))}
-            </Grid>
-          </Box>
+                  </Stack>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
 
           {/* Filters and Search */}
           <Card 
             sx={{ 
-              mb: 4, 
-              borderRadius: 1,
+              mb: 2.5, 
+              borderRadius: 1.5,
               border: '1px solid',
               borderColor: 'divider',
               boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)',
@@ -922,8 +944,8 @@ const UserPermissionsDashboard: React.FC = () => {
               },
             }}
           >
-            <CardContent sx={{ p: 1.5 }}>
-              <Grid container spacing={1} alignItems="center">
+            <CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
+              <Grid container spacing={1.5} alignItems="center">
                 <Grid item xs={12} md={4}>
                   <TextField
                     fullWidth
@@ -939,7 +961,7 @@ const UserPermissionsDashboard: React.FC = () => {
                     }}
                     sx={{
                       '& .MuiOutlinedInput-root': {
-                        borderRadius: 1,
+                        borderRadius: 2,
                         backgroundColor: 'background.paper',
                         transition: 'all 0.3s ease',
                         '&:hover': {
@@ -951,8 +973,8 @@ const UserPermissionsDashboard: React.FC = () => {
                         },
                       },
                       '& .MuiInputBase-input': {
-                        fontSize: '0.8rem',
-                        py: 1,
+                        fontSize: '0.875rem',
+                        py: 1.25,
                       },
                       '& .MuiInputBase-input::placeholder': {
                         color: 'text.secondary',
@@ -962,16 +984,11 @@ const UserPermissionsDashboard: React.FC = () => {
                   />
                 </Grid>
                 <Grid item xs={12} md={3}>
-                  <TextField
+                  <FormControl
                     fullWidth
-                    select
-                    label="Filter by Role"
-                    value={filterRole}
-                    onChange={(e) => setFilterRole(e.target.value)}
-                    SelectProps={{ native: true }}
                     sx={{
                       '& .MuiOutlinedInput-root': {
-                        borderRadius: 1,
+                        borderRadius: 2,
                         backgroundColor: 'background.paper',
                         transition: 'all 0.3s ease',
                         '&:hover': {
@@ -983,20 +1000,27 @@ const UserPermissionsDashboard: React.FC = () => {
                         },
                       },
                       '& .MuiInputLabel-root': {
-                        fontSize: '0.8rem',
+                        fontSize: '0.875rem',
                         fontWeight: 500,
                       },
                       '& .MuiSelect-select': {
-                        fontSize: '0.8rem',
-                        py: 1,
+                        fontSize: '0.875rem',
+                        py: 1.5,
                       },
                     }}
                   >
-                    <option value="all">All Roles</option>
-                    <option value={ROLES.SUPERADMIN}>Super Admin</option>
-                    <option value={ROLES.ADMIN}>Admin</option>
-                    <option value={ROLES.OPERATOR}>Operator</option>
-                  </TextField>
+                    <InputLabel>Filter by Role</InputLabel>
+                    <Select
+                      value={filterRole}
+                      onChange={(e) => setFilterRole(e.target.value)}
+                      label="Filter by Role"
+                    >
+                      <MenuItem value="all">All Roles</MenuItem>
+                      <MenuItem value={ROLES.SUPERADMIN}>Super Admin</MenuItem>
+                      <MenuItem value={ROLES.ADMIN}>Admin</MenuItem>
+                      <MenuItem value={ROLES.OPERATOR}>Operator</MenuItem>
+                    </Select>
+                  </FormControl>
                 </Grid>
                 <Grid item xs={12} md={3}>
                   <FormControlLabel
@@ -1017,7 +1041,7 @@ const UserPermissionsDashboard: React.FC = () => {
                     label="Show Inactive Users"
                     sx={{
                       '& .MuiFormControlLabel-label': {
-                        fontSize: '0.8rem',
+                        fontSize: '0.875rem',
                         fontWeight: 500,
                         color: 'text.primary',
                       },
@@ -1029,7 +1053,8 @@ const UserPermissionsDashboard: React.FC = () => {
                   <Box sx={{ display: 'flex', gap: 1 }}>
                     <Button
                       variant="outlined"
-                      startIcon={<Visibility />}
+                      size="small"
+                      startIcon={<Visibility sx={{ fontSize: 16 }} />}
                       onClick={async () => {
                         // Fetch current user's permissions
                         let currentUserPermissions: any[] = [];
@@ -1056,13 +1081,13 @@ const UserPermissionsDashboard: React.FC = () => {
                       sx={{ 
                         minWidth: 'auto',
                         whiteSpace: 'nowrap',
-                        borderRadius: 1,
+                        borderRadius: 1.5,
                         borderColor: 'divider',
                         color: 'text.primary',
-                        fontSize: '0.8rem',
+                        fontSize: '0.8125rem',
                         fontWeight: 500,
-                        px: 1,
-                        py: 1,
+                        px: 2,
+                        py: 0.75,
                         textTransform: 'none',
                         transition: 'all 0.3s ease',
                         '&:hover': {
@@ -1083,8 +1108,8 @@ const UserPermissionsDashboard: React.FC = () => {
 
           {/* Error Display */}
           {error && (
-            <Alert severity="warning" sx={{ mb: 1 }}>
-              <Typography variant="body2" sx={{ mb: 1 }}>
+            <Alert severity="warning" sx={{ mb: 2.5, fontSize: '0.8125rem', py: 0.75 }}>
+              <Typography variant="body2" sx={{ mb: 2 }}>
                 {error}
               </Typography>
               <Button 
@@ -1099,10 +1124,10 @@ const UserPermissionsDashboard: React.FC = () => {
           )}
 
           {/* Users Table */}
-          <Card sx={{ borderRadius: 1 }}>
-            <CardContent>
+          <Card sx={{ borderRadius: 1.5, boxShadow: 1 }}>
+            <CardContent sx={{ p: { xs: 1.5, sm: 2 }, '&:last-child': { pb: { xs: 1.5, sm: 2 } } }}>
           {loading ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'center', py: 2.5 }}>
               <Typography>Loading users...</Typography>
             </Box>
           ) : (
@@ -1113,41 +1138,49 @@ const UserPermissionsDashboard: React.FC = () => {
                     <TableRow>
                       <TableCell sx={{ 
                         fontWeight: 600, 
-                        fontSize: '0.8rem',
+                        fontSize: '0.875rem',
                         color: 'text.primary',
-                        py: 1
+                        py: 2
                       }}>
                         User
                       </TableCell>
                       <TableCell sx={{ 
                         fontWeight: 600, 
-                        fontSize: '0.8rem',
+                        fontSize: '0.875rem',
                         color: 'text.primary',
-                        py: 1
+                        py: 2
                       }}>
                         Role
                       </TableCell>
                       <TableCell sx={{ 
                         fontWeight: 600, 
-                        fontSize: '0.8rem',
+                        fontSize: '0.875rem',
                         color: 'text.primary',
-                        py: 1
+                        py: 2
                       }}>
                         Status
                       </TableCell>
                       <TableCell sx={{ 
                         fontWeight: 600, 
-                        fontSize: '0.8rem',
+                        fontSize: '0.875rem',
                         color: 'text.primary',
-                        py: 1
+                        py: 2
                       }}>
                         Last Login
                       </TableCell>
+                      <TableCell sx={{ 
+                        fontWeight: 600, 
+                        fontSize: '0.875rem',
+                        color: 'text.primary',
+                        py: 2
+                      }}>
+                        Permissions
+                      </TableCell>
                       <TableCell align="center" sx={{ 
                         fontWeight: 600, 
-                        fontSize: '0.8rem',
+                        fontSize: '0.875rem',
                         color: 'text.primary',
-                        py: 1
+                        py: 2
                       }}>
                         Actions
                       </TableCell>
@@ -1165,8 +1198,8 @@ const UserPermissionsDashboard: React.FC = () => {
                             transition: 'background-color 0.2s'
                           }}
                         >
-                          <TableCell sx={{ py: 1 }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <TableCell sx={{ py: 2.5 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                               <Avatar 
                                 sx={{ 
                                   width: 44, 
@@ -1195,7 +1228,7 @@ const UserPermissionsDashboard: React.FC = () => {
                                   variant="body2" 
                                   color="text.secondary"
                                   sx={{ 
-                                    fontSize: '0.7rem',
+                                    fontSize: '0.8125rem',
                                     lineHeight: 1.4
                                   }}
                                 >
@@ -1204,11 +1237,11 @@ const UserPermissionsDashboard: React.FC = () => {
                               </Box>
                             </Box>
                           </TableCell>
-                          <TableCell sx={{ py: 1 }}>
+                          <TableCell sx={{ py: 2.5 }}>
                             <Typography 
                               variant="body2" 
                               sx={{ 
-                                fontSize: '0.7rem',
+                                fontSize: '0.8125rem',
                                 fontWeight: 600,
                                 color: 'text.primary'
                               }}
@@ -1216,34 +1249,47 @@ const UserPermissionsDashboard: React.FC = () => {
                               {getRoleDisplayName(user.role || 'unknown')}
                             </Typography>
                           </TableCell>
-                          <TableCell sx={{ py: 1 }}>
+                          <TableCell sx={{ py: 2.5 }}>
                             <Chip
                               label={user.isActive ? 'Active' : 'Inactive'}
                               color={user.isActive ? 'success' : 'default'}
                               size="small"
                               icon={user.isActive ? <CheckCircle sx={{ fontSize: '1rem' }} /> : <Cancel sx={{ fontSize: '1rem' }} />}
                               sx={{ 
-                                fontSize: '0.7rem',
-                                height: 22,
+                                fontSize: '0.8125rem',
+                                height: 28,
                                 fontWeight: 500,
                                 '& .MuiChip-label': {
-                                  px: 1
+                                  px: 1.5
                                 }
                               }}
                             />
                           </TableCell>
-                          <TableCell sx={{ py: 1 }}>
+                          <TableCell sx={{ py: 2.5 }}>
                             <Typography 
                               variant="body2" 
                               sx={{ 
-                                fontSize: '0.7rem',
+                                fontSize: '0.8125rem',
                                 color: 'text.secondary'
                               }}
                             >
                               {formatLastLogin(user.lastLogin || user.updatedAt || user.createdAt)}
                             </Typography>
                           </TableCell>
-                          <TableCell sx={{ textAlign: 'center', py: 1 }}>
+                          <TableCell sx={{ py: 2.5 }}>
+                            <Chip
+                              label={`${user.permissions?.length || 0} perms`}
+                              color="primary"
+                              variant="outlined"
+                              size="small"
+                              sx={{ 
+                                fontSize: '0.75rem',
+                                height: 24,
+                                fontWeight: 500,
+                              }}
+                            />
+                          </TableCell>
+                          <TableCell sx={{ textAlign: 'center', py: 2.5 }}>
                             <IconButton
                               onClick={() => handleViewPermissions(user)}
                               size="small"
@@ -1254,20 +1300,20 @@ const UserPermissionsDashboard: React.FC = () => {
                                 }
                               }}
                             >
-                              <Visibility sx={{ fontSize: '1rem' }} />
+                              <Visibility sx={{ fontSize: '1.25rem' }} />
                             </IconButton>
                           </TableCell>
                         </TableRow>
                       ))
                     ) : (
                       <TableRow>
-                        <TableCell colSpan={5} align="center">
-                          <Box sx={{ py: 8, px: 4, textAlign: 'center', maxWidth: 600, mx: 'auto' }}>
-                            <Security sx={{ fontSize: 80, color: 'text.secondary', mb: 1 }} />
+                        <TableCell colSpan={6} align="center">
+                          <Box sx={{ py: 8, px: 2.5, textAlign: 'center', maxWidth: 600, mx: 'auto' }}>
+                            <Security sx={{ fontSize: 80, color: 'text.secondary', mb: 3 }} />
                             <Typography variant="h5" color="text.secondary" gutterBottom fontWeight="600">
                               No Users Found
                             </Typography>
-                            <Typography variant="body2" color="text.secondary" sx={{ mb: 1, lineHeight: 1.6, fontSize: '0.8rem' }}>
+                            <Typography variant="body2" color="text.secondary" sx={{ mb: 3, lineHeight: 1.6, fontSize: '0.875rem' }}>
                               No users found for this venue. Users will appear here once they are assigned to this venue.
                             </Typography>
                             {error && (
@@ -1322,11 +1368,11 @@ const UserPermissionsDashboard: React.FC = () => {
         </DialogTitle>
         
         <DialogContent sx={{ 
-          px: { xs: 1, sm: 3 }, 
-          py: { xs: 1, sm: 4 },
+          px: { xs: 2, sm: 3 }, 
+          py: { xs: 2, sm: 3 },
           minHeight: '500px'
         }}>
-          <Grid container spacing={1}>
+          <Grid container spacing={2}>
             {permissionCategories.map((category) => {
               const userPermissions = selectedUser?.permissions || [];
               const categoryPermissions = userPermissions.filter((p: any) => 
@@ -1362,21 +1408,21 @@ const UserPermissionsDashboard: React.FC = () => {
                       transition: 'all 0.2s ease-in-out',
                     }}
                   >
-                    <CardContent sx={{ flexGrow: 1, p: 1 }}>
+                    <CardContent sx={{ flexGrow: 1, p: 2 }}>
                       {/* Category Header */}
-                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                         <Avatar
                           sx={{
                             bgcolor: category.color,
-                            width: 22,
-                            height: 22,
+                            width: 36,
+                            height: 36,
                             mr: 1.5,
                           }}
                         >
                           {React.cloneElement(category.icon, { fontSize: 'small' })}
                         </Avatar>
                         <Box>
-                          <Typography variant="h6" fontWeight="600" sx={{ fontSize: '1rem' }}>
+                          <Typography variant="h6" fontWeight="600" sx={{ fontSize: '1.1rem' }}>
                             {String(category.name)}
                           </Typography>
                           <Typography variant="caption" color="text.secondary">
@@ -1403,9 +1449,9 @@ const UserPermissionsDashboard: React.FC = () => {
                           >
                             <Box sx={{ mr: 1 }}>
                               {permission.hasPermission ? (
-                                <CheckCircle sx={{ fontSize: 12, color: 'success.main' }} />
+                                <CheckCircle sx={{ fontSize: 16, color: 'success.main' }} />
                               ) : (
-                                <Cancel sx={{ fontSize: 12, color: 'grey.400' }} />
+                                <Cancel sx={{ fontSize: 16, color: 'grey.400' }} />
                               )}
                             </Box>
                             <Box sx={{ flexGrow: 1 }}>
@@ -1413,7 +1459,7 @@ const UserPermissionsDashboard: React.FC = () => {
                                 variant="body2" 
                                 fontWeight={permission.hasPermission ? 500 : 400}
                                 sx={{ 
-                                  fontSize: '0.8rem',
+                                  fontSize: '0.875rem',
                                   color: permission.hasPermission ? 'text.primary' : 'text.secondary'
                                 }}
                               >
@@ -1441,8 +1487,8 @@ const UserPermissionsDashboard: React.FC = () => {
             })}
           </Grid>
 
-          <Box sx={{ mt: 6, mb: 1, pt: 3, borderTop: '1px solid', borderColor: 'divider' }}>
-            <Typography variant="subtitle2" gutterBottom fontWeight="600" sx={{ mb: 1 }}>
+          <Box sx={{ mt: 6, mb: 3, pt: 3, borderTop: '1px solid', borderColor: 'divider' }}>
+            <Typography variant="subtitle2" gutterBottom fontWeight="600" sx={{ mb: 2 }}>
               Permission Summary:
             </Typography>
             <Typography variant="body2" color="text.secondary">

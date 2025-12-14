@@ -204,7 +204,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
   const renderUserActions = () => {
     if (user) {
       return (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
           <NotificationCenter />
           
           <Button
@@ -215,33 +215,33 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
                 <Avatar 
                   src={dinoAvatar} 
                   sx={{ 
-                    width: 26, 
-                    height: 26,
+                    width: 20, 
+                    height: 20,
                   }}
                 >
-                  <DinoLogo size={18} animated={false} />
+                  <DinoLogo size={14} animated={false} />
                 </Avatar>
               ) : (
-                <AccountCircle sx={{ fontSize: 22 }} />
+                <AccountCircle sx={{ fontSize: 18 }} />
               )
             }
             sx={{
               textTransform: 'none',
-              fontWeight: 700,
-              px: 3,
-              py: 1.25,
-              borderRadius: 2.5,
-              fontSize: '1rem',
-              borderWidth: 2,
+              fontWeight: 600,
+              px: 2,
+              py: 0.75,
+              borderRadius: 2,
+              fontSize: '0.875rem',
+              borderWidth: 1.5,
               borderColor: 'divider',
               color: 'text.primary',
-              minHeight: 44,
+              minHeight: 36,
               '&:hover': {
-                borderWidth: 2,
+                borderWidth: 1.5,
                 borderColor: 'primary.main',
-                backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                backgroundColor: alpha(theme.palette.primary.main, 0.08),
                 color: 'primary.main',
-                transform: 'translateY(-2px)',
+                transform: 'translateY(-1px)',
               },
               transition: 'all 0.3s ease',
             }}
@@ -252,24 +252,24 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
           <Button
             variant="outlined"
             onClick={handleLogout}
-            startIcon={<ExitToApp sx={{ fontSize: 22 }} />}
+            startIcon={<ExitToApp sx={{ fontSize: 18 }} />}
             sx={{
               textTransform: 'none',
-              fontWeight: 700,
-              px: 3,
-              py: 1.25,
-              borderRadius: 2.5,
-              fontSize: '1rem',
-              borderWidth: 2,
+              fontWeight: 600,
+              px: 2,
+              py: 0.75,
+              borderRadius: 2,
+              fontSize: '0.875rem',
+              borderWidth: 1.5,
               borderColor: alpha(theme.palette.error.main, 0.5),
               color: 'error.main',
-              minHeight: 44,
+              minHeight: 36,
               '&:hover': {
-                borderWidth: 2,
+                borderWidth: 1.5,
                 borderColor: 'error.main',
-                backgroundColor: alpha(theme.palette.error.main, 0.1),
+                backgroundColor: alpha(theme.palette.error.main, 0.08),
                 color: 'error.main',
-                transform: 'translateY(-2px)',
+                transform: 'translateY(-1px)',
               },
               transition: 'all 0.3s ease',
             }}
@@ -357,7 +357,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
         }}
       >
         <Container maxWidth="lg">
-          <Toolbar sx={{ px: { xs: 0, sm: 2 }, minHeight: { xs: 68, md: 80 } }}>
+          <Toolbar sx={{ px: { xs: 0, sm: 2 }, minHeight: { xs: 60, md: 64 } }}>
             {/* Logo and Title */}
             <Box
               sx={{
@@ -383,15 +383,15 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
               }}
             >
               <Box className="logo" sx={{ transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)' }}>
-                <DinoLogo size={isMobile ? 44 : 52} animated={true} />
+                <DinoLogo size={isMobile ? 36 : 40} animated={true} />
               </Box>
               <Box>
                 <Typography
                   className="company-name"
                   variant="h6"
                   sx={{
-                    fontWeight: 900,
-                    fontSize: { xs: '1.25rem', md: '1.5rem' },
+                    fontWeight: 800,
+                    fontSize: { xs: '1.125rem', md: '1.25rem' },
                     color: 'text.primary',
                     letterSpacing: '-0.5px',
                     lineHeight: 1.1,
@@ -405,10 +405,10 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
                     variant="caption"
                     sx={{
                       color: 'text.secondary',
-                      fontSize: '0.8125rem',
-                      fontWeight: 600,
+                      fontSize: '0.75rem',
+                      fontWeight: 500,
                       letterSpacing: '0.3px',
-                      mt: 0.5,
+                      mt: 0.25,
                       display: 'block',
                     }}
                   >
