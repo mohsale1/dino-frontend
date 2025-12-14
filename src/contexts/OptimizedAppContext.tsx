@@ -4,7 +4,7 @@
  */
 
 import React, { createContext, useContext, useReducer, useEffect, useCallback, useMemo } from 'react';
-import { optimizedApiService } from '../utils/api';
+import { apiService } from '../utils/api/api';
 import { performanceService } from '../utils/performance';
 import StorageManager from '../utils/storage';
 
@@ -235,7 +235,7 @@ export const OptimizedAppProvider: React.FC<{ children: React.ReactNode }> = ({ 
     try {
       const startTime = Date.now();
       
-      const response = await optimizedApiService.post('/auth/login', {
+      const response = await apiService.post<{ access_token: string; user: any }>('/auth/login', {
         email,
         password
       });
@@ -245,7 +245,7 @@ export const OptimizedAppProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
       if (response.success && response.data) {
         // Store token
-        StorageManager.setItem(StorageManager.KEYS.TOKEN, response.data.access_token);
+        StorageManager.setItem(StorageManager.KEYS.TOKEN, (response.data as any).access_token);
         
         // Store user data
         const userData = response.data.user;
@@ -272,7 +272,7 @@ export const OptimizedAppProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const logout = useCallback(() => {
     // Clear all data
     StorageManager.clearAuthData();
-    optimizedApiService.clearCache();
+    apiService.clearRequestQueue();
     
     // Reset state
     dispatch({ type: 'RESET_STATE' });
@@ -285,7 +285,7 @@ export const OptimizedAppProvider: React.FC<{ children: React.ReactNode }> = ({ 
     if (!state.isAuthenticated) return;
 
     try {
-      const response = await optimizedApiService.get('/auth/me');
+      const response = await apiService.get<any>('/auth/me');
       if (response.success && response.data) {
         StorageManager.setUserData(response.data);
         dispatch({ type: 'SET_USER', payload: response.data });
@@ -297,7 +297,7 @@ export const OptimizedAppProvider: React.FC<{ children: React.ReactNode }> = ({ 
   // Data loading functions
   const loadUserPermissions = useCallback(async () => {
     try {
-      const response = await optimizedApiService.get('/auth/permissions');
+      const response = await apiService.get<any>('/auth/permissions');
       if (response.success && response.data) {
         StorageManager.setPermissions(response.data);
         dispatch({ type: 'SET_PERMISSIONS', payload: response.data });
@@ -311,7 +311,7 @@ export const OptimizedAppProvider: React.FC<{ children: React.ReactNode }> = ({ 
     if (!state.user?.workspace_id) return;
 
     try {
-      const response = await optimizedApiService.get(`/workspaces/${state.user.workspace_id}`);
+      const response = await apiService.get<any>(`/workspaces/${state.user.workspace_id}`);
       if (response.success && response.data) {
         StorageManager.setWorkspaceData(response.data);
         dispatch({ type: 'SET_WORKSPACE', payload: response.data });
@@ -325,7 +325,7 @@ export const OptimizedAppProvider: React.FC<{ children: React.ReactNode }> = ({ 
     if (!state.user?.venue_id) return;
 
     try {
-      const response = await optimizedApiService.get(`/venues/${state.user.venue_id}`);
+      const response = await apiService.get<any>(`/venues/${state.user.venue_id}`);
       if (response.success && response.data) {
         StorageManager.setVenueData(response.data);
         dispatch({ type: 'SET_VENUE', payload: response.data });
@@ -339,7 +339,7 @@ export const OptimizedAppProvider: React.FC<{ children: React.ReactNode }> = ({ 
     if (!state.user?.workspace_id) return;
 
     try {
-      const response = await optimizedApiService.get(
+      const response = await apiService.get<any>(
         `/venues/workspace/${state.user.workspace_id}/venues`
       );
       if (response.success && response.data) {
@@ -389,9 +389,9 @@ export const OptimizedAppProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
     // Adjust API service based on performance mode
     if (mode === 'minimal') {
-      optimizedApiService.updateConfig({ enableCache: false, enableRetry: false });
+      // apiService.updateConfig({ enableCache: false, enableRetry: false });
     } else if (mode === 'optimized') {
-      optimizedApiService.updateConfig({ enableCache: true, enableRetry: true });
+      // apiService.updateConfig({ enableCache: true, enableRetry: true });
     }
   }, []);
 
@@ -400,11 +400,11 @@ export const OptimizedAppProvider: React.FC<{ children: React.ReactNode }> = ({ 
     StorageManager.setSettings({ ...settings, cacheEnabled: enabled });
     dispatch({ type: 'SET_CACHE_ENABLED', payload: enabled });
     
-    optimizedApiService.updateConfig({ enableCache: enabled });
+    // apiService.updateConfig({ enableCache: enabled });
   }, []);
 
   const clearCache = useCallback(() => {
-    optimizedApiService.clearCache();
+    apiService.clearRequestQueue();
     StorageManager.clearCache();
     performanceService.clearMetrics();
   }, []);

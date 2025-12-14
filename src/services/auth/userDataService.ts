@@ -1,6 +1,6 @@
 import { apiService } from '../../utils/api';
 import { ApiResponse } from '../../types/api';
-import { ROLE_NAMES, isAdminLevel } from '../../constants/roles';
+import { ROLES, isAdminLevel } from '../../types/auth';
 import StorageManager from '../../utils/storage';
 
 export interface UserData {
@@ -273,7 +273,7 @@ class UserDataService {
   }
 
   isSuperAdmin(userData: UserData | null): boolean {
-    return this.getUserRole(userData) === ROLE_NAMES.SUPERADMIN;
+    return this.getUserRole(userData) === ROLES.SUPERADMIN;
   }
 
   isAdmin(userData: UserData | null): boolean {
@@ -282,7 +282,7 @@ class UserDataService {
   }
 
   isOperator(userData: UserData | null): boolean {
-    return this.getUserRole(userData) === ROLE_NAMES.OPERATOR;
+    return this.getUserRole(userData) === ROLES.OPERATOR;
   }
 
   formatCurrency(amount: number, currency: string = 'INR'): string {

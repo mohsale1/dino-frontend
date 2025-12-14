@@ -6,8 +6,6 @@
 
 export {
   NotFoundPage,
-  ServerErrorPage,
-  NetworkErrorPage,
   ErrorPage,
   VenueNotAcceptingOrdersPage,
   VenueClosedPage,

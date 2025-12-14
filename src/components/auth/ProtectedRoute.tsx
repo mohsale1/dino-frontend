@@ -2,7 +2,7 @@ import React, { ReactNode } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { Box, CircularProgress, Typography } from '@mui/material';
 import { useAuth } from '../../contexts/AuthContext';
-import { isAdminLevel } from '../../constants/roles';
+import { isAdminLevel } from '../../types/auth';
 import { GenericErrorPage } from '../errors';
 
 interface ProtectedRouteProps {
@@ -23,6 +23,14 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const { user, loading, isAuthenticated } = useAuth();
   const location = useLocation();
 
+  // Check if login bypass is enabled
+  const bypassLogin = process.env.REACT_APP_BYPASS_LOGIN === 'true';
+
+  // If bypass is enabled, skip all authentication checks
+  if (bypassLogin) {
+    return <>{children}</>;
+  }
+
   // Show loading spinner while checking authentication
   if (loading) {
     return (
@@ -33,7 +41,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
           alignItems: 'center',
           justifyContent: 'center',
           minHeight: '50vh',
-          gap: 1,
+          gap: 2,
         }}
       >
         <CircularProgress size={60} />

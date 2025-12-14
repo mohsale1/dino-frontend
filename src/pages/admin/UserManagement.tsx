@@ -60,12 +60,11 @@ import { useWorkspace } from '../../contexts/WorkspaceContext';
 import { useUserData } from '../../contexts/UserDataContext';
 import { useErrorHandler } from '../../hooks/useErrorHandler';
 import { useNavigate } from 'react-router-dom';
-import { ROLES, PERMISSIONS } from '../../types/auth';
+import { ROLES, PERMISSIONS, getRoleDisplayName } from '../../types/auth';
 import { PasswordUpdateDialog } from '../../components/auth';
 import { userService, User, UserCreate, UserUpdate } from '../../services/auth';
 import { roleService, Role } from '../../services/auth/roleService';
 import { VenueUser } from '../../types/api';
-import { ROLE_NAMES, getRoleDisplayName } from '../../constants/roles';
 import { PageLoadingSkeleton, EmptyState } from '../../components/ui/LoadingStates';
 import { DeleteConfirmationModal } from '../../components/modals';
 import AnimatedBackground from '../../components/ui/AnimatedBackground';
@@ -632,11 +631,11 @@ const UserManagement: React.FC = () => {
 
   const getRoleColor = (roleName: string): string => {
     switch (roleName) {
-      case ROLE_NAMES.SUPERADMIN:
+      case ROLES.SUPERADMIN:
         return '#0D47A1'; // Dark blue
-      case ROLE_NAMES.ADMIN:
+      case ROLES.ADMIN:
         return '#1976D2'; // Medium blue
-      case ROLE_NAMES.OPERATOR:
+      case ROLES.OPERATOR:
         return '#64B5F6'; // Light blue
       default:
         return '#1565C0'; // Default blue

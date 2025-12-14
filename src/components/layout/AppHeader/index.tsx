@@ -29,7 +29,7 @@ import { NotificationCenter } from '../../common';
 import MobileMenu from '../MobileMenu';
 import { COMPANY_INFO } from '../../../data/info';
 import { getUserFirstName } from '../../../utils/userUtils';
-import { isAdminLevel } from '../../../constants/roles';
+import { isAdminLevel } from '../../../types/auth';
 import { LogoutConfirmationModal } from '../../modals';
 
 interface AppHeaderProps {

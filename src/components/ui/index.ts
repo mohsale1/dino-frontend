@@ -1,8 +1,6 @@
 /**
  * UI Components Barrel Export
- * 
- * This file provides a single entry point for all UI components
- * following atomic design principles.
+ * Single entry point for all UI components
  */
 
 // ===================================================================
@@ -36,7 +34,7 @@ export {
   TableLoadingSkeleton,
   CardLoadingSkeleton,
   PageLoadingSkeleton,
-  InlineLoader as LoadingStatesInlineLoader, // Alias to avoid conflict
+  InlineLoader as LoadingStatesInlineLoader,
   FullPageLoader,
   RetryLoader,
   EmptyState,
@@ -54,7 +52,6 @@ export {
 } from './ToastNotification';
 export { default as ToastNotification } from './ToastNotification';
 export { default as FragmentNavigation } from './FragmentNavigation';
-export { default as ToastNotificationComponent } from './ToastNotification';
 
 // ===================================================================
 // MOLECULES - Component combinations
@@ -62,36 +59,14 @@ export { default as ToastNotificationComponent } from './ToastNotification';
 
 // Animated Components
 export { default as AnimatedBackground } from './AnimatedBackground';
-export { default as AnimatedBackgroundComponent } from './AnimatedBackground';
 export { default as AnimatedCounter } from './AnimatedCounter';
-export { default as AnimatedCounterComponent } from './AnimatedCounter';
-export { default as MenuAnimatedBackground } from './MenuAnimatedBackground';
-export { default as MenuAnimatedBackgroundComponent } from './MenuAnimatedBackground';
-export { default as LoginAnimatedBackground } from './LoginAnimatedBackground';
-export { default as LoginAnimatedBackgroundComponent } from './LoginAnimatedBackground';
-export { default as SpaceLoginBackground } from './SpaceLoginBackground';
-export { default as SpaceLoginBackgroundComponent } from './SpaceLoginBackground';
 
-// ===================================================================
-// UTILITY EXPORTS
-// ===================================================================
-
-// Common component props and types
-// Note: ButtonProps and CardProps are internal interfaces, not exported from components
-// If needed, they can be re-exported here
+// Stats Components
+export { default as StatsCards } from './StatsCards';
 
 // ===================================================================
 // LEGACY EXPORTS (for backward compatibility)
 // ===================================================================
 
-// These exports maintain backward compatibility
-// They will be deprecated in future versions
 export { Button as StandardButton } from './Button';
 export { Card as StandardCard } from './Card';
-
-// ===================================================================
-// COMPONENT COLLECTIONS
-// ===================================================================
-
-// Note: Component collections are commented out due to import/export complexity
-// Individual components should be imported directly from their respective files

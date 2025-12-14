@@ -27,15 +27,15 @@ export const COMPANY_INFO = {
   name: 'Dino',
   tagline: 'Revolutionizing Restaurant Ordering',
   description: 'Digital menu solutions for modern restaurants',
-  website: 'https://dino-emenu.com',
+  website: 'https://dinocafe.in',
   email: 'contact@dino-emenu.com',
-  phone: '+91 98765 43210',
+  phone: '+91 81211 37113',
   address: {
-    street: '123 Tech Park',
-    city: 'Bangalore',
-    state: 'Karnataka',
+    street: 'Madhapur',
+    city: 'Hyderabad',
+    state: 'Telangana',
     country: 'India',
-    pincode: '560001'
+    pincode: '50081'
   },
   social: {
     twitter: '@dinoemenu',
@@ -44,7 +44,7 @@ export const COMPANY_INFO = {
     linkedin: 'dino-emenu'
   },
   legal: {
-    copyright: '© 2024 Dino. All rights reserved.',
+    copyright: '© 2026 Dino. All rights reserved.',
     privacy: 'Privacy Policy',
     terms: 'Terms of Service'
   },
@@ -56,10 +56,10 @@ export const COMPANY_INFO = {
   ],
   contact: {
     address: {
-      full: '123 Tech Park, Whitefield, Bangalore 560066'
+      full: 'Madhapur, Hyderabad,50081'
     },
     phone: {
-      primary: '+91 98765 43210'
+      primary: '+91 81211 37113'
     },
     email: {
       primary: 'contact@dino-emenu.com'

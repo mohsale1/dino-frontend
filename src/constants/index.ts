@@ -1,18 +1,21 @@
 /**
  * Centralized Constants Export
+ * Single entry point for application constants
  * 
- * This file provides a single entry point for all constants
- * used throughout the application.
+ * Note: For roles, import from 'types/auth'
+ * Note: For storage keys, import from 'config/storage'
  */
 
 // ===================================================================
-// MAIN EXPORTS
+// APPLICATION CONSTANTS
 // ===================================================================
 
-// Application configuration and technical constants
 export * from './app';
 
-// User-facing messages and content (from info.ts)
+// ===================================================================
+// USER-FACING CONTENT
+// ===================================================================
+
 export {
   // UI Messages
   PAGE_TITLES,
@@ -47,44 +50,9 @@ export {
   TESTIMONIAL_STATS,
 } from '../data/info';
 
-// Type exports for better TypeScript support
-export type { ToastSeverity, ToastMessage } from '../components/ui/ToastNotification';
-
-// Re-export auth types for convenience (excluding PERMISSIONS to avoid conflict)
-export { ROLES, type User, type UserRole, type PermissionName, type RoleName } from '../types/auth';
-
-// ===================================================================
-// DEPRECATED EXPORTS (for backward compatibility)
-// ===================================================================
-// These will be removed in future versions
-
-// Legacy storage keys (use STORAGE_KEYS from app.ts instead)
-export const STORAGE_KEY = {
-  TOKEN: 'dino_token',
-  USER: 'dino_user',
-  REFRESH_TOKEN: 'dino_refresh_token',
-  CART: 'dino_cart',
-  PREFERENCES: 'dino_preferences',
-} as const;
-
 // ===================================================================
 // UTILITY FUNCTIONS
 // ===================================================================
-
-/**
- * Get user role display name
- */
-export const getRoleDisplayName = (role: string): string => {
-  const roleNames: Record<string, string> = {
-    super_admin: 'Super Administrator',
-    admin: 'Administrator',
-    manager: 'Manager',
-    operator: 'Operator',
-    staff: 'Staff',
-    customer: 'Customer',
-  };
-  return roleNames[role] || role;
-};
 
 /**
  * Get order status display name
@@ -116,16 +84,6 @@ export const getPaymentStatusDisplayName = (status: string): string => {
     refunded: 'Refunded',
   };
   return statusNames[status] || status;
-};
-
-/**
- * Check if user has permission
- */
-export const hasPermission = (userRole: string, requiredPermission: string): boolean => {
-  // Import ROLE_PERMISSIONS from app.ts
-  const { ROLE_PERMISSIONS } = require('./app');
-  const rolePermissions = ROLE_PERMISSIONS[userRole] || [];
-  return rolePermissions.includes(requiredPermission);
 };
 
 /**

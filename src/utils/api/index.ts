@@ -4,6 +4,4 @@
  */
 
 export * from './apiConfig';
-export * from './apiOptimization';
 export { apiService } from './api';
-export { optimizedApiService } from './optimizedApiService';

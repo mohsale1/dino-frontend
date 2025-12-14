@@ -10,15 +10,7 @@ export const APP_CONFIG = {
   COMPANY: 'Dino',
 } as const;
 
-// Local Storage Keys
-export const STORAGE_KEYS = {
-  TOKEN: 'dino_token',
-  USER: 'dino_user',
-  REFRESH_TOKEN: 'dino_refresh_token',
-  CART: 'dino_cart',
-  PREFERENCES: 'dino_preferences',
-  PERMISSIONS: 'dino_permissions',
-} as const;
+// Storage keys moved to config/storage.ts
 
 export const API_CONFIG = {
   BASE_URL: CENTRALIZED_API_CONFIG.BASE_URL,
@@ -66,7 +58,7 @@ export const FEATURES = {
   ANALYTICS: true,
   NOTIFICATIONS: true,
   MULTI_LANGUAGE: false,
-  DARK_MODE: false,
+  DARK_MODE: true, // Now enabled
 } as const;
 
 // Business Rules (Indian Market)
@@ -376,20 +368,9 @@ export const TABLE_STATUS = {
 } as const;
 
 // ===================================================================
-// ROLE & PERMISSION CONSTANTS
+// PERMISSIONS (Detailed permission system)
 // ===================================================================
 
-// User Roles
-export const USER_ROLES = {
-  SUPER_ADMIN: 'super_admin',
-  ADMIN: 'admin',
-  MANAGER: 'manager',
-  OPERATOR: 'operator',
-  STAFF: 'staff',
-  CUSTOMER: 'customer',
-} as const;
-
-// Permissions
 export const PERMISSIONS = {
   // Order Management
   VIEW_ORDERS: 'view_orders',
@@ -429,64 +410,4 @@ export const PERMISSIONS = {
   MANAGE_SETTINGS: 'manage_settings',
   MANAGE_VENUE: 'manage_venue',
   SYSTEM_ADMIN: 'system_admin',
-} as const;
-
-// Role Permissions Mapping
-export const ROLE_PERMISSIONS = {
-  [USER_ROLES.SUPER_ADMIN]: Object.values(PERMISSIONS),
-  [USER_ROLES.ADMIN]: [
-    PERMISSIONS.VIEW_ORDERS,
-    PERMISSIONS.CREATE_ORDERS,
-    PERMISSIONS.UPDATE_ORDERS,
-    PERMISSIONS.CANCEL_ORDERS,
-    PERMISSIONS.VIEW_MENU,
-    PERMISSIONS.CREATE_MENU_ITEMS,
-    PERMISSIONS.UPDATE_MENU_ITEMS,
-    PERMISSIONS.DELETE_MENU_ITEMS,
-    PERMISSIONS.MANAGE_CATEGORIES,
-    PERMISSIONS.VIEW_TABLES,
-    PERMISSIONS.CREATE_TABLES,
-    PERMISSIONS.UPDATE_TABLES,
-    PERMISSIONS.DELETE_TABLES,
-    PERMISSIONS.ASSIGN_TABLES,
-    PERMISSIONS.VIEW_USERS,
-    PERMISSIONS.CREATE_USERS,
-    PERMISSIONS.UPDATE_USERS,
-    PERMISSIONS.VIEW_ANALYTICS,
-    PERMISSIONS.EXPORT_DATA,
-    PERMISSIONS.VIEW_REPORTS,
-    PERMISSIONS.MANAGE_SETTINGS,
-    PERMISSIONS.MANAGE_VENUE,
-  ],
-  [USER_ROLES.MANAGER]: [
-    PERMISSIONS.VIEW_ORDERS,
-    PERMISSIONS.CREATE_ORDERS,
-    PERMISSIONS.UPDATE_ORDERS,
-    PERMISSIONS.CANCEL_ORDERS,
-    PERMISSIONS.VIEW_MENU,
-    PERMISSIONS.UPDATE_MENU_ITEMS,
-    PERMISSIONS.VIEW_TABLES,
-    PERMISSIONS.UPDATE_TABLES,
-    PERMISSIONS.ASSIGN_TABLES,
-    PERMISSIONS.VIEW_USERS,
-    PERMISSIONS.VIEW_ANALYTICS,
-    PERMISSIONS.VIEW_REPORTS,
-  ],
-  [USER_ROLES.OPERATOR]: [
-    PERMISSIONS.VIEW_ORDERS,
-    PERMISSIONS.UPDATE_ORDERS,
-    PERMISSIONS.VIEW_MENU,
-    PERMISSIONS.VIEW_TABLES,
-    PERMISSIONS.ASSIGN_TABLES,
-  ],
-  [USER_ROLES.STAFF]: [
-    PERMISSIONS.VIEW_ORDERS,
-    PERMISSIONS.UPDATE_ORDERS,
-    PERMISSIONS.VIEW_MENU,
-    PERMISSIONS.VIEW_TABLES,
-  ],
-  [USER_ROLES.CUSTOMER]: [
-    PERMISSIONS.VIEW_MENU,
-    PERMISSIONS.CREATE_ORDERS,
-  ],
 } as const;

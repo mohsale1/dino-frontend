@@ -1,6 +1,5 @@
 import { User, Permission, UserRole, PERMISSIONS, ROLES, PermissionName, RoleName } from '../../types/auth';
 import StorageManager from '../../utils/storage';
-import { ROLE_NAMES } from '../../constants/roles';
 import { apiService } from '../../utils/api';
 import { authService } from './authService';
 

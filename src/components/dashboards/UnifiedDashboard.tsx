@@ -8,7 +8,7 @@ import {
 } from '@mui/material';
 import { useAuth } from '../../contexts/AuthContext';
 import { useUserData } from '../../contexts/UserDataContext';
-import { PERMISSIONS, UserRole } from '../../types/auth';
+import { PERMISSIONS, UserRole, ROLES } from '../../types/auth';
 import { dashboardService } from '../../services/business';
 import { AdminDashboardResponse, SuperAdminDashboardResponse, OperatorDashboardResponse } from '../../types/dashboard';
 import VenueAssignmentCheck from '../common/VenueAssignmentCheck';
@@ -16,7 +16,6 @@ import DashboardTour from '../tour/DashboardTour';
 import { usePermissions } from '../auth';
 import { useDashboardFlags } from '../../flags/FlagContext';
 import DateRangePicker, { DateRange } from '../common/DateRangePicker';
-import { ROLE_NAMES } from '../../constants/roles';
 
 // Import modular components
 import DashboardHeader from './components/DashboardHeader';

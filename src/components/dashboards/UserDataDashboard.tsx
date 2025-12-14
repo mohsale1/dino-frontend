@@ -38,7 +38,7 @@ import {
 } from '@mui/icons-material';
 import { useUserData } from '../../contexts/UserDataContext';
 
-import { ROLE_NAMES, getRoleDisplayName, isAdminLevel } from '../../constants/roles';
+import { ROLES, getRoleDisplayName, isAdminLevel } from '../../types/auth';
 
 interface UserDataDashboardProps {
   className?: string;
@@ -66,7 +66,7 @@ const UserDataDashboard: React.FC<UserDataDashboardProps> = ({ className }) => {
 
   if (loading) {
     return (
-      <Container maxWidth="xl" className="container-responsive">
+      <Container maxWidth="lg" className="container-responsive">
         <Box 
           display="flex" 
           flexDirection="column"
@@ -87,8 +87,8 @@ const UserDataDashboard: React.FC<UserDataDashboardProps> = ({ className }) => {
 
   if (!userData) {
     return (
-      <Container maxWidth="xl" className="container-responsive">
-        <Alert severity="error" sx={{ mb: 1 }}>
+      <Container maxWidth="lg" className="container-responsive">
+        <Alert severity="error" sx={{ mb: 3 }}>
           <Typography variant={isMobile ? "body1" : "h6"} fontWeight="600">
             No Data Available
           </Typography>
@@ -99,7 +99,7 @@ const UserDataDashboard: React.FC<UserDataDashboardProps> = ({ className }) => {
             onClick={refreshUserData} 
             className="btn-responsive"
             variant="contained"
-            sx={{ mt: 1 }}
+            sx={{ mt: 2 }}
           >
             Retry
           </Button>
@@ -115,16 +115,16 @@ const UserDataDashboard: React.FC<UserDataDashboardProps> = ({ className }) => {
   const users = getUsers();
 
   return (
-    <Container maxWidth="xl" className={`container-responsive ${className || ''}`} sx={{ pt: { xs: '56px', sm: '64px' } }}>
-      <Box sx={{ py: { xs: 1, sm: 3 } }}>
+    <Container maxWidth="lg" className={`container-responsive ${className || ''}`} sx={{ pt: { xs: '56px', sm: '64px' } }}>
+      <Box sx={{ py: { xs: 2, sm: 3 } }}>
         {/* Header */}
-        <Box sx={{ mb: { xs: 3, md: 1 } }}>
+        <Box sx={{ mb: { xs: 3, md: 4 } }}>
           <Stack 
             direction={{ xs: 'column', lg: 'row' }}
             justifyContent="space-between" 
             alignItems={{ xs: 'flex-start', lg: 'center' }}
             spacing={{ xs: 2, lg: 0 }}
-            sx={{ mb: 1 }}
+            sx={{ mb: 2 }}
           >
             <Box sx={{ width: '100%' }}>
               <Stack 
@@ -142,7 +142,7 @@ const UserDataDashboard: React.FC<UserDataDashboardProps> = ({ className }) => {
                   component="h1"
                   fontWeight="bold"
                   sx={{ 
-                    fontSize: { xs: '1.25rem', sm: '2rem', md: '2.125rem' },
+                    fontSize: { xs: '1.5rem', sm: '2rem', md: '2.125rem' },
                     lineHeight: 1.2
                   }}
                 >
@@ -191,7 +191,7 @@ const UserDataDashboard: React.FC<UserDataDashboardProps> = ({ className }) => {
         </Box>
 
         {/* Tabs */}
-        <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: { xs: 2, md: 1.5 } }}>
+        <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: { xs: 2, md: 3 } }}>
           <Tabs 
             value={currentTab} 
             onChange={(e, newValue) => setCurrentTab(newValue)}
@@ -201,11 +201,11 @@ const UserDataDashboard: React.FC<UserDataDashboardProps> = ({ className }) => {
             sx={{
               '& .MuiTab-root': {
                 minHeight: { xs: 48, sm: 48 },
-                fontSize: { xs: '0.8rem', sm: '0.8rem' },
+                fontSize: { xs: '0.875rem', sm: '0.875rem' },
                 fontWeight: 500,
                 textTransform: 'none',
                 minWidth: { xs: 'auto', sm: 160 },
-                px: { xs: 1, sm: 3 }
+                px: { xs: 2, sm: 3 }
               }
             }}
           >
@@ -221,14 +221,14 @@ const UserDataDashboard: React.FC<UserDataDashboardProps> = ({ className }) => {
         {currentTab === 0 && (
           <>
             {/* Stats Cards */}
-            <Grid container spacing={{ xs: 2, sm: 3 }} sx={{ mb: { xs: 3, md: 1 } }}>
+            <Grid container spacing={{ xs: 2, sm: 3 }} sx={{ mb: { xs: 3, md: 4 } }}>
               <Grid item xs={6} sm={6} md={3}>
                 <Card className="card-responsive">
                   <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
                     <Stack 
                       direction={{ xs: 'column', sm: 'row' }}
                       alignItems={{ xs: 'center', sm: 'flex-start' }}
-                      spacing={{ xs: 1, sm: 1 }}
+                      spacing={{ xs: 1, sm: 2 }}
                       textAlign={{ xs: 'center', sm: 'left' }}
                     >
                       <Receipt 
@@ -239,14 +239,14 @@ const UserDataDashboard: React.FC<UserDataDashboardProps> = ({ className }) => {
                         <Typography 
                           variant={isMobile ? "h5" : "h4"} 
                           fontWeight="bold"
-                          sx={{ fontSize: { xs: '1.25rem', sm: '2rem' } }}
+                          sx={{ fontSize: { xs: '1.5rem', sm: '2rem' } }}
                         >
                           {statistics?.total_orders || 0}
                         </Typography>
                         <Typography 
                           variant="body2" 
                           color="text.secondary"
-                          sx={{ fontSize: { xs: '0.75rem', sm: '0.8rem' } }}
+                          sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
                         >
                           Total Orders
                         </Typography>
@@ -262,7 +262,7 @@ const UserDataDashboard: React.FC<UserDataDashboardProps> = ({ className }) => {
                     <Stack 
                       direction={{ xs: 'column', sm: 'row' }}
                       alignItems={{ xs: 'center', sm: 'flex-start' }}
-                      spacing={{ xs: 1, sm: 1 }}
+                      spacing={{ xs: 1, sm: 2 }}
                       textAlign={{ xs: 'center', sm: 'left' }}
                     >
                       <TrendingUp 
@@ -280,7 +280,7 @@ const UserDataDashboard: React.FC<UserDataDashboardProps> = ({ className }) => {
                         <Typography 
                           variant="body2" 
                           color="text.secondary"
-                          sx={{ fontSize: { xs: '0.75rem', sm: '0.8rem' } }}
+                          sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
                         >
                           Total Revenue
                         </Typography>
@@ -296,7 +296,7 @@ const UserDataDashboard: React.FC<UserDataDashboardProps> = ({ className }) => {
                     <Stack 
                       direction={{ xs: 'column', sm: 'row' }}
                       alignItems={{ xs: 'center', sm: 'flex-start' }}
-                      spacing={{ xs: 1, sm: 1 }}
+                      spacing={{ xs: 1, sm: 2 }}
                       textAlign={{ xs: 'center', sm: 'left' }}
                     >
                       <TableBar 
@@ -314,7 +314,7 @@ const UserDataDashboard: React.FC<UserDataDashboardProps> = ({ className }) => {
                         <Typography 
                           variant="body2" 
                           color="text.secondary"
-                          sx={{ fontSize: { xs: '0.75rem', sm: '0.8rem' } }}
+                          sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
                         >
                           Active Tables
                         </Typography>
@@ -330,7 +330,7 @@ const UserDataDashboard: React.FC<UserDataDashboardProps> = ({ className }) => {
                     <Stack 
                       direction={{ xs: 'column', sm: 'row' }}
                       alignItems={{ xs: 'center', sm: 'flex-start' }}
-                      spacing={{ xs: 1, sm: 1 }}
+                      spacing={{ xs: 1, sm: 2 }}
                       textAlign={{ xs: 'center', sm: 'left' }}
                     >
                       <Restaurant 
@@ -348,7 +348,7 @@ const UserDataDashboard: React.FC<UserDataDashboardProps> = ({ className }) => {
                         <Typography 
                           variant="body2" 
                           color="text.secondary"
-                          sx={{ fontSize: { xs: '0.75rem', sm: '0.8rem' } }}
+                          sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
                         >
                           Menu Items
                         </Typography>
@@ -371,8 +371,8 @@ const UserDataDashboard: React.FC<UserDataDashboardProps> = ({ className }) => {
                 </Typography>
                 
                 {recentOrders.length === 0 ? (
-                  <Box sx={{ textAlign: 'center', py: { xs: 1, sm: 4 } }}>
-                    <Receipt sx={{ fontSize: { xs: 40, sm: 48 }, color: 'text.secondary', mb: 1 }} />
+                  <Box sx={{ textAlign: 'center', py: { xs: 2, sm: 3 } }}>
+                    <Receipt sx={{ fontSize: { xs: 40, sm: 48 }, color: 'text.secondary', mb: 2 }} />
                     <Typography 
                       variant={isMobile ? "body2" : "body1"} 
                       color="text.secondary"
@@ -393,20 +393,20 @@ const UserDataDashboard: React.FC<UserDataDashboardProps> = ({ className }) => {
                     <Table size={isMobile ? "small" : "medium"}>
                       <TableHead>
                         <TableRow>
-                          <TableCell sx={{ fontSize: { xs: '0.75rem', sm: '0.8rem' } }}>
+                          <TableCell sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
                             Order ID
                           </TableCell>
-                          <TableCell sx={{ fontSize: { xs: '0.75rem', sm: '0.8rem' } }}>
+                          <TableCell sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
                             Table
                           </TableCell>
-                          <TableCell sx={{ fontSize: { xs: '0.75rem', sm: '0.8rem' } }}>
+                          <TableCell sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
                             Amount
                           </TableCell>
-                          <TableCell sx={{ fontSize: { xs: '0.75rem', sm: '0.8rem' } }}>
+                          <TableCell sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
                             Status
                           </TableCell>
                           <TableCell sx={{ 
-                            fontSize: { xs: '0.75rem', sm: '0.8rem' },
+                            fontSize: { xs: '0.75rem', sm: '0.875rem' },
                             display: { xs: 'none', sm: 'table-cell' }
                           }}>
                             Time
@@ -416,13 +416,13 @@ const UserDataDashboard: React.FC<UserDataDashboardProps> = ({ className }) => {
                       <TableBody>
                         {recentOrders.slice(0, 5).map((order: any) => (
                           <TableRow key={order.id}>
-                            <TableCell sx={{ fontSize: { xs: '0.75rem', sm: '0.8rem' } }}>
+                            <TableCell sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
                               #{order.id.slice(-6)}
                             </TableCell>
-                            <TableCell sx={{ fontSize: { xs: '0.75rem', sm: '0.8rem' } }}>
+                            <TableCell sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
                               Table {order.table_number || 'N/A'}
                             </TableCell>
-                            <TableCell sx={{ fontSize: { xs: '0.75rem', sm: '0.8rem' } }}>
+                            <TableCell sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
                               ₹{((order.subtotal || 0) + (order.tax_amount || 0) - (order.discount_amount || 0)).toLocaleString()}
                             </TableCell>
                             <TableCell>
@@ -434,7 +434,7 @@ const UserDataDashboard: React.FC<UserDataDashboardProps> = ({ className }) => {
                               />
                             </TableCell>
                             <TableCell sx={{ 
-                              fontSize: { xs: '0.75rem', sm: '0.8rem' },
+                              fontSize: { xs: '0.75rem', sm: '0.875rem' },
                               display: { xs: 'none', sm: 'table-cell' }
                             }}>
                               {new Date(order.createdAt).toLocaleTimeString()}
@@ -471,7 +471,7 @@ const UserDataDashboard: React.FC<UserDataDashboardProps> = ({ className }) => {
                 justifyContent="space-between" 
                 alignItems={{ xs: 'flex-start', sm: 'center' }}
                 spacing={{ xs: 2, sm: 0 }}
-                sx={{ mb: 1 }}
+                sx={{ mb: 3 }}
               >
                 <Typography variant={isMobile ? "body1" : "h6"} fontWeight="600">
                   Menu Items ({menuItems.length})
@@ -488,8 +488,8 @@ const UserDataDashboard: React.FC<UserDataDashboardProps> = ({ className }) => {
                 )}
               </Stack>
               
-              <Box sx={{ textAlign: 'center', py: { xs: 1, sm: 6 } }}>
-                <Restaurant sx={{ fontSize: { xs: 48, sm: 64 }, color: 'text.secondary', mb: 1 }} />
+              <Box sx={{ textAlign: 'center', py: { xs: 4, sm: 6 } }}>
+                <Restaurant sx={{ fontSize: { xs: 48, sm: 64 }, color: 'text.secondary', mb: 2 }} />
                 <Typography 
                   variant={isMobile ? "body1" : "h6"} 
                   color="text.secondary" 
@@ -501,7 +501,7 @@ const UserDataDashboard: React.FC<UserDataDashboardProps> = ({ className }) => {
                 <Typography 
                   variant="body2" 
                   color="text.secondary" 
-                  sx={{ mb: 1, maxWidth: 400, mx: 'auto' }}
+                  sx={{ mb: 3, maxWidth: 400, mx: 'auto' }}
                 >
                   {hasPermission('can_manage_menu') 
                     ? "Use the dedicated Menu Management page to create and manage your restaurant's menu items, categories, and pricing."
@@ -533,7 +533,7 @@ const UserDataDashboard: React.FC<UserDataDashboardProps> = ({ className }) => {
                 justifyContent="space-between" 
                 alignItems={{ xs: 'flex-start', sm: 'center' }}
                 spacing={{ xs: 2, sm: 0 }}
-                sx={{ mb: 1 }}
+                sx={{ mb: 3 }}
               >
                 <Typography variant={isMobile ? "body1" : "h6"} fontWeight="600">
                   Tables ({tables.length})
@@ -550,8 +550,8 @@ const UserDataDashboard: React.FC<UserDataDashboardProps> = ({ className }) => {
                 )}
               </Stack>
               
-              <Box sx={{ textAlign: 'center', py: { xs: 1, sm: 6 } }}>
-                <TableBar sx={{ fontSize: { xs: 48, sm: 64 }, color: 'text.secondary', mb: 1 }} />
+              <Box sx={{ textAlign: 'center', py: { xs: 4, sm: 6 } }}>
+                <TableBar sx={{ fontSize: { xs: 48, sm: 64 }, color: 'text.secondary', mb: 2 }} />
                 <Typography 
                   variant={isMobile ? "body1" : "h6"} 
                   color="text.secondary" 
@@ -563,7 +563,7 @@ const UserDataDashboard: React.FC<UserDataDashboardProps> = ({ className }) => {
                 <Typography 
                   variant="body2" 
                   color="text.secondary" 
-                  sx={{ mb: 1, maxWidth: 400, mx: 'auto' }}
+                  sx={{ mb: 3, maxWidth: 400, mx: 'auto' }}
                 >
                   {hasPermission('can_manage_tables') 
                     ? "Use the dedicated Table Management page to set up and manage your dining area, add tables, and generate QR codes."
@@ -599,8 +599,8 @@ const UserDataDashboard: React.FC<UserDataDashboardProps> = ({ className }) => {
               </Typography>
               
               {recentOrders.length === 0 ? (
-                <Box sx={{ textAlign: 'center', py: { xs: 1, sm: 6 } }}>
-                  <Receipt sx={{ fontSize: { xs: 48, sm: 64 }, color: 'text.secondary', mb: 1 }} />
+                <Box sx={{ textAlign: 'center', py: { xs: 4, sm: 6 } }}>
+                  <Receipt sx={{ fontSize: { xs: 48, sm: 64 }, color: 'text.secondary', mb: 2 }} />
                   <Typography 
                     variant={isMobile ? "body1" : "h6"} 
                     color="text.secondary" 
@@ -612,7 +612,7 @@ const UserDataDashboard: React.FC<UserDataDashboardProps> = ({ className }) => {
                   <Typography 
                     variant="body2" 
                     color="text.secondary" 
-                    sx={{ mb: 1, maxWidth: 400, mx: 'auto' }}
+                    sx={{ mb: 2, maxWidth: 400, mx: 'auto' }}
                   >
                     Orders from customers will appear here once they start placing orders through your menu.
                   </Typography>
@@ -629,37 +629,37 @@ const UserDataDashboard: React.FC<UserDataDashboardProps> = ({ className }) => {
                   <Table size={isMobile ? "small" : "medium"}>
                     <TableHead>
                       <TableRow>
-                        <TableCell sx={{ fontSize: { xs: '0.75rem', sm: '0.8rem' } }}>
+                        <TableCell sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
                           Order ID
                         </TableCell>
                         <TableCell sx={{ 
-                          fontSize: { xs: '0.75rem', sm: '0.8rem' },
+                          fontSize: { xs: '0.75rem', sm: '0.875rem' },
                           display: { xs: 'none', sm: 'table-cell' }
                         }}>
                           Customer
                         </TableCell>
-                        <TableCell sx={{ fontSize: { xs: '0.75rem', sm: '0.8rem' } }}>
+                        <TableCell sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
                           Table
                         </TableCell>
                         <TableCell sx={{ 
-                          fontSize: { xs: '0.75rem', sm: '0.8rem' },
+                          fontSize: { xs: '0.75rem', sm: '0.875rem' },
                           display: { xs: 'none', md: 'table-cell' }
                         }}>
                           Items
                         </TableCell>
-                        <TableCell sx={{ fontSize: { xs: '0.75rem', sm: '0.8rem' } }}>
+                        <TableCell sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
                           Amount
                         </TableCell>
-                        <TableCell sx={{ fontSize: { xs: '0.75rem', sm: '0.8rem' } }}>
+                        <TableCell sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
                           Status
                         </TableCell>
                         <TableCell sx={{ 
-                          fontSize: { xs: '0.75rem', sm: '0.8rem' },
+                          fontSize: { xs: '0.75rem', sm: '0.875rem' },
                           display: { xs: 'none', lg: 'table-cell' }
                         }}>
                           Time
                         </TableCell>
-                        <TableCell sx={{ fontSize: { xs: '0.75rem', sm: '0.8rem' } }}>
+                        <TableCell sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
                           Actions
                         </TableCell>
                       </TableRow>
@@ -667,25 +667,25 @@ const UserDataDashboard: React.FC<UserDataDashboardProps> = ({ className }) => {
                     <TableBody>
                       {recentOrders.map((order: any) => (
                         <TableRow key={order.id}>
-                          <TableCell sx={{ fontSize: { xs: '0.75rem', sm: '0.8rem' } }}>
+                          <TableCell sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
                             #{order.id.slice(-6)}
                           </TableCell>
                           <TableCell sx={{ 
-                            fontSize: { xs: '0.75rem', sm: '0.8rem' },
+                            fontSize: { xs: '0.75rem', sm: '0.875rem' },
                             display: { xs: 'none', sm: 'table-cell' }
                           }}>
                             {order.customer_name || 'Walk-in'}
                           </TableCell>
-                          <TableCell sx={{ fontSize: { xs: '0.75rem', sm: '0.8rem' } }}>
+                          <TableCell sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
                             Table {order.table_number || 'N/A'}
                           </TableCell>
                           <TableCell sx={{ 
-                            fontSize: { xs: '0.75rem', sm: '0.8rem' },
+                            fontSize: { xs: '0.75rem', sm: '0.875rem' },
                             display: { xs: 'none', md: 'table-cell' }
                           }}>
                             {order.items?.length || 0} items
                           </TableCell>
-                          <TableCell sx={{ fontSize: { xs: '0.75rem', sm: '0.8rem' } }}>
+                          <TableCell sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
                             ₹{((order.subtotal || 0) + (order.tax_amount || 0) - (order.discount_amount || 0)).toLocaleString()}
                           </TableCell>
                           <TableCell>
@@ -701,7 +701,7 @@ const UserDataDashboard: React.FC<UserDataDashboardProps> = ({ className }) => {
                             />
                           </TableCell>
                           <TableCell sx={{ 
-                            fontSize: { xs: '0.75rem', sm: '0.8rem' },
+                            fontSize: { xs: '0.75rem', sm: '0.875rem' },
                             display: { xs: 'none', lg: 'table-cell' }
                           }}>
                             {new Date(order.createdAt).toLocaleString()}
@@ -745,7 +745,7 @@ const UserDataDashboard: React.FC<UserDataDashboardProps> = ({ className }) => {
                 justifyContent="space-between" 
                 alignItems={{ xs: 'flex-start', sm: 'center' }}
                 spacing={{ xs: 2, sm: 0 }}
-                sx={{ mb: 1 }}
+                sx={{ mb: 3 }}
               >
                 <Typography variant={isMobile ? "body1" : "h6"} fontWeight="600">
                   Users ({users.length})
@@ -761,8 +761,8 @@ const UserDataDashboard: React.FC<UserDataDashboardProps> = ({ className }) => {
               </Stack>
               
               {users.length === 0 ? (
-                <Box sx={{ textAlign: 'center', py: { xs: 1, sm: 6 } }}>
-                  <People sx={{ fontSize: { xs: 48, sm: 64 }, color: 'text.secondary', mb: 1 }} />
+                <Box sx={{ textAlign: 'center', py: { xs: 4, sm: 6 } }}>
+                  <People sx={{ fontSize: { xs: 48, sm: 64 }, color: 'text.secondary', mb: 2 }} />
                   <Typography 
                     variant={isMobile ? "body1" : "h6"} 
                     color="text.secondary" 
@@ -774,7 +774,7 @@ const UserDataDashboard: React.FC<UserDataDashboardProps> = ({ className }) => {
                   <Typography 
                     variant="body2" 
                     color="text.secondary" 
-                    sx={{ mb: 1, maxWidth: 400, mx: 'auto' }}
+                    sx={{ mb: 3, maxWidth: 400, mx: 'auto' }}
                   >
                     Build your team by adding staff members who can help manage your restaurant operations.
                   </Typography>
@@ -796,22 +796,22 @@ const UserDataDashboard: React.FC<UserDataDashboardProps> = ({ className }) => {
                   <Table size={isMobile ? "small" : "medium"}>
                     <TableHead>
                       <TableRow>
-                        <TableCell sx={{ fontSize: { xs: '0.75rem', sm: '0.8rem' } }}>
+                        <TableCell sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
                           Name
                         </TableCell>
                         <TableCell sx={{ 
-                          fontSize: { xs: '0.75rem', sm: '0.8rem' },
+                          fontSize: { xs: '0.75rem', sm: '0.875rem' },
                           display: { xs: 'none', sm: 'table-cell' }
                         }}>
                           Email
                         </TableCell>
-                        <TableCell sx={{ fontSize: { xs: '0.75rem', sm: '0.8rem' } }}>
+                        <TableCell sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
                           Role
                         </TableCell>
-                        <TableCell sx={{ fontSize: { xs: '0.75rem', sm: '0.8rem' } }}>
+                        <TableCell sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
                           Status
                         </TableCell>
-                        <TableCell sx={{ fontSize: { xs: '0.75rem', sm: '0.8rem' } }}>
+                        <TableCell sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
                           Actions
                         </TableCell>
                       </TableRow>
@@ -819,11 +819,11 @@ const UserDataDashboard: React.FC<UserDataDashboardProps> = ({ className }) => {
                     <TableBody>
                       {users.map((user: any) => (
                         <TableRow key={user.id}>
-                          <TableCell sx={{ fontSize: { xs: '0.75rem', sm: '0.8rem' } }}>
+                          <TableCell sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
                             {user.firstName} {user.lastName}
                           </TableCell>
                           <TableCell sx={{ 
-                            fontSize: { xs: '0.75rem', sm: '0.8rem' },
+                            fontSize: { xs: '0.75rem', sm: '0.875rem' },
                             display: { xs: 'none', sm: 'table-cell' }
                           }}>
                             {user.email}
@@ -832,7 +832,7 @@ const UserDataDashboard: React.FC<UserDataDashboardProps> = ({ className }) => {
                             <Chip
                               label={user.role}
                               color={
-                                user.role === ROLE_NAMES.SUPERADMIN ? 'error' :
+                                user.role === ROLES.SUPERADMIN ? 'error' :
                                 isAdminLevel(user.role) ? 'primary' : 'secondary'
                               }
                               size="small"

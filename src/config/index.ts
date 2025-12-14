@@ -24,6 +24,9 @@ export {
   getAuthenticatedFetchOptions
 } from '../utils/api';
 
+// Storage configuration
+export { STORAGE_KEYS, STORAGE_CONFIG, CACHE_TTL, type StorageKey } from './storage';
+
 // Default export for convenience
 export { RUNTIME_CONFIG as default } from './runtime';
 

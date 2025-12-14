@@ -1,154 +1,113 @@
 /* Import optimized Google Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
+/* CSS Custom Properties */
+:root {
+  /* Breakpoints */
+  --breakpoint-xs: 0px;
+  --breakpoint-sm: 600px;
+  --breakpoint-md: 900px;
+  --breakpoint-lg: 1200px;
+  --breakpoint-xl: 1536px;
+  
+  /* Spacing scale */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-xxl: 48px;
+  
+  /* Container max-widths */
+  --container-sm: 600px;
+  --container-md: 900px;
+  --container-lg: 1140px;
+  --container-xl: 1320px;
+  
+  /* Colors */
+  --color-primary: #1565c0;
+  --color-primary-light: #60a5fa;
+  --color-bg-white: #ffffff;
+  --color-bg-dark: #1a1a1a;
+  
+  /* Transitions */
+  --transition-fast: 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --transition-normal: 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 /* Reset and base styles */
-* {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  /* Prevent text size adjustment on mobile */
-  -webkit-text-size-adjust: 100%;
-  -moz-text-size-adjust: 100%;
-  -ms-text-size-adjust: 100%;
-  text-size-adjust: 100%;
+  /* Hide scrollbar globally */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
 }
 
-/* Hide scrollbar globally for all elements */
+/* Hide scrollbar for webkit browsers */
 *::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Opera */
+  display: none;
   width: 0;
   height: 0;
 }
 
-* {
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE and Edge */
+/* HTML and Body base styles */
+html {
+  font-size: 16px;
+  background-color: var(--color-bg-white);
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  overscroll-behavior: none;
+  -webkit-overscroll-behavior: none;
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100%;
 }
 
 body {
   margin: 0;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.6;
   scroll-behavior: smooth;
   overflow-x: hidden;
-  background-color: white;
-  transition: background-color 0.3s ease, color 0.3s ease;
-  /* Hide scrollbar */
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE and Edge */
-  /* Prevent zoom and ensure proper sizing */
-  -webkit-text-size-adjust: 100%;
-  -moz-text-size-adjust: 100%;
-  -ms-text-size-adjust: 100%;
-  text-size-adjust: 100%;
-  font-size: 16px; /* Base font size */
-  zoom: 1; /* Ensure no zoom */
-}
-
-html {
-  background-color: white;
-  /* Hide scrollbar */
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE and Edge */
-  /* Prevent zoom and ensure proper sizing */
-  -webkit-text-size-adjust: 100%;
-  -moz-text-size-adjust: 100%;
-  -ms-text-size-adjust: 100%;
-  text-size-adjust: 100%;
-  font-size: 16px; /* Base font size */
-}
-
-/* Fix iOS Safari bounce background */
-html, body {
-  background-color: white !important;
-  background: white !important;
-}
-
-/* Fix overscroll behavior */
-html {
+  background-color: var(--color-bg-white);
   overscroll-behavior: none;
   -webkit-overscroll-behavior: none;
+  width: 100%;
+  max-width: 100%;
 }
 
-body {
-  overscroll-behavior: none;
-  -webkit-overscroll-behavior: none;
-}
-
-/* Fix any Material-UI theme background overrides */
+/* Root container */
 #root {
-  background-color: white !important;
+  background-color: var(--color-bg-white);
   min-height: 100vh;
-  margin: 0 !important;
-  padding: 0 !important;
-  width: 100% !important;
-  max-width: 100% !important;
-  overflow-x: hidden !important;
-  /* Hide scrollbar */
-  scrollbar-width: none !important; /* Firefox */
-  -ms-overflow-style: none !important; /* IE and Edge */
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
-#root::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Opera */
-}
-
-/* Fix any potential blue backgrounds from Material-UI */
-.MuiCssBaseline-root {
-  background-color: white !important;
-}
-
+/* Code blocks */
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
 
-/* Hide scrollbar for cleaner look while maintaining scroll functionality */
-::-webkit-scrollbar {
-  width: 0px;
-  height: 0px;
+/* Images */
+img {
+  max-width: 100%;
+  height: auto;
 }
 
-::-webkit-scrollbar-track {
-  background: transparent;
-}
+/* ========================================
+   ANIMATIONS
+   ======================================== */
 
-::-webkit-scrollbar-thumb {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: transparent;
-}
-
-/* Dark mode scrollbar - also hidden */
-[data-theme="dark"] ::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-[data-theme="dark"] ::-webkit-scrollbar-thumb {
-  background: transparent;
-}
-
-[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
-  background: transparent;
-}
-
-/* For Firefox */
-* {
-  scrollbar-width: none;
-}
-
-/* For IE and Edge */
-* {
-  -ms-overflow-style: none;
-}
-
-/* Professional optimized animations */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -202,17 +161,22 @@ code {
   }
 }
 
-/* Professional utility classes */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Animation utility classes */
 .fade-in {
-  animation: fadeIn 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  animation: fadeIn var(--transition-normal);
 }
 
 .slide-in {
-  animation: slideIn 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  animation: slideIn var(--transition-normal);
 }
 
 .slide-up {
-  animation: slideUp 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  animation: slideUp var(--transition-normal);
 }
 
 .scale-in {
@@ -231,7 +195,10 @@ code {
   transform: translateY(-1px);
 }
 
-/* Loading spinner */
+/* ========================================
+   LOADING SPINNER
+   ======================================== */
+
 .loading-spinner {
   display: flex;
   justify-content: center;
@@ -248,245 +215,100 @@ code {
   animation: spin 1s linear infinite;
 }
 
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-/* Dark mode spinner */
 [data-theme="dark"] .spinner {
   border: 3px solid #3a3a3a;
   border-top: 3px solid #7bb3f0;
 }
 
-/* Professional focus styles for accessibility */
+/* ========================================
+   ACCESSIBILITY
+   ======================================== */
+
+/* Focus styles */
 button:focus-visible,
 a:focus-visible,
 input:focus-visible,
 textarea:focus-visible,
 select:focus-visible {
-  outline: 2px solid #1565c0;
+  outline: 2px solid var(--color-primary);
   outline-offset: 2px;
   border-radius: 6px;
-  transition: outline 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition: outline var(--transition-fast);
 }
 
-/* Dark mode focus styles */
 [data-theme="dark"] button:focus-visible,
 [data-theme="dark"] a:focus-visible,
 [data-theme="dark"] input:focus-visible,
 [data-theme="dark"] textarea:focus-visible,
 [data-theme="dark"] select:focus-visible {
-  outline: 2px solid #60a5fa;
-  outline-offset: 2px;
-  border-radius: 6px;
+  outline: 2px solid var(--color-primary-light);
 }
 
-/* Professional selection styles */
+/* Selection styles */
 ::selection {
   background: rgba(21, 101, 192, 0.15);
-  color: #1565c0;
+  color: var(--color-primary);
 }
 
 ::-moz-selection {
   background: rgba(21, 101, 192, 0.15);
-  color: #1565c0;
+  color: var(--color-primary);
 }
 
-/* Dark mode selection styles */
 [data-theme="dark"] ::selection {
   background: rgba(96, 165, 250, 0.25);
-  color: #60a5fa;
+  color: var(--color-primary-light);
 }
 
 [data-theme="dark"] ::-moz-selection {
   background: rgba(96, 165, 250, 0.25);
-  color: #60a5fa;
+  color: var(--color-primary-light);
 }
 
-/* Enhanced Responsive Utilities */
-/* Mobile-first breakpoints */
-:root {
-  --breakpoint-xs: 0px;
-  --breakpoint-sm: 600px;
-  --breakpoint-md: 900px;
-  --breakpoint-lg: 1200px;
-  --breakpoint-xl: 1536px;
-  
-  /* Consistent spacing scale */
-  --spacing-xs: 4px;
-  --spacing-sm: 8px;
-  --spacing-md: 16px;
-  --spacing-lg: 24px;
-  --spacing-xl: 32px;
-  --spacing-xxl: 48px;
-  
-  /* Container max-widths - Optimized for better content density */
-  --container-sm: 600px;
-  --container-md: 900px;
-  --container-lg: 1140px;
-  --container-xl: 1320px;
+/* Hide number input spinners */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button,
+.MuiTextField-root input::-webkit-outer-spin-button,
+.MuiTextField-root input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
-/* Responsive visibility utilities */
-@media (max-width: 599px) {
-  .hide-xs {
-    display: none !important;
+input[type=number],
+.MuiTextField-root input[type=number] {
+  -moz-appearance: textfield;
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 
-@media (max-width: 899px) {
-  .hide-sm {
-    display: none !important;
-  }
-}
+/* ========================================
+   MATERIAL-UI OVERRIDES
+   ======================================== */
 
-@media (max-width: 1199px) {
-  .hide-md {
-    display: none !important;
-  }
-}
-
-@media (min-width: 600px) {
-  .show-sm-up {
-    display: block !important;
-  }
-  .hide-sm-down {
-    display: none !important;
-  }
-}
-
-@media (min-width: 900px) {
-  .show-md-up {
-    display: block !important;
-  }
-  .hide-md-down {
-    display: none !important;
-  }
-}
-
-@media (min-width: 1200px) {
-  .show-lg-up {
-    display: block !important;
-  }
-  .hide-lg-down {
-    display: none !important;
-  }
-}
-
-/* Legacy support */
-@media (max-width: 768px) {
-  .hide-mobile {
-    display: none !important;
-  }
-}
-
-@media (min-width: 769px) {
-  .hide-desktop {
-    display: none !important;
-  }
-}
-
-/* Responsive spacing utilities */
-.p-responsive {
-  padding: var(--spacing-sm);
-}
-
-.m-responsive {
-  margin: var(--spacing-sm);
-}
-
-@media (min-width: 600px) {
-  .p-responsive {
-    padding: var(--spacing-md);
-  }
-  .m-responsive {
-    margin: var(--spacing-md);
-  }
-}
-
-@media (min-width: 900px) {
-  .p-responsive {
-    padding: var(--spacing-lg);
-  }
-  .m-responsive {
-    margin: var(--spacing-lg);
-  }
-}
-
-/* Responsive text utilities */
-.text-responsive {
-  font-size: 0.875rem;
-  line-height: 1.4;
-}
-
-@media (min-width: 600px) {
-  .text-responsive {
-    font-size: 1rem;
-    line-height: 1.5;
-  }
-}
-
-@media (min-width: 900px) {
-  .text-responsive {
-    font-size: 1.125rem;
-    line-height: 1.6;
-  }
-}
-
-/* Responsive container */
-.container-responsive {
-  width: 100%;
-  max-width: 100%;
-  margin: 0 auto;
-  padding: 0 var(--spacing-md);
-}
-
-@media (min-width: 600px) {
-  .container-responsive {
-    max-width: var(--container-sm);
-  }
-}
-
-@media (min-width: 900px) {
-  .container-responsive {
-    max-width: var(--container-md);
-  }
-}
-
-@media (min-width: 1200px) {
-  .container-responsive {
-    max-width: var(--container-lg);
-  }
-}
-
-@media (min-width: 1536px) {
-  .container-responsive {
-    max-width: var(--container-xl);
-  }
-}
-
-/* Performance optimizations */
-.will-change-transform {
-  will-change: transform;
-}
-
-.will-change-opacity {
-  will-change: opacity;
-}
-
-/* Professional smooth transitions for all elements */
-* {
-  transition: background-color 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
-              border-color 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
-              color 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-
-/* Enhanced Layout Stability - Prevent shifts and flickering */
-.MuiButton-root {
+/* Prevent user selection on interactive elements */
+.MuiButton-root,
+.MuiIconButton-root,
+.MuiChip-root,
+.MuiToggleButton-root {
+  user-select: none;
+  -webkit-user-select: none;
   transform-origin: center;
-  min-height: 36px; /* Consistent button height */
   box-sizing: border-box;
+}
+
+/* Button sizes */
+.MuiButton-root {
+  min-height: 36px;
   position: relative;
   overflow: hidden;
 }
@@ -499,33 +321,8 @@ select:focus-visible {
   min-height: 42px;
 }
 
-.MuiChip-root {
-  transform-origin: center;
-  box-sizing: border-box;
-}
-
-/* Prevent border width changes from affecting layout */
-.MuiOutlinedInput-root {
-  box-sizing: border-box;
-}
-
-.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
-  border-width: 2px;
-  margin: -0.5px; /* Compensate for border width increase */
-}
-
-/* Stable card layouts */
-.MuiCard-root {
-  transform-origin: center;
-  box-sizing: border-box;
-  position: relative;
-  overflow: hidden;
-}
-
-/* Stable icon buttons */
+/* Icon button sizes */
 .MuiIconButton-root {
-  transform-origin: center;
-  box-sizing: border-box;
   flex-shrink: 0;
   width: 48px;
   height: 48px;
@@ -541,33 +338,42 @@ select:focus-visible {
   height: 56px;
 }
 
-/* Prevent text selection on interactive elements */
-.MuiButton-root,
-.MuiIconButton-root,
+/* Stable layouts */
+.MuiCard-root,
+.MuiPaper-root,
 .MuiChip-root {
-  user-select: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-}
-
-/* Smooth state transitions without layout shift */
-.MuiToggleButton-root {
-  transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
-              color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-              border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transform-origin: center;
   box-sizing: border-box;
 }
 
-/* Prevent menu item movement */
-.MuiMenuItem-root {
+.MuiCard-root {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Form controls */
+.MuiOutlinedInput-root,
+.MuiFormControl-root,
+.MuiTextField-root {
+  box-sizing: border-box;
+}
+
+.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-width: 2px;
+  margin: -0.5px;
+}
+
+/* List items */
+.MuiMenuItem-root,
+.MuiListItem-root,
+.MuiListItemButton-root {
   min-height: 48px;
   display: flex;
   align-items: center;
   box-sizing: border-box;
 }
 
-/* Consistent grid layouts */
+/* Grid */
 .MuiGrid-container {
   align-items: stretch;
   box-sizing: border-box;
@@ -577,69 +383,13 @@ select:focus-visible {
   box-sizing: border-box;
 }
 
-/* Stable form controls */
-.MuiFormControl-root {
-  box-sizing: border-box;
-}
-
-.MuiTextField-root {
-  box-sizing: border-box;
-}
-
-/* Prevent avatar size changes */
+/* Avatar */
 .MuiAvatar-root {
   flex-shrink: 0;
   box-sizing: border-box;
 }
 
-/* Stable list items */
-.MuiListItem-root {
-  box-sizing: border-box;
-  min-height: 48px;
-}
-
-.MuiListItemButton-root {
-  box-sizing: border-box;
-  min-height: 48px;
-}
-
-/* Stable paper components */
-.MuiPaper-root {
-  box-sizing: border-box;
-}
-
-/* Prevent toolbar height changes */
-.MuiToolbar-root {
-  min-height: 64px;
-  box-sizing: border-box;
-}
-
-@media (max-width: 599px) {
-  .MuiToolbar-root {
-    min-height: 56px;
-  }
-}
-
-/* Stable app bar */
-.MuiAppBar-root {
-  box-sizing: border-box;
-  margin: 0 !important;
-  padding: 0 !important;
-  width: 100% !important;
-  max-width: 100% !important;
-  left: 0 !important;
-  right: 0 !important;
-}
-
-/* Ensure Container in AppBar has no unwanted margins */
-.MuiAppBar-root .MuiContainer-root {
-  margin-left: auto !important;
-  margin-right: auto !important;
-  padding-right: 16px !important;
-  max-width: 100% !important;
-}
-
-/* Prevent badge position shifts */
+/* Badge */
 .MuiBadge-root {
   position: relative;
   display: inline-flex;
@@ -647,31 +397,152 @@ select:focus-visible {
   flex-shrink: 0;
 }
 
-/* Stable stepper */
-.MuiStepper-root {
+/* Toolbar */
+.MuiToolbar-root {
+  min-height: 64px;
   box-sizing: border-box;
 }
 
+/* AppBar */
+.MuiAppBar-root {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  max-width: 100%;
+  left: 0;
+  right: 0;
+}
+
+.MuiAppBar-root .MuiContainer-root {
+  margin-left: auto;
+  margin-right: auto;
+  padding-right: 16px;
+  max-width: 100%;
+}
+
+/* Stepper */
+.MuiStepper-root,
 .MuiStep-root {
   box-sizing: border-box;
 }
 
-/* Stable dialog */
+/* Dialog */
 .MuiDialog-paper {
   box-sizing: border-box;
   max-height: calc(100% - 64px);
 }
 
-@media (max-width: 599px) {
-  .MuiDialog-paper {
-    margin: 32px;
-    max-height: calc(100% - 64px);
-  }
+/* Toggle button smooth transitions */
+.MuiToggleButton-root {
+  transition: background-color var(--transition-normal), 
+              color var(--transition-normal),
+              border-color var(--transition-normal);
 }
 
-/* Mobile-specific optimizations */
+/* ========================================
+   RESPONSIVE UTILITIES
+   ======================================== */
+
+/* Visibility utilities */
 @media (max-width: 599px) {
-  /* Improve touch targets */
+  .hide-xs { display: none; }
+}
+
+@media (max-width: 768px) {
+  .hide-mobile { display: none; }
+}
+
+@media (max-width: 899px) {
+  .hide-sm { display: none; }
+}
+
+@media (max-width: 1199px) {
+  .hide-md { display: none; }
+}
+
+@media (min-width: 600px) {
+  .show-sm-up { display: block; }
+  .hide-sm-down { display: none; }
+}
+
+@media (min-width: 769px) {
+  .hide-desktop { display: none; }
+}
+
+@media (min-width: 900px) {
+  .show-md-up { display: block; }
+  .hide-md-down { display: none; }
+}
+
+@media (min-width: 1200px) {
+  .show-lg-up { display: block; }
+  .hide-lg-down { display: none; }
+}
+
+/* Responsive spacing */
+.p-responsive {
+  padding: var(--spacing-sm);
+}
+
+.m-responsive {
+  margin: var(--spacing-sm);
+}
+
+/* Responsive text */
+.text-responsive {
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+/* Responsive container */
+.container-responsive {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0 var(--spacing-md);
+}
+
+/* Responsive flexbox */
+.flex-responsive {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+/* Responsive grid */
+.grid-responsive {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-sm);
+}
+
+/* Responsive table */
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Performance optimizations */
+.will-change-transform {
+  will-change: transform;
+}
+
+.will-change-opacity {
+  will-change: opacity;
+}
+
+/* ========================================
+   MOBILE OPTIMIZATIONS (< 600px)
+   ======================================== */
+
+@media (max-width: 599px) {
+  /* Toolbar */
+  .MuiToolbar-root {
+    min-height: 56px;
+  }
+  
+  /* Touch targets */
   .MuiButton-root {
     min-height: 44px;
     padding: 8px 16px;
@@ -682,119 +553,254 @@ select:focus-visible {
     height: 44px;
   }
   
-  /* Better mobile typography */
-  .MuiTypography-h1 {
-    font-size: 2rem !important;
-  }
+  /* Typography */
+  .MuiTypography-h1 { font-size: 2rem !important; }
+  .MuiTypography-h2 { font-size: 1.75rem !important; }
+  .MuiTypography-h3 { font-size: 1.5rem !important; }
+  .MuiTypography-h4 { font-size: 1.25rem !important; }
+  .MuiTypography-h5 { font-size: 1.125rem !important; }
+  .MuiTypography-h6 { font-size: 1rem !important; }
   
-  .MuiTypography-h2 {
-    font-size: 1.75rem !important;
-  }
-  
-  .MuiTypography-h3 {
-    font-size: 1.5rem !important;
-  }
-  
-  .MuiTypography-h4 {
-    font-size: 1.25rem !important;
-  }
-  
-  .MuiTypography-h5 {
-    font-size: 1.125rem !important;
-  }
-  
-  .MuiTypography-h6 {
-    font-size: 1rem !important;
-  }
-  
-  /* Mobile-friendly spacing */
+  /* Container spacing */
   .MuiContainer-root {
     padding-left: 12px !important;
     padding-right: 12px !important;
   }
   
-  /* Mobile card adjustments */
+  /* Card spacing */
   .MuiCard-root {
     margin: 8px 0;
   }
   
-  /* Mobile form adjustments */
+  /* Form spacing */
   .MuiTextField-root {
     margin-bottom: 16px;
   }
   
-  /* Mobile dialog adjustments */
+  /* Dialog */
   .MuiDialog-paper {
     margin: 16px;
     width: calc(100% - 32px);
+    max-height: calc(100% - 64px);
   }
   
-  /* Mobile stepper adjustments */
+  /* Stepper */
   .MuiStepper-root {
     padding: 16px 0;
   }
-}
-
-/* Tablet optimizations */
-@media (min-width: 600px) and (max-width: 899px) {
-  .MuiContainer-root {
-    padding-left: 20px !important;
-    padding-right: 20px !important;
+  
+  /* Page content */
+  .page-content-with-navbar {
+    padding-top: 56px;
+    min-height: calc(100vh - 56px);
   }
   
-  .MuiCard-root {
-    margin: 12px 0;
-  }
-}
-
-/* Desktop optimizations */
-@media (min-width: 900px) {
-  .MuiContainer-root {
-    padding-left: 24px !important;
-    padding-right: 24px !important;
+  .page-content-with-customer-navbar {
+    padding-top: 0;
+    min-height: 100vh;
   }
   
-  .MuiCard-root {
-    margin: 16px 0;
+  /* Drawer */
+  .MuiDrawer-root {
+    z-index: 1300;
+  }
+  
+  .MuiDrawer-paper {
+    margin-top: 56px;
+    height: calc(100vh - 56px);
+  }
+  
+  /* Main content */
+  .MuiContainer-root.main-content {
+    padding-top: 16px;
+  }
+  
+  /* Enable momentum scrolling on iOS */
+  * {
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Fix mobile viewport */
+  html {
+    height: 100%;
+    overflow-y: auto;
+  }
+  
+  body {
+    height: 100%;
+    overflow-y: auto;
+    position: relative;
+  }
+  
+  /* Scrollable areas */
+  .MuiContainer-root,
+  .admin-main-content,
+  .container-responsive,
+  main {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .admin-main-content {
+    height: auto;
+    min-height: calc(100vh - 64px);
+  }
+  
+  .container-responsive {
+    max-height: none;
+  }
+  
+  #root {
+    overflow-y: auto;
+    height: auto;
+    min-height: 100vh;
   }
 }
 
-/* Responsive flexbox utilities */
-.flex-responsive {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-sm);
-}
+/* ========================================
+   TABLET OPTIMIZATIONS (600px - 899px)
+   ======================================== */
 
 @media (min-width: 600px) {
+  /* Responsive spacing */
+  .p-responsive {
+    padding: var(--spacing-md);
+  }
+  
+  .m-responsive {
+    margin: var(--spacing-md);
+  }
+  
+  /* Responsive text */
+  .text-responsive {
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+  
+  /* Responsive container */
+  .container-responsive {
+    max-width: var(--container-sm);
+  }
+  
+  /* Responsive flexbox */
   .flex-responsive {
     flex-direction: row;
     gap: var(--spacing-md);
   }
-}
-
-/* Responsive grid utilities */
-.grid-responsive {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--spacing-sm);
-}
-
-@media (min-width: 600px) {
+  
+  /* Responsive grid */
   .grid-responsive {
     grid-template-columns: repeat(2, 1fr);
     gap: var(--spacing-md);
   }
 }
 
+@media (min-width: 600px) and (max-width: 899px) {
+  /* Container spacing */
+  .MuiContainer-root {
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+  }
+  
+  /* Card spacing */
+  .MuiCard-root {
+    margin: 12px 0;
+  }
+  
+  /* Page content */
+  .page-content-with-navbar {
+    padding-top: 64px;
+    min-height: calc(100vh - 64px);
+  }
+  
+  .page-content-with-customer-navbar {
+    padding-top: 0;
+    min-height: 100vh;
+  }
+  
+  /* Drawer */
+  .MuiDrawer-paper {
+    margin-top: 64px;
+    height: calc(100vh - 64px);
+  }
+}
+
+/* ========================================
+   DESKTOP OPTIMIZATIONS (>= 900px)
+   ======================================== */
+
 @media (min-width: 900px) {
+  /* Responsive spacing */
+  .p-responsive {
+    padding: var(--spacing-lg);
+  }
+  
+  .m-responsive {
+    margin: var(--spacing-lg);
+  }
+  
+  /* Responsive text */
+  .text-responsive {
+    font-size: 1.125rem;
+    line-height: 1.6;
+  }
+  
+  /* Responsive container */
+  .container-responsive {
+    max-width: var(--container-md);
+  }
+  
+  /* Responsive grid */
   .grid-responsive {
     grid-template-columns: repeat(3, 1fr);
     gap: var(--spacing-lg);
   }
+  
+  /* Container spacing */
+  .MuiContainer-root {
+    padding-left: 24px !important;
+    padding-right: 24px !important;
+  }
+  
+  /* Card spacing */
+  .MuiCard-root {
+    margin: 16px 0;
+  }
+  
+  /* Page content */
+  .page-content-with-navbar {
+    padding-top: 70px;
+    min-height: calc(100vh - 70px);
+  }
+  
+  .page-content-with-customer-navbar {
+    padding-top: 0;
+    min-height: 100vh;
+  }
+  
+  /* Drawer */
+  .MuiDrawer-paper {
+    margin-top: 70px;
+    height: calc(100vh - 70px);
+  }
 }
 
-/* Safe area support for mobile devices */
+@media (min-width: 1200px) {
+  .container-responsive {
+    max-width: var(--container-lg);
+  }
+}
+
+@media (min-width: 1536px) {
+  .container-responsive {
+    max-width: var(--container-xl);
+  }
+}
+
+/* ========================================
+   SAFE AREA SUPPORT
+   ======================================== */
+
 @supports (padding: max(0px)) {
   .safe-area-inset-top {
     padding-top: max(env(safe-area-inset-top), 0px);
@@ -810,178 +816,5 @@ select:focus-visible {
   
   .safe-area-inset-right {
     padding-right: max(env(safe-area-inset-right), 0px);
-  }
-}
-
-/* Fix mobile navigation overlapping issues */
-@media (max-width: 899px) {
-  /* Ensure proper spacing for fixed headers */
-  .page-content-with-navbar {
-    padding-top: 56px !important;
-    min-height: calc(100vh - 56px) !important;
-  }
-  
-  .page-content-with-customer-navbar {
-    padding-top: 0px !important; /* Remove padding since we handle it in component */
-    min-height: 100vh !important;
-  }
-  
-  /* Fix mobile drawer positioning */
-  .MuiDrawer-root {
-    z-index: 1300 !important;
-  }
-  
-  .MuiDrawer-paper {
-    margin-top: 56px !important;
-    height: calc(100vh - 56px) !important;
-  }
-  
-  /* Prevent content from going under fixed headers */
-  .MuiContainer-root.main-content {
-    padding-top: 16px !important;
-  }
-}
-
-@media (min-width: 600px) and (max-width: 899px) {
-  .page-content-with-navbar {
-    padding-top: 64px !important;
-    min-height: calc(100vh - 64px) !important;
-  }
-  
-  .page-content-with-customer-navbar {
-    padding-top: 0px !important; /* Remove padding since we handle it in component */
-    min-height: 100vh !important;
-  }
-  
-  .MuiDrawer-paper {
-    margin-top: 64px !important;
-    height: calc(100vh - 64px) !important;
-  }
-}
-
-@media (min-width: 900px) {
-  .page-content-with-navbar {
-    padding-top: 70px !important;
-    min-height: calc(100vh - 70px) !important;
-  }
-  
-  .page-content-with-customer-navbar {
-    padding-top: 0px !important; /* Remove padding since we handle it in component */
-    min-height: 100vh !important;
-  }
-  
-  .MuiDrawer-paper {
-    margin-top: 70px !important;
-    height: calc(100vh - 70px) !important;
-  }
-}
-
-/* Prevent horizontal scroll on mobile */
-html, body {
-  overflow-x: hidden;
-  width: 100%;
-  max-width: 100%;
-}
-
-/* Ensure proper mobile scrolling */
-@media (max-width: 899px) {
-  /* Enable momentum scrolling on iOS */
-  * {
-    -webkit-overflow-scrolling: touch;
-  }
-  
-  /* Fix mobile viewport issues */
-  html {
-    height: 100%;
-    overflow-y: auto;
-  }
-  
-  body {
-    height: 100%;
-    overflow-y: auto;
-    position: relative;
-  }
-  
-  /* Ensure main content areas are scrollable */
-  .MuiContainer-root {
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-  
-  /* Fix admin layout scrolling */
-  .admin-main-content {
-    overflow-y: auto !important;
-    -webkit-overflow-scrolling: touch;
-    height: auto !important;
-    min-height: calc(100vh - 64px);
-  }
-  
-  /* Ensure table management and other admin pages scroll properly */
-  .container-responsive {
-    overflow-y: auto !important;
-    -webkit-overflow-scrolling: touch;
-    max-height: none !important;
-  }
-  
-  /* Fix root container scrolling on mobile */
-  #root {
-    overflow-y: auto !important;
-    -webkit-overflow-scrolling: touch;
-    height: auto !important;
-    min-height: 100vh !important;
-  }
-  
-  /* Ensure all main content areas can scroll */
-  main {
-    overflow-y: auto !important;
-    -webkit-overflow-scrolling: touch;
-  }
-}
-
-/* Responsive images */
-img {
-  max-width: 100%;
-  height: auto;
-}
-
-/* Responsive tables */
-.table-responsive {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-}
-
-/* Hide number input spinners globally */
-/* Chrome, Safari, Edge, Opera */
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-/* Firefox */
-input[type=number] {
-  -moz-appearance: textfield;
-}
-
-/* Material-UI TextField number input spinners */
-.MuiTextField-root input::-webkit-outer-spin-button,
-.MuiTextField-root input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-.MuiTextField-root input[type=number] {
-  -moz-appearance: textfield;
-}
-
-/* Reduce motion for accessibility */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
   }
 }

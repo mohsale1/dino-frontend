@@ -17,7 +17,7 @@ import { Email, Lock, Visibility, VisibilityOff, Home } from '@mui/icons-materia
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import DinoLogo from '../../components/DinoLogo';
-import { isDinos, isOperator, isAdmin, isSuperAdmin } from '../../constants/roles';
+import { isDinos, isOperator, isAdmin, isSuperAdmin } from '../../types/auth';
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
@@ -257,13 +257,14 @@ const LoginPage: React.FC = () => {
                 ),
               }}
               sx={{ 
-                mb: 3,
+                mb: 3.5,
                 '& .MuiOutlinedInput-root': {
                   borderRadius: 2,
-                  fontSize: { xs: '0.9375rem', sm: '1rem' },
+                  fontSize: { xs: '1rem', sm: '1.0625rem' },
+                  height: { xs: 52, sm: 56 },
                 },
                 '& .MuiInputLabel-root': {
-                  fontSize: { xs: '0.9375rem', sm: '1rem' },
+                  fontSize: { xs: '1rem', sm: '1.0625rem' },
                 },
               }}
             />
@@ -299,10 +300,11 @@ const LoginPage: React.FC = () => {
                 mb: 4,
                 '& .MuiOutlinedInput-root': {
                   borderRadius: 2,
-                  fontSize: { xs: '0.9375rem', sm: '1rem' },
+                  fontSize: { xs: '1rem', sm: '1.0625rem' },
+                  height: { xs: 52, sm: 56 },
                 },
                 '& .MuiInputLabel-root': {
-                  fontSize: { xs: '0.9375rem', sm: '1rem' },
+                  fontSize: { xs: '1rem', sm: '1.0625rem' },
                 },
               }}
             />

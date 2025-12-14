@@ -11,15 +11,6 @@ import GenericErrorPage from './GenericErrorPage';
 export { default as GenericErrorPage } from './GenericErrorPage';
 export type { ErrorType } from './GenericErrorPage';
 
-// Standard error page (kept for backward compatibility)
-export {
-  StandardErrorPage,
-  NotFoundErrorPage as StandardNotFoundPage,
-  ServerErrorPage as StandardServerErrorPage,
-  NetworkErrorPage as StandardNetworkErrorPage,
-  AccessDeniedErrorPage,
-} from './StandardErrorPage';
-
 // Re-export existing error components for backward compatibility
 export { default as GlobalErrorBoundary } from '../ErrorBoundary/GlobalErrorBoundary';
 export { default as ErrorBoundary } from '../ErrorBoundary/GlobalErrorBoundary';
