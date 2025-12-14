@@ -142,10 +142,32 @@ export function useMenuData(options: UseMenuDataOptions = {}): UseMenuDataResult
       if (venueData) {
         setRestaurant(venueData);
         
-        // Check if venue is open and accepting orders
+        console.log('[useMenuData] Venue data loaded:', {
+          name: venueData.name,
+          isActive: venueData.isActive,
+          is_open: (venueData as any).is_open,
+          isOpen: (venueData as any).isOpen,
+        });
+        
+        // Check if venue is active first (required field)
+        if (venueData.isActive === false) {
+          console.log('[useMenuData] Venue is inactive');
+          setVenueNotAcceptingOrders({
+            show: true,
+            venueName: venueData.name,
+            venueStatus: 'inactive',
+            message: 'This venue is currently not accepting orders. Please try again later.'
+          });
+          return;
+        }
+        
+        // Check if venue is open for orders (optional field - default to true if not set)
         // Handle both is_open (from API) and isOpen (normalized)
-        const isOpen = (venueData as any).is_open ?? (venueData as any).isOpen ?? false;
-        if (!isOpen) {
+        const isOpen = (venueData as any).is_open ?? (venueData as any).isOpen ?? true;
+        console.log('[useMenuData] Venue is_open status:', isOpen);
+        
+        if (isOpen === false) {
+          console.log('[useMenuData] Venue is closed for orders');
           setVenueNotAcceptingOrders({
             show: true,
             venueName: venueData.name,
@@ -155,15 +177,7 @@ export function useMenuData(options: UseMenuDataOptions = {}): UseMenuDataResult
           return;
         }
         
-        if (!venueData.isActive) {
-          setVenueNotAcceptingOrders({
-            show: true,
-            venueName: venueData.name,
-            venueStatus: 'inactive',
-            message: 'This venue is currently not accepting orders. Please try again later.'
-          });
-          return;
-        }
+        console.log('[useMenuData] Venue is available for orders');
       } else {
         setError('Restaurant not found. Please check the QR code or link.');
       }
