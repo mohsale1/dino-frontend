@@ -165,7 +165,7 @@ const ClassicTemplate: React.FC<TemplateProps> = ({
               { icon: '🍽️', text: 'Order!' }
             ].map((step, index) => (
               <Box key={index} sx={{ textAlign: 'center', flex: '1 1 80px' }}>
-                <Typography sx={{ fontSize: '1.2rem', marginBottom: '5px' }}>
+                <Typography sx={{ fontSize: '1.05rem', marginBottom: '5px' }}>
                   {step.icon}
                 </Typography>
                 <Typography

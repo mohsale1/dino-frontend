@@ -584,7 +584,7 @@ const GenericErrorPage: React.FC<GenericErrorPageProps> = ({
                 gap: 1,
               }}
             >
-              <Box component="span" sx={{ fontSize: '1.25rem' }}>💡</Box>
+              <Box component="span" sx={{ fontSize: '1rem' }}>💡</Box>
               What you can try:
             </Typography>
             <Stack spacing={1.5}>

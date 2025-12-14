@@ -173,7 +173,7 @@ export const ChartCard: React.FC<ChartCardProps> = ({
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
             {React.cloneElement(icon, {
               sx: { 
-                fontSize: '1.5rem',
+                fontSize: '1rem',
                 color: 'primary.main'
               }
             })}
@@ -217,7 +217,7 @@ export const SectionHeader: React.FC<SectionHeaderProps> = ({
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
         {React.cloneElement(icon, {
           sx: { 
-            fontSize: '1.5rem',
+            fontSize: '1rem',
             color: 'primary.main'
           }
         })}
@@ -269,7 +269,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
       textAlign: 'center'
     }}>
       {React.cloneElement(icon, { 
-        sx: { fontSize: 48, color: 'text.disabled' } 
+        sx: { fontSize: 14, color: 'text.disabled' } 
       })}
       <Typography variant="body1" color="text.secondary" fontWeight={500}>
         {title}
@@ -371,7 +371,7 @@ export const DashboardHero: React.FC<DashboardHeroProps> = ({
               }}
             >
               {React.cloneElement(badge.icon, {
-                sx: { fontSize: 18, mr: 1, color: 'primary.main', opacity: 0.9 }
+                sx: { fontSize: 14, mr: 1, color: 'primary.main', opacity: 0.9 }
               })}
               <Typography variant="body2" fontWeight="500" color="text.primary">
                 {badge.text}

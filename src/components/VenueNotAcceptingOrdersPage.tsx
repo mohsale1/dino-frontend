@@ -181,7 +181,7 @@ const VenueNotAcceptingOrdersPage: React.FC<VenueNotAcceptingOrdersPageProps> = 
                 borderColor: 'info.200'
               }}
             >
-              <Schedule color="info" sx={{ fontSize: '1.25rem' }} />
+              <Schedule color="info" sx={{ fontSize: '1rem' }} />
               <Typography 
                 variant="body2" 
                 color="info.main"

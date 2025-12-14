@@ -118,7 +118,7 @@ const OrderStatusFragment: React.FC<OrderStatusFragmentProps> = ({ venueId, tabl
         >
           <Toolbar sx={{ justifyContent: 'center', py: 1 }}>
             <Stack direction="row" spacing={1} alignItems="center">
-              <Receipt sx={{ color: theme.palette.primary.main, fontSize: 28 }} />
+              <Receipt sx={{ color: theme.palette.primary.main, fontSize: 14 }} />
               <Typography
                 variant="h6"
                 sx={{
@@ -177,7 +177,7 @@ const OrderStatusFragment: React.FC<OrderStatusFragmentProps> = ({ venueId, tabl
         >
           <Toolbar sx={{ justifyContent: 'center', py: 1 }}>
             <Stack direction="row" spacing={1} alignItems="center">
-              <Receipt sx={{ color: theme.palette.primary.main, fontSize: 28 }} />
+              <Receipt sx={{ color: theme.palette.primary.main, fontSize: 14 }} />
               <Typography
                 variant="h6"
                 sx={{
@@ -231,7 +231,7 @@ const OrderStatusFragment: React.FC<OrderStatusFragmentProps> = ({ venueId, tabl
         >
           <Toolbar sx={{ justifyContent: 'center', py: 1 }}>
             <Stack direction="row" spacing={1} alignItems="center">
-              <Receipt sx={{ color: theme.palette.primary.main, fontSize: 28 }} />
+              <Receipt sx={{ color: theme.palette.primary.main, fontSize: 14 }} />
               <Typography
                 variant="h6"
                 sx={{
@@ -319,7 +319,7 @@ const OrderStatusFragment: React.FC<OrderStatusFragmentProps> = ({ venueId, tabl
       >
         <Toolbar sx={{ justifyContent: 'space-between', py: 1, px: { xs: 2, sm: 3 } }}>
           <Stack direction="row" spacing={1} alignItems="center">
-            <Receipt sx={{ color: theme.palette.primary.main, fontSize: 28 }} />
+            <Receipt sx={{ color: theme.palette.primary.main, fontSize: 14 }} />
             <Typography
               variant="h6"
               sx={{

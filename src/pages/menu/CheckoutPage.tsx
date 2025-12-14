@@ -1091,7 +1091,7 @@ const CheckoutPage: React.FC = () => {
                                     {method.icon}
                                   </Box>
                                   <Box sx={{ flex: 1 }}>
-                                    <Typography variant="h6" sx={{ fontSize: '1.1rem', fontWeight: 600 }}>
+                                    <Typography variant="h6" sx={{ fontSize: '1rem', fontWeight: 600 }}>
                                       {method.name}
                                     </Typography>
                                     <Typography variant="body2" color="text.secondary">
@@ -1229,7 +1229,7 @@ const CheckoutPage: React.FC = () => {
                     justifyContent: 'space-between'
                   }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <LocalOffer sx={{ color: 'success.main', fontSize: 20 }} />
+                      <LocalOffer sx={{ color: 'success.main', fontSize: 14 }} />
                       <Typography variant="body2" sx={{ color: 'success.main', fontWeight: 600 }}>
                         {`${appliedPromo.promo_code} Applied!`}
                       </Typography>
@@ -1239,7 +1239,7 @@ const CheckoutPage: React.FC = () => {
                       onClick={handleRemovePromo}
                       sx={{ color: 'success.main' }}
                     >
-                      <Delete sx={{ fontSize: 16 }} />
+                      <Delete sx={{ fontSize: 14 }} />
                     </IconButton>
                   </Box>
                 ) : (
@@ -1268,13 +1268,13 @@ const CheckoutPage: React.FC = () => {
                 mb: 2
               }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                  <LocationOn sx={{ fontSize: 16, color: 'text.secondary' }} />
+                  <LocationOn sx={{ fontSize: 14, color: 'text.secondary' }} />
                   <Typography variant="body2" fontWeight="600">
                     Table {tableId}
                   </Typography>
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Schedule sx={{ fontSize: 16, color: 'text.secondary' }} />
+                  <Schedule sx={{ fontSize: 14, color: 'text.secondary' }} />
                   <Typography variant="body2" color="text.secondary">
                     Estimated: 25-30 minutes
                   </Typography>

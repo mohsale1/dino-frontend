@@ -62,7 +62,7 @@ const TableFilters: React.FC<TableFiltersProps> = ({
               justifyContent: 'center'
             }}
           >
-            <FilterList sx={{ color: 'white', fontSize: 20 }} />
+            <FilterList sx={{ color: 'white', fontSize: 14 }} />
           </Box>
           <Box>
             <Typography variant="h6" fontWeight="700" sx={{ color: 'text.primary', mb: 0.25 }}>

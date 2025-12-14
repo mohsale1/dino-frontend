@@ -24,7 +24,7 @@ const WorkspaceDetailsStep: React.FC<WorkspaceDetailsStepProps> = ({
             display: 'flex', 
             alignItems: 'center', 
             gap: 1,
-            fontSize: '1.25rem'
+            fontSize: '1rem'
           }}
         >
           <Business color="primary" />

@@ -202,7 +202,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
                       color: 'white',
                     }}
                   >
-                    {React.cloneElement(column.icon, { sx: { fontSize: 18 } })}
+                    {React.cloneElement(column.icon, { sx: { fontSize: 14 } })}
                   </Box>
                   <Typography variant="subtitle1" fontWeight="700" color="text.primary">
                     {column.title}
@@ -279,7 +279,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
                       }}
                     >
                       {React.cloneElement(column.icon, {
-                        sx: { fontSize: 32, color: column.color },
+                        sx: { fontSize: 26, color: column.color },
                       })}
                     </Box>
                     <Typography variant="body2" color="text.secondary" fontWeight="500">

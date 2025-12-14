@@ -167,7 +167,7 @@ const DynamicMenuRenderer: React.FC<DynamicMenuRendererProps> = ({
             flexShrink: 0,
           }}
         >
-          <Restaurant sx={{ fontSize: 40, color: alpha(colors.primary, 0.3) }} />
+          <Restaurant sx={{ fontSize: 26, color: alpha(colors.primary, 0.3) }} />
         </Box>
       )}
 
@@ -266,7 +266,7 @@ const DynamicMenuRenderer: React.FC<DynamicMenuRendererProps> = ({
           <Button
             variant="outlined"
             size="small"
-            startIcon={<Add sx={{ fontSize: 16 }} />}
+            startIcon={<Add sx={{ fontSize: 14 }} />}
             sx={{
               minWidth: 70,
               height: 28,
@@ -309,7 +309,7 @@ const DynamicMenuRenderer: React.FC<DynamicMenuRendererProps> = ({
             border: `1px dashed ${alpha(colors.primary, 0.2)}`,
           }}
         >
-          <Restaurant sx={{ fontSize: 48, color: colors.textSecondary, mb: 1.5, opacity: 0.5 }} />
+          <Restaurant sx={{ fontSize: 14, color: colors.textSecondary, mb: 1.5, opacity: 0.5 }} />
           <Typography variant="body2" color={colors.textSecondary} sx={{ fontSize: '0.85rem' }}>
             No menu items available
           </Typography>

@@ -116,7 +116,7 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
               color: 'error.main',
             }}
           >
-            <WarningIcon sx={{ fontSize: 20 }} />
+            <WarningIcon sx={{ fontSize: 14 }} />
           </Box>
           <Typography variant="h6" fontWeight={600} color="text.primary">
             {title}
@@ -266,7 +266,7 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
           variant="contained"
           color="error"
           startIcon={
-            isDeleting || loading ? undefined : <DeleteIcon sx={{ fontSize: 18 }} />
+            isDeleting || loading ? undefined : <DeleteIcon sx={{ fontSize: 14 }} />
           }
           sx={{
             minWidth: 120,

@@ -358,7 +358,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                 <Button
                   size="small"
                   variant="outlined"
-                  startIcon={<AccountCircle sx={{ fontSize: 16 }} />}
+                  startIcon={<AccountCircle sx={{ fontSize: 14 }} />}
                   onClick={() => handleNavigate('/profile')}
                   sx={{ 
                     flex: 1, 
@@ -372,7 +372,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                   size="small"
                   variant="outlined"
                   color="error"
-                  startIcon={<ExitToApp sx={{ fontSize: 16 }} />}
+                  startIcon={<ExitToApp sx={{ fontSize: 14 }} />}
                   onClick={handleLogout}
                   sx={{ 
                     flex: 1, 
@@ -406,7 +406,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                 color="text.primary"
                 sx={{ mb: 1.5, display: 'flex', alignItems: 'center', gap: 1 }}
               >
-                <Store sx={{ fontSize: 16, color: venueStatus?.isOpen ? 'success.main' : 'error.main' }} />
+                <Store sx={{ fontSize: 14, color: venueStatus?.isOpen ? 'success.main' : 'error.main' }} />
                 Venue Status
               </Typography>
               
@@ -418,9 +418,9 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                     </Typography>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                       {venueStatus.isOpen ? (
-                        <CheckCircle sx={{ fontSize: 16, color: 'success.main' }} />
+                        <CheckCircle sx={{ fontSize: 14, color: 'success.main' }} />
                       ) : (
-                        <Cancel sx={{ fontSize: 16, color: 'error.main' }} />
+                        <Cancel sx={{ fontSize: 14, color: 'error.main' }} />
                       )}
                       <Typography 
                         variant="caption" 
@@ -468,7 +468,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                       {userData?.venue?.name || 'Current Venue'}
                     </Typography>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                      <Cancel sx={{ fontSize: 16, color: 'warning.main' }} />
+                      <Cancel sx={{ fontSize: 14, color: 'warning.main' }} />
                       <Typography 
                         variant="caption" 
                         fontWeight={600}

@@ -1926,7 +1926,7 @@ const QRCodeViewer: React.FC<QRCodeViewerProps> = ({
                         { icon: <TableRestaurant />, text: 'Browse and order!' },
                       ].map((step, index) => (
                         <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <Box sx={{ color: 'primary.main', fontSize: 16 }}>{step.icon}</Box>
+                          <Box sx={{ color: 'primary.main', fontSize: 14 }}>{step.icon}</Box>
                           <Typography variant="body2" color="text.secondary">
                             {index + 1}. {step.text}
                           </Typography>

@@ -134,7 +134,7 @@ const MenuFragment: React.FC<MenuFragmentProps> = ({
       >
         <Toolbar sx={{ justifyContent: 'center', py: 1 }}>
           <Stack direction="row" spacing={1} alignItems="center">
-            <Restaurant sx={{ color: 'white', fontSize: 28 }} />
+            <Restaurant sx={{ color: 'white', fontSize: 14 }} />
             <Typography
               variant="h6"
               sx={{
@@ -610,7 +610,7 @@ const MenuFragment: React.FC<MenuFragmentProps> = ({
                       sx={{
                         backgroundColor: activeCategory === category.id ? theme.palette.primary.main : alpha(theme.palette.grey[400], 0.2),
                         color: activeCategory === category.id ? 'white' : 'text.secondary',
-                        fontSize: '1.5rem',
+                        fontSize: '1rem',
                       }}
                     >
                       {category.icon}

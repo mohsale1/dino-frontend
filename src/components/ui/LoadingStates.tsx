@@ -348,31 +348,31 @@ export const SmartLoading: React.FC<SmartLoadingProps> = ({
     switch (type) {
       case 'menu':
         return {
-          icon: <Restaurant sx={{ fontSize: 48, color: 'primary.main' }} />,
+          icon: <Restaurant sx={{ fontSize: 14, color: 'primary.main' }} />,
           defaultMessage: 'Loading delicious menu items...',
           skeleton: 'menu' as const,
         };
       case 'dashboard':
         return {
-          icon: <Dashboard sx={{ fontSize: 48, color: 'primary.main' }} />,
+          icon: <Dashboard sx={{ fontSize: 14, color: 'primary.main' }} />,
           defaultMessage: 'Preparing your dashboard...',
           skeleton: 'dashboard' as const,
         };
       case 'orders':
         return {
-          icon: <Assignment sx={{ fontSize: 48, color: 'primary.main' }} />,
+          icon: <Assignment sx={{ fontSize: 14, color: 'primary.main' }} />,
           defaultMessage: 'Fetching latest orders...',
           skeleton: 'list' as const,
         };
       case 'tables':
         return {
-          icon: <TableRestaurant sx={{ fontSize: 48, color: 'primary.main' }} />,
+          icon: <TableRestaurant sx={{ fontSize: 14, color: 'primary.main' }} />,
           defaultMessage: 'Loading table information...',
           skeleton: 'table' as const,
         };
       case 'users':
         return {
-          icon: <MenuBook sx={{ fontSize: 48, color: 'primary.main' }} />,
+          icon: <MenuBook sx={{ fontSize: 14, color: 'primary.main' }} />,
           defaultMessage: 'Loading user data...',
           skeleton: 'list' as const,
         };

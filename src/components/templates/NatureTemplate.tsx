@@ -53,7 +53,7 @@ const NatureTemplate: React.FC<TemplateProps> = ({
             position: 'absolute',
             top: '15px',
             left: '15px',
-            fontSize: '2rem',
+            fontSize: '1rem',
             opacity: 0.1,
             color: primaryColor,
             transform: 'rotate(-2deg)'
@@ -125,7 +125,7 @@ const NatureTemplate: React.FC<TemplateProps> = ({
             <Typography
               key={index}
               sx={{
-                fontSize: '1.5rem'
+                fontSize: '1rem'
               }}
             >
               {element}
@@ -268,7 +268,7 @@ const NatureTemplate: React.FC<TemplateProps> = ({
                     border: `2px solid ${step.color}30`
                   }}
                 >
-                  <Typography sx={{ fontSize: '1.5rem', marginBottom: '8px' }}>
+                  <Typography sx={{ fontSize: '1rem', marginBottom: '8px' }}>
                     {step.icon}
                   </Typography>
                   <Typography

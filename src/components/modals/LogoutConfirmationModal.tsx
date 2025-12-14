@@ -73,7 +73,7 @@ const LogoutConfirmationModal: React.FC<LogoutConfirmationModalProps> = ({
           >
             <Warning
               sx={{
-                fontSize: 32,
+                fontSize: 26,
                 color: 'warning.main',
               }}
             />

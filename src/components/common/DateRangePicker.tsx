@@ -155,7 +155,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
       <Stack spacing={2}>
         {/* Label */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <CalendarToday sx={{ fontSize: 20, color: 'primary.main' }} />
+          <CalendarToday sx={{ fontSize: 14, color: 'primary.main' }} />
           <Typography variant="subtitle2" fontWeight={600}>
             {label}
           </Typography>
@@ -205,7 +205,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
           />
           
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <DateRangeIcon sx={{ color: 'text.secondary', fontSize: 20 }} />
+            <DateRangeIcon sx={{ color: 'text.secondary', fontSize: 14 }} />
           </Box>
           
           <TextField

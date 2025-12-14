@@ -56,9 +56,9 @@ const MenuTemplateSelector: React.FC<MenuTemplateSelectorProps> = ({
   };
 
   const categoryIcons = {
-    professional: <Star sx={{ fontSize: 20 }} />,
-    creative: <TrendingUp sx={{ fontSize: 20 }} />,
-    themed: <CheckCircle sx={{ fontSize: 20 }} />,
+    professional: <Star sx={{ fontSize: 14 }} />,
+    creative: <TrendingUp sx={{ fontSize: 14 }} />,
+    themed: <CheckCircle sx={{ fontSize: 14 }} />,
   };
 
   return (
@@ -170,7 +170,7 @@ const MenuTemplateSelector: React.FC<MenuTemplateSelectorProps> = ({
                               boxShadow: theme.shadows[4],
                             }}
                           >
-                            <CheckCircle sx={{ fontSize: 20 }} />
+                            <CheckCircle sx={{ fontSize: 14 }} />
                           </Box>
                         </Fade>
                       )}
@@ -222,7 +222,7 @@ const MenuTemplateSelector: React.FC<MenuTemplateSelectorProps> = ({
                             sx={{
                               p: 0,
                               '& .MuiSvgIcon-root': {
-                                fontSize: 20,
+                                fontSize: 14,
                               },
                             }}
                           />

@@ -435,7 +435,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     },
                   }}
                 >
-                  <MenuIcon sx={{ fontSize: 24 }} />
+                  <MenuIcon sx={{ fontSize: 14 }} />
                 </IconButton>
               </Box>
             )}

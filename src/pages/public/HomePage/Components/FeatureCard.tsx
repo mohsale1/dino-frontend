@@ -91,7 +91,7 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
             transition: 'all 0.3s ease',
           }}
         >
-          <Icon sx={{ fontSize: 32, color: 'primary.main' }} />
+          <Icon sx={{ fontSize: 26, color: 'primary.main' }} />
         </Box>
 
         {/* Title */}

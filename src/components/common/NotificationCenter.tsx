@@ -140,7 +140,7 @@ const NotificationCenter: React.FC = () => {
 
         {notifications.length === 0 ? (
           <Box sx={{ p: 4, textAlign: 'center' }}>
-            <NotificationsNone sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />
+            <NotificationsNone sx={{ fontSize: 14, color: 'text.secondary', mb: 2 }} />
             <Typography variant="h6" color="text.secondary" gutterBottom>
               No notifications
             </Typography>

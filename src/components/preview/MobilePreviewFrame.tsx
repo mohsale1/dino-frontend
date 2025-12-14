@@ -151,9 +151,9 @@ const MobilePreviewFrame: React.FC<MobilePreviewFrameProps> = ({
 
             {/* Right side - Network & Battery */}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <SignalCellularAlt sx={{ fontSize: 16, color: '#000000' }} />
-              <Wifi sx={{ fontSize: 16, color: '#000000' }} />
-              <BatteryFull sx={{ fontSize: 20, color: '#000000' }} />
+              <SignalCellularAlt sx={{ fontSize: 14, color: '#000000' }} />
+              <Wifi sx={{ fontSize: 14, color: '#000000' }} />
+              <BatteryFull sx={{ fontSize: 14, color: '#000000' }} />
             </Box>
           </Box>
 
@@ -196,7 +196,7 @@ const MobilePreviewFrame: React.FC<MobilePreviewFrameProps> = ({
               }}
             >
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <ArrowBack sx={{ fontSize: 20 }} />
+                <ArrowBack sx={{ fontSize: 14 }} />
                 <Typography variant="body2" fontWeight="600" sx={{ fontSize: '0.875rem' }}>
                   Menu
                 </Typography>
@@ -212,7 +212,7 @@ const MobilePreviewFrame: React.FC<MobilePreviewFrameProps> = ({
                   gap: 0.5,
                 }}
               >
-                <ShoppingCart sx={{ fontSize: 16 }} />
+                <ShoppingCart sx={{ fontSize: 14 }} />
                 <Typography variant="caption" fontWeight="600">
                   0
                 </Typography>

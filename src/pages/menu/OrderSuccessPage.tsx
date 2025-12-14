@@ -290,7 +290,7 @@ const OrderSuccessPage: React.FC = () => {
                 
                 <Stack spacing={2}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <Person sx={{ color: 'text.secondary', fontSize: 20 }} />
+                    <Person sx={{ color: 'text.secondary', fontSize: 14 }} />
                     <Box>
                       <Typography variant="body2" color="text.secondary">Customer</Typography>
                       <Typography variant="body1" fontWeight="500">{orderData.customerInfo.name}</Typography>
@@ -298,7 +298,7 @@ const OrderSuccessPage: React.FC = () => {
                   </Box>
 
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <Phone sx={{ color: 'text.secondary', fontSize: 20 }} />
+                    <Phone sx={{ color: 'text.secondary', fontSize: 14 }} />
                     <Box>
                       <Typography variant="body2" color="text.secondary">Phone</Typography>
                       <Typography variant="body1" fontWeight="500">{orderData.customerInfo.phone}</Typography>
@@ -306,7 +306,7 @@ const OrderSuccessPage: React.FC = () => {
                   </Box>
 
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <LocationOn sx={{ color: 'text.secondary', fontSize: 20 }} />
+                    <LocationOn sx={{ color: 'text.secondary', fontSize: 14 }} />
                     <Box>
                       <Typography variant="body2" color="text.secondary">Table</Typography>
                       <Typography variant="body1" fontWeight="500">Table {orderData.tableId}</Typography>
@@ -315,7 +315,7 @@ const OrderSuccessPage: React.FC = () => {
 
                   {orderData.createdAt && (
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                      <Schedule sx={{ color: 'text.secondary', fontSize: 20 }} />
+                      <Schedule sx={{ color: 'text.secondary', fontSize: 14 }} />
                       <Box>
                         <Typography variant="body2" color="text.secondary">Order Time</Typography>
                         <Typography variant="body1" fontWeight="500">
@@ -327,7 +327,7 @@ const OrderSuccessPage: React.FC = () => {
 
                   {orderData.status && (
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                      <CheckCircle sx={{ color: 'success.main', fontSize: 20 }} />
+                      <CheckCircle sx={{ color: 'success.main', fontSize: 14 }} />
                       <Box sx={{ flex: 1 }}>
                         <Typography variant="body2" color="text.secondary">Status</Typography>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 0.5 }}>
@@ -465,7 +465,7 @@ const OrderSuccessPage: React.FC = () => {
             border: `1px solid ${alpha(theme.palette.info.main, 0.2)}`
           }}>
             <Stack direction="row" spacing={2} alignItems="center" justifyContent="center" sx={{ mb: 2 }}>
-              <Schedule sx={{ color: 'info.main', fontSize: 24 }} />
+              <Schedule sx={{ color: 'info.main', fontSize: 14 }} />
               <Typography variant="h6" color="info.main" fontWeight="600">
                 Estimated Time: {orderData?.estimatedTime ? `${orderData.estimatedTime} minutes` : '25-30 minutes'}
               </Typography>

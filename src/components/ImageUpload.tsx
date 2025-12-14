@@ -287,7 +287,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
       >
         <input {...getInputProps()} ref={fileInputRef} />
         
-        <CloudUpload sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />
+        <CloudUpload sx={{ fontSize: 14, color: 'text.secondary', mb: 2 }} />
         
         <Typography variant="h6" gutterBottom>
           {isDragActive ? 'Drop images here' : 'Drag & drop images here'}

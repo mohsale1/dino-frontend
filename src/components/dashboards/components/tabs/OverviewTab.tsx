@@ -131,7 +131,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ dashboardData, stats, analyti
                   border: '2px dashed',
                   borderColor: 'grey.300'
                 }}>
-                  <Restaurant sx={{ fontSize: 48, color: 'grey.400', mb: 2 }} />
+                  <Restaurant sx={{ fontSize: 14, color: 'grey.400', mb: 2 }} />
                   <Typography variant="h6" color="text.secondary">No Menu Data</Typography>
                 </Box>
               )}
@@ -185,7 +185,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ dashboardData, stats, analyti
                           width: 36, 
                           height: 36 
                         }}>
-                          <ShoppingCart sx={{ fontSize: 20 }} />
+                          <ShoppingCart sx={{ fontSize: 14 }} />
                         </Avatar>
                       </ListItemIcon>
                       <ListItemText
@@ -240,7 +240,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ dashboardData, stats, analyti
                   border: '2px dashed',
                   borderColor: 'grey.300'
                 }}>
-                  <ShoppingCart sx={{ fontSize: 48, color: 'grey.400', mb: 2 }} />
+                  <ShoppingCart sx={{ fontSize: 14, color: 'grey.400', mb: 2 }} />
                   <Typography variant="h6" color="text.secondary" gutterBottom>
                     No Recent Activity
                   </Typography>

@@ -199,7 +199,7 @@ const RegistrationCodeInput: React.FC<RegistrationCodeInputProps> = ({ onCodeVer
               maxLength: 1,
               style: {
                 textAlign: 'center',
-                fontSize: '1.75rem',
+                fontSize: '1rem',
                 fontWeight: 700,
                 padding: '14px 0',
               },

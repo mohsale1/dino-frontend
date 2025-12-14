@@ -31,9 +31,9 @@ const HeroSection: React.FC = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const features = [
-    { icon: <TrendingUp sx={{ fontSize: 16 }} />, text: '3x Faster Orders' },
-    { icon: <Speed sx={{ fontSize: 16 }} />, text: 'Real-time Updates' },
-    { icon: <Security sx={{ fontSize: 16 }} />, text: 'Secure & Reliable' },
+    { icon: <TrendingUp sx={{ fontSize: 14 }} />, text: '3x Faster Orders' },
+    { icon: <Speed sx={{ fontSize: 14 }} />, text: 'Real-time Updates' },
+    { icon: <Security sx={{ fontSize: 14 }} />, text: 'Secure & Reliable' },
   ];
 
   return (
@@ -169,7 +169,7 @@ const HeroSection: React.FC = () => {
               {/* Badge */}
               <Box>
                 <Chip
-                  icon={<AutoAwesome sx={{ fontSize: 18 }} />}
+                  icon={<AutoAwesome sx={{ fontSize: 14 }} />}
                   label="Trusted by 500+ Restaurants"
                   sx={{
                     backgroundColor: alpha(theme.palette.primary.main, 0.1),
@@ -368,7 +368,7 @@ const HeroSection: React.FC = () => {
                         justifyContent: 'center',
                       }}
                     >
-                      <QrCode2 sx={{ color: 'primary.main', fontSize: 32 }} />
+                      <QrCode2 sx={{ color: 'primary.main', fontSize: 26 }} />
                     </Box>
                     <Box>
                       <Typography variant="h6" fontWeight={700} sx={{ mb: 0.5 }}>
@@ -409,7 +409,7 @@ const HeroSection: React.FC = () => {
                         justifyContent: 'center',
                       }}
                     >
-                      <DashboardIcon sx={{ color: 'secondary.main', fontSize: 32 }} />
+                      <DashboardIcon sx={{ color: 'secondary.main', fontSize: 26 }} />
                     </Box>
                     <Box>
                       <Typography variant="h6" fontWeight={700} sx={{ mb: 0.5 }}>
@@ -450,7 +450,7 @@ const HeroSection: React.FC = () => {
                         justifyContent: 'center',
                       }}
                     >
-                      <Restaurant sx={{ color: 'success.main', fontSize: 32 }} />
+                      <Restaurant sx={{ color: 'success.main', fontSize: 26 }} />
                     </Box>
                     <Box>
                       <Typography variant="h6" fontWeight={700} sx={{ mb: 0.5 }}>

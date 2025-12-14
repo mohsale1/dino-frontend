@@ -26,19 +26,19 @@ const CTASection: React.FC = () => {
 
   const contactMethods = [
     {
-      icon: <Phone sx={{ fontSize: 24 }} />,
+      icon: <Phone sx={{ fontSize: 14 }} />,
       title: 'Call Us',
       value: COMPANY_INFO.contact.phone.primary,
       action: `tel:${COMPANY_INFO.contact.phone.primary.replace(/\s/g, '')}`,
     },
     {
-      icon: <Email sx={{ fontSize: 24 }} />,
+      icon: <Email sx={{ fontSize: 14 }} />,
       title: 'Email Us',
       value: COMPANY_INFO.contact.email.primary,
       action: `mailto:${COMPANY_INFO.contact.email.primary}`,
     },
     {
-      icon: <LocationOn sx={{ fontSize: 24 }} />,
+      icon: <LocationOn sx={{ fontSize: 14 }} />,
       title: 'Visit Us',
       value: COMPANY_INFO.contact.address.full,
       action: null,

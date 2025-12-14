@@ -221,7 +221,7 @@ const PermissionDashboard: React.FC<PermissionDashboardProps> = ({
                       display: 'flex',
                       justifyContent: 'space-between',
                       alignItems: 'center',
-                      fontSize: '16px',
+                      fontSize: '14px',
                       fontWeight: 'bold',
                       color: '#495057'
                     }}

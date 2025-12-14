@@ -496,7 +496,7 @@ const OrdersManagement: React.FC = () => {
               
               <Stack direction="row" justifyContent="space-between" alignItems="center">
                 <Stack direction="row" alignItems="center" spacing={0.5}>
-                  <AccessTime fontSize="small" sx={{ fontSize: 16, color: 'text.secondary' }} />
+                  <AccessTime fontSize="small" sx={{ fontSize: 14, color: 'text.secondary' }} />
                   <Typography variant="body2" color="text.secondary" fontSize="0.8rem">
                     {formatTime(order.createdAt)}
                   </Typography>
@@ -700,7 +700,7 @@ const OrdersManagement: React.FC = () => {
             {/* Header Content */}
             <Box sx={{ flex: 1 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                <Kitchen sx={{ fontSize: 32, mr: 1.5, color: 'text.primary', opacity: 0.9 }} />
+                <Kitchen sx={{ fontSize: 26, mr: 1.5, color: 'text.primary', opacity: 0.9 }} />
                 <Typography
                   variant="h4"
                   component="h1"
@@ -744,7 +744,7 @@ const OrdersManagement: React.FC = () => {
                   border: '1px solid rgba(0, 0, 0, 0.1)',
                 }}
               >
-                <Store sx={{ fontSize: 18, mr: 1, color: 'primary.main', opacity: 0.9 }} />
+                <Store sx={{ fontSize: 14, mr: 1, color: 'primary.main', opacity: 0.9 }} />
                 <Typography variant="body2" fontWeight="500" color="text.primary">
                   {getVenueDisplayName()}
                 </Typography>
@@ -1129,7 +1129,7 @@ const OrdersManagement: React.FC = () => {
                       borderColor: 'primary.main',
                     }}
                   >
-                    <Restaurant sx={{ fontSize: 40, color: '#1565c0' }} />
+                    <Restaurant sx={{ fontSize: 26, color: '#1565c0' }} />
                   </Box>
                   
                   <Typography variant="h6" fontWeight="600" gutterBottom color="text.primary">
@@ -1182,7 +1182,7 @@ const OrdersManagement: React.FC = () => {
                       borderColor: 'success.main',
                     }}
                   >
-                    <CheckCircle sx={{ fontSize: 40, color: '#2e7d32' }} />
+                    <CheckCircle sx={{ fontSize: 26, color: '#2e7d32' }} />
                   </Box>
                   
                   <Typography variant="h6" fontWeight="600" gutterBottom color="text.primary">

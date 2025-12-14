@@ -346,7 +346,7 @@ export const DonutChart: React.FC<PieChartProps> = ({ data, height = 250 }) => {
         zIndex: 10
       }}>
         <div style={{ 
-          fontSize: '24px', 
+          fontSize: '14px', 
           fontWeight: 'bold', 
           color: '#333333',
           lineHeight: '1.2'
@@ -502,7 +502,7 @@ export const EnhancedRevenueChart: React.FC<EnhancedRevenueChartProps> = ({ data
       <CardContent sx={{ p: 3 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <ShowChart sx={{ color: 'primary.main', fontSize: 28 }} />
+            <ShowChart sx={{ color: 'primary.main', fontSize: 14 }} />
             <Typography variant="h6" sx={{ fontWeight: 700, color: 'text.primary' }}>
               Revenue & Orders Analytics
             </Typography>
@@ -565,7 +565,7 @@ export const EnhancedRevenueChart: React.FC<EnhancedRevenueChartProps> = ({ data
               borderColor: 'grey.300'
             }}>
               <Box sx={{ textAlign: 'center' }}>
-                <ShowChart sx={{ fontSize: 48, color: 'grey.400', mb: 1 }} />
+                <ShowChart sx={{ fontSize: 14, color: 'grey.400', mb: 1 }} />
                 <Typography variant="h6" color="text.secondary">No Revenue Data</Typography>
                 <Typography variant="body2" color="text.secondary">
                   Revenue trends will appear here once data is available
@@ -622,7 +622,7 @@ export const EnhancedOrderStatusChart: React.FC<EnhancedOrderStatusChartProps> =
       <CardContent sx={{ p: 3 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <PieChart sx={{ color: 'primary.main', fontSize: 28 }} />
+            <PieChart sx={{ color: 'primary.main', fontSize: 14 }} />
             <Typography variant="h6" sx={{ fontWeight: 700, color: 'text.primary' }}>
               Order Status Distribution
             </Typography>
@@ -650,7 +650,7 @@ export const EnhancedOrderStatusChart: React.FC<EnhancedOrderStatusChartProps> =
               borderColor: 'grey.300'
             }}>
               <Box sx={{ textAlign: 'center' }}>
-                <PieChart sx={{ fontSize: 48, color: 'grey.400', mb: 1 }} />
+                <PieChart sx={{ fontSize: 14, color: 'grey.400', mb: 1 }} />
                 <Typography variant="h6" color="text.secondary">No Order Data</Typography>
                 <Typography variant="body2" color="text.secondary">
                   Order status distribution will appear here
@@ -747,9 +747,9 @@ export const EnhancedSalesMetrics: React.FC<EnhancedSalesMetricsProps> = ({ data
                   </Box>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                     {metric.changeType === 'positive' ? (
-                      <TrendingUp sx={{ fontSize: 16, color: 'success.main' }} />
+                      <TrendingUp sx={{ fontSize: 14, color: 'success.main' }} />
                     ) : (
-                      <TrendingDown sx={{ fontSize: 16, color: 'error.main' }} />
+                      <TrendingDown sx={{ fontSize: 14, color: 'error.main' }} />
                     )}
                     <Typography 
                       variant="caption" 
@@ -804,7 +804,7 @@ export const EnhancedPerformanceChart: React.FC<EnhancedPerformanceChartProps> =
       <CardContent sx={{ p: 3 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <BarChart sx={{ color: 'primary.main', fontSize: 28 }} />
+            <BarChart sx={{ color: 'primary.main', fontSize: 14 }} />
             <Typography variant="h6" sx={{ fontWeight: 700, color: 'text.primary' }}>
               Revenue by Category
             </Typography>
@@ -832,7 +832,7 @@ export const EnhancedPerformanceChart: React.FC<EnhancedPerformanceChartProps> =
               borderColor: 'grey.300'
             }}>
               <Box sx={{ textAlign: 'center' }}>
-                <BarChart sx={{ fontSize: 48, color: 'grey.400', mb: 1 }} />
+                <BarChart sx={{ fontSize: 14, color: 'grey.400', mb: 1 }} />
                 <Typography variant="h6" color="text.secondary">No Performance Data</Typography>
                 <Typography variant="body2" color="text.secondary">
                   Revenue breakdown will appear here

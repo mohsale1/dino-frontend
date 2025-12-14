@@ -110,7 +110,7 @@ const CustomerNavbar: React.FC<CustomerNavbarProps> = ({
             )}
             
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Restaurant sx={{ color: '#1976D2', fontSize: 24 }} />
+              <Restaurant sx={{ color: '#1976D2', fontSize: 14 }} />
               <Box>
                 <Typography 
                   variant="h6" 

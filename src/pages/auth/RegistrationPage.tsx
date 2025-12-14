@@ -94,9 +94,9 @@ const ResponsiveStepLabel = styled(StepLabel)(({ theme }) => ({
   '& .MuiStepLabel-iconContainer': {
     paddingRight: 0,
     '& .MuiSvgIcon-root': {
-      fontSize: '1.5rem',
+      fontSize: '1rem',
       [theme.breakpoints.down('sm')]: {
-        fontSize: '1.25rem',
+        fontSize: '1rem',
       },
     },
   },
@@ -534,7 +534,7 @@ const RegistrationPage: React.FC = () => {
                   borderColor: alpha(theme.palette.success.main, 0.3),
                 }}
               >
-                <CheckCircle sx={{ fontSize: 16, mr: 1, color: 'success.main' }} />
+                <CheckCircle sx={{ fontSize: 14, mr: 1, color: 'success.main' }} />
                 <Typography variant="caption" fontWeight="600" color="success.main">
                   Code Verified
                 </Typography>

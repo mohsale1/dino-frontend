@@ -581,7 +581,7 @@ const VenueSettings: React.FC = () => {
             {/* Header Content */}
             <Box sx={{ flex: 1 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                <Settings sx={{ fontSize: 32, mr: 1.5, color: 'text.primary', opacity: 0.9 }} />
+                <Settings sx={{ fontSize: 26, mr: 1.5, color: 'text.primary', opacity: 0.9 }} />
                 <Typography
                   variant='h4'
                   component='h1'
@@ -622,7 +622,7 @@ const VenueSettings: React.FC = () => {
                   border: '1px solid rgba(0, 0, 0, 0.1)',
                 }}
               >
-                <Restaurant sx={{ fontSize: 18, mr: 1, color: 'primary.main', opacity: 0.9 }} />
+                <Restaurant sx={{ fontSize: 14, mr: 1, color: 'primary.main', opacity: 0.9 }} />
                 <Typography variant='body2' fontWeight='500' color='text.primary'>
                   {settings.name || 'Your Venue'}
                 </Typography>
@@ -1065,10 +1065,10 @@ const VenueSettings: React.FC = () => {
                         mx: 'auto', 
                         mb: 2,
                         bgcolor: 'primary.main',
-                        fontSize: '2rem'
+                        fontSize: '1rem'
                       }}
                     >
-                      <Restaurant sx={{ fontSize: '2.5rem', color: 'white' }} />
+                      <Restaurant sx={{ fontSize: '1rem', color: 'white' }} />
                     </Avatar>
                     <Button
                       variant='contained'
@@ -1119,7 +1119,7 @@ const VenueSettings: React.FC = () => {
                 borderRadius: 2,
                 boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15)',
                 '& .MuiAlert-icon': {
-                  fontSize: '1.5rem'
+                  fontSize: '1rem'
                 },
                 width: { xs: '90vw', sm: 'auto' },
                 maxWidth: { xs: '400px', sm: 'none' }

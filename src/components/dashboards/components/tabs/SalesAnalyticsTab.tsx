@@ -135,7 +135,7 @@ const SalesAnalyticsTab: React.FC<SalesAnalyticsTabProps> = ({ dashboardData, st
           <CardContent sx={{ p: 3 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Restaurant sx={{ color: 'primary.main', fontSize: 28 }} />
+                <Restaurant sx={{ color: 'primary.main', fontSize: 14 }} />
                 <Typography variant="h6" sx={{ fontWeight: 700, color: 'text.primary' }}>
                   Top Selling Items
                 </Typography>
@@ -230,7 +230,7 @@ const SalesAnalyticsTab: React.FC<SalesAnalyticsTabProps> = ({ dashboardData, st
                 borderColor: 'grey.300'
               }}>
                 <Box sx={{ textAlign: 'center' }}>
-                  <Restaurant sx={{ fontSize: 48, color: 'grey.400', mb: 1 }} />
+                  <Restaurant sx={{ fontSize: 14, color: 'grey.400', mb: 1 }} />
                   <Typography variant="h6" color="text.secondary">No Menu Data</Typography>
                   <Typography variant="body2" color="text.secondary">
                     Top selling items will appear here

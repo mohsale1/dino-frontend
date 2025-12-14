@@ -861,7 +861,7 @@ const UserManagement: React.FC = () => {
             {/* Header Content */}
             <Box sx={{ flex: 1 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                <People sx={{ fontSize: 32, mr: 1.5, color: 'text.primary', opacity: 0.9 }} />
+                <People sx={{ fontSize: 26, mr: 1.5, color: 'text.primary', opacity: 0.9 }} />
                 <Typography
                   variant="h4"
                   component="h1"
@@ -903,7 +903,7 @@ const UserManagement: React.FC = () => {
                     border: '1px solid rgba(0, 0, 0, 0.1)',
                   }}
                 >
-                  <Business sx={{ fontSize: 18, mr: 1, color: 'primary.main', opacity: 0.9 }} />
+                  <Business sx={{ fontSize: 14, mr: 1, color: 'primary.main', opacity: 0.9 }} />
                   <Typography variant="body2" fontWeight="500" color="text.primary">
                     {venue.name}
                   </Typography>

@@ -171,7 +171,7 @@ const PaymentsTab: React.FC<PaymentsTabProps> = ({ stats, analyticsData }) => {
         }}>
           <CardContent sx={{ p: 3 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
-              <Assessment sx={{ color: 'primary.main', fontSize: 28 }} />
+              <Assessment sx={{ color: 'primary.main', fontSize: 14 }} />
               <Typography variant="h6" sx={{ fontWeight: 700, color: 'text.primary' }}>
                 Payment Analytics Overview
               </Typography>
@@ -203,9 +203,9 @@ const PaymentsTab: React.FC<PaymentsTabProps> = ({ stats, analyticsData }) => {
                        {stat.change && (
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                           {stat.changeType === 'positive' ? (
-                            <TrendingUp sx={{ fontSize: 16, color: 'success.main' }} />
+                            <TrendingUp sx={{ fontSize: 14, color: 'success.main' }} />
                           ) : (
-                            <TrendingDown sx={{ fontSize: 16, color: 'error.main' }} />
+                            <TrendingDown sx={{ fontSize: 14, color: 'error.main' }} />
                           )}
                           <Typography 
                             variant="caption" 
@@ -334,7 +334,7 @@ const PaymentsTab: React.FC<PaymentsTabProps> = ({ stats, analyticsData }) => {
                 }}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Schedule sx={{ fontSize: 18, color: 'text.secondary' }} />
+                      <Schedule sx={{ fontSize: 14, color: 'text.secondary' }} />
                       <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
                         {trend.time}
                       </Typography>

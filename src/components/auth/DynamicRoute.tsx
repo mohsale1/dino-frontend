@@ -299,7 +299,7 @@ const AccessDeniedPage: React.FC = () => {
     switch (role.toLowerCase()) {
       case 'operator':
         return {
-          icon: <Person sx={{ fontSize: '1.25rem' }} />,
+          icon: <Person sx={{ fontSize: '1rem' }} />,
           color: 'info',
           label: 'Operator',
           description: 'You have limited access to manage orders only.',
@@ -307,7 +307,7 @@ const AccessDeniedPage: React.FC = () => {
         };
       case 'admin':
         return {
-          icon: <AdminPanelSettings sx={{ fontSize: '1.25rem' }} />,
+          icon: <AdminPanelSettings sx={{ fontSize: '1rem' }} />,
           color: 'primary',
           label: 'Admin',
           description: 'You have access to most administrative features.',
@@ -315,7 +315,7 @@ const AccessDeniedPage: React.FC = () => {
         };
       case 'super_admin':
         return {
-          icon: <Security sx={{ fontSize: '1.25rem' }} />,
+          icon: <Security sx={{ fontSize: '1rem' }} />,
           color: 'success',
           label: 'Super Admin',
           description: 'You have full access to all features.',
@@ -323,7 +323,7 @@ const AccessDeniedPage: React.FC = () => {
         };
       default:
         return {
-          icon: <Person sx={{ fontSize: '1.25rem' }} />,
+          icon: <Person sx={{ fontSize: '1rem' }} />,
           color: 'default',
           label: role,
           description: 'Your role has specific access permissions.',
@@ -617,7 +617,7 @@ const AccessDeniedPage: React.FC = () => {
                 gap: 1,
               }}
             >
-              <Box component="span" sx={{ fontSize: '1.25rem' }}>💡</Box>
+              <Box component="span" sx={{ fontSize: '1rem' }}>💡</Box>
               What you can try:
             </Typography>
             <Stack spacing={1.5}>

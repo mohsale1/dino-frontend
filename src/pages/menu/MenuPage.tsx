@@ -600,12 +600,12 @@ const EnhancedMenuItemCard: React.FC<{
           {isFavorite ? (
             <Favorite sx={{ 
               color: theme.palette.error.main, 
-              fontSize: 20 
+              fontSize: 14 
             }} />
           ) : (
             <FavoriteBorder sx={{ 
               color: 'text.secondary', 
-              fontSize: 20 
+              fontSize: 14 
             }} />
           )}
         </IconButton>
@@ -722,7 +722,7 @@ const EnhancedMenuItemCard: React.FC<{
                 <LocalFireDepartment 
                   key={i} 
                   sx={{ 
-                    fontSize: 16, 
+                    fontSize: 14, 
                     color: item.spicyLevel === 1 ? '#FFA726' : item.spicyLevel === 2 ? '#FF7043' : '#F44336',
                   }} 
                 />

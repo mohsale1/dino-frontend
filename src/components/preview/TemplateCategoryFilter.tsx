@@ -23,11 +23,11 @@ const TemplateCategoryFilter: React.FC<TemplateCategoryFilterProps> = ({
 
   // Category icons mapping
   const categoryIcons: Record<string, React.ReactElement> = {
-    All: <Fastfood sx={{ fontSize: 16 }} />,
-    Pizza: <LocalPizza sx={{ fontSize: 16 }} />,
-    'Main Course': <Restaurant sx={{ fontSize: 16 }} />,
-    Salads: <LocalDining sx={{ fontSize: 16 }} />,
-    Desserts: <Cake sx={{ fontSize: 16 }} />,
+    All: <Fastfood sx={{ fontSize: 14 }} />,
+    Pizza: <LocalPizza sx={{ fontSize: 14 }} />,
+    'Main Course': <Restaurant sx={{ fontSize: 14 }} />,
+    Salads: <LocalDining sx={{ fontSize: 14 }} />,
+    Desserts: <Cake sx={{ fontSize: 14 }} />,
   };
 
   // Category images (placeholder URLs for demo)

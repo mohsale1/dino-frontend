@@ -492,7 +492,7 @@ const UserPermissionsDashboard: React.FC = () => {
                 margin: '0 auto 24px',
               }}
             >
-              <Cancel sx={{ fontSize: 48, color: 'error.main' }} />
+              <Cancel sx={{ fontSize: 14, color: 'error.main' }} />
             </Box>
             <Typography variant="h5" fontWeight="600" color="text.primary" gutterBottom>
               Authentication Error
@@ -559,7 +559,7 @@ const UserPermissionsDashboard: React.FC = () => {
                 margin: '0 auto 24px',
               }}
             >
-              <Security sx={{ fontSize: 48, color: 'warning.main' }} />
+              <Security sx={{ fontSize: 14, color: 'warning.main' }} />
             </Box>
             <Typography variant="h5" fontWeight="600" color="text.primary" gutterBottom>
               Access Denied
@@ -637,7 +637,7 @@ const UserPermissionsDashboard: React.FC = () => {
                 },
               }}
             >
-              <Security sx={{ fontSize: 48, color: 'primary.main' }} />
+              <Security sx={{ fontSize: 14, color: 'primary.main' }} />
             </Box>
             <Typography variant="h5" fontWeight="600" color="text.primary" gutterBottom>
               Loading Permissions
@@ -698,7 +698,7 @@ const UserPermissionsDashboard: React.FC = () => {
             {/* Header Content */}
             <Box sx={{ flex: 1 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                <Security sx={{ fontSize: 32, mr: 1.5, color: 'text.primary', opacity: 0.9 }} />
+                <Security sx={{ fontSize: 26, mr: 1.5, color: 'text.primary', opacity: 0.9 }} />
                 <Typography
                   variant="h4"
                   component="h1"
@@ -739,7 +739,7 @@ const UserPermissionsDashboard: React.FC = () => {
                   border: '1px solid rgba(0, 0, 0, 0.1)',
                 }}
               >
-                <Person sx={{ fontSize: 18, mr: 1, color: 'primary.main', opacity: 0.9 }} />
+                <Person sx={{ fontSize: 14, mr: 1, color: 'primary.main', opacity: 0.9 }} />
                 <Typography variant="body2" fontWeight="500" color="text.primary">
                   {userData?.venue?.name || 'All Venues'}
                 </Typography>
@@ -1254,7 +1254,7 @@ const UserPermissionsDashboard: React.FC = () => {
                                 }
                               }}
                             >
-                              <Visibility sx={{ fontSize: '1.25rem' }} />
+                              <Visibility sx={{ fontSize: '1rem' }} />
                             </IconButton>
                           </TableCell>
                         </TableRow>
@@ -1376,7 +1376,7 @@ const UserPermissionsDashboard: React.FC = () => {
                           {React.cloneElement(category.icon, { fontSize: 'small' })}
                         </Avatar>
                         <Box>
-                          <Typography variant="h6" fontWeight="600" sx={{ fontSize: '1.1rem' }}>
+                          <Typography variant="h6" fontWeight="600" sx={{ fontSize: '1rem' }}>
                             {String(category.name)}
                           </Typography>
                           <Typography variant="caption" color="text.secondary">
@@ -1403,9 +1403,9 @@ const UserPermissionsDashboard: React.FC = () => {
                           >
                             <Box sx={{ mr: 1 }}>
                               {permission.hasPermission ? (
-                                <CheckCircle sx={{ fontSize: 16, color: 'success.main' }} />
+                                <CheckCircle sx={{ fontSize: 14, color: 'success.main' }} />
                               ) : (
-                                <Cancel sx={{ fontSize: 16, color: 'grey.400' }} />
+                                <Cancel sx={{ fontSize: 14, color: 'grey.400' }} />
                               )}
                             </Box>
                             <Box sx={{ flexGrow: 1 }}>

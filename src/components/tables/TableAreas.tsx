@@ -58,7 +58,7 @@ const TableAreas: React.FC<TableAreasProps> = ({
               justifyContent: 'center'
             }}
           >
-            <LocationOn sx={{ color: 'white', fontSize: 24 }} />
+            <LocationOn sx={{ color: 'white', fontSize: 14 }} />
           </Box>
           <Box>
             <Typography variant="h5" fontWeight="700" sx={{ color: 'text.primary', mb: 0.5 }}>
@@ -114,7 +114,7 @@ const TableAreas: React.FC<TableAreasProps> = ({
                 mb: 3
               }}
             >
-              <LocationOn sx={{ fontSize: 40, color: 'text.secondary' }} />
+              <LocationOn sx={{ fontSize: 26, color: 'text.secondary' }} />
             </Box>
             <Typography variant="h6" fontWeight="600" gutterBottom color="text.primary">
               No Seating Areas Yet
@@ -205,7 +205,7 @@ const TableAreas: React.FC<TableAreasProps> = ({
                               transition: 'all 0.2s ease-in-out'
                             }}
                           >
-                            <Edit sx={{ fontSize: 16 }} />
+                            <Edit sx={{ fontSize: 14 }} />
                           </IconButton>
                         </Tooltip>
                         <Tooltip title="Delete Area" placement="top">
@@ -225,7 +225,7 @@ const TableAreas: React.FC<TableAreasProps> = ({
                               transition: 'all 0.2s ease-in-out'
                             }}
                           >
-                            <Delete sx={{ fontSize: 16 }} />
+                            <Delete sx={{ fontSize: 14 }} />
                           </IconButton>
                         </Tooltip>
                       </Box>
@@ -244,7 +244,7 @@ const TableAreas: React.FC<TableAreasProps> = ({
                           mb: 2,
                         }}
                       >
-                        <LocationOn sx={{ color: 'white', fontSize: 32 }} />
+                        <LocationOn sx={{ color: 'white', fontSize: 26 }} />
                       </Box>
                       
                       {/* Area Name */}
@@ -300,11 +300,11 @@ const TableAreas: React.FC<TableAreasProps> = ({
                         border: '1px solid',
                         borderColor: 'grey.200'
                       }}>
-                        <TableRestaurant sx={{ fontSize: 18, color: 'primary.main' }} />
+                        <TableRestaurant sx={{ fontSize: 14, color: 'primary.main' }} />
                         <Typography 
                           variant="h6" 
                           fontWeight="700" 
-                          sx={{ color: 'primary.main', fontSize: '1.25rem' }}
+                          sx={{ color: 'primary.main', fontSize: '1rem' }}
                         >
                           {tablesInArea.length}
                         </Typography>

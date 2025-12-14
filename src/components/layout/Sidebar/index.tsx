@@ -473,9 +473,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
               {statusLoading ? (
                 <CircularProgress size={16} />
               ) : venueStatus.isOpen ? (
-                <CheckCircle sx={{ fontSize: 20, color: 'success.main' }} />
+                <CheckCircle sx={{ fontSize: 14, color: 'success.main' }} />
               ) : (
-                <Cancel sx={{ fontSize: 20, color: 'error.main' }} />
+                <Cancel sx={{ fontSize: 14, color: 'error.main' }} />
               )}
             </IconButton>
           </Tooltip>

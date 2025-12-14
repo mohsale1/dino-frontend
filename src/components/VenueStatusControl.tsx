@@ -124,7 +124,7 @@ const VenueStatusControl: React.FC<VenueStatusControlProps> = () => {
             justifyContent: 'space-between'
           }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <StoreIcon sx={{ fontSize: 20, color: 'text.primary' }} />
+              <StoreIcon sx={{ fontSize: 14, color: 'text.primary' }} />
               <Box>
                 <Typography variant="subtitle2" fontWeight="600">
                   {currentVenue.name || 'Current Venue'}
@@ -144,7 +144,7 @@ const VenueStatusControl: React.FC<VenueStatusControlProps> = () => {
                 size="medium"
               />
               <Chip
-                icon={venueOpen ? <CheckCircleIcon sx={{ fontSize: 16 }} /> : <CancelIcon sx={{ fontSize: 16 }} />}
+                icon={venueOpen ? <CheckCircleIcon sx={{ fontSize: 14 }} /> : <CancelIcon sx={{ fontSize: 14 }} />}
                 label={venueOpen ? 'OPEN' : 'CLOSED'}
                 size="small"
                 color={venueOpen ? 'success' : 'error'}
@@ -164,7 +164,7 @@ const VenueStatusControl: React.FC<VenueStatusControlProps> = () => {
               gap: 1,
               mb: 1
             }}>
-              <ScheduleIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
+              <ScheduleIcon sx={{ fontSize: 14, color: 'text.secondary' }} />
               <Typography variant="body2" fontWeight="500">
                 Order Status
               </Typography>

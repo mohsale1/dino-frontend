@@ -83,7 +83,7 @@ const ColorfulTemplate: React.FC<TemplateProps> = ({
             <Typography
               key={index}
               sx={{
-                fontSize: '1.5rem'
+                fontSize: '1rem'
               }}
             >
               {icon}

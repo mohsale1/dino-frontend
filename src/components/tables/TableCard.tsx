@@ -137,7 +137,7 @@ const TableCard: React.FC<TableCardProps> = ({
               borderColor: 'grey.100'
             }}
           >
-            <People sx={{ fontSize: 16, color: 'primary.main' }} />
+            <People sx={{ fontSize: 14, color: 'primary.main' }} />
             <Typography variant="body2" color="text.primary" fontWeight="500" sx={{ fontSize: '0.8rem' }}>
               {table.capacity} people
             </Typography>
@@ -157,7 +157,7 @@ const TableCard: React.FC<TableCardProps> = ({
             }}
           >
             {React.cloneElement(getStatusIcon(table.table_status || table.status), { 
-              sx: { fontSize: 16, color: getStatusColor(table.table_status || table.status) === 'success' ? 'success.main' : 
+              sx: { fontSize: 14, color: getStatusColor(table.table_status || table.status) === 'success' ? 'success.main' : 
                                    getStatusColor(table.table_status || table.status) === 'error' ? 'error.main' :
                                    getStatusColor(table.table_status || table.status) === 'warning' ? 'warning.main' : 'primary.main' }
             })}
@@ -217,7 +217,7 @@ const TableCard: React.FC<TableCardProps> = ({
                   }
                 }}
               >
-                <QrCode sx={{ fontSize: 16 }} />
+                <QrCode sx={{ fontSize: 14 }} />
               </IconButton>
             </Tooltip>
             <Tooltip title="Print QR Code">
@@ -237,7 +237,7 @@ const TableCard: React.FC<TableCardProps> = ({
                   }
                 }}
               >
-                <Print sx={{ fontSize: 16 }} />
+                <Print sx={{ fontSize: 14 }} />
               </IconButton>
             </Tooltip>
           </Stack>
@@ -261,7 +261,7 @@ const TableCard: React.FC<TableCardProps> = ({
                   }
                 }}
               >
-                <Edit sx={{ fontSize: 16 }} />
+                <Edit sx={{ fontSize: 14 }} />
               </IconButton>
             </Tooltip>
             <Tooltip title="Delete Table">
@@ -283,7 +283,7 @@ const TableCard: React.FC<TableCardProps> = ({
                   }
                 }}
               >
-                <Delete sx={{ fontSize: 16 }} />
+                <Delete sx={{ fontSize: 14 }} />
               </IconButton>
             </Tooltip>
           </Stack>

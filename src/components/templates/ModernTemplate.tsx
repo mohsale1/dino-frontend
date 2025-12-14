@@ -209,7 +209,7 @@ const ModernTemplate: React.FC<TemplateProps> = ({
                     }
                   }}
                 >
-                  <Typography sx={{ fontSize: '1.5rem', marginBottom: '8px' }}>
+                  <Typography sx={{ fontSize: '1rem', marginBottom: '8px' }}>
                     {feature.icon}
                   </Typography>
                   <Typography

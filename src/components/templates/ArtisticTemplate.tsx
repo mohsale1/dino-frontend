@@ -221,7 +221,7 @@ const ArtisticTemplate: React.FC<TemplateProps> = ({
                     transform: `rotate(${(index % 2 === 0 ? 1 : -1) * 2}deg)`
                   }}
                 >
-                  <Typography sx={{ fontSize: '1.5rem', marginBottom: '8px' }}>
+                  <Typography sx={{ fontSize: '1rem', marginBottom: '8px' }}>
                     {step.icon}
                   </Typography>
                   <Typography

@@ -267,7 +267,7 @@ const TechTemplate: React.FC<TemplateProps> = ({
 
                 }}
               >
-                <Typography sx={{ fontSize: '1.2rem', marginBottom: '5px' }}>
+                <Typography sx={{ fontSize: '1.05rem', marginBottom: '5px' }}>
                   {step.icon}
                 </Typography>
                 <Typography

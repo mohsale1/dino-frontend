@@ -427,7 +427,7 @@ const WorkspaceManagement: React.FC = () => {
             {/* Header Content */}
             <Box sx={{ flex: 1 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                <Restaurant sx={{ fontSize: 32, mr: 1.5, color: 'text.primary', opacity: 0.9 }} />
+                <Restaurant sx={{ fontSize: 26, mr: 1.5, color: 'text.primary', opacity: 0.9 }} />
                 <Typography
                   variant="h4"
                   component="h1"
@@ -469,7 +469,7 @@ const WorkspaceManagement: React.FC = () => {
                     border: '1px solid rgba(0, 0, 0, 0.1)',
                   }}
                 >
-                  <Store sx={{ fontSize: 18, mr: 1, color: 'primary.main', opacity: 0.9 }} />
+                  <Store sx={{ fontSize: 14, mr: 1, color: 'primary.main', opacity: 0.9 }} />
                   <Typography variant="body2" fontWeight="500" color="text.primary">
                     {userData.workspace.displayName || userData.workspace.name}
                   </Typography>
@@ -824,7 +824,7 @@ const WorkspaceManagement: React.FC = () => {
                   }}
                 >
                   {!venue.image_url && (
-                    <Store sx={{ fontSize: 48, color: '#999' }} />
+                    <Store sx={{ fontSize: 14, color: '#999' }} />
                   )}
                 </Box>
 
@@ -860,7 +860,7 @@ const WorkspaceManagement: React.FC = () => {
                       },
                     }}
                   >
-                    <MoreVert sx={{ fontSize: 18 }} />
+                    <MoreVert sx={{ fontSize: 14 }} />
                   </IconButton>
 
                   {/* Header */}
@@ -870,7 +870,7 @@ const WorkspaceManagement: React.FC = () => {
                       fontWeight="700"
                       sx={{ 
                         color: 'text.primary',
-                        fontSize: '1.25rem',
+                        fontSize: '1rem',
                         lineHeight: 1.3,
                         mb: 1,
                         pr: 4, // Space for menu button
@@ -935,9 +935,9 @@ const WorkspaceManagement: React.FC = () => {
                     <Box sx={{ display: 'flex', gap: 2, mb: 1 }}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8 }}>
                         {venue.isActive ? (
-                          <CheckCircle sx={{ fontSize: 16, color: 'success.main' }} />
+                          <CheckCircle sx={{ fontSize: 14, color: 'success.main' }} />
                         ) : (
-                          <Cancel sx={{ fontSize: 16, color: 'grey.400' }} />
+                          <Cancel sx={{ fontSize: 14, color: 'grey.400' }} />
                         )}
                         <Typography variant="body2" sx={{ fontSize: '0.85rem', color: 'text.secondary', fontWeight: 400, textTransform: 'capitalize' }}>
                           {venue.isActive ? 'Active' : 'Inactive'}
@@ -945,9 +945,9 @@ const WorkspaceManagement: React.FC = () => {
                       </Box>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8 }}>
                         {venue.is_open ? (
-                          <Visibility sx={{ fontSize: 16, color: 'success.main' }} />
+                          <Visibility sx={{ fontSize: 14, color: 'success.main' }} />
                         ) : (
-                          <VisibilityOff sx={{ fontSize: 16, color: 'error.main' }} />
+                          <VisibilityOff sx={{ fontSize: 14, color: 'error.main' }} />
                         )}
                         <Typography variant="body2" sx={{ fontSize: '0.85rem', color: 'text.secondary', fontWeight: 400, textTransform: 'capitalize' }}>
                           {venue.is_open ? 'Open' : 'Closed'}
@@ -960,7 +960,7 @@ const WorkspaceManagement: React.FC = () => {
                   <Box sx={{ px: 3, flex: 1, overflow: 'hidden' }}>
                     {/* Location */}
                     <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: 2 }}>
-                      <LocationOn sx={{ color: 'text.secondary', fontSize: 18, mt: 0.2, mr: 1.5 }} />
+                      <LocationOn sx={{ color: 'text.secondary', fontSize: 14, mt: 0.2, mr: 1.5 }} />
                       <Typography 
                         variant="body2" 
                         color="text.secondary"
@@ -988,7 +988,7 @@ const WorkspaceManagement: React.FC = () => {
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                       {venue.phone && (
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <Phone sx={{ color: 'text.secondary', fontSize: 16, mr: 1.5 }} />
+                          <Phone sx={{ color: 'text.secondary', fontSize: 14, mr: 1.5 }} />
                           <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.9rem' }}>
                             {venue.phone}
                           </Typography>
@@ -996,7 +996,7 @@ const WorkspaceManagement: React.FC = () => {
                       )}
                       {venue.email && (
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <Email sx={{ color: 'text.secondary', fontSize: 16, mr: 1.5 }} />
+                          <Email sx={{ color: 'text.secondary', fontSize: 14, mr: 1.5 }} />
                           <Typography 
                             variant="body2" 
                             color="text.secondary" 
@@ -1059,7 +1059,7 @@ const WorkspaceManagement: React.FC = () => {
             >
               <Restaurant
                 sx={{
-                  fontSize: 40,
+                  fontSize: 26,
                   color: '#1565c0',
                 }}
               />
@@ -1181,7 +1181,7 @@ const WorkspaceManagement: React.FC = () => {
             {/* Basic Information */}
             <Grid item xs={12}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                <Business sx={{ color: 'primary.main', fontSize: 20 }} />
+                <Business sx={{ color: 'primary.main', fontSize: 14 }} />
                 <Typography variant="subtitle1" fontWeight="600">
                   Basic Information
                 </Typography>
@@ -1257,7 +1257,7 @@ const WorkspaceManagement: React.FC = () => {
             <Grid item xs={12}>
               <Divider sx={{ my: 2 }} />
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                <Map sx={{ color: 'primary.main', fontSize: 20 }} />
+                <Map sx={{ color: 'primary.main', fontSize: 14 }} />
                 <Typography variant="subtitle1" fontWeight="600">
                   Location Details
                 </Typography>
@@ -1361,7 +1361,7 @@ const WorkspaceManagement: React.FC = () => {
             <Grid item xs={12}>
               <Divider sx={{ my: 2 }} />
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                <Phone sx={{ color: 'primary.main', fontSize: 20 }} />
+                <Phone sx={{ color: 'primary.main', fontSize: 14 }} />
                 <Typography variant="subtitle1" fontWeight="600">
                   Contact Information
                 </Typography>
@@ -1411,7 +1411,7 @@ const WorkspaceManagement: React.FC = () => {
             <Grid item xs={12}>
               <Divider sx={{ my: 2 }} />
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                <AttachMoney sx={{ color: 'primary.main', fontSize: 20 }} />
+                <AttachMoney sx={{ color: 'primary.main', fontSize: 14 }} />
                 <Typography variant="subtitle1" fontWeight="600">
                   Additional Settings
                 </Typography>

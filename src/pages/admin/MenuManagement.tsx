@@ -629,7 +629,7 @@ const MenuManagement: React.FC = () => {
             {/* Header Content */}
             <Box sx={{ flex: 1 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                <Restaurant sx={{ fontSize: 32, mr: 1.5, color: 'text.primary', opacity: 0.9 }} />
+                <Restaurant sx={{ fontSize: 26, mr: 1.5, color: 'text.primary', opacity: 0.9 }} />
                 <Typography
                   variant="h4"
                   component="h1"
@@ -670,7 +670,7 @@ const MenuManagement: React.FC = () => {
                   border: '1px solid rgba(0, 0, 0, 0.1)',
                 }}
               >
-                <Store sx={{ fontSize: 18, mr: 1, color: 'primary.main', opacity: 0.9 }} />
+                <Store sx={{ fontSize: 14, mr: 1, color: 'primary.main', opacity: 0.9 }} />
                 <Typography variant="body2" fontWeight="500" color="text.primary">
                   {getVenueDisplayName()}
                 </Typography>
@@ -842,7 +842,7 @@ const MenuManagement: React.FC = () => {
                           justifyContent: 'center'
                         }}
                       >
-                        <Category sx={{ color: 'white', fontSize: 24 }} />
+                        <Category sx={{ color: 'white', fontSize: 14 }} />
                       </Box>
                       <Box>
                         <Typography variant="h5" fontWeight="700" sx={{ color: 'text.primary', mb: 0.5 }}>
@@ -896,7 +896,7 @@ const MenuManagement: React.FC = () => {
                           mb: 3
                         }}
                       >
-                        <Category sx={{ fontSize: 40, color: 'text.secondary' }} />
+                        <Category sx={{ fontSize: 26, color: 'text.secondary' }} />
                       </Box>
                       
                       <Typography variant="h6" fontWeight="600" gutterBottom color="text.primary">
@@ -959,7 +959,7 @@ const MenuManagement: React.FC = () => {
                                       backgroundColor: 'primary.main',
                                       border: '3px solid',
                                       borderColor: 'grey.100',
-                                      fontSize: '1.5rem',
+                                      fontSize: '1rem',
                                       fontWeight: 700,
                                       color: 'white'
                                     }}

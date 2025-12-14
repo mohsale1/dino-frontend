@@ -281,7 +281,7 @@ export const LoadingError: React.FC<BaseErrorProps & {
         <Paper sx={{ p: 4, textAlign: 'center' }}>
           <Box sx={{ mb: 2 }}>
             <div className="animate-spin">
-              <Refresh sx={{ fontSize: 48, color: 'primary.main' }} />
+              <Refresh sx={{ fontSize: 14, color: 'primary.main' }} />
             </div>
           </Box>
           <Typography variant="h6" color="text.secondary">

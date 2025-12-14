@@ -473,7 +473,7 @@ const TableManagement = () => {
             {/* Header Content */}
             <Box sx={{ flex: 1 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                <TableRestaurant sx={{ fontSize: 32, mr: 1.5, color: 'text.primary', opacity: 0.9 }} />
+                <TableRestaurant sx={{ fontSize: 26, mr: 1.5, color: 'text.primary', opacity: 0.9 }} />
                 <Typography
                   variant="h4"
                   component="h1"
@@ -515,7 +515,7 @@ const TableManagement = () => {
                     border: '1px solid rgba(0, 0, 0, 0.1)',
                   }}
                 >
-                  <Store sx={{ fontSize: 18, mr: 1, color: 'primary.main', opacity: 0.9 }} />
+                  <Store sx={{ fontSize: 14, mr: 1, color: 'primary.main', opacity: 0.9 }} />
                   <Typography variant="body2" fontWeight="500" color="text.primary">
                     {getVenueDisplayName()}
                   </Typography>

@@ -116,7 +116,7 @@ const MenuPerformanceTab: React.FC<MenuPerformanceTabProps> = ({ menuPerformance
           <CardContent sx={{ p: 3 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Assessment sx={{ color: 'primary.main', fontSize: 28 }} />
+                <Assessment sx={{ color: 'primary.main', fontSize: 14 }} />
                 <Typography variant="h6" sx={{ fontWeight: 700, color: 'text.primary' }}>
                   Menu Performance Overview
                 </Typography>
@@ -255,7 +255,7 @@ const MenuPerformanceTab: React.FC<MenuPerformanceTabProps> = ({ menuPerformance
                 </Box>
               )) : (
                 <Box sx={{ textAlign: 'center', py: 4 }}>
-                  <Restaurant sx={{ fontSize: 48, color: 'grey.400', mb: 1 }} />
+                  <Restaurant sx={{ fontSize: 14, color: 'grey.400', mb: 1 }} />
                   <Typography variant="body2" color="text.secondary">
                     No category data available
                   </Typography>
@@ -375,7 +375,7 @@ const MenuPerformanceTab: React.FC<MenuPerformanceTabProps> = ({ menuPerformance
                           </TableCell>
                           <TableCell align="center">
                             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
-                              <Star sx={{ fontSize: 16, color: 'warning.main' }} />
+                              <Star sx={{ fontSize: 14, color: 'warning.main' }} />
                               <Typography variant="body2" sx={{ fontWeight: 600 }}>
                                 {item.rating || 4.0}
                               </Typography>
@@ -405,10 +405,10 @@ const MenuPerformanceTab: React.FC<MenuPerformanceTabProps> = ({ menuPerformance
                           <TableCell align="center">
                             <Stack direction="row" spacing={0.5} justifyContent="center">
                               <IconButton size="small" color="primary">
-                                <Visibility sx={{ fontSize: 18 }} />
+                                <Visibility sx={{ fontSize: 14 }} />
                               </IconButton>
                               <IconButton size="small" color="secondary">
-                                <Edit sx={{ fontSize: 18 }} />
+                                <Edit sx={{ fontSize: 14 }} />
                               </IconButton>
                             </Stack>
                           </TableCell>

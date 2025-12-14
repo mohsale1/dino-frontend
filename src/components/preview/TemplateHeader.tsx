@@ -41,7 +41,7 @@ const TemplateHeader: React.FC<TemplateHeaderProps> = ({
             border: `2px solid ${alpha('#fff', 0.3)}`,
           }}
         >
-          <Typography variant="h6" fontWeight="700" sx={{ fontSize: '1.25rem' }}>
+          <Typography variant="h6" fontWeight="700" sx={{ fontSize: '1rem' }}>
             {venueName.charAt(0)}
           </Typography>
         </Box>
@@ -166,7 +166,7 @@ const TemplateHeader: React.FC<TemplateHeaderProps> = ({
             boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
           }}
         >
-          <Typography variant="h4" fontWeight="700" sx={{ fontSize: '1.75rem' }}>
+          <Typography variant="h4" fontWeight="700" sx={{ fontSize: '1rem' }}>
             {venueName.charAt(0)}
           </Typography>
         </Box>
@@ -175,7 +175,7 @@ const TemplateHeader: React.FC<TemplateHeaderProps> = ({
           variant="h5"
           fontWeight="700"
           sx={{
-            fontSize: '1.25rem',
+            fontSize: '1rem',
             mb: 0.5,
             fontFamily: template.typography.headerFont,
           }}

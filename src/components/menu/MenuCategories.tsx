@@ -64,7 +64,7 @@ const MenuCategories: React.FC<MenuCategoriesProps> = ({
       }}>
         {/* Left side - Categories title */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Category sx={{ color: 'primary.main', fontSize: 20 }} />
+          <Category sx={{ color: 'primary.main', fontSize: 14 }} />
           <Typography variant="subtitle1" fontWeight="700" color="text.primary" sx={{ fontSize: '0.95rem' }}>
             Categories ({categories.length})
           </Typography>
@@ -74,7 +74,7 @@ const MenuCategories: React.FC<MenuCategoriesProps> = ({
         <Button
           variant="outlined"
           size="small"
-          startIcon={<Add sx={{ fontSize: 18 }} />}
+          startIcon={<Add sx={{ fontSize: 14 }} />}
           onClick={onAddCategory}
           sx={{ 
             borderRadius: 1.5,
@@ -104,7 +104,7 @@ const MenuCategories: React.FC<MenuCategoriesProps> = ({
           textAlign: 'center'
         }}>
           <Category sx={{ 
-            fontSize: 48, 
+            fontSize: 14, 
             color: 'text.disabled', 
             mb: 1.5 
           }} />

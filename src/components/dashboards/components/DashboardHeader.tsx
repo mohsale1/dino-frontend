@@ -84,7 +84,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           {/* Header Content */}
           <Box sx={{ flex: 1 }} data-tour="dashboard-header">
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.75 }}>
-              <DashboardIcon sx={{ fontSize: 28, mr: 1.25, color: 'text.primary', opacity: 0.9 }} />
+              <DashboardIcon sx={{ fontSize: 14, mr: 1.25, color: 'text.primary', opacity: 0.9 }} />
               <Typography
                 variant="h5"
                 component="h1"
@@ -125,7 +125,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                 border: '1px solid rgba(0, 0, 0, 0.1)',
               }}
             >
-              <Business sx={{ fontSize: 16, mr: 0.75, color: 'primary.main', opacity: 0.9 }} />
+              <Business sx={{ fontSize: 14, mr: 0.75, color: 'primary.main', opacity: 0.9 }} />
               <Typography variant="caption" fontWeight="500" color="text.primary" sx={{ fontSize: '0.75rem' }}>
                 {getSubtitle()}
               </Typography>

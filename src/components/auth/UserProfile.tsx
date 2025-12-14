@@ -212,7 +212,7 @@ const UserProfile: React.FC = () => {
                   borderColor: 'primary.main',
                   boxShadow: 3,
                   backgroundColor: '#4CAF50',
-                  fontSize: '2rem'
+                  fontSize: '1rem'
                 }}
                 onLoad={() => {                }}
                 onError={() => {                  // Don't clear avatar, just show fallback

@@ -117,7 +117,7 @@ const StatsSection: React.FC = () => {
                     color: stat.color,
                   }}
                 >
-                  {React.createElement(stat.icon, { sx: { fontSize: 32 } })}
+                  {React.createElement(stat.icon, { sx: { fontSize: 26 } })}
                 </Box>
 
                 {/* Counter */}

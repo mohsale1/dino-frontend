@@ -138,7 +138,7 @@ const KanbanOrderCard: React.FC<KanbanOrderCardProps> = ({
               },
             }}
           >
-            <Visibility sx={{ fontSize: 18 }} />
+            <Visibility sx={{ fontSize: 14 }} />
           </IconButton>
         </Box>
 
@@ -165,7 +165,7 @@ const KanbanOrderCard: React.FC<KanbanOrderCardProps> = ({
                 color: 'white',
               }}
             >
-              <TableRestaurant sx={{ fontSize: 16 }} />
+              <TableRestaurant sx={{ fontSize: 14 }} />
             </Box>
             <Box flex={1}>
               <Typography variant="caption" color="text.secondary" display="block" sx={{ lineHeight: 1.2, fontSize: '0.7rem' }}>
@@ -294,7 +294,7 @@ const KanbanOrderCard: React.FC<KanbanOrderCardProps> = ({
               gap: 0.75,
             }}
           >
-            <Timer sx={{ fontSize: 16, color: 'warning.main' }} />
+            <Timer sx={{ fontSize: 14, color: 'warning.main' }} />
             <Typography variant="caption" color="warning.main" fontWeight="600" sx={{ fontSize: '0.7rem' }}>
               In Kitchen
             </Typography>

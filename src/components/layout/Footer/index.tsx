@@ -113,7 +113,7 @@ const Footer: React.FC<FooterProps> = ({ variant = 'default' }) => {
           }}>
             <Restaurant 
               sx={{ 
-                fontSize: 20,
+                fontSize: 14,
                 animation: `${wave} 2s ease-in-out infinite`,
               }} 
             />
@@ -256,7 +256,7 @@ const Footer: React.FC<FooterProps> = ({ variant = 'default' }) => {
                       animation: `${pulse} 2s ease-in-out infinite`,
                       animationDelay: `${index * 0.5}s`,
                       '& svg': {
-                        fontSize: 32,
+                        fontSize: 26,
                         color: 'white'
                       }
                     }}
@@ -289,7 +289,7 @@ const Footer: React.FC<FooterProps> = ({ variant = 'default' }) => {
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
                 <Restaurant 
                   sx={{ 
-                    fontSize: 32, 
+                    fontSize: 26, 
                     color: 'white',
                     animation: `${rotate} 10s linear infinite`,
                   }} 
@@ -488,7 +488,7 @@ const Footer: React.FC<FooterProps> = ({ variant = 'default' }) => {
                         animationDelay: `${index * 0.3}s`,
                       }}
                     >
-                      {React.cloneElement(contact.icon, { sx: { fontSize: 20 } })}
+                      {React.cloneElement(contact.icon, { sx: { fontSize: 14 } })}
                     </Box>
                     <Typography variant="body2" sx={{ opacity: 0.9, flex: 1 }}>
                       {contact.text}

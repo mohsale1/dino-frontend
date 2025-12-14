@@ -347,7 +347,7 @@ const TourOverlay: React.FC<TourOverlayProps> = ({ className }) => {
                 <Typography
                   variant="h6"
                   sx={{
-                    fontSize: '1.2rem',
+                    fontSize: '1.05rem',
                     fontWeight: 700,
                     background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
                     WebkitBackgroundClip: 'text',

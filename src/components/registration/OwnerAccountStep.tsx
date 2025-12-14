@@ -38,7 +38,7 @@ const OwnerAccountStep: React.FC<OwnerAccountStepProps> = ({
             display: 'flex', 
             alignItems: 'center', 
             gap: 1,
-            fontSize: '1.25rem'
+            fontSize: '1rem'
           }}
         >
           <Person color="primary" />

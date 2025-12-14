@@ -159,11 +159,11 @@ const TablesOrdersTab: React.FC<TablesOrdersTabProps> = ({ tableStatuses: propTa
 
   const getTableStatusIcon = (status: string) => {
     switch (status) {
-      case 'occupied': return <People sx={{ fontSize: 16 }} />;
-      case 'available': return <CheckCircle sx={{ fontSize: 16 }} />;
-      case 'reserved': return <Schedule sx={{ fontSize: 16 }} />;
-      case 'maintenance': return <CleaningServices sx={{ fontSize: 16 }} />;
-      default: return <Warning sx={{ fontSize: 16 }} />;
+      case 'occupied': return <People sx={{ fontSize: 14 }} />;
+      case 'available': return <CheckCircle sx={{ fontSize: 14 }} />;
+      case 'reserved': return <Schedule sx={{ fontSize: 14 }} />;
+      case 'maintenance': return <CleaningServices sx={{ fontSize: 14 }} />;
+      default: return <Warning sx={{ fontSize: 14 }} />;
     }
   };
 

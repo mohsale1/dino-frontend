@@ -34,7 +34,7 @@ const VenueInformationStep: React.FC<VenueInformationStepProps> = ({
             display: 'flex', 
             alignItems: 'center', 
             gap: 1,
-            fontSize: '1.25rem'
+            fontSize: '1rem'
           }}
         >
           <Store color="primary" />

@@ -238,7 +238,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
                   <DinoLogo size={16} animated={false} />
                 </Avatar>
               ) : (
-                <AccountCircle sx={{ fontSize: 20 }} />
+                <AccountCircle sx={{ fontSize: 14 }} />
               )
             }
             sx={{
@@ -265,7 +265,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
           <Button
             variant="outlined"
             onClick={handleLogout}
-            startIcon={<ExitToApp sx={{ fontSize: 20 }} />}
+            startIcon={<ExitToApp sx={{ fontSize: 14 }} />}
             sx={{
               textTransform: 'none',
               fontWeight: 600,
@@ -295,7 +295,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
         <Button
           variant="outlined"
           onClick={() => navigate('/register')}
-          startIcon={<PersonAdd sx={{ fontSize: 20 }} />}
+          startIcon={<PersonAdd sx={{ fontSize: 14 }} />}
           sx={{
             textTransform: 'none',
             fontWeight: 600,
@@ -320,7 +320,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
         <Button
           variant="contained"
           onClick={() => navigate('/login')}
-          startIcon={<Login sx={{ fontSize: 20 }} />}
+          startIcon={<Login sx={{ fontSize: 14 }} />}
           sx={{
             fontWeight: 700,
             textTransform: 'none',

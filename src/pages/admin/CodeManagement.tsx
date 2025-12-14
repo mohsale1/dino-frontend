@@ -159,7 +159,7 @@ const CodeManagement: React.FC = () => {
             {/* Header Content */}
             <Box sx={{ flex: 1 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                <CodeIcon sx={{ fontSize: 32, mr: 1.5, color: 'text.primary', opacity: 0.9 }} />
+                <CodeIcon sx={{ fontSize: 26, mr: 1.5, color: 'text.primary', opacity: 0.9 }} />
                 <Typography
                   variant="h4"
                   component="h1"
@@ -352,7 +352,7 @@ const CodeManagement: React.FC = () => {
                           readOnly: true,
                           style: {
                             textAlign: 'center',
-                            fontSize: '1.75rem',
+                            fontSize: '1rem',
                             fontWeight: 700,
                             padding: '14px 0',
                             cursor: 'default',

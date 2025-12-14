@@ -367,7 +367,7 @@ const MenuItemsGrid: React.FC<MenuItemsGridProps> = ({
               maxWidth: '600px', 
               mx: 'auto', 
               lineHeight: 1.6,
-              fontSize: '1.1rem'
+              fontSize: '1rem'
             }}>
               {menuItems.length === 0 
                 ? 'Start building your menu by adding delicious items that will make your customers\' mouths water. Create categories and add your signature dishes!'
