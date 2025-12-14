@@ -2,7 +2,7 @@ import React, { ReactNode } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { Box, CircularProgress, Typography } from '@mui/material';
 import { useAuth } from '../../contexts/AuthContext';
-import { /* ROLE_NAMES, */ isAdminLevel } from '../../constants/roles';
+import { isAdminLevel } from '../../constants/roles';
 import { GenericErrorPage } from '../errors';
 
 interface ProtectedRouteProps {
