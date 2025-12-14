@@ -59,8 +59,8 @@ export const UserCard = React.memo<UserCardProps>(({
   return (
     <Card 
       sx={{ 
-        mb: 2, 
-        borderRadius: 2,
+        mb: 1, 
+        borderRadius: 1,
         border: '1px solid',
         borderColor: 'divider',
         transition: 'all 0.2s ease',
@@ -70,8 +70,8 @@ export const UserCard = React.memo<UserCardProps>(({
         }
       }}
     >
-      <CardContent sx={{ p: 2 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+      <CardContent sx={{ p: 1 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Avatar sx={{ width: 40, height: 40, bgcolor: 'primary.main' }}>
             {user.firstName.charAt(0)}{user.lastName.charAt(0)}
           </Avatar>
@@ -93,14 +93,14 @@ export const UserCard = React.memo<UserCardProps>(({
               label={user.role_display_name || getDisplayName(user.role)}
               color={getRoleColor(user.role)}
               size="small"
-              sx={{ fontSize: '0.75rem' }}
+              sx={{ fontSize: '0.7rem' }}
             />
             <Chip
               label={user.status === 'active' ? 'Active' : 'Inactive'}
               color={user.status === 'active' ? 'success' : 'default'}
               size="small"
               icon={user.status === 'active' ? <CheckCircle /> : <Cancel />}
-              sx={{ fontSize: '0.75rem' }}
+              sx={{ fontSize: '0.7rem' }}
             />
           </Box>
           <IconButton onClick={handleMenuClick} size="small">
@@ -170,7 +170,7 @@ export const UserTableRow = React.memo<UserTableRowProps>(({
       }}
     >
       <TableCell>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 2 } }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 1 } }}>
           <Avatar sx={{ 
             width: { xs: 32, sm: 40 }, 
             height: { xs: 32, sm: 40 },
@@ -183,7 +183,7 @@ export const UserTableRow = React.memo<UserTableRowProps>(({
               variant="subtitle2" 
               fontWeight="600"
               sx={{ 
-                fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                fontSize: { xs: '0.75rem', sm: '0.8rem' },
                 overflow: 'hidden',
                 textOverflow: 'ellipsis'
               }}
@@ -234,7 +234,7 @@ export const UserTableRow = React.memo<UserTableRowProps>(({
         />
       </TableCell>
       <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>
-        <Typography variant="body2" sx={{ fontSize: '0.75rem' }}>
+        <Typography variant="body2" sx={{ fontSize: '0.7rem' }}>
           {formatLastLogin(user.last_logged_in || user.updated_at || user.created_at)}
         </Typography>
       </TableCell>
@@ -277,14 +277,14 @@ export const EmptyState = React.memo<EmptyStateProps>(({
     <Box sx={{ 
       textAlign: 'center', 
       py: { xs: 6, sm: 8 }, 
-      px: { xs: 2, sm: 3 },
+      px: { xs: 1, sm: 3 },
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
       minHeight: 300,
     }}>
-      <Box sx={{ mb: 3, opacity: 0.7 }}>
+      <Box sx={{ mb: 1, opacity: 0.7 }}>
         {icon}
       </Box>
       <Typography 
@@ -292,7 +292,7 @@ export const EmptyState = React.memo<EmptyStateProps>(({
         fontWeight="600"
         color="text.primary"
         gutterBottom
-        sx={{ fontSize: { xs: '1.125rem', sm: '1.25rem' } }}
+        sx={{ fontSize: { xs: '0.95rem', sm: '1.25rem' } }}
       >
         {title}
       </Typography>
@@ -300,17 +300,17 @@ export const EmptyState = React.memo<EmptyStateProps>(({
         variant="body1" 
         color="text.secondary" 
         sx={{ 
-          mb: 3, 
+          mb: 1, 
           maxWidth: 400, 
           mx: 'auto',
-          fontSize: { xs: '0.875rem', sm: '1rem' },
+          fontSize: { xs: '0.8rem', sm: '1rem' },
           lineHeight: 1.6
         }}
       >
         {description}
       </Typography>
       {action && (
-        <Box sx={{ mt: 2 }}>
+        <Box sx={{ mt: 1 }}>
           {action}
         </Box>
       )}
@@ -329,7 +329,7 @@ export const UserRowSkeleton = React.memo<UserRowSkeletonProps>(({ isMobile = fa
   return (
     <TableRow>
       <TableCell>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Box
             sx={{
               width: { xs: 32, sm: 40 },
@@ -443,11 +443,11 @@ export const UserList = React.memo<UserListProps>(({
 }) => {
   if (loading) {
     return (
-      <Stack spacing={2}>
+      <Stack spacing={1}>
         {Array.from({ length: 5 }).map((_, index) => (
-          <Card key={index} sx={{ borderRadius: 2 }}>
-            <CardContent sx={{ p: 2 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Card key={index} sx={{ borderRadius: 1 }}>
+            <CardContent sx={{ p: 1 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <Box
                   sx={{
                     width: 40,
@@ -498,7 +498,7 @@ export const UserList = React.memo<UserListProps>(({
   }
 
   return (
-    <Stack spacing={2}>
+    <Stack spacing={1}>
       {users.map((user) => (
         <UserCard
           key={user.id}

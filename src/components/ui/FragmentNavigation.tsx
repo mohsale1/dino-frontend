@@ -59,7 +59,7 @@ const FragmentNavigation: React.FC<FragmentNavigationProps> = ({
             '&.Mui-selected': {
               color: theme.palette.primary.main,
               '& .MuiBottomNavigationAction-label': {
-                fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                fontSize: { xs: '0.75rem', sm: '0.8rem' },
                 fontWeight: 600,
               },
             },

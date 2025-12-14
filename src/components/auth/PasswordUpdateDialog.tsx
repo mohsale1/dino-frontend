@@ -101,26 +101,26 @@ const PasswordUpdateDialog: React.FC<PasswordUpdateDialogProps> = ({
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
       <DialogTitle>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Lock color="primary" />
           <Typography variant="h6">Update User Password</Typography>
         </Box>
       </DialogTitle>
       
       <DialogContent>
-        <Grid container spacing={2} sx={{ mt: 1 }}>
+        <Grid container spacing={1} sx={{ mt: 1 }}>
           {/* User Information */}
           <Grid item xs={12}>
             <Box
               sx={{
-                p: 2,
+                p: 1,
                 backgroundColor: 'grey.50',
                 borderRadius: 1,
                 border: '1px solid',
                 borderColor: 'divider',
               }}
             >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                 <Person color="primary" />
                 <Typography variant="h6">
                   {user.firstName} {user.lastName}

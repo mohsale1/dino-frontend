@@ -75,7 +75,7 @@ const DynamicMenuRenderer: React.FC<DynamicMenuRendererProps> = ({
       sx={{
         display: 'flex',
         flexDirection: 'row',
-        mb: 1.5,
+        mb: 1,
         borderRadius: card.borderRadius / 4,
         backgroundColor: colors.cardBackground,
         border: `1px solid ${alpha(colors.primary, 0.1)}`,
@@ -210,7 +210,7 @@ const DynamicMenuRenderer: React.FC<DynamicMenuRendererProps> = ({
             variant="body2"
             sx={{
               fontFamily: typography.bodyFont,
-              fontSize: '0.75rem',
+              fontSize: '0.7rem',
               color: colors.textSecondary,
               mb: 1,
               lineHeight: 1.4,
@@ -227,7 +227,7 @@ const DynamicMenuRenderer: React.FC<DynamicMenuRendererProps> = ({
 
         {/* Spicy Level */}
         {menuItem.spicyLevel && menuItem.spicyLevel > 0 && (
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.75 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
             {[...Array(Math.min(menuItem.spicyLevel, 3))].map((_, i) => (
               <LocalFireDepartment
                 key={i}
@@ -266,17 +266,17 @@ const DynamicMenuRenderer: React.FC<DynamicMenuRendererProps> = ({
           <Button
             variant="outlined"
             size="small"
-            startIcon={<Add sx={{ fontSize: 14 }} />}
+            startIcon={<Add sx={{ fontSize: 12 }} />}
             sx={{
               minWidth: 70,
-              height: 28,
+              height: 22,
               fontSize: '0.7rem',
               fontWeight: 600,
               borderColor: colors.primary,
               color: colors.primary,
               textTransform: 'none',
-              borderRadius: 1.5,
-              px: 1.5,
+              borderRadius: 1,
+              px: 1,
               '&:hover': {
                 backgroundColor: alpha(colors.primary, 0.08),
                 borderColor: colors.primary,
@@ -309,7 +309,7 @@ const DynamicMenuRenderer: React.FC<DynamicMenuRendererProps> = ({
             border: `1px dashed ${alpha(colors.primary, 0.2)}`,
           }}
         >
-          <Restaurant sx={{ fontSize: 14, color: colors.textSecondary, mb: 1.5, opacity: 0.5 }} />
+          <Restaurant sx={{ fontSize: 12, color: colors.textSecondary, mb: 1, opacity: 0.5 }} />
           <Typography variant="body2" color={colors.textSecondary} sx={{ fontSize: '0.85rem' }}>
             No menu items available
           </Typography>

@@ -145,7 +145,7 @@ const ContactPage: React.FC = () => {
         <Grid container spacing={6}>
           {/* Contact Form */}
           <Grid item xs={12} md={8}>
-            <Paper elevation={2} sx={{ p: 4 }}>
+            <Paper elevation={2} sx={{ p: 1 }}>
               <Typography variant="h4" gutterBottom fontWeight="600">
                 Send us a Message
               </Typography>
@@ -156,7 +156,7 @@ const ContactPage: React.FC = () => {
               {submitted && (
                 <Alert 
                   severity="success" 
-                  sx={{ mb: 3 }}
+                  sx={{ mb: 1 }}
                   icon={<CheckCircle />}
                 >
                   Thank you for your message! We'll get back to you soon.
@@ -164,7 +164,7 @@ const ContactPage: React.FC = () => {
               )}
 
               <Box component="form" onSubmit={handleSubmit}>
-                <Grid container spacing={3}>
+                <Grid container spacing={1}>
                   <Grid item xs={12} sm={6}>
                     <TextField
                       fullWidth
@@ -239,7 +239,7 @@ const ContactPage: React.FC = () => {
                       size="large"
                       disabled={!isFormValid || loading}
                       startIcon={loading ? <CircularProgress size={20} /> : <Send />}
-                      sx={{ px: 4, py: 1.5 }}
+                      sx={{ px: 4, py: 1 }}
                     >
                       {loading ? 'Sending...' : 'Send Message'}
                     </Button>
@@ -255,16 +255,16 @@ const ContactPage: React.FC = () => {
               <Typography variant="h5" gutterBottom fontWeight="600">
                 Contact Information
               </Typography>
-              <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+              <Typography variant="body1" color="text.secondary" sx={{ mb: 1 }}>
                 Reach out to us through any of these channels.
               </Typography>
 
-              <Grid container spacing={3}>
+              <Grid container spacing={1}>
                 {contactInfo.map((info, index) => (
                   <Grid item xs={12} key={index}>
                     <Card variant="outlined">
-                      <CardContent sx={{ p: 3 }}>
-                        <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: 2 }}>
+                      <CardContent sx={{ p: 1.5 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: 1 }}>
                           <Avatar
                             sx={{
                               backgroundColor: 'primary.main',
@@ -330,13 +330,13 @@ const ContactPage: React.FC = () => {
                     },
                   }}
                 >
-                  <CardContent sx={{ p: 3 }}>
+                  <CardContent sx={{ p: 1.5 }}>
                     <Avatar
                       sx={{
                         width: 56,
                         height: 56,
                         mx: 'auto',
-                        mb: 2,
+                        mb: 1,
                         backgroundColor: 'primary.main',
                       }}
                     >
@@ -347,7 +347,7 @@ const ContactPage: React.FC = () => {
                       {dept.title}
                     </Typography>
                     
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
                       {dept.description}
                     </Typography>
 
@@ -381,7 +381,7 @@ const ContactPage: React.FC = () => {
         <Grid container spacing={4}>
           {FAQS.slice(5, 9).map((faq, index) => (
             <Grid item xs={12} md={6} key={index}>
-              <Paper elevation={1} sx={{ p: 3, height: '100%' }}>
+              <Paper elevation={1} sx={{ p: 1.5, height: '100%' }}>
                 <Typography variant="h6" gutterBottom fontWeight="600">
                   {faq.question}
                 </Typography>
@@ -409,7 +409,7 @@ const ContactPage: React.FC = () => {
           <Paper
             elevation={2}
             sx={{
-              p: 4,
+              p: 1,
               textAlign: 'center',
               backgroundColor: 'primary.main',
               color: 'white',
@@ -418,7 +418,7 @@ const ContactPage: React.FC = () => {
             <Typography variant="h5" gutterBottom fontWeight="600">
               {COMPANY_INFO.name} Headquarters
             </Typography>
-            <Typography variant="body1" sx={{ mb: 2, opacity: 0.9 }}>
+            <Typography variant="body1" sx={{ mb: 1, opacity: 0.9 }}>
               {COMPANY_INFO.contact.address.full}
             </Typography>
             <Button

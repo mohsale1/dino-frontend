@@ -39,7 +39,7 @@ export const TableLoadingSkeleton: React.FC<{ rows?: number }> = ({ rows = 5 }) 
       <CardContent sx={{ p: 0 }}>
         {/* Table Header Skeleton */}
         <Box sx={{ p: { xs: 2, sm: 3 }, borderBottom: '1px solid', borderColor: 'divider' }}>
-          <Stack direction="row" spacing={2} alignItems="center">
+          <Stack direction="row" spacing={1} alignItems="center">
             <Skeleton variant="text" width={120} height={24} />
             <Skeleton variant="text" width={80} height={24} />
             <Skeleton variant="text" width={100} height={24} />
@@ -58,8 +58,8 @@ export const TableLoadingSkeleton: React.FC<{ rows?: number }> = ({ rows = 5 }) 
               borderColor: 'divider'
             }}
           >
-            <Stack direction="row" spacing={2} alignItems="center">
-              <Stack direction="row" spacing={2} alignItems="center" sx={{ flex: 1 }}>
+            <Stack direction="row" spacing={1} alignItems="center">
+              <Stack direction="row" spacing={1} alignItems="center" sx={{ flex: 1 }}>
                 <Skeleton variant="circular" width={40} height={40} />
                 <Box sx={{ flex: 1 }}>
                   <Skeleton variant="text" width="60%" height={20} />
@@ -83,7 +83,7 @@ export const CardLoadingSkeleton: React.FC<{ count?: number }> = ({ count = 3 })
   const theme = useTheme();
 
   return (
-    <Stack spacing={3}>
+    <Stack spacing={1}>
       {Array.from({ length: count }).map((_, index) => (
         <Card 
           key={index}
@@ -95,7 +95,7 @@ export const CardLoadingSkeleton: React.FC<{ count?: number }> = ({ count = 3 })
           }}
         >
           <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-            <Stack spacing={2}>
+            <Stack spacing={1}>
               <Skeleton variant="text" width="40%" height={32} />
               <Skeleton variant="text" width="80%" height={24} />
               <Skeleton variant="rectangular" height={120} sx={{ borderRadius: 1 }} />
@@ -117,9 +117,9 @@ export const PageLoadingSkeleton: React.FC = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   return (
-    <Box sx={{ py: { xs: 2, sm: 4 } }}>
+    <Box sx={{ py: { xs: 1, sm: 4 } }}>
       {/* Header Skeleton */}
-      <Box sx={{ mb: { xs: 2, md: 3 } }}>
+      <Box sx={{ mb: { xs: 2, md: 1.5 } }}>
         <Stack 
           direction={{ xs: 'column', sm: 'row' }}
           justifyContent="space-between" 
@@ -157,10 +157,10 @@ export const InlineLoader: React.FC<{
   return (
     <Stack 
       direction="row" 
-      spacing={2} 
+      spacing={1} 
       alignItems="center" 
       justifyContent="center"
-      sx={{ py: 2 }}
+      sx={{ py: 1 }}
     >
       <CircularProgress size={size} color={color} />
       <Typography variant="body2" color="text.secondary">
@@ -198,12 +198,12 @@ export const FullPageLoader: React.FC<{
       }}
     >
       <Box sx={{ textAlign: 'center', maxWidth: 300 }}>
-        <CircularProgress size={48} sx={{ mb: 3 }} />
+        <CircularProgress size={48} sx={{ mb: 1 }} />
         <Typography variant="h6" fontWeight="600" gutterBottom>
           {message}
         </Typography>
         {showProgress && (
-          <Box sx={{ mt: 2, width: '100%' }}>
+          <Box sx={{ mt: 1, width: '100%' }}>
             <LinearProgress 
               variant="determinate" 
               value={progress} 
@@ -243,7 +243,7 @@ export const RetryLoader: React.FC<{
       <Typography variant="body1" color="text.secondary" gutterBottom>
         {message}
       </Typography>
-      <Box sx={{ mt: 2 }}>
+      <Box sx={{ mt: 1 }}>
         {isRetrying ? (
           <InlineLoader message="Retrying..." />
         ) : (
@@ -255,14 +255,14 @@ export const RetryLoader: React.FC<{
               alignItems: 'center',
               gap: 1,
               px: 3,
-              py: 1.5,
+              py: 1,
               backgroundColor: 'primary.main',
               color: 'white',
               border: 'none',
-              borderRadius: 2,
+              borderRadius: 1,
               cursor: 'pointer',
               fontWeight: 600,
-              fontSize: '0.875rem',
+              fontSize: '0.8rem',
               transition: 'all 0.2s ease',
               '&:hover': {
                 backgroundColor: 'primary.dark',
@@ -298,9 +298,9 @@ export const EmptyState: React.FC<{
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   return (
-    <Box sx={{ textAlign: 'center', py: { xs: 6, sm: 8 }, px: { xs: 2, sm: 3 } }}>
+    <Box sx={{ textAlign: 'center', py: { xs: 6, sm: 8 }, px: { xs: 1, sm: 3 } }}>
       {icon && (
-        <Box sx={{ mb: 3 }}>
+        <Box sx={{ mb: 1 }}>
           {icon}
         </Box>
       )}
@@ -316,13 +316,13 @@ export const EmptyState: React.FC<{
         <Typography 
           variant="body1" 
           color="text.secondary" 
-          sx={{ mb: 3, maxWidth: 400, mx: 'auto' }}
+          sx={{ mb: 1, maxWidth: 400, mx: 'auto' }}
         >
           {description}
         </Typography>
       )}
       {action && (
-        <Box sx={{ mt: 3 }}>
+        <Box sx={{ mt: 1 }}>
           {action}
         </Box>
       )}
@@ -348,31 +348,31 @@ export const SmartLoading: React.FC<SmartLoadingProps> = ({
     switch (type) {
       case 'menu':
         return {
-          icon: <Restaurant sx={{ fontSize: 14, color: 'primary.main' }} />,
+          icon: <Restaurant sx={{ fontSize: 12, color: 'primary.main' }} />,
           defaultMessage: 'Loading delicious menu items...',
           skeleton: 'menu' as const,
         };
       case 'dashboard':
         return {
-          icon: <Dashboard sx={{ fontSize: 14, color: 'primary.main' }} />,
+          icon: <Dashboard sx={{ fontSize: 12, color: 'primary.main' }} />,
           defaultMessage: 'Preparing your dashboard...',
           skeleton: 'dashboard' as const,
         };
       case 'orders':
         return {
-          icon: <Assignment sx={{ fontSize: 14, color: 'primary.main' }} />,
+          icon: <Assignment sx={{ fontSize: 12, color: 'primary.main' }} />,
           defaultMessage: 'Fetching latest orders...',
           skeleton: 'list' as const,
         };
       case 'tables':
         return {
-          icon: <TableRestaurant sx={{ fontSize: 14, color: 'primary.main' }} />,
+          icon: <TableRestaurant sx={{ fontSize: 12, color: 'primary.main' }} />,
           defaultMessage: 'Loading table information...',
           skeleton: 'table' as const,
         };
       case 'users':
         return {
-          icon: <MenuBook sx={{ fontSize: 14, color: 'primary.main' }} />,
+          icon: <MenuBook sx={{ fontSize: 12, color: 'primary.main' }} />,
           defaultMessage: 'Loading user data...',
           skeleton: 'list' as const,
         };
@@ -394,7 +394,7 @@ export const SmartLoading: React.FC<SmartLoadingProps> = ({
   const config = getLoadingConfig();
 
   return (
-    <Box sx={{ p: 3 }}>
+    <Box sx={{ p: 1.5 }}>
       <Box
         sx={{
           display: 'flex',
@@ -402,7 +402,7 @@ export const SmartLoading: React.FC<SmartLoadingProps> = ({
           alignItems: 'center',
           justifyContent: 'center',
           mb: 4,
-          gap: 2,
+          gap: 1,
         }}
       >
         {config.icon}
@@ -463,8 +463,8 @@ export const EnhancedFullPageLoader: React.FC<{
         <Paper
           elevation={3}
           sx={{
-            borderRadius: 2,
-            p: 4,
+            borderRadius: 1,
+            p: 1,
             maxWidth: 400,
             mx: 2,
             textAlign: 'center',
@@ -479,12 +479,12 @@ export const EnhancedFullPageLoader: React.FC<{
             />
           ) : (
             <Box>
-              <CircularProgress size={48} sx={{ mb: 3 }} />
+              <CircularProgress size={48} sx={{ mb: 1 }} />
               <Typography variant="h6" fontWeight="600" gutterBottom>
                 {message}
               </Typography>
               {showProgress && (
-                <Box sx={{ mt: 2, width: '100%' }}>
+                <Box sx={{ mt: 1, width: '100%' }}>
                   <LinearProgress 
                     variant="determinate" 
                     value={progress} 

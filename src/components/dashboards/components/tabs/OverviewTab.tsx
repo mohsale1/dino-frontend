@@ -63,7 +63,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ dashboardData, stats, analyti
   const popularItems = analyticsData?.popular_items || dashboardData?.analytics?.popular_items || [];
 
   return (
-    <Grid container spacing={3}>
+    <Grid container spacing={1}>
       {/* Enhanced Revenue Chart - Full Width */}
       <FlagGate flag="dashboard.showRevenueChart">
         <Grid item xs={12}>
@@ -95,8 +95,8 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ dashboardData, stats, analyti
             borderColor: 'divider',
             height: '100%'
           }}>
-            <CardContent sx={{ p: 3 }}>
-              <Typography variant="h6" sx={{ fontWeight: 700, mb: 3, color: 'text.primary' }}>
+            <CardContent sx={{ p: 1.5 }}>
+              <Typography variant="h6" sx={{ fontWeight: 700, mb: 1, color: 'text.primary' }}>
                 Top Menu Items
               </Typography>
               
@@ -127,11 +127,11 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ dashboardData, stats, analyti
                   flexDirection: 'column', 
                   py: 6,
                   backgroundColor: 'grey.50',
-                  borderRadius: 2,
+                  borderRadius: 1,
                   border: '2px dashed',
                   borderColor: 'grey.300'
                 }}>
-                  <Restaurant sx={{ fontSize: 14, color: 'grey.400', mb: 2 }} />
+                  <Restaurant sx={{ fontSize: 12, color: 'grey.400', mb: 1 }} />
                   <Typography variant="h6" color="text.secondary">No Menu Data</Typography>
                 </Box>
               )}
@@ -150,8 +150,8 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ dashboardData, stats, analyti
             borderColor: 'divider',
             height: '100%'
           }}>
-            <CardContent sx={{ p: 3 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+            <CardContent sx={{ p: 1.5 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                 <Typography variant="h6" sx={{ fontWeight: 700, color: 'text.primary' }}>
                   Recent Activity
                 </Typography>
@@ -182,10 +182,10 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ dashboardData, stats, analyti
                       <ListItemIcon>
                         <Avatar sx={{ 
                           backgroundColor: 'primary.main', 
-                          width: 36, 
-                          height: 36 
+                          width: 22, 
+                          height: 22 
                         }}>
-                          <ShoppingCart sx={{ fontSize: 14 }} />
+                          <ShoppingCart sx={{ fontSize: 12 }} />
                         </Avatar>
                       </ListItemIcon>
                       <ListItemText
@@ -216,7 +216,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ dashboardData, stats, analyti
                                 ₹{((activity.subtotal || 0) + (activity.tax_amount || 0) - (activity.discount_amount || 0)).toFixed(2)}
                               </Typography>
                               <Box component="span" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                <AccessTime sx={{ fontSize: 14, color: 'text.secondary' }} />
+                                <AccessTime sx={{ fontSize: 12, color: 'text.secondary' }} />
                                 <Typography component="span" variant="caption" color="text.secondary">
                                   {new Date(activity.createdAt).toLocaleTimeString()}
                                 </Typography>
@@ -236,11 +236,11 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ dashboardData, stats, analyti
                   flexDirection: 'column', 
                   py: 6,
                   backgroundColor: 'grey.50',
-                  borderRadius: 2,
+                  borderRadius: 1,
                   border: '2px dashed',
                   borderColor: 'grey.300'
                 }}>
-                  <ShoppingCart sx={{ fontSize: 14, color: 'grey.400', mb: 2 }} />
+                  <ShoppingCart sx={{ fontSize: 12, color: 'grey.400', mb: 1 }} />
                   <Typography variant="h6" color="text.secondary" gutterBottom>
                     No Recent Activity
                   </Typography>

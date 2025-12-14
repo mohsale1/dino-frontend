@@ -145,7 +145,7 @@ export const Card: React.FC<CardProps> = ({
   // Get variant-specific styles
   const getVariantStyles = () => {
     const baseStyles = {
-      borderRadius: 2,
+      borderRadius: 1,
       transition: shouldAnimate ? 'all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)' : 'none',
     };
 
@@ -203,9 +203,9 @@ export const Card: React.FC<CardProps> = ({
       case 'small':
         return { p: 1 };
       case 'large':
-        return { p: 3 };
+        return { p: 1.5 };
       default: // 'medium'
-        return { p: 2 };
+        return { p: 1 };
     }
   };
 
@@ -298,7 +298,7 @@ export const Card: React.FC<CardProps> = ({
     >
       {/* Custom header or standard header */}
       {header ? (
-        <Box sx={{ p: 2, pb: 0 }}>
+        <Box sx={{ p: 1, pb: 0 }}>
           {header}
         </Box>
       ) : (title || subtitle || avatar || showHeaderAction || headerAction) ? (
@@ -338,7 +338,7 @@ export const Card: React.FC<CardProps> = ({
       
       {/* Actions */}
       {actions && (
-        <CardActions sx={{ px: 2, pb: 2 }}>
+        <CardActions sx={{ px: 1, pb: 1 }}>
           {actions}
         </CardActions>
       )}

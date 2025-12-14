@@ -714,7 +714,7 @@ const UserManagement: React.FC = () => {
           </Box>
           
           <Card sx={{ 
-            borderRadius: 2,
+            borderRadius: 1,
             border: '1px solid',
             borderColor: 'divider',
             transition: 'all 0.2s ease-in-out',
@@ -723,15 +723,15 @@ const UserManagement: React.FC = () => {
               transform: 'translateY(-2px)',
             },
           }}>
-            <CardContent sx={{ p: 4, textAlign: 'center' }}>
-              <People sx={{ fontSize: 64, color: 'error.main', mb: 2 }} />
+            <CardContent sx={{ p: 1, textAlign: 'center' }}>
+              <People sx={{ fontSize: 64, color: 'error.main', mb: 1 }} />
               <Typography variant="h5" fontWeight="600" gutterBottom color="error.main">
                 Unable to Load Users
               </Typography>
-              <Typography variant="body1" color="text.secondary" sx={{ mb: 3, maxWidth: 500, mx: 'auto' }}>
+              <Typography variant="body1" color="text.secondary" sx={{ mb: 1, maxWidth: 500, mx: 'auto' }}>
                 {error}
               </Typography>
-              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} justifyContent="center">
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} justifyContent="center">
                 <Button 
                   variant="contained" 
                   startIcon={<Refresh />}
@@ -784,10 +784,10 @@ const UserManagement: React.FC = () => {
               alignItems: 'center',
               justifyContent: 'center',
               minHeight: '400px',
-              borderRadius: 2,
+              borderRadius: 1,
               border: '1px solid',
               borderColor: 'divider',
-              p: 4,
+              p: 1,
               transition: 'all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
               '&:hover': {
                 borderColor: 'primary.main',
@@ -799,7 +799,7 @@ const UserManagement: React.FC = () => {
               sx={{
                 fontSize: 80,
                 color: 'text.secondary',
-                mb: 2,
+                mb: 1,
               }}
             />
             <Typography variant="h5" fontWeight="600" gutterBottom color="text.secondary">
@@ -853,8 +853,8 @@ const UserManagement: React.FC = () => {
               flexDirection: { xs: 'column', md: 'row' },
               justifyContent: 'space-between',
               alignItems: { xs: 'flex-start', md: 'center' },
-              gap: { xs: 2, md: 3 },
-              py: { xs: 3, sm: 4 },
+              gap: { xs: 1, md: 1.5 },
+              py: { xs: 1, sm: 4 },
               px: { xs: 3, sm: 4 },
             }}
           >
@@ -880,7 +880,7 @@ const UserManagement: React.FC = () => {
               <Typography
                 variant="body1"
                 sx={{
-                  fontSize: { xs: '0.875rem', sm: '1rem' },
+                  fontSize: { xs: '0.8rem', sm: '1rem' },
                   fontWeight: 400,
                   mb: 1,
                   maxWidth: '500px',
@@ -897,13 +897,13 @@ const UserManagement: React.FC = () => {
                     alignItems: 'center',
                     backgroundColor: 'rgba(255, 255, 255, 0.9)',
                     backdropFilter: 'blur(10px)',
-                    px: 2,
+                    px: 1,
                     py: 1,
-                    borderRadius: 2,
+                    borderRadius: 1,
                     border: '1px solid rgba(0, 0, 0, 0.1)',
                   }}
                 >
-                  <Business sx={{ fontSize: 14, mr: 1, color: 'primary.main', opacity: 0.9 }} />
+                  <Business sx={{ fontSize: 12, mr: 1, color: 'primary.main', opacity: 0.9 }} />
                   <Typography variant="body2" fontWeight="500" color="text.primary">
                     {venue.name}
                   </Typography>
@@ -915,7 +915,7 @@ const UserManagement: React.FC = () => {
             <Box
               sx={{
                 display: 'flex',
-                gap: 1.5,
+                gap: 1,
                 flexDirection: { xs: 'row', sm: 'row' },
                 flexWrap: 'wrap',
                 alignItems: 'center',
@@ -934,9 +934,9 @@ const UserManagement: React.FC = () => {
                       fontWeight: 600,
                       px: 3,
                       py: 1,
-                      borderRadius: 2,
+                      borderRadius: 1,
                       textTransform: 'none',
-                      fontSize: '0.875rem',
+                      fontSize: '0.8rem',
                       boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
                       '&:hover': {
                         backgroundColor: 'primary.dark',
@@ -1010,7 +1010,7 @@ const UserManagement: React.FC = () => {
 
           {/* Statistics Cards */}
           <FlagGate flag="users.showUserStats">
-            <Grid container spacing={3} sx={{ mb: 4 }}>
+            <Grid container spacing={1} sx={{ mb: 4 }}>
             {[
               {
                 label: 'Total Users',
@@ -1050,7 +1050,7 @@ const UserManagement: React.FC = () => {
                 <Card
                   sx={{
                     p: { xs: 2.5, sm: 3 },
-                    borderRadius: 2,
+                    borderRadius: 1,
                     backgroundColor: `${stat.color}08`,
                     border: `1px solid ${stat.color}33`,
                     transition: 'all 0.3s ease',
@@ -1061,13 +1061,13 @@ const UserManagement: React.FC = () => {
                     },
                   }}
                 >
-                  <Stack direction="row" alignItems="center" spacing={2}>
+                  <Stack direction="row" alignItems="center" spacing={1}>
                     {/* Icon on the left */}
                     <Box
                       sx={{
                         width: { xs: 40, sm: 48 },
                         height: { xs: 40, sm: 48 },
-                        borderRadius: 2,
+                        borderRadius: 1,
                         backgroundColor: stat.color,
                         display: 'flex',
                         alignItems: 'center',
@@ -1100,7 +1100,7 @@ const UserManagement: React.FC = () => {
                         color="text.secondary"
                         fontWeight="600"
                         sx={{ 
-                          fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                          fontSize: { xs: '0.75rem', sm: '0.8rem' },
                           lineHeight: 1.2,
                           display: '-webkit-box',
                           WebkitLineClamp: 2,
@@ -1120,9 +1120,9 @@ const UserManagement: React.FC = () => {
 
           {/* Filters and Search */}
           <FlagGate flag="users.showUserFilters">
-            <Card sx={{ mb: 4, borderRadius: 2 }}>
+            <Card sx={{ mb: 4, borderRadius: 1 }}>
             <CardContent>
-              <Grid container spacing={3} alignItems="center">
+              <Grid container spacing={1} alignItems="center">
                 <Grid item xs={12} md={4}>
                   <TextField
                     fullWidth
@@ -1172,7 +1172,7 @@ const UserManagement: React.FC = () => {
           {/* Users Table */}
           <Card 
             sx={{ 
-              borderRadius: 2,
+              borderRadius: 1,
               border: '1px solid',
               borderColor: 'divider',
               transition: 'all 0.2s ease-in-out',
@@ -1189,19 +1189,19 @@ const UserManagement: React.FC = () => {
                   flexDirection: 'column', 
                   alignItems: 'center', 
                   justifyContent: 'center',
-                  py: { xs: 4, sm: 6 },
+                  py: { xs: 1, sm: 6 },
                   textAlign: 'center'
                 }}>
                   <People sx={{ 
                     fontSize: { xs: 48, sm: 64 }, 
                     color: 'text.secondary', 
-                    mb: 2,
+                    mb: 1,
                     opacity: 0.5 
                   }} />
                   <Typography variant="h6" fontWeight="600" gutterBottom color="text.secondary" sx={{ fontSize: { xs: '1rem', sm: '1.25rem' } }}>
                     No Users Found
                   </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 400, fontSize: { xs: '0.875rem', sm: '0.875rem' } }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 400, fontSize: { xs: '0.8rem', sm: '0.8rem' } }}>
                     No users found for this venue. Users will appear here once they are assigned to this venue.
                   </Typography>
                 </Box>
@@ -1228,10 +1228,10 @@ const UserManagement: React.FC = () => {
                       <TableRow>
                         <TableCell sx={{ 
                           fontWeight: 600, 
-                          fontSize: { xs: '0.8125rem', sm: '0.875rem' },
+                          fontSize: { xs: '0.75rem', sm: '0.8rem' },
                           color: 'text.primary',
-                          py: { xs: 1.5, sm: 2 },
-                          px: { xs: 2, sm: 2 },
+                          py: { xs: 1, sm: 1 },
+                          px: { xs: 1, sm: 1 },
                           position: { xs: 'sticky', sm: 'static' },
                           left: 0,
                           backgroundColor: 'background.paper',
@@ -1242,30 +1242,30 @@ const UserManagement: React.FC = () => {
                         </TableCell>
                         <TableCell sx={{ 
                           fontWeight: 600, 
-                          fontSize: { xs: '0.8125rem', sm: '0.875rem' },
+                          fontSize: { xs: '0.75rem', sm: '0.8rem' },
                           color: 'text.primary',
-                          py: { xs: 1.5, sm: 2 },
-                          px: { xs: 2, sm: 2 },
+                          py: { xs: 1, sm: 1 },
+                          px: { xs: 1, sm: 1 },
                           minWidth: 100
                         }}>
                           Role
                         </TableCell>
                         <TableCell sx={{ 
                           fontWeight: 600, 
-                          fontSize: { xs: '0.8125rem', sm: '0.875rem' },
+                          fontSize: { xs: '0.75rem', sm: '0.8rem' },
                           color: 'text.primary',
-                          py: { xs: 1.5, sm: 2 },
-                          px: { xs: 2, sm: 2 },
+                          py: { xs: 1, sm: 1 },
+                          px: { xs: 1, sm: 1 },
                           minWidth: 100
                         }}>
                           Status
                         </TableCell>
                         <TableCell sx={{ 
                           fontWeight: 600, 
-                          fontSize: { xs: '0.8125rem', sm: '0.875rem' },
+                          fontSize: { xs: '0.75rem', sm: '0.8rem' },
                           color: 'text.primary',
-                          py: { xs: 1.5, sm: 2 },
-                          px: { xs: 2, sm: 2 },
+                          py: { xs: 1, sm: 1 },
+                          px: { xs: 1, sm: 1 },
                           display: { xs: 'none', md: 'table-cell' },
                           minWidth: 120
                         }}>
@@ -1273,10 +1273,10 @@ const UserManagement: React.FC = () => {
                         </TableCell>
                         <TableCell align="center" sx={{ 
                           fontWeight: 600, 
-                          fontSize: { xs: '0.8125rem', sm: '0.875rem' },
+                          fontSize: { xs: '0.75rem', sm: '0.8rem' },
                           color: 'text.primary',
-                          py: { xs: 1.5, sm: 2 },
-                          px: { xs: 2, sm: 2 },
+                          py: { xs: 1, sm: 1 },
+                          px: { xs: 1, sm: 1 },
                           minWidth: 80
                         }}>
                           Actions
@@ -1295,19 +1295,19 @@ const UserManagement: React.FC = () => {
                         }}
                       >
                         <TableCell sx={{ 
-                          py: { xs: 2, sm: 2.5 },
-                          px: { xs: 2, sm: 2 },
+                          py: { xs: 1, sm: 1.5 },
+                          px: { xs: 1, sm: 1 },
                           position: { xs: 'sticky', sm: 'static' },
                           left: 0,
                           backgroundColor: 'background.paper',
                           zIndex: 1,
                         }}>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1.5, sm: 2 } }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 1 } }}>
                             <Avatar 
                               sx={{ 
                                 width: { xs: 36, sm: 44 }, 
                                 height: { xs: 36, sm: 44 }, 
-                                fontSize: { xs: '0.875rem', sm: '1rem' },
+                                fontSize: { xs: '0.8rem', sm: '1rem' },
                                 fontWeight: 600,
                                 bgcolor: 'primary.main'
                               }}
@@ -1319,7 +1319,7 @@ const UserManagement: React.FC = () => {
                                 variant="subtitle2" 
                                 fontWeight="600"
                                 sx={{ 
-                                  fontSize: { xs: '0.875rem', sm: '0.9375rem' },
+                                  fontSize: { xs: '0.8rem', sm: '0.9375rem' },
                                   color: 'text.primary',
                                   mb: 0.5,
                                   lineHeight: 1.3
@@ -1355,7 +1355,7 @@ const UserManagement: React.FC = () => {
                             </Box>
                           </Box>
                         </TableCell>
-                        <TableCell sx={{ py: { xs: 2, sm: 2.5 }, px: { xs: 2, sm: 2 } }}>
+                        <TableCell sx={{ py: { xs: 1, sm: 1.5 }, px: { xs: 1, sm: 1 } }}>
                           <Typography 
                             variant="body2" 
                             sx={{ 
@@ -1368,12 +1368,12 @@ const UserManagement: React.FC = () => {
                             {user.role_display_name || getDisplayName(user.role)}
                           </Typography>
                         </TableCell>
-                        <TableCell sx={{ py: { xs: 2, sm: 2.5 }, px: { xs: 2, sm: 2 } }}>
+                        <TableCell sx={{ py: { xs: 1, sm: 1.5 }, px: { xs: 1, sm: 1 } }}>
                           <Chip
                             label={user.status || (user.isActive ? 'Active' : 'Inactive')}
                             color={user.isActive ? 'success' : 'default'}
                             size="small"
-                            icon={user.isActive ? <CheckCircle sx={{ fontSize: { xs: '0.875rem', sm: '1rem' } }} /> : <Cancel sx={{ fontSize: { xs: '0.875rem', sm: '1rem' } }} />}
+                            icon={user.isActive ? <CheckCircle sx={{ fontSize: { xs: '0.8rem', sm: '1rem' } }} /> : <Cancel sx={{ fontSize: { xs: '0.8rem', sm: '1rem' } }} />}
                             sx={{ 
                               fontSize: { xs: '0.75rem', sm: '0.8125rem' },
                               height: { xs: 24, sm: 28 },
@@ -1384,11 +1384,11 @@ const UserManagement: React.FC = () => {
                             }}
                           />
                         </TableCell>
-                        <TableCell sx={{ py: { xs: 2, sm: 2.5 }, px: { xs: 2, sm: 2 }, display: { xs: 'none', md: 'table-cell' } }}>
+                        <TableCell sx={{ py: { xs: 1, sm: 1.5 }, px: { xs: 1, sm: 1 }, display: { xs: 'none', md: 'table-cell' } }}>
                           <Typography 
                             variant="body2" 
                             sx={{ 
-                              fontSize: '0.8125rem',
+                              fontSize: '0.7rem',
                               color: 'text.secondary',
                               whiteSpace: 'nowrap'
                             }}
@@ -1396,7 +1396,7 @@ const UserManagement: React.FC = () => {
                             {formatLastLogin(user.last_login || user.updatedAt || user.createdAt)}
                           </Typography>
                         </TableCell>
-                        <TableCell sx={{ textAlign: 'center', py: { xs: 2, sm: 2.5 }, px: { xs: 2, sm: 2 } }}>
+                        <TableCell sx={{ textAlign: 'center', py: { xs: 1, sm: 1.5 }, px: { xs: 1, sm: 1 } }}>
                           <IconButton
                             onClick={(e) => handleMenuClick(e, user)}
                             size="small"
@@ -1409,7 +1409,7 @@ const UserManagement: React.FC = () => {
                               }
                             }}
                           >
-                            <MoreVert sx={{ fontSize: { xs: '1.125rem', sm: '1.25rem' } }} />
+                            <MoreVert sx={{ fontSize: { xs: '0.95rem', sm: '1.25rem' } }} />
                           </IconButton>
                         </TableCell>
                       </TableRow>
@@ -1504,7 +1504,7 @@ const UserManagement: React.FC = () => {
         }}
       >
         <DialogTitle sx={{ 
-          pb: { xs: 2, sm: 2 }, 
+          pb: { xs: 2, sm: 1 }, 
           px: { xs: 3, sm: 3 },
           pt: { xs: 2.5, sm: 3 },
           borderBottom: '1px solid',
@@ -1521,9 +1521,9 @@ const UserManagement: React.FC = () => {
           flex: 1,
           overflow: 'auto'
         }}>
-          <Stack spacing={{ xs: 2.5, sm: 3 }} sx={{ mt: { xs: 2, sm: 2.5 } }}>
+          <Stack spacing={{ xs: 2.5, sm: 3 }} sx={{ mt: { xs: 2, sm: 1.5 } }}>
             {/* Name Fields */}
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
               <TextField
                 fullWidth
                 label="First Name"
@@ -1556,7 +1556,7 @@ const UserManagement: React.FC = () => {
 
             {/* Password Fields - Only show for new users */}
             {editingUser && (
-              <Alert severity="info" sx={{ my: { xs: 3, sm: 2 } }}>
+              <Alert severity="info" sx={{ my: { xs: 3, sm: 1 } }}>
                 To update the password for this user, use the "Update Password" option from the user actions menu.
               </Alert>
             )}
@@ -1620,7 +1620,7 @@ const UserManagement: React.FC = () => {
             )}
 
             {/* Phone and Role */}
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
               <TextField
                 fullWidth
                 label="Phone"
@@ -1708,7 +1708,7 @@ const UserManagement: React.FC = () => {
               py: { xs: 1, sm: 1 },
               borderRadius: 1,
               backgroundColor: 'grey.50',
-              px: { xs: 2, sm: 2 }
+              px: { xs: 1, sm: 1 }
             }}>
               <FormControlLabel
                 control={
@@ -1736,7 +1736,7 @@ const UserManagement: React.FC = () => {
         <DialogActions sx={{ 
           px: { xs: 3, sm: 4 }, 
           pb: { xs: 2.5, sm: 3 },
-          pt: { xs: 2, sm: 2 },
+          pt: { xs: 2, sm: 1 },
           borderTop: '1px solid',
           borderColor: 'divider',
           gap: 1

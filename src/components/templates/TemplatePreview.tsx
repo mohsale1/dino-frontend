@@ -22,10 +22,10 @@ const TemplatePreview: React.FC<TemplatePreviewProps> = ({
       elevation={selected ? 8 : 2}
       onClick={onClick}
       sx={{
-        p: 2,
+        p: 1,
         cursor: 'pointer',
         border: selected ? '2px solid #1976d2' : '1px solid #e0e0e0',
-        borderRadius: 2,
+        borderRadius: 1,
         transition: 'all 0.3s ease',
         '&:hover': {
           elevation: 6,
@@ -45,7 +45,7 @@ const TemplatePreview: React.FC<TemplatePreviewProps> = ({
           justifyContent: 'center',
           color: config.textColor,
           fontWeight: 'bold',
-          fontSize: '0.875rem',
+          fontSize: '0.8rem',
           marginBottom: 1,
           position: 'relative',
           overflow: 'hidden'

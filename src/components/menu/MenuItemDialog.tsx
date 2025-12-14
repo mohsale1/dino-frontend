@@ -121,7 +121,7 @@ const MenuItemDialog: React.FC<MenuItemDialogProps> = ({
               maxWidth: '500px',
               maxHeight: '90vh',
               bgcolor: 'background.paper',
-              borderRadius: 2,
+              borderRadius: 1,
               boxShadow: 24,
               display: 'flex',
               flexDirection: 'column',
@@ -129,7 +129,7 @@ const MenuItemDialog: React.FC<MenuItemDialogProps> = ({
             }}
           >
             <AppBar position="static" color="default" elevation={0} sx={{ borderBottom: '1px solid', borderColor: 'divider' }}>
-              <Toolbar sx={{ px: { xs: 2, sm: 3 } }}>
+              <Toolbar sx={{ px: { xs: 1, sm: 3 } }}>
                 <Typography variant="h6" sx={{ flexGrow: 1 }}>
                   {item ? 'Edit Menu Item' : 'Add Menu Item'}
                 </Typography>
@@ -140,7 +140,7 @@ const MenuItemDialog: React.FC<MenuItemDialogProps> = ({
             </AppBar>
 
             <Box sx={{ overflow: 'auto', p: { xs: 2, sm: 3 } }}>
-              <Stack spacing={3}>
+              <Stack spacing={1}>
                 <TextField
                   fullWidth
                   label="Item Name"
@@ -155,7 +155,7 @@ const MenuItemDialog: React.FC<MenuItemDialogProps> = ({
                   value={formData.description}
                   onChange={(e) => handleChange('description', e.target.value)}
                 />
-                <Stack direction="row" spacing={2}>
+                <Stack direction="row" spacing={1}>
                   <TextField
                     fullWidth
                     label="Price (₹)"
@@ -217,7 +217,7 @@ const MenuItemDialog: React.FC<MenuItemDialogProps> = ({
                     ))}
                   </Select>
                 </FormControl>
-                <Stack direction="row" spacing={2}>
+                <Stack direction="row" spacing={1}>
                   <FormControlLabel
                     control={
                       <Switch
@@ -246,7 +246,7 @@ const MenuItemDialog: React.FC<MenuItemDialogProps> = ({
                     component="label"
                     startIcon={<CloudUpload />}
                     fullWidth
-                    sx={{ mb: 2 }}
+                    sx={{ mb: 1 }}
                   >
                     Upload Image
                     <input
@@ -276,7 +276,7 @@ const MenuItemDialog: React.FC<MenuItemDialogProps> = ({
             </Box>
 
             <Box sx={{ p: { xs: 2, sm: 3 }, borderTop: '1px solid', borderColor: 'divider', bgcolor: 'background.default' }}>
-              <Stack direction="row" spacing={2}>
+              <Stack direction="row" spacing={1}>
                 <Button onClick={onClose} fullWidth variant="outlined">
                   Cancel
                 </Button>
@@ -310,7 +310,7 @@ const MenuItemDialog: React.FC<MenuItemDialogProps> = ({
         </Typography>
       </DialogTitle>
       <DialogContent sx={{ px: 3, py: 4 }}>
-        <Grid container spacing={3} sx={{ mt: 1 }}>
+        <Grid container spacing={1} sx={{ mt: 1 }}>
           <Grid item xs={12} md={6}>
             <TextField
               fullWidth
@@ -396,7 +396,7 @@ const MenuItemDialog: React.FC<MenuItemDialogProps> = ({
             />
           </Grid>
           <Grid item xs={12} md={4}>
-            <Stack direction="row" spacing={2} sx={{ height: '100%', alignItems: 'center' }}>
+            <Stack direction="row" spacing={1} sx={{ height: '100%', alignItems: 'center' }}>
               <FormControlLabel
                 control={
                   <Switch
@@ -425,7 +425,7 @@ const MenuItemDialog: React.FC<MenuItemDialogProps> = ({
               variant="outlined"
               component="label"
               startIcon={<CloudUpload />}
-              sx={{ mb: 2 }}
+              sx={{ mb: 1 }}
             >
               Upload Image
               <input

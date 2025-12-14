@@ -87,16 +87,16 @@ export const Button: React.FC<ButtonProps> = ({
         return {
           ...baseStyles,
           minHeight: 32,
-          px: 2,
+          px: 1,
           py: 0.75,
-          fontSize: '0.8125rem',
+          fontSize: '0.7rem',
         };
       case 'large':
         return {
           ...baseStyles,
           minHeight: 48,
           px: 4,
-          py: 1.5,
+          py: 1,
           fontSize: '1rem',
         };
       default: // medium
@@ -105,7 +105,7 @@ export const Button: React.FC<ButtonProps> = ({
           minHeight: 40,
           px: 3,
           py: 1.25,
-          fontSize: '0.875rem',
+          fontSize: '0.8rem',
         };
     }
   };

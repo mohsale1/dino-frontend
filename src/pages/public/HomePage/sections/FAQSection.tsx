@@ -38,9 +38,9 @@ const FAQSection: React.FC = () => {
             sx={{
               color: 'primary.main',
               fontWeight: 700,
-              fontSize: '0.875rem',
+              fontSize: '0.8rem',
               letterSpacing: 1.5,
-              mb: 2,
+              mb: 1,
               display: 'block',
             }}
           >
@@ -51,7 +51,7 @@ const FAQSection: React.FC = () => {
             sx={{
               fontSize: { xs: '2rem', md: '3rem' },
               fontWeight: 700,
-              mb: 2,
+              mb: 1,
             }}
           >
             Frequently Asked Questions
@@ -77,7 +77,7 @@ const FAQSection: React.FC = () => {
               onChange={handleChange(`panel${index}`)}
               elevation={0}
               sx={{
-                mb: 2,
+                mb: 1,
                 border: '1px solid',
                 borderColor: expanded === `panel${index}` ? 'primary.main' : 'divider',
                 borderRadius: '12px !important',
@@ -102,7 +102,7 @@ const FAQSection: React.FC = () => {
                   />
                 }
                 sx={{
-                  py: 2,
+                  py: 1,
                   px: 3,
                   '& .MuiAccordionSummary-content': {
                     my: 1,

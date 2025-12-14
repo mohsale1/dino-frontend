@@ -81,7 +81,7 @@ const CategoryDialog: React.FC<CategoryDialogProps> = ({
               maxWidth: '450px',
               maxHeight: '85vh',
               bgcolor: 'background.paper',
-              borderRadius: 2,
+              borderRadius: 1,
               boxShadow: 24,
               display: 'flex',
               flexDirection: 'column',
@@ -89,7 +89,7 @@ const CategoryDialog: React.FC<CategoryDialogProps> = ({
             }}
           >
             <AppBar position="static" color="default" elevation={0} sx={{ borderBottom: '1px solid', borderColor: 'divider' }}>
-              <Toolbar sx={{ px: { xs: 2, sm: 3 } }}>
+              <Toolbar sx={{ px: { xs: 1, sm: 3 } }}>
                 <Typography variant="h6" sx={{ flexGrow: 1 }}>
                   {category ? 'Edit Category' : 'Add Category'}
                 </Typography>
@@ -100,7 +100,7 @@ const CategoryDialog: React.FC<CategoryDialogProps> = ({
             </AppBar>
 
             <Box sx={{ overflow: 'auto', p: { xs: 2, sm: 3 } }}>
-              <Stack spacing={3}>
+              <Stack spacing={1}>
                 <TextField
                   fullWidth
                   label="Category Name"
@@ -119,7 +119,7 @@ const CategoryDialog: React.FC<CategoryDialogProps> = ({
             </Box>
 
             <Box sx={{ p: { xs: 2, sm: 3 }, borderTop: '1px solid', borderColor: 'divider', bgcolor: 'background.default' }}>
-              <Stack direction="row" spacing={2}>
+              <Stack direction="row" spacing={1}>
                 <Button onClick={onClose} fullWidth variant="outlined">
                   Cancel
                 </Button>
@@ -153,7 +153,7 @@ const CategoryDialog: React.FC<CategoryDialogProps> = ({
         </Typography>
       </DialogTitle>
       <DialogContent sx={{ px: 3, py: 4 }}>
-        <Grid container spacing={3} sx={{ mt: 1 }}>
+        <Grid container spacing={1} sx={{ mt: 1 }}>
           <Grid item xs={12}>
             <TextField
               fullWidth

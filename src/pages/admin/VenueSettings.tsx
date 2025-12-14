@@ -517,14 +517,14 @@ const VenueSettings: React.FC = () => {
   if (false) { // Disabled blocking UI
     return (
       <Box sx={{ pt: { xs: '56px', sm: '64px' }, py: 4, width: '100%' }}>        <Container maxWidth='xl'>
-          <Alert severity='error' sx={{ mb: 3 }}>
+          <Alert severity='error' sx={{ mb: 1 }}>
             Placeholder
           </Alert>
           <Box sx={{ textAlign: 'center' }}>
             <Button 
               variant='contained' 
               onClick={() => window.location.reload()}
-              sx={{ mt: 2 }}
+              sx={{ mt: 1 }}
             >
               Reload Page
             </Button>
@@ -573,8 +573,8 @@ const VenueSettings: React.FC = () => {
               flexDirection: { xs: 'column', md: 'row' },
               justifyContent: 'space-between',
               alignItems: { xs: 'flex-start', md: 'center' },
-              gap: { xs: 2, md: 3 },
-              py: { xs: 3, sm: 4 },
+              gap: { xs: 1, md: 1.5 },
+              py: { xs: 1, sm: 4 },
               px: { xs: 3, sm: 4 },
             }}
           >
@@ -600,7 +600,7 @@ const VenueSettings: React.FC = () => {
               <Typography
                 variant='body1'
                 sx={{
-                  fontSize: { xs: '0.875rem', sm: '1rem' },
+                  fontSize: { xs: '0.8rem', sm: '1rem' },
                   fontWeight: 400,
                   mb: 1,
                   maxWidth: '500px',
@@ -616,13 +616,13 @@ const VenueSettings: React.FC = () => {
                   alignItems: 'center',
                   backgroundColor: 'rgba(255, 255, 255, 0.9)',
                   backdropFilter: 'blur(10px)',
-                  px: 2,
+                  px: 1,
                   py: 1,
-                  borderRadius: 2,
+                  borderRadius: 1,
                   border: '1px solid rgba(0, 0, 0, 0.1)',
                 }}
               >
-                <Restaurant sx={{ fontSize: 14, mr: 1, color: 'primary.main', opacity: 0.9 }} />
+                <Restaurant sx={{ fontSize: 12, mr: 1, color: 'primary.main', opacity: 0.9 }} />
                 <Typography variant='body2' fontWeight='500' color='text.primary'>
                   {settings.name || 'Your Venue'}
                 </Typography>
@@ -633,7 +633,7 @@ const VenueSettings: React.FC = () => {
             <Box
               sx={{
                 display: 'flex',
-                gap: 1.5,
+                gap: 1,
                 flexDirection: { xs: 'row', sm: 'row' },
                 flexWrap: 'wrap',
                 alignItems: 'center',
@@ -653,9 +653,9 @@ const VenueSettings: React.FC = () => {
                     fontWeight: 600,
                     px: 3,
                     py: 1,
-                    borderRadius: 2,
+                    borderRadius: 1,
                     textTransform: 'none',
-                    fontSize: '0.875rem',
+                    fontSize: '0.8rem',
                     boxShadow: venueActive ? 'none' : '0 2px 8px rgba(0, 0, 0, 0.15)',
                     '&:hover': {
                       backgroundColor: venueActive ? 'rgba(211, 47, 47, 0.1)' : 'success.dark',
@@ -723,24 +723,24 @@ const VenueSettings: React.FC = () => {
 
         {/* Unsaved Changes Banner */}
         {hasChanges && (
-          <Box sx={{ px: { xs: 3, sm: 4 }, mb: 3 }}>
+          <Box sx={{ px: { xs: 3, sm: 4 }, mb: 1 }}>
             <Paper 
               elevation={2} 
               sx={{ 
-                p: 3, 
+                p: 1.5, 
                 bgcolor: 'rgba(33, 150, 243, 0.08)',
                 display: 'flex',
                 flexDirection: { xs: 'column', sm: 'row' },
                 justifyContent: 'space-between',
                 alignItems: { xs: 'flex-start', sm: 'center' },
-                gap: 2,
-                borderRadius: 2,
+                gap: 1,
+                borderRadius: 1,
                 border: '1px solid',
                 borderColor: 'rgba(33, 150, 243, 0.2)',
                 marginTop: 3
               }}
             >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <Edit sx={{ color: 'primary.main' }} />
                 <Box>
                   <Typography variant='body1' color='primary.main' fontWeight='600'>
@@ -751,7 +751,7 @@ const VenueSettings: React.FC = () => {
                   </Typography>
                 </Box>
               </Box>
-              <Box sx={{ display: 'flex', gap: 2, width: { xs: '100%', sm: 'auto' } }}>
+              <Box sx={{ display: 'flex', gap: 1, width: { xs: '100%', sm: 'auto' } }}>
                 <Button 
                   variant='outlined' 
                   onClick={handleReset}
@@ -790,7 +790,7 @@ const VenueSettings: React.FC = () => {
 
         {/* Settings Tabs */}
         <Box sx={{ px: { xs: 3, sm: 4 }, pt: { xs: 3, sm: 4 }, pb: 4 }}>
-          <Paper elevation={2} sx={{ borderRadius: 2, overflow: 'hidden' }}>
+          <Paper elevation={2} sx={{ borderRadius: 1, overflow: 'hidden' }}>
             <Tabs 
               value={tabValue} 
               onChange={(e, newValue) => {
@@ -808,11 +808,11 @@ const VenueSettings: React.FC = () => {
                 backgroundColor: 'grey.50',
                 '& .MuiTab-root': {
                   minHeight: { xs: 48, sm: 72 },
-                  fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                  fontSize: { xs: '0.75rem', sm: '0.8rem' },
                   fontWeight: 500,
                   textTransform: 'none',
                   minWidth: { xs: 'auto', sm: 120 },
-                  px: { xs: 1, sm: 2 },
+                  px: { xs: 1, sm: 1 },
                   '&.Mui-selected': {
                     backgroundColor: 'white',
                     fontWeight: 600,
@@ -852,14 +852,14 @@ const VenueSettings: React.FC = () => {
             </Tabs>
 
           <TabPanel value={tabValue} index={0}>
-            <Grid container spacing={3}>
+            <Grid container spacing={1}>
               <Grid item xs={12} md={8}>
                 <Card>
                   <CardContent sx={{ p: { xs: 3, sm: 4 } }}>
-                    <Typography variant='h5' gutterBottom fontWeight='600' sx={{ mb: 3 }}>
+                    <Typography variant='h5' gutterBottom fontWeight='600' sx={{ mb: 1 }}>
                       Basic Information
                     </Typography>
-                    <Grid container spacing={3}>
+                    <Grid container spacing={1}>
                       <Grid item xs={12}>
                         <TextField
                           fullWidth
@@ -1055,7 +1055,7 @@ const VenueSettings: React.FC = () => {
               <Grid item xs={12} md={4}>
                 <Card>
                   <CardContent sx={{ textAlign: 'center', p: { xs: 3, sm: 4 } }}>
-                    <Typography variant='h5' gutterBottom fontWeight='600' sx={{ mb: 3 }}>
+                    <Typography variant='h5' gutterBottom fontWeight='600' sx={{ mb: 1 }}>
                       Venue Logo
                     </Typography>
                     <Avatar
@@ -1063,7 +1063,7 @@ const VenueSettings: React.FC = () => {
                         width: 80, 
                         height: 80, 
                         mx: 'auto', 
-                        mb: 2,
+                        mb: 1,
                         bgcolor: 'primary.main',
                         fontSize: '1rem'
                       }}
@@ -1084,12 +1084,12 @@ const VenueSettings: React.FC = () => {
                       sx={{
                         fontSize: '1rem',
                         fontWeight: 500,
-                        py: 1.5,
+                        py: 1,
                       }}
                     >
                       Upload Logo
                     </Button>
-                    <Typography variant='body2' color='text.secondary' sx={{ mt: 2, display: 'block', fontSize: '0.875rem' }}>
+                    <Typography variant='body2' color='text.secondary' sx={{ mt: 1, display: 'block', fontSize: '0.8rem' }}>
                       Recommended: 512x512px, PNG or JPG
                     </Typography>
                   </CardContent>
@@ -1116,7 +1116,7 @@ const VenueSettings: React.FC = () => {
               severity={snackbar.severity} 
               onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
               sx={{
-                borderRadius: 2,
+                borderRadius: 1,
                 boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15)',
                 '& .MuiAlert-icon': {
                   fontSize: '1rem'

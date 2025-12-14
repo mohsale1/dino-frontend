@@ -129,11 +129,11 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
         sx={{
           p: { xs: 3, sm: 4 },
           textAlign: 'center',
-          borderRadius: 2,
+          borderRadius: 1,
           boxShadow: theme.shadows[4],
         }}
       >
-        <Box sx={{ mb: 3 }}>
+        <Box sx={{ mb: 1 }}>
           {icon || config.icon}
         </Box>
 
@@ -149,18 +149,18 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
         <Typography
           variant="body1"
           color="text.secondary"
-          sx={{ mb: 3, lineHeight: 1.6 }}
+          sx={{ mb: 1, lineHeight: 1.6 }}
         >
           {message || config.message}
         </Typography>
 
         {/* Suggestions */}
         {config.suggestions && (
-          <Box sx={{ mb: 3, textAlign: 'left', maxWidth: 400, mx: 'auto' }}>
+          <Box sx={{ mb: 1, textAlign: 'left', maxWidth: 400, mx: 'auto' }}>
             <Typography variant="subtitle2" fontWeight="600" gutterBottom color="text.primary">
               What you can try:
             </Typography>
-            <Box component="ul" sx={{ pl: 2, m: 0 }}>
+            <Box component="ul" sx={{ pl: 1, m: 0 }}>
               {config.suggestions.map((suggestion: string, index: number) => (
                 <Typography
                   key={index}
@@ -180,9 +180,9 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
 
         <Stack
           direction={{ xs: 'column', sm: 'row' }}
-          spacing={2}
+          spacing={1}
           justifyContent="center"
-          sx={{ mt: 3 }}
+          sx={{ mt: 1 }}
         >
           {showRetry && onRetry && (
             <Button
@@ -243,11 +243,11 @@ export const MenuError: React.FC<BaseErrorProps & { venueId?: string; tableId?: 
     {...props}
   >
     {venueId && tableId && (
-      <Alert severity="info" sx={{ mt: 2, textAlign: 'left' }}>
+      <Alert severity="info" sx={{ mt: 1, textAlign: 'left' }}>
         <Typography variant="body2" sx={{ mb: 1 }}>
           <strong>What you can try:</strong>
         </Typography>
-        <Box component="ul" sx={{ pl: 2, m: 0 }}>
+        <Box component="ul" sx={{ pl: 1, m: 0 }}>
           <Typography component="li" variant="body2" sx={{ mb: 0.5 }}>
             Wait a few minutes and try again
           </Typography>
@@ -278,10 +278,10 @@ export const LoadingError: React.FC<BaseErrorProps & {
   if (isLoading) {
     return (
       <Container maxWidth="sm">
-        <Paper sx={{ p: 4, textAlign: 'center' }}>
-          <Box sx={{ mb: 2 }}>
+        <Paper sx={{ p: 1, textAlign: 'center' }}>
+          <Box sx={{ mb: 1 }}>
             <div className="animate-spin">
-              <Refresh sx={{ fontSize: 14, color: 'primary.main' }} />
+              <Refresh sx={{ fontSize: 12, color: 'primary.main' }} />
             </div>
           </Box>
           <Typography variant="h6" color="text.secondary">
@@ -317,7 +317,7 @@ export const EmptyState: React.FC<{
         px: 3,
       }}
     >
-      <Box sx={{ mb: 3 }}>
+      <Box sx={{ mb: 1 }}>
         {icon || <Search sx={{ fontSize: { xs: 48, sm: 64 }, color: 'text.disabled' }} />}
       </Box>
 
@@ -333,7 +333,7 @@ export const EmptyState: React.FC<{
       <Typography
         variant="body1"
         color="text.secondary"
-        sx={{ mb: 3, maxWidth: 400, mx: 'auto', lineHeight: 1.6 }}
+        sx={{ mb: 1, maxWidth: 400, mx: 'auto', lineHeight: 1.6 }}
       >
         {message}
       </Typography>

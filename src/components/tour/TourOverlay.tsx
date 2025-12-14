@@ -235,7 +235,7 @@ const TourOverlay: React.FC<TourOverlayProps> = ({ className }) => {
             left: `${highlightPosition.left - 4}px`,
             width: `${highlightPosition.width + 8}px`,
             height: `${highlightPosition.height + 8}px`,
-            borderRadius: 2,
+            borderRadius: 1,
             border: '3px solid',
             borderColor: theme.palette.primary.main,
             background: 'transparent',
@@ -334,8 +334,8 @@ const TourOverlay: React.FC<TourOverlayProps> = ({ className }) => {
             {/* Modern header */}
             <Box
               sx={{
-                p: 3,
-                pb: 2,
+                p: 1.5,
+                pb: 1,
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'flex-start',
@@ -363,7 +363,7 @@ const TourOverlay: React.FC<TourOverlayProps> = ({ className }) => {
                   variant="caption"
                   sx={{
                     color: 'text.secondary',
-                    fontSize: '0.75rem',
+                    fontSize: '0.7rem',
                     fontWeight: 500,
                   }}
                 >
@@ -386,13 +386,13 @@ const TourOverlay: React.FC<TourOverlayProps> = ({ className }) => {
             </Box>
 
             {/* Content */}
-            <Box sx={{ p: 3, pt: 2.5 }}>
+            <Box sx={{ p: 1.5, pt: 2.5 }}>
               <Typography
                 variant="body1"
                 sx={{
                   color: 'text.primary',
                   lineHeight: 1.6,
-                  mb: 3,
+                  mb: 1,
                   fontSize: '0.95rem',
                 }}
               >
@@ -418,7 +418,7 @@ const TourOverlay: React.FC<TourOverlayProps> = ({ className }) => {
                   disabled={currentStep === 0}
                   sx={{
                     minWidth: 'auto',
-                    px: 2,
+                    px: 1,
                     borderColor: 'divider',
                     color: 'text.secondary',
                     '&:hover': {

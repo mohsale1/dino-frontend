@@ -21,8 +21,8 @@ const TemplateHeader: React.FC<TemplateHeaderProps> = ({
         sx={{
           background: template.hero.background,
           color: 'white',
-          px: 2,
-          py: 1.5,
+          px: 1,
+          py: 1,
           textAlign: 'center',
         }}
       >
@@ -54,7 +54,7 @@ const TemplateHeader: React.FC<TemplateHeaderProps> = ({
         </Typography>
 
         {/* Full info with rating, location, delivery */}
-        <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, flexWrap: 'wrap' }}>
+        <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1, flexWrap: 'wrap' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
             <Star sx={{ fontSize: 12 }} />
             <Typography variant="caption" sx={{ fontSize: '0.7rem' }}>
@@ -85,15 +85,15 @@ const TemplateHeader: React.FC<TemplateHeaderProps> = ({
         sx={{
           background: template.hero.background,
           color: 'white',
-          px: 2,
-          py: 1.5,
+          px: 1,
+          py: 1,
           textAlign: 'left',
         }}
       >
-        <Typography variant="h6" fontWeight="700" sx={{ fontSize: '1.125rem', mb: 0.25 }}>
+        <Typography variant="h6" fontWeight="700" sx={{ fontSize: '0.95rem', mb: 0.2 }}>
           {venueName}
         </Typography>
-        <Typography variant="caption" sx={{ fontSize: '0.75rem', opacity: 0.85 }}>
+        <Typography variant="caption" sx={{ fontSize: '0.7rem', opacity: 0.85 }}>
           Table {tableNumber}
         </Typography>
       </Box>
@@ -107,8 +107,8 @@ const TemplateHeader: React.FC<TemplateHeaderProps> = ({
         sx={{
           backgroundColor: '#fff',
           borderBottom: `1px solid ${alpha(template.colors.primary, 0.1)}`,
-          px: 2,
-          py: 1.5,
+          px: 1,
+          py: 1,
           textAlign: 'center',
         }}
       >
@@ -126,10 +126,10 @@ const TemplateHeader: React.FC<TemplateHeaderProps> = ({
         <Typography
           variant="caption"
           sx={{
-            fontSize: '0.75rem',
+            fontSize: '0.7rem',
             color: template.colors.textSecondary,
             display: 'block',
-            mt: 0.25,
+            mt: 0.2,
           }}
         >
           Table {tableNumber}
@@ -145,8 +145,8 @@ const TemplateHeader: React.FC<TemplateHeaderProps> = ({
         sx={{
           background: template.hero.background,
           color: 'white',
-          px: 2,
-          py: 2,
+          px: 1,
+          py: 1,
           textAlign: 'center',
         }}
       >
@@ -161,7 +161,7 @@ const TemplateHeader: React.FC<TemplateHeaderProps> = ({
             alignItems: 'center',
             justifyContent: 'center',
             margin: '0 auto',
-            mb: 1.5,
+            mb: 1,
             border: `3px solid ${alpha('#fff', 0.25)}`,
             boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
           }}
@@ -186,9 +186,9 @@ const TemplateHeader: React.FC<TemplateHeaderProps> = ({
         <Typography
           variant="body2"
           sx={{
-            fontSize: '0.8125rem',
+            fontSize: '0.7rem',
             opacity: 0.9,
-            mb: 1.5,
+            mb: 1,
             fontStyle: 'italic',
           }}
         >
@@ -198,20 +198,20 @@ const TemplateHeader: React.FC<TemplateHeaderProps> = ({
         {/* Full details */}
         <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2.5, flexWrap: 'wrap' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-            <Star sx={{ fontSize: 14 }} />
-            <Typography variant="caption" sx={{ fontSize: '0.75rem' }}>
+            <Star sx={{ fontSize: 12 }} />
+            <Typography variant="caption" sx={{ fontSize: '0.7rem' }}>
               4.5 (200+)
             </Typography>
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-            <LocationOn sx={{ fontSize: 14 }} />
-            <Typography variant="caption" sx={{ fontSize: '0.75rem' }}>
+            <LocationOn sx={{ fontSize: 12 }} />
+            <Typography variant="caption" sx={{ fontSize: '0.7rem' }}>
               Hyderabad
             </Typography>
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-            <Schedule sx={{ fontSize: 14 }} />
-            <Typography variant="caption" sx={{ fontSize: '0.75rem' }}>
+            <Schedule sx={{ fontSize: 12 }} />
+            <Typography variant="caption" sx={{ fontSize: '0.7rem' }}>
               25-30 min
             </Typography>
           </Box>

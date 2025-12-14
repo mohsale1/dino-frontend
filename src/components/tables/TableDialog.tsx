@@ -129,7 +129,7 @@ const TableDialog: React.FC<TableDialogProps> = ({
               maxWidth: '500px',
               maxHeight: '90vh',
               bgcolor: 'background.paper',
-              borderRadius: 2,
+              borderRadius: 1,
               boxShadow: 24,
               display: 'flex',
               flexDirection: 'column',
@@ -137,7 +137,7 @@ const TableDialog: React.FC<TableDialogProps> = ({
             }}
           >
             <AppBar position="static" color="default" elevation={0} sx={{ borderBottom: '1px solid', borderColor: 'divider' }}>
-              <Toolbar sx={{ px: { xs: 2, sm: 3 } }}>
+              <Toolbar sx={{ px: { xs: 1, sm: 3 } }}>
                 <Typography variant="h6" sx={{ flexGrow: 1 }}>
                   {table ? 'Edit Table' : 'Add Table'}
                 </Typography>
@@ -233,7 +233,7 @@ const TableDialog: React.FC<TableDialogProps> = ({
             </Box>
 
             <Box sx={{ p: { xs: 2, sm: 1.5 }, borderTop: '1px solid', borderColor: 'divider', bgcolor: 'background.default' }}>
-              <Stack direction="row" spacing={2}>
+              <Stack direction="row" spacing={1}>
                 <Button onClick={onClose} fullWidth variant="outlined">
                   Cancel
                 </Button>
@@ -267,10 +267,10 @@ const TableDialog: React.FC<TableDialogProps> = ({
         </Typography>
       </DialogTitle>
       <DialogContent sx={{ 
-        px: { xs: 2, sm: 3 }, 
-        py: { xs: 3, sm: 4 }
+        px: { xs: 1, sm: 3 }, 
+        py: { xs: 1, sm: 4 }
       }}>
-        <Grid container spacing={3} sx={{ mt: 1 }}>
+        <Grid container spacing={1} sx={{ mt: 1 }}>
           <Grid item xs={12} md={6}>
             <TextField
               fullWidth

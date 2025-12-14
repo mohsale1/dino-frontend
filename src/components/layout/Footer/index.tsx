@@ -86,7 +86,7 @@ const Footer: React.FC<FooterProps> = ({ variant = 'default' }) => {
         sx={{
           background: 'linear-gradient(135deg, #1976D2 0%, #1565C0 100%)',
           color: 'white',
-          py: 2,
+          py: 1,
           mt: 'auto',
           position: 'relative',
           overflow: 'hidden',
@@ -113,7 +113,7 @@ const Footer: React.FC<FooterProps> = ({ variant = 'default' }) => {
           }}>
             <Restaurant 
               sx={{ 
-                fontSize: 14,
+                fontSize: 12,
                 animation: `${wave} 2s ease-in-out infinite`,
               }} 
             />
@@ -224,13 +224,13 @@ const Footer: React.FC<FooterProps> = ({ variant = 'default' }) => {
           >
             🦕 Revolutionizing Restaurant Experience
           </Typography>
-          <Grid container spacing={3}>
+          <Grid container spacing={1}>
             {features.map((feature, index) => (
               <Grid item xs={12} sm={6} md={3} key={index}>
                 <Box
                   sx={{
                     textAlign: 'center',
-                    p: 3,
+                    p: 1.5,
                     borderRadius: '16px',
                     background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
                     backdropFilter: 'blur(10px)',
@@ -249,10 +249,10 @@ const Footer: React.FC<FooterProps> = ({ variant = 'default' }) => {
                   <Box
                     sx={{
                       display: 'inline-flex',
-                      p: 2,
+                      p: 1,
                       borderRadius: '50%',
                       background: 'linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 100%)',
-                      mb: 2,
+                      mb: 1,
                       animation: `${pulse} 2s ease-in-out infinite`,
                       animationDelay: `${index * 0.5}s`,
                       '& svg': {
@@ -286,7 +286,7 @@ const Footer: React.FC<FooterProps> = ({ variant = 'default' }) => {
                 animationDelay: '0.2s',
               }}
             >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                 <Restaurant 
                   sx={{ 
                     fontSize: 26, 
@@ -301,7 +301,7 @@ const Footer: React.FC<FooterProps> = ({ variant = 'default' }) => {
                   {COMPANY_INFO.tagline}
                 </Typography>
               </Box>
-              <Typography variant="body2" sx={{ mb: 3, opacity: 0.9, lineHeight: 1.6 }}>
+              <Typography variant="body2" sx={{ mb: 1, opacity: 0.9, lineHeight: 1.6 }}>
                 {COMPANY_INFO.description}
               </Typography>
               <Box sx={{ display: 'flex', gap: 1 }}>
@@ -348,10 +348,10 @@ const Footer: React.FC<FooterProps> = ({ variant = 'default' }) => {
                 animationDelay: '0.4s',
               }}
             >
-              <Typography variant="h6" fontWeight="600" sx={{ mb: 3 }}>
+              <Typography variant="h6" fontWeight="600" sx={{ mb: 1 }}>
                 Platform
               </Typography>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                 {NAVIGATION.footer.platform.map((item, index) => (
                   <Link
                     key={item}
@@ -398,10 +398,10 @@ const Footer: React.FC<FooterProps> = ({ variant = 'default' }) => {
                 animationDelay: '0.6s',
               }}
             >
-              <Typography variant="h6" fontWeight="600" sx={{ mb: 3 }}>
+              <Typography variant="h6" fontWeight="600" sx={{ mb: 1 }}>
                 Solutions
               </Typography>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                 {NAVIGATION.footer.solutions.map((item) => (
                   <Link
                     key={item}
@@ -448,10 +448,10 @@ const Footer: React.FC<FooterProps> = ({ variant = 'default' }) => {
                 animationDelay: '0.8s',
               }}
             >
-              <Typography variant="h6" fontWeight="600" sx={{ mb: 3 }}>
+              <Typography variant="h6" fontWeight="600" sx={{ mb: 1 }}>
                 Get in Touch
               </Typography>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                 {[
                   { icon: <LocationOn />, text: COMPANY_INFO.contact.address.full },
                   { icon: <Phone />, text: COMPANY_INFO.contact.phone.primary },
@@ -462,8 +462,8 @@ const Footer: React.FC<FooterProps> = ({ variant = 'default' }) => {
                     sx={{ 
                       display: 'flex', 
                       alignItems: 'center', 
-                      gap: 2,
-                      p: 2,
+                      gap: 1,
+                      p: 1,
                       borderRadius: '12px',
                       background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
                       backdropFilter: 'blur(10px)',
@@ -488,7 +488,7 @@ const Footer: React.FC<FooterProps> = ({ variant = 'default' }) => {
                         animationDelay: `${index * 0.3}s`,
                       }}
                     >
-                      {React.cloneElement(contact.icon, { sx: { fontSize: 14 } })}
+                      {React.cloneElement(contact.icon, { sx: { fontSize: 12 } })}
                     </Box>
                     <Typography variant="body2" sx={{ opacity: 0.9, flex: 1 }}>
                       {contact.text}
@@ -509,7 +509,7 @@ const Footer: React.FC<FooterProps> = ({ variant = 'default' }) => {
             justifyContent: 'space-between',
             alignItems: 'center',
             flexWrap: 'wrap',
-            gap: 2,
+            gap: 1,
             animation: `${slideInUp} 1s ease-out`,
             animationDelay: '1s',
           }}

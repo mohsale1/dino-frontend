@@ -159,11 +159,11 @@ const TablesOrdersTab: React.FC<TablesOrdersTabProps> = ({ tableStatuses: propTa
 
   const getTableStatusIcon = (status: string) => {
     switch (status) {
-      case 'occupied': return <People sx={{ fontSize: 14 }} />;
-      case 'available': return <CheckCircle sx={{ fontSize: 14 }} />;
-      case 'reserved': return <Schedule sx={{ fontSize: 14 }} />;
-      case 'maintenance': return <CleaningServices sx={{ fontSize: 14 }} />;
-      default: return <Warning sx={{ fontSize: 14 }} />;
+      case 'occupied': return <People sx={{ fontSize: 12 }} />;
+      case 'available': return <CheckCircle sx={{ fontSize: 12 }} />;
+      case 'reserved': return <Schedule sx={{ fontSize: 12 }} />;
+      case 'maintenance': return <CleaningServices sx={{ fontSize: 12 }} />;
+      default: return <Warning sx={{ fontSize: 12 }} />;
     }
   };
 
@@ -250,7 +250,7 @@ const TablesOrdersTab: React.FC<TablesOrdersTabProps> = ({ tableStatuses: propTa
   ];
 
   return (
-    <Grid container spacing={3}>
+    <Grid container spacing={1}>
       {/* Error Alert */}
       {error && (
         <Grid item xs={12}>
@@ -263,14 +263,14 @@ const TablesOrdersTab: React.FC<TablesOrdersTabProps> = ({ tableStatuses: propTa
       {/* Status Distribution */}
       <Grid item xs={12} md={4}>
         <Card sx={{ 
-          borderRadius: 2,
+          borderRadius: 1,
           boxShadow: theme.shadows[2],
           border: '1px solid',
           borderColor: 'divider',
           height: '100%'
         }}>
-          <CardContent sx={{ p: 3 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+          <CardContent sx={{ p: 1.5 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
               <Typography variant="h6" sx={{ fontWeight: 700, color: 'text.primary' }}>
                 Tables Distribution
               </Typography>
@@ -289,16 +289,16 @@ const TablesOrdersTab: React.FC<TablesOrdersTabProps> = ({ tableStatuses: propTa
               </Tooltip>
             </Box>
             
-            <Stack spacing={2.5}>
+            <Stack spacing={1}>
               {statusStats.map((stat) => (
                 <Box key={stat.label} sx={{ 
-                  p: 2.5, 
+                  p: 1.5, 
                   backgroundColor: `${stat.color}15`,
-                  borderRadius: 2,
+                  borderRadius: 1,
                   border: '1px solid',
                   borderColor: `${stat.color}40`
                 }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       <Avatar sx={{ 
                         backgroundColor: stat.color,
@@ -338,8 +338,8 @@ const TablesOrdersTab: React.FC<TablesOrdersTabProps> = ({ tableStatuses: propTa
             </Stack>
 
             {/* Quick Stats */}
-            <Box sx={{ mt: 3, pt: 3, borderTop: '1px solid', borderColor: 'divider' }}>
-              <Grid container spacing={2}>
+            <Box sx={{ mt: 1, pt: 3, borderTop: '1px solid', borderColor: 'divider' }}>
+              <Grid container spacing={1}>
                 <Grid item xs={6}>
                   <Box sx={{ textAlign: 'center' }}>
                     <Typography variant="h5" sx={{ fontWeight: 700, color: 'warning.main' }}>
@@ -364,7 +364,7 @@ const TablesOrdersTab: React.FC<TablesOrdersTabProps> = ({ tableStatuses: propTa
             </Box>
 
             {/* Last Refresh */}
-            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', textAlign: 'center', mt: 2 }}>
+            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', textAlign: 'center', mt: 1 }}>
               Last updated: {lastRefresh.toLocaleTimeString()}
             </Typography>
           </CardContent>
@@ -374,14 +374,14 @@ const TablesOrdersTab: React.FC<TablesOrdersTabProps> = ({ tableStatuses: propTa
       {/* Table Status Grid */}
       <Grid item xs={12} md={8}>
         <Card sx={{ 
-          borderRadius: 2,
+          borderRadius: 1,
           boxShadow: theme.shadows[2],
           border: '1px solid',
           borderColor: 'divider',
           height: '100%'
         }}>
-          <CardContent sx={{ p: 3 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+          <CardContent sx={{ p: 1.5 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
               <Typography variant="h6" sx={{ fontWeight: 700, color: 'text.primary' }}>
                 Table Status Grid
               </Typography>
@@ -415,10 +415,10 @@ const TablesOrdersTab: React.FC<TablesOrdersTabProps> = ({ tableStatuses: propTa
                 display: 'flex', 
                 flexDirection: 'column', 
                 alignItems: 'center', 
-                gap: 2, 
+                gap: 1, 
                 py: 8,
                 backgroundColor: 'grey.50',
-                borderRadius: 2,
+                borderRadius: 1,
                 border: '2px dashed',
                 borderColor: 'grey.300'
               }}>
@@ -429,13 +429,13 @@ const TablesOrdersTab: React.FC<TablesOrdersTabProps> = ({ tableStatuses: propTa
                 </Typography>
               </Box>
             ) : (
-              <Grid container spacing={2} sx={{ maxHeight: 500, overflow: 'auto', pr: 1 }}>
+              <Grid container spacing={1} sx={{ maxHeight: 500, overflow: 'auto', pr: 1 }}>
                 {tableStatuses.map((table) => (
                   <Grid item xs={12} sm={6} lg={4} key={table.id}>
                     <Card sx={{ 
                       border: '2px solid',
                       borderColor: getTableStatusColor(table.status),
-                      borderRadius: 2,
+                      borderRadius: 1,
                       transition: 'all 0.3s ease',
                       backgroundColor: `${getTableStatusColor(table.status)}08`,
                       '&:hover': {
@@ -443,8 +443,8 @@ const TablesOrdersTab: React.FC<TablesOrdersTabProps> = ({ tableStatuses: propTa
                         transform: 'translateY(-2px)'
                       }
                     }}>
-                      <CardContent sx={{ p: 2.5 }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                      <CardContent sx={{ p: 1.5 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                             <TableRestaurant sx={{ color: getTableStatusColor(table.status) }} />
                             <Typography variant="h6" sx={{ fontWeight: 700 }}>
@@ -469,7 +469,7 @@ const TablesOrdersTab: React.FC<TablesOrdersTabProps> = ({ tableStatuses: propTa
                         <Stack spacing={1}>
                           {table.capacity && (
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              <People sx={{ fontSize: 14, color: 'text.secondary' }} />
+                              <People sx={{ fontSize: 12, color: 'text.secondary' }} />
                               <Typography variant="body2" color="text.secondary">
                                 Capacity: {table.capacity} guests
                               </Typography>
@@ -491,7 +491,7 @@ const TablesOrdersTab: React.FC<TablesOrdersTabProps> = ({ tableStatuses: propTa
                           
                           {table.occupancy_time && (
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              <AccessTime sx={{ fontSize: 14, color: 'text.secondary' }} />
+                              <AccessTime sx={{ fontSize: 12, color: 'text.secondary' }} />
                               <Typography variant="body2" color="text.secondary">
                                 Occupied: {table.occupancy_time} minutes
                               </Typography>
@@ -500,7 +500,7 @@ const TablesOrdersTab: React.FC<TablesOrdersTabProps> = ({ tableStatuses: propTa
                           
                           {table.status === 'available' && (
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              <CheckCircle sx={{ fontSize: 14, color: 'success.main' }} />
+                              <CheckCircle sx={{ fontSize: 12, color: 'success.main' }} />
                               <Typography variant="body2" color="success.main" sx={{ fontWeight: 600 }}>
                                 Ready for guests
                               </Typography>
@@ -509,7 +509,7 @@ const TablesOrdersTab: React.FC<TablesOrdersTabProps> = ({ tableStatuses: propTa
 
                           {table.status === 'maintenance' && (
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              <CleaningServices sx={{ fontSize: 14, color: 'text.secondary' }} />
+                              <CleaningServices sx={{ fontSize: 12, color: 'text.secondary' }} />
                               <Typography variant="body2" color="text.secondary">
                                 Under maintenance
                               </Typography>
@@ -525,8 +525,8 @@ const TablesOrdersTab: React.FC<TablesOrdersTabProps> = ({ tableStatuses: propTa
                           startIcon={<Edit />}
                           onClick={() => handleOpenStatusDialog(table)}
                           sx={{ 
-                            mt: 2,
-                            borderRadius: 2,
+                            mt: 1,
+                            borderRadius: 1,
                             fontWeight: 600,
                             borderWidth: 2,
                             '&:hover': {
@@ -555,7 +555,7 @@ const TablesOrdersTab: React.FC<TablesOrdersTabProps> = ({ tableStatuses: propTa
         maxWidth="sm"
         fullWidth
         PaperProps={{
-          sx: { borderRadius: 2 }
+          sx: { borderRadius: 1 }
         }}
       >
         <DialogTitle>
@@ -573,11 +573,11 @@ const TablesOrdersTab: React.FC<TablesOrdersTabProps> = ({ tableStatuses: propTa
           {selectedTable && (
             <>
               {/* Current Status */}
-              <Box sx={{ mb: 3 }}>
+              <Box sx={{ mb: 1 }}>
                 <Typography variant="subtitle2" gutterBottom>
                   Current Status
                 </Typography>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Chip
                     icon={getTableStatusIcon(selectedTable.status)}
                     label={selectedTable.status.charAt(0).toUpperCase() + selectedTable.status.slice(1)}
@@ -593,10 +593,10 @@ const TablesOrdersTab: React.FC<TablesOrdersTabProps> = ({ tableStatuses: propTa
                 </Box>
               </Box>
 
-              <Divider sx={{ mb: 3 }} />
+              <Divider sx={{ mb: 1 }} />
 
               {/* Status Selection */}
-              <FormControl fullWidth sx={{ mb: 3 }}>
+              <FormControl fullWidth sx={{ mb: 1 }}>
                 <InputLabel>New Status</InputLabel>
                 <Select
                   value={newStatus}
@@ -606,7 +606,7 @@ const TablesOrdersTab: React.FC<TablesOrdersTabProps> = ({ tableStatuses: propTa
                 >
                   {statusOptions.map((option) => (
                     <MenuItem key={option.value} value={option.value}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%' }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
                         <Box sx={{ color: getTableStatusColor(option.value) }}>
                           {getTableStatusIcon(option.value)}
                         </Box>
@@ -625,16 +625,16 @@ const TablesOrdersTab: React.FC<TablesOrdersTabProps> = ({ tableStatuses: propTa
               {/* Status Preview */}
               {newStatus !== selectedTable.status && (
                 <Box sx={{ 
-                  p: 2, 
+                  p: 1, 
                   backgroundColor: 'grey.50', 
-                  borderRadius: 2,
+                  borderRadius: 1,
                   border: '1px solid',
                   borderColor: 'divider'
                 }}>
                   <Typography variant="subtitle2" gutterBottom>
                     Preview
                   </Typography>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <Chip
                       icon={getTableStatusIcon(newStatus)}
                       label={newStatus.charAt(0).toUpperCase() + newStatus.slice(1)}
@@ -657,11 +657,11 @@ const TablesOrdersTab: React.FC<TablesOrdersTabProps> = ({ tableStatuses: propTa
           )}
         </DialogContent>
 
-        <DialogActions sx={{ p: 3, pt: 1 }}>
+        <DialogActions sx={{ p: 1.5, pt: 1 }}>
           <Button 
             onClick={handleCloseStatusDialog}
             disabled={updating}
-            sx={{ borderRadius: 2 }}
+            sx={{ borderRadius: 1 }}
           >
             Cancel
           </Button>
@@ -670,7 +670,7 @@ const TablesOrdersTab: React.FC<TablesOrdersTabProps> = ({ tableStatuses: propTa
             disabled={updating || !selectedTable || newStatus === selectedTable.status}
             variant="contained"
             startIcon={updating ? <CircularProgress size={16} /> : <CheckCircle />}
-            sx={{ borderRadius: 2 }}
+            sx={{ borderRadius: 1 }}
           >
             {updating ? 'Updating...' : 'Update Status'}
           </Button>

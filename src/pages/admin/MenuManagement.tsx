@@ -621,9 +621,9 @@ const MenuManagement: React.FC = () => {
               flexDirection: { xs: 'column', md: 'row' },
               justifyContent: 'space-between',
               alignItems: { xs: 'flex-start', md: 'center' },
-              gap: { xs: 2, md: 3 },
-              py: { xs: 2, sm: 3 },
-              px: { xs: 2, sm: 3 },
+              gap: { xs: 1, md: 1.5 },
+              py: { xs: 1, sm: 3 },
+              px: { xs: 1, sm: 3 },
             }}
           >
             {/* Header Content */}
@@ -648,7 +648,7 @@ const MenuManagement: React.FC = () => {
               <Typography
                 variant="body1"
                 sx={{
-                  fontSize: { xs: '0.875rem', sm: '1rem' },
+                  fontSize: { xs: '0.8rem', sm: '1rem' },
                   fontWeight: 400,
                   mb: 1,
                   maxWidth: '500px',
@@ -664,13 +664,13 @@ const MenuManagement: React.FC = () => {
                   alignItems: 'center',
                   backgroundColor: 'rgba(255, 255, 255, 0.9)',
                   backdropFilter: 'blur(10px)',
-                  px: 2,
+                  px: 1,
                   py: 1,
-                  borderRadius: 2,
+                  borderRadius: 1,
                   border: '1px solid rgba(0, 0, 0, 0.1)',
                 }}
               >
-                <Store sx={{ fontSize: 14, mr: 1, color: 'primary.main', opacity: 0.9 }} />
+                <Store sx={{ fontSize: 12, mr: 1, color: 'primary.main', opacity: 0.9 }} />
                 <Typography variant="body2" fontWeight="500" color="text.primary">
                   {getVenueDisplayName()}
                 </Typography>
@@ -722,7 +722,7 @@ const MenuManagement: React.FC = () => {
       <Box sx={{ width: '100%', padding: 0, margin: 0 }}>
         {/* Error Alert */}
         {error && (
-          <Box sx={{ px: { xs: 2, sm: 3 }, pt: 3, pb: 1 }}>
+          <Box sx={{ px: { xs: 1, sm: 3 }, pt: 3, pb: 1 }}>
             <Alert 
               severity="error" 
               onClose={() => setError(null)}
@@ -734,7 +734,7 @@ const MenuManagement: React.FC = () => {
 
         {/* Menu Statistics */}
         <FlagGate flag="menu.showMenuStats">
-          <Box sx={{ px: { xs: 2, sm: 3 }, py: 3 }}>
+          <Box sx={{ px: { xs: 1, sm: 3 }, py: 3 }}>
             <MenuStats menuItems={menuItems} categories={categories} />
           </Box>
         </FlagGate>
@@ -756,11 +756,11 @@ const MenuManagement: React.FC = () => {
               borderColor: 'divider',
               '& .MuiTab-root': {
                 minHeight: { xs: 48, sm: 48 },
-                fontSize: { xs: '0.875rem', sm: '0.875rem' },
+                fontSize: { xs: '0.8rem', sm: '0.8rem' },
                 fontWeight: 500,
                 textTransform: 'none',
                 minWidth: { xs: 'auto', sm: 160 },
-                px: { xs: 1, sm: 2 }
+                px: { xs: 1, sm: 1 }
               }
             }}
           >
@@ -817,7 +817,7 @@ const MenuManagement: React.FC = () => {
               {/* Categories List - Similar to Tables */}
               <Box sx={{ 
                 backgroundColor: 'white',
-                borderRadius: 2,
+                borderRadius: 1,
                 border: '1px solid',
                 borderColor: 'grey.200',
                 boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
@@ -825,12 +825,12 @@ const MenuManagement: React.FC = () => {
               }}>
                 {/* Header */}
                 <Box sx={{ 
-                  p: 3,
+                  p: 1.5,
                   borderBottom: '1px solid',
                   borderColor: 'grey.200'
                 }}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       <Box
                         sx={{
                           width: 48,
@@ -842,7 +842,7 @@ const MenuManagement: React.FC = () => {
                           justifyContent: 'center'
                         }}
                       >
-                        <Category sx={{ color: 'white', fontSize: 14 }} />
+                        <Category sx={{ color: 'white', fontSize: 12 }} />
                       </Box>
                       <Box>
                         <Typography variant="h5" fontWeight="700" sx={{ color: 'text.primary', mb: 0.5 }}>
@@ -860,7 +860,7 @@ const MenuManagement: React.FC = () => {
                       onClick={handleAddCategory}
                       size="medium"
                       sx={{
-                        borderRadius: 2,
+                        borderRadius: 1,
                         backgroundColor: 'primary.main',
                         color: 'white',
                         fontWeight: 600,
@@ -880,7 +880,7 @@ const MenuManagement: React.FC = () => {
                 </Box>
 
                 {/* Content */}
-                <Box sx={{ p: 3 }}>
+                <Box sx={{ p: 1.5 }}>
                   {categories.length === 0 ? (
                     <Box sx={{ textAlign: 'center', py: 4 }}>
                       <Box
@@ -893,7 +893,7 @@ const MenuManagement: React.FC = () => {
                           alignItems: 'center',
                           justifyContent: 'center',
                           mx: 'auto',
-                          mb: 3
+                          mb: 1
                         }}
                       >
                         <Category sx={{ fontSize: 26, color: 'text.secondary' }} />
@@ -915,10 +915,10 @@ const MenuManagement: React.FC = () => {
                         sx={{
                           backgroundColor: 'primary.main',
                           color: 'white',
-                          borderRadius: 2,
+                          borderRadius: 1,
                           fontWeight: 600,
                           px: 4,
-                          py: 1.5,
+                          py: 1,
                           '&:hover': {
                             backgroundColor: 'primary.dark',
                             transform: 'translateY(-1px)',
@@ -939,17 +939,17 @@ const MenuManagement: React.FC = () => {
                           <React.Fragment key={category.id}>
                             <ListItem
                               sx={{
-                                py: 2.5,
+                                py: 1,
                                 px: 0,
                                 transition: 'all 0.2s ease-in-out',
                                 '&:hover': {
                                   backgroundColor: 'grey.50',
                                   transform: 'translateX(4px)',
-                                  borderRadius: 2
+                                  borderRadius: 1
                                 }
                               }}
                             >
-                              <Stack direction="row" alignItems="center" spacing={3} sx={{ width: '100%' }}>
+                              <Stack direction="row" alignItems="center" spacing={1} sx={{ width: '100%' }}>
                                 {/* Category Icon */}
                                 <Box sx={{ position: 'relative' }}>
                                   <Avatar
@@ -1021,7 +1021,7 @@ const MenuManagement: React.FC = () => {
                                     variant="outlined"
                                     sx={{
                                       fontWeight: 600,
-                                      fontSize: '0.75rem'
+                                      fontSize: '0.7rem'
                                     }}
                                   />
                                 </Box>

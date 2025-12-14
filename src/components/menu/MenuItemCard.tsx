@@ -77,7 +77,7 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
         backgroundColor: 'background.paper',
         border: '1px solid', 
         borderColor: 'divider',
-        borderRadius: 2,
+        borderRadius: 1,
         opacity: (item.available ?? item.isAvailable) ? 1 : 0.7,
         transition: 'all 0.3s ease-in-out',
         overflow: 'hidden',
@@ -221,7 +221,7 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
             color: 'white',
             px: 1.25,
             py: 0.5,
-            borderRadius: 1.5,
+            borderRadius: 1,
             display: 'flex',
             alignItems: 'center',
             gap: 0.5,
@@ -245,7 +245,7 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
       }}>
         {/* Header with Veg/Non-Veg and Name */}
         <Box sx={{ mb: 1 }}>
-          <Stack direction="row" spacing={0.75} alignItems="flex-start" sx={{ mb: 0.75 }}>
+          <Stack direction="row" spacing={0.75} alignItems="flex-start" sx={{ mb: 0.5 }}>
             <VegNonVegIcon isVeg={item.isVeg} />
             <Typography 
               variant="h6" 
@@ -270,7 +270,7 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
             variant="h6" 
             color="primary.main" 
             fontWeight="700"
-            sx={{ mb: 0.75, fontSize: { xs: '1.1rem', sm: '1.25rem' } }}
+            sx={{ mb: 0.5, fontSize: { xs: '1.1rem', sm: '1.25rem' } }}
           >
             {formatCurrency(item.price)}
           </Typography>
@@ -296,7 +296,7 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
           variant="body2" 
           color="text.secondary" 
           sx={{ 
-            mb: 1.5,
+            mb: 1,
             lineHeight: 1.4,
             fontSize: '0.8rem',
             display: '-webkit-box',
@@ -309,7 +309,7 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
           {item.description}
         </Typography>
 
-        <Divider sx={{ mb: 1.5 }} />
+        <Divider sx={{ mb: 1 }} />
         
         {/* Actions */}
         <Box sx={{ 

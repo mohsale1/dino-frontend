@@ -419,8 +419,8 @@ const WorkspaceManagement: React.FC = () => {
               flexDirection: { xs: 'column', md: 'row' },
               justifyContent: 'space-between',
               alignItems: { xs: 'flex-start', md: 'center' },
-              gap: { xs: 2, md: 3 },
-              py: { xs: 3, sm: 4 },
+              gap: { xs: 1, md: 1.5 },
+              py: { xs: 1, sm: 4 },
               px: { xs: 3, sm: 4 },
             }}
           >
@@ -446,7 +446,7 @@ const WorkspaceManagement: React.FC = () => {
               <Typography
                 variant="body1"
                 sx={{
-                  fontSize: { xs: '0.875rem', sm: '1rem' },
+                  fontSize: { xs: '0.8rem', sm: '1rem' },
                   fontWeight: 400,
                   mb: 1,
                   maxWidth: '500px',
@@ -463,13 +463,13 @@ const WorkspaceManagement: React.FC = () => {
                     alignItems: 'center',
                     backgroundColor: 'rgba(255, 255, 255, 0.9)',
                     backdropFilter: 'blur(10px)',
-                    px: 2,
+                    px: 1,
                     py: 1,
-                    borderRadius: 2,
+                    borderRadius: 1,
                     border: '1px solid rgba(0, 0, 0, 0.1)',
                   }}
                 >
-                  <Store sx={{ fontSize: 14, mr: 1, color: 'primary.main', opacity: 0.9 }} />
+                  <Store sx={{ fontSize: 12, mr: 1, color: 'primary.main', opacity: 0.9 }} />
                   <Typography variant="body2" fontWeight="500" color="text.primary">
                     {userData.workspace.displayName || userData.workspace.name}
                   </Typography>
@@ -481,7 +481,7 @@ const WorkspaceManagement: React.FC = () => {
             <Box
               sx={{
                 display: 'flex',
-                gap: 1.5,
+                gap: 1,
                 flexDirection: { xs: 'row', sm: 'row' },
                 flexWrap: 'wrap',
                 alignItems: 'center',
@@ -499,9 +499,9 @@ const WorkspaceManagement: React.FC = () => {
                     fontWeight: 600,
                     px: 3,
                     py: 1,
-                    borderRadius: 2,
+                    borderRadius: 1,
                     textTransform: 'none',
-                    fontSize: '0.875rem',
+                    fontSize: '0.8rem',
                     boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
                     '&:hover': {
                       backgroundColor: 'primary.dark',
@@ -559,17 +559,17 @@ const WorkspaceManagement: React.FC = () => {
       >
         {/* Stats Section */}
         {venues.length > 0 && (
-          <Box sx={{ px: { xs: 3, sm: 4 }, py: 2 }}>
+          <Box sx={{ px: { xs: 3, sm: 4 }, py: 1 }}>
             <Box sx={{ 
               px: { xs: 3, sm: 4 }, 
-              py: { xs: 3, sm: 4 }, 
+              py: { xs: 1, sm: 4 }, 
               backgroundColor: 'background.paper', 
               borderRadius: 3, 
               mb: 4,
               border: `1px solid ${theme.palette.grey[100]}`,
               boxShadow: '0 4px 20px rgba(0,0,0,0.08)'
             }}>
-              <Typography variant="h6" fontWeight="700" color="text.primary" sx={{ mb: 3 }}>
+              <Typography variant="h6" fontWeight="700" color="text.primary" sx={{ mb: 1 }}>
                 Workspace Overview
               </Typography>
               
@@ -608,7 +608,7 @@ const WorkspaceManagement: React.FC = () => {
                     <Box
                       sx={{
                         p: { xs: 2.5, sm: 3 },
-                        borderRadius: 2,
+                        borderRadius: 1,
                         backgroundColor: alpha(stat.color, 0.05),
                         border: `1px solid ${alpha(stat.color, 0.2)}`,
                         transition: 'all 0.3s ease',
@@ -619,13 +619,13 @@ const WorkspaceManagement: React.FC = () => {
                         },
                       }}
                     >
-                      <Stack direction="row" alignItems="center" spacing={2}>
+                      <Stack direction="row" alignItems="center" spacing={1}>
                         {/* Icon on the left */}
                         <Box
                           sx={{
                             width: 48,
                             height: 48,
-                            borderRadius: 2,
+                            borderRadius: 1,
                             backgroundColor: stat.color,
                             display: 'flex',
                             alignItems: 'center',
@@ -644,7 +644,7 @@ const WorkspaceManagement: React.FC = () => {
                             fontWeight="700" 
                             color="text.primary" 
                             sx={{ 
-                              fontSize: { xs: '1.5rem', sm: '2rem' },
+                              fontSize: { xs: '1.25rem', sm: '2rem' },
                               lineHeight: 1.2,
                               mb: 0.5
                             }}
@@ -656,7 +656,7 @@ const WorkspaceManagement: React.FC = () => {
                             color="text.secondary" 
                             fontWeight="600"
                             sx={{ 
-                              fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                              fontSize: { xs: '0.75rem', sm: '0.8rem' },
                               lineHeight: 1.2,
                               display: '-webkit-box',
                               WebkitLineClamp: 2,
@@ -677,13 +677,13 @@ const WorkspaceManagement: React.FC = () => {
         )}
 
         {/* Section Header */}
-        <Box sx={{ mb: 4, px: { xs: 3, sm: 4 }, py: 2 }}>
+        <Box sx={{ mb: 4, px: { xs: 3, sm: 4 }, py: 1 }}>
           <Typography
             variant="h6"
             fontWeight="600"
             color="text.primary"
             gutterBottom
-            sx={{ fontSize: { xs: '1.25rem', sm: '1.375rem' }, mb: 1 }}
+            sx={{ fontSize: { xs: '1.25rem', sm: '1.15rem' }, mb: 1 }}
           >
             Your Venues
           </Typography>
@@ -698,7 +698,7 @@ const WorkspaceManagement: React.FC = () => {
       {/* Venues Grid */}
       <Box sx={{ px: { xs: 3, sm: 4 }, pb: 4 }}>
       {loadingVenues ? (
-        <Grid container spacing={2}>
+        <Grid container spacing={1}>
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <Grid item xs={12} sm={6} lg={4} xl={3} key={i}>
               <Card
@@ -709,9 +709,9 @@ const WorkspaceManagement: React.FC = () => {
                 }}
               >
                 {/* Header Skeleton */}
-                <Box sx={{ p: 3, pb: 2, backgroundColor: 'grey.50' }}>
+                <Box sx={{ p: 1.5, pb: 1, backgroundColor: 'grey.50' }}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
-                    <Box sx={{ flex: 1, pr: 2 }}>
+                    <Box sx={{ flex: 1, pr: 1 }}>
                       <Skeleton variant="text" width="70%" height={28} sx={{ mb: 0.5 }} />
                       <Skeleton variant="text" width="40%" height={20} />
                     </Box>
@@ -720,8 +720,8 @@ const WorkspaceManagement: React.FC = () => {
                 </Box>
 
                 {/* Content Skeleton */}
-                <CardContent sx={{ p: 3, pt: 2 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: 2 }}>
+                <CardContent sx={{ p: 1.5, pt: 1 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: 1 }}>
                     <Skeleton variant="circular" width={18} height={18} sx={{ mt: 0.2, mr: 1 }} />
                     <Box sx={{ flex: 1 }}>
                       <Skeleton variant="text" width="90%" height={20} />
@@ -729,9 +729,9 @@ const WorkspaceManagement: React.FC = () => {
                     </Box>
                   </Box>
 
-                  <Skeleton variant="text" width="85%" height={20} sx={{ mb: 2 }} />
+                  <Skeleton variant="text" width="85%" height={20} sx={{ mb: 1 }} />
 
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 2 }}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 1 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
                       <Skeleton variant="circular" width={16} height={16} sx={{ mr: 1 }} />
                       <Skeleton variant="text" width="50%" height={20} />
@@ -742,15 +742,15 @@ const WorkspaceManagement: React.FC = () => {
                     </Box>
                   </Box>
 
-                  <Skeleton variant="rectangular" width={80} height={24} sx={{ borderRadius: 2, mb: 2 }} />
+                  <Skeleton variant="rectangular" width={80} height={24} sx={{ borderRadius: 1, mb: 1 }} />
                 </CardContent>
 
                 {/* Footer Skeleton */}
-                <Box sx={{ p: 3, pt: 0, borderTop: '1px solid', borderColor: 'divider', backgroundColor: 'rgba(0,0,0,0.02)' }}>
+                <Box sx={{ p: 1.5, pt: 0, borderTop: '1px solid', borderColor: 'divider', backgroundColor: 'rgba(0,0,0,0.02)' }}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Box sx={{ display: 'flex', gap: 1 }}>
-                      <Skeleton variant="rectangular" width={50} height={24} sx={{ borderRadius: 2 }} />
-                      <Skeleton variant="rectangular" width={45} height={24} sx={{ borderRadius: 2 }} />
+                      <Skeleton variant="rectangular" width={50} height={24} sx={{ borderRadius: 1 }} />
+                      <Skeleton variant="rectangular" width={45} height={24} sx={{ borderRadius: 1 }} />
                     </Box>
                     <Skeleton variant="text" width={60} height={16} />
                   </Box>
@@ -760,7 +760,7 @@ const WorkspaceManagement: React.FC = () => {
           ))}
         </Grid>
       ) : venues.length > 0 ? (
-        <Grid container spacing={3}>
+        <Grid container spacing={1}>
           {venues.map((venue) => (
             <Grid item xs={12} sm={6} lg={6} xl={4} key={venue.id}>
               <Card
@@ -792,7 +792,7 @@ const WorkspaceManagement: React.FC = () => {
                       zIndex: 3,
                       backgroundColor: 'grey.600',
                       color: 'white',
-                      px: 1.5,
+                      px: 1,
                       py: 0.5,
                       borderRadius: 1,
                       fontSize: '0.7rem',
@@ -824,7 +824,7 @@ const WorkspaceManagement: React.FC = () => {
                   }}
                 >
                   {!venue.image_url && (
-                    <Store sx={{ fontSize: 14, color: '#999' }} />
+                    <Store sx={{ fontSize: 12, color: '#999' }} />
                   )}
                 </Box>
 
@@ -860,11 +860,11 @@ const WorkspaceManagement: React.FC = () => {
                       },
                     }}
                   >
-                    <MoreVert sx={{ fontSize: 14 }} />
+                    <MoreVert sx={{ fontSize: 12 }} />
                   </IconButton>
 
                   {/* Header */}
-                  <Box sx={{ p: 3, pb: 2 }}>
+                  <Box sx={{ p: 1.5, pb: 1 }}>
                     <Typography 
                       variant="h6" 
                       fontWeight="700"
@@ -888,7 +888,7 @@ const WorkspaceManagement: React.FC = () => {
                           color: 'text.secondary',
                           fontSize: '0.9rem',
                           lineHeight: 1.4,
-                          mb: 1.5,
+                          mb: 1,
                           fontWeight: 400,
                           fontStyle: 'italic',
                           display: '-webkit-box',
@@ -902,7 +902,7 @@ const WorkspaceManagement: React.FC = () => {
                       </Typography>
                     )}
                     
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                       <Box
                         sx={{
                           width: 24,
@@ -915,7 +915,7 @@ const WorkspaceManagement: React.FC = () => {
                         }}
                       >
                         {React.cloneElement(getVenueTypeIcon(venue.venue_type || 'restaurant'), {
-                          sx: { color: 'white', fontSize: 14 }
+                          sx: { color: 'white', fontSize: 12 }
                         })}
                       </Box>
                       <Typography 
@@ -932,12 +932,12 @@ const WorkspaceManagement: React.FC = () => {
                     </Box>
 
                     {/* Status Icons */}
-                    <Box sx={{ display: 'flex', gap: 2, mb: 1 }}>
+                    <Box sx={{ display: 'flex', gap: 1, mb: 1 }}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8 }}>
                         {venue.isActive ? (
-                          <CheckCircle sx={{ fontSize: 14, color: 'success.main' }} />
+                          <CheckCircle sx={{ fontSize: 12, color: 'success.main' }} />
                         ) : (
-                          <Cancel sx={{ fontSize: 14, color: 'grey.400' }} />
+                          <Cancel sx={{ fontSize: 12, color: 'grey.400' }} />
                         )}
                         <Typography variant="body2" sx={{ fontSize: '0.85rem', color: 'text.secondary', fontWeight: 400, textTransform: 'capitalize' }}>
                           {venue.isActive ? 'Active' : 'Inactive'}
@@ -945,9 +945,9 @@ const WorkspaceManagement: React.FC = () => {
                       </Box>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8 }}>
                         {venue.is_open ? (
-                          <Visibility sx={{ fontSize: 14, color: 'success.main' }} />
+                          <Visibility sx={{ fontSize: 12, color: 'success.main' }} />
                         ) : (
-                          <VisibilityOff sx={{ fontSize: 14, color: 'error.main' }} />
+                          <VisibilityOff sx={{ fontSize: 12, color: 'error.main' }} />
                         )}
                         <Typography variant="body2" sx={{ fontSize: '0.85rem', color: 'text.secondary', fontWeight: 400, textTransform: 'capitalize' }}>
                           {venue.is_open ? 'Open' : 'Closed'}
@@ -959,8 +959,8 @@ const WorkspaceManagement: React.FC = () => {
                   {/* Content */}
                   <Box sx={{ px: 3, flex: 1, overflow: 'hidden' }}>
                     {/* Location */}
-                    <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: 2 }}>
-                      <LocationOn sx={{ color: 'text.secondary', fontSize: 14, mt: 0.2, mr: 1.5 }} />
+                    <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: 1 }}>
+                      <LocationOn sx={{ color: 'text.secondary', fontSize: 12, mt: 0.2, mr: 1.5 }} />
                       <Typography 
                         variant="body2" 
                         color="text.secondary"
@@ -988,7 +988,7 @@ const WorkspaceManagement: React.FC = () => {
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                       {venue.phone && (
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <Phone sx={{ color: 'text.secondary', fontSize: 14, mr: 1.5 }} />
+                          <Phone sx={{ color: 'text.secondary', fontSize: 12, mr: 1.5 }} />
                           <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.9rem' }}>
                             {venue.phone}
                           </Typography>
@@ -996,7 +996,7 @@ const WorkspaceManagement: React.FC = () => {
                       )}
                       {venue.email && (
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <Email sx={{ color: 'text.secondary', fontSize: 14, mr: 1.5 }} />
+                          <Email sx={{ color: 'text.secondary', fontSize: 12, mr: 1.5 }} />
                           <Typography 
                             variant="body2" 
                             color="text.secondary" 
@@ -1026,8 +1026,8 @@ const WorkspaceManagement: React.FC = () => {
             borderColor: 'primary.light',
             background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)',
             textAlign: 'center',
-            py: { xs: 4, sm: 6 },
-            px: { xs: 2, sm: 3 },
+            py: { xs: 1, sm: 6 },
+            px: { xs: 1, sm: 3 },
             position: 'relative',
             overflow: 'hidden',
             '&::before': {
@@ -1052,7 +1052,7 @@ const WorkspaceManagement: React.FC = () => {
                 alignItems: 'center',
                 justifyContent: 'center',
                 mx: 'auto',
-                mb: 3,
+                mb: 1,
                 border: '2px solid',
                 borderColor: 'primary.main',
               }}
@@ -1070,7 +1070,7 @@ const WorkspaceManagement: React.FC = () => {
               fontWeight="600" 
               gutterBottom 
               color="text.primary"
-              sx={{ fontSize: { xs: '1.25rem', sm: '1.375rem' } }}
+              sx={{ fontSize: { xs: '1.25rem', sm: '1.15rem' } }}
             >
               No Venues Yet
             </Typography>
@@ -1079,10 +1079,10 @@ const WorkspaceManagement: React.FC = () => {
               variant="body1" 
               color="text.secondary" 
               sx={{ 
-                mb: 3,
+                mb: 1,
                 maxWidth: '400px',
                 mx: 'auto',
-                fontSize: { xs: '0.875rem', sm: '1rem' },
+                fontSize: { xs: '0.8rem', sm: '1rem' },
                 lineHeight: 1.5,
               }}
             >
@@ -1091,7 +1091,7 @@ const WorkspaceManagement: React.FC = () => {
             </Typography>
 
             {canCreateVenues && (
-              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
                 <Button
                   variant="contained"
                   startIcon={<Add />}
@@ -1100,8 +1100,8 @@ const WorkspaceManagement: React.FC = () => {
                   sx={{
                     px: 3,
                     py: 1,
-                    borderRadius: 2,
-                    fontSize: '0.875rem',
+                    borderRadius: 1,
+                    fontSize: '0.8rem',
                     fontWeight: 600,
                     textTransform: 'none',
                     boxShadow: '0 2px 8px rgba(25, 118, 210, 0.3)',
@@ -1158,13 +1158,13 @@ const WorkspaceManagement: React.FC = () => {
         fullWidth
         PaperProps={{
           sx: {
-            borderRadius: 2,
+            borderRadius: 1,
             maxHeight: '90vh'
           }
         }}
       >
         <DialogTitle>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Restaurant color="primary" />
             <Typography variant="h6" fontWeight="600">
               {editingVenue ? 'Edit Venue' : 'Add New Venue'}
@@ -1173,15 +1173,15 @@ const WorkspaceManagement: React.FC = () => {
         </DialogTitle>
         
         <DialogContent dividers sx={{ 
-          px: { xs: 2, sm: 3 }, 
-          py: { xs: 3, sm: 4 },
+          px: { xs: 1, sm: 3 }, 
+          py: { xs: 1, sm: 4 },
           minHeight: '600px'
         }}>
-          <Grid container spacing={3}>
+          <Grid container spacing={1}>
             {/* Basic Information */}
             <Grid item xs={12}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                <Business sx={{ color: 'primary.main', fontSize: 14 }} />
+                <Business sx={{ color: 'primary.main', fontSize: 12 }} />
                 <Typography variant="subtitle1" fontWeight="600">
                   Basic Information
                 </Typography>
@@ -1257,7 +1257,7 @@ const WorkspaceManagement: React.FC = () => {
             <Grid item xs={12}>
               <Divider sx={{ my: 2 }} />
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                <Map sx={{ color: 'primary.main', fontSize: 14 }} />
+                <Map sx={{ color: 'primary.main', fontSize: 12 }} />
                 <Typography variant="subtitle1" fontWeight="600">
                   Location Details
                 </Typography>
@@ -1361,7 +1361,7 @@ const WorkspaceManagement: React.FC = () => {
             <Grid item xs={12}>
               <Divider sx={{ my: 2 }} />
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                <Phone sx={{ color: 'primary.main', fontSize: 14 }} />
+                <Phone sx={{ color: 'primary.main', fontSize: 12 }} />
                 <Typography variant="subtitle1" fontWeight="600">
                   Contact Information
                 </Typography>
@@ -1411,7 +1411,7 @@ const WorkspaceManagement: React.FC = () => {
             <Grid item xs={12}>
               <Divider sx={{ my: 2 }} />
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                <AttachMoney sx={{ color: 'primary.main', fontSize: 14 }} />
+                <AttachMoney sx={{ color: 'primary.main', fontSize: 12 }} />
                 <Typography variant="subtitle1" fontWeight="600">
                   Additional Settings
                 </Typography>
@@ -1437,7 +1437,7 @@ const WorkspaceManagement: React.FC = () => {
             </Grid>
             
             <Grid item xs={12} md={6}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                 <FormControlLabel
                   control={
                     <Switch
@@ -1463,7 +1463,7 @@ const WorkspaceManagement: React.FC = () => {
           </Grid>
         </DialogContent>
         
-        <DialogActions sx={{ p: 3, gap: 2 }}>
+        <DialogActions sx={{ p: 1.5, gap: 1 }}>
           <Button
             onClick={() => {
               setOpenVenueDialog(false);

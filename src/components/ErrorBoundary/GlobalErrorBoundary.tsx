@@ -257,7 +257,7 @@ const ErrorBoundaryUI: React.FC<ErrorBoundaryUIProps> = ({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        p: 2,
+        p: 1,
       }}
     >
       <Container maxWidth="md">
@@ -265,17 +265,17 @@ const ErrorBoundaryUI: React.FC<ErrorBoundaryUIProps> = ({
           sx={{
             p: { xs: 3, sm: 4 },
             textAlign: 'center',
-            borderRadius: 2,
+            borderRadius: 1,
             boxShadow: 3,
           }}
         >
           {/* Error Icon */}
-          <Box sx={{ mb: 3 }}>
+          <Box sx={{ mb: 1 }}>
             <ErrorOutline
               sx={{
                 fontSize: { xs: 64, sm: 80 },
                 color: 'error.main',
-                mb: 2,
+                mb: 1,
               }}
             />
             <Typography
@@ -292,7 +292,7 @@ const ErrorBoundaryUI: React.FC<ErrorBoundaryUIProps> = ({
           <Typography
             variant="body1"
             color="text.secondary"
-            sx={{ mb: 3, lineHeight: 1.6, maxWidth: 600, mx: 'auto' }}
+            sx={{ mb: 1, lineHeight: 1.6, maxWidth: 600, mx: 'auto' }}
           >
             {userMessage}
           </Typography>
@@ -302,7 +302,7 @@ const ErrorBoundaryUI: React.FC<ErrorBoundaryUIProps> = ({
             <Typography variant="subtitle2" fontWeight="600" gutterBottom>
               What you can try:
             </Typography>
-            <Box component="ul" sx={{ pl: 2, m: 0 }}>
+            <Box component="ul" sx={{ pl: 1, m: 0 }}>
               {suggestions.map((suggestion, index) => (
                 <Typography
                   key={index}
@@ -320,9 +320,9 @@ const ErrorBoundaryUI: React.FC<ErrorBoundaryUIProps> = ({
           {/* Action Buttons */}
           <Stack
             direction={{ xs: 'column', sm: 'row' }}
-            spacing={2}
+            spacing={1}
             justifyContent="center"
-            sx={{ mb: 3 }}
+            sx={{ mb: 1 }}
           >
             <Button
               variant="contained"
@@ -346,7 +346,7 @@ const ErrorBoundaryUI: React.FC<ErrorBoundaryUIProps> = ({
           </Stack>
 
           {/* Error Details (Collapsible) */}
-          <Box sx={{ mt: 3 }}>
+          <Box sx={{ mt: 1 }}>
             <Button
               variant="text"
               size="small"
@@ -361,7 +361,7 @@ const ErrorBoundaryUI: React.FC<ErrorBoundaryUIProps> = ({
               <Alert
                 severity="info"
                 sx={{
-                  mt: 2,
+                  mt: 1,
                   textAlign: 'left',
                   '& .MuiAlert-message': {
                     width: '100%',
@@ -378,7 +378,7 @@ const ErrorBoundaryUI: React.FC<ErrorBoundaryUIProps> = ({
                   <Box
                     component="pre"
                     sx={{
-                      fontSize: '0.75rem',
+                      fontSize: '0.7rem',
                       backgroundColor: 'grey.100',
                       p: 1,
                       borderRadius: 1,
@@ -399,7 +399,7 @@ const ErrorBoundaryUI: React.FC<ErrorBoundaryUIProps> = ({
                     <Box
                       component="pre"
                       sx={{
-                        fontSize: '0.75rem',
+                        fontSize: '0.7rem',
                         backgroundColor: 'grey.100',
                         p: 1,
                         borderRadius: 1,

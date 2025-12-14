@@ -50,7 +50,7 @@ const HomeFragment: React.FC<HomeFragmentProps> = ({
           background: `linear-gradient(180deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
           color: 'white',
           pt: { xs: 3, sm: 4, md: 5 },
-          pb: { xs: 4, sm: 5, md: 6 },
+          pb: { xs: 4, sm: 5, md: 1.5 },
           overflow: 'hidden',
           width: '100%',
         }}
@@ -63,7 +63,7 @@ const HomeFragment: React.FC<HomeFragmentProps> = ({
           sx={{ 
             position: 'relative', 
             zIndex: 1,
-            px: { xs: 2, sm: 3 },
+            px: { xs: 1, sm: 3 },
           }}
         >
           {/* Restaurant Info */}
@@ -84,12 +84,12 @@ const HomeFragment: React.FC<HomeFragmentProps> = ({
             <Typography
               variant="h6"
               sx={{
-                mb: { xs: 2, sm: 2.5 },
+                mb: { xs: 2, sm: 1.5 },
                 opacity: 0.95,
                 fontWeight: 400,
-                fontSize: { xs: '0.875rem', sm: '1rem', md: '1.1rem' },
+                fontSize: { xs: '0.8rem', sm: '1rem', md: '1.1rem' },
                 lineHeight: 1.5,
-                px: { xs: 1, sm: 2 },
+                px: { xs: 1, sm: 1 },
               }}
             >
               {restaurant?.description || 'Delicious food awaits you'}
@@ -98,7 +98,7 @@ const HomeFragment: React.FC<HomeFragmentProps> = ({
             {/* Restaurant Meta Info */}
             <Stack
               direction={{ xs: 'column', sm: 'row' }}
-              spacing={{ xs: 1, sm: 2, md: 3 }}
+              spacing={{ xs: 1, sm: 2, md: 1.5 }}
               justifyContent="center"
               alignItems="center"
               sx={{ mb: { xs: 2, sm: 3 } }}
@@ -108,21 +108,21 @@ const HomeFragment: React.FC<HomeFragmentProps> = ({
                 <Typography variant="body1" fontWeight="600" sx={{ fontSize: { xs: '0.9rem', sm: '1rem' } }}>
                   {restaurant?.rating?.toFixed(1) || '4.5'}
                 </Typography>
-                <Typography variant="body2" sx={{ opacity: 0.9, fontSize: { xs: '0.8rem', sm: '0.875rem' } }}>
+                <Typography variant="body2" sx={{ opacity: 0.9, fontSize: { xs: '0.8rem', sm: '0.8rem' } }}>
                   ({restaurant?.total_reviews || 0}+ reviews)
                 </Typography>
               </Box>
 
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                 <LocationOn sx={{ fontSize: { xs: 16, sm: 18 } }} />
-                <Typography variant="body2" sx={{ opacity: 0.9, fontSize: { xs: '0.8rem', sm: '0.875rem' } }}>
+                <Typography variant="body2" sx={{ opacity: 0.9, fontSize: { xs: '0.8rem', sm: '0.8rem' } }}>
                   {restaurant?.location.city || 'Location'}
                 </Typography>
               </Box>
 
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                 <Schedule sx={{ fontSize: { xs: 16, sm: 18 } }} />
-                <Typography variant="body2" sx={{ opacity: 0.9, fontSize: { xs: '0.8rem', sm: '0.875rem' } }}>
+                <Typography variant="body2" sx={{ opacity: 0.9, fontSize: { xs: '0.8rem', sm: '0.8rem' } }}>
                   25-30 min
                 </Typography>
               </Box>
@@ -137,7 +137,7 @@ const HomeFragment: React.FC<HomeFragmentProps> = ({
                 flexWrap="wrap"
                 sx={{ 
                   gap: 1,
-                  px: { xs: 2, sm: 0 },
+                  px: { xs: 1, sm: 0 },
                 }}
               >
                 {restaurant.cuisine_types.map((cuisine, index) => (
@@ -167,7 +167,7 @@ const HomeFragment: React.FC<HomeFragmentProps> = ({
         <Container 
           maxWidth="lg" 
           sx={{ 
-            px: { xs: 2, sm: 3 },
+            px: { xs: 1, sm: 3 },
           }}
         >
           <Box sx={{ mb: { xs: 3, sm: 4 } }}>
@@ -178,7 +178,7 @@ const HomeFragment: React.FC<HomeFragmentProps> = ({
                 mb: { xs: 2, sm: 3 },
                 textAlign: 'center',
                 color: 'text.primary',
-                fontSize: { xs: '1.25rem', sm: '1.5rem' },
+                fontSize: { xs: '1.25rem', sm: '1.25rem' },
               }}
             >
               Browse by Category
@@ -222,9 +222,9 @@ const HomeFragment: React.FC<HomeFragmentProps> = ({
                     <CardContent
                       sx={{
                         textAlign: 'center',
-                        p: { xs: 1.5, sm: 2, md: 3 },
+                        p: { xs: 1.5, sm: 2, md: 1.5 },
                         '&:last-child': {
-                          pb: { xs: 1.5, sm: 2, md: 3 },
+                          pb: { xs: 1.5, sm: 2, md: 1.5 },
                         },
                       }}
                     >
@@ -245,7 +245,7 @@ const HomeFragment: React.FC<HomeFragmentProps> = ({
                         variant="h6"
                         sx={{
                           fontWeight: 600,
-                          fontSize: { xs: '0.875rem', sm: '1rem', md: '1.1rem' },
+                          fontSize: { xs: '0.8rem', sm: '1rem', md: '1.1rem' },
                           mb: 0.5,
                           color: 'text.primary',
                           lineHeight: 1.3,

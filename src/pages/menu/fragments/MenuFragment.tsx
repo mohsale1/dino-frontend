@@ -134,7 +134,7 @@ const MenuFragment: React.FC<MenuFragmentProps> = ({
       >
         <Toolbar sx={{ justifyContent: 'center', py: 1 }}>
           <Stack direction="row" spacing={1} alignItems="center">
-            <Restaurant sx={{ color: 'white', fontSize: 14 }} />
+            <Restaurant sx={{ color: 'white', fontSize: 12 }} />
             <Typography
               variant="h6"
               sx={{
@@ -155,7 +155,7 @@ const MenuFragment: React.FC<MenuFragmentProps> = ({
           background: `linear-gradient(135deg, ${alpha(theme.palette.grey[50], 1)} 0%, ${alpha(theme.palette.grey[100], 0.8)} 100%)`,
           position: 'relative',
           overflow: 'hidden',
-          mb: { xs: 2, sm: 3, md: 4 },
+          mb: { xs: 2, sm: 3, md: 1 },
           borderBottom: `1px solid ${theme.palette.divider}`,
           width: '100%',
         }}
@@ -180,18 +180,18 @@ const MenuFragment: React.FC<MenuFragmentProps> = ({
           sx={{ 
             position: 'relative', 
             zIndex: 1, 
-            py: { xs: 3, sm: 4, md: 5 },
-            px: { xs: 2, sm: 3 },
+            py: { xs: 1, sm: 4, md: 5 },
+            px: { xs: 1, sm: 3 },
           }}
         >
           {/* Search Bar */}
-          <Box sx={{ mb: { xs: 2.5, sm: 3, md: 4 } }}>
+          <Box sx={{ mb: { xs: 2.5, sm: 3, md: 1 } }}>
             <Typography
               variant="h5"
               sx={{
                 color: 'text.primary',
                 fontWeight: 700,
-                mb: { xs: 1.5, sm: 2 },
+                mb: { xs: 1.5, sm: 1 },
                 textAlign: 'center',
                 fontSize: { xs: '1.1rem', sm: '1.25rem', md: '1.5rem' },
               }}
@@ -224,7 +224,7 @@ const MenuFragment: React.FC<MenuFragmentProps> = ({
                   },
                   '& .MuiInputBase-input': {
                     py: { xs: 1.75, sm: 2, md: 2.5 },
-                    px: { xs: 1.5, sm: 2 },
+                    px: { xs: 1, sm: 1 },
                     fontSize: { xs: '0.9rem', sm: '0.95rem', md: '1.05rem' },
                   },
                 }}
@@ -259,7 +259,7 @@ const MenuFragment: React.FC<MenuFragmentProps> = ({
           <Box sx={{ mb: { xs: 2, sm: 3 } }}>
             <Stack 
               direction="row" 
-              spacing={{ xs: 1.5, sm: 2 }} 
+              spacing={{ xs: 1.5, sm: 1 }} 
               justifyContent="center" 
               flexWrap="wrap" 
               sx={{ gap: { xs: 1, sm: 1.5 } }}
@@ -278,7 +278,7 @@ const MenuFragment: React.FC<MenuFragmentProps> = ({
                   transition: 'all 0.2s ease',
                 }}
               >
-                <Typography sx={{ fontSize: { xs: '1.3rem', sm: '1.5rem', md: '1.75rem' } }}>🍽️</Typography>
+                <Typography sx={{ fontSize: { xs: '1.3rem', sm: '1.25rem', md: '1.75rem' } }}>🍽️</Typography>
               </IconButton>
 
               <IconButton
@@ -380,7 +380,7 @@ const MenuFragment: React.FC<MenuFragmentProps> = ({
 
       <Container 
         maxWidth="lg"
-        sx={{ px: { xs: 2, sm: 3 } }}
+        sx={{ px: { xs: 1, sm: 3 } }}
       >
         {filteredGroups.map((group, index) => (
           <Box key={group.id}>
@@ -389,7 +389,7 @@ const MenuFragment: React.FC<MenuFragmentProps> = ({
               ref={(el: HTMLDivElement | null) => (categoryRefs.current[group.id] = el)}
             >
               {/* Category Header */}
-              <Box sx={{ mb: { xs: 2, sm: 2.5 } }}>
+              <Box sx={{ mb: { xs: 2, sm: 1.5 } }}>
                 <Typography 
                   variant="h5" 
                   fontWeight="700" 
@@ -404,7 +404,7 @@ const MenuFragment: React.FC<MenuFragmentProps> = ({
                 <Typography 
                   variant="body2" 
                   color="text.secondary"
-                  sx={{ fontSize: { xs: '0.8rem', sm: '0.875rem' } }}
+                  sx={{ fontSize: { xs: '0.8rem', sm: '0.8rem' } }}
                 >
                   {group.description || `Discover our delicious ${group.name.toLowerCase()}`}
                 </Typography>
@@ -432,7 +432,7 @@ const MenuFragment: React.FC<MenuFragmentProps> = ({
                 sx={{
                   height: { xs: 6, sm: 8, md: 10 },
                   backgroundColor: alpha(theme.palette.grey[200], 0.5),
-                  my: { xs: 2.5, sm: 3, md: 4 },
+                  my: { xs: 2.5, sm: 3, md: 1 },
                 }}
               />
             )}
@@ -450,7 +450,7 @@ const MenuFragment: React.FC<MenuFragmentProps> = ({
               border: `2px dashed ${theme.palette.grey[300]}`,
             }}
           >
-            <Search sx={{ fontSize: { xs: 48, sm: 56, md: 64 }, color: 'text.disabled', mb: 2 }} />
+            <Search sx={{ fontSize: { xs: 48, sm: 56, md: 64 }, color: 'text.disabled', mb: 1 }} />
             <Typography 
               variant="h6" 
               color="text.secondary" 
@@ -464,7 +464,7 @@ const MenuFragment: React.FC<MenuFragmentProps> = ({
               variant="body1" 
               color="text.secondary" 
               sx={{ 
-                mb: 3,
+                mb: 1,
                 fontSize: { xs: '0.9rem', sm: '1rem' },
               }}
             >
@@ -481,12 +481,12 @@ const MenuFragment: React.FC<MenuFragmentProps> = ({
                 setActiveCategory('all');
               }}
               sx={{
-                px: { xs: 2.5, sm: 3 },
+                px: { xs: 1.5, sm: 3 },
                 py: { xs: 0.75, sm: 1 },
-                borderRadius: 2,
+                borderRadius: 1,
                 textTransform: 'none',
                 fontWeight: 600,
-                fontSize: { xs: '0.875rem', sm: '0.9375rem' },
+                fontSize: { xs: '0.8rem', sm: '0.9375rem' },
               }}
             >
               Clear All Filters
@@ -530,9 +530,9 @@ const MenuFragment: React.FC<MenuFragmentProps> = ({
           },
         }}
       >
-        <Box sx={{ p: { xs: 2, sm: 2.5 } }}>
+        <Box sx={{ p: { xs: 2, sm: 1.5 } }}>
           {/* Header */}
-          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
             <Typography variant="h6" fontWeight="700" sx={{ fontSize: { xs: '1.1rem', sm: '1.25rem' } }}>
               Quick Access
             </Typography>
@@ -541,7 +541,7 @@ const MenuFragment: React.FC<MenuFragmentProps> = ({
             </IconButton>
           </Stack>
 
-          <Divider sx={{ mb: 2 }} />
+          <Divider sx={{ mb: 1 }} />
 
           {/* Categories List */}
           <List sx={{ p: 0 }}>
@@ -554,7 +554,7 @@ const MenuFragment: React.FC<MenuFragmentProps> = ({
                   setShowQuickAccess(false);
                 }}
                 sx={{
-                  borderRadius: 2,
+                  borderRadius: 1,
                   mb: 1,
                   '&.Mui-selected': {
                     backgroundColor: alpha(theme.palette.primary.main, 0.1),
@@ -595,7 +595,7 @@ const MenuFragment: React.FC<MenuFragmentProps> = ({
                     setShowQuickAccess(false);
                   }}
                   sx={{
-                    borderRadius: 2,
+                    borderRadius: 1,
                     mb: 1,
                     '&.Mui-selected': {
                       backgroundColor: alpha(theme.palette.primary.main, 0.1),
@@ -694,12 +694,12 @@ const MenuItemRectangleCard: React.FC<MenuItemRectangleCardProps> = ({
       sx={{
         display: 'flex',
         flexDirection: 'row',
-        py: { xs: 2, sm: 2.5 },
+        py: { xs: 1, sm: 1.5 },
         borderBottom: `1px solid ${theme.palette.divider}`,
         '&:last-child': {
           borderBottom: 'none',
         },
-        gap: { xs: 1.5, sm: 2, md: 3 },
+        gap: { xs: 1, sm: 2, md: 1.5 },
       }}
     >
       {/* Left Side - Content */}
@@ -764,7 +764,7 @@ const MenuItemRectangleCard: React.FC<MenuItemRectangleCardProps> = ({
                 sx={{
                   textDecoration: 'line-through',
                   color: 'text.disabled',
-                  fontSize: { xs: '0.8rem', sm: '0.875rem' },
+                  fontSize: { xs: '0.8rem', sm: '0.8rem' },
                 }}
               >
                 ₹{item.originalPrice}
@@ -813,7 +813,7 @@ const MenuItemRectangleCard: React.FC<MenuItemRectangleCardProps> = ({
           {/* Meta Info */}
           <Stack 
             direction="row" 
-            spacing={{ xs: 1, sm: 1.5, md: 2 }} 
+            spacing={{ xs: 1, sm: 1.5, md: 1 }} 
             alignItems="center" 
             flexWrap="wrap" 
             sx={{ mb: { xs: 1, sm: 1.5 }, gap: { xs: 0.5, sm: 0.75 } }}
@@ -890,7 +890,7 @@ const MenuItemRectangleCard: React.FC<MenuItemRectangleCardProps> = ({
             width: { xs: 90, sm: 110, md: 130 },
             height: { xs: 90, sm: 110, md: 130 },
             position: 'relative',
-            borderRadius: { xs: 1.5, sm: 2 },
+            borderRadius: { xs: 1.5, sm: 1 },
             overflow: 'hidden',
           }}
         >
@@ -992,7 +992,7 @@ const MenuItemRectangleCard: React.FC<MenuItemRectangleCardProps> = ({
                 py: { xs: 0.5, sm: 0.75 },
                 fontWeight: 600,
                 textTransform: 'none',
-                borderRadius: 1.5,
+                borderRadius: 1,
                 fontSize: { xs: '0.7rem', sm: '0.75rem' },
                 boxShadow: 'none',
                 '&:hover': {
@@ -1010,7 +1010,7 @@ const MenuItemRectangleCard: React.FC<MenuItemRectangleCardProps> = ({
               justifyContent="space-between"
               sx={{
                 backgroundColor: alpha(theme.palette.primary.main, 0.1),
-                borderRadius: 1.5,
+                borderRadius: 1,
                 p: 0.5,
                 border: `2px solid ${theme.palette.primary.main}`,
               }}
@@ -1038,7 +1038,7 @@ const MenuItemRectangleCard: React.FC<MenuItemRectangleCardProps> = ({
                 sx={{ 
                   minWidth: { xs: 16, sm: 18 }, 
                   textAlign: 'center',
-                  fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                  fontSize: { xs: '0.75rem', sm: '0.8rem' },
                 }}
               >
                 {quantityInCart}

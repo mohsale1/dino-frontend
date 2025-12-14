@@ -106,7 +106,7 @@ const VenueStatusControl: React.FC<VenueStatusControlProps> = () => {
   return (
     <>
       <Card sx={{ 
-        mb: 2,
+        mb: 1,
         borderRadius: 0,
         boxShadow: theme.shadows[1],
         border: '1px solid',
@@ -115,7 +115,7 @@ const VenueStatusControl: React.FC<VenueStatusControlProps> = () => {
       }}>
         <CardContent sx={{ p: 0 }}>
           <Box sx={{ 
-            p: 2, 
+            p: 1, 
             backgroundColor: 'background.paper',
             borderBottom: '1px solid',
             borderColor: 'divider',
@@ -124,18 +124,18 @@ const VenueStatusControl: React.FC<VenueStatusControlProps> = () => {
             justifyContent: 'space-between'
           }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <StoreIcon sx={{ fontSize: 14, color: 'text.primary' }} />
+              <StoreIcon sx={{ fontSize: 12, color: 'text.primary' }} />
               <Box>
                 <Typography variant="subtitle2" fontWeight="600">
                   {currentVenue.name || 'Current Venue'}
                 </Typography>
-                <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+                <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
                   {venueActive ? 'Venue Active' : 'Venue Inactive'}
                 </Typography>
               </Box>
             </Box>
             
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <Switch
                 checked={venueOpen}
                 onChange={handleToggleVenueOpen}
@@ -144,7 +144,7 @@ const VenueStatusControl: React.FC<VenueStatusControlProps> = () => {
                 size="medium"
               />
               <Chip
-                icon={venueOpen ? <CheckCircleIcon sx={{ fontSize: 14 }} /> : <CancelIcon sx={{ fontSize: 14 }} />}
+                icon={venueOpen ? <CheckCircleIcon sx={{ fontSize: 12 }} /> : <CancelIcon sx={{ fontSize: 12 }} />}
                 label={venueOpen ? 'OPEN' : 'CLOSED'}
                 size="small"
                 color={venueOpen ? 'success' : 'error'}
@@ -157,14 +157,14 @@ const VenueStatusControl: React.FC<VenueStatusControlProps> = () => {
             </Box>
           </Box>
 
-          <Box sx={{ p: 2 }}>
+          <Box sx={{ p: 1 }}>
             <Box sx={{ 
               display: 'flex', 
               alignItems: 'center', 
               gap: 1,
               mb: 1
             }}>
-              <ScheduleIcon sx={{ fontSize: 14, color: 'text.secondary' }} />
+              <ScheduleIcon sx={{ fontSize: 12, color: 'text.secondary' }} />
               <Typography variant="body2" fontWeight="500">
                 Order Status
               </Typography>
@@ -174,9 +174,9 @@ const VenueStatusControl: React.FC<VenueStatusControlProps> = () => {
               variant="body2" 
               color="text.secondary" 
               sx={{ 
-                fontSize: '0.875rem',
+                fontSize: '0.8rem',
                 fontStyle: venueOpen ? 'normal' : 'italic',
-                mb: 2
+                mb: 1
               }}
             >
               {venueOpen 
@@ -189,11 +189,11 @@ const VenueStatusControl: React.FC<VenueStatusControlProps> = () => {
               <Alert 
                 severity="warning" 
                 sx={{ 
-                  mb: 2, 
-                  fontSize: '0.75rem',
+                  mb: 1, 
+                  fontSize: '0.7rem',
                   borderRadius: 0,
                   '& .MuiAlert-message': {
-                    fontSize: '0.75rem'
+                    fontSize: '0.7rem'
                   }
                 }}
               >
@@ -205,11 +205,11 @@ const VenueStatusControl: React.FC<VenueStatusControlProps> = () => {
               <Alert 
                 severity="info" 
                 sx={{ 
-                  mb: 2, 
-                  fontSize: '0.75rem',
+                  mb: 1, 
+                  fontSize: '0.7rem',
                   borderRadius: 0,
                   '& .MuiAlert-message': {
-                    fontSize: '0.75rem'
+                    fontSize: '0.7rem'
                   }
                 }}
               >
@@ -218,7 +218,7 @@ const VenueStatusControl: React.FC<VenueStatusControlProps> = () => {
             )}
 
             {statusLoading && (
-              <Box sx={{ mb: 2 }}>
+              <Box sx={{ mb: 1 }}>
                 <LinearProgress sx={{ borderRadius: 0 }} />
                 <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
                   Updating venue status...

@@ -91,12 +91,12 @@ const KanbanOrderCard: React.FC<KanbanOrderCardProps> = ({
   return (
     <Card
       sx={{
-        mb: 2,
+        mb: 1,
         cursor: 'grab',
         opacity: isDragging ? 0.5 : 1,
         transition: 'all 0.2s ease',
         border: `2px solid ${isUrgent ? theme.palette.error.light : 'transparent'}`,
-        borderRadius: 2,
+        borderRadius: 1,
         backgroundColor: 'background.paper',
         '&:hover': {
           boxShadow: 4,
@@ -107,9 +107,9 @@ const KanbanOrderCard: React.FC<KanbanOrderCardProps> = ({
         },
       }}
     >
-      <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+      <CardContent sx={{ p: 1, '&:last-child': { pb: 1 } }}>
         {/* Header */}
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1.5 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
           <Box>
             <Typography variant="subtitle2" fontWeight="700" color="text.primary">
               #{getTrimmedOrderId(order.id)}
@@ -138,14 +138,14 @@ const KanbanOrderCard: React.FC<KanbanOrderCardProps> = ({
               },
             }}
           >
-            <Visibility sx={{ fontSize: 14 }} />
+            <Visibility sx={{ fontSize: 12 }} />
           </IconButton>
         </Box>
 
         {/* Table Info */}
         <Box
           sx={{
-            mb: 1.5,
+            mb: 1,
             p: 1,
             backgroundColor: alpha(theme.palette.primary.main, 0.05),
             borderRadius: 1,
@@ -155,8 +155,8 @@ const KanbanOrderCard: React.FC<KanbanOrderCardProps> = ({
           <Stack direction="row" alignItems="center" spacing={1}>
             <Box
               sx={{
-                width: 28,
-                height: 28,
+                width: 22,
+                height: 22,
                 borderRadius: 1,
                 backgroundColor: 'primary.main',
                 display: 'flex',
@@ -165,13 +165,13 @@ const KanbanOrderCard: React.FC<KanbanOrderCardProps> = ({
                 color: 'white',
               }}
             >
-              <TableRestaurant sx={{ fontSize: 14 }} />
+              <TableRestaurant sx={{ fontSize: 12 }} />
             </Box>
             <Box flex={1}>
               <Typography variant="caption" color="text.secondary" display="block" sx={{ lineHeight: 1.2, fontSize: '0.7rem' }}>
                 Table
               </Typography>
-              <Typography variant="body2" fontWeight="700" color="primary.main" sx={{ fontSize: '0.875rem' }}>
+              <Typography variant="body2" fontWeight="700" color="primary.main" sx={{ fontSize: '0.8rem' }}>
                 {getTableNumber(order)}
               </Typography>
             </Box>
@@ -179,9 +179,9 @@ const KanbanOrderCard: React.FC<KanbanOrderCardProps> = ({
         </Box>
 
         {/* Time Info */}
-        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1.5 }}>
+        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
           <Stack direction="row" alignItems="center" spacing={0.5}>
-            <AccessTime sx={{ fontSize: 14, color: 'text.secondary' }} />
+            <AccessTime sx={{ fontSize: 12, color: 'text.secondary' }} />
             <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
               {formatTime(order.createdAt)}
             </Typography>
@@ -211,7 +211,7 @@ const KanbanOrderCard: React.FC<KanbanOrderCardProps> = ({
             color="text.secondary"
             fontWeight="700"
             display="block"
-            sx={{ mb: 0.75, fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: 0.5 }}
+            sx={{ mb: 0.5, fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: 0.5 }}
           >
             Items ({order.items.length})
           </Typography>
@@ -248,7 +248,7 @@ const KanbanOrderCard: React.FC<KanbanOrderCardProps> = ({
                   color="text.primary"
                   fontWeight="500"
                   sx={{
-                    fontSize: '0.75rem',
+                    fontSize: '0.7rem',
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
                     whiteSpace: 'nowrap',
@@ -294,7 +294,7 @@ const KanbanOrderCard: React.FC<KanbanOrderCardProps> = ({
               gap: 0.75,
             }}
           >
-            <Timer sx={{ fontSize: 14, color: 'warning.main' }} />
+            <Timer sx={{ fontSize: 12, color: 'warning.main' }} />
             <Typography variant="caption" color="warning.main" fontWeight="600" sx={{ fontSize: '0.7rem' }}>
               In Kitchen
             </Typography>

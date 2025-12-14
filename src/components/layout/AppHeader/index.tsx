@@ -177,9 +177,9 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
                 color: activeSection === item.id ? 'primary.main' : 'text.primary',
                 fontWeight: activeSection === item.id ? 700 : 500,
                 textTransform: 'none',
-                px: 2.5,
+                px: 1,
                 py: 1,
-                borderRadius: 2,
+                borderRadius: 1,
                 fontSize: '0.9375rem',
                 position: 'relative',
                 minHeight: 40,
@@ -200,7 +200,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
                   width: activeSection === item.id ? '60%' : '0%',
                   height: 3,
                   backgroundColor: 'primary.main',
-                  borderRadius: 2,
+                  borderRadius: 1,
                   transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                   pointerEvents: 'none',
                 },
@@ -220,7 +220,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
   const renderUserActions = () => {
     if (user) {
       return (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <NotificationCenter />
           
           <Button
@@ -238,15 +238,15 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
                   <DinoLogo size={16} animated={false} />
                 </Avatar>
               ) : (
-                <AccountCircle sx={{ fontSize: 14 }} />
+                <AccountCircle sx={{ fontSize: 12 }} />
               )
             }
             sx={{
               textTransform: 'none',
               fontWeight: 600,
-              px: 2.5,
+              px: 1,
               py: 1,
-              borderRadius: 2,
+              borderRadius: 1,
               fontSize: '0.9375rem',
               borderColor: 'divider',
               color: 'text.primary',
@@ -265,13 +265,13 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
           <Button
             variant="outlined"
             onClick={handleLogout}
-            startIcon={<ExitToApp sx={{ fontSize: 14 }} />}
+            startIcon={<ExitToApp sx={{ fontSize: 12 }} />}
             sx={{
               textTransform: 'none',
               fontWeight: 600,
-              px: 2.5,
+              px: 1,
               py: 1,
-              borderRadius: 2,
+              borderRadius: 1,
               fontSize: '0.9375rem',
               borderColor: alpha(theme.palette.error.main, 0.5),
               color: 'error.main',
@@ -291,17 +291,17 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
     }
 
     return (
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
         <Button
           variant="outlined"
           onClick={() => navigate('/register')}
-          startIcon={<PersonAdd sx={{ fontSize: 14 }} />}
+          startIcon={<PersonAdd sx={{ fontSize: 12 }} />}
           sx={{
             textTransform: 'none',
             fontWeight: 600,
-            px: 2.5,
+            px: 1,
             py: 1,
-            borderRadius: 2,
+            borderRadius: 1,
             fontSize: '0.9375rem',
             borderColor: 'divider',
             color: 'text.primary',
@@ -320,13 +320,13 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
         <Button
           variant="contained"
           onClick={() => navigate('/login')}
-          startIcon={<Login sx={{ fontSize: 14 }} />}
+          startIcon={<Login sx={{ fontSize: 12 }} />}
           sx={{
             fontWeight: 700,
             textTransform: 'none',
             px: 3,
             py: 1,
-            borderRadius: 2,
+            borderRadius: 1,
             fontSize: '0.9375rem',
             minHeight: 40,
             background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
@@ -367,7 +367,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
                 alignItems: 'center',
                 flexGrow: 1,
                 cursor: 'pointer',
-                gap: 1.5,
+                gap: 1,
                 '&:hover .logo': {
                   transform: 'scale(1.05)',
                 },
@@ -389,7 +389,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
                   variant="h6"
                   sx={{
                     fontWeight: 800,
-                    fontSize: { xs: '1.125rem', md: '1.375rem' },
+                    fontSize: { xs: '0.95rem', md: '1.375rem' },
                     color: 'text.primary',
                     letterSpacing: '-0.5px',
                     lineHeight: 1,
@@ -402,7 +402,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
                     variant="caption"
                     sx={{
                       color: 'text.secondary',
-                      fontSize: '0.75rem',
+                      fontSize: '0.7rem',
                       fontWeight: 500,
                       letterSpacing: '0.5px',
                     }}

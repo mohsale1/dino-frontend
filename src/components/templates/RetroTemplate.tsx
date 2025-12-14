@@ -63,7 +63,7 @@ const RetroTemplate: React.FC<TemplateProps> = ({
             background: '#8b4513',
             color: '#fff8dc',
             padding: '8px 16px',
-            fontSize: '0.75rem',
+            fontSize: '0.7rem',
             fontWeight: 'bold',
             textTransform: 'uppercase',
             letterSpacing: '1px',

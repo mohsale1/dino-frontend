@@ -95,7 +95,7 @@ const DashboardTabs: React.FC<DashboardTabsProps> = ({
   };
 
   return (
-    <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }} data-tour="quick-actions">
+    <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 1 }} data-tour="quick-actions">
       <Tabs 
         value={safeCurrentTab} 
         onChange={handleTabChange}

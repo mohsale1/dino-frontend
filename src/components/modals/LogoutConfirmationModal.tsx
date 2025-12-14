@@ -56,7 +56,7 @@ const LogoutConfirmationModal: React.FC<LogoutConfirmationModalProps> = ({
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: 2,
+            gap: 1,
           }}
         >
           <Box
@@ -89,18 +89,18 @@ const LogoutConfirmationModal: React.FC<LogoutConfirmationModalProps> = ({
         </Box>
       </DialogTitle>
 
-      <DialogContent sx={{ textAlign: 'center', px: 3, py: 2 }}>
+      <DialogContent sx={{ textAlign: 'center', px: 3, py: 1 }}>
         <Typography
           variant="body1"
           color="text.secondary"
-          sx={{ mb: 2, lineHeight: 1.6 }}
+          sx={{ mb: 1, lineHeight: 1.6 }}
         >
           Are you sure you want to logout{userName ? ` as ${userName}` : ''}?
         </Typography>
         <Typography
           variant="body2"
           color="text.secondary"
-          sx={{ fontSize: '0.875rem' }}
+          sx={{ fontSize: '0.8rem' }}
         >
           You will need to sign in again to access your account.
         </Typography>
@@ -109,7 +109,7 @@ const LogoutConfirmationModal: React.FC<LogoutConfirmationModalProps> = ({
       <DialogActions
         sx={{
           justifyContent: 'center',
-          gap: 2,
+          gap: 1,
           px: 3,
           pb: 3,
           pt: 1,
@@ -121,7 +121,7 @@ const LogoutConfirmationModal: React.FC<LogoutConfirmationModalProps> = ({
           size="large"
           sx={{
             minWidth: 120,
-            borderRadius: 2,
+            borderRadius: 1,
             textTransform: 'none',
             fontWeight: 500,
             borderColor: 'divider',
@@ -142,7 +142,7 @@ const LogoutConfirmationModal: React.FC<LogoutConfirmationModalProps> = ({
           startIcon={<ExitToApp />}
           sx={{
             minWidth: 120,
-            borderRadius: 2,
+            borderRadius: 1,
             textTransform: 'none',
             fontWeight: 600,
             boxShadow: `0 4px 12px ${alpha(theme.palette.error.main, 0.3)}`,

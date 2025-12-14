@@ -262,8 +262,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
                 minWidth: showExpanded ? 40 : '100%',
                 width: showExpanded ? 40 : '100%',
                 height: 40,
-                borderRadius: 2,
-                fontSize: '0.8125rem',
+                borderRadius: 1,
+                fontSize: '0.7rem',
                 fontWeight: 500,
                 color: 'text.primary',
                 backgroundColor: 'transparent',
@@ -281,7 +281,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
                 '& .MuiButton-startIcon': {
                   mr: 0,
                   color: 'inherit',
-                  fontSize: '1.125rem',
+                  fontSize: '0.95rem',
                 },
               }}
               startIcon={isCollapsed ? <ChevronRight /> : <ChevronLeft />}
@@ -304,7 +304,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
               alignItems: 'center',
               gap: 1.25,
               p: 1.25,
-              borderRadius: 2,
+              borderRadius: 1,
               backgroundColor: alpha(theme.palette.primary.main, 0.05),
               border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
             }}
@@ -314,7 +314,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
                 width: 32,
                 height: 32,
                 backgroundColor: 'primary.main',
-                fontSize: '0.8125rem',
+                fontSize: '0.7rem',
                 fontWeight: 600,
               }}
             >
@@ -328,7 +328,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
                   sx={{
                     fontWeight: 600,
                     color: 'text.primary',
-                    fontSize: '0.8125rem',
+                    fontSize: '0.7rem',
                     lineHeight: 1.2,
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
@@ -375,35 +375,35 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
           <Box
             sx={{
               p: 1.5,
-              borderRadius: 2,
+              borderRadius: 1,
               backgroundColor: alpha(theme.palette.background.default, 0.8),
               border: `1px solid ${alpha(theme.palette.divider, 0.2)}`,
             }}
           >
             {/* Order Status */}
-            <Box sx={{ mb: 1.5 }}>
+            <Box sx={{ mb: 1 }}>
               <Typography
                 variant="body2"
                 sx={{
                   color: 'text.secondary',
-                  fontSize: '0.75rem',
+                  fontSize: '0.7rem',
                   fontWeight: 500,
-                  mb: 0.75,
+                  mb: 0.5,
                 }}
               >
                 Order Status
               </Typography>
               <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 0.75, mb: 1 }}>
                 {venueStatus.isOpen ? (
-                  <CheckCircle sx={{ fontSize: 14, color: 'success.main', mt: 0.1 }} />
+                  <CheckCircle sx={{ fontSize: 12, color: 'success.main', mt: 0.1 }} />
                 ) : (
-                  <Cancel sx={{ fontSize: 14, color: 'error.main', mt: 0.1 }} />
+                  <Cancel sx={{ fontSize: 12, color: 'error.main', mt: 0.1 }} />
                 )}
                 <Typography
                   variant="body2"
                   sx={{
                     color: 'text.primary',
-                    fontSize: '0.75rem',
+                    fontSize: '0.7rem',
                     lineHeight: 1.4,
                   }}
                 >
@@ -473,9 +473,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
               {statusLoading ? (
                 <CircularProgress size={16} />
               ) : venueStatus.isOpen ? (
-                <CheckCircle sx={{ fontSize: 14, color: 'success.main' }} />
+                <CheckCircle sx={{ fontSize: 12, color: 'success.main' }} />
               ) : (
-                <Cancel sx={{ fontSize: 14, color: 'error.main' }} />
+                <Cancel sx={{ fontSize: 12, color: 'error.main' }} />
               )}
             </IconButton>
           </Tooltip>
@@ -511,7 +511,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
             color: 'text.secondary',
             fontWeight: 600,
             fontSize: '0.7rem',
-            mb: 1.5,
+            mb: 1,
             display: showExpanded ? 'block' : 'none',
             px: 1,
           }}
@@ -538,9 +538,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
                     textAlign: 'left',
                     py: 1.25,
                     px: showExpanded ? 1.5 : 1,
-                    borderRadius: 2,
+                    borderRadius: 1,
                     minHeight: 42,
-                    fontSize: '0.8125rem',
+                    fontSize: '0.7rem',
                     fontWeight: isActive ? 600 : 500,
                     color: isActive ? 'primary.main' : 'text.primary',
                     backgroundColor: isActive 
@@ -581,7 +581,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
                     '& .MuiButton-startIcon': {
                       mr: showExpanded ? 1 : 0,
                       color: isActive ? 'primary.main' : 'text.secondary',
-                      fontSize: '1.125rem',
+                      fontSize: '0.95rem',
                       transition: 'color 0.2s ease',
                     },
                   }}

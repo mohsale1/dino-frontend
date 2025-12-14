@@ -118,7 +118,7 @@ const OrderStatusFragment: React.FC<OrderStatusFragmentProps> = ({ venueId, tabl
         >
           <Toolbar sx={{ justifyContent: 'center', py: 1 }}>
             <Stack direction="row" spacing={1} alignItems="center">
-              <Receipt sx={{ color: theme.palette.primary.main, fontSize: 14 }} />
+              <Receipt sx={{ color: theme.palette.primary.main, fontSize: 12 }} />
               <Typography
                 variant="h6"
                 sx={{
@@ -135,12 +135,12 @@ const OrderStatusFragment: React.FC<OrderStatusFragmentProps> = ({ venueId, tabl
 
         <Container 
           maxWidth="md"
-          sx={{ px: { xs: 2, sm: 3 }, pt: { xs: 3, sm: 4 } }}
+          sx={{ px: { xs: 1, sm: 3 }, pt: { xs: 3, sm: 4 } }}
         >
           <Typography 
             variant="h5" 
             sx={{ 
-              mb: 3, 
+              mb: 1, 
               textAlign: 'center',
               fontSize: { xs: '1.1rem', sm: '1.25rem' },
             }}
@@ -177,7 +177,7 @@ const OrderStatusFragment: React.FC<OrderStatusFragmentProps> = ({ venueId, tabl
         >
           <Toolbar sx={{ justifyContent: 'center', py: 1 }}>
             <Stack direction="row" spacing={1} alignItems="center">
-              <Receipt sx={{ color: theme.palette.primary.main, fontSize: 14 }} />
+              <Receipt sx={{ color: theme.palette.primary.main, fontSize: 12 }} />
               <Typography
                 variant="h6"
                 sx={{
@@ -194,9 +194,9 @@ const OrderStatusFragment: React.FC<OrderStatusFragmentProps> = ({ venueId, tabl
 
         <Container 
           maxWidth="md"
-          sx={{ px: { xs: 2, sm: 3 }, pt: { xs: 3, sm: 4 } }}
+          sx={{ px: { xs: 1, sm: 3 }, pt: { xs: 3, sm: 4 } }}
         >
-          <Alert severity="error" sx={{ mb: 2 }}>
+          <Alert severity="error" sx={{ mb: 1 }}>
             {error}
           </Alert>
           <Button variant="contained" onClick={loadOrders} fullWidth>
@@ -231,7 +231,7 @@ const OrderStatusFragment: React.FC<OrderStatusFragmentProps> = ({ venueId, tabl
         >
           <Toolbar sx={{ justifyContent: 'center', py: 1 }}>
             <Stack direction="row" spacing={1} alignItems="center">
-              <Receipt sx={{ color: theme.palette.primary.main, fontSize: 14 }} />
+              <Receipt sx={{ color: theme.palette.primary.main, fontSize: 12 }} />
               <Typography
                 variant="h6"
                 sx={{
@@ -248,7 +248,7 @@ const OrderStatusFragment: React.FC<OrderStatusFragmentProps> = ({ venueId, tabl
 
         <Container 
           maxWidth="md"
-          sx={{ px: { xs: 2, sm: 3 }, pt: { xs: 3, sm: 4 } }}
+          sx={{ px: { xs: 1, sm: 3 }, pt: { xs: 3, sm: 4 } }}
         >
           <Box
             sx={{
@@ -264,7 +264,7 @@ const OrderStatusFragment: React.FC<OrderStatusFragmentProps> = ({ venueId, tabl
                 width: { xs: 64, sm: 72, md: 80 },
                 height: { xs: 64, sm: 72, md: 80 },
                 mx: 'auto',
-                mb: 2,
+                mb: 1,
                 backgroundColor: alpha(theme.palette.primary.main, 0.1),
                 color: theme.palette.primary.main,
               }}
@@ -284,7 +284,7 @@ const OrderStatusFragment: React.FC<OrderStatusFragmentProps> = ({ venueId, tabl
               variant="body1" 
               color="text.secondary" 
               sx={{ 
-                mb: 3,
+                mb: 1,
                 fontSize: { xs: '0.9rem', sm: '1rem' },
               }}
             >
@@ -317,9 +317,9 @@ const OrderStatusFragment: React.FC<OrderStatusFragmentProps> = ({ venueId, tabl
           zIndex: 100,
         }}
       >
-        <Toolbar sx={{ justifyContent: 'space-between', py: 1, px: { xs: 2, sm: 3 } }}>
+        <Toolbar sx={{ justifyContent: 'space-between', py: 1, px: { xs: 1, sm: 3 } }}>
           <Stack direction="row" spacing={1} alignItems="center">
-            <Receipt sx={{ color: theme.palette.primary.main, fontSize: 14 }} />
+            <Receipt sx={{ color: theme.palette.primary.main, fontSize: 12 }} />
             <Typography
               variant="h6"
               sx={{
@@ -337,9 +337,9 @@ const OrderStatusFragment: React.FC<OrderStatusFragmentProps> = ({ venueId, tabl
             onClick={loadOrders}
             size="small"
             sx={{
-              px: { xs: 1.5, sm: 2 },
+              px: { xs: 1, sm: 1 },
               py: { xs: 0.5, sm: 0.75 },
-              fontSize: { xs: '0.75rem', sm: '0.875rem' },
+              fontSize: { xs: '0.75rem', sm: '0.8rem' },
             }}
           >
             Refresh
@@ -349,9 +349,9 @@ const OrderStatusFragment: React.FC<OrderStatusFragmentProps> = ({ venueId, tabl
 
       <Container 
         maxWidth="md"
-        sx={{ px: { xs: 2, sm: 3 }, pt: { xs: 3, sm: 4 } }}
+        sx={{ px: { xs: 1, sm: 3 }, pt: { xs: 3, sm: 4 } }}
       >
-        <Stack spacing={{ xs: 2, sm: 2.5, md: 3 }}>
+        <Stack spacing={{ xs: 2, sm: 2.5, md: 1.5 }}>
           {orders.map((order) => (
             <Card
               key={order.order_id}
@@ -362,14 +362,14 @@ const OrderStatusFragment: React.FC<OrderStatusFragmentProps> = ({ venueId, tabl
                 overflow: 'hidden',
               }}
             >
-              <CardContent sx={{ p: { xs: 2, sm: 2.5, md: 3 } }}>
+              <CardContent sx={{ p: { xs: 2, sm: 2.5, md: 1.5 } }}>
                 {/* Order Header */}
                 <Stack
                   direction={{ xs: 'column', sm: 'row' }}
                   justifyContent="space-between"
                   alignItems={{ xs: 'flex-start', sm: 'center' }}
-                  spacing={{ xs: 1.5, sm: 2 }}
-                  sx={{ mb: { xs: 1.5, sm: 2 } }}
+                  spacing={{ xs: 1.5, sm: 1 }}
+                  sx={{ mb: { xs: 1.5, sm: 1 } }}
                 >
                   <Box>
                     <Typography 
@@ -385,7 +385,7 @@ const OrderStatusFragment: React.FC<OrderStatusFragmentProps> = ({ venueId, tabl
                     <Typography 
                       variant="body2" 
                       color="text.secondary"
-                      sx={{ fontSize: { xs: '0.8rem', sm: '0.875rem' } }}
+                      sx={{ fontSize: { xs: '0.8rem', sm: '0.8rem' } }}
                     >
                       {formatTime(order.createdAt)}
                     </Typography>
@@ -403,7 +403,7 @@ const OrderStatusFragment: React.FC<OrderStatusFragmentProps> = ({ venueId, tabl
                 </Stack>
 
                 {/* Progress Bar */}
-                <Box sx={{ mb: { xs: 1.5, sm: 2 } }}>
+                <Box sx={{ mb: { xs: 1.5, sm: 1 } }}>
                   <Stack 
                     direction="row" 
                     justifyContent="space-between" 
@@ -435,7 +435,7 @@ const OrderStatusFragment: React.FC<OrderStatusFragmentProps> = ({ venueId, tabl
                   />
                 </Box>
 
-                <Divider sx={{ my: { xs: 1.5, sm: 2 } }} />
+                <Divider sx={{ my: { xs: 1.5, sm: 1 } }} />
 
                 {/* Order Items */}
                 <Typography 
@@ -443,7 +443,7 @@ const OrderStatusFragment: React.FC<OrderStatusFragmentProps> = ({ venueId, tabl
                   fontWeight="600" 
                   sx={{ 
                     mb: { xs: 1, sm: 1.5 },
-                    fontSize: { xs: '0.875rem', sm: '0.9375rem' },
+                    fontSize: { xs: '0.8rem', sm: '0.9375rem' },
                   }}
                 >
                   Items ({order.items.length})
@@ -455,7 +455,7 @@ const OrderStatusFragment: React.FC<OrderStatusFragmentProps> = ({ venueId, tabl
                       sx={{ 
                         px: 0, 
                         py: { xs: 0.75, sm: 1 },
-                        gap: { xs: 1.5, sm: 2 },
+                        gap: { xs: 1, sm: 1 },
                       }}
                     >
                       <Avatar
@@ -515,7 +515,7 @@ const OrderStatusFragment: React.FC<OrderStatusFragmentProps> = ({ venueId, tabl
                   )}
                 </List>
 
-                <Divider sx={{ my: { xs: 1.5, sm: 2 } }} />
+                <Divider sx={{ my: { xs: 1.5, sm: 1 } }} />
 
                 {/* Total */}
                 <Stack 

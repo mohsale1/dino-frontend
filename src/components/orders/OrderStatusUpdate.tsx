@@ -214,17 +214,17 @@ const OrderStatusUpdate: React.FC<OrderStatusUpdateProps> = ({
       
       <DialogContent>
         {error && (
-          <Alert severity="error" sx={{ mb: 3 }}>
+          <Alert severity="error" sx={{ mb: 1 }}>
             {error}
           </Alert>
         )}
 
         {/* Current Status */}
-        <Box sx={{ mb: 3 }}>
+        <Box sx={{ mb: 1 }}>
           <Typography variant="subtitle2" gutterBottom>
             Current Status
           </Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             {renderStatusChip(currentStatus, 'medium')}
             <Typography variant="body2" color="text.secondary">
               {currentConfig.description}
@@ -232,10 +232,10 @@ const OrderStatusUpdate: React.FC<OrderStatusUpdateProps> = ({
           </Box>
         </Box>
 
-        <Divider sx={{ mb: 3 }} />
+        <Divider sx={{ mb: 1 }} />
 
         {/* Status Selection */}
-        <FormControl fullWidth sx={{ mb: 3 }}>
+        <FormControl fullWidth sx={{ mb: 1 }}>
           <InputLabel>New Status</InputLabel>
           <Select
             value={selectedStatus}
@@ -245,7 +245,7 @@ const OrderStatusUpdate: React.FC<OrderStatusUpdateProps> = ({
           >
             {/* Current status option */}
             <MenuItem value={currentStatus}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
                 <Box sx={{ color: currentConfig.color }}>
                   {React.cloneElement(currentConfig.icon, { sx: { color: currentConfig.color } })}
                 </Box>
@@ -263,7 +263,7 @@ const OrderStatusUpdate: React.FC<OrderStatusUpdateProps> = ({
               const config = statusConfig[status];
               return (
                 <MenuItem key={status} value={status}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
                     <Box sx={{ color: config.color }}>
                       {React.cloneElement(config.icon, { sx: { color: config.color } })}
                     </Box>
@@ -283,16 +283,16 @@ const OrderStatusUpdate: React.FC<OrderStatusUpdateProps> = ({
         {/* Status Preview */}
         {selectedStatus !== currentStatus && (
           <Box sx={{ 
-            p: 2, 
+            p: 1, 
             backgroundColor: 'grey.50', 
-            borderRadius: 2,
+            borderRadius: 1,
             border: '1px solid',
             borderColor: 'divider'
           }}>
             <Typography variant="subtitle2" gutterBottom>
               Preview
             </Typography>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               {renderStatusChip(selectedStatus, 'medium')}
               <Typography variant="body2" color="text.secondary">
                 {statusConfig[selectedStatus].description}
@@ -308,11 +308,11 @@ const OrderStatusUpdate: React.FC<OrderStatusUpdateProps> = ({
         )}
       </DialogContent>
 
-      <DialogActions sx={{ p: 3, pt: 1 }}>
+      <DialogActions sx={{ p: 1.5, pt: 1 }}>
         <Button 
           onClick={handleClose}
           disabled={loading}
-          sx={{ borderRadius: 2 }}
+          sx={{ borderRadius: 1 }}
         >
           Cancel
         </Button>
@@ -321,7 +321,7 @@ const OrderStatusUpdate: React.FC<OrderStatusUpdateProps> = ({
           disabled={loading || selectedStatus === currentStatus || allowedStatuses.length === 0}
           variant="contained"
           startIcon={loading ? <CircularProgress size={16} /> : <CheckCircle />}
-          sx={{ borderRadius: 2 }}
+          sx={{ borderRadius: 1 }}
         >
           {loading ? 'Updating...' : 'Update Status'}
         </Button>
@@ -352,9 +352,9 @@ const OrderStatusUpdate: React.FC<OrderStatusUpdateProps> = ({
   // Card variant - shows full status card
   if (variant === 'card') {
     return (
-      <Card sx={{ mb: 2 }}>
+      <Card sx={{ mb: 1 }}>
         <CardContent>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
             <Box>
               <Typography variant="h6" gutterBottom>
                 Order Status
@@ -391,7 +391,7 @@ const OrderStatusUpdate: React.FC<OrderStatusUpdateProps> = ({
                     label={statusConfig[status].label}
                     size="small"
                     variant="outlined"
-                    sx={{ fontSize: '0.75rem' }}
+                    sx={{ fontSize: '0.7rem' }}
                   />
                 ))}
               </Stack>

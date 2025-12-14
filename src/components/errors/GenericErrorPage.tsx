@@ -349,8 +349,8 @@ const GenericErrorPage: React.FC<GenericErrorPageProps> = ({
         background: `linear-gradient(135deg, ${alpha(config.bgColor, 0.3)} 0%, ${alpha(theme.palette.background.default, 0.9)} 100%)`,
         position: 'relative',
         overflow: 'hidden',
-        py: { xs: 4, md: 6 },
-        px: { xs: 2, md: 3 },
+        py: { xs: 1, md: 1.5 },
+        px: { xs: 1, md: 1.5 },
       }}
     >
       {/* Animated Background Elements */}
@@ -410,7 +410,7 @@ const GenericErrorPage: React.FC<GenericErrorPageProps> = ({
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',
                 lineHeight: 0.9,
-                mb: 2,
+                mb: 1,
                 letterSpacing: '-0.02em',
                 animation: `${pulse} 3s ease-in-out infinite`,
               }}
@@ -475,15 +475,15 @@ const GenericErrorPage: React.FC<GenericErrorPageProps> = ({
 
           {/* Venue Status Chip */}
           {config.showStatus && context.venueStatus && (
-            <Box sx={{ mb: 3 }}>
+            <Box sx={{ mb: 1 }}>
               <Chip
                 icon={<Info />}
                 label={getStatusText(context.venueStatus)}
                 color={getStatusColor(context.venueStatus) as any}
                 sx={{
                   fontWeight: 600,
-                  fontSize: { xs: '0.875rem', md: '1rem' },
-                  py: 2.5,
+                  fontSize: { xs: '0.8rem', md: '1rem' },
+                  py: 1,
                   px: 1,
                   borderRadius: 3,
                   boxShadow: 2,
@@ -501,7 +501,7 @@ const GenericErrorPage: React.FC<GenericErrorPageProps> = ({
             sx={{
               fontSize: { xs: '1.75rem', sm: '2.25rem', md: '2.75rem' },
               lineHeight: 1.2,
-              mb: 2,
+              mb: 1,
               letterSpacing: '-0.01em',
             }}
           >
@@ -530,10 +530,10 @@ const GenericErrorPage: React.FC<GenericErrorPageProps> = ({
               sx={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: 1.5,
+                gap: 1,
                 mb: 4,
                 px: 3,
-                py: 2,
+                py: 1,
                 backgroundColor: alpha(theme.palette.info.main, 0.1),
                 borderRadius: 3,
                 border: `1px solid ${alpha(theme.palette.info.main, 0.3)}`,
@@ -543,14 +543,14 @@ const GenericErrorPage: React.FC<GenericErrorPageProps> = ({
               <Schedule
                 sx={{
                   color: 'info.main',
-                  fontSize: { xs: '1.5rem', md: '1.75rem' },
+                  fontSize: { xs: '1.25rem', md: '1.75rem' },
                 }}
               />
               <Typography
                 variant="body1"
                 color="info.main"
                 fontWeight="600"
-                sx={{ fontSize: { xs: '0.875rem', md: '1rem' } }}
+                sx={{ fontSize: { xs: '0.8rem', md: '1rem' } }}
               >
                 We'll be back soon! Please check again later.
               </Typography>
@@ -563,7 +563,7 @@ const GenericErrorPage: React.FC<GenericErrorPageProps> = ({
               maxWidth: 500,
               mx: 'auto',
               mb: 4,
-              p: { xs: 2.5, md: 3 },
+              p: { xs: 2.5, md: 1.5 },
               backgroundColor: alpha(theme.palette.background.paper, 0.8),
               backdropFilter: 'blur(10px)',
               borderRadius: 3,
@@ -577,7 +577,7 @@ const GenericErrorPage: React.FC<GenericErrorPageProps> = ({
               fontWeight="700"
               color="text.primary"
               sx={{ 
-                mb: 2.5, 
+                mb: 1, 
                 fontSize: { xs: '1rem', md: '1.125rem' },
                 display: 'flex',
                 alignItems: 'center',
@@ -587,14 +587,14 @@ const GenericErrorPage: React.FC<GenericErrorPageProps> = ({
               <Box component="span" sx={{ fontSize: '1rem' }}>💡</Box>
               What you can try:
             </Typography>
-            <Stack spacing={1.5}>
+            <Stack spacing={1}>
               {config.suggestions.map((suggestion, index) => (
                 <Box
                   key={index}
                   sx={{
                     display: 'flex',
                     alignItems: 'flex-start',
-                    gap: 1.5,
+                    gap: 1,
                   }}
                 >
                   <Box
@@ -611,7 +611,7 @@ const GenericErrorPage: React.FC<GenericErrorPageProps> = ({
                     variant="body2"
                     color="text.secondary"
                     sx={{
-                      fontSize: { xs: '0.875rem', md: '0.9375rem' },
+                      fontSize: { xs: '0.8rem', md: '0.9375rem' },
                       lineHeight: 1.6,
                       flex: 1,
                     }}
@@ -629,10 +629,10 @@ const GenericErrorPage: React.FC<GenericErrorPageProps> = ({
           {/* Action Buttons */}
           <Stack
             direction={{ xs: 'column', sm: 'row' }}
-            spacing={2}
+            spacing={1}
             justifyContent="center"
             alignItems="center"
-            sx={{ mb: 3 }}
+            sx={{ mb: 1 }}
           >
             {showRetry && (
               <Button
@@ -739,10 +739,10 @@ const GenericErrorPage: React.FC<GenericErrorPageProps> = ({
               variant="caption"
               color="text.secondary"
               sx={{
-                fontSize: { xs: '0.8125rem', md: '0.875rem' },
+                fontSize: { xs: '0.75rem', md: '0.875rem' },
                 fontStyle: 'italic',
                 display: 'block',
-                mt: 2,
+                mt: 1,
               }}
             >
               Thank you for your patience and understanding. 🙏
@@ -755,8 +755,8 @@ const GenericErrorPage: React.FC<GenericErrorPageProps> = ({
               variant="body2"
               color="text.secondary"
               sx={{
-                mt: 3,
-                fontSize: { xs: '0.8125rem', md: '0.875rem' },
+                mt: 1,
+                fontSize: { xs: '0.75rem', md: '0.875rem' },
                 opacity: 0.8,
               }}
             >

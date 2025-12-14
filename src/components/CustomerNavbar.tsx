@@ -89,7 +89,7 @@ const CustomerNavbar: React.FC<CustomerNavbarProps> = ({
         right: 0,
       }}
     >
-      <Container maxWidth="lg" sx={{ px: { xs: 1, sm: 2 } }}>
+      <Container maxWidth="lg" sx={{ px: { xs: 1, sm: 1 } }}>
         <Toolbar sx={{ minHeight: { xs: 56, sm: 64 }, px: 0 }}>
           {/* Left Section */}
           <Box sx={{ display: 'flex', alignItems: 'center', flex: 1 }}>
@@ -110,7 +110,7 @@ const CustomerNavbar: React.FC<CustomerNavbarProps> = ({
             )}
             
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Restaurant sx={{ color: '#1976D2', fontSize: 14 }} />
+              <Restaurant sx={{ color: '#1976D2', fontSize: 12 }} />
               <Box>
                 <Typography 
                   variant="h6" 
@@ -127,7 +127,7 @@ const CustomerNavbar: React.FC<CustomerNavbarProps> = ({
                   variant="caption" 
                   color="text.secondary"
                   sx={{ 
-                    fontSize: '0.75rem',
+                    fontSize: '0.7rem',
                     display: 'block',
                     lineHeight: 1,
                   }}
@@ -162,7 +162,7 @@ const CustomerNavbar: React.FC<CustomerNavbarProps> = ({
                       backgroundColor: '#D32F2F',
                       color: 'white',
                       fontWeight: '600',
-                      fontSize: '0.75rem',
+                      fontSize: '0.7rem',
                     },
                   }}
                 >

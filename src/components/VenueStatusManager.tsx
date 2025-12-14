@@ -135,7 +135,7 @@ const VenueStatusManager: React.FC<VenueStatusManagerProps> = ({
     <>
       <Card>
         <CardContent>
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
               <Avatar
                 sx={{
@@ -165,11 +165,11 @@ const VenueStatusManager: React.FC<VenueStatusManagerProps> = ({
             />
           </Box>
 
-          <Grid container spacing={3}>
+          <Grid container spacing={1}>
             {/* Operational Status */}
             <Grid item xs={12} md={6}>
-              <Box sx={{ p: 2, border: '1px solid', borderColor: 'divider', borderRadius: 1 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+              <Box sx={{ p: 1, border: '1px solid', borderColor: 'divider', borderRadius: 1 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center' }}>
                     <Visibility sx={{ mr: 1, color: 'primary.main' }} />
                     <Typography variant="subtitle1" fontWeight="600">
@@ -211,8 +211,8 @@ const VenueStatusManager: React.FC<VenueStatusManagerProps> = ({
 
             {/* Active Status */}
             <Grid item xs={12} md={6}>
-              <Box sx={{ p: 2, border: '1px solid', borderColor: 'divider', borderRadius: 1 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+              <Box sx={{ p: 1, border: '1px solid', borderColor: 'divider', borderRadius: 1 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center' }}>
                     <Settings sx={{ mr: 1, color: 'secondary.main' }} />
                     <Typography variant="subtitle1" fontWeight="600">
@@ -256,7 +256,7 @@ const VenueStatusManager: React.FC<VenueStatusManagerProps> = ({
           <Divider sx={{ my: 3 }} />
 
           {/* Additional Information */}
-          <Grid container spacing={2}>
+          <Grid container spacing={1}>
             <Grid item xs={12} sm={6}>
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
                 <AccessTime sx={{ mr: 1, color: 'text.secondary' }} />
@@ -286,7 +286,7 @@ const VenueStatusManager: React.FC<VenueStatusManagerProps> = ({
           </Grid>
 
           {!canManageStatus && (
-            <Alert severity="warning" sx={{ mt: 2 }}>
+            <Alert severity="warning" sx={{ mt: 1 }}>
               You don't have permission to change venue status. Contact your administrator.
             </Alert>
           )}
@@ -299,7 +299,7 @@ const VenueStatusManager: React.FC<VenueStatusManagerProps> = ({
           Confirm Status Change
         </DialogTitle>
         <DialogContent>
-          <Alert severity="info" sx={{ mb: 3 }}>
+          <Alert severity="info" sx={{ mb: 1 }}>
             You are about to {statusType === 'open' ? 
               (targetVenue.isOpen ? 'close' : 'open') : 
               (targetVenue.isActive ? 'deactivate' : 'activate')
@@ -325,7 +325,7 @@ const VenueStatusManager: React.FC<VenueStatusManagerProps> = ({
             rows={3}
             value={reason}
             onChange={(e) => setReason(e.target.value)}
-            sx={{ mt: 2 }}
+            sx={{ mt: 1 }}
             placeholder="Enter reason for this status change..."
           />
         </DialogContent>

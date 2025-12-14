@@ -25,7 +25,7 @@ const VenueInformationStep: React.FC<VenueInformationStepProps> = ({
   errors
 }) => {
   return (
-    <Grid container spacing={3}>
+    <Grid container spacing={1}>
       <Grid item xs={12}>
         <Typography 
           variant="h6" 
@@ -43,7 +43,7 @@ const VenueInformationStep: React.FC<VenueInformationStepProps> = ({
         <Typography 
           variant="body2" 
           color="text.secondary" 
-          sx={{ mb: 3 }}
+          sx={{ mb: 1 }}
         >
           Configure your first venue under this workspace
         </Typography>
@@ -99,8 +99,8 @@ const VenueInformationStep: React.FC<VenueInformationStepProps> = ({
             display: 'flex', 
             alignItems: 'center', 
             gap: 1, 
-            mt: 2,
-            fontSize: '1.125rem',
+            mt: 1,
+            fontSize: '0.95rem',
             fontWeight: 500
           }}
         >
@@ -192,8 +192,8 @@ const VenueInformationStep: React.FC<VenueInformationStepProps> = ({
           variant="subtitle1" 
           gutterBottom 
           sx={{ 
-            mt: 2,
-            fontSize: '1.125rem',
+            mt: 1,
+            fontSize: '0.95rem',
             fontWeight: 500
           }}
         >

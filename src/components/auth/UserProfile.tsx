@@ -54,7 +54,7 @@ function TabPanel(props: TabPanelProps) {
       aria-labelledby={`profile-tab-${index}`}
       {...other}
     >
-      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
+      {value === index && <Box sx={{ p: 1.5 }}>{children}</Box>}
     </div>
   );
 }
@@ -194,13 +194,13 @@ const UserProfile: React.FC = () => {
           ml: { xs: 0, sm: 0, md: 0 },
           mr: { xs: 0, sm: 6, md: 12 },
           maxWidth: { xs: 'md', sm: 'md', md: 'lg' },
-          pl: { xs: 2, sm: 3, md: 4 },
-          pr: { xs: 2, sm: 2, md: 2 }
+          pl: { xs: 2, sm: 3, md: 1 },
+          pr: { xs: 2, sm: 2, md: 1 }
         }}
       >
       {/* Header */}
-      <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
-        <Grid container spacing={3} alignItems="center">
+      <Paper elevation={2} sx={{ p: 1.5, mb: 1 }}>
+        <Grid container spacing={1} alignItems="center">
           <Grid item>
             <Box sx={{ position: 'relative' }}>
               <Avatar
@@ -268,13 +268,13 @@ const UserProfile: React.FC = () => {
 
       {/* Alerts */}
       {error && (
-        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
+        <Alert severity="error" sx={{ mb: 1 }} onClose={() => setError(null)}>
           {error}
         </Alert>
       )}
       
       {success && (
-        <Alert severity="success" sx={{ mb: 2 }} onClose={() => setSuccess(null)}>
+        <Alert severity="success" sx={{ mb: 1 }} onClose={() => setSuccess(null)}>
           {success}
         </Alert>
       )}
@@ -289,7 +289,7 @@ const UserProfile: React.FC = () => {
 
         {/* Personal Info Tab */}
         <TabPanel value={tabValue} index={0}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
             <Typography variant="h6">Personal Information</Typography>
             <Button
               variant={editing ? "outlined" : "contained"}
@@ -305,7 +305,7 @@ const UserProfile: React.FC = () => {
             </Button>
           </Box>
 
-          <Grid container spacing={3}>
+          <Grid container spacing={1}>
             <Grid item xs={12} sm={6}>
               <TextField
                 fullWidth
@@ -363,7 +363,7 @@ const UserProfile: React.FC = () => {
           </Grid>
 
           {editing && (
-            <Box sx={{ mt: 3, display: 'flex', gap: 2 }}>
+            <Box sx={{ mt: 1, display: 'flex', gap: 1 }}>
               <Button
                 variant="contained"
                 onClick={handleProfileUpdate}
@@ -387,8 +387,8 @@ const UserProfile: React.FC = () => {
               sx={{ 
                 flexDirection: { xs: 'column', sm: 'row' },
                 alignItems: { xs: 'flex-start', sm: 'center' },
-                gap: { xs: 2, sm: 0 },
-                py: 2
+                gap: { xs: 1, sm: 0 },
+                py: 1
               }}
             >
               <Box sx={{ display: 'flex', alignItems: 'center', flex: 1, minWidth: 0 }}>
@@ -399,12 +399,12 @@ const UserProfile: React.FC = () => {
                   primary="Password"
                   secondary="Change your account password"
                   sx={{ 
-                    pr: { xs: 0, sm: 2 },
+                    pr: { xs: 0, sm: 1 },
                     '& .MuiListItemText-primary': {
                       fontSize: { xs: '1rem', sm: '1rem' }
                     },
                     '& .MuiListItemText-secondary': {
-                      fontSize: { xs: '0.875rem', sm: '0.875rem' }
+                      fontSize: { xs: '0.8rem', sm: '0.8rem' }
                     }
                   }}
                 />
@@ -430,8 +430,8 @@ const UserProfile: React.FC = () => {
               sx={{ 
                 flexDirection: { xs: 'column', sm: 'row' },
                 alignItems: { xs: 'flex-start', sm: 'center' },
-                gap: { xs: 2, sm: 0 },
-                py: 2
+                gap: { xs: 1, sm: 0 },
+                py: 1
               }}
             >
               <Box sx={{ display: 'flex', alignItems: 'center', flex: 1, minWidth: 0 }}>
@@ -442,12 +442,12 @@ const UserProfile: React.FC = () => {
                   primary="Account Status"
                   secondary={user?.isVerified ? "Verified account" : "Unverified account"}
                   sx={{ 
-                    pr: { xs: 0, sm: 2 },
+                    pr: { xs: 0, sm: 1 },
                     '& .MuiListItemText-primary': {
                       fontSize: { xs: '1rem', sm: '1rem' }
                     },
                     '& .MuiListItemText-secondary': {
-                      fontSize: { xs: '0.875rem', sm: '0.875rem' }
+                      fontSize: { xs: '0.8rem', sm: '0.8rem' }
                     }
                   }}
                 />
@@ -490,11 +490,11 @@ const UserProfile: React.FC = () => {
         <DialogTitle>Change Password</DialogTitle>
         <DialogContent>
           {passwordError && (
-            <Alert severity="error" sx={{ mb: 2, mt: 2 }} onClose={() => setPasswordError(null)}>
+            <Alert severity="error" sx={{ mb: 1, mt: 1 }} onClose={() => setPasswordError(null)}>
               {passwordError}
             </Alert>
           )}
-          <Grid container spacing={2} sx={{ mt: 1 }}>
+          <Grid container spacing={1} sx={{ mt: 1 }}>
             <Grid item xs={12}>
               <TextField
                 fullWidth

@@ -66,7 +66,7 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({
         },
       }}
     >
-      <CardContent sx={{ p: 4 }}>
+      <CardContent sx={{ p: 1 }}>
         {/* Quote Icon */}
         <Box
           sx={{
@@ -91,7 +91,7 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({
           value={rating}
           readOnly
           sx={{
-            mb: 2,
+            mb: 1,
             '& .MuiRating-iconFilled': {
               color: '#FFB400',
             },
@@ -103,7 +103,7 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({
           variant="body1"
           sx={{
             color: 'text.primary',
-            mb: 3,
+            mb: 1,
             lineHeight: 1.7,
             fontSize: { xs: '0.9375rem', md: '1rem' },
             fontStyle: 'italic',
@@ -115,7 +115,7 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({
         </Typography>
 
         {/* Author Info */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Avatar
             src={avatar}
             alt={name}
@@ -142,7 +142,7 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({
               variant="body2"
               sx={{
                 color: 'text.secondary',
-                fontSize: '0.875rem',
+                fontSize: '0.8rem',
               }}
             >
               {role} at {restaurant}

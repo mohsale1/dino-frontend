@@ -88,7 +88,7 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
       fullWidth
       PaperProps={{
         sx: {
-          borderRadius: 2,
+          borderRadius: 1,
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
         }
       }}
@@ -103,7 +103,7 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
           borderColor: 'divider',
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Box
             sx={{
               display: 'flex',
@@ -116,7 +116,7 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
               color: 'error.main',
             }}
           >
-            <WarningIcon sx={{ fontSize: 14 }} />
+            <WarningIcon sx={{ fontSize: 12 }} />
           </Box>
           <Typography variant="h6" fontWeight={600} color="text.primary">
             {title}
@@ -137,9 +137,9 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
         </IconButton>
       </DialogTitle>
 
-      <DialogContent sx={{ pt: 3, pb: 2 }}>
-        <Box sx={{ mb: 3 }}>
-          <Typography variant="body1" color="text.primary" sx={{ mb: 2 }}>
+      <DialogContent sx={{ pt: 3, pb: 1 }}>
+        <Box sx={{ mb: 1 }}>
+          <Typography variant="body1" color="text.primary" sx={{ mb: 1 }}>
             Are you sure you want to delete {itemType}{' '}
             <Chip
               label={itemName}
@@ -155,12 +155,12 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
           </Typography>
 
           {description && (
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
               {description}
             </Typography>
           )}
 
-          <Alert severity="error" sx={{ mb: 2 }}>
+          <Alert severity="error" sx={{ mb: 1 }}>
             <Typography variant="body2" fontWeight={500}>
               This action cannot be undone!
             </Typography>
@@ -170,11 +170,11 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
           </Alert>
 
           {additionalWarnings.length > 0 && (
-            <Alert severity="warning" sx={{ mb: 2 }}>
+            <Alert severity="warning" sx={{ mb: 1 }}>
               <Typography variant="body2" fontWeight={500} sx={{ mb: 1 }}>
                 Additional considerations:
               </Typography>
-              <Box component="ul" sx={{ m: 0, pl: 2 }}>
+              <Box component="ul" sx={{ m: 0, pl: 1 }}>
                 {additionalWarnings.map((warning, index) => (
                   <Typography
                     key={index}
@@ -192,7 +192,7 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
 
         {requireTyping && (
           <Box>
-            <Typography variant="body2" color="text.primary" sx={{ mb: 1.5 }}>
+            <Typography variant="body2" color="text.primary" sx={{ mb: 1 }}>
               To confirm deletion, please type{' '}
               <Typography
                 component="span"
@@ -243,7 +243,7 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
           px: 3,
           pb: 3,
           pt: 1,
-          gap: 1.5,
+          gap: 1,
           borderTop: '1px solid',
           borderColor: 'divider',
         }}
@@ -266,7 +266,7 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
           variant="contained"
           color="error"
           startIcon={
-            isDeleting || loading ? undefined : <DeleteIcon sx={{ fontSize: 14 }} />
+            isDeleting || loading ? undefined : <DeleteIcon sx={{ fontSize: 12 }} />
           }
           sx={{
             minWidth: 120,

@@ -175,14 +175,14 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({ stats }) => {
   const statsToRender = getStatsToRender();
 
   return (
-    <Box sx={{ mb: 3 }}>
-      <Grid container spacing={2}>
+    <Box sx={{ mb: 1 }}>
+      <Grid container spacing={1}>
         {statsToRender.map((stat, index) => (
           <Grid item xs={6} md={3} key={index}>
             <Card
               sx={{
-                p: 2,
-                borderRadius: 2,
+                p: 1,
+                borderRadius: 1,
                 backgroundColor: `${stat.color}08`,
                 border: `1px solid ${stat.color}33`,
                 transition: 'all 0.3s ease',
@@ -194,15 +194,15 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({ stats }) => {
               }}
               data-tour="stats-cards"
             >
-              <Stack direction="row" alignItems="center" spacing={1.5}>
+              <Stack direction="row" alignItems="center" spacing={1}>
                 {/* Icon with Badge for Operator */}
                 {isOperator ? (
                   <Badge badgeContent={stat.value} color={index === 0 ? 'warning' : index === 1 ? 'primary' : 'success'}>
                     <Box
                       sx={{
-                        width: 36,
-                        height: 36,
-                        borderRadius: 1.5,
+                        width: 22,
+                        height: 22,
+                        borderRadius: 1,
                         backgroundColor: stat.color,
                         display: 'flex',
                         alignItems: 'center',
@@ -219,9 +219,9 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({ stats }) => {
                 ) : (
                   <Box
                     sx={{
-                      width: 36,
-                      height: 36,
-                      borderRadius: 1.5,
+                      width: 22,
+                      height: 22,
+                      borderRadius: 1,
                       backgroundColor: stat.color,
                       display: 'flex',
                       alignItems: 'center',
@@ -242,9 +242,9 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({ stats }) => {
                     fontWeight="700" 
                     color="text.primary"
                     sx={{ 
-                      fontSize: { xs: '1.125rem', sm: '1.375rem' },
+                      fontSize: { xs: '0.95rem', sm: '1.15rem' },
                       lineHeight: 1.2,
-                      mb: 0.25
+                      mb: 0.2
                     }}
                   >
                     {stat.value}
@@ -254,7 +254,7 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({ stats }) => {
                     color="text.secondary"
                     fontWeight="600"
                     sx={{ 
-                      fontSize: '0.75rem',
+                      fontSize: '0.7rem',
                       lineHeight: 1.3,
                       display: '-webkit-box',
                       WebkitLineClamp: 2,
@@ -272,11 +272,11 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({ stats }) => {
                       value={(stat as any).progress} 
                       sx={{ 
                         height: 3,
-                        borderRadius: 1.5,
+                        borderRadius: 1,
                         backgroundColor: 'rgba(255,255,255,0.3)',
-                        mt: 0.75,
+                        mt: 0.5,
                         '& .MuiLinearProgress-bar': {
-                          borderRadius: 1.5,
+                          borderRadius: 1,
                           backgroundColor: stat.color
                         }
                       }}
@@ -287,9 +287,9 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({ stats }) => {
                     variant="caption" 
                     color="text.secondary"
                     sx={{ 
-                      fontSize: '0.6875rem',
+                      fontSize: '0.65rem',
                       lineHeight: 1.3,
-                      mt: 0.25,
+                      mt: 0.2,
                       display: 'block'
                     }}
                   >

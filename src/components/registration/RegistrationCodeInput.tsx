@@ -125,14 +125,14 @@ const RegistrationCodeInput: React.FC<RegistrationCodeInputProps> = ({ onCodeVer
       }}
     >
       {/* Header */}
-      <Box sx={{ textAlign: 'center', mb: 3 }}>
+      <Box sx={{ textAlign: 'center', mb: 1 }}>
         <Typography
           variant="h5"
           component="h2"
           fontWeight="700"
           sx={{
             mb: 1,
-            fontSize: { xs: '1.25rem', sm: '1.5rem' },
+            fontSize: { xs: '1.25rem', sm: '1.25rem' },
             color: 'text.primary',
           }}
         >
@@ -143,7 +143,7 @@ const RegistrationCodeInput: React.FC<RegistrationCodeInputProps> = ({ onCodeVer
           variant="body2"
           sx={{
             color: 'text.secondary',
-            fontSize: { xs: '0.875rem', sm: '1rem' },
+            fontSize: { xs: '0.8rem', sm: '1rem' },
           }}
         >
           Please enter the 4-digit code to proceed
@@ -155,7 +155,7 @@ const RegistrationCodeInput: React.FC<RegistrationCodeInputProps> = ({ onCodeVer
         sx={{
           display: 'flex',
           justifyContent: 'center',
-          mb: 3,
+          mb: 1,
         }}
       >
         <Box
@@ -183,8 +183,8 @@ const RegistrationCodeInput: React.FC<RegistrationCodeInputProps> = ({ onCodeVer
         sx={{
           display: 'flex',
           justifyContent: 'center',
-          gap: { xs: 1.5, sm: 2 },
-          mb: 3,
+          gap: { xs: 1, sm: 1 },
+          mb: 1,
         }}
       >
         {code.map((digit, index) => (
@@ -207,7 +207,7 @@ const RegistrationCodeInput: React.FC<RegistrationCodeInputProps> = ({ onCodeVer
             sx={{
               width: { xs: 55, sm: 65 },
               '& .MuiOutlinedInput-root': {
-                borderRadius: 2,
+                borderRadius: 1,
                 '&.Mui-focused fieldset': {
                   borderWidth: 2,
                   borderColor: 'primary.main',
@@ -225,7 +225,7 @@ const RegistrationCodeInput: React.FC<RegistrationCodeInputProps> = ({ onCodeVer
 
       {/* Error Message */}
       {error && (
-        <Alert severity="error" sx={{ mb: 3, width: '100%' }}>
+        <Alert severity="error" sx={{ mb: 1, width: '100%' }}>
           {error}
         </Alert>
       )}
@@ -239,12 +239,12 @@ const RegistrationCodeInput: React.FC<RegistrationCodeInputProps> = ({ onCodeVer
         disabled={!isCodeComplete || loading}
         endIcon={loading ? <CircularProgress size={20} /> : <ArrowForward />}
         sx={{
-          py: 1.5,
-          borderRadius: 2,
+          py: 1,
+          borderRadius: 1,
           fontWeight: 600,
           fontSize: '1rem',
           textTransform: 'none',
-          mb: 2,
+          mb: 1,
         }}
       >
         {loading ? 'Verifying...' : 'Verify Code'}
@@ -253,9 +253,9 @@ const RegistrationCodeInput: React.FC<RegistrationCodeInputProps> = ({ onCodeVer
       {/* Help Text */}
       <Box
         sx={{
-          mt: 2,
-          p: 2,
-          borderRadius: 2,
+          mt: 1,
+          p: 1,
+          borderRadius: 1,
           backgroundColor: alpha(theme.palette.info.main, 0.05),
           border: '1px solid',
           borderColor: alpha(theme.palette.info.main, 0.2),

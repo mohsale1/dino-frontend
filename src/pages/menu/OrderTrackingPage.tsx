@@ -195,14 +195,14 @@ const OrderTrackingPage: React.FC = () => {
         pt: { xs: '56px', sm: '64px' },
       }}>
         <Container maxWidth="md" sx={{ 
-          py: { xs: 2, md: 4 },
-          px: { xs: 2, sm: 3 },
+          py: { xs: 1, md: 1 },
+          px: { xs: 1, sm: 3 },
           flex: 1
         }}>
-          <Grid container spacing={{ xs: 2, md: 3 }}>
+          <Grid container spacing={{ xs: 2, md: 1.5 }}>
             <Grid item xs={12}>
               <Card sx={{ 
-                borderRadius: 2,
+                borderRadius: 1,
                 boxShadow: theme.shadows[1],
                 border: '1px solid',
                 borderColor: 'divider'
@@ -210,7 +210,7 @@ const OrderTrackingPage: React.FC = () => {
                 <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
                   <Skeleton variant="text" height={40} />
                   <Skeleton variant="text" height={24} />
-                  <Skeleton variant="rectangular" height={200} sx={{ mt: 2, borderRadius: 1 }} />
+                  <Skeleton variant="rectangular" height={200} sx={{ mt: 1, borderRadius: 1 }} />
                 </CardContent>
               </Card>
             </Grid>
@@ -230,13 +230,13 @@ const OrderTrackingPage: React.FC = () => {
         pt: { xs: '56px', sm: '64px' },
       }}>
         <Container maxWidth="md" sx={{ 
-          py: { xs: 2, md: 4 },
-          px: { xs: 2, sm: 3 },
+          py: { xs: 1, md: 1 },
+          px: { xs: 1, sm: 3 },
           flex: 1,
           display: 'flex',
           alignItems: 'center'
         }}>
-          <Box sx={{ textAlign: 'center', py: { xs: 4, md: 8 }, width: '100%' }}>
+          <Box sx={{ textAlign: 'center', py: { xs: 1, md: 8 }, width: '100%' }}>
             <Typography 
               variant="h6" 
               color="error" 
@@ -249,10 +249,10 @@ const OrderTrackingPage: React.FC = () => {
               variant="contained" 
               onClick={handleRefresh} 
               sx={{ 
-                mt: 2,
+                mt: 1,
                 px: { xs: 3, sm: 4 },
                 py: { xs: 1, sm: 1.5 },
-                fontSize: { xs: '0.875rem', sm: '1rem' },
+                fontSize: { xs: '0.8rem', sm: '1rem' },
                 borderRadius: 1,
                 fontWeight: 600,
                 textTransform: 'none',
@@ -279,18 +279,18 @@ const OrderTrackingPage: React.FC = () => {
       pt: { xs: '56px', sm: '64px' },
     }}>
       <Container maxWidth="md" sx={{ 
-        py: { xs: 2, md: 4 },
-        px: { xs: 2, sm: 3 },
+        py: { xs: 1, md: 1 },
+        px: { xs: 1, sm: 3 },
         flex: 1
       }}>
         {/* Header */}
-        <Box sx={{ mb: { xs: 3, md: 4 } }}>
+        <Box sx={{ mb: { xs: 3, md: 1 } }}>
           <Typography 
             variant="h4" 
             component="h1" 
             gutterBottom 
             sx={{ 
-              fontSize: { xs: '1.5rem', sm: '2rem', md: '2.5rem' },
+              fontSize: { xs: '1.25rem', sm: '2rem', md: '2.5rem' },
               fontWeight: 600,
               color: 'text.primary',
               letterSpacing: '-0.01em'
@@ -301,7 +301,7 @@ const OrderTrackingPage: React.FC = () => {
           <Typography 
             variant="body1" 
             color="text.secondary"
-            sx={{ fontSize: { xs: '0.875rem', sm: '1rem' } }}
+            sx={{ fontSize: { xs: '0.8rem', sm: '1rem' } }}
           >
             Track your order in real-time
           </Typography>
@@ -309,20 +309,20 @@ const OrderTrackingPage: React.FC = () => {
 
         {/* Order Status Card */}
         <Card sx={{ 
-          mb: 3,
-          borderRadius: 2,
+          mb: 1,
+          borderRadius: 1,
           boxShadow: theme.shadows[1],
           border: '1px solid',
           borderColor: 'divider'
         }}>
           <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-            <Grid container spacing={{ xs: 2, md: 3 }} alignItems="center">
+            <Grid container spacing={{ xs: 2, md: 1.5 }} alignItems="center">
               <Grid item xs={12} md={8}>
                 <Box sx={{ 
                   display: 'flex', 
                   alignItems: 'center', 
-                  gap: { xs: 1, sm: 2 }, 
-                  mb: 2,
+                  gap: { xs: 1, sm: 1 }, 
+                  mb: 1,
                   flexWrap: 'wrap'
                 }}>
                   <Typography 
@@ -340,7 +340,7 @@ const OrderTrackingPage: React.FC = () => {
                     sx={{ 
                       backgroundColor: getStatusColor(order.status),
                       color: 'white',
-                      fontSize: { xs: '0.7rem', sm: '0.875rem' },
+                      fontSize: { xs: '0.7rem', sm: '0.8rem' },
                       height: { xs: 24, sm: 32 },
                       fontWeight: 500
                     }}
@@ -350,7 +350,7 @@ const OrderTrackingPage: React.FC = () => {
                   variant="body2" 
                   color="text.secondary" 
                   gutterBottom
-                  sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+                  sx={{ fontSize: { xs: '0.75rem', sm: '0.8rem' } }}
                 >
                   {order.table_number && `Table ${order.table_number} • `}
                   Ordered at {formatTime(order.createdAt)}
@@ -358,7 +358,7 @@ const OrderTrackingPage: React.FC = () => {
                 <Typography 
                   variant="body2" 
                   color="text.secondary"
-                  sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+                  sx={{ fontSize: { xs: '0.75rem', sm: '0.8rem' } }}
                 >
                   Estimated ready time: {getEstimatedDeliveryTime()}
                 </Typography>
@@ -369,7 +369,7 @@ const OrderTrackingPage: React.FC = () => {
                 flexDirection: { xs: 'row', md: 'column' },
                 justifyContent: { xs: 'space-between', md: 'flex-end' },
                 alignItems: { xs: 'center', md: 'flex-end' },
-                gap: { xs: 2, md: 0 }
+                gap: { xs: 1, md: 0 }
               }}>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                   <Button
@@ -378,9 +378,9 @@ const OrderTrackingPage: React.FC = () => {
                     onClick={handleRefresh}
                     disabled={loading}
                     sx={{ 
-                      px: { xs: 2, sm: 3 },
+                      px: { xs: 1, sm: 3 },
                       py: { xs: 0.75, sm: 1 },
-                      fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                      fontSize: { xs: '0.75rem', sm: '0.8rem' },
                       borderRadius: 1,
                       fontWeight: 500,
                       textTransform: 'none'
@@ -407,7 +407,7 @@ const OrderTrackingPage: React.FC = () => {
                 <Typography 
                   variant="h5" 
                   sx={{ 
-                    fontSize: { xs: '1.25rem', sm: '1.5rem' },
+                    fontSize: { xs: '1.25rem', sm: '1.25rem' },
                     fontWeight: 600,
                     color: 'primary.main'
                   }}
@@ -423,14 +423,14 @@ const OrderTrackingPage: React.FC = () => {
                 <Typography 
                   variant="body2" 
                   color="text.secondary"
-                  sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+                  sx={{ fontSize: { xs: '0.75rem', sm: '0.8rem' } }}
                 >
                   Progress
                 </Typography>
                 <Typography 
                   variant="body2" 
                   color="text.secondary"
-                  sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+                  sx={{ fontSize: { xs: '0.75rem', sm: '0.8rem' } }}
                 >
                   {Math.round(getProgressPercentage())}%
                 </Typography>
@@ -448,11 +448,11 @@ const OrderTrackingPage: React.FC = () => {
           </CardContent>
         </Card>
 
-        <Grid container spacing={{ xs: 2, md: 3 }}>
+        <Grid container spacing={{ xs: 2, md: 1.5 }}>
           {/* Order Status Steps */}
           <Grid item xs={12} md={6}>
             <Card sx={{ 
-              borderRadius: 2,
+              borderRadius: 1,
               boxShadow: theme.shadows[1],
               border: '1px solid',
               borderColor: 'divider',
@@ -498,7 +498,7 @@ const OrderTrackingPage: React.FC = () => {
                           <Typography 
                             variant="subtitle1" 
                             sx={{ 
-                              fontSize: { xs: '0.875rem', sm: '1rem' },
+                              fontSize: { xs: '0.8rem', sm: '1rem' },
                               fontWeight: 600,
                               color: 'text.primary'
                             }}
@@ -510,7 +510,7 @@ const OrderTrackingPage: React.FC = () => {
                           <Typography 
                             variant="body2" 
                             color="text.secondary"
-                            sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+                            sx={{ fontSize: { xs: '0.75rem', sm: '0.8rem' } }}
                           >
                             {step.message}
                           </Typography>
@@ -522,7 +522,7 @@ const OrderTrackingPage: React.FC = () => {
                                 size="small"
                                 color="primary"
                                 sx={{
-                                  fontSize: { xs: '0.7rem', sm: '0.875rem' },
+                                  fontSize: { xs: '0.7rem', sm: '0.8rem' },
                                   height: { xs: 24, sm: 28 }
                                 }}
                               />
@@ -533,11 +533,11 @@ const OrderTrackingPage: React.FC = () => {
                     ))}
                   </Stepper>
                 ) : (
-                  <Box sx={{ textAlign: 'center', py: { xs: 3, sm: 4 } }}>
+                  <Box sx={{ textAlign: 'center', py: { xs: 1, sm: 4 } }}>
                     <Typography 
                       variant="body2" 
                       color="text.secondary"
-                      sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+                      sx={{ fontSize: { xs: '0.75rem', sm: '0.8rem' } }}
                     >
                       Order status updates will appear here
                     </Typography>
@@ -550,7 +550,7 @@ const OrderTrackingPage: React.FC = () => {
           {/* Order Items */}
           <Grid item xs={12} md={6}>
             <Card sx={{ 
-              borderRadius: 2,
+              borderRadius: 1,
               boxShadow: theme.shadows[1],
               border: '1px solid',
               borderColor: 'divider',
@@ -584,7 +584,7 @@ const OrderTrackingPage: React.FC = () => {
                           sx={{ 
                             width: { xs: 40, sm: 48 }, 
                             height: { xs: 40, sm: 48 }, 
-                            mr: { xs: 0, sm: 2 },
+                            mr: { xs: 0, sm: 1 },
                             alignSelf: { xs: 'center', sm: 'flex-start' },
                             border: '1px solid',
                             borderColor: 'divider'
@@ -608,7 +608,7 @@ const OrderTrackingPage: React.FC = () => {
                               <Typography 
                                 variant="subtitle2"
                                 sx={{ 
-                                  fontSize: { xs: '0.875rem', sm: '1rem' },
+                                  fontSize: { xs: '0.8rem', sm: '1rem' },
                                   fontWeight: 600,
                                   color: 'text.primary'
                                 }}
@@ -618,7 +618,7 @@ const OrderTrackingPage: React.FC = () => {
                               <Typography 
                                 variant="subtitle2" 
                                 sx={{ 
-                                  fontSize: { xs: '0.875rem', sm: '1rem' },
+                                  fontSize: { xs: '0.8rem', sm: '1rem' },
                                   fontWeight: 600,
                                   color: 'primary.main'
                                 }}
@@ -632,7 +632,7 @@ const OrderTrackingPage: React.FC = () => {
                               <Typography 
                                 variant="body2" 
                                 color="text.secondary"
-                                sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+                                sx={{ fontSize: { xs: '0.75rem', sm: '0.8rem' } }}
                               >
                                 Quantity: {item.quantity} × {formatPrice(item.unit_price)}
                               </Typography>
@@ -643,7 +643,7 @@ const OrderTrackingPage: React.FC = () => {
                                   sx={{ 
                                     fontStyle: 'italic', 
                                     mt: 0.5,
-                                    fontSize: { xs: '0.7rem', sm: '0.875rem' }
+                                    fontSize: { xs: '0.7rem', sm: '0.8rem' }
                                   }}
                                 >
                                   Note: {item.special_instructions}
@@ -693,7 +693,7 @@ const OrderTrackingPage: React.FC = () => {
           {/* Customer Information */}
           <Grid item xs={12}>
             <Card sx={{ 
-              borderRadius: 2,
+              borderRadius: 1,
               boxShadow: theme.shadows[1],
               border: '1px solid',
               borderColor: 'divider'
@@ -710,19 +710,19 @@ const OrderTrackingPage: React.FC = () => {
                 >
                   Order Details
                 </Typography>
-                <Grid container spacing={{ xs: 2, sm: 2 }}>
+                <Grid container spacing={{ xs: 2, sm: 1 }}>
                   <Grid item xs={12} sm={6}>
                     <Typography 
                       variant="body2" 
                       color="text.secondary"
-                      sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+                      sx={{ fontSize: { xs: '0.75rem', sm: '0.8rem' } }}
                     >
                       Customer Name
                     </Typography>
                     <Typography 
                       variant="body1" 
                       sx={{ 
-                        fontSize: { xs: '0.875rem', sm: '1rem' },
+                        fontSize: { xs: '0.8rem', sm: '1rem' },
                         fontWeight: 500,
                         color: 'text.primary'
                       }}
@@ -734,14 +734,14 @@ const OrderTrackingPage: React.FC = () => {
                     <Typography 
                       variant="body2" 
                       color="text.secondary"
-                      sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+                      sx={{ fontSize: { xs: '0.75rem', sm: '0.8rem' } }}
                     >
                       Phone Number
                     </Typography>
                     <Typography 
                       variant="body1" 
                       sx={{ 
-                        fontSize: { xs: '0.875rem', sm: '1rem' },
+                        fontSize: { xs: '0.8rem', sm: '1rem' },
                         fontWeight: 500,
                         color: 'text.primary'
                       }}
@@ -754,14 +754,14 @@ const OrderTrackingPage: React.FC = () => {
                       <Typography 
                         variant="body2" 
                         color="text.secondary"
-                        sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+                        sx={{ fontSize: { xs: '0.75rem', sm: '0.8rem' } }}
                       >
                         Table Number
                       </Typography>
                       <Typography 
                         variant="body1" 
                         sx={{ 
-                          fontSize: { xs: '0.875rem', sm: '1rem' },
+                          fontSize: { xs: '0.8rem', sm: '1rem' },
                           fontWeight: 500,
                           color: 'text.primary'
                         }}
@@ -775,7 +775,7 @@ const OrderTrackingPage: React.FC = () => {
                       variant="body2" 
                       color="text.secondary"
                       sx={{ 
-                        fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                        fontSize: { xs: '0.75rem', sm: '0.8rem' },
                         mb: 1
                       }}
                     >
@@ -786,7 +786,7 @@ const OrderTrackingPage: React.FC = () => {
                       size="small"
                       color={order.payment_status === 'paid' ? 'success' : 'warning'}
                       sx={{
-                        fontSize: { xs: '0.7rem', sm: '0.875rem' },
+                        fontSize: { xs: '0.7rem', sm: '0.8rem' },
                         height: { xs: 24, sm: 28 },
                         fontWeight: 500
                       }}
@@ -799,11 +799,11 @@ const OrderTrackingPage: React.FC = () => {
         </Grid>
 
         {/* Help Section */}
-        <Box sx={{ mt: { xs: 3, md: 4 } }}>
+        <Box sx={{ mt: { xs: 3, md: 1 } }}>
           <Alert 
             severity="info"
             sx={{ 
-              borderRadius: 2,
+              borderRadius: 1,
               border: '1px solid',
               borderColor: 'info.light',
               '& .MuiAlert-message': {
@@ -813,7 +813,7 @@ const OrderTrackingPage: React.FC = () => {
           >
             <Typography 
               variant="body2"
-              sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+              sx={{ fontSize: { xs: '0.75rem', sm: '0.8rem' } }}
             >
               <strong>Need help?</strong> If you have any questions about your order, 
               please contact our staff or show them your order ID: <strong>{order.order_number || order.order_id}</strong>
@@ -823,9 +823,9 @@ const OrderTrackingPage: React.FC = () => {
 
         {/* Action Buttons */}
         <Box sx={{ 
-          mt: 3, 
+          mt: 1, 
           display: 'flex', 
-          gap: { xs: 1, sm: 2 }, 
+          gap: { xs: 1, sm: 1 }, 
           justifyContent: 'center',
           flexDirection: { xs: 'column', sm: 'row' },
           alignItems: 'center'
@@ -836,7 +836,7 @@ const OrderTrackingPage: React.FC = () => {
             sx={{
               px: { xs: 3, sm: 4 },
               py: { xs: 1, sm: 1.5 },
-              fontSize: { xs: '0.875rem', sm: '1rem' },
+              fontSize: { xs: '0.8rem', sm: '1rem' },
               borderRadius: 1,
               width: { xs: '100%', sm: 'auto' },
               maxWidth: { xs: 300, sm: 'none' },
@@ -852,7 +852,7 @@ const OrderTrackingPage: React.FC = () => {
             sx={{
               px: { xs: 3, sm: 4 },
               py: { xs: 1, sm: 1.5 },
-              fontSize: { xs: '0.875rem', sm: '1rem' },
+              fontSize: { xs: '0.8rem', sm: '1rem' },
               borderRadius: 1,
               width: { xs: '100%', sm: 'auto' },
               maxWidth: { xs: 300, sm: 'none' },
@@ -874,8 +874,8 @@ const OrderTrackingPage: React.FC = () => {
         sx={{ 
           flexShrink: 0,
           textAlign: 'center',
-          py: { xs: 2, lg: 3 },
-          px: { xs: 2, lg: 3 },
+          py: { xs: 1, lg: 3 },
+          px: { xs: 1, lg: 3 },
           borderTop: '1px solid',
           borderColor: 'divider',
           backgroundColor: 'background.paper',
@@ -886,7 +886,7 @@ const OrderTrackingPage: React.FC = () => {
           variant="body2" 
           color="text.secondary"
           sx={{ 
-            fontSize: { xs: '0.75rem', sm: '0.875rem' },
+            fontSize: { xs: '0.75rem', sm: '0.8rem' },
             fontWeight: 500 
           }}
         >

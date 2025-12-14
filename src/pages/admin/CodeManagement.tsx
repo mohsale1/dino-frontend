@@ -151,9 +151,9 @@ const CodeManagement: React.FC = () => {
               flexDirection: { xs: 'column', md: 'row' },
               justifyContent: 'space-between',
               alignItems: { xs: 'flex-start', md: 'center' },
-              gap: { xs: 2, md: 3 },
-              py: { xs: 2, sm: 3 },
-              px: { xs: 2, sm: 3 },
+              gap: { xs: 1, md: 1.5 },
+              py: { xs: 1, sm: 3 },
+              px: { xs: 1, sm: 3 },
             }}
           >
             {/* Header Content */}
@@ -178,7 +178,7 @@ const CodeManagement: React.FC = () => {
               <Typography
                 variant="body1"
                 sx={{
-                  fontSize: { xs: '0.875rem', sm: '1rem' },
+                  fontSize: { xs: '0.8rem', sm: '1rem' },
                   fontWeight: 400,
                   mb: 1,
                   maxWidth: '500px',
@@ -234,7 +234,7 @@ const CodeManagement: React.FC = () => {
       <Box sx={{ width: '100%', padding: 0, margin: 0 }}>
         {/* Error Alert */}
         {error && (
-          <Box sx={{ px: { xs: 2, sm: 3 }, pt: 3, pb: 1 }}>
+          <Box sx={{ px: { xs: 1, sm: 3 }, pt: 3, pb: 1 }}>
             <Alert 
               severity="error" 
               onClose={() => setError(null)}
@@ -245,7 +245,7 @@ const CodeManagement: React.FC = () => {
         )}
 
         {/* Code Display Section */}
-        <Box sx={{ px: { xs: 2, sm: 3 }, py: 4 }}>
+        <Box sx={{ px: { xs: 1, sm: 3 }, py: 4 }}>
           <Container maxWidth="sm">
             <Paper
               sx={{
@@ -266,7 +266,7 @@ const CodeManagement: React.FC = () => {
                     py: 8,
                   }}
                 >
-                  <CircularProgress size={48} sx={{ mb: 2 }} />
+                  <CircularProgress size={48} sx={{ mb: 1 }} />
                   <Typography variant="body1" color="text.secondary">
                     Loading code...
                   </Typography>
@@ -281,14 +281,14 @@ const CodeManagement: React.FC = () => {
                   }}
                 >
                   {/* Header */}
-                  <Box sx={{ textAlign: 'center', mb: 3 }}>
+                  <Box sx={{ textAlign: 'center', mb: 1 }}>
                     <Typography
                       variant="h5"
                       component="h2"
                       fontWeight="700"
                       sx={{
                         mb: 1,
-                        fontSize: { xs: '1.25rem', sm: '1.5rem' },
+                        fontSize: { xs: '1.25rem', sm: '1.25rem' },
                         color: 'text.primary',
                       }}
                     >
@@ -299,7 +299,7 @@ const CodeManagement: React.FC = () => {
                       variant="body2"
                       sx={{
                         color: 'text.secondary',
-                        fontSize: { xs: '0.875rem', sm: '1rem' },
+                        fontSize: { xs: '0.8rem', sm: '1rem' },
                       }}
                     >
                       This is the current 4-digit system code
@@ -311,7 +311,7 @@ const CodeManagement: React.FC = () => {
                     sx={{
                       display: 'flex',
                       justifyContent: 'center',
-                      mb: 3,
+                      mb: 1,
                     }}
                   >
                     <Box
@@ -339,8 +339,8 @@ const CodeManagement: React.FC = () => {
                     sx={{
                       display: 'flex',
                       justifyContent: 'center',
-                      gap: { xs: 1.5, sm: 2 },
-                      mb: 3,
+                      gap: { xs: 1, sm: 1 },
+                      mb: 1,
                     }}
                   >
                     {code.map((digit, index) => (
@@ -361,7 +361,7 @@ const CodeManagement: React.FC = () => {
                         sx={{
                           width: { xs: 55, sm: 65 },
                           '& .MuiOutlinedInput-root': {
-                            borderRadius: 2,
+                            borderRadius: 1,
                             backgroundColor: alpha(theme.palette.primary.main, 0.05),
                             '& fieldset': {
                               borderWidth: 2,
@@ -388,12 +388,12 @@ const CodeManagement: React.FC = () => {
                     disabled={refreshing}
                     startIcon={refreshing ? <CircularProgress size={20} /> : <Refresh />}
                     sx={{
-                      py: 1.5,
-                      borderRadius: 2,
+                      py: 1,
+                      borderRadius: 1,
                       fontWeight: 600,
                       fontSize: '1rem',
                       textTransform: 'none',
-                      mb: 2,
+                      mb: 1,
                     }}
                   >
                     {refreshing ? 'Refreshing...' : 'Refresh Code'}
@@ -402,9 +402,9 @@ const CodeManagement: React.FC = () => {
                   {/* Help Text */}
                   <Box
                     sx={{
-                      mt: 2,
-                      p: 2,
-                      borderRadius: 2,
+                      mt: 1,
+                      p: 1,
+                      borderRadius: 1,
                       backgroundColor: alpha(theme.palette.info.main, 0.05),
                       border: '1px solid',
                       borderColor: alpha(theme.palette.info.main, 0.2),

@@ -144,14 +144,14 @@ const RegistrationResult: React.FC<RegistrationResultProps> = ({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          p: 2,
+          p: 1,
         }}
       >
         <Container maxWidth="sm">
           <Paper
             elevation={12}
             sx={{
-              p: { xs: 3, md: 4 },
+              p: { xs: 3, md: 1 },
               borderRadius: 3,
               backgroundColor: 'background.paper',
               border: '1px solid',
@@ -179,14 +179,14 @@ const RegistrationResult: React.FC<RegistrationResultProps> = ({
             {/* Content */}
             <Box sx={{ position: 'relative', zIndex: 1 }}>
               {/* Header with Logo */}
-              <Stack direction="row" alignItems="center" justifyContent="center" spacing={1.5} sx={{ mb: 3 }}>
+              <Stack direction="row" alignItems="center" justifyContent="center" spacing={1} sx={{ mb: 1 }}>
                 <DinoLogo size={32} animated={true} />
                 <Typography
                   variant="h5"
                   component="h1"
                   fontWeight="700"
                   sx={{
-                    fontSize: { xs: '1.25rem', sm: '1.5rem' },
+                    fontSize: { xs: '1.25rem', sm: '1.25rem' },
                     color: 'text.primary',
                   }}
                 >
@@ -195,7 +195,7 @@ const RegistrationResult: React.FC<RegistrationResultProps> = ({
               </Stack>
 
               {/* Success Icon */}
-              <Box sx={{ mb: 3 }}>
+              <Box sx={{ mb: 1 }}>
                 <CheckCircle
                   sx={{
                     fontSize: { xs: 60, md: 70 },
@@ -211,9 +211,9 @@ const RegistrationResult: React.FC<RegistrationResultProps> = ({
                 component="h2"
                 fontWeight="700"
                 sx={{
-                  fontSize: { xs: '1.5rem', sm: '1.75rem' },
+                  fontSize: { xs: '1.25rem', sm: '1.75rem' },
                   color: 'success.main',
-                  mb: 1.5,
+                  mb: 1,
                 }}
               >
                 Workspace Created!
@@ -224,7 +224,7 @@ const RegistrationResult: React.FC<RegistrationResultProps> = ({
                 sx={{
                   fontSize: { xs: '0.9rem', sm: '1rem' },
                   color: 'text.secondary',
-                  mb: 3,
+                  mb: 1,
                   lineHeight: 1.6,
                 }}
               >
@@ -236,7 +236,7 @@ const RegistrationResult: React.FC<RegistrationResultProps> = ({
               {/* Action Buttons */}
               <Stack
                 direction={{ xs: 'column', sm: 'row' }}
-                spacing={2}
+                spacing={1}
                 justifyContent="center"
                 alignItems="center"
               >
@@ -247,9 +247,9 @@ const RegistrationResult: React.FC<RegistrationResultProps> = ({
                   startIcon={<Login />}
                   sx={{
                     minWidth: { xs: '100%', sm: 180 },
-                    py: 1.5,
+                    py: 1,
                     px: 3,
-                    borderRadius: 2,
+                    borderRadius: 1,
                     fontWeight: 600,
                     fontSize: '1rem',
                     textTransform: 'none',
@@ -264,9 +264,9 @@ const RegistrationResult: React.FC<RegistrationResultProps> = ({
                   onClick={handleBackToHome}
                   sx={{
                     minWidth: { xs: '100%', sm: 140 },
-                    py: 1.5,
-                    px: 2,
-                    borderRadius: 2,
+                    py: 1,
+                    px: 1,
+                    borderRadius: 1,
                     fontWeight: 600,
                     fontSize: '0.9rem',
                     textTransform: 'none',
@@ -278,11 +278,11 @@ const RegistrationResult: React.FC<RegistrationResultProps> = ({
 
               {/* Additional Info */}
               {ownerEmail && (
-                <Box sx={{ mt: 3, p: 2, backgroundColor: 'grey.50', borderRadius: 2 }}>
-                  <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem' }}>
+                <Box sx={{ mt: 1, p: 1, backgroundColor: 'grey.50', borderRadius: 1 }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.8rem' }}>
                     <strong>Login Email:</strong> {ownerEmail}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5, fontSize: '0.875rem' }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5, fontSize: '0.8rem' }}>
                     Use the password you created during registration.
                   </Typography>
                 </Box>
@@ -303,14 +303,14 @@ const RegistrationResult: React.FC<RegistrationResultProps> = ({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        p: 2,
+        p: 1,
       }}
     >
       <Container maxWidth="sm">
         <Paper
           elevation={12}
           sx={{
-            p: { xs: 3, md: 4 },
+            p: { xs: 3, md: 1 },
             borderRadius: 3,
             backgroundColor: 'background.paper',
             border: '1px solid',
@@ -338,14 +338,14 @@ const RegistrationResult: React.FC<RegistrationResultProps> = ({
           {/* Content */}
           <Box sx={{ position: 'relative', zIndex: 1 }}>
             {/* Header with Logo */}
-            <Stack direction="row" alignItems="center" justifyContent="center" spacing={1.5} sx={{ mb: 3 }}>
+            <Stack direction="row" alignItems="center" justifyContent="center" spacing={1} sx={{ mb: 1 }}>
               <DinoLogo size={32} animated={true} />
               <Typography
                 variant="h5"
                 component="h1"
                 fontWeight="700"
                 sx={{
-                  fontSize: { xs: '1.25rem', sm: '1.5rem' },
+                  fontSize: { xs: '1.25rem', sm: '1.25rem' },
                   color: 'text.primary',
                 }}
               >
@@ -354,7 +354,7 @@ const RegistrationResult: React.FC<RegistrationResultProps> = ({
             </Stack>
 
             {/* Error Icon */}
-            <Box sx={{ mb: 3 }}>
+            <Box sx={{ mb: 1 }}>
               <Error
                 sx={{
                   fontSize: { xs: 60, md: 70 },
@@ -370,9 +370,9 @@ const RegistrationResult: React.FC<RegistrationResultProps> = ({
               component="h2"
               fontWeight="700"
               sx={{
-                fontSize: { xs: '1.5rem', sm: '1.75rem' },
+                fontSize: { xs: '1.25rem', sm: '1.75rem' },
                 color: 'error.main',
-                mb: 1.5,
+                mb: 1,
               }}
             >
               Registration Failed
@@ -383,7 +383,7 @@ const RegistrationResult: React.FC<RegistrationResultProps> = ({
               sx={{
                 fontSize: { xs: '0.9rem', sm: '1rem' },
                 color: 'text.secondary',
-                mb: 3,
+                mb: 1,
                 lineHeight: 1.6,
               }}
             >
@@ -394,17 +394,17 @@ const RegistrationResult: React.FC<RegistrationResultProps> = ({
             <Alert 
               severity="error" 
               sx={{ 
-                mb: 3, 
+                mb: 1, 
                 textAlign: 'left',
                 '& .MuiAlert-message': {
                   width: '100%'
                 }
               }}
             >
-              <Typography variant="body2" fontWeight="600" sx={{ mb: 0.5, fontSize: '0.875rem' }}>
+              <Typography variant="body2" fontWeight="600" sx={{ mb: 0.5, fontSize: '0.8rem' }}>
                 {errorSolution.title}
               </Typography>
-              <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>
+              <Typography variant="body2" sx={{ fontSize: '0.8rem' }}>
                 {error}
               </Typography>
               {errorCode && (
@@ -417,17 +417,17 @@ const RegistrationResult: React.FC<RegistrationResultProps> = ({
             <Divider sx={{ my: 3 }} />
 
             {/* Solution */}
-            <Box sx={{ mb: 3, textAlign: 'left' }}>
+            <Box sx={{ mb: 1, textAlign: 'left' }}>
               <Typography
                 variant="subtitle1"
                 fontWeight="600"
-                sx={{ mb: 1.5, color: 'text.primary', textAlign: 'center', fontSize: '1rem' }}
+                sx={{ mb: 1, color: 'text.primary', textAlign: 'center', fontSize: '1rem' }}
               >
                 How to Fix This
               </Typography>
               
-              <Alert severity="info" sx={{ mb: 2 }}>
-                <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>
+              <Alert severity="info" sx={{ mb: 1 }}>
+                <Typography variant="body2" sx={{ fontSize: '0.8rem' }}>
                   {errorSolution.solution}
                 </Typography>
               </Alert>
@@ -436,10 +436,10 @@ const RegistrationResult: React.FC<RegistrationResultProps> = ({
             {/* Action Buttons */}
             <Stack
               direction={{ xs: 'column', sm: 'row' }}
-              spacing={2}
+              spacing={1}
               justifyContent="center"
               alignItems="center"
-              sx={{ mb: 3 }}
+              sx={{ mb: 1 }}
             >
               <Button
                 variant="contained"
@@ -448,9 +448,9 @@ const RegistrationResult: React.FC<RegistrationResultProps> = ({
                 startIcon={<Refresh />}
                 sx={{
                   minWidth: { xs: '100%', sm: 180 },
-                  py: 1.5,
+                  py: 1,
                   px: 3,
-                  borderRadius: 2,
+                  borderRadius: 1,
                   fontWeight: 600,
                   fontSize: '1rem',
                   textTransform: 'none',
@@ -466,9 +466,9 @@ const RegistrationResult: React.FC<RegistrationResultProps> = ({
                 startIcon={<Home />}
                 sx={{
                   minWidth: { xs: '100%', sm: 140 },
-                  py: 1.5,
-                  px: 2,
-                  borderRadius: 2,
+                  py: 1,
+                  px: 1,
+                  borderRadius: 1,
                   fontWeight: 600,
                   fontSize: '0.9rem',
                   textTransform: 'none',
@@ -485,14 +485,14 @@ const RegistrationResult: React.FC<RegistrationResultProps> = ({
               <Typography
                 variant="subtitle1"
                 fontWeight="600"
-                sx={{ mb: 2, color: 'text.primary', fontSize: '1rem' }}
+                sx={{ mb: 1, color: 'text.primary', fontSize: '1rem' }}
               >
                 Need Help?
               </Typography>
 
               <Stack
                 direction={{ xs: 'column', sm: 'row' }}
-                spacing={1.5}
+                spacing={1}
                 justifyContent="center"
                 alignItems="center"
               >
@@ -504,7 +504,7 @@ const RegistrationResult: React.FC<RegistrationResultProps> = ({
                   sx={{
                     textTransform: 'none',
                     fontWeight: 600,
-                    fontSize: '0.875rem',
+                    fontSize: '0.8rem',
                   }}
                 >
                   Email Support
@@ -518,7 +518,7 @@ const RegistrationResult: React.FC<RegistrationResultProps> = ({
                   sx={{
                     textTransform: 'none',
                     fontWeight: 600,
-                    fontSize: '0.875rem',
+                    fontSize: '0.8rem',
                   }}
                 >
                   Call Support

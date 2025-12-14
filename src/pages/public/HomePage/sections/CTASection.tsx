@@ -26,19 +26,19 @@ const CTASection: React.FC = () => {
 
   const contactMethods = [
     {
-      icon: <Phone sx={{ fontSize: 14 }} />,
+      icon: <Phone sx={{ fontSize: 12 }} />,
       title: 'Call Us',
       value: COMPANY_INFO.contact.phone.primary,
       action: `tel:${COMPANY_INFO.contact.phone.primary.replace(/\s/g, '')}`,
     },
     {
-      icon: <Email sx={{ fontSize: 14 }} />,
+      icon: <Email sx={{ fontSize: 12 }} />,
       title: 'Email Us',
       value: COMPANY_INFO.contact.email.primary,
       action: `mailto:${COMPANY_INFO.contact.email.primary}`,
     },
     {
-      icon: <LocationOn sx={{ fontSize: 14 }} />,
+      icon: <LocationOn sx={{ fontSize: 12 }} />,
       title: 'Visit Us',
       value: COMPANY_INFO.contact.address.full,
       action: null,
@@ -81,9 +81,9 @@ const CTASection: React.FC = () => {
               sx={{
                 color: alpha('#fff', 0.9),
                 fontWeight: 700,
-                fontSize: '0.875rem',
+                fontSize: '0.8rem',
                 letterSpacing: 1.5,
-                mb: 2,
+                mb: 1,
                 display: 'block',
               }}
             >
@@ -94,7 +94,7 @@ const CTASection: React.FC = () => {
               sx={{
                 fontSize: { xs: '2rem', md: '3rem' },
                 fontWeight: 700,
-                mb: 3,
+                mb: 1,
                 color: 'white',
               }}
             >
@@ -114,7 +114,7 @@ const CTASection: React.FC = () => {
             </Typography>
 
             {/* CTA Buttons */}
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
               {user ? (
                 <Button
                   variant="contained"
@@ -123,10 +123,10 @@ const CTASection: React.FC = () => {
                   onClick={() => navigate('/admin')}
                   sx={{
                     px: 4,
-                    py: 1.5,
+                    py: 1,
                     fontSize: '1rem',
                     fontWeight: 600,
-                    borderRadius: 2,
+                    borderRadius: 1,
                     textTransform: 'none',
                     backgroundColor: 'white',
                     color: 'primary.main',
@@ -149,10 +149,10 @@ const CTASection: React.FC = () => {
                     onClick={() => navigate('/register')}
                     sx={{
                       px: 4,
-                      py: 1.5,
+                      py: 1,
                       fontSize: '1rem',
                       fontWeight: 600,
-                      borderRadius: 2,
+                      borderRadius: 1,
                       textTransform: 'none',
                       backgroundColor: 'white',
                       color: 'primary.main',
@@ -172,10 +172,10 @@ const CTASection: React.FC = () => {
                     onClick={() => navigate('/login')}
                     sx={{
                       px: 4,
-                      py: 1.5,
+                      py: 1,
                       fontSize: '1rem',
                       fontWeight: 600,
-                      borderRadius: 2,
+                      borderRadius: 1,
                       textTransform: 'none',
                       borderWidth: 2,
                       borderColor: 'white',
@@ -197,15 +197,15 @@ const CTASection: React.FC = () => {
 
           {/* Right Content - Contact Methods */}
           <Grid item xs={12} md={6}>
-            <Stack spacing={3}>
+            <Stack spacing={1}>
               {contactMethods.map((method, index) => (
                 <Box
                   key={index}
                   onClick={() => method.action && window.open(method.action, '_blank')}
                   sx={{
-                    p: 3,
+                    p: 1.5,
                     backgroundColor: alpha('#fff', 0.1),
-                    borderRadius: 2,
+                    borderRadius: 1,
                     border: `1px solid ${alpha('#fff', 0.2)}`,
                     cursor: method.action ? 'pointer' : 'default',
                     transition: 'all 0.3s ease',
@@ -218,7 +218,7 @@ const CTASection: React.FC = () => {
                       : {},
                   }}
                 >
-                  <Stack direction="row" spacing={2} alignItems="center">
+                  <Stack direction="row" spacing={1} alignItems="center">
                     <Box
                       sx={{
                         width: 48,

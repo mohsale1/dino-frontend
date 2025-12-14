@@ -465,8 +465,8 @@ const TableManagement = () => {
               flexDirection: { xs: 'column', md: 'row' },
               justifyContent: 'space-between',
               alignItems: { xs: 'flex-start', md: 'center' },
-              gap: { xs: 2, md: 3 },
-              py: { xs: 3, sm: 4 },
+              gap: { xs: 1, md: 1.5 },
+              py: { xs: 1, sm: 4 },
               px: { xs: 3, sm: 4 },
             }}
           >
@@ -492,7 +492,7 @@ const TableManagement = () => {
               <Typography
                 variant="body1"
                 sx={{
-                  fontSize: { xs: '0.875rem', sm: '1rem' },
+                  fontSize: { xs: '0.8rem', sm: '1rem' },
                   fontWeight: 400,
                   mb: 1,
                   maxWidth: '500px',
@@ -509,13 +509,13 @@ const TableManagement = () => {
                     alignItems: 'center',
                     backgroundColor: 'rgba(255, 255, 255, 0.9)',
                     backdropFilter: 'blur(10px)',
-                    px: 2,
+                    px: 1,
                     py: 1,
-                    borderRadius: 2,
+                    borderRadius: 1,
                     border: '1px solid rgba(0, 0, 0, 0.1)',
                   }}
                 >
-                  <Store sx={{ fontSize: 14, mr: 1, color: 'primary.main', opacity: 0.9 }} />
+                  <Store sx={{ fontSize: 12, mr: 1, color: 'primary.main', opacity: 0.9 }} />
                   <Typography variant="body2" fontWeight="500" color="text.primary">
                     {getVenueDisplayName()}
                   </Typography>
@@ -527,7 +527,7 @@ const TableManagement = () => {
             <Box
               sx={{
                 display: 'flex',
-                gap: 1.5,
+                gap: 1,
                 flexDirection: { xs: 'row', sm: 'row' },
                 flexWrap: 'wrap',
                 alignItems: 'center',
@@ -547,9 +547,9 @@ const TableManagement = () => {
                     fontWeight: 600,
                     px: 3,
                     py: 1,
-                    borderRadius: 2,
+                    borderRadius: 1,
                     textTransform: 'none',
-                    fontSize: '0.875rem',
+                    fontSize: '0.8rem',
                     '&:hover': {
                       backgroundColor: 'rgba(255, 255, 255, 1)',
                       borderColor: 'primary.main',
@@ -641,11 +641,11 @@ const TableManagement = () => {
               borderColor: 'divider',
               '& .MuiTab-root': {
                 minHeight: { xs: 48, sm: 48 },
-                fontSize: { xs: '0.875rem', sm: '0.875rem' },
+                fontSize: { xs: '0.8rem', sm: '0.8rem' },
                 fontWeight: 500,
                 textTransform: 'none',
                 minWidth: { xs: 'auto', sm: 160 },
-                px: { xs: 1, sm: 2 }
+                px: { xs: 1, sm: 1 }
               }
             }}
           >

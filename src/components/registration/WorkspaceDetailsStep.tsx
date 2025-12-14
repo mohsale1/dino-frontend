@@ -15,7 +15,7 @@ const WorkspaceDetailsStep: React.FC<WorkspaceDetailsStepProps> = ({
   errors
 }) => {
   return (
-    <Grid container spacing={3}>
+    <Grid container spacing={1}>
       <Grid item xs={12}>
         <Typography 
           variant="h6" 
@@ -33,7 +33,7 @@ const WorkspaceDetailsStep: React.FC<WorkspaceDetailsStepProps> = ({
         <Typography 
           variant="body2" 
           color="text.secondary" 
-          sx={{ mb: 3 }}
+          sx={{ mb: 1 }}
         >
           Set up your business workspace that will contain all your venues
         </Typography>

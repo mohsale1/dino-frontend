@@ -235,7 +235,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
         {/* Header */}
         <Box
           sx={{
-            p: { xs: 2, sm: 2.5 },
+            p: { xs: 2, sm: 1.5 },
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -243,10 +243,10 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
             borderColor: 'divider',
             minHeight: { xs: 60, sm: 64 },
             // Add safe area for mobile devices with notches
-            paddingTop: { xs: 'max(16px, env(safe-area-inset-top))', sm: 2.5 },
+            paddingTop: { xs: 'max(16px, env(safe-area-inset-top))', sm: 1.5 },
           }}
         >
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1.5, sm: 2 } }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 1 } }}>
             <DinoLogo size={isMobile ? 28 : 32} animated={false} />
             <Box>
               <Typography 
@@ -282,17 +282,17 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
 
         {/* User Section */}
         {user && (
-          <Box sx={{ p: { xs: 1.5, sm: 2 }, borderBottom: '1px solid', borderColor: 'divider' }}>
+          <Box sx={{ p: { xs: 1.5, sm: 1 }, borderBottom: '1px solid', borderColor: 'divider' }}>
             <Paper
               elevation={0}
               sx={{
-                p: { xs: 1.5, sm: 2 },
+                p: { xs: 1.5, sm: 1 },
                 backgroundColor: '#E3F2FD',
                 border: 'none',
-                borderRadius: 2,
+                borderRadius: 1,
               }}
             >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                 <Avatar
                   src={dinoAvatar || undefined}
                   sx={{
@@ -358,7 +358,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                 <Button
                   size="small"
                   variant="outlined"
-                  startIcon={<AccountCircle sx={{ fontSize: 14 }} />}
+                  startIcon={<AccountCircle sx={{ fontSize: 12 }} />}
                   onClick={() => handleNavigate('/profile')}
                   sx={{ 
                     flex: 1, 
@@ -372,7 +372,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                   size="small"
                   variant="outlined"
                   color="error"
-                  startIcon={<ExitToApp sx={{ fontSize: 14 }} />}
+                  startIcon={<ExitToApp sx={{ fontSize: 12 }} />}
                   onClick={handleLogout}
                   sx={{ 
                     flex: 1, 
@@ -389,38 +389,38 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
 
         {/* Venue Status Display - Only for Admin and SuperAdmin */}
         {user && (isAdmin() || isSuperAdmin()) && (
-          <Box sx={{ p: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
+          <Box sx={{ p: 1, borderBottom: '1px solid', borderColor: 'divider' }}>
             <Paper
               elevation={0}
               sx={{
-                p: 2,
+                p: 1,
                 backgroundColor: venueStatus?.isOpen ? 'success.50' : 'warning.50',
                 border: '1px solid',
                 borderColor: venueStatus?.isOpen ? 'success.200' : 'warning.200',
-                borderRadius: 2,
+                borderRadius: 1,
               }}
             >
               <Typography
                 variant="subtitle2"
                 fontWeight={600}
                 color="text.primary"
-                sx={{ mb: 1.5, display: 'flex', alignItems: 'center', gap: 1 }}
+                sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}
               >
-                <Store sx={{ fontSize: 14, color: venueStatus?.isOpen ? 'success.main' : 'error.main' }} />
+                <Store sx={{ fontSize: 12, color: venueStatus?.isOpen ? 'success.main' : 'error.main' }} />
                 Venue Status
               </Typography>
               
               {venueStatus ? (
                 <>
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
                     <Typography variant="body2" fontWeight={500} color="text.primary">
                       {venueStatus.venueName}
                     </Typography>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                       {venueStatus.isOpen ? (
-                        <CheckCircle sx={{ fontSize: 14, color: 'success.main' }} />
+                        <CheckCircle sx={{ fontSize: 12, color: 'success.main' }} />
                       ) : (
-                        <Cancel sx={{ fontSize: 14, color: 'error.main' }} />
+                        <Cancel sx={{ fontSize: 12, color: 'error.main' }} />
                       )}
                       <Typography 
                         variant="caption" 
@@ -468,7 +468,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                       {userData?.venue?.name || 'Current Venue'}
                     </Typography>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                      <Cancel sx={{ fontSize: 14, color: 'warning.main' }} />
+                      <Cancel sx={{ fontSize: 12, color: 'warning.main' }} />
                       <Typography 
                         variant="caption" 
                         fontWeight={600}
@@ -496,13 +496,13 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
         }}>
           {/* Home Navigation */}
           {isHomePage && homeNavItems.length > 0 && (
-            <Box sx={{ p: 2 }}>
+            <Box sx={{ p: 1 }}>
               <Typography
                 variant="overline"
                 sx={{
                   color: 'text.secondary',
                   fontWeight: 600,
-                  fontSize: '0.75rem',
+                  fontSize: '0.7rem',
                   mb: 1,
                   display: 'block',
                 }}
@@ -531,7 +531,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                         primaryTypographyProps={{
                           fontWeight: activeSection === item.id ? 600 : 400,
                           color: activeSection === item.id ? 'primary.main' : 'text.primary',
-                          fontSize: '0.875rem',
+                          fontSize: '0.8rem',
                         }}
                       />
                     </ListItemButton>
@@ -542,13 +542,13 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
           )}
 
           {/* Quick Actions */}
-          <Box sx={{ p: 2 }}>
+          <Box sx={{ p: 1 }}>
             <Typography
               variant="overline"
               sx={{
                 color: 'text.secondary',
                 fontWeight: 600,
-                fontSize: '0.75rem',
+                fontSize: '0.7rem',
                 mb: 1,
                 display: 'block',
               }}
@@ -580,7 +580,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                           primaryTypographyProps={{
                             fontWeight: 500,
                             color: 'text.primary',
-                            fontSize: '0.875rem',
+                            fontSize: '0.8rem',
                           }}
                         />
                       </ListItemButton>
@@ -608,7 +608,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                           primaryTypographyProps={{
                             fontWeight: 500,
                             color: 'text.primary',
-                            fontSize: '0.875rem',
+                            fontSize: '0.8rem',
                           }}
                         />
                       </ListItemButton>
@@ -636,7 +636,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                           primaryTypographyProps={{
                             fontWeight: 500,
                             color: 'text.primary',
-                            fontSize: '0.875rem',
+                            fontSize: '0.8rem',
                           }}
                         />
                       </ListItemButton>
@@ -664,7 +664,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                           primaryTypographyProps={{
                             fontWeight: 500,
                             color: 'text.primary',
-                            fontSize: '0.875rem',
+                            fontSize: '0.8rem',
                           }}
                         />
                       </ListItemButton>
@@ -692,7 +692,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                           primaryTypographyProps={{
                             fontWeight: 500,
                             color: 'text.primary',
-                            fontSize: '0.875rem',
+                            fontSize: '0.8rem',
                           }}
                         />
                       </ListItemButton>
@@ -720,7 +720,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                           primaryTypographyProps={{
                             fontWeight: 500,
                             color: 'text.primary',
-                            fontSize: '0.875rem',
+                            fontSize: '0.8rem',
                           }}
                         />
                       </ListItemButton>
@@ -748,7 +748,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                           primaryTypographyProps={{
                             fontWeight: 500,
                             color: 'text.primary',
-                            fontSize: '0.875rem',
+                            fontSize: '0.8rem',
                           }}
                         />
                       </ListItemButton>
@@ -776,7 +776,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                           primaryTypographyProps={{
                             fontWeight: 500,
                             color: 'text.primary',
-                            fontSize: '0.875rem',
+                            fontSize: '0.8rem',
                           }}
                         />
                       </ListItemButton>
@@ -808,7 +808,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                           primaryTypographyProps={{
                             fontWeight: 500,
                             color: 'text.primary',
-                            fontSize: '0.875rem',
+                            fontSize: '0.8rem',
                           }}
                         />
                       </ListItemButton>
@@ -839,7 +839,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                         primaryTypographyProps={{
                           fontWeight: 500,
                           color: 'text.primary',
-                          fontSize: '0.875rem',
+                          fontSize: '0.8rem',
                         }}
                       />
                     </ListItemButton>
@@ -863,7 +863,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                         primaryTypographyProps={{
                           fontWeight: 500,
                           color: 'text.primary',
-                          fontSize: '0.875rem',
+                          fontSize: '0.8rem',
                         }}
                       />
                     </ListItemButton>

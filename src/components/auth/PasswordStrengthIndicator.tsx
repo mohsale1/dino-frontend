@@ -89,9 +89,9 @@ const PasswordStrengthIndicator: React.FC<PasswordStrengthIndicatorProps> = ({
   }
 
   return (
-    <Box sx={{ mt: 2 }}>
+    <Box sx={{ mt: 1 }}>
       {/* Strength Indicator */}
-      <Box sx={{ mb: 2 }}>
+      <Box sx={{ mb: 1 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
           <Typography variant="body2" color="text.secondary">
             Password Strength:

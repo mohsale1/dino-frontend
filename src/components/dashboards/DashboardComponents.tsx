@@ -41,7 +41,7 @@ export const StatsCard: React.FC<StatsCardProps> = ({
     <Card
       sx={{
         p: { xs: 2.5, sm: 3 },
-        borderRadius: 2,
+        borderRadius: 1,
         backgroundColor: `${color}08`,
         border: `1px solid ${color}33`,
         transition: 'all 0.3s ease',
@@ -52,13 +52,13 @@ export const StatsCard: React.FC<StatsCardProps> = ({
         },
       }}
     >
-      <Stack direction="row" alignItems="center" spacing={2}>
+      <Stack direction="row" alignItems="center" spacing={1}>
         {/* Icon */}
         <Box
           sx={{
             width: { xs: 40, sm: 48 },
             height: { xs: 40, sm: 48 },
-            borderRadius: 2,
+            borderRadius: 1,
             backgroundColor: color,
             display: 'flex',
             alignItems: 'center',
@@ -91,7 +91,7 @@ export const StatsCard: React.FC<StatsCardProps> = ({
             color="text.secondary"
             fontWeight="600"
             sx={{ 
-              fontSize: { xs: '0.75rem', sm: '0.875rem' },
+              fontSize: { xs: '0.75rem', sm: '0.8rem' },
               lineHeight: 1.2,
               display: '-webkit-box',
               WebkitLineClamp: 2,
@@ -119,11 +119,11 @@ export const StatsCard: React.FC<StatsCardProps> = ({
               value={progress} 
               sx={{ 
                 height: 4,
-                borderRadius: 2,
+                borderRadius: 1,
                 backgroundColor: 'rgba(255,255,255,0.3)',
                 mt: 1,
                 '& .MuiLinearProgress-bar': {
-                  borderRadius: 2,
+                  borderRadius: 1,
                   backgroundColor: color
                 }
               }}
@@ -163,14 +163,14 @@ export const ChartCard: React.FC<ChartCardProps> = ({
       }} 
       data-tour={tourId}
     >
-      <CardContent sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <CardContent sx={{ p: 1.5, height: '100%', display: 'flex', flexDirection: 'column' }}>
         <Box sx={{ 
           display: 'flex', 
           alignItems: 'center', 
           justifyContent: 'space-between',
-          mb: 3
+          mb: 1
         }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             {React.cloneElement(icon, {
               sx: { 
                 fontSize: '1rem',
@@ -180,7 +180,7 @@ export const ChartCard: React.FC<ChartCardProps> = ({
             <Typography 
               variant="h6" 
               sx={{ 
-                fontSize: '1.125rem',
+                fontSize: '0.95rem',
                 fontWeight: 600,
                 color: 'text.primary'
               }}
@@ -213,8 +213,8 @@ export const SectionHeader: React.FC<SectionHeaderProps> = ({
   subtitle,
 }) => {
   return (
-    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
         {React.cloneElement(icon, {
           sx: { 
             fontSize: '1rem',
@@ -225,7 +225,7 @@ export const SectionHeader: React.FC<SectionHeaderProps> = ({
           <Typography 
             variant="h6"
             sx={{ 
-              fontSize: '1.125rem',
+              fontSize: '0.95rem',
               fontWeight: 600,
               color: 'text.primary'
             }}
@@ -264,12 +264,12 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
       flexDirection: 'column', 
       alignItems: 'center', 
       justifyContent: 'center',
-      gap: 2,
+      gap: 1,
       py: 4,
       textAlign: 'center'
     }}>
       {React.cloneElement(icon, { 
-        sx: { fontSize: 14, color: 'text.disabled' } 
+        sx: { fontSize: 12, color: 'text.disabled' } 
       })}
       <Typography variant="body1" color="text.secondary" fontWeight={500}>
         {title}
@@ -322,8 +322,8 @@ export const DashboardHero: React.FC<DashboardHeroProps> = ({
             flexDirection: { xs: 'column', md: 'row' },
             justifyContent: 'space-between',
             alignItems: { xs: 'flex-start', md: 'center' },
-            gap: { xs: 2, md: 3 },
-            py: { xs: 3, sm: 4 },
+            gap: { xs: 1, md: 1.5 },
+            py: { xs: 1, sm: 4 },
             px: { xs: 3, sm: 4 },
           }}
         >
@@ -348,7 +348,7 @@ export const DashboardHero: React.FC<DashboardHeroProps> = ({
             <Typography
               variant="body1"
               sx={{
-                fontSize: { xs: '0.875rem', sm: '1rem' },
+                fontSize: { xs: '0.8rem', sm: '1rem' },
                 fontWeight: 400,
                 mb: 1,
                 maxWidth: '500px',
@@ -364,14 +364,14 @@ export const DashboardHero: React.FC<DashboardHeroProps> = ({
                 alignItems: 'center',
                 backgroundColor: 'rgba(255, 255, 255, 0.9)',
                 backdropFilter: 'blur(10px)',
-                px: 2,
+                px: 1,
                 py: 1,
-                borderRadius: 2,
+                borderRadius: 1,
                 border: '1px solid rgba(0, 0, 0, 0.1)',
               }}
             >
               {React.cloneElement(badge.icon, {
-                sx: { fontSize: 14, mr: 1, color: 'primary.main', opacity: 0.9 }
+                sx: { fontSize: 12, mr: 1, color: 'primary.main', opacity: 0.9 }
               })}
               <Typography variant="body2" fontWeight="500" color="text.primary">
                 {badge.text}
@@ -384,7 +384,7 @@ export const DashboardHero: React.FC<DashboardHeroProps> = ({
             <Box
               sx={{
                 display: 'flex',
-                gap: 1.5,
+                gap: 1,
                 flexDirection: { xs: 'row', sm: 'row' },
                 flexWrap: 'wrap',
                 alignItems: 'center',

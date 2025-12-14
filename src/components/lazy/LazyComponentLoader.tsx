@@ -117,8 +117,8 @@ const DefaultErrorFallback: React.FC<{ error: Error; retry: () => void }> = ({
 
 export const PageSkeleton: React.FC = () => (
   <Box p={0}>
-    <Skeleton variant="text" width="40%" height={40} sx={{ mb: 2 }} />
-    <Skeleton variant="text" width="60%" height={20} sx={{ mb: 3 }} />
+    <Skeleton variant="text" width="40%" height={40} sx={{ mb: 1 }} />
+    <Skeleton variant="text" width="60%" height={20} sx={{ mb: 1 }} />
     <Box display="flex" gap={2} mb={3}>
       <Skeleton variant="rectangular" width={120} height={36} />
       <Skeleton variant="rectangular" width={100} height={36} />
@@ -130,8 +130,8 @@ export const PageSkeleton: React.FC = () => (
 export const CardSkeleton: React.FC = () => (
   <Box p={2}>
     <Skeleton variant="text" width="80%" height={24} sx={{ mb: 1 }} />
-    <Skeleton variant="text" width="60%" height={20} sx={{ mb: 2 }} />
-    <Skeleton variant="rectangular" width="100%" height={200} sx={{ mb: 2 }} />
+    <Skeleton variant="text" width="60%" height={20} sx={{ mb: 1 }} />
+    <Skeleton variant="rectangular" width="100%" height={200} sx={{ mb: 1 }} />
     <Box display="flex" gap={1}>
       <Skeleton variant="rectangular" width={60} height={24} />
       <Skeleton variant="rectangular" width={80} height={24} />
@@ -156,7 +156,7 @@ export const ListSkeleton: React.FC = () => (
 
 export const DashboardSkeleton: React.FC = () => (
   <Box p={3}>
-    <Skeleton variant="text" width="30%" height={32} sx={{ mb: 3 }} />
+    <Skeleton variant="text" width="30%" height={32} sx={{ mb: 1 }} />
     <Box display="grid" gridTemplateColumns="repeat(auto-fit, minmax(250px, 1fr))" gap={3} mb={4}>
       {[1, 2, 3, 4].map((i) => (
         <Box key={i} p={2} border="1px solid #eee" borderRadius={2}>

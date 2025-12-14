@@ -1745,8 +1745,8 @@ const QRCodeViewer: React.FC<QRCodeViewerProps> = ({
         sx: { borderRadius: 3, maxHeight: '90vh' }
       }}
     >
-      <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pb: 2 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+      <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pb: 1 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <QrCode color="primary" />
           <Typography variant="h5" fontWeight="bold">
             QR Code Manager
@@ -1759,7 +1759,7 @@ const QRCodeViewer: React.FC<QRCodeViewerProps> = ({
 
       <DialogContent sx={{ pt: 1 }}>
         {error && (
-          <Alert severity="error" sx={{ mb: 3 }}>
+          <Alert severity="error" sx={{ mb: 1 }}>
             {error}
           </Alert>
         )}
@@ -1769,18 +1769,18 @@ const QRCodeViewer: React.FC<QRCodeViewerProps> = ({
             <CircularProgress />
           </Box>
         ) : qrData ? (
-          <Grid container spacing={3}>
+          <Grid container spacing={1}>
             {/* QR Code Display */}
             <Grid item xs={12} md={6}>
               <Paper
                 elevation={3}
                 sx={{
-                  p: 3,
+                  p: 1.5,
                   textAlign: 'center',
                   background: 'linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%)',
                   border: '2px solid',
                   borderColor: 'primary.main',
-                  borderRadius: 2,
+                  borderRadius: 1,
                 }}
               >
                 <Typography variant="h6" gutterBottom fontWeight="600" color="primary">
@@ -1795,14 +1795,14 @@ const QRCodeViewer: React.FC<QRCodeViewerProps> = ({
                     width: 200,
                     height: 200,
                     mx: 'auto',
-                    mb: 2,
+                    mb: 1,
                     backgroundColor: 'white',
                     border: '1px solid #ddd',
-                    borderRadius: 2,
+                    borderRadius: 1,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    p: 2,
+                    p: 1,
                   }}
                 >
                   <img
@@ -1812,7 +1812,7 @@ const QRCodeViewer: React.FC<QRCodeViewerProps> = ({
                   />
                 </Box>
 
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
                   Scan to view menu & order
                 </Typography>
 
@@ -1843,12 +1843,12 @@ const QRCodeViewer: React.FC<QRCodeViewerProps> = ({
 
             {/* Controls and Info */}
             <Grid item xs={12} md={6}>
-              <Box sx={{ mb: 3 }}>
+              <Box sx={{ mb: 1 }}>
                 <Typography variant="h6" gutterBottom fontWeight="600">
                   Print Settings
                 </Typography>
                 
-                <FormControl fullWidth sx={{ mb: 2 }}>
+                <FormControl fullWidth sx={{ mb: 1 }}>
                   <InputLabel>Template Style</InputLabel>
                   <Select
                     value={template}
@@ -1883,7 +1883,7 @@ const QRCodeViewer: React.FC<QRCodeViewerProps> = ({
 
               <Divider sx={{ my: 2 }} />
 
-              <Box sx={{ mb: 3 }}>
+              <Box sx={{ mb: 1 }}>
                 <Typography variant="h6" gutterBottom fontWeight="600">
                   QR Code Details
                 </Typography>
@@ -1913,8 +1913,8 @@ const QRCodeViewer: React.FC<QRCodeViewerProps> = ({
               </Box>
 
               {showInstructions && (
-                <Card sx={{ mb: 2 }}>
-                  <CardContent sx={{ p: 2 }}>
+                <Card sx={{ mb: 1 }}>
+                  <CardContent sx={{ p: 1 }}>
                     <Typography variant="subtitle2" gutterBottom fontWeight="600">
                       How customers use this QR code:
                     </Typography>
@@ -1926,7 +1926,7 @@ const QRCodeViewer: React.FC<QRCodeViewerProps> = ({
                         { icon: <TableRestaurant />, text: 'Browse and order!' },
                       ].map((step, index) => (
                         <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <Box sx={{ color: 'primary.main', fontSize: 14 }}>{step.icon}</Box>
+                          <Box sx={{ color: 'primary.main', fontSize: 12 }}>{step.icon}</Box>
                           <Typography variant="body2" color="text.secondary">
                             {index + 1}. {step.text}
                           </Typography>
@@ -1940,7 +1940,7 @@ const QRCodeViewer: React.FC<QRCodeViewerProps> = ({
           </Grid>
         ) : (
           <Box sx={{ textAlign: 'center', py: 4 }}>
-            <QrCode sx={{ fontSize: 80, color: 'text.secondary', mb: 2 }} />
+            <QrCode sx={{ fontSize: 80, color: 'text.secondary', mb: 1 }} />
             <Typography variant="h6" color="text.secondary" gutterBottom>
               No QR Code Data
             </Typography>
@@ -1951,7 +1951,7 @@ const QRCodeViewer: React.FC<QRCodeViewerProps> = ({
         )}
       </DialogContent>
 
-      <DialogActions sx={{ p: 3, pt: 1 }}>
+      <DialogActions sx={{ p: 1.5, pt: 1 }}>
         {qrData && (
           <>
             <Button

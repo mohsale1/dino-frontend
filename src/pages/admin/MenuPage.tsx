@@ -38,7 +38,7 @@ const MenuPage: React.FC = () => {
       <Typography variant="h6" color="text.secondary" gutterBottom>
         Current Theme: <span style={{ textTransform: 'capitalize', color: '#1976d2' }}>{theme}</span>
       </Typography>
-      <Typography variant="body1" color="text.secondary" sx={{ mt: 2 }}>
+      <Typography variant="body1" color="text.secondary" sx={{ mt: 1 }}>
         This page is under development. Please use the Menu Management section in the admin dashboard.
       </Typography>
     </Container>

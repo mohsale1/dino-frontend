@@ -141,27 +141,27 @@ const MenuPage: React.FC = () => {
             maxWidth: { xs: '100%', sm: 480 },
             p: { xs: 2, sm: 3 },
             textAlign: 'center',
-            borderRadius: 2,
+            borderRadius: 1,
             background: theme.palette.background.paper,
             boxShadow: theme.shadows[24],
           }}
         >
-          <Box sx={{ mb: 3 }}>
+          <Box sx={{ mb: 1 }}>
             <Avatar
               sx={{
                 width: { xs: 56, sm: 64 },
                 height: { xs: 56, sm: 64 },
                 background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
                 mx: 'auto',
-                mb: 2,
+                mb: 1,
               }}
             >
               <Restaurant sx={{ fontSize: { xs: 28, sm: 32 } }} />
             </Avatar>
-            <Typography variant="h5" fontWeight="600" sx={{ mb: 2, fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>
+            <Typography variant="h5" fontWeight="600" sx={{ mb: 1, fontSize: { xs: '1.25rem', sm: '1.25rem' } }}>
               Mobile Ordering Experience
             </Typography>
-            <Typography variant="body1" color="text.secondary" sx={{ mb: 3, lineHeight: 1.6 }}>
+            <Typography variant="body1" color="text.secondary" sx={{ mb: 1, lineHeight: 1.6 }}>
               Our menu is optimized for mobile devices to provide the best ordering experience. 
               Please use your smartphone or tablet to browse and order.
             </Typography>
@@ -172,16 +172,16 @@ const MenuPage: React.FC = () => {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: 2,
-              p: 2,
+              gap: 1,
+              p: 1,
               backgroundColor: alpha(theme.palette.primary.main, 0.08),
-              borderRadius: 2,
-              mb: 3,
+              borderRadius: 1,
+              mb: 1,
             }}
           >
             <Box
               sx={{
-                width: 28,
+                width: 22,
                 height: 42,
                 borderRadius: 1,
                 border: `2px solid ${theme.palette.primary.main}`,
@@ -205,7 +205,7 @@ const MenuPage: React.FC = () => {
             </Typography>
           </Box>
 
-          <Stack spacing={1} sx={{ textAlign: 'left', mb: 3 }}>
+          <Stack spacing={1} sx={{ textAlign: 'left', mb: 1 }}>
             <Typography variant="body2" color="text.secondary">
               • Faster ordering process
             </Typography>
@@ -534,7 +534,7 @@ const EnhancedMenuItemCard: React.FC<{
         }}>
           {item.isNew && (
             <Chip
-              icon={<NewReleases sx={{ fontSize: 14 }} />}
+              icon={<NewReleases sx={{ fontSize: 12 }} />}
               label="New"
               size="small"
               sx={{ 
@@ -549,7 +549,7 @@ const EnhancedMenuItemCard: React.FC<{
           )}
           {item.isPopular && (
             <Chip
-              icon={<Whatshot sx={{ fontSize: 14 }} />}
+              icon={<Whatshot sx={{ fontSize: 12 }} />}
               label="Popular"
               size="small"
               sx={{ 
@@ -564,7 +564,7 @@ const EnhancedMenuItemCard: React.FC<{
           )}
           {item.discount && (
             <Chip
-              icon={<LocalOffer sx={{ fontSize: 14 }} />}
+              icon={<LocalOffer sx={{ fontSize: 12 }} />}
               label={`${item.discount}% OFF`}
               size="small"
               sx={{ 
@@ -593,19 +593,19 @@ const EnhancedMenuItemCard: React.FC<{
               backgroundColor: theme.palette.background.paper,
               transform: 'scale(1.1)',
             },
-            width: 36,
-            height: 36,
+            width: 22,
+            height: 22,
           }}
         >
           {isFavorite ? (
             <Favorite sx={{ 
               color: theme.palette.error.main, 
-              fontSize: 14 
+              fontSize: 12 
             }} />
           ) : (
             <FavoriteBorder sx={{ 
               color: 'text.secondary', 
-              fontSize: 14 
+              fontSize: 12 
             }} />
           )}
         </IconButton>
@@ -618,17 +618,17 @@ const EnhancedMenuItemCard: React.FC<{
             left: 12,
             backgroundColor: alpha(theme.palette.common.black, 0.8),
             color: 'white',
-            px: 1.5,
+            px: 1,
             py: 0.75,
-            borderRadius: 2,
+            borderRadius: 1,
             display: 'flex',
             alignItems: 'center',
             gap: 0.5,
             backdropFilter: 'blur(8px)',
           }}
         >
-          <Timer sx={{ fontSize: 14 }} />
-          <Typography variant="caption" fontWeight="600" sx={{ fontSize: '0.75rem' }}>
+          <Timer sx={{ fontSize: 12 }} />
+          <Typography variant="caption" fontWeight="600" sx={{ fontSize: '0.7rem' }}>
             {item.preparationTime} min
           </Typography>
         </Box>
@@ -639,11 +639,11 @@ const EnhancedMenuItemCard: React.FC<{
         flex: 1, 
         display: 'flex', 
         flexDirection: 'column', 
-        p: { xs: 2, sm: 2.5 },
+        p: { xs: 2, sm: 1.5 },
         backgroundColor: 'background.paper'
       }}>
         {/* Header with Veg/Non-Veg and Name */}
-        <Box sx={{ mb: 1.5 }}>
+        <Box sx={{ mb: 1 }}>
           <Stack direction="row" spacing={1} alignItems="flex-start" sx={{ mb: 1 }}>
             <VegNonVegIcon isVeg={item.isVeg || false} />
             <Typography 
@@ -676,7 +676,7 @@ const EnhancedMenuItemCard: React.FC<{
         </Box>
 
         {/* Price Section */}
-        <Box sx={{ mb: 1.5 }}>
+        <Box sx={{ mb: 1 }}>
           <Stack direction="row" alignItems="center" spacing={1}>
             <Typography variant="h5" fontWeight="700" color="primary.main">
               ₹{item.price}
@@ -701,7 +701,7 @@ const EnhancedMenuItemCard: React.FC<{
           variant="body2" 
           color="text.secondary" 
           sx={{ 
-            mb: 2,
+            mb: 1,
             lineHeight: 1.5,
             fontSize: '0.85rem',
             display: '-webkit-box',
@@ -716,18 +716,18 @@ const EnhancedMenuItemCard: React.FC<{
 
         {/* Spicy Level */}
         {item.spicyLevel && item.spicyLevel > 0 && (
-          <Box sx={{ mb: 2 }}>
+          <Box sx={{ mb: 1 }}>
             <Stack direction="row" alignItems="center" spacing={0.5}>
               {[...Array(Math.min(item.spicyLevel, 3))].map((_, i) => (
                 <LocalFireDepartment 
                   key={i} 
                   sx={{ 
-                    fontSize: 14, 
+                    fontSize: 12, 
                     color: item.spicyLevel === 1 ? '#FFA726' : item.spicyLevel === 2 ? '#FF7043' : '#F44336',
                   }} 
                 />
               ))}
-              <Typography variant="caption" color="text.secondary" sx={{ ml: 0.5, fontSize: '0.75rem', fontWeight: 500 }}>
+              <Typography variant="caption" color="text.secondary" sx={{ ml: 0.5, fontSize: '0.7rem', fontWeight: 500 }}>
                 {item.spicyLevel === 1 ? 'Mild' : item.spicyLevel === 2 ? 'Medium' : 'Hot'}
               </Typography>
             </Stack>
@@ -742,10 +742,10 @@ const EnhancedMenuItemCard: React.FC<{
               variant="contained"
               onClick={() => onAddToCart(item)}
               sx={{
-                py: 1.5,
+                py: 1,
                 fontWeight: 700,
                 textTransform: 'none',
-                borderRadius: 2,
+                borderRadius: 1,
                 fontSize: '0.9rem',
                 boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
                 '&:hover': {
@@ -763,7 +763,7 @@ const EnhancedMenuItemCard: React.FC<{
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 backgroundColor: alpha(theme.palette.primary.main, 0.1),
-                borderRadius: 2,
+                borderRadius: 1,
                 p: 1.5,
                 border: `2px solid ${theme.palette.primary.main}`,
               }}

@@ -56,9 +56,9 @@ const MenuTemplateSelector: React.FC<MenuTemplateSelectorProps> = ({
   };
 
   const categoryIcons = {
-    professional: <Star sx={{ fontSize: 14 }} />,
-    creative: <TrendingUp sx={{ fontSize: 14 }} />,
-    themed: <CheckCircle sx={{ fontSize: 14 }} />,
+    professional: <Star sx={{ fontSize: 12 }} />,
+    creative: <TrendingUp sx={{ fontSize: 12 }} />,
+    themed: <CheckCircle sx={{ fontSize: 12 }} />,
   };
 
   return (
@@ -81,8 +81,8 @@ const MenuTemplateSelector: React.FC<MenuTemplateSelectorProps> = ({
             sx={{
               display: 'flex',
               alignItems: 'center',
-              gap: 1.5,
-              mb: 3,
+              gap: 1,
+              mb: 1,
               pb: 1.5,
               borderBottom: `2px solid ${alpha(theme.palette.primary.main, 0.2)}`,
             }}
@@ -92,9 +92,9 @@ const MenuTemplateSelector: React.FC<MenuTemplateSelectorProps> = ({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                width: 36,
-                height: 36,
-                borderRadius: 2,
+                width: 22,
+                height: 22,
+                borderRadius: 1,
                 backgroundColor: alpha(theme.palette.primary.main, 0.1),
                 color: 'primary.main',
               }}
@@ -117,7 +117,7 @@ const MenuTemplateSelector: React.FC<MenuTemplateSelectorProps> = ({
           </Box>
 
           {/* Template Grid */}
-          <Grid container spacing={3}>
+          <Grid container spacing={1}>
             {templates.map((template) => {
               const isSelected = selectedTemplate === template.key;
               const isHovered = hoveredTemplate === template.key;
@@ -170,7 +170,7 @@ const MenuTemplateSelector: React.FC<MenuTemplateSelectorProps> = ({
                               boxShadow: theme.shadows[4],
                             }}
                           >
-                            <CheckCircle sx={{ fontSize: 14 }} />
+                            <CheckCircle sx={{ fontSize: 12 }} />
                           </Box>
                         </Fade>
                       )}
@@ -211,7 +211,7 @@ const MenuTemplateSelector: React.FC<MenuTemplateSelectorProps> = ({
                       </Box>
 
                       {/* Template Info */}
-                      <CardContent sx={{ p: 2.5 }}>
+                      <CardContent sx={{ p: 1.5 }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                           <Typography variant="h6" fontWeight="700" sx={{ flex: 1 }}>
                             {template.name}
@@ -222,7 +222,7 @@ const MenuTemplateSelector: React.FC<MenuTemplateSelectorProps> = ({
                             sx={{
                               p: 0,
                               '& .MuiSvgIcon-root': {
-                                fontSize: 14,
+                                fontSize: 12,
                               },
                             }}
                           />
@@ -244,7 +244,7 @@ const MenuTemplateSelector: React.FC<MenuTemplateSelectorProps> = ({
                         </Typography>
 
                         {/* Category Badge */}
-                        <Box sx={{ mt: 2 }}>
+                        <Box sx={{ mt: 1 }}>
                           <Chip
                             label={template.category}
                             size="small"
@@ -276,7 +276,7 @@ const MenuTemplateSelector: React.FC<MenuTemplateSelectorProps> = ({
           bottom: 0,
           left: 0,
           right: 0,
-          p: 3,
+          p: 1.5,
           mt: 4,
           backgroundColor: alpha(theme.palette.background.paper, 0.98),
           backdropFilter: 'blur(10px)',
@@ -289,7 +289,7 @@ const MenuTemplateSelector: React.FC<MenuTemplateSelectorProps> = ({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            gap: 2,
+            gap: 1,
           }}
         >
           <Box>
@@ -308,10 +308,10 @@ const MenuTemplateSelector: React.FC<MenuTemplateSelectorProps> = ({
             disabled={saving || !selectedTemplate}
             sx={{
               px: 4,
-              py: 1.5,
+              py: 1,
               fontWeight: 600,
               fontSize: '1rem',
-              borderRadius: 2,
+              borderRadius: 1,
               boxShadow: theme.shadows[4],
               '&:hover': {
                 boxShadow: theme.shadows[8],

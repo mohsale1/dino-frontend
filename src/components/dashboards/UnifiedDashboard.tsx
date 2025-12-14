@@ -405,7 +405,7 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({ className }) => {
   
   if (false && error) { // Disabled blocking UI
     return (
-      <Alert severity="error" sx={{ mb: 3 }}>
+      <Alert severity="error" sx={{ mb: 1 }}>
         {error}
         <Button onClick={refreshDashboard} sx={{ ml: 2 }}>
           Retry
@@ -452,11 +452,11 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({ className }) => {
 
         {/* Error Alert */}
         {error && (
-          <Box sx={{ px: { xs: 2, sm: 2.5 }, pt: 2, pb: 1 }}>
+          <Box sx={{ px: { xs: 1, sm: 1.5 }, pt: 1, pb: 1 }}>
             <Alert 
               severity="error" 
               onClose={() => setError(null)}
-              sx={{ fontSize: '0.875rem' }}
+              sx={{ fontSize: '0.8rem' }}
             >
               {error}
             </Alert>
@@ -472,14 +472,14 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({ className }) => {
           }}
         >
           {/* Dashboard Content Container */}
-          <Box sx={{ px: { xs: 2, sm: 2.5 }, py: 2, pb: { xs: 4, sm: 6 } }}>
+          <Box sx={{ px: { xs: 1, sm: 1.5 }, py: 1, pb: { xs: 4, sm: 6 } }}>
             
             {/* Dashboard Tour */}
             <DashboardTour />
 
             {/* Date Range Picker - Only for SuperAdmin and Admin */}
             {(isSuperAdmin || isAdmin) && (
-              <Box sx={{ mb: 2.5 }}>
+              <Box sx={{ mb: 1 }}>
                 <DateRangePicker
                   value={dateRange}
                   onChange={setDateRange}

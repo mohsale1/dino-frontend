@@ -26,7 +26,7 @@ interface ReviewStepProps {
 
 const ReviewStep: React.FC<ReviewStepProps> = ({ formData }) => {
   const InfoRow = ({ label, value, icon }: { label: string; value: string; icon?: React.ReactNode }) => (
-    <Box sx={{ mb: 2 }}>
+    <Box sx={{ mb: 1 }}>
       <Typography 
         variant="caption" 
         sx={{ 
@@ -74,25 +74,25 @@ const ReviewStep: React.FC<ReviewStepProps> = ({ formData }) => {
       <Paper 
         elevation={0}
         sx={{ 
-          p: 3,
-          mb: 3,
+          p: 1.5,
+          mb: 1,
           border: '1px solid',
           borderColor: 'divider',
-          borderRadius: 2,
+          borderRadius: 1,
           backgroundColor: 'background.paper'
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
-          <Business sx={{ color: 'primary.main', fontSize: 14 }} />
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+          <Business sx={{ color: 'primary.main', fontSize: 12 }} />
           <Typography variant="h6" sx={{ fontWeight: 600 }}>
             Workspace Details
           </Typography>
-          <CheckCircle sx={{ ml: 'auto', color: 'success.main', fontSize: 14 }} />
+          <CheckCircle sx={{ ml: 'auto', color: 'success.main', fontSize: 12 }} />
         </Box>
         
-        <Divider sx={{ mb: 3 }} />
+        <Divider sx={{ mb: 1 }} />
         
-        <Grid container spacing={3}>
+        <Grid container spacing={1}>
           <Grid item xs={12} sm={6}>
             <InfoRow 
               label="Workspace Name" 
@@ -115,25 +115,25 @@ const ReviewStep: React.FC<ReviewStepProps> = ({ formData }) => {
       <Paper 
         elevation={0}
         sx={{ 
-          p: 3,
-          mb: 3,
+          p: 1.5,
+          mb: 1,
           border: '1px solid',
           borderColor: 'divider',
-          borderRadius: 2,
+          borderRadius: 1,
           backgroundColor: 'background.paper'
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
-          <Store sx={{ color: 'primary.main', fontSize: 14 }} />
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+          <Store sx={{ color: 'primary.main', fontSize: 12 }} />
           <Typography variant="h6" sx={{ fontWeight: 600 }}>
             Venue Information
           </Typography>
-          <CheckCircle sx={{ ml: 'auto', color: 'success.main', fontSize: 14 }} />
+          <CheckCircle sx={{ ml: 'auto', color: 'success.main', fontSize: 12 }} />
         </Box>
         
-        <Divider sx={{ mb: 3 }} />
+        <Divider sx={{ mb: 1 }} />
         
-        <Grid container spacing={3}>
+        <Grid container spacing={1}>
           <Grid item xs={12} sm={6}>
             <InfoRow 
               label="Venue Name" 
@@ -145,7 +145,7 @@ const ReviewStep: React.FC<ReviewStepProps> = ({ formData }) => {
             <InfoRow 
               label="Venue Type" 
               value={formData.venueType.charAt(0).toUpperCase() + formData.venueType.slice(1).replace('_', ' ')}
-              icon={<Category sx={{ fontSize: 14, color: 'text.secondary' }} />}
+              icon={<Category sx={{ fontSize: 12, color: 'text.secondary' }} />}
             />
           </Grid>
           
@@ -153,7 +153,7 @@ const ReviewStep: React.FC<ReviewStepProps> = ({ formData }) => {
             <InfoRow 
               label="Price Range" 
               value={priceRangeOptions.find(p => p.value === formData.priceRange)?.label || formData.priceRange}
-              icon={<AttachMoney sx={{ fontSize: 14, color: 'text.secondary' }} />}
+              icon={<AttachMoney sx={{ fontSize: 12, color: 'text.secondary' }} />}
             />
           </Grid>
           
@@ -161,7 +161,7 @@ const ReviewStep: React.FC<ReviewStepProps> = ({ formData }) => {
             <InfoRow 
               label="Phone" 
               value={formData.venuePhone}
-              icon={<Phone sx={{ fontSize: 14, color: 'text.secondary' }} />}
+              icon={<Phone sx={{ fontSize: 12, color: 'text.secondary' }} />}
             />
           </Grid>
           
@@ -169,12 +169,12 @@ const ReviewStep: React.FC<ReviewStepProps> = ({ formData }) => {
             <InfoRow 
               label="Email" 
               value={formData.venueEmail}
-              icon={<Email sx={{ fontSize: 14, color: 'text.secondary' }} />}
+              icon={<Email sx={{ fontSize: 12, color: 'text.secondary' }} />}
             />
           </Grid>
           
           <Grid item xs={12} sm={6}>
-            <Box sx={{ mb: 2 }}>
+            <Box sx={{ mb: 1 }}>
               <Typography 
                 variant="caption" 
                 sx={{ 
@@ -188,19 +188,19 @@ const ReviewStep: React.FC<ReviewStepProps> = ({ formData }) => {
                 Address
               </Typography>
               <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mt: 0.5 }}>
-                <Place sx={{ fontSize: 14, color: 'text.secondary', mt: 0.2 }} />
+                <Place sx={{ fontSize: 12, color: 'text.secondary', mt: 0.2 }} />
                 <Box>
                   <Typography variant="body2" sx={{ fontWeight: 500, color: 'text.primary' }}>
                     {formData.venueLocation.address}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem' }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.8rem' }}>
                     {formData.venueLocation.city}, {formData.venueLocation.state} {formData.venueLocation.postal_code}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem' }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.8rem' }}>
                     {formData.venueLocation.country}
                   </Typography>
                   {formData.venueLocation.landmark && (
-                    <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem', fontStyle: 'italic' }}>
+                    <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.8rem', fontStyle: 'italic' }}>
                       Near {formData.venueLocation.landmark}
                     </Typography>
                   )}
@@ -224,16 +224,16 @@ const ReviewStep: React.FC<ReviewStepProps> = ({ formData }) => {
       <Paper 
         elevation={0}
         sx={{ 
-          p: 3,
-          mb: 3,
+          p: 1.5,
+          mb: 1,
           border: '1px solid',
           borderColor: 'divider',
-          borderRadius: 2,
+          borderRadius: 1,
           backgroundColor: 'background.paper'
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
-          <Person sx={{ color: 'primary.main', fontSize: 14 }} />
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+          <Person sx={{ color: 'primary.main', fontSize: 12 }} />
           <Typography variant="h6" sx={{ fontWeight: 600 }}>
             Owner Account
           </Typography>
@@ -243,12 +243,12 @@ const ReviewStep: React.FC<ReviewStepProps> = ({ formData }) => {
             color="primary" 
             sx={{ ml: 'auto', fontWeight: 600, fontSize: '0.7rem' }}
           />
-          <CheckCircle sx={{ color: 'success.main', fontSize: 14 }} />
+          <CheckCircle sx={{ color: 'success.main', fontSize: 12 }} />
         </Box>
         
-        <Divider sx={{ mb: 3 }} />
+        <Divider sx={{ mb: 1 }} />
         
-        <Grid container spacing={3}>
+        <Grid container spacing={1}>
           <Grid item xs={12} sm={6}>
             <InfoRow 
               label="Full Name" 
@@ -260,7 +260,7 @@ const ReviewStep: React.FC<ReviewStepProps> = ({ formData }) => {
             <InfoRow 
               label="Email" 
               value={formData.ownerEmail}
-              icon={<Email sx={{ fontSize: 14, color: 'text.secondary' }} />}
+              icon={<Email sx={{ fontSize: 12, color: 'text.secondary' }} />}
             />
           </Grid>
           
@@ -268,7 +268,7 @@ const ReviewStep: React.FC<ReviewStepProps> = ({ formData }) => {
             <InfoRow 
               label="Phone" 
               value={formData.ownerPhone}
-              icon={<Phone sx={{ fontSize: 14, color: 'text.secondary' }} />}
+              icon={<Phone sx={{ fontSize: 12, color: 'text.secondary' }} />}
             />
           </Grid>
         </Grid>
@@ -277,8 +277,8 @@ const ReviewStep: React.FC<ReviewStepProps> = ({ formData }) => {
       {/* Info Box */}
       <Box 
         sx={{ 
-          p: 2.5,
-          borderRadius: 2,
+          p: 1.5,
+          borderRadius: 1,
           backgroundColor: 'primary.50',
           border: '1px solid',
           borderColor: 'primary.200',

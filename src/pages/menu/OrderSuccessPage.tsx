@@ -150,8 +150,8 @@ const OrderSuccessPage: React.FC = () => {
           showCart={false}
         />
         <Container maxWidth="md" sx={{ 
-          py: { xs: 2, md: 4 }, 
-          px: { xs: 1.5, sm: 2 },
+          py: { xs: 1, md: 1 }, 
+          px: { xs: 1, sm: 1 },
           flex: 1, 
           display: 'flex', 
           alignItems: 'center' 
@@ -163,7 +163,7 @@ const OrderSuccessPage: React.FC = () => {
             borderRadius: 3,
             boxShadow: theme.shadows[8],
           }}>
-            <CircularProgress size={60} sx={{ mb: 3 }} />
+            <CircularProgress size={60} sx={{ mb: 1 }} />
             <Typography variant="h5" gutterBottom>
               Loading Order Details...
             </Typography>
@@ -192,8 +192,8 @@ const OrderSuccessPage: React.FC = () => {
       />
 
       <Container maxWidth="md" sx={{ 
-        py: { xs: 2, md: 4 }, 
-        px: { xs: 1.5, sm: 2 },
+        py: { xs: 1, md: 1 }, 
+        px: { xs: 1, sm: 1 },
         flex: 1, 
         display: 'flex', 
         alignItems: 'center' 
@@ -209,14 +209,14 @@ const OrderSuccessPage: React.FC = () => {
           background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)',
         }}>
           {/* Success Icon */}
-          <Box sx={{ mb: 3 }}>
+          <Box sx={{ mb: 1 }}>
             <Avatar
               sx={{
                 width: { xs: 80, sm: 100 },
                 height: { xs: 80, sm: 100 },
                 backgroundColor: 'success.main',
                 mx: 'auto',
-                mb: 2,
+                mb: 1,
                 boxShadow: '0 8px 32px rgba(76, 175, 80, 0.3)',
               }}
             >
@@ -245,7 +245,7 @@ const OrderSuccessPage: React.FC = () => {
             variant="h6" 
             color="text.secondary" 
             sx={{ 
-              mb: 3,
+              mb: 1,
               fontSize: { xs: '1rem', sm: '1.25rem' },
               fontWeight: 500
             }}
@@ -258,9 +258,9 @@ const OrderSuccessPage: React.FC = () => {
             mb: 4, 
             backgroundColor: alpha(theme.palette.primary.main, 0.05),
             border: `2px solid ${alpha(theme.palette.primary.main, 0.1)}`,
-            borderRadius: 2
+            borderRadius: 1
           }}>
-            <CardContent sx={{ py: 2 }}>
+            <CardContent sx={{ py: 1 }}>
               <Typography variant="body2" color="text.secondary" gutterBottom>
                 Order ID
               </Typography>
@@ -268,7 +268,7 @@ const OrderSuccessPage: React.FC = () => {
                 variant="h5" 
                 fontWeight="bold" 
                 color="primary.main"
-                sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem' } }}
+                sx={{ fontSize: { xs: '1.25rem', sm: '1.25rem' } }}
               >
                 #{orderData?.orderNumber || orderId}
               </Typography>
@@ -281,32 +281,32 @@ const OrderSuccessPage: React.FC = () => {
               mb: 4, 
               textAlign: 'left',
               backgroundColor: 'grey.50',
-              borderRadius: 2
+              borderRadius: 1
             }}>
               <CardContent>
-                <Typography variant="h6" gutterBottom fontWeight="600" sx={{ textAlign: 'center', mb: 2 }}>
+                <Typography variant="h6" gutterBottom fontWeight="600" sx={{ textAlign: 'center', mb: 1 }}>
                   Order Summary
                 </Typography>
                 
-                <Stack spacing={2}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <Person sx={{ color: 'text.secondary', fontSize: 14 }} />
+                <Stack spacing={1}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Person sx={{ color: 'text.secondary', fontSize: 12 }} />
                     <Box>
                       <Typography variant="body2" color="text.secondary">Customer</Typography>
                       <Typography variant="body1" fontWeight="500">{orderData.customerInfo.name}</Typography>
                     </Box>
                   </Box>
 
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <Phone sx={{ color: 'text.secondary', fontSize: 14 }} />
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Phone sx={{ color: 'text.secondary', fontSize: 12 }} />
                     <Box>
                       <Typography variant="body2" color="text.secondary">Phone</Typography>
                       <Typography variant="body1" fontWeight="500">{orderData.customerInfo.phone}</Typography>
                     </Box>
                   </Box>
 
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <LocationOn sx={{ color: 'text.secondary', fontSize: 14 }} />
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <LocationOn sx={{ color: 'text.secondary', fontSize: 12 }} />
                     <Box>
                       <Typography variant="body2" color="text.secondary">Table</Typography>
                       <Typography variant="body1" fontWeight="500">Table {orderData.tableId}</Typography>
@@ -314,8 +314,8 @@ const OrderSuccessPage: React.FC = () => {
                   </Box>
 
                   {orderData.createdAt && (
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                      <Schedule sx={{ color: 'text.secondary', fontSize: 14 }} />
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Schedule sx={{ color: 'text.secondary', fontSize: 12 }} />
                       <Box>
                         <Typography variant="body2" color="text.secondary">Order Time</Typography>
                         <Typography variant="body1" fontWeight="500">
@@ -326,11 +326,11 @@ const OrderSuccessPage: React.FC = () => {
                   )}
 
                   {orderData.status && (
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                      <CheckCircle sx={{ color: 'success.main', fontSize: 14 }} />
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <CheckCircle sx={{ color: 'success.main', fontSize: 12 }} />
                       <Box sx={{ flex: 1 }}>
                         <Typography variant="body2" color="text.secondary">Status</Typography>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 0.5 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
                           <Typography variant="body1" fontWeight="500" sx={{ textTransform: 'capitalize' }}>
                             {orderData.status}
                           </Typography>
@@ -375,7 +375,7 @@ const OrderSuccessPage: React.FC = () => {
                             justifyContent: 'space-between', 
                             alignItems: 'center',
                             py: 1,
-                            px: 2,
+                            px: 1,
                             backgroundColor: 'background.paper',
                             borderRadius: 1,
                             border: '1px solid',
@@ -459,13 +459,13 @@ const OrderSuccessPage: React.FC = () => {
           {/* Status Info */}
           <Box sx={{ 
             mb: 4, 
-            p: 3, 
+            p: 1.5, 
             backgroundColor: alpha(theme.palette.info.main, 0.05),
-            borderRadius: 2,
+            borderRadius: 1,
             border: `1px solid ${alpha(theme.palette.info.main, 0.2)}`
           }}>
-            <Stack direction="row" spacing={2} alignItems="center" justifyContent="center" sx={{ mb: 2 }}>
-              <Schedule sx={{ color: 'info.main', fontSize: 14 }} />
+            <Stack direction="row" spacing={1} alignItems="center" justifyContent="center" sx={{ mb: 1 }}>
+              <Schedule sx={{ color: 'info.main', fontSize: 12 }} />
               <Typography variant="h6" color="info.main" fontWeight="600">
                 Estimated Time: {orderData?.estimatedTime ? `${orderData.estimatedTime} minutes` : '25-30 minutes'}
               </Typography>
@@ -478,10 +478,10 @@ const OrderSuccessPage: React.FC = () => {
           {/* Action Buttons */}
           <Stack 
             direction={{ xs: 'column', sm: 'row' }}
-            spacing={2}
+            spacing={1}
             justifyContent="center"
             alignItems="center"
-            sx={{ mb: 3 }}
+            sx={{ mb: 1 }}
           >
             <Button
               variant="contained"
@@ -490,9 +490,9 @@ const OrderSuccessPage: React.FC = () => {
               size="large"
               sx={{
                 px: 4,
-                py: 1.5,
+                py: 1,
                 fontSize: '1rem',
-                borderRadius: 2,
+                borderRadius: 1,
                 width: { xs: '100%', sm: 'auto' },
                 boxShadow: '0 4px 12px rgba(25, 118, 210, 0.3)',
                 '&:hover': {
@@ -511,9 +511,9 @@ const OrderSuccessPage: React.FC = () => {
               size="large"
               sx={{
                 px: 4,
-                py: 1.5,
+                py: 1,
                 fontSize: '1rem',
-                borderRadius: 2,
+                borderRadius: 1,
                 width: { xs: '100%', sm: 'auto' }
               }}
             >
@@ -533,7 +533,7 @@ const OrderSuccessPage: React.FC = () => {
               onClick={handleShare}
               startIcon={<Share />}
               size="small"
-              sx={{ fontSize: '0.875rem' }}
+              sx={{ fontSize: '0.8rem' }}
             >
               Share Order
             </Button>
@@ -543,7 +543,7 @@ const OrderSuccessPage: React.FC = () => {
               onClick={handleGoHome}
               startIcon={<Home />}
               size="small"
-              sx={{ fontSize: '0.875rem' }}
+              sx={{ fontSize: '0.8rem' }}
             >
               Go Home
             </Button>
@@ -566,8 +566,8 @@ const OrderSuccessPage: React.FC = () => {
         sx={{ 
           flexShrink: 0,
           textAlign: 'center',
-          py: { xs: 2, lg: 3 },
-          px: { xs: 2, lg: 3 },
+          py: { xs: 1, lg: 3 },
+          px: { xs: 1, lg: 3 },
           borderTop: '1px solid',
           borderColor: 'divider',
           backgroundColor: 'background.paper',
@@ -577,7 +577,7 @@ const OrderSuccessPage: React.FC = () => {
           variant="body2" 
           color="text.secondary"
           sx={{ 
-            fontSize: { xs: '0.75rem', sm: '0.875rem' },
+            fontSize: { xs: '0.75rem', sm: '0.8rem' },
             fontWeight: 500 
           }}
         >

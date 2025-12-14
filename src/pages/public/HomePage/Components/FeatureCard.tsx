@@ -75,19 +75,19 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
         },
       }}
     >
-      <CardContent sx={{ p: 4 }}>
+      <CardContent sx={{ p: 1 }}>
         {/* Icon */}
         <Box
           className="feature-icon"
           sx={{
             width: 64,
             height: 64,
-            borderRadius: 2,
+            borderRadius: 1,
             backgroundColor: alpha(theme.palette.primary.main, 0.1),
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            mb: 3,
+            mb: 1,
             transition: 'all 0.3s ease',
           }}
         >
@@ -99,7 +99,7 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
           variant="h5"
           sx={{
             fontWeight: 700,
-            mb: 2,
+            mb: 1,
             fontSize: { xs: '1.25rem', md: '1.5rem' },
             color: 'text.primary',
           }}
@@ -112,7 +112,7 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
           variant="body1"
           sx={{
             color: 'text.secondary',
-            mb: 3,
+            mb: 1,
             lineHeight: 1.7,
             fontSize: { xs: '0.9375rem', md: '1rem' },
           }}
@@ -129,7 +129,7 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
             color: 'primary.main',
             fontWeight: 600,
             border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
-            fontSize: '0.8125rem',
+            fontSize: '0.7rem',
           }}
         />
       </CardContent>

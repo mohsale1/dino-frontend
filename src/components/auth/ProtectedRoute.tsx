@@ -33,7 +33,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
           alignItems: 'center',
           justifyContent: 'center',
           minHeight: '50vh',
-          gap: 2,
+          gap: 1,
         }}
       >
         <CircularProgress size={60} />

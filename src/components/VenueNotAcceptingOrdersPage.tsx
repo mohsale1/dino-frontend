@@ -85,8 +85,8 @@ const VenueNotAcceptingOrdersPage: React.FC<VenueNotAcceptingOrdersPageProps> = 
       maxWidth="md" 
       className={className}
       sx={{ 
-        py: { xs: 4, md: 8 },
-        px: { xs: 2, md: 3 },
+        py: { xs: 1, md: 8 },
+        px: { xs: 1, md: 1.5 },
         minHeight: '100vh',
         display: 'flex',
         alignItems: 'center',
@@ -104,10 +104,10 @@ const VenueNotAcceptingOrdersPage: React.FC<VenueNotAcceptingOrdersPageProps> = 
           overflow: 'hidden'
         }}
       >
-        <CardContent sx={{ p: { xs: 3, md: 4 } }}>
+        <CardContent sx={{ p: { xs: 3, md: 1 } }}>
           <Box sx={{ textAlign: 'center', mb: 4 }}>
             {/* Venue Avatar */}
-            <Box sx={{ mb: 3, display: 'flex', justifyContent: 'center' }}>
+            <Box sx={{ mb: 1, display: 'flex', justifyContent: 'center' }}>
               <Avatar
                 sx={{
                   width: { xs: 80, md: 100 },
@@ -122,7 +122,7 @@ const VenueNotAcceptingOrdersPage: React.FC<VenueNotAcceptingOrdersPageProps> = 
 
             {/* Venue Status Chip */}
             {venueStatus && (
-              <Box sx={{ mb: 2 }}>
+              <Box sx={{ mb: 1 }}>
                 <Chip
                   icon={<Info />}
                   label={getStatusText(venueStatus)}
@@ -143,9 +143,9 @@ const VenueNotAcceptingOrdersPage: React.FC<VenueNotAcceptingOrdersPageProps> = 
               color="text.primary"
               gutterBottom
               sx={{ 
-                fontSize: { xs: '1.5rem', md: '2rem' },
+                fontSize: { xs: '1.25rem', md: '2rem' },
                 lineHeight: 1.2,
-                mb: 2
+                mb: 1
               }}
             >
               {venueName} is Not Accepting Orders
@@ -156,11 +156,11 @@ const VenueNotAcceptingOrdersPage: React.FC<VenueNotAcceptingOrdersPageProps> = 
               variant="body1"
               color="text.secondary"
               sx={{ 
-                fontSize: { xs: '0.875rem', md: '1rem' },
+                fontSize: { xs: '0.8rem', md: '1rem' },
                 lineHeight: 1.6,
                 maxWidth: 480,
                 mx: 'auto',
-                mb: 3
+                mb: 1
               }}
             >
               {message}
@@ -174,9 +174,9 @@ const VenueNotAcceptingOrdersPage: React.FC<VenueNotAcceptingOrdersPageProps> = 
                 justifyContent: 'center',
                 gap: 1,
                 mb: 4,
-                p: 2,
+                p: 1,
                 backgroundColor: 'info.50',
-                borderRadius: 2,
+                borderRadius: 1,
                 border: '1px solid',
                 borderColor: 'info.200'
               }}
@@ -196,7 +196,7 @@ const VenueNotAcceptingOrdersPage: React.FC<VenueNotAcceptingOrdersPageProps> = 
           {/* Action Buttons */}
           <Stack 
             direction={{ xs: 'column', sm: 'row' }}
-            spacing={2}
+            spacing={1}
             justifyContent="center"
             alignItems="center"
           >
@@ -211,8 +211,8 @@ const VenueNotAcceptingOrdersPage: React.FC<VenueNotAcceptingOrdersPageProps> = 
                   minWidth: { xs: 'auto', sm: 160 },
                   fontWeight: 600,
                   textTransform: 'none',
-                  borderRadius: 2,
-                  py: { xs: 1.5, sm: 1.25 }
+                  borderRadius: 1,
+                  py: { xs: 1, sm: 1.25 }
                 }}
               >
                 Check Again
@@ -229,8 +229,8 @@ const VenueNotAcceptingOrdersPage: React.FC<VenueNotAcceptingOrdersPageProps> = 
                 minWidth: { xs: 'auto', sm: 160 },
                 fontWeight: 600,
                 textTransform: 'none',
-                borderRadius: 2,
-                py: { xs: 1.5, sm: 1.25 },
+                borderRadius: 1,
+                py: { xs: 1, sm: 1.25 },
                 borderColor: 'divider',
                 color: 'text.primary',
                 '&:hover': {

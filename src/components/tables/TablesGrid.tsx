@@ -70,7 +70,7 @@ const TablesGrid: React.FC<TablesGridProps> = ({
   return (
     <Box sx={{ 
       backgroundColor: 'white',
-      borderRadius: 2,
+      borderRadius: 1,
       border: '1px solid',
       borderColor: 'grey.200',
       boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
@@ -82,8 +82,8 @@ const TablesGrid: React.FC<TablesGridProps> = ({
         borderBottom: '1px solid',
         borderColor: 'grey.200'
       }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' }, flexWrap: 'wrap', gap: 2, flexDirection: { xs: 'column', sm: 'row' } }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1.5, sm: 2 }, width: { xs: '100%', sm: 'auto' } }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' }, flexWrap: 'wrap', gap: 1, flexDirection: { xs: 'column', sm: 'row' } }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 1 }, width: { xs: '100%', sm: 'auto' } }}>
             <Box
               sx={{
                 width: { xs: 40, sm: 48 },
@@ -99,17 +99,17 @@ const TablesGrid: React.FC<TablesGridProps> = ({
               <TableRestaurant sx={{ color: 'white', fontSize: { xs: 20, sm: 24 } }} />
             </Box>
             <Box sx={{ flex: 1, minWidth: 0 }}>
-              <Typography variant="h5" fontWeight="700" sx={{ color: 'text.primary', mb: 0.5, fontSize: { xs: '1.125rem', sm: '1.5rem' } }}>
+              <Typography variant="h5" fontWeight="700" sx={{ color: 'text.primary', mb: 0.5, fontSize: { xs: '0.95rem', sm: '1.25rem' } }}>
                 Tables ({filteredTables.length})
               </Typography>
-              <Typography variant="body1" sx={{ color: 'text.secondary', fontSize: { xs: '0.875rem', sm: '1rem' }, display: { xs: 'none', sm: 'block' } }}>
+              <Typography variant="body1" sx={{ color: 'text.secondary', fontSize: { xs: '0.8rem', sm: '1rem' }, display: { xs: 'none', sm: 'block' } }}>
                 Manage your restaurant seating layout
               </Typography>
             </Box>
           </Box>
           
           {/* Filters and Add Button */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, width: { xs: '100%', sm: 'auto' }, flexWrap: { xs: 'wrap', sm: 'nowrap' } }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: { xs: '100%', sm: 'auto' }, flexWrap: { xs: 'wrap', sm: 'nowrap' } }}>
             {/* Area Filter */}
             <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 140 }, flex: { xs: 1, sm: 'none' } }}>
               <InputLabel>Filter Area</InputLabel>
@@ -155,7 +155,7 @@ const TablesGrid: React.FC<TablesGridProps> = ({
                   backgroundColor: 'primary.main',
                   color: 'white',
                   fontWeight: 600,
-                  px: { xs: 2, sm: 2.5 },
+                  px: { xs: 1, sm: 1.5 },
                   py: { xs: 0.75, sm: 0.75 },
                   fontSize: { xs: '0.75rem', sm: '0.8rem' },
                   boxShadow: 'none',
@@ -178,7 +178,7 @@ const TablesGrid: React.FC<TablesGridProps> = ({
       {/* Content */}
       <Box sx={{ p: { xs: 2, sm: 3 } }}>
         {filteredTables.length === 0 ? (
-          <Box sx={{ textAlign: 'center', py: { xs: 3, sm: 4 } }}>
+          <Box sx={{ textAlign: 'center', py: { xs: 1, sm: 4 } }}>
             <Box
               sx={{
                 width: { xs: 64, sm: 80 },
@@ -199,7 +199,7 @@ const TablesGrid: React.FC<TablesGridProps> = ({
               {selectedArea === 'all' ? 'No Tables Yet' : 'No Tables in This Area'}
             </Typography>
             
-            <Typography variant="body1" sx={{ mb: { xs: 3, sm: 4 }, color: 'text.secondary', maxWidth: '500px', mx: 'auto', fontSize: { xs: '0.875rem', sm: '1rem' }, px: { xs: 2, sm: 0 } }}>
+            <Typography variant="body1" sx={{ mb: { xs: 3, sm: 4 }, color: 'text.secondary', maxWidth: '500px', mx: 'auto', fontSize: { xs: '0.8rem', sm: '1rem' }, px: { xs: 1, sm: 0 } }}>
               {selectedArea === 'all' 
                 ? 'Start building your restaurant layout by adding your first table. You can organize tables into different seating areas for better management.'
                 : `No tables found in "${areas.find(a => a.id === selectedArea)?.name || 'this area'}". Add tables to this area or select a different area to view existing tables.`
@@ -214,11 +214,11 @@ const TablesGrid: React.FC<TablesGridProps> = ({
               sx={{
                 backgroundColor: 'primary.main',
                 color: 'white',
-                borderRadius: 2,
+                borderRadius: 1,
                 fontWeight: 600,
                 px: { xs: 3, sm: 4 },
                 py: { xs: 1.25, sm: 1.5 },
-                fontSize: { xs: '0.875rem', sm: '1rem' },
+                fontSize: { xs: '0.8rem', sm: '1rem' },
                 '&:hover': {
                   backgroundColor: 'primary.dark',
                   transform: 'translateY(-1px)',
@@ -236,14 +236,14 @@ const TablesGrid: React.FC<TablesGridProps> = ({
               <React.Fragment key={table.id}>
                 <ListItem
                   sx={{
-                    py: { xs: 2, sm: 2.5 },
+                    py: { xs: 1, sm: 1.5 },
                     px: 0,
                     transition: 'all 0.2s ease-in-out',
                     opacity: table.isActive ? 1 : 0.7,
                     '&:hover': {
                       backgroundColor: 'grey.50',
                       transform: { xs: 'none', sm: 'translateX(4px)' },
-                      borderRadius: 2
+                      borderRadius: 1
                     }
                   }}
                 >
@@ -285,7 +285,7 @@ const TablesGrid: React.FC<TablesGridProps> = ({
 
                     {/* Table Info */}
                     <Box sx={{ flex: 1, minWidth: 0 }}>
-                      <Stack direction={{ xs: 'column', sm: 'row' }} alignItems={{ xs: 'flex-start', sm: 'center' }} spacing={{ xs: 0.5, sm: 2 }} sx={{ mb: { xs: 0.75, sm: 1 } }}>
+                      <Stack direction={{ xs: 'column', sm: 'row' }} alignItems={{ xs: 'flex-start', sm: 'center' }} spacing={{ xs: 0.5, sm: 1 }} sx={{ mb: { xs: 0.75, sm: 1 } }}>
                         <Typography 
                           variant="h6" 
                           fontWeight="700" 
@@ -307,10 +307,10 @@ const TablesGrid: React.FC<TablesGridProps> = ({
                         />
                       </Stack>
                       
-                      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={{ xs: 0.75, sm: 2 }} alignItems={{ xs: 'flex-start', sm: 'center' }} sx={{ mb: { xs: 0.5, sm: 1 } }}>
+                      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={{ xs: 0.75, sm: 1 }} alignItems={{ xs: 'flex-start', sm: 'center' }} sx={{ mb: { xs: 0.5, sm: 1 } }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                           <People sx={{ fontSize: { xs: 14, sm: 16 }, color: 'text.secondary' }} />
-                          <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500, fontSize: { xs: '0.8125rem', sm: '0.875rem' } }}>
+                          <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500, fontSize: { xs: '0.75rem', sm: '0.8rem' } }}>
                             {table.capacity} people
                           </Typography>
                         </Box>

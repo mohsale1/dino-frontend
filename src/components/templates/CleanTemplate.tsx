@@ -44,7 +44,7 @@ const CleanTemplate: React.FC<TemplateProps> = ({
         }}
       >
         {/* Clean Header */}
-        <Box sx={{ mb: 3 }}>
+        <Box sx={{ mb: 1 }}>
           <Typography
             variant="h2"
             sx={{
@@ -110,7 +110,7 @@ const CleanTemplate: React.FC<TemplateProps> = ({
 
         {/* Clean Instructions */}
         {includeInstructions && (
-          <Box sx={{ mt: 3 }}>
+          <Box sx={{ mt: 1 }}>
             <Typography
               sx={{
                 fontSize: layout === 'compact' ? '0.9rem' : layout === 'large' ? '1.2rem' : '1rem',

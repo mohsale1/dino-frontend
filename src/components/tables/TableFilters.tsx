@@ -42,15 +42,15 @@ const TableFilters: React.FC<TableFiltersProps> = ({
       sx={{ 
         backgroundColor: 'white',
         borderRadius: 3,
-        p: 3,
+        p: 1.5,
         border: '1px solid',
         borderColor: 'grey.200',
         boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)'
       }}
     >
       {/* Header */}
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Box
             sx={{
               width: 40,
@@ -62,10 +62,10 @@ const TableFilters: React.FC<TableFiltersProps> = ({
               justifyContent: 'center'
             }}
           >
-            <FilterList sx={{ color: 'white', fontSize: 14 }} />
+            <FilterList sx={{ color: 'white', fontSize: 12 }} />
           </Box>
           <Box>
-            <Typography variant="h6" fontWeight="700" sx={{ color: 'text.primary', mb: 0.25 }}>
+            <Typography variant="h6" fontWeight="700" sx={{ color: 'text.primary', mb: 0.2 }}>
               Filters & Search
             </Typography>
             <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '0.85rem' }}>
@@ -87,7 +87,7 @@ const TableFilters: React.FC<TableFiltersProps> = ({
       </Box>
 
       {/* Filters */}
-      <Grid container spacing={2} alignItems="center">
+      <Grid container spacing={1} alignItems="center">
         {/* Area Filter */}
         <Grid item xs={12} md={4}>
           <FormControl fullWidth>
@@ -98,7 +98,7 @@ const TableFilters: React.FC<TableFiltersProps> = ({
               label="Filter by Area"
               size="medium"
               sx={{ 
-                borderRadius: 2,
+                borderRadius: 1,
                 backgroundColor: 'grey.50',
                 '&:hover': {
                   backgroundColor: 'grey.100'
@@ -134,7 +134,7 @@ const TableFilters: React.FC<TableFiltersProps> = ({
         <Grid item xs={12} md={8}>
           <Stack 
             direction={{ xs: 'column', sm: 'row' }}
-            spacing={2}
+            spacing={1}
             justifyContent="flex-end"
             alignItems="center"
           >
@@ -144,7 +144,7 @@ const TableFilters: React.FC<TableFiltersProps> = ({
               onClick={onAddArea}
               size="medium"
               sx={{
-                borderRadius: 2,
+                borderRadius: 1,
                 borderColor: 'grey.300',
                 color: 'text.primary',
                 backgroundColor: 'white',
@@ -167,7 +167,7 @@ const TableFilters: React.FC<TableFiltersProps> = ({
               onClick={onAddTable}
               size="medium"
               sx={{
-                borderRadius: 2,
+                borderRadius: 1,
                 backgroundColor: 'primary.main',
                 color: 'white',
                 fontWeight: 600,
@@ -190,7 +190,7 @@ const TableFilters: React.FC<TableFiltersProps> = ({
                 color: 'text.secondary',
                 border: '1px solid',
                 borderColor: 'grey.200',
-                borderRadius: 2,
+                borderRadius: 1,
                 width: 48,
                 height: 48,
                 '&:hover': { 

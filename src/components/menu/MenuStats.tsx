@@ -53,14 +53,14 @@ const MenuStats: React.FC<MenuStatsProps> = ({ menuItems, categories }) => {
   return (
     <Box sx={{ 
       px: { xs: 3, sm: 4 }, 
-      py: { xs: 3, sm: 4 }, 
+      py: { xs: 1, sm: 4 }, 
       backgroundColor: 'background.paper', 
       borderRadius: 3, 
       mb: 4,
       border: `1px solid ${theme.palette.grey[100]}`,
       boxShadow: '0 4px 20px rgba(0,0,0,0.08)'
     }}>
-      <Typography variant="h6" fontWeight="700" color="text.primary" sx={{ mb: 3 }}>
+      <Typography variant="h6" fontWeight="700" color="text.primary" sx={{ mb: 1 }}>
         Menu Overview
       </Typography>
       
@@ -70,7 +70,7 @@ const MenuStats: React.FC<MenuStatsProps> = ({ menuItems, categories }) => {
             <Box
               sx={{
                 p: { xs: 2.5, sm: 3 },
-                borderRadius: 2,
+                borderRadius: 1,
                 backgroundColor: alpha(stat.color, 0.05),
                 border: `1px solid ${alpha(stat.color, 0.2)}`,
                 transition: 'all 0.3s ease',
@@ -81,13 +81,13 @@ const MenuStats: React.FC<MenuStatsProps> = ({ menuItems, categories }) => {
                 },
               }}
             >
-              <Stack direction="row" alignItems="center" spacing={2}>
+              <Stack direction="row" alignItems="center" spacing={1}>
                 {/* Icon on the left */}
                 <Box
                   sx={{
                     width: 48,
                     height: 48,
-                    borderRadius: 2,
+                    borderRadius: 1,
                     backgroundColor: stat.color,
                     display: 'flex',
                     alignItems: 'center',
@@ -106,7 +106,7 @@ const MenuStats: React.FC<MenuStatsProps> = ({ menuItems, categories }) => {
                     fontWeight="700" 
                     color="text.primary" 
                     sx={{ 
-                      fontSize: { xs: '1.5rem', sm: '2rem' },
+                      fontSize: { xs: '1.25rem', sm: '2rem' },
                       lineHeight: 1.2,
                       mb: 0.5
                     }}
@@ -118,7 +118,7 @@ const MenuStats: React.FC<MenuStatsProps> = ({ menuItems, categories }) => {
                     color="text.secondary" 
                     fontWeight="600"
                     sx={{ 
-                      fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                      fontSize: { xs: '0.75rem', sm: '0.8rem' },
                       lineHeight: 1.2,
                       display: '-webkit-box',
                       WebkitLineClamp: 2,

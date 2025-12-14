@@ -23,11 +23,11 @@ const TemplateCategoryFilter: React.FC<TemplateCategoryFilterProps> = ({
 
   // Category icons mapping
   const categoryIcons: Record<string, React.ReactElement> = {
-    All: <Fastfood sx={{ fontSize: 14 }} />,
-    Pizza: <LocalPizza sx={{ fontSize: 14 }} />,
-    'Main Course': <Restaurant sx={{ fontSize: 14 }} />,
-    Salads: <LocalDining sx={{ fontSize: 14 }} />,
-    Desserts: <Cake sx={{ fontSize: 14 }} />,
+    All: <Fastfood sx={{ fontSize: 12 }} />,
+    Pizza: <LocalPizza sx={{ fontSize: 12 }} />,
+    'Main Course': <Restaurant sx={{ fontSize: 12 }} />,
+    Salads: <LocalDining sx={{ fontSize: 12 }} />,
+    Desserts: <Cake sx={{ fontSize: 12 }} />,
   };
 
   // Category images (placeholder URLs for demo)
@@ -46,7 +46,7 @@ const TemplateCategoryFilter: React.FC<TemplateCategoryFilterProps> = ({
         sx={{
           backgroundColor: '#fff',
           borderBottom: `1px solid ${alpha(template.colors.primary, 0.1)}`,
-          px: 2,
+          px: 1,
           py: 0.75,
           display: 'flex',
           gap: 1,
@@ -73,8 +73,8 @@ const TemplateCategoryFilter: React.FC<TemplateCategoryFilterProps> = ({
                 }`,
                 color: isSelected ? template.colors.primary : template.colors.textSecondary,
                 fontWeight: isSelected ? 600 : 400,
-                fontSize: '0.75rem',
-                height: 28,
+                fontSize: '0.7rem',
+                height: 22,
                 '& .MuiChip-icon': {
                   color: isSelected ? template.colors.primary : template.colors.textSecondary,
                 },
@@ -93,10 +93,10 @@ const TemplateCategoryFilter: React.FC<TemplateCategoryFilterProps> = ({
         sx={{
           backgroundColor: '#fff',
           borderBottom: `1px solid ${alpha(template.colors.primary, 0.1)}`,
-          px: 2,
+          px: 1,
           py: 0.75,
           display: 'flex',
-          gap: 1.5,
+          gap: 1,
           justifyContent: 'center',
           overflowX: 'auto',
           '&::-webkit-scrollbar': {
@@ -158,10 +158,10 @@ const TemplateCategoryFilter: React.FC<TemplateCategoryFilterProps> = ({
         sx={{
           backgroundColor: '#fff',
           borderBottom: `1px solid ${alpha(template.colors.primary, 0.1)}`,
-          px: 2,
+          px: 1,
           py: 0.75,
           display: 'flex',
-          gap: 2,
+          gap: 1,
           overflowX: 'auto',
           '&::-webkit-scrollbar': {
             display: 'none',
@@ -182,7 +182,7 @@ const TemplateCategoryFilter: React.FC<TemplateCategoryFilterProps> = ({
               <Typography
                 variant="body2"
                 sx={{
-                  fontSize: '0.8125rem',
+                  fontSize: '0.7rem',
                   fontWeight: isSelected ? 600 : 400,
                   color: isSelected ? template.colors.primary : template.colors.textSecondary,
                   fontFamily: template.typography.bodyFont,
@@ -204,10 +204,10 @@ const TemplateCategoryFilter: React.FC<TemplateCategoryFilterProps> = ({
         sx={{
           backgroundColor: '#fff',
           borderBottom: `1px solid ${alpha(template.colors.primary, 0.1)}`,
-          px: 2,
+          px: 1,
           py: 1,
           display: 'flex',
-          gap: 1.5,
+          gap: 1,
           overflowX: 'auto',
           '&::-webkit-scrollbar': {
             display: 'none',
@@ -223,7 +223,7 @@ const TemplateCategoryFilter: React.FC<TemplateCategoryFilterProps> = ({
                 display: 'flex',
                 alignItems: 'center',
                 gap: 0.75,
-                px: 1.5,
+                px: 1,
                 py: 0.5,
                 borderRadius: 3,
                 backgroundColor: isSelected
@@ -259,7 +259,7 @@ const TemplateCategoryFilter: React.FC<TemplateCategoryFilterProps> = ({
               <Typography
                 variant="caption"
                 sx={{
-                  fontSize: '0.75rem',
+                  fontSize: '0.7rem',
                   fontWeight: isSelected ? 600 : 500,
                   color: isSelected ? template.colors.primary : template.colors.textSecondary,
                   fontFamily: template.typography.bodyFont,

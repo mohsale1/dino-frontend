@@ -194,9 +194,9 @@ export function StandardForm<T extends Record<string, any>>({
       sx={{
         maxWidth,
         mx: 'auto',
-        p: 3,
+        p: 1.5,
         backgroundColor: 'background.paper',
-        borderRadius: 2,
+        borderRadius: 1,
         boxShadow: theme.shadows[1],
       }}
     >
@@ -208,7 +208,7 @@ export function StandardForm<T extends Record<string, any>>({
           sx={{
             fontWeight: 600,
             color: 'text.primary',
-            mb: 3,
+            mb: 1,
             textAlign: 'center',
           }}
         >
@@ -219,7 +219,7 @@ export function StandardForm<T extends Record<string, any>>({
       {submitSuccess && (
         <Alert
           severity="success"
-          sx={{ mb: 2 }}
+          sx={{ mb: 1 }}
           onClose={() => setSubmitSuccess(false)}
         >
           {successMessage}
@@ -229,7 +229,7 @@ export function StandardForm<T extends Record<string, any>>({
       {submitError && (
         <Alert
           severity="error"
-          sx={{ mb: 2 }}
+          sx={{ mb: 1 }}
           onClose={() => setSubmitError(null)}
         >
           {submitError}
@@ -261,8 +261,8 @@ export function StandardForm<T extends Record<string, any>>({
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          mt: 3,
-          gap: 2,
+          mt: 1,
+          gap: 1,
         }}
       >
         <Box sx={{ flex: 1 }}>
@@ -278,9 +278,9 @@ export function StandardForm<T extends Record<string, any>>({
             minWidth: 120,
             fontWeight: 600,
             textTransform: 'none',
-            borderRadius: 2,
+            borderRadius: 1,
             px: 3,
-            py: 1.5,
+            py: 1,
           }}
         >
           {isSubmitting ? 'Submitting...' : submitText}

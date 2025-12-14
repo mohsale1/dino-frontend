@@ -134,7 +134,7 @@ const ToastNotification: React.FC<ToastNotificationProps> = ({
         sx={{
           width: '100%',
           maxWidth: isMobile ? 'none' : 400,
-          borderRadius: 2,
+          borderRadius: 1,
           boxShadow: theme.shadows[8],
           border: '1px solid',
           borderColor: `${getSeverityColor()}20`,
@@ -154,7 +154,7 @@ const ToastNotification: React.FC<ToastNotificationProps> = ({
         {toast.title && (
           <AlertTitle sx={{ 
             fontWeight: 600, 
-            fontSize: '0.875rem',
+            fontSize: '0.8rem',
             mb: toast.message ? 0.5 : 0,
           }}>
             {toast.title}
@@ -163,7 +163,7 @@ const ToastNotification: React.FC<ToastNotificationProps> = ({
         <Typography 
           variant="body2" 
           sx={{ 
-            fontSize: '0.8125rem',
+            fontSize: '0.7rem',
             lineHeight: 1.4,
             wordBreak: 'break-word',
           }}

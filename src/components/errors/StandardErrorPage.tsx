@@ -196,7 +196,7 @@ export const StandardErrorPage: React.FC<StandardErrorPageProps> = ({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        mb: 3,
+        mb: 1,
         mx: 'auto',
         position: 'relative',
         overflow: 'hidden',
@@ -244,7 +244,7 @@ export const StandardErrorPage: React.FC<StandardErrorPageProps> = ({
               fontWeight: 900,
               color: alpha(typeStyles.color, 0.3),
               lineHeight: 0.8,
-              mb: 2,
+              mb: 1,
               userSelect: 'none',
             }}
           >
@@ -254,7 +254,7 @@ export const StandardErrorPage: React.FC<StandardErrorPageProps> = ({
 
         {/* Illustration */}
         {showIllustration && (
-          <Box sx={{ mb: 3 }}>
+          <Box sx={{ mb: 1 }}>
             {illustration || defaultIllustration}
           </Box>
         )}
@@ -267,7 +267,7 @@ export const StandardErrorPage: React.FC<StandardErrorPageProps> = ({
           sx={{
             fontWeight: 700,
             color: 'text.primary',
-            mb: 2,
+            mb: 1,
             fontSize: { xs: '1.75rem', sm: '2.5rem', md: '3rem' },
           }}
         >
@@ -300,7 +300,7 @@ export const StandardErrorPage: React.FC<StandardErrorPageProps> = ({
           sx={{
             display: 'flex',
             flexDirection: { xs: 'column', sm: 'row' },
-            gap: 2,
+            gap: 1,
             alignItems: 'center',
             justifyContent: centered ? 'center' : 'flex-start',
           }}
@@ -315,7 +315,7 @@ export const StandardErrorPage: React.FC<StandardErrorPageProps> = ({
                 minWidth: 140,
                 fontWeight: 600,
                 textTransform: 'none',
-                borderRadius: 2,
+                borderRadius: 1,
               }}
             >
               {primaryAction.label}
@@ -332,7 +332,7 @@ export const StandardErrorPage: React.FC<StandardErrorPageProps> = ({
                 minWidth: 140,
                 fontWeight: 600,
                 textTransform: 'none',
-                borderRadius: 2,
+                borderRadius: 1,
               }}
             >
               {secondaryAction.label}
@@ -351,7 +351,7 @@ export const StandardErrorPage: React.FC<StandardErrorPageProps> = ({
                   minWidth: 140,
                   fontWeight: 600,
                   textTransform: 'none',
-                  borderRadius: 2,
+                  borderRadius: 1,
                 }}
               >
                 Go Home
@@ -366,7 +366,7 @@ export const StandardErrorPage: React.FC<StandardErrorPageProps> = ({
                   minWidth: 140,
                   fontWeight: 600,
                   textTransform: 'none',
-                  borderRadius: 2,
+                  borderRadius: 1,
                 }}
               >
                 Go Back
@@ -382,7 +382,7 @@ export const StandardErrorPage: React.FC<StandardErrorPageProps> = ({
                     minWidth: 140,
                     fontWeight: 600,
                     textTransform: 'none',
-                    borderRadius: 2,
+                    borderRadius: 1,
                   }}
                 >
                   Retry

@@ -173,7 +173,7 @@ const CorporateTemplate: React.FC<TemplateProps> = ({
             sx={{
               display: 'flex',
               justifyContent: 'space-between',
-              fontSize: '0.75rem',
+              fontSize: '0.7rem',
               color: '#6c757d'
             }}
           >

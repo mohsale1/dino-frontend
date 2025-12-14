@@ -112,7 +112,7 @@ const NotificationCenter: React.FC = () => {
           sx: { width: 380, maxHeight: 500 }
         }}
       >
-        <Box sx={{ p: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
+        <Box sx={{ p: 1, borderBottom: '1px solid', borderColor: 'divider' }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
             <Typography variant="h6">Notifications</Typography>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -139,8 +139,8 @@ const NotificationCenter: React.FC = () => {
         </Box>
 
         {notifications.length === 0 ? (
-          <Box sx={{ p: 4, textAlign: 'center' }}>
-            <NotificationsNone sx={{ fontSize: 14, color: 'text.secondary', mb: 2 }} />
+          <Box sx={{ p: 1, textAlign: 'center' }}>
+            <NotificationsNone sx={{ fontSize: 12, color: 'text.secondary', mb: 1 }} />
             <Typography variant="h6" color="text.secondary" gutterBottom>
               No notifications
             </Typography>
@@ -253,7 +253,7 @@ const NotificationCenter: React.FC = () => {
                                 e.stopPropagation();
                                 markAsRead(notification.id);
                               }}
-                              sx={{ mt: 1, p: 0, minWidth: 'auto', fontSize: '0.75rem' }}
+                              sx={{ mt: 1, p: 0, minWidth: 'auto', fontSize: '0.7rem' }}
                             >
                               Mark as read
                             </Button>
@@ -268,7 +268,7 @@ const NotificationCenter: React.FC = () => {
             </List>
             
             {notifications.length > 0 && (
-              <Box sx={{ p: 2, borderTop: '1px solid', borderColor: 'divider' }}>
+              <Box sx={{ p: 1, borderTop: '1px solid', borderColor: 'divider' }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <Typography variant="body2" color="text.secondary">
                     {notifications.length > 10 && `Showing 10 of ${notifications.length} notifications`}

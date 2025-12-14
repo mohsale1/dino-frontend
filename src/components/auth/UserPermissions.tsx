@@ -164,8 +164,8 @@ const UserPermissions: React.FC = () => {
   return (
     <Box>
       {/* Role Information */}
-      <Paper elevation={1} sx={{ p: 3, mb: 3, border: '1px solid', borderColor: 'divider' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+      <Paper elevation={1} sx={{ p: 1.5, mb: 1, border: '1px solid', borderColor: 'divider' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
           <Avatar
             sx={{
               bgcolor: `${roleInfo.color}.main`,
@@ -211,7 +211,7 @@ const UserPermissions: React.FC = () => {
           No specific permissions assigned. Contact your administrator if you need access to additional features.
         </Alert>
       ) : (
-        <Grid container spacing={2}>
+        <Grid container spacing={1}>
           {permissionCategories
             .filter(category => category.permissions.length > 0)
             .map((category) => (
@@ -219,7 +219,7 @@ const UserPermissions: React.FC = () => {
                 <Paper
                   elevation={1}
                   sx={{
-                    p: 2,
+                    p: 1,
                     height: '100%',
                     border: '1px solid',
                     borderColor: 'divider',
@@ -228,7 +228,7 @@ const UserPermissions: React.FC = () => {
                     },
                   }}
                 >
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                     <Avatar
                       sx={{
                         bgcolor: category.color,
@@ -261,7 +261,7 @@ const UserPermissions: React.FC = () => {
                           primary={permission.description || permission.name || 'Access granted'}
                           primaryTypographyProps={{
                             variant: 'body2',
-                            fontSize: '0.875rem'
+                            fontSize: '0.8rem'
                           }}
                           sx={{ ml: 1 }}
                         />
@@ -275,7 +275,7 @@ const UserPermissions: React.FC = () => {
       )}
 
       {/* Permission Summary */}
-      <Paper elevation={1} sx={{ p: 2, mt: 3, backgroundColor: 'grey.50' }}>
+      <Paper elevation={1} sx={{ p: 1, mt: 1, backgroundColor: 'grey.50' }}>
         <Typography variant="subtitle2" gutterBottom fontWeight="600">
           Permission Summary
         </Typography>

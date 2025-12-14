@@ -132,7 +132,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
       sx={{
         width: '100%',
         overflowX: 'auto',
-        pb: 2,
+        pb: 1,
         // Custom scrollbar
         '&::-webkit-scrollbar': {
           height: 8,
@@ -152,7 +152,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
     >
       <Stack
         direction="row"
-        spacing={2}
+        spacing={1}
         sx={{
           minWidth: isMobile ? '1200px' : 'auto',
           width: isMobile ? 'max-content' : '100%',
@@ -172,10 +172,10 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
                 flex: 1,
                 minWidth: isMobile ? 280 : 240,
                 maxWidth: isMobile ? 280 : 'none',
-                p: 2,
+                p: 1,
                 backgroundColor: isActive ? alpha(column.color, 0.05) : 'background.paper',
                 border: `2px solid ${isActive ? column.color : 'transparent'}`,
-                borderRadius: 2,
+                borderRadius: 1,
                 transition: 'all 0.2s ease',
                 height: 'fit-content',
                 minHeight: 400,
@@ -184,7 +184,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
               {/* Column Header */}
               <Box
                 sx={{
-                  mb: 2,
+                  mb: 1,
                   pb: 1.5,
                   borderBottom: `2px solid ${column.color}`,
                 }}
@@ -202,7 +202,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
                       color: 'white',
                     }}
                   >
-                    {React.cloneElement(column.icon, { sx: { fontSize: 14 } })}
+                    {React.cloneElement(column.icon, { sx: { fontSize: 12 } })}
                   </Box>
                   <Typography variant="subtitle1" fontWeight="700" color="text.primary">
                     {column.title}
@@ -217,7 +217,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
                       backgroundColor: column.color,
                       color: 'white',
                       fontWeight: 700,
-                      fontSize: '0.75rem',
+                      fontSize: '0.7rem',
                       height: 20,
                       minWidth: 20,
                       borderRadius: 1,
@@ -262,7 +262,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
                       alignItems: 'center',
                       justifyContent: 'center',
                       py: 6,
-                      px: 2,
+                      px: 1,
                       textAlign: 'center',
                     }}
                   >
@@ -275,7 +275,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        mb: 2,
+                        mb: 1,
                       }}
                     >
                       {React.cloneElement(column.icon, {

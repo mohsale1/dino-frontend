@@ -75,12 +75,12 @@ const MenuItemsGrid: React.FC<MenuItemsGridProps> = ({
   return (
     <Box sx={{ minHeight: '50vh' }}>
       {/* Title and Filters Row */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' }, mb: { xs: 2, sm: 3 }, flexWrap: 'wrap', gap: 2, flexDirection: { xs: 'column', sm: 'row' } }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' }, mb: { xs: 2, sm: 3 }, flexWrap: 'wrap', gap: 1, flexDirection: { xs: 'column', sm: 'row' } }}>
         <Box sx={{ width: { xs: '100%', sm: 'auto' } }}>
           <Typography variant="h6" fontWeight="700" color="text.primary" sx={{ mb: 0.5, fontSize: { xs: '1rem', sm: '1.15rem' } }}>
             Menu Items ({filteredItems.length})
           </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '0.8125rem', sm: '0.85rem' }, display: { xs: 'none', sm: 'block' } }}>
+          <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '0.75rem', sm: '0.85rem' }, display: { xs: 'none', sm: 'block' } }}>
             Browse and manage your menu offerings
           </Typography>
         </Box>
@@ -105,7 +105,7 @@ const MenuItemsGrid: React.FC<MenuItemsGridProps> = ({
                 '& .MuiOutlinedInput-root': {
                   borderRadius: 1,
                   backgroundColor: alpha(theme.palette.grey[50], 0.8),
-                  fontSize: { xs: '0.875rem', sm: '0.875rem' },
+                  fontSize: { xs: '0.8rem', sm: '0.8rem' },
                   '&:hover': {
                     backgroundColor: 'background.paper',
                   }
@@ -129,14 +129,14 @@ const MenuItemsGrid: React.FC<MenuItemsGridProps> = ({
 
             {/* Category Filter Dropdown */}
             <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 140 } }}>
-              <InputLabel sx={{ fontSize: { xs: '0.875rem', sm: '0.875rem' } }}>Category</InputLabel>
+              <InputLabel sx={{ fontSize: { xs: '0.8rem', sm: '0.8rem' } }}>Category</InputLabel>
               <Select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
                 label="Category"
                 sx={{ 
                   borderRadius: 1,
-                  fontSize: { xs: '0.875rem', sm: '0.875rem' }
+                  fontSize: { xs: '0.8rem', sm: '0.8rem' }
                 }}
               >
                 <MenuItem value="all">All Categories</MenuItem>
@@ -233,7 +233,7 @@ const MenuItemsGrid: React.FC<MenuItemsGridProps> = ({
                 onClick={onAddItem}
                 sx={{ 
                   borderRadius: 1,
-                  px: { xs: 2, sm: 2.5 },
+                  px: { xs: 1, sm: 1.5 },
                   py: { xs: 0.75, sm: 0.75 },
                   fontWeight: 600,
                   fontSize: { xs: '0.75rem', sm: '0.8rem' },
@@ -255,17 +255,17 @@ const MenuItemsGrid: React.FC<MenuItemsGridProps> = ({
       {setShowFilters && (
         <Collapse in={showFilters}>
           <Box sx={{ 
-            mb: 3,
-            p: 3, 
+            mb: 1,
+            p: 1.5, 
             backgroundColor: alpha(theme.palette.grey[50], 0.8), 
             borderRadius: 1,
             border: `1px solid ${theme.palette.grey[200]}`
           }}>
-            <Typography variant="subtitle2" fontWeight="600" sx={{ mb: 2, color: 'text.primary' }}>
+            <Typography variant="subtitle2" fontWeight="600" sx={{ mb: 1, color: 'text.primary' }}>
               Advanced Filters
             </Typography>
             
-            <Grid container spacing={2} alignItems="center">
+            <Grid container spacing={1} alignItems="center">
               {/* Category Filter */}
               <Grid item xs={12} sm={6} md={4}>
                 <FormControl fullWidth size="small">
@@ -358,7 +358,7 @@ const MenuItemsGrid: React.FC<MenuItemsGridProps> = ({
               <Restaurant sx={{ fontSize: { xs: 50, sm: 60 }, color: 'primary.main' }} />
             </Box>
             
-            <Typography variant="h4" fontWeight="700" gutterBottom color="text.primary" sx={{ mb: 2 }}>
+            <Typography variant="h4" fontWeight="700" gutterBottom color="text.primary" sx={{ mb: 1 }}>
               {menuItems.length === 0 ? 'No Menu Items Yet' : 'No Items Match Your Filters'}
             </Typography>
             
@@ -382,9 +382,9 @@ const MenuItemsGrid: React.FC<MenuItemsGridProps> = ({
                 onClick={onAddItem}
                 size="large"
                 sx={{ 
-                  borderRadius: 2,
+                  borderRadius: 1,
                   px: 6,
-                  py: 2,
+                  py: 1,
                   fontWeight: 700,
                   fontSize: '1rem',
                   boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
@@ -397,15 +397,15 @@ const MenuItemsGrid: React.FC<MenuItemsGridProps> = ({
                 Add Your First Menu Item
               </Button>
             ) : (
-              <Stack direction="row" spacing={3} justifyContent="center">
+              <Stack direction="row" spacing={1} justifyContent="center">
                 <Button 
                   variant="outlined" 
                   onClick={onClearFilters}
                   size="large"
                   sx={{ 
-                    borderRadius: 2,
+                    borderRadius: 1,
                     px: 4,
-                    py: 1.5,
+                    py: 1,
                     fontWeight: 600,
                   }}
                 >
@@ -417,9 +417,9 @@ const MenuItemsGrid: React.FC<MenuItemsGridProps> = ({
                   onClick={onAddItem}
                   size="large"
                   sx={{ 
-                    borderRadius: 2,
+                    borderRadius: 1,
                     px: 4,
-                    py: 1.5,
+                    py: 1,
                     fontWeight: 700,
                   }}
                 >
@@ -431,7 +431,7 @@ const MenuItemsGrid: React.FC<MenuItemsGridProps> = ({
         ) : (
           /* Menu Items Grid */
           <Box>
-            <Grid container spacing={{ xs: 2, sm: 2.5, md: 3 }}>
+            <Grid container spacing={{ xs: 2, sm: 2.5, md: 1.5 }}>
               {filteredItems.map(item => (
                 <Grid item xs={12} sm={6} md={4} lg={3} xl={2.4} key={item.id}>
                   <MenuItemCard
@@ -465,7 +465,7 @@ const MenuItemsGrid: React.FC<MenuItemsGridProps> = ({
                   py: 1,
                   fontWeight: 500,
                   color: 'text.secondary',
-                  fontSize: '0.875rem',
+                  fontSize: '0.8rem',
                   '&:hover': {
                     backgroundColor: alpha(theme.palette.primary.main, 0.05),
                     color: 'primary.main',

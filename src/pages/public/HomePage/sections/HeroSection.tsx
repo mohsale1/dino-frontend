@@ -31,9 +31,9 @@ const HeroSection: React.FC = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const features = [
-    { icon: <TrendingUp sx={{ fontSize: 14 }} />, text: '3x Faster Orders' },
-    { icon: <Speed sx={{ fontSize: 14 }} />, text: 'Real-time Updates' },
-    { icon: <Security sx={{ fontSize: 14 }} />, text: 'Secure & Reliable' },
+    { icon: <TrendingUp sx={{ fontSize: 12 }} />, text: '3x Faster Orders' },
+    { icon: <Speed sx={{ fontSize: 12 }} />, text: 'Real-time Updates' },
+    { icon: <Security sx={{ fontSize: 12 }} />, text: 'Secure & Reliable' },
   ];
 
   return (
@@ -165,17 +165,17 @@ const HeroSection: React.FC = () => {
         <Grid container spacing={6} alignItems="center">
           {/* Left Content */}
           <Grid item xs={12} md={6}>
-            <Stack spacing={3}>
+            <Stack spacing={1}>
               {/* Badge */}
               <Box>
                 <Chip
-                  icon={<AutoAwesome sx={{ fontSize: 14 }} />}
+                  icon={<AutoAwesome sx={{ fontSize: 12 }} />}
                   label="Trusted by 500+ Restaurants"
                   sx={{
                     backgroundColor: alpha(theme.palette.primary.main, 0.1),
                     color: 'primary.main',
                     fontWeight: 600,
-                    fontSize: '0.875rem',
+                    fontSize: '0.8rem',
                     px: 1,
                     border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
                     '& .MuiChip-icon': {
@@ -196,7 +196,7 @@ const HeroSection: React.FC = () => {
                   backgroundClip: 'text',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
-                  mb: 2,
+                  mb: 1,
                 }}
               >
                 Revolutionize Your Restaurant
@@ -217,7 +217,7 @@ const HeroSection: React.FC = () => {
               </Typography>
 
               {/* Feature Pills */}
-              <Stack direction="row" spacing={2} flexWrap="wrap" useFlexGap>
+              <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
                 {features.map((feature, index) => (
                   <Chip
                     key={index}
@@ -238,7 +238,7 @@ const HeroSection: React.FC = () => {
               </Stack>
 
               {/* CTA Buttons */}
-              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ pt: 2 }}>
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ pt: 1 }}>
                 {user ? (
                   <Button
                     variant="contained"
@@ -339,13 +339,13 @@ const HeroSection: React.FC = () => {
               }}
             >
               {/* Stacked Feature Cards */}
-              <Stack spacing={2} sx={{ width: '100%', maxWidth: 400 }}>
+              <Stack spacing={1} sx={{ width: '100%', maxWidth: 400 }}>
                 {/* QR Code Feature */}
                 <Box
                   sx={{
                     backgroundColor: 'background.paper',
                     borderRadius: 3,
-                    p: 3,
+                    p: 1.5,
                     border: `2px solid ${alpha(theme.palette.primary.main, 0.2)}`,
                     boxShadow: `0 12px 40px ${alpha(theme.palette.primary.main, 0.15)}`,
                     transform: 'translateX(-20px)',
@@ -356,12 +356,12 @@ const HeroSection: React.FC = () => {
                     },
                   }}
                 >
-                  <Stack direction="row" spacing={2} alignItems="center">
+                  <Stack direction="row" spacing={1} alignItems="center">
                     <Box
                       sx={{
                         width: 56,
                         height: 56,
-                        borderRadius: 2,
+                        borderRadius: 1,
                         backgroundColor: alpha(theme.palette.primary.main, 0.1),
                         display: 'flex',
                         alignItems: 'center',
@@ -386,7 +386,7 @@ const HeroSection: React.FC = () => {
                   sx={{
                     backgroundColor: 'background.paper',
                     borderRadius: 3,
-                    p: 3,
+                    p: 1.5,
                     border: `2px solid ${alpha(theme.palette.secondary.main, 0.2)}`,
                     boxShadow: `0 12px 40px ${alpha(theme.palette.secondary.main, 0.15)}`,
                     transform: 'translateX(20px)',
@@ -397,12 +397,12 @@ const HeroSection: React.FC = () => {
                     },
                   }}
                 >
-                  <Stack direction="row" spacing={2} alignItems="center">
+                  <Stack direction="row" spacing={1} alignItems="center">
                     <Box
                       sx={{
                         width: 56,
                         height: 56,
-                        borderRadius: 2,
+                        borderRadius: 1,
                         backgroundColor: alpha(theme.palette.secondary.main, 0.1),
                         display: 'flex',
                         alignItems: 'center',
@@ -427,7 +427,7 @@ const HeroSection: React.FC = () => {
                   sx={{
                     backgroundColor: 'background.paper',
                     borderRadius: 3,
-                    p: 3,
+                    p: 1.5,
                     border: `2px solid ${alpha(theme.palette.success.main, 0.2)}`,
                     boxShadow: `0 12px 40px ${alpha(theme.palette.success.main, 0.15)}`,
                     transform: 'translateX(-20px)',
@@ -438,12 +438,12 @@ const HeroSection: React.FC = () => {
                     },
                   }}
                 >
-                  <Stack direction="row" spacing={2} alignItems="center">
+                  <Stack direction="row" spacing={1} alignItems="center">
                     <Box
                       sx={{
                         width: 56,
                         height: 56,
-                        borderRadius: 2,
+                        borderRadius: 1,
                         backgroundColor: alpha(theme.palette.success.main, 0.1),
                         display: 'flex',
                         alignItems: 'center',

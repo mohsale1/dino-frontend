@@ -32,9 +32,9 @@ const StatsSection: React.FC = () => {
             sx={{
               color: 'primary.main',
               fontWeight: 700,
-              fontSize: '0.875rem',
+              fontSize: '0.8rem',
               letterSpacing: 1.5,
-              mb: 2,
+              mb: 1,
               display: 'block',
             }}
           >
@@ -45,7 +45,7 @@ const StatsSection: React.FC = () => {
             sx={{
               fontSize: { xs: '2rem', md: '3rem' },
               fontWeight: 700,
-              mb: 2,
+              mb: 1,
             }}
           >
             Numbers That Speak
@@ -71,7 +71,7 @@ const StatsSection: React.FC = () => {
               <Paper
                 elevation={0}
                 sx={{
-                  p: 4,
+                  p: 1,
                   textAlign: 'center',
                   height: '100%',
                   background: 'background.paper',
@@ -113,7 +113,7 @@ const StatsSection: React.FC = () => {
                     alignItems: 'center',
                     justifyContent: 'center',
                     mx: 'auto',
-                    mb: 3,
+                    mb: 1,
                     color: stat.color,
                   }}
                 >

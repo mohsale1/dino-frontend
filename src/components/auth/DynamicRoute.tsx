@@ -140,7 +140,7 @@ const AccessDeniedAvatar: React.FC<{ size?: number }> = ({ size = 120 }) => {
       sx={{
         position: 'relative',
         display: 'inline-block',
-        mb: 3,
+        mb: 1,
       }}
     >
       {/* Main Lock Avatar */}
@@ -366,8 +366,8 @@ const AccessDeniedPage: React.FC = () => {
         background: `linear-gradient(135deg, ${errorBgColor} 0%, ${alpha(theme.palette.background.default, 0.9)} 100%)`,
         position: 'relative',
         overflow: 'hidden',
-        py: { xs: 4, md: 6 },
-        px: { xs: 2, md: 3 },
+        py: { xs: 1, md: 1.5 },
+        px: { xs: 1, md: 1.5 },
       }}
     >
       {/* Animated Background Elements */}
@@ -443,8 +443,8 @@ const AccessDeniedPage: React.FC = () => {
           key={index}
           sx={{
             position: 'absolute',
-            width: { xs: 4, md: 6 },
-            height: { xs: 4, md: 6 },
+            width: { xs: 4, md: 1.5 },
+            height: { xs: 4, md: 1.5 },
             borderRadius: '50%',
             backgroundColor: 'text.disabled',
             opacity: 0.2,
@@ -489,7 +489,7 @@ const AccessDeniedPage: React.FC = () => {
             sx={{ 
               fontSize: { xs: '1.75rem', md: '2.5rem' },
               lineHeight: 1.2,
-              mb: 2,
+              mb: 1,
             }}
           >
             Access Denied
@@ -502,7 +502,7 @@ const AccessDeniedPage: React.FC = () => {
             sx={{ 
               fontSize: { xs: '1rem', md: '1.125rem' },
               lineHeight: 1.6,
-              mb: 3,
+              mb: 1,
               fontWeight: 400,
             }}
           >
@@ -517,8 +517,8 @@ const AccessDeniedPage: React.FC = () => {
               color={roleInfo.color as any}
               sx={{
                 fontWeight: 600,
-                fontSize: { xs: '0.875rem', md: '1rem' },
-                py: 2.5,
+                fontSize: { xs: '0.8rem', md: '1rem' },
+                py: 1,
                 px: 1,
                 borderRadius: 3,
                 boxShadow: 2,
@@ -530,9 +530,9 @@ const AccessDeniedPage: React.FC = () => {
           <Box 
             sx={{ 
               mb: 4,
-              p: 2, 
+              p: 1, 
               backgroundColor: alpha(theme.palette.info.main, 0.1),
-              borderRadius: 2,
+              borderRadius: 1,
               border: '1px solid',
               borderColor: alpha(theme.palette.info.main, 0.3),
               maxWidth: 500,
@@ -544,7 +544,7 @@ const AccessDeniedPage: React.FC = () => {
               color="info.main"
               sx={{ 
                 fontWeight: 500,
-                fontSize: { xs: '0.875rem', md: '0.9375rem' },
+                fontSize: { xs: '0.8rem', md: '0.9375rem' },
                 mb: 1,
               }}
             >
@@ -555,7 +555,7 @@ const AccessDeniedPage: React.FC = () => {
                 variant="body2" 
                 color="text.secondary"
                 sx={{ 
-                  fontSize: { xs: '0.8125rem', md: '0.875rem' },
+                  fontSize: { xs: '0.75rem', md: '0.875rem' },
                   mt: 1,
                 }}
               >
@@ -568,9 +568,9 @@ const AccessDeniedPage: React.FC = () => {
           <Box 
             sx={{ 
               mb: 4,
-              p: 2, 
+              p: 1, 
               backgroundColor: 'grey.100', 
-              borderRadius: 2,
+              borderRadius: 1,
               border: '1px solid',
               borderColor: 'grey.300',
               maxWidth: 500,
@@ -596,7 +596,7 @@ const AccessDeniedPage: React.FC = () => {
               maxWidth: 500,
               mx: 'auto',
               mb: 4,
-              p: { xs: 2.5, md: 3 },
+              p: { xs: 2.5, md: 1.5 },
               backgroundColor: alpha(theme.palette.background.paper, 0.8),
               backdropFilter: 'blur(10px)',
               borderRadius: 3,
@@ -610,7 +610,7 @@ const AccessDeniedPage: React.FC = () => {
               fontWeight="700"
               color="text.primary"
               sx={{ 
-                mb: 2.5, 
+                mb: 1, 
                 fontSize: { xs: '1rem', md: '1.125rem' },
                 display: 'flex',
                 alignItems: 'center',
@@ -620,14 +620,14 @@ const AccessDeniedPage: React.FC = () => {
               <Box component="span" sx={{ fontSize: '1rem' }}>💡</Box>
               What you can try:
             </Typography>
-            <Stack spacing={1.5}>
+            <Stack spacing={1}>
               {suggestions.map((suggestion, index) => (
                 <Box
                   key={index}
                   sx={{
                     display: 'flex',
                     alignItems: 'flex-start',
-                    gap: 1.5,
+                    gap: 1,
                   }}
                 >
                   <Box
@@ -644,7 +644,7 @@ const AccessDeniedPage: React.FC = () => {
                     variant="body2"
                     color="text.secondary"
                     sx={{
-                      fontSize: { xs: '0.875rem', md: '0.9375rem' },
+                      fontSize: { xs: '0.8rem', md: '0.9375rem' },
                       lineHeight: 1.6,
                       flex: 1,
                     }}
@@ -659,10 +659,10 @@ const AccessDeniedPage: React.FC = () => {
           {/* Action Buttons */}
           <Stack 
             direction={{ xs: 'column', sm: 'row' }}
-            spacing={2}
+            spacing={1}
             justifyContent="center"
             alignItems="center"
-            sx={{ mb: 3 }}
+            sx={{ mb: 1 }}
           >
             <Button
               variant="contained"
@@ -751,8 +751,8 @@ const AccessDeniedPage: React.FC = () => {
             variant="body2" 
             color="text.secondary"
             sx={{ 
-              mt: 3,
-              fontSize: { xs: '0.8125rem', md: '0.875rem' },
+              mt: 1,
+              fontSize: { xs: '0.75rem', md: '0.875rem' },
               opacity: 0.8,
             }}
           >

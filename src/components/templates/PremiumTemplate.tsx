@@ -64,7 +64,7 @@ const PremiumTemplate: React.FC<TemplateProps> = ({
           color: '#000',
           padding: '8px 16px',
           borderRadius: '20px',
-          fontSize: '0.75rem',
+          fontSize: '0.7rem',
           fontWeight: 'bold',
           letterSpacing: '1px',
           textTransform: 'uppercase',

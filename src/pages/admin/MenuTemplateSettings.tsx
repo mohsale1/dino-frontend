@@ -213,7 +213,7 @@ const MenuTemplateSettings: React.FC = () => {
       >
         <Box sx={{ textAlign: 'center' }}>
           <CircularProgress size={60} />
-          <Typography variant="h6" sx={{ mt: 2 }}>
+          <Typography variant="h6" sx={{ mt: 1 }}>
             Loading templates...
           </Typography>
         </Box>
@@ -252,8 +252,8 @@ const MenuTemplateSettings: React.FC = () => {
               flexDirection: { xs: 'column', md: 'row' },
               justifyContent: 'space-between',
               alignItems: { xs: 'flex-start', md: 'center' },
-              gap: { xs: 2, md: 3 },
-              py: { xs: 3, sm: 4 },
+              gap: { xs: 1, md: 1.5 },
+              py: { xs: 1, sm: 4 },
               px: { xs: 3, sm: 4 },
             }}
           >
@@ -279,7 +279,7 @@ const MenuTemplateSettings: React.FC = () => {
               <Typography
                 variant="body1"
                 sx={{
-                  fontSize: { xs: '0.875rem', sm: '1rem' },
+                  fontSize: { xs: '0.8rem', sm: '1rem' },
                   fontWeight: 400,
                   maxWidth: '600px',
                   color: 'text.secondary',
@@ -290,7 +290,7 @@ const MenuTemplateSettings: React.FC = () => {
             </Box>
 
             {/* Action Buttons */}
-            <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center' }}>
+            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
               <Button
                 variant="contained"
                 startIcon={saving ? <CircularProgress size={16} color="inherit" /> : <Save />}
@@ -301,7 +301,7 @@ const MenuTemplateSettings: React.FC = () => {
                   py: 1,
                   fontWeight: 600,
                   textTransform: 'none',
-                  borderRadius: 2,
+                  borderRadius: 1,
                 }}
               >
                 {saving ? 'Saving...' : 'Save Template'}
@@ -332,14 +332,14 @@ const MenuTemplateSettings: React.FC = () => {
 
       {/* Main Content - Split Screen */}
       <Box sx={{ px: { xs: 3, sm: 4 }, py: 4, pb: 0 }}>
-        <Grid container spacing={3}>
+        <Grid container spacing={1}>
           {/* Left Side - Template Selector */}
           <Grid item xs={12} md={5}>
             <Paper
               elevation={2}
               sx={{
-                p: 3,
-                borderRadius: 2,
+                p: 1.5,
+                borderRadius: 1,
                 height: '100%',
                 minHeight: '600px',
               }}
@@ -347,13 +347,13 @@ const MenuTemplateSettings: React.FC = () => {
               <Typography variant="h6" fontWeight="600" gutterBottom>
                 Choose Template
               </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
                 Select a template to preview how your menu will look to customers
               </Typography>
 
-              <Divider sx={{ mb: 3 }} />
+              <Divider sx={{ mb: 1 }} />
 
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                 {menuTemplates.map((template) => (
                   <Card
                     key={template.id}
@@ -369,13 +369,13 @@ const MenuTemplateSettings: React.FC = () => {
                       },
                     }}
                   >
-                    <CardContent sx={{ p: 2.5 }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                    <CardContent sx={{ p: 1.5 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <Box
                           sx={{
                             width: 48,
                             height: 48,
-                            borderRadius: 2,
+                            borderRadius: 1,
                             backgroundColor: alpha(template.color, 0.1),
                             display: 'flex',
                             alignItems: 'center',
@@ -408,7 +408,7 @@ const MenuTemplateSettings: React.FC = () => {
                       </Box>
 
                       {selectedTemplate === template.id && (
-                        <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid', borderColor: 'divider' }}>
+                        <Box sx={{ mt: 1, pt: 1, borderTop: '1px solid', borderColor: 'divider' }}>
                           <Chip
                             icon={<CheckCircle />}
                             label="Currently Selected"
@@ -433,8 +433,8 @@ const MenuTemplateSettings: React.FC = () => {
             <Paper
               elevation={2}
               sx={{
-                p: 3,
-                borderRadius: 2,
+                p: 1.5,
+                borderRadius: 1,
                 height: '100%',
                 minHeight: '750px',
                 backgroundColor: '#fafafa',
@@ -443,11 +443,11 @@ const MenuTemplateSettings: React.FC = () => {
               <Typography variant="h6" fontWeight="600" gutterBottom>
                 Live Customer View
               </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
                 This is exactly how customers will see your menu on their phones
               </Typography>
 
-              <Divider sx={{ mb: 3 }} />
+              <Divider sx={{ mb: 1 }} />
 
               {/* Mobile Preview Frame */}
               <Box
@@ -481,7 +481,7 @@ const MenuTemplateSettings: React.FC = () => {
           severity={snackbar.severity}
           onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
           sx={{
-            borderRadius: 2,
+            borderRadius: 1,
             boxShadow: theme.shadows[8],
             backgroundColor: '#ffffff',
             color: 'text.primary',

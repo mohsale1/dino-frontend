@@ -186,8 +186,8 @@ const ErrorPage: React.FC<ErrorPageProps> = ({
       maxWidth="md" 
       className={className}
       sx={{ 
-        py: { xs: 4, md: 8 },
-        px: { xs: 2, md: 3 },
+        py: { xs: 1, md: 8 },
+        px: { xs: 1, md: 1.5 },
         minHeight: '100vh',
         display: 'flex',
         alignItems: 'center',
@@ -205,10 +205,10 @@ const ErrorPage: React.FC<ErrorPageProps> = ({
           overflow: 'hidden'
         }}
       >
-        <CardContent sx={{ p: { xs: 3, md: 4 } }}>
+        <CardContent sx={{ p: { xs: 3, md: 1 } }}>
           <Box sx={{ textAlign: 'center', mb: 4 }}>
             {/* Error Icon */}
-            <Box sx={{ mb: 3 }}>
+            <Box sx={{ mb: 1 }}>
               {errorConfig.icon}
             </Box>
 
@@ -219,7 +219,7 @@ const ErrorPage: React.FC<ErrorPageProps> = ({
                 color="text.secondary" 
                 sx={{ 
                   fontFamily: 'monospace',
-                  fontSize: { xs: '0.875rem', md: '1rem' },
+                  fontSize: { xs: '0.8rem', md: '1rem' },
                   mb: 1
                 }}
               >
@@ -234,9 +234,9 @@ const ErrorPage: React.FC<ErrorPageProps> = ({
               color="text.primary"
               gutterBottom
               sx={{ 
-                fontSize: { xs: '1.5rem', md: '2rem' },
+                fontSize: { xs: '1.25rem', md: '2rem' },
                 lineHeight: 1.2,
-                mb: 2
+                mb: 1
               }}
             >
               {errorConfig.title}
@@ -247,7 +247,7 @@ const ErrorPage: React.FC<ErrorPageProps> = ({
               variant="body1"
               color="text.secondary"
               sx={{ 
-                fontSize: { xs: '0.875rem', md: '1rem' },
+                fontSize: { xs: '0.8rem', md: '1rem' },
                 lineHeight: 1.6,
                 maxWidth: 480,
                 mx: 'auto'
@@ -266,11 +266,11 @@ const ErrorPage: React.FC<ErrorPageProps> = ({
               fontWeight="600" 
               color="text.primary"
               gutterBottom
-              sx={{ mb: 2 }}
+              sx={{ mb: 1 }}
             >
               What you can try:
             </Typography>
-            <Box component="ul" sx={{ pl: 2, m: 0 }}>
+            <Box component="ul" sx={{ pl: 1, m: 0 }}>
               {errorConfig.suggestions.map((suggestion, index) => (
                 <Typography 
                   key={index}
@@ -291,7 +291,7 @@ const ErrorPage: React.FC<ErrorPageProps> = ({
           {/* Action Buttons */}
           <Stack 
             direction={{ xs: 'column', sm: 'row' }}
-            spacing={2}
+            spacing={1}
             justifyContent="center"
             alignItems="center"
           >
@@ -306,8 +306,8 @@ const ErrorPage: React.FC<ErrorPageProps> = ({
                   minWidth: { xs: 'auto', sm: 140 },
                   fontWeight: 600,
                   textTransform: 'none',
-                  borderRadius: 2,
-                  py: { xs: 1.5, sm: 1.25 }
+                  borderRadius: 1,
+                  py: { xs: 1, sm: 1.25 }
                 }}
               >
                 Try Again
@@ -325,8 +325,8 @@ const ErrorPage: React.FC<ErrorPageProps> = ({
                   minWidth: { xs: 'auto', sm: 140 },
                   fontWeight: 600,
                   textTransform: 'none',
-                  borderRadius: 2,
-                  py: { xs: 1.5, sm: 1.25 },
+                  borderRadius: 1,
+                  py: { xs: 1, sm: 1.25 },
                   borderColor: 'divider',
                   color: 'text.primary',
                   '&:hover': {
@@ -350,8 +350,8 @@ const ErrorPage: React.FC<ErrorPageProps> = ({
                   minWidth: { xs: 'auto', sm: 140 },
                   fontWeight: 600,
                   textTransform: 'none',
-                  borderRadius: 2,
-                  py: { xs: 1.5, sm: 1.25 },
+                  borderRadius: 1,
+                  py: { xs: 1, sm: 1.25 },
                   color: 'text.secondary',
                   '&:hover': {
                     backgroundColor: 'action.hover'
@@ -365,7 +365,7 @@ const ErrorPage: React.FC<ErrorPageProps> = ({
 
           {/* Debug Info (Development Only) */}
           {process.env.NODE_ENV === 'development' && error && (
-            <Box sx={{ mt: 4, p: 2, backgroundColor: 'grey.50', borderRadius: 1 }}>
+            <Box sx={{ mt: 4, p: 1, backgroundColor: 'grey.50', borderRadius: 1 }}>
               <Typography variant="caption" color="text.secondary" sx={{ fontFamily: 'monospace' }}>
                 Debug Info: {typeof error === 'string' ? error : error.message}
               </Typography>

@@ -77,13 +77,13 @@ const ResponsiveStepConnector = styled(StepConnector)(({ theme }) => ({
 
 const ResponsiveStepLabel = styled(StepLabel)(({ theme }) => ({
   '& .MuiStepLabel-label': {
-    fontSize: '0.875rem',
+    fontSize: '0.8rem',
     fontWeight: 500,
     marginTop: theme.spacing(1),
     textAlign: 'center',
     lineHeight: 1.2,
     [theme.breakpoints.down('sm')]: {
-      fontSize: '0.75rem',
+      fontSize: '0.7rem',
       marginTop: theme.spacing(0.5),
     },
     [theme.breakpoints.down('xs')]: {
@@ -452,7 +452,7 @@ const RegistrationPage: React.FC = () => {
         backgroundColor: alpha(theme.palette.primary.main, 0.02),
         display: 'flex',
         flexDirection: 'column',
-        py: { xs: 2, md: 4 },
+        py: { xs: 1, md: 1 },
       }}
     >
       {/* Header Section */}
@@ -462,7 +462,7 @@ const RegistrationPage: React.FC = () => {
           borderBottom: '1px solid',
           borderColor: 'divider',
           py: 3,
-          mb: 3,
+          mb: 1,
         }}
       >
         <Container maxWidth="lg">
@@ -472,7 +472,7 @@ const RegistrationPage: React.FC = () => {
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              gap: 2,
+              gap: 1,
             }}
           >
             {/* Home Button - Absolute positioned on desktop */}
@@ -484,7 +484,7 @@ const RegistrationPage: React.FC = () => {
                 position: 'absolute',
                 right: 0,
                 top: 0,
-                borderRadius: 2,
+                borderRadius: 1,
                 textTransform: 'none',
                 fontWeight: 600,
                 display: { xs: 'none', sm: 'flex' },
@@ -494,14 +494,14 @@ const RegistrationPage: React.FC = () => {
             </Button>
 
             {/* Centered Content */}
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <DinoLogo size={40} animated={true} />
               <Typography
                 variant="h4"
                 component="h1"
                 fontWeight="700"
                 sx={{
-                  fontSize: { xs: '1.5rem', sm: '2rem' },
+                  fontSize: { xs: '1.25rem', sm: '2rem' },
                   color: 'text.primary',
                 }}
               >
@@ -527,14 +527,14 @@ const RegistrationPage: React.FC = () => {
                   display: 'inline-flex',
                   alignItems: 'center',
                   backgroundColor: alpha(theme.palette.success.main, 0.1),
-                  px: 2,
+                  px: 1,
                   py: 0.5,
-                  borderRadius: 2,
+                  borderRadius: 1,
                   border: '1px solid',
                   borderColor: alpha(theme.palette.success.main, 0.3),
                 }}
               >
-                <CheckCircle sx={{ fontSize: 14, mr: 1, color: 'success.main' }} />
+                <CheckCircle sx={{ fontSize: 12, mr: 1, color: 'success.main' }} />
                 <Typography variant="caption" fontWeight="600" color="success.main">
                   Code Verified
                 </Typography>
@@ -579,9 +579,9 @@ const RegistrationPage: React.FC = () => {
                 align="center" 
                 display="block" 
                 sx={{ 
-                  mt: 2, 
+                  mt: 1, 
                   color: 'text.secondary',
-                  fontSize: '0.75rem',
+                  fontSize: '0.7rem',
                   fontWeight: 500
                 }}
               >
@@ -591,19 +591,19 @@ const RegistrationPage: React.FC = () => {
           </Box>
 
           {error && (
-            <Alert severity="error" sx={{ mb: 3 }}>
+            <Alert severity="error" sx={{ mb: 1 }}>
               {error}
             </Alert>
           )}
 
-          <Box sx={{ mb: 3 }}>
+          <Box sx={{ mb: 1 }}>
             {renderStepContent(activeStep)}
           </Box>
 
           <Divider sx={{ my: 3 }} />
 
           {/* Navigation */}
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 1 }}>
             <Button
               disabled={activeStep === 0}
               onClick={handleBack}
@@ -611,8 +611,8 @@ const RegistrationPage: React.FC = () => {
               size="large"
               sx={{ 
                 minWidth: 100,
-                py: 1.5,
-                borderRadius: 2,
+                py: 1,
+                borderRadius: 1,
                 fontWeight: 600,
                 textTransform: 'none',
               }}
@@ -629,8 +629,8 @@ const RegistrationPage: React.FC = () => {
                 size="large"
                 sx={{ 
                   minWidth: 160,
-                  py: 1.5,
-                  borderRadius: 2,
+                  py: 1,
+                  borderRadius: 1,
                   fontWeight: 600,
                   textTransform: 'none',
                   fontSize: '1rem',
@@ -646,8 +646,8 @@ const RegistrationPage: React.FC = () => {
                 size="large"
                 sx={{ 
                   minWidth: 100,
-                  py: 1.5,
-                  borderRadius: 2,
+                  py: 1,
+                  borderRadius: 1,
                   fontWeight: 600,
                   textTransform: 'none',
                   fontSize: '1rem',
@@ -659,11 +659,11 @@ const RegistrationPage: React.FC = () => {
           </Box>
 
           {/* Login Link */}
-          <Box sx={{ mt: 3, textAlign: 'center' }}>
+          <Box sx={{ mt: 1, textAlign: 'center' }}>
             <Typography 
               variant="body2" 
               color="text.secondary"
-              sx={{ fontSize: '0.875rem' }}
+              sx={{ fontSize: '0.8rem' }}
             >
               Already have an account?{' '}
               <Button 
@@ -671,7 +671,7 @@ const RegistrationPage: React.FC = () => {
                 onClick={() => navigate('/login')}
                 size="small"
                 sx={{
-                  fontSize: '0.875rem',
+                  fontSize: '0.8rem',
                   textTransform: 'none',
                   fontWeight: 600,
                 }}
@@ -682,14 +682,14 @@ const RegistrationPage: React.FC = () => {
           </Box>
 
           {/* Home Link - Mobile Only */}
-          <Box sx={{ mt: 2, textAlign: 'center', display: { xs: 'block', sm: 'none' } }}>
+          <Box sx={{ mt: 1, textAlign: 'center', display: { xs: 'block', sm: 'none' } }}>
             <Button
               variant="text"
               startIcon={<Home />}
               onClick={() => navigate('/')}
               size="small"
               sx={{
-                fontSize: '0.875rem',
+                fontSize: '0.8rem',
                 textTransform: 'none',
                 fontWeight: 600,
               }}

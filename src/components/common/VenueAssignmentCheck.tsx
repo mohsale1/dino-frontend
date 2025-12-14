@@ -46,26 +46,26 @@ const VenueAssignmentCheck: React.FC<VenueAssignmentCheckProps> = ({
           justifyContent: 'center',
           alignItems: 'center',
           minHeight: '60vh',
-          p: 3,
+          p: 1.5,
         }}
       >
         <Card sx={{ maxWidth: 600, width: '100%' }}>
-          <CardContent sx={{ textAlign: 'center', p: 4 }}>
+          <CardContent sx={{ textAlign: 'center', p: 1 }}>
             <StoreIcon 
               sx={{ 
                 fontSize: 80, 
                 color: 'warning.main', 
-                mb: 2 
+                mb: 1 
               }} 
             />
             <Typography variant="h4" gutterBottom color="warning.main">
               No Venue Assigned
             </Typography>
-            <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+            <Typography variant="body1" color="text.secondary" sx={{ mb: 1 }}>
               {defaultMessage}
             </Typography>
             
-            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center', flexWrap: 'wrap' }}>
               <Button
                 variant="contained"
                 startIcon={<ContactIcon />}
@@ -90,7 +90,7 @@ const VenueAssignmentCheck: React.FC<VenueAssignmentCheckProps> = ({
               )}
             </Box>
             
-            <Alert severity="info" sx={{ mt: 3, textAlign: 'left' }}>
+            <Alert severity="info" sx={{ mt: 1, textAlign: 'left' }}>
               <Typography variant="subtitle2" gutterBottom>
                 What you can do:
               </Typography>
@@ -111,15 +111,15 @@ const VenueAssignmentCheck: React.FC<VenueAssignmentCheckProps> = ({
     <Alert 
       severity="warning" 
       icon={<WarningIcon />}
-      sx={{ mb: 3 }}
+      sx={{ mb: 1 }}
     >
       <Typography variant="h6" gutterBottom>
         No Venue Assigned
       </Typography>
-      <Typography variant="body2" sx={{ mb: 2 }}>
+      <Typography variant="body2" sx={{ mb: 1 }}>
         {defaultMessage}
       </Typography>
-      <Box sx={{ display: 'flex', gap: 2, mt: 2, flexWrap: 'wrap' }}>
+      <Box sx={{ display: 'flex', gap: 1, mt: 1, flexWrap: 'wrap' }}>
         <Button 
           size="small"
           variant="contained" 

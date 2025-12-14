@@ -46,8 +46,8 @@ const MenuCategories: React.FC<MenuCategoriesProps> = ({
 
   return (
     <Box sx={{ 
-      py: { xs: 2, sm: 2.5 }, 
-      px: { xs: 2, sm: 2.5 },
+      py: { xs: 1, sm: 1.5 }, 
+      px: { xs: 1, sm: 1.5 },
       backgroundColor: 'background.paper', 
       borderRadius: 2.5, 
       border: '1px solid', 
@@ -60,11 +60,11 @@ const MenuCategories: React.FC<MenuCategoriesProps> = ({
         display: 'flex', 
         justifyContent: 'space-between', 
         alignItems: 'center',
-        mb: 2
+        mb: 1
       }}>
         {/* Left side - Categories title */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Category sx={{ color: 'primary.main', fontSize: 14 }} />
+          <Category sx={{ color: 'primary.main', fontSize: 12 }} />
           <Typography variant="subtitle1" fontWeight="700" color="text.primary" sx={{ fontSize: '0.95rem' }}>
             Categories ({categories.length})
           </Typography>
@@ -74,14 +74,14 @@ const MenuCategories: React.FC<MenuCategoriesProps> = ({
         <Button
           variant="outlined"
           size="small"
-          startIcon={<Add sx={{ fontSize: 14 }} />}
+          startIcon={<Add sx={{ fontSize: 12 }} />}
           onClick={onAddCategory}
           sx={{ 
-            borderRadius: 1.5,
-            px: 1.5,
+            borderRadius: 1,
+            px: 1,
             py: 0.5,
             fontWeight: 600,
-            fontSize: '0.75rem',
+            fontSize: '0.7rem',
             textTransform: 'none',
             '&:hover': {
               transform: 'translateY(-1px)',
@@ -104,14 +104,14 @@ const MenuCategories: React.FC<MenuCategoriesProps> = ({
           textAlign: 'center'
         }}>
           <Category sx={{ 
-            fontSize: 14, 
+            fontSize: 12, 
             color: 'text.disabled', 
-            mb: 1.5 
+            mb: 1 
           }} />
           <Typography variant="body2" color="text.secondary" gutterBottom sx={{ fontSize: '0.85rem' }}>
             No categories yet
           </Typography>
-          <Typography variant="caption" color="text.secondary" sx={{ mb: 2, maxWidth: 300 }}>
+          <Typography variant="caption" color="text.secondary" sx={{ mb: 1, maxWidth: 300 }}>
             Create categories to organize your menu items
           </Typography>
           <Button
@@ -120,7 +120,7 @@ const MenuCategories: React.FC<MenuCategoriesProps> = ({
             startIcon={<Add />}
             onClick={onAddCategory}
             sx={{ 
-              fontSize: '0.75rem',
+              fontSize: '0.7rem',
               textTransform: 'none'
             }}
           >
@@ -131,7 +131,7 @@ const MenuCategories: React.FC<MenuCategoriesProps> = ({
         <Box sx={{ 
           display: 'flex', 
           flexWrap: 'wrap', 
-          gap: 1.5,
+          gap: 1,
           alignItems: 'center'
         }}>
           {categories.map(category => {
@@ -159,7 +159,7 @@ const MenuCategories: React.FC<MenuCategoriesProps> = ({
                         variant="body2" 
                         sx={{ 
                           fontWeight: 600,
-                          fontSize: '0.875rem',
+                          fontSize: '0.8rem',
                           color: isSelected ? 'primary.contrastText' : 'text.primary',
                           whiteSpace: 'nowrap'
                         }}
@@ -206,7 +206,7 @@ const MenuCategories: React.FC<MenuCategoriesProps> = ({
                       boxShadow: `0 3px 10px ${alpha(theme.palette.primary.main, 0.25)}`,
                     } : {},
                     '& .MuiChip-label': {
-                      px: 2,
+                      px: 1,
                       py: 0.75,
                     }
                   }}
@@ -232,8 +232,8 @@ const MenuCategories: React.FC<MenuCategoriesProps> = ({
                           onEditCategory(category);
                         }}
                         sx={{
-                          width: 28,
-                          height: 28,
+                          width: 22,
+                          height: 22,
                           backgroundColor: 'background.paper',
                           border: '1.5px solid',
                           borderColor: 'grey.300',
@@ -258,8 +258,8 @@ const MenuCategories: React.FC<MenuCategoriesProps> = ({
                           onDeleteCategory(category.id);
                         }}
                         sx={{
-                          width: 28,
-                          height: 28,
+                          width: 22,
+                          height: 22,
                           backgroundColor: 'background.paper',
                           border: '1.5px solid',
                           borderColor: 'grey.300',

@@ -29,7 +29,7 @@ const OwnerAccountStep: React.FC<OwnerAccountStepProps> = ({
   onToggleConfirmPassword
 }) => {
   return (
-    <Grid container spacing={3}>
+    <Grid container spacing={1}>
       <Grid item xs={12}>
         <Typography 
           variant="h6" 
@@ -47,7 +47,7 @@ const OwnerAccountStep: React.FC<OwnerAccountStepProps> = ({
         <Typography 
           variant="body2" 
           color="text.secondary" 
-          sx={{ mb: 3 }}
+          sx={{ mb: 1 }}
         >
           Create your admin account to manage the workspace and venue
         </Typography>

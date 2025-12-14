@@ -54,7 +54,7 @@ const TableCard: React.FC<TableCardProps> = ({
         border: '1px solid', 
         borderColor: 'grey.200',
         backgroundColor: 'background.paper',
-        borderRadius: 2,
+        borderRadius: 1,
         borderLeft: `4px solid`,
         borderLeftColor: 'primary.main',
         opacity: table.isActive ? 1 : 0.6,
@@ -69,7 +69,7 @@ const TableCard: React.FC<TableCardProps> = ({
       }}
     >
       <CardContent sx={{ 
-        p: 2, 
+        p: 1, 
         flexGrow: 1, 
         display: 'flex', 
         flexDirection: 'column', 
@@ -81,7 +81,7 @@ const TableCard: React.FC<TableCardProps> = ({
           justifyContent="space-between" 
           alignItems="flex-start" 
           spacing={1}
-          sx={{ mb: 1.5 }}
+          sx={{ mb: 1 }}
         >
           <Box sx={{ flex: 1, minWidth: 0 }}>
             <Typography 
@@ -92,7 +92,7 @@ const TableCard: React.FC<TableCardProps> = ({
               sx={{ 
                 fontSize: '1rem',
                 letterSpacing: '-0.01em',
-                mb: 0.25
+                mb: 0.2
               }}
             >
               Table {table.table_number}
@@ -101,7 +101,7 @@ const TableCard: React.FC<TableCardProps> = ({
               variant="body2" 
               color="text.secondary"
               noWrap
-              sx={{ fontSize: '0.75rem' }}
+              sx={{ fontSize: '0.7rem' }}
             >
               {getAreaName(table.location || '')}
             </Typography>
@@ -113,8 +113,8 @@ const TableCard: React.FC<TableCardProps> = ({
               onClick={() => onToggleTableStatus(table.id)}
               sx={{ 
                 color: table.isActive ? 'success.main' : 'text.disabled',
-                width: 28,
-                height: 28
+                width: 22,
+                height: 22
               }}
             >
               {table.isActive ? <Visibility fontSize="small" /> : <VisibilityOff fontSize="small" />}
@@ -132,12 +132,12 @@ const TableCard: React.FC<TableCardProps> = ({
               gap: 1,
               p: 1.25,
               backgroundColor: 'grey.50',
-              borderRadius: 1.5,
+              borderRadius: 1,
               border: '1px solid',
               borderColor: 'grey.100'
             }}
           >
-            <People sx={{ fontSize: 14, color: 'primary.main' }} />
+            <People sx={{ fontSize: 12, color: 'primary.main' }} />
             <Typography variant="body2" color="text.primary" fontWeight="500" sx={{ fontSize: '0.8rem' }}>
               {table.capacity} people
             </Typography>
@@ -151,13 +151,13 @@ const TableCard: React.FC<TableCardProps> = ({
               gap: 1,
               p: 1.25,
               backgroundColor: 'grey.50',
-              borderRadius: 1.5,
+              borderRadius: 1,
               border: '1px solid',
               borderColor: 'grey.100'
             }}
           >
             {React.cloneElement(getStatusIcon(table.table_status || table.status), { 
-              sx: { fontSize: 14, color: getStatusColor(table.table_status || table.status) === 'success' ? 'success.main' : 
+              sx: { fontSize: 12, color: getStatusColor(table.table_status || table.status) === 'success' ? 'success.main' : 
                                    getStatusColor(table.table_status || table.status) === 'error' ? 'error.main' :
                                    getStatusColor(table.table_status || table.status) === 'warning' ? 'warning.main' : 'primary.main' }
             })}
@@ -181,7 +181,7 @@ const TableCard: React.FC<TableCardProps> = ({
               variant="body2" 
               color="text.secondary"
               sx={{ 
-                fontSize: '0.75rem',
+                fontSize: '0.7rem',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
                 display: '-webkit-box',
@@ -217,7 +217,7 @@ const TableCard: React.FC<TableCardProps> = ({
                   }
                 }}
               >
-                <QrCode sx={{ fontSize: 14 }} />
+                <QrCode sx={{ fontSize: 12 }} />
               </IconButton>
             </Tooltip>
             <Tooltip title="Print QR Code">
@@ -237,7 +237,7 @@ const TableCard: React.FC<TableCardProps> = ({
                   }
                 }}
               >
-                <Print sx={{ fontSize: 14 }} />
+                <Print sx={{ fontSize: 12 }} />
               </IconButton>
             </Tooltip>
           </Stack>
@@ -261,7 +261,7 @@ const TableCard: React.FC<TableCardProps> = ({
                   }
                 }}
               >
-                <Edit sx={{ fontSize: 14 }} />
+                <Edit sx={{ fontSize: 12 }} />
               </IconButton>
             </Tooltip>
             <Tooltip title="Delete Table">
@@ -283,7 +283,7 @@ const TableCard: React.FC<TableCardProps> = ({
                   }
                 }}
               >
-                <Delete sx={{ fontSize: 14 }} />
+                <Delete sx={{ fontSize: 12 }} />
               </IconButton>
             </Tooltip>
           </Stack>

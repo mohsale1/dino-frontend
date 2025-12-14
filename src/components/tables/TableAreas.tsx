@@ -31,7 +31,7 @@ const TableAreas: React.FC<TableAreasProps> = ({
   return (
     <Box sx={{ 
       backgroundColor: 'white',
-      borderRadius: 2,
+      borderRadius: 1,
       border: '1px solid',
       borderColor: 'grey.200',
       boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
@@ -42,11 +42,11 @@ const TableAreas: React.FC<TableAreasProps> = ({
         display: 'flex', 
         alignItems: 'center', 
         justifyContent: 'space-between', 
-        p: 3,
+        p: 1.5,
         borderBottom: '1px solid',
         borderColor: 'grey.200'
       }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Box
             sx={{
               width: 48,
@@ -58,7 +58,7 @@ const TableAreas: React.FC<TableAreasProps> = ({
               justifyContent: 'center'
             }}
           >
-            <LocationOn sx={{ color: 'white', fontSize: 14 }} />
+            <LocationOn sx={{ color: 'white', fontSize: 12 }} />
           </Box>
           <Box>
             <Typography variant="h5" fontWeight="700" sx={{ color: 'text.primary', mb: 0.5 }}>
@@ -76,7 +76,7 @@ const TableAreas: React.FC<TableAreasProps> = ({
           onClick={onAddArea}
           size="medium"
           sx={{
-            borderRadius: 2,
+            borderRadius: 1,
             backgroundColor: 'primary.main',
             color: 'white',
             fontWeight: 600,
@@ -95,7 +95,7 @@ const TableAreas: React.FC<TableAreasProps> = ({
       </Box>
       
       {/* Content */}
-      <Box sx={{ p: 3 }}>
+      <Box sx={{ p: 1.5 }}>
         {areas.length === 0 ? (
           <Box sx={{ 
             textAlign: 'center', 
@@ -111,7 +111,7 @@ const TableAreas: React.FC<TableAreasProps> = ({
                 alignItems: 'center',
                 justifyContent: 'center',
                 mx: 'auto',
-                mb: 3
+                mb: 1
               }}
             >
               <LocationOn sx={{ fontSize: 26, color: 'text.secondary' }} />
@@ -130,10 +130,10 @@ const TableAreas: React.FC<TableAreasProps> = ({
               sx={{
                 backgroundColor: 'primary.main',
                 color: 'white',
-                borderRadius: 2,
+                borderRadius: 1,
                 fontWeight: 600,
                 px: 4,
-                py: 1.5,
+                py: 1,
                 '&:hover': {
                   backgroundColor: 'primary.dark',
                   transform: 'translateY(-1px)',
@@ -146,7 +146,7 @@ const TableAreas: React.FC<TableAreasProps> = ({
             </Button>
           </Box>
         ) : (
-          <Grid container spacing={3}>
+          <Grid container spacing={1}>
             {areas.map((area) => {
               const tablesInArea = tables.filter(t => t.location === area.id);
               
@@ -158,7 +158,7 @@ const TableAreas: React.FC<TableAreasProps> = ({
                       backgroundColor: 'white',
                       border: '1px solid',
                       borderColor: 'grey.200',
-                      borderRadius: 2,
+                      borderRadius: 1,
                       transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                       position: 'relative',
                       overflow: 'hidden',
@@ -178,7 +178,7 @@ const TableAreas: React.FC<TableAreasProps> = ({
                       }
                     }}
                   >
-                    <CardContent sx={{ p: 2.5, position: 'relative' }}>
+                    <CardContent sx={{ p: 1.5, position: 'relative' }}>
                       {/* Action Buttons */}
                       <Box sx={{ 
                         position: 'absolute', 
@@ -205,7 +205,7 @@ const TableAreas: React.FC<TableAreasProps> = ({
                               transition: 'all 0.2s ease-in-out'
                             }}
                           >
-                            <Edit sx={{ fontSize: 14 }} />
+                            <Edit sx={{ fontSize: 12 }} />
                           </IconButton>
                         </Tooltip>
                         <Tooltip title="Delete Area" placement="top">
@@ -225,7 +225,7 @@ const TableAreas: React.FC<TableAreasProps> = ({
                               transition: 'all 0.2s ease-in-out'
                             }}
                           >
-                            <Delete sx={{ fontSize: 14 }} />
+                            <Delete sx={{ fontSize: 12 }} />
                           </IconButton>
                         </Tooltip>
                       </Box>
@@ -235,13 +235,13 @@ const TableAreas: React.FC<TableAreasProps> = ({
                         sx={{
                           width: 64,
                           height: 64,
-                          borderRadius: 2,
+                          borderRadius: 1,
                           backgroundColor: 'primary.main',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
                           mx: 'auto',
-                          mb: 2,
+                          mb: 1,
                         }}
                       >
                         <LocationOn sx={{ color: 'white', fontSize: 26 }} />
@@ -271,7 +271,7 @@ const TableAreas: React.FC<TableAreasProps> = ({
                           variant="body2" 
                           sx={{ 
                             color: 'text.secondary',
-                            mb: 2,
+                            mb: 1,
                             fontSize: '0.85rem',
                             textAlign: 'center',
                             lineHeight: 1.5,
@@ -293,14 +293,14 @@ const TableAreas: React.FC<TableAreasProps> = ({
                         alignItems: 'center', 
                         justifyContent: 'center', 
                         gap: 1, 
-                        mb: 2,
+                        mb: 1,
                         p: 1.5,
                         borderRadius: 1,
                         backgroundColor: 'grey.50',
                         border: '1px solid',
                         borderColor: 'grey.200'
                       }}>
-                        <TableRestaurant sx={{ fontSize: 14, color: 'primary.main' }} />
+                        <TableRestaurant sx={{ fontSize: 12, color: 'primary.main' }} />
                         <Typography 
                           variant="h6" 
                           fontWeight="700" 
@@ -310,7 +310,7 @@ const TableAreas: React.FC<TableAreasProps> = ({
                         </Typography>
                         <Typography 
                           variant="body2" 
-                          sx={{ color: 'text.secondary', fontWeight: 500, fontSize: '0.875rem' }}
+                          sx={{ color: 'text.secondary', fontWeight: 500, fontSize: '0.8rem' }}
                         >
                           {tablesInArea.length === 1 ? 'table' : 'tables'}
                         </Typography>
@@ -333,10 +333,10 @@ const TableAreas: React.FC<TableAreasProps> = ({
                           variant="outlined"
                           sx={{
                             fontWeight: 600,
-                            fontSize: '0.75rem',
+                            fontSize: '0.7rem',
                             height: 24,
                             '& .MuiChip-label': {
-                              px: 1.5
+                              px: 1
                             }
                           }}
                         />

@@ -182,7 +182,7 @@ const ProfessionalTemplate: React.FC<TemplateProps> = ({
         >
           <Typography
             sx={{
-              fontSize: '0.75rem',
+              fontSize: '0.7rem',
               color: '#95a5a6',
               fontFamily: '"Times New Roman", serif',
               fontStyle: 'italic'

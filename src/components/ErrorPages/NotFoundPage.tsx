@@ -30,7 +30,7 @@ const Shop404Avatar: React.FC<{ size?: number }> = ({ size = 120 }) => {
       sx={{
         position: 'relative',
         display: 'inline-block',
-        mb: 3,
+        mb: 1,
       }}
     >
       {/* Main Shop Avatar */}
@@ -244,8 +244,8 @@ const NotFoundPage: React.FC<NotFoundPageProps> = ({
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: 'background.default',
-        px: { xs: 3, md: 4 },
-        py: { xs: 4, md: 6 },
+        px: { xs: 3, md: 1 },
+        py: { xs: 1, md: 1.5 },
         textAlign: 'center',
         position: 'relative',
         overflow: 'hidden',
@@ -369,8 +369,8 @@ const NotFoundPage: React.FC<NotFoundPageProps> = ({
           key={index}
           sx={{
             position: 'absolute',
-            width: { xs: 4, md: 6 },
-            height: { xs: 4, md: 6 },
+            width: { xs: 4, md: 1.5 },
+            height: { xs: 4, md: 1.5 },
             borderRadius: '50%',
             backgroundColor: 'text.disabled',
             opacity: 0.2,
@@ -422,7 +422,7 @@ const NotFoundPage: React.FC<NotFoundPageProps> = ({
           sx={{ 
             fontSize: { xs: '1.75rem', md: '2.5rem' },
             lineHeight: 1.2,
-            mb: 2,
+            mb: 1,
           }}
         >
           {title}
@@ -435,7 +435,7 @@ const NotFoundPage: React.FC<NotFoundPageProps> = ({
           sx={{ 
             fontSize: { xs: '1rem', md: '1.125rem' },
             lineHeight: 1.6,
-            mb: 3,
+            mb: 1,
             fontWeight: 400,
           }}
         >
@@ -446,9 +446,9 @@ const NotFoundPage: React.FC<NotFoundPageProps> = ({
         <Box 
           sx={{ 
             mb: 4,
-            p: 2, 
+            p: 1, 
             backgroundColor: 'grey.100', 
-            borderRadius: 2,
+            borderRadius: 1,
             border: '1px solid',
             borderColor: 'grey.300',
             maxWidth: 500,
@@ -476,13 +476,13 @@ const NotFoundPage: React.FC<NotFoundPageProps> = ({
               fontWeight="600" 
               color="text.primary"
               gutterBottom
-              sx={{ mb: 2 }}
+              sx={{ mb: 1 }}
             >
               Try these instead:
             </Typography>
             <Stack 
               direction={{ xs: 'column', sm: 'row' }}
-              spacing={2}
+              spacing={1}
               justifyContent="center"
               flexWrap="wrap"
             >
@@ -496,7 +496,7 @@ const NotFoundPage: React.FC<NotFoundPageProps> = ({
                     fontWeight: 500,
                     py: 1,
                     px: 3,
-                    borderRadius: 2,
+                    borderRadius: 1,
                     borderColor: 'primary.200',
                     color: 'primary.main',
                     '&:hover': {
@@ -515,7 +515,7 @@ const NotFoundPage: React.FC<NotFoundPageProps> = ({
         {/* Action Buttons */}
         <Stack 
           direction={{ xs: 'column', sm: 'row' }}
-          spacing={3}
+          spacing={1}
           justifyContent="center"
           alignItems="center"
           sx={{ mt: 4 }}
@@ -529,8 +529,8 @@ const NotFoundPage: React.FC<NotFoundPageProps> = ({
               minWidth: 160,
               fontWeight: 600,
               textTransform: 'none',
-              borderRadius: 2,
-              py: 1.5,
+              borderRadius: 1,
+              py: 1,
               px: 4,
               fontSize: '1rem',
               boxShadow: 2,
@@ -552,8 +552,8 @@ const NotFoundPage: React.FC<NotFoundPageProps> = ({
               minWidth: 160,
               fontWeight: 600,
               textTransform: 'none',
-              borderRadius: 2,
-              py: 1.5,
+              borderRadius: 1,
+              py: 1,
               px: 4,
               fontSize: '1rem',
               borderColor: 'divider',
@@ -577,8 +577,8 @@ const NotFoundPage: React.FC<NotFoundPageProps> = ({
               minWidth: 160,
               fontWeight: 600,
               textTransform: 'none',
-              borderRadius: 2,
-              py: 1.5,
+              borderRadius: 1,
+              py: 1,
               px: 4,
               fontSize: '1rem',
               color: 'text.secondary',
@@ -598,7 +598,7 @@ const NotFoundPage: React.FC<NotFoundPageProps> = ({
           color="text.secondary"
           sx={{ 
             mt: 4,
-            fontSize: '0.875rem',
+            fontSize: '0.8rem',
             fontStyle: 'italic'
           }}
         >

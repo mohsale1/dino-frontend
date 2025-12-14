@@ -97,7 +97,7 @@ const LoginPage: React.FC = () => {
         backgroundColor: alpha(theme.palette.primary.main, 0.02),
         display: 'flex',
         flexDirection: 'column',
-        py: { xs: 2, md: 4 },
+        py: { xs: 1, md: 1 },
       }}
     >
       {/* Header Section */}
@@ -107,7 +107,7 @@ const LoginPage: React.FC = () => {
           borderBottom: '1px solid',
           borderColor: 'divider',
           py: 3,
-          mb: 3,
+          mb: 1,
         }}
       >
         <Container maxWidth="lg">
@@ -117,7 +117,7 @@ const LoginPage: React.FC = () => {
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              gap: 2,
+              gap: 1,
             }}
           >
             {/* Home Button - Absolute positioned on desktop */}
@@ -129,7 +129,7 @@ const LoginPage: React.FC = () => {
                 position: 'absolute',
                 right: 0,
                 top: 0,
-                borderRadius: 2,
+                borderRadius: 1,
                 textTransform: 'none',
                 fontWeight: 600,
                 display: { xs: 'none', sm: 'flex' },
@@ -139,14 +139,14 @@ const LoginPage: React.FC = () => {
             </Button>
 
             {/* Centered Content */}
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <DinoLogo size={40} animated={true} />
               <Typography
                 variant="h4"
                 component="h1"
                 fontWeight="700"
                 sx={{
-                  fontSize: { xs: '1.5rem', sm: '2rem' },
+                  fontSize: { xs: '1.25rem', sm: '2rem' },
                   color: 'text.primary',
                 }}
               >
@@ -188,7 +188,7 @@ const LoginPage: React.FC = () => {
               component="h2"
               fontWeight="600"
               sx={{
-                fontSize: { xs: '1.25rem', sm: '1.5rem' },
+                fontSize: { xs: '1.25rem', sm: '1.25rem' },
                 color: 'text.primary',
                 mb: 1,
               }}
@@ -198,7 +198,7 @@ const LoginPage: React.FC = () => {
             <Typography
               variant="body2"
               sx={{
-                fontSize: { xs: '0.875rem', sm: '1rem' },
+                fontSize: { xs: '0.8rem', sm: '1rem' },
                 color: 'text.secondary',
               }}
             >
@@ -211,8 +211,8 @@ const LoginPage: React.FC = () => {
             <Alert 
               severity="success" 
               sx={{ 
-                mb: 3,
-                borderRadius: 2,
+                mb: 1,
+                borderRadius: 1,
               }}
             >
               {successMessage}
@@ -224,8 +224,8 @@ const LoginPage: React.FC = () => {
             <Alert 
               severity="error" 
               sx={{ 
-                mb: 3,
-                borderRadius: 2,
+                mb: 1,
+                borderRadius: 1,
               }}
             >
               {error}
@@ -252,9 +252,9 @@ const LoginPage: React.FC = () => {
                 ),
               }}
               sx={{ 
-                mb: 3,
+                mb: 1,
                 '& .MuiOutlinedInput-root': {
-                  borderRadius: 2,
+                  borderRadius: 1,
                 },
               }}
             />
@@ -289,7 +289,7 @@ const LoginPage: React.FC = () => {
               sx={{ 
                 mb: 4,
                 '& .MuiOutlinedInput-root': {
-                  borderRadius: 2,
+                  borderRadius: 1,
                 },
               }}
             />
@@ -302,12 +302,12 @@ const LoginPage: React.FC = () => {
               size="large"
               disabled={loading}
               sx={{ 
-                py: 1.5,
-                borderRadius: 2,
+                py: 1,
+                borderRadius: 1,
                 fontWeight: 600,
                 textTransform: 'none',
                 fontSize: '1rem',
-                mb: 3,
+                mb: 1,
               }}
             >
               {loading ? (
@@ -322,7 +322,7 @@ const LoginPage: React.FC = () => {
               <Typography 
                 variant="body2" 
                 color="text.secondary"
-                sx={{ fontSize: '0.875rem' }}
+                sx={{ fontSize: '0.8rem' }}
               >
                 Don't have an account?{' '}
                 <Button 
@@ -330,7 +330,7 @@ const LoginPage: React.FC = () => {
                   onClick={() => navigate('/register')}
                   size="small"
                   sx={{
-                    fontSize: '0.875rem',
+                    fontSize: '0.8rem',
                     textTransform: 'none',
                     fontWeight: 600,
                   }}
@@ -341,14 +341,14 @@ const LoginPage: React.FC = () => {
             </Box>
 
             {/* Home Link - Mobile Only */}
-            <Box sx={{ textAlign: 'center', mt: 2, display: { xs: 'block', sm: 'none' } }}>
+            <Box sx={{ textAlign: 'center', mt: 1, display: { xs: 'block', sm: 'none' } }}>
               <Button
                 variant="text"
                 startIcon={<Home />}
                 onClick={() => navigate('/')}
                 size="small"
                 sx={{
-                  fontSize: '0.875rem',
+                  fontSize: '0.8rem',
                   textTransform: 'none',
                   fontWeight: 600,
                 }}

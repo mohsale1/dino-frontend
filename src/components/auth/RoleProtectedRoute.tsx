@@ -99,23 +99,23 @@ const AccessDeniedPage: React.FC = () => {
           borderColor: 'error.200'
         }}
       >
-        <Lock sx={{ fontSize: 80, color: 'error.main', mb: 3 }} />
+        <Lock sx={{ fontSize: 80, color: 'error.main', mb: 1 }} />
         
         <Typography variant="h4" gutterBottom fontWeight="bold" color="error.main">
           Access Denied
         </Typography>
         
-        <Typography variant="h6" color="text.secondary" sx={{ mb: 3 }}>
+        <Typography variant="h6" color="text.secondary" sx={{ mb: 1 }}>
           You don't have permission to access this page
         </Typography>
         
         <Box sx={{ 
-          p: 3, 
+          p: 1.5, 
           backgroundColor: 'warning.50', 
-          borderRadius: 2, 
+          borderRadius: 1, 
           border: '1px solid',
           borderColor: 'warning.200',
-          mb: 3 
+          mb: 1 
         }}>
           <Warning sx={{ color: 'warning.main', mr: 1, verticalAlign: 'middle' }} />
           <Typography variant="body1" component="span" color="warning.dark">
@@ -124,14 +124,14 @@ const AccessDeniedPage: React.FC = () => {
         </Box>
 
         {isOperator() && (
-          <Box sx={{ mt: 3 }}>
+          <Box sx={{ mt: 1 }}>
             <Typography variant="body2" color="text.secondary">
               As an operator, you only have access to the Orders page.
             </Typography>
           </Box>
         )}
         
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
           If you believe this is an error, please contact your administrator.
         </Typography>
       </Paper>

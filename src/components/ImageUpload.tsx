@@ -226,11 +226,11 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
     <Box>
       {/* Existing Images */}
       {existingImages.length > 0 && (
-        <Box sx={{ mb: 3 }}>
+        <Box sx={{ mb: 1 }}>
           <Typography variant="h6" gutterBottom>
             Current Images
           </Typography>
-          <Grid container spacing={2}>
+          <Grid container spacing={1}>
             {existingImages.map((imageUrl, index) => (
               <Grid item xs={6} sm={4} md={3} key={index}>
                 <Card>
@@ -272,8 +272,8 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
         sx={{
           border: '2px dashed',
           borderColor: isDragActive ? 'primary.main' : 'grey.300',
-          borderRadius: 2,
-          p: 3,
+          borderRadius: 1,
+          p: 1.5,
           textAlign: 'center',
           cursor: disabled ? 'not-allowed' : 'pointer',
           bgcolor: isDragActive ? 'action.hover' : 'background.paper',
@@ -287,13 +287,13 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
       >
         <input {...getInputProps()} ref={fileInputRef} />
         
-        <CloudUpload sx={{ fontSize: 14, color: 'text.secondary', mb: 2 }} />
+        <CloudUpload sx={{ fontSize: 12, color: 'text.secondary', mb: 1 }} />
         
         <Typography variant="h6" gutterBottom>
           {isDragActive ? 'Drop images here' : 'Drag & drop images here'}
         </Typography>
         
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
           or click to select files
         </Typography>
         
@@ -309,7 +309,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
           Choose Files
         </Button>
         
-        <Typography variant="caption" display="block" sx={{ mt: 2 }}>
+        <Typography variant="caption" display="block" sx={{ mt: 1 }}>
           Supported formats: JPEG, PNG, WebP, GIF (max {storageService.formatFileSize(5 * 1024 * 1024)})
           {multiple && ` • Max ${maxFiles} files`}
         </Typography>
@@ -317,12 +317,12 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
 
       {/* File List */}
       {files.length > 0 && (
-        <Box sx={{ mt: 3 }}>
+        <Box sx={{ mt: 1 }}>
           <Typography variant="h6" gutterBottom>
             Selected Files ({files.length})
           </Typography>
           
-          <Grid container spacing={2}>
+          <Grid container spacing={1}>
             {files.map((fileData, index) => (
               <Grid item xs={6} sm={4} md={3} key={index}>
                 <Card>
@@ -394,7 +394,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
           
           {/* Upload Progress */}
           {uploading && (
-            <Box sx={{ mt: 2 }}>
+            <Box sx={{ mt: 1 }}>
               <Typography variant="body2" gutterBottom>
                 Upload Progress: {Math.round(getUploadProgress())}%
               </Typography>
@@ -403,7 +403,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
           )}
           
           {/* Upload Button */}
-          <Box sx={{ mt: 2, display: 'flex', gap: 2 }}>
+          <Box sx={{ mt: 1, display: 'flex', gap: 1 }}>
             <Button
               variant="contained"
               onClick={uploadAllFiles}
@@ -424,13 +424,13 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
           
           {/* Status Messages */}
           {allUploaded && (
-            <Alert severity="success" sx={{ mt: 2 }}>
+            <Alert severity="success" sx={{ mt: 1 }}>
               All files uploaded successfully!
             </Alert>
           )}
           
           {hasErrors && (
-            <Alert severity="error" sx={{ mt: 2 }}>
+            <Alert severity="error" sx={{ mt: 1 }}>
               Some files failed to upload. Please check the errors above.
             </Alert>
           )}

@@ -43,7 +43,7 @@ const StandardTemplate: React.FC<TemplateProps> = ({
         }}
       >
         {/* Standard Header */}
-        <Box sx={{ mb: 3 }}>
+        <Box sx={{ mb: 1 }}>
           <Typography
             variant="h2"
             sx={{
@@ -117,7 +117,7 @@ const StandardTemplate: React.FC<TemplateProps> = ({
 
         {/* Standard Instructions */}
         {includeInstructions && (
-          <Box sx={{ mt: 3 }}>
+          <Box sx={{ mt: 1 }}>
             <Typography
               variant="h6"
               sx={{
@@ -169,7 +169,7 @@ const StandardTemplate: React.FC<TemplateProps> = ({
             />
             <Typography
               sx={{
-                fontSize: '0.75rem',
+                fontSize: '0.7rem',
                 color: '#999999',
                 fontFamily: '"Roboto", sans-serif'
               }}

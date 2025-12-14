@@ -46,7 +46,7 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 2,
+    gap: 1,
     ...(fullScreen && {
       position: 'fixed',
       top: 0,
@@ -108,7 +108,7 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
       case 'skeleton':
         return (
           <Box sx={{ width: '100%', maxWidth: 300 }}>
-            <Skeleton variant="rectangular" height={spinnerSize} sx={{ borderRadius: 2 }} />
+            <Skeleton variant="rectangular" height={spinnerSize} sx={{ borderRadius: 1 }} />
             <Skeleton variant="text" sx={{ mt: 1 }} />
             <Skeleton variant="text" width="60%" />
           </Box>

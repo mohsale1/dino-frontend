@@ -31,9 +31,9 @@ const TestimonialsSection: React.FC = () => {
             sx={{
               color: 'primary.main',
               fontWeight: 700,
-              fontSize: '0.875rem',
+              fontSize: '0.8rem',
               letterSpacing: 1.5,
-              mb: 2,
+              mb: 1,
               display: 'block',
             }}
           >
@@ -44,7 +44,7 @@ const TestimonialsSection: React.FC = () => {
             sx={{
               fontSize: { xs: '2rem', md: '3rem' },
               fontWeight: 700,
-              mb: 2,
+              mb: 1,
               background: `linear-gradient(135deg, ${theme.palette.text.primary} 0%, ${alpha(theme.palette.text.primary, 0.7)} 100%)`,
               backgroundClip: 'text',
               WebkitBackgroundClip: 'text',

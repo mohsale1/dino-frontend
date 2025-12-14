@@ -74,7 +74,7 @@ const MobilePreviewFrame: React.FC<MobilePreviewFrameProps> = ({
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: '#f0f0f0',
-        p: 2,
+        p: 1,
       }}
     >
       {/* Mobile Device Frame */}
@@ -131,7 +131,7 @@ const MobilePreviewFrame: React.FC<MobilePreviewFrameProps> = ({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              px: 2,
+              px: 1,
               pt: 0.5,
               flexShrink: 0,
             }}
@@ -151,9 +151,9 @@ const MobilePreviewFrame: React.FC<MobilePreviewFrameProps> = ({
 
             {/* Right side - Network & Battery */}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <SignalCellularAlt sx={{ fontSize: 14, color: '#000000' }} />
-              <Wifi sx={{ fontSize: 14, color: '#000000' }} />
-              <BatteryFull sx={{ fontSize: 14, color: '#000000' }} />
+              <SignalCellularAlt sx={{ fontSize: 12, color: '#000000' }} />
+              <Wifi sx={{ fontSize: 12, color: '#000000' }} />
+              <BatteryFull sx={{ fontSize: 12, color: '#000000' }} />
             </Box>
           </Box>
 
@@ -185,7 +185,7 @@ const MobilePreviewFrame: React.FC<MobilePreviewFrameProps> = ({
                 zIndex: 100,
                 backgroundColor: template.colors.primary,
                 color: 'white',
-                px: 2,
+                px: 1,
                 py: 0.75,
                 display: 'flex',
                 alignItems: 'center',
@@ -196,23 +196,23 @@ const MobilePreviewFrame: React.FC<MobilePreviewFrameProps> = ({
               }}
             >
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <ArrowBack sx={{ fontSize: 14 }} />
-                <Typography variant="body2" fontWeight="600" sx={{ fontSize: '0.875rem' }}>
+                <ArrowBack sx={{ fontSize: 12 }} />
+                <Typography variant="body2" fontWeight="600" sx={{ fontSize: '0.8rem' }}>
                   Menu
                 </Typography>
               </Box>
               <Box
                 sx={{
                   backgroundColor: alpha('#fff', 0.2),
-                  borderRadius: 2,
-                  px: 1.5,
+                  borderRadius: 1,
+                  px: 1,
                   py: 0.5,
                   display: 'flex',
                   alignItems: 'center',
                   gap: 0.5,
                 }}
               >
-                <ShoppingCart sx={{ fontSize: 14 }} />
+                <ShoppingCart sx={{ fontSize: 12 }} />
                 <Typography variant="caption" fontWeight="600">
                   0
                 </Typography>
@@ -247,7 +247,7 @@ const MobilePreviewFrame: React.FC<MobilePreviewFrameProps> = ({
             {/* Menu Items - Dynamic Renderer */}
             <Box 
               sx={{ 
-                px: 1.5,
+                px: 1,
                 py: 1,
                 backgroundColor: template.colors.background,
                 minHeight: 300,
@@ -272,12 +272,12 @@ const MobilePreviewFrame: React.FC<MobilePreviewFrameProps> = ({
               sx={{
                 backgroundColor: '#f5f5f5',
                 borderTop: `2px solid ${template.colors.primary}`,
-                px: 2,
-                py: 2.5,
+                px: 1,
+                py: 1,
                 textAlign: 'center',
                 flexShrink: 0,
                 width: '100%',
-                mt: 2,
+                mt: 1,
               }}
             >
               <Typography

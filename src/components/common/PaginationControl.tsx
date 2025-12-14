@@ -56,14 +56,14 @@ const PaginationControl: React.FC<PaginationControlProps> = ({
       <Paper
         elevation={0}
         sx={{
-          p: 2,
+          p: 1,
           border: '1px solid',
           borderColor: 'divider',
-          borderRadius: 2,
+          borderRadius: 1,
           backgroundColor: 'background.paper',
         }}
       >
-        <Stack spacing={2}>
+        <Stack spacing={1}>
           {/* Item Count */}
           {showItemCount && (
             <Typography
@@ -118,16 +118,16 @@ const PaginationControl: React.FC<PaginationControlProps> = ({
     <Paper
       elevation={0}
       sx={{
-        p: 2,
+        p: 1,
         border: '1px solid',
         borderColor: 'divider',
-        borderRadius: 2,
+        borderRadius: 1,
         backgroundColor: 'background.paper',
       }}
     >
       <Stack
         direction={isTablet ? 'column' : 'row'}
-        spacing={2}
+        spacing={1}
         alignItems={isTablet ? 'stretch' : 'center'}
         justifyContent="space-between"
       >

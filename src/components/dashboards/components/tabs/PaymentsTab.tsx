@@ -63,7 +63,7 @@ const PaymentsTab: React.FC<PaymentsTabProps> = ({ stats, analyticsData }) => {
         py: 8,
         px: 3
       }}>
-        <Payment sx={{ fontSize: 80, color: 'text.disabled', mb: 2 }} />
+        <Payment sx={{ fontSize: 80, color: 'text.disabled', mb: 1 }} />
         <Typography variant="h6" color="text.secondary" gutterBottom>
           No Payment Data Available
         </Typography>
@@ -160,7 +160,7 @@ const PaymentsTab: React.FC<PaymentsTabProps> = ({ stats, analyticsData }) => {
     : 1;
 
   return (
-    <Grid container spacing={3}>
+    <Grid container spacing={1}>
       {/* Payment Overview */}
       <Grid item xs={12}>
         <Card sx={{ 
@@ -169,21 +169,21 @@ const PaymentsTab: React.FC<PaymentsTabProps> = ({ stats, analyticsData }) => {
           border: '1px solid',
           borderColor: 'divider'
         }}>
-          <CardContent sx={{ p: 3 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
-              <Assessment sx={{ color: 'primary.main', fontSize: 14 }} />
+          <CardContent sx={{ p: 1.5 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+              <Assessment sx={{ color: 'primary.main', fontSize: 12 }} />
               <Typography variant="h6" sx={{ fontWeight: 700, color: 'text.primary' }}>
                 Payment Analytics Overview
               </Typography>
             </Box>
 
-            <Grid container spacing={3}>
+            <Grid container spacing={1}>
               {paymentStats.map((stat, index) => (
                 <Grid item xs={12} sm={6} md={3} key={index}>
                   <Box sx={{ 
-                    p: 2.5, 
+                    p: 1.5, 
                     backgroundColor: stat.bgColor,
-                    borderRadius: 2,
+                    borderRadius: 1,
                     border: '1px solid',
                     borderColor: stat.color,
                     transition: 'all 0.3s ease',
@@ -192,7 +192,7 @@ const PaymentsTab: React.FC<PaymentsTabProps> = ({ stats, analyticsData }) => {
                       boxShadow: theme.shadows[4]
                     }
                   }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
                       <Avatar sx={{ 
                         backgroundColor: stat.color,
                         width: 40,
@@ -203,9 +203,9 @@ const PaymentsTab: React.FC<PaymentsTabProps> = ({ stats, analyticsData }) => {
                        {stat.change && (
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                           {stat.changeType === 'positive' ? (
-                            <TrendingUp sx={{ fontSize: 14, color: 'success.main' }} />
+                            <TrendingUp sx={{ fontSize: 12, color: 'success.main' }} />
                           ) : (
-                            <TrendingDown sx={{ fontSize: 14, color: 'error.main' }} />
+                            <TrendingDown sx={{ fontSize: 12, color: 'error.main' }} />
                           )}
                           <Typography 
                             variant="caption" 
@@ -244,26 +244,26 @@ const PaymentsTab: React.FC<PaymentsTabProps> = ({ stats, analyticsData }) => {
           borderColor: 'divider',
           height: '100%'
         }}>
-          <CardContent sx={{ p: 3 }}>
-            <Typography variant="h6" sx={{ fontWeight: 700, mb: 3, color: 'text.primary' }}>
+          <CardContent sx={{ p: 1.5 }}>
+            <Typography variant="h6" sx={{ fontWeight: 700, mb: 1, color: 'text.primary' }}>
               Payment Methods Distribution
             </Typography>
             
-            <Stack spacing={2.5}>
+            <Stack spacing={1}>
               {paymentMethods.map((method: any, index: number) => (
                 <Box key={method.method} sx={{ 
-                  p: 2.5, 
+                  p: 1.5, 
                   backgroundColor: `${method.color}15`,
-                  borderRadius: 2,
+                  borderRadius: 1,
                   border: '1px solid',
                   borderColor: `${method.color}40`
                 }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       <Avatar sx={{ 
                         backgroundColor: method.color,
-                        width: 36,
-                        height: 36
+                        width: 22,
+                        height: 22
                       }}>
                         {React.cloneElement(method.icon, { fontSize: 'small' })}
                       </Avatar>
@@ -310,31 +310,31 @@ const PaymentsTab: React.FC<PaymentsTabProps> = ({ stats, analyticsData }) => {
           borderColor: 'divider',
           height: '100%'
         }}>
-          <CardContent sx={{ p: 3 }}>
-            <Typography variant="h6" sx={{ fontWeight: 700, mb: 3, color: 'text.primary' }}>
+          <CardContent sx={{ p: 1.5 }}>
+            <Typography variant="h6" sx={{ fontWeight: 700, mb: 1, color: 'text.primary' }}>
               Hourly Transaction Trends
             </Typography>
             
             {transactionTrends.length === 0 ? (
               <Box sx={{ textAlign: 'center', py: 4 }}>
-                <Schedule sx={{ fontSize: 60, color: 'text.disabled', mb: 2 }} />
+                <Schedule sx={{ fontSize: 60, color: 'text.disabled', mb: 1 }} />
                 <Typography variant="body2" color="text.secondary">
                   Hourly trends will appear here once more data is available
                 </Typography>
               </Box>
             ) : (
-              <Stack spacing={2}>
+              <Stack spacing={1}>
                 {transactionTrends.map((trend: any, index: number) => (
                 <Box key={trend.time} sx={{ 
-                  p: 2, 
+                  p: 1, 
                   backgroundColor: 'grey.50',
-                  borderRadius: 2,
+                  borderRadius: 1,
                   border: '1px solid',
                   borderColor: 'grey.200'
                 }}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Schedule sx={{ fontSize: 14, color: 'text.secondary' }} />
+                      <Schedule sx={{ fontSize: 12, color: 'text.secondary' }} />
                       <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
                         {trend.time}
                       </Typography>

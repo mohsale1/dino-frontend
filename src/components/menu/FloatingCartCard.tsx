@@ -58,20 +58,20 @@ const FloatingCartCard: React.FC<FloatingCartCardProps> = ({
       >
         <Box
           sx={{
-            p: { xs: 2, sm: 2.5 },
+            p: { xs: 2, sm: 1.5 },
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            gap: 2,
+            gap: 1,
           }}
         >
           {/* Left Section - Cart Info */}
-          <Stack direction="row" spacing={2} alignItems="center" flex={1}>
+          <Stack direction="row" spacing={1} alignItems="center" flex={1}>
             <Box
               sx={{
                 width: { xs: 48, sm: 56 },
                 height: { xs: 48, sm: 56 },
-                borderRadius: 2,
+                borderRadius: 1,
                 background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
                 display: 'flex',
                 alignItems: 'center',
@@ -92,7 +92,7 @@ const FloatingCartCard: React.FC<FloatingCartCardProps> = ({
                   backgroundColor: theme.palette.error.main,
                   color: 'white',
                   fontWeight: 700,
-                  fontSize: '0.75rem',
+                  fontSize: '0.7rem',
                 }}
               />
             </Box>
@@ -101,7 +101,7 @@ const FloatingCartCard: React.FC<FloatingCartCardProps> = ({
               <Typography
                 variant="body2"
                 color="text.secondary"
-                sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+                sx={{ fontSize: { xs: '0.75rem', sm: '0.8rem' } }}
               >
                 {totalItems} {totalItems === 1 ? 'item' : 'items'}
               </Typography>
@@ -126,8 +126,8 @@ const FloatingCartCard: React.FC<FloatingCartCardProps> = ({
             onClick={handleOrderNow}
             sx={{
               px: { xs: 3, sm: 4 },
-              py: { xs: 1.5, sm: 1.75 },
-              borderRadius: 2,
+              py: { xs: 1, sm: 1.75 },
+              borderRadius: 1,
               fontWeight: 700,
               fontSize: { xs: '0.9rem', sm: '1rem' },
               textTransform: 'none',
