@@ -15,7 +15,7 @@ const WorkspaceDetailsStep: React.FC<WorkspaceDetailsStepProps> = ({
   errors
 }) => {
   return (
-    <Grid container spacing={1}>
+    <Grid container spacing={3}>
       <Grid item xs={12}>
         <Typography 
           variant="h6" 
@@ -24,7 +24,7 @@ const WorkspaceDetailsStep: React.FC<WorkspaceDetailsStepProps> = ({
             display: 'flex', 
             alignItems: 'center', 
             gap: 1,
-            fontSize: '1rem'
+            fontSize: '1.25rem'
           }}
         >
           <Business color="primary" />
@@ -33,7 +33,7 @@ const WorkspaceDetailsStep: React.FC<WorkspaceDetailsStepProps> = ({
         <Typography 
           variant="body2" 
           color="text.secondary" 
-          sx={{ mb: 1 }}
+          sx={{ mb: 3 }}
         >
           Set up your business workspace that will contain all your venues
         </Typography>
@@ -48,6 +48,14 @@ const WorkspaceDetailsStep: React.FC<WorkspaceDetailsStepProps> = ({
           error={!!errors.workspaceName}
           helperText={errors.workspaceName || `This will be your main business identifier (${formData.workspaceName.length}/100)`}
           required
+          sx={{
+            '& .MuiOutlinedInput-root': {
+              fontSize: { xs: '1rem', sm: '1.0625rem' },
+            },
+            '& .MuiInputLabel-root': {
+              fontSize: { xs: '1rem', sm: '1.0625rem' },
+            },
+          }}
         />
       </Grid>
       
@@ -61,6 +69,14 @@ const WorkspaceDetailsStep: React.FC<WorkspaceDetailsStepProps> = ({
           rows={3}
           error={!!errors.workspaceDescription}
           helperText={errors.workspaceDescription || `Brief description of your business (optional) (${formData.workspaceDescription.length}/500)`}
+          sx={{
+            '& .MuiOutlinedInput-root': {
+              fontSize: { xs: '1rem', sm: '1.0625rem' },
+            },
+            '& .MuiInputLabel-root': {
+              fontSize: { xs: '1rem', sm: '1.0625rem' },
+            },
+          }}
         />
       </Grid>
     </Grid>

@@ -28,8 +28,20 @@ const OwnerAccountStep: React.FC<OwnerAccountStepProps> = ({
   onTogglePassword,
   onToggleConfirmPassword
 }) => {
+  const textFieldSx = {
+    '& .MuiOutlinedInput-root': {
+      fontSize: { xs: '1rem', sm: '1.0625rem' },
+    },
+    '& .MuiInputLabel-root': {
+      fontSize: { xs: '1rem', sm: '1.0625rem' },
+    },
+    '& .MuiFormHelperText-root': {
+      fontSize: { xs: '0.8125rem', sm: '0.875rem' },
+    },
+  };
+
   return (
-    <Grid container spacing={1}>
+    <Grid container spacing={3}>
       <Grid item xs={12}>
         <Typography 
           variant="h6" 
@@ -38,7 +50,7 @@ const OwnerAccountStep: React.FC<OwnerAccountStepProps> = ({
             display: 'flex', 
             alignItems: 'center', 
             gap: 1,
-            fontSize: '1rem'
+            fontSize: '1.25rem'
           }}
         >
           <Person color="primary" />
@@ -47,14 +59,14 @@ const OwnerAccountStep: React.FC<OwnerAccountStepProps> = ({
         <Typography 
           variant="body2" 
           color="text.secondary" 
-          sx={{ mb: 1 }}
+          sx={{ mb: 3 }}
         >
           Create your admin account to manage the workspace and venue
         </Typography>
       </Grid>
       
       <Grid item xs={12} sm={6}>
-        <TextField
+        <TextField sx={textFieldSx}
           fullWidth
           label="First Name"
           value={formData.ownerFirstName}
@@ -66,7 +78,7 @@ const OwnerAccountStep: React.FC<OwnerAccountStepProps> = ({
       </Grid>
       
       <Grid item xs={12} sm={6}>
-        <TextField
+        <TextField sx={textFieldSx}
           fullWidth
           label="Last Name"
           value={formData.ownerLastName}
@@ -78,7 +90,7 @@ const OwnerAccountStep: React.FC<OwnerAccountStepProps> = ({
       </Grid>
       
       <Grid item xs={12}>
-        <TextField
+        <TextField sx={textFieldSx}
           fullWidth
           label="Email Address"
           type="email"
@@ -98,7 +110,7 @@ const OwnerAccountStep: React.FC<OwnerAccountStepProps> = ({
       </Grid>
       
       <Grid item xs={12}>
-        <TextField
+        <TextField sx={textFieldSx}
           fullWidth
           label="Phone Number"
           value={formData.ownerPhone}
@@ -127,7 +139,7 @@ const OwnerAccountStep: React.FC<OwnerAccountStepProps> = ({
       </Grid>
       
       <Grid item xs={12}>
-        <TextField
+        <TextField sx={textFieldSx}
           fullWidth
           label="Password"
           type={showPassword ? 'text' : 'password'}
@@ -152,7 +164,7 @@ const OwnerAccountStep: React.FC<OwnerAccountStepProps> = ({
       </Grid>
       
       <Grid item xs={12}>
-        <TextField
+        <TextField sx={textFieldSx}
           fullWidth
           label="Confirm Password"
           type={showConfirmPassword ? 'text' : 'password'}

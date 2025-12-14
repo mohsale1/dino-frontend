@@ -24,8 +24,20 @@ const VenueInformationStep: React.FC<VenueInformationStepProps> = ({
   onInputChange,
   errors
 }) => {
+  const textFieldSx = {
+    '& .MuiOutlinedInput-root': {
+      fontSize: { xs: '1rem', sm: '1.0625rem' },
+    },
+    '& .MuiInputLabel-root': {
+      fontSize: { xs: '1rem', sm: '1.0625rem' },
+    },
+    '& .MuiFormHelperText-root': {
+      fontSize: { xs: '0.8125rem', sm: '0.875rem' },
+    },
+  };
+
   return (
-    <Grid container spacing={1}>
+    <Grid container spacing={3}>
       <Grid item xs={12}>
         <Typography 
           variant="h6" 
@@ -34,7 +46,7 @@ const VenueInformationStep: React.FC<VenueInformationStepProps> = ({
             display: 'flex', 
             alignItems: 'center', 
             gap: 1,
-            fontSize: '1rem'
+            fontSize: '1.25rem'
           }}
         >
           <Store color="primary" />
@@ -43,14 +55,14 @@ const VenueInformationStep: React.FC<VenueInformationStepProps> = ({
         <Typography 
           variant="body2" 
           color="text.secondary" 
-          sx={{ mb: 1 }}
+          sx={{ mb: 3 }}
         >
           Configure your first venue under this workspace
         </Typography>
       </Grid>
       
       <Grid item xs={12} sm={6}>
-        <TextField
+        <TextField sx={textFieldSx}
           fullWidth
           label="Venue Name"
           value={formData.venueName}
@@ -79,7 +91,7 @@ const VenueInformationStep: React.FC<VenueInformationStepProps> = ({
       </Grid>
       
       <Grid item xs={12}>
-        <TextField
+        <TextField sx={textFieldSx}
           fullWidth
           label="Venue Description"
           value={formData.venueDescription}
@@ -99,8 +111,8 @@ const VenueInformationStep: React.FC<VenueInformationStepProps> = ({
             display: 'flex', 
             alignItems: 'center', 
             gap: 1, 
-            mt: 1,
-            fontSize: '0.95rem',
+            mt: 2,
+            fontSize: '1.125rem',
             fontWeight: 500
           }}
         >
@@ -110,7 +122,7 @@ const VenueInformationStep: React.FC<VenueInformationStepProps> = ({
       </Grid>
       
       <Grid item xs={12}>
-        <TextField
+        <TextField sx={textFieldSx}
           fullWidth
           label="Address"
           value={formData.venueLocation.address}
@@ -122,7 +134,7 @@ const VenueInformationStep: React.FC<VenueInformationStepProps> = ({
       </Grid>
       
       <Grid item xs={12} sm={6}>
-        <TextField
+        <TextField sx={textFieldSx}
           fullWidth
           label="City"
           value={formData.venueLocation.city}
@@ -134,7 +146,7 @@ const VenueInformationStep: React.FC<VenueInformationStepProps> = ({
       </Grid>
       
       <Grid item xs={12} sm={6}>
-        <TextField
+        <TextField sx={textFieldSx}
           fullWidth
           label="State"
           value={formData.venueLocation.state}
@@ -146,7 +158,7 @@ const VenueInformationStep: React.FC<VenueInformationStepProps> = ({
       </Grid>
       
       <Grid item xs={12} sm={6}>
-        <TextField
+        <TextField sx={textFieldSx}
           fullWidth
           label="Postal Code"
           value={formData.venueLocation.postal_code}
@@ -168,7 +180,7 @@ const VenueInformationStep: React.FC<VenueInformationStepProps> = ({
       </Grid>
       
       <Grid item xs={12} sm={6}>
-        <TextField
+        <TextField sx={textFieldSx}
           fullWidth
           label="Country"
           value={formData.venueLocation.country}
@@ -178,7 +190,7 @@ const VenueInformationStep: React.FC<VenueInformationStepProps> = ({
       </Grid>
       
       <Grid item xs={12}>
-        <TextField
+        <TextField sx={textFieldSx}
           fullWidth
           label="Landmark (Optional)"
           value={formData.venueLocation.landmark}
@@ -192,8 +204,8 @@ const VenueInformationStep: React.FC<VenueInformationStepProps> = ({
           variant="subtitle1" 
           gutterBottom 
           sx={{ 
-            mt: 1,
-            fontSize: '0.95rem',
+            mt: 2,
+            fontSize: '1.125rem',
             fontWeight: 500
           }}
         >
@@ -202,7 +214,7 @@ const VenueInformationStep: React.FC<VenueInformationStepProps> = ({
       </Grid>
       
       <Grid item xs={12} sm={6}>
-        <TextField
+        <TextField sx={textFieldSx}
           fullWidth
           label="Venue Phone"
           value={formData.venuePhone}
@@ -231,7 +243,7 @@ const VenueInformationStep: React.FC<VenueInformationStepProps> = ({
       </Grid>
       
       <Grid item xs={12} sm={6}>
-        <TextField
+        <TextField sx={textFieldSx}
           fullWidth
           label="Venue Email"
           value={formData.venueEmail}

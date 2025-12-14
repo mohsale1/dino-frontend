@@ -41,12 +41,14 @@ const HeroSection: React.FC = () => {
       id="hero"
       sx={{
         position: 'relative',
-        minHeight: '100vh',
-        height: '100vh',
+        minHeight: { xs: 'auto', md: '100vh' },
+        height: { xs: 'auto', md: '100vh' },
         width: '100%',
         display: 'flex',
         alignItems: 'center',
         overflow: 'hidden',
+        pt: { xs: 10, sm: 12, md: 0 },
+        pb: { xs: 6, sm: 8, md: 0 },
         background: `linear-gradient(135deg, 
           ${alpha(theme.palette.primary.main, 0.05)} 0%, 
           ${alpha(theme.palette.background.default, 1)} 50%,
@@ -168,7 +170,7 @@ const HeroSection: React.FC = () => {
         sx={{ 
           position: 'relative', 
           zIndex: 2, 
-          py: { xs: 4, sm: 6, md: 8 },
+          py: { xs: 0, sm: 0, md: 8 },
           px: { xs: 2, sm: 3, md: 3 },
           height: '100%',
           display: 'flex',

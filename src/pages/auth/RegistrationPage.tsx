@@ -77,13 +77,13 @@ const ResponsiveStepConnector = styled(StepConnector)(({ theme }) => ({
 
 const ResponsiveStepLabel = styled(StepLabel)(({ theme }) => ({
   '& .MuiStepLabel-label': {
-    fontSize: '0.8rem',
+    fontSize: '0.875rem',
     fontWeight: 500,
     marginTop: theme.spacing(1),
     textAlign: 'center',
     lineHeight: 1.2,
     [theme.breakpoints.down('sm')]: {
-      fontSize: '0.7rem',
+      fontSize: '0.75rem',
       marginTop: theme.spacing(0.5),
     },
     [theme.breakpoints.down('xs')]: {
@@ -94,9 +94,9 @@ const ResponsiveStepLabel = styled(StepLabel)(({ theme }) => ({
   '& .MuiStepLabel-iconContainer': {
     paddingRight: 0,
     '& .MuiSvgIcon-root': {
-      fontSize: '1rem',
+      fontSize: '1.5rem',
       [theme.breakpoints.down('sm')]: {
-        fontSize: '1rem',
+        fontSize: '1.25rem',
       },
     },
   },
@@ -292,17 +292,17 @@ const RegistrationPage: React.FC = () => {
   };
 
   const handleInputChange = useCallback((field: string, value: any) => {
-    // Convert email fields to lowercase
+    // Normalize email fields to lowercase
     if (field === 'ownerEmail' || field === 'venueEmail') {
-      value = typeof value === 'string' ? value.toLowerCase() : value;
+      value = typeof value === 'string' ? value.toLowerCase().trim() : value;
     }
     
-    // Restrict phone numbers to digits only (max 10 digits)
+    // Normalize phone numbers to digits only (max 10 digits)
     if (field === 'venuePhone' || field === 'ownerPhone') {
       value = typeof value === 'string' ? value.replace(/\D/g, '').slice(0, 10) : value;
     }
     
-    // Restrict postal code to digits only (max 6 digits for Indian postal codes)
+    // Normalize postal code to digits only (max 6 digits)
     if (field === 'venueLocation.postal_code') {
       value = typeof value === 'string' ? value.replace(/\D/g, '').slice(0, 6) : value;
     }
@@ -449,116 +449,115 @@ const RegistrationPage: React.FC = () => {
     <Box
       sx={{
         minHeight: '100vh',
-        backgroundColor: alpha(theme.palette.primary.main, 0.02),
+        backgroundColor: alpha(theme.palette.primary.main, 0.03),
         display: 'flex',
         flexDirection: 'column',
-        py: { xs: 1, md: 1 },
+        justifyContent: 'center',
+        py: { xs: 4, sm: 5, md: 6 },
+        px: { xs: 2, sm: 3 },
       }}
     >
       {/* Header Section */}
       <Box
         sx={{
-          backgroundColor: 'background.paper',
-          borderBottom: '1px solid',
-          borderColor: 'divider',
-          py: 3,
-          mb: 1,
+          textAlign: 'center',
+          mb: { xs: 4, md: 5 },
         }}
       >
-        <Container maxWidth="lg">
-          <Box
+        {/* Home Button - Top Right */}
+        <Box
+          sx={{
+            position: 'absolute',
+            top: { xs: 16, sm: 24 },
+            right: { xs: 16, sm: 24 },
+          }}
+        >
+          <Button
+            variant="outlined"
+            startIcon={<Home />}
+            onClick={() => navigate('/')}
             sx={{
-              position: 'relative',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: 1,
+              borderRadius: 2,
+              textTransform: 'none',
+              fontWeight: 600,
+              px: { xs: 2, sm: 3 },
+              py: { xs: 1, sm: 1.25 },
+              fontSize: { xs: '0.875rem', sm: '1rem' },
+              borderWidth: 2,
+              '&:hover': {
+                borderWidth: 2,
+              },
             }}
           >
-            {/* Home Button - Absolute positioned on desktop */}
-            <Button
-              variant="outlined"
-              startIcon={<Home />}
-              onClick={() => navigate('/')}
-              sx={{
-                position: 'absolute',
-                right: 0,
-                top: 0,
-                borderRadius: 1,
-                textTransform: 'none',
-                fontWeight: 600,
-                display: { xs: 'none', sm: 'flex' },
-              }}
-            >
-              Home
-            </Button>
+            Home
+          </Button>
+        </Box>
 
-            {/* Centered Content */}
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <DinoLogo size={40} animated={true} />
-              <Typography
-                variant="h4"
-                component="h1"
-                fontWeight="700"
-                sx={{
-                  fontSize: { xs: '1.25rem', sm: '2rem' },
-                  color: 'text.primary',
-                }}
-              >
-                Create Your Workspace
-              </Typography>
-            </Box>
-            
-            <Typography
-              variant="body1"
-              sx={{
-                fontSize: { xs: '0.9rem', sm: '1rem' },
-                color: 'text.secondary',
-                textAlign: 'center',
-              }}
-            >
-              Set up your complete restaurant management workspace
+        {/* Logo and Title */}
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2, mb: 2 }}>
+          <DinoLogo size={48} animated={true} />
+          <Typography
+            variant="h3"
+            component="h1"
+            fontWeight="800"
+            sx={{
+              fontSize: { xs: '1.75rem', sm: '2.25rem', md: '2.5rem' },
+              color: 'text.primary',
+            }}
+          >
+            Create Your Workspace
+          </Typography>
+        </Box>
+        
+        <Typography
+          variant="h6"
+          sx={{
+            fontSize: { xs: '1rem', sm: '1.125rem' },
+            color: 'text.secondary',
+            fontWeight: 400,
+            mb: 2,
+          }}
+        >
+          Set up your complete restaurant management workspace
+        </Typography>
+
+        {/* Code Verified Badge */}
+        {codeVerified && (
+          <Box
+            sx={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              backgroundColor: alpha(theme.palette.success.main, 0.12),
+              px: 2.5,
+              py: 1,
+              borderRadius: 2.5,
+              border: '2px solid',
+              borderColor: alpha(theme.palette.success.main, 0.3),
+            }}
+          >
+            <CheckCircle sx={{ fontSize: 20, mr: 1, color: 'success.main' }} />
+            <Typography variant="body2" fontWeight="700" color="success.main">
+              Code Verified
             </Typography>
-
-            {/* Code Verified Badge */}
-            {codeVerified && (
-              <Box
-                sx={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  backgroundColor: alpha(theme.palette.success.main, 0.1),
-                  px: 1,
-                  py: 0.5,
-                  borderRadius: 1,
-                  border: '1px solid',
-                  borderColor: alpha(theme.palette.success.main, 0.3),
-                }}
-              >
-                <CheckCircle sx={{ fontSize: 12, mr: 1, color: 'success.main' }} />
-                <Typography variant="caption" fontWeight="600" color="success.main">
-                  Code Verified
-                </Typography>
-              </Box>
-            )}
           </Box>
-        </Container>
+        )}
       </Box>
 
       {/* Form Content */}
-      <Container maxWidth="md" sx={{ flex: 1 }}>
+      <Container maxWidth="md">
         <Paper
-          elevation={12}
+          elevation={0}
           sx={{
-            p: { xs: 3, md: 4, lg: 5 },
+            p: { xs: 3, sm: 4, md: 5 },
             borderRadius: 3,
             backgroundColor: 'background.paper',
-            border: '1px solid',
+            border: '2px solid',
             borderColor: 'divider',
-            boxShadow: '0 12px 48px rgba(0, 0, 0, 0.1)',
+            boxShadow: `0 20px 60px ${alpha(theme.palette.primary.main, 0.08)}`,
           }}
         >
           {/* Stepper */}
-          <Box sx={{ mb: 4 }}>
+          <Box sx={{ mb: 3 }}>
             <Stepper 
               activeStep={activeStep} 
               connector={<ResponsiveStepConnector />}
@@ -579,9 +578,9 @@ const RegistrationPage: React.FC = () => {
                 align="center" 
                 display="block" 
                 sx={{ 
-                  mt: 1, 
+                  mt: 2, 
                   color: 'text.secondary',
-                  fontSize: '0.7rem',
+                  fontSize: '0.75rem',
                   fontWeight: 500
                 }}
               >
@@ -591,19 +590,19 @@ const RegistrationPage: React.FC = () => {
           </Box>
 
           {error && (
-            <Alert severity="error" sx={{ mb: 1 }}>
+            <Alert severity="error" sx={{ mb: 3 }}>
               {error}
             </Alert>
           )}
 
-          <Box sx={{ mb: 1 }}>
+          <Box sx={{ mb: 3 }}>
             {renderStepContent(activeStep)}
           </Box>
 
           <Divider sx={{ my: 3 }} />
 
           {/* Navigation */}
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 1 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2 }}>
             <Button
               disabled={activeStep === 0}
               onClick={handleBack}
@@ -611,8 +610,8 @@ const RegistrationPage: React.FC = () => {
               size="large"
               sx={{ 
                 minWidth: 100,
-                py: 1,
-                borderRadius: 1,
+                py: 1.5,
+                borderRadius: 2,
                 fontWeight: 600,
                 textTransform: 'none',
               }}
@@ -629,8 +628,8 @@ const RegistrationPage: React.FC = () => {
                 size="large"
                 sx={{ 
                   minWidth: 160,
-                  py: 1,
-                  borderRadius: 1,
+                  py: 1.5,
+                  borderRadius: 2,
                   fontWeight: 600,
                   textTransform: 'none',
                   fontSize: '1rem',
@@ -646,8 +645,8 @@ const RegistrationPage: React.FC = () => {
                 size="large"
                 sx={{ 
                   minWidth: 100,
-                  py: 1,
-                  borderRadius: 1,
+                  py: 1.5,
+                  borderRadius: 2,
                   fontWeight: 600,
                   textTransform: 'none',
                   fontSize: '1rem',
@@ -659,11 +658,11 @@ const RegistrationPage: React.FC = () => {
           </Box>
 
           {/* Login Link */}
-          <Box sx={{ mt: 1, textAlign: 'center' }}>
+          <Box sx={{ mt: 3, textAlign: 'center' }}>
             <Typography 
               variant="body2" 
               color="text.secondary"
-              sx={{ fontSize: '0.8rem' }}
+              sx={{ fontSize: '0.875rem' }}
             >
               Already have an account?{' '}
               <Button 
@@ -671,7 +670,7 @@ const RegistrationPage: React.FC = () => {
                 onClick={() => navigate('/login')}
                 size="small"
                 sx={{
-                  fontSize: '0.8rem',
+                  fontSize: '0.875rem',
                   textTransform: 'none',
                   fontWeight: 600,
                 }}
@@ -682,14 +681,14 @@ const RegistrationPage: React.FC = () => {
           </Box>
 
           {/* Home Link - Mobile Only */}
-          <Box sx={{ mt: 1, textAlign: 'center', display: { xs: 'block', sm: 'none' } }}>
+          <Box sx={{ mt: 2, textAlign: 'center', display: { xs: 'block', sm: 'none' } }}>
             <Button
               variant="text"
               startIcon={<Home />}
               onClick={() => navigate('/')}
               size="small"
               sx={{
-                fontSize: '0.8rem',
+                fontSize: '0.875rem',
                 textTransform: 'none',
                 fontWeight: 600,
               }}
