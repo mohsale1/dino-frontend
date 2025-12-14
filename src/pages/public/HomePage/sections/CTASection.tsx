@@ -26,19 +26,19 @@ const CTASection: React.FC = () => {
 
   const contactMethods = [
     {
-      icon: <Phone sx={{ fontSize: 12 }} />,
+      icon: <Phone sx={{ fontSize: { xs: 20, md: 24 } }} />,
       title: 'Call Us',
       value: COMPANY_INFO.contact.phone.primary,
       action: `tel:${COMPANY_INFO.contact.phone.primary.replace(/\s/g, '')}`,
     },
     {
-      icon: <Email sx={{ fontSize: 12 }} />,
+      icon: <Email sx={{ fontSize: { xs: 20, md: 24 } }} />,
       title: 'Email Us',
       value: COMPANY_INFO.contact.email.primary,
       action: `mailto:${COMPANY_INFO.contact.email.primary}`,
     },
     {
-      icon: <LocationOn sx={{ fontSize: 12 }} />,
+      icon: <LocationOn sx={{ fontSize: { xs: 20, md: 24 } }} />,
       title: 'Visit Us',
       value: COMPANY_INFO.contact.address.full,
       action: null,
@@ -49,7 +49,8 @@ const CTASection: React.FC = () => {
     <Box
       id="contact"
       sx={{
-        py: { xs: 8, md: 12 },
+        pt: { xs: 10, sm: 12, md: 16 },
+        pb: { xs: 8, sm: 10, md: 12 },
         background: `linear-gradient(135deg, 
           ${theme.palette.primary.main} 0%, 
           ${theme.palette.primary.dark} 100%)`,
@@ -73,7 +74,7 @@ const CTASection: React.FC = () => {
       />
 
       <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
-        <Grid container spacing={6} alignItems="center">
+        <Grid container spacing={{ xs: 4, md: 6 }} alignItems="center">
           {/* Left Content */}
           <Grid item xs={12} md={6}>
             <Typography
@@ -81,9 +82,9 @@ const CTASection: React.FC = () => {
               sx={{
                 color: alpha('#fff', 0.9),
                 fontWeight: 700,
-                fontSize: '0.8rem',
+                fontSize: { xs: '0.75rem', sm: '0.8125rem' },
                 letterSpacing: 1.5,
-                mb: 1,
+                mb: 1.5,
                 display: 'block',
               }}
             >
@@ -92,9 +93,9 @@ const CTASection: React.FC = () => {
             <Typography
               variant="h2"
               sx={{
-                fontSize: { xs: '2rem', md: '3rem' },
+                fontSize: { xs: '1.75rem', sm: '2.25rem', md: '2.75rem' },
                 fontWeight: 700,
-                mb: 1,
+                mb: 2.5,
                 color: 'white',
               }}
             >
@@ -104,8 +105,8 @@ const CTASection: React.FC = () => {
               variant="h6"
               sx={{
                 color: alpha('#fff', 0.9),
-                mb: 4,
-                fontSize: { xs: '1rem', md: '1.25rem' },
+                mb: 3,
+                fontSize: { xs: '0.9375rem', sm: '1rem', md: '1.125rem' },
                 fontWeight: 400,
                 lineHeight: 1.6,
               }}
@@ -114,7 +115,7 @@ const CTASection: React.FC = () => {
             </Typography>
 
             {/* CTA Buttons */}
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
               {user ? (
                 <Button
                   variant="contained"
@@ -122,20 +123,22 @@ const CTASection: React.FC = () => {
                   endIcon={<ArrowForward />}
                   onClick={() => navigate('/admin')}
                   sx={{
-                    px: 4,
-                    py: 1,
-                    fontSize: '1rem',
-                    fontWeight: 600,
-                    borderRadius: 1,
+                    px: { xs: 3, sm: 4 },
+                    py: { xs: 1.25, sm: 1.5 },
+                    fontSize: { xs: '0.9375rem', sm: '1rem' },
+                    fontWeight: 700,
+                    borderRadius: 2,
                     textTransform: 'none',
+                    minHeight: { xs: 44, sm: 48 },
                     backgroundColor: 'white',
                     color: 'primary.main',
+                    boxShadow: `0 8px 24px ${alpha('#000', 0.15)}`,
                     '&:hover': {
-                      backgroundColor: alpha('#fff', 0.9),
+                      backgroundColor: alpha('#fff', 0.95),
                       transform: 'translateY(-2px)',
-                      boxShadow: `0 8px 24px ${alpha('#000', 0.2)}`,
+                      boxShadow: `0 12px 32px ${alpha('#000', 0.25)}`,
                     },
-                    transition: 'all 0.3s ease',
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                   }}
                 >
                   Go to Dashboard
@@ -148,20 +151,22 @@ const CTASection: React.FC = () => {
                     endIcon={<ArrowForward />}
                     onClick={() => navigate('/register')}
                     sx={{
-                      px: 4,
-                      py: 1,
-                      fontSize: '1rem',
-                      fontWeight: 600,
-                      borderRadius: 1,
+                      px: { xs: 3, sm: 4 },
+                      py: { xs: 1.25, sm: 1.5 },
+                      fontSize: { xs: '0.9375rem', sm: '1rem' },
+                      fontWeight: 700,
+                      borderRadius: 2,
                       textTransform: 'none',
+                      minHeight: { xs: 44, sm: 48 },
                       backgroundColor: 'white',
                       color: 'primary.main',
+                      boxShadow: `0 8px 24px ${alpha('#000', 0.15)}`,
                       '&:hover': {
-                        backgroundColor: alpha('#fff', 0.9),
+                        backgroundColor: alpha('#fff', 0.95),
                         transform: 'translateY(-2px)',
-                        boxShadow: `0 8px 24px ${alpha('#000', 0.2)}`,
+                        boxShadow: `0 12px 32px ${alpha('#000', 0.25)}`,
                       },
-                      transition: 'all 0.3s ease',
+                      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                     }}
                   >
                     Start Free Trial
@@ -171,21 +176,24 @@ const CTASection: React.FC = () => {
                     size="large"
                     onClick={() => navigate('/login')}
                     sx={{
-                      px: 4,
-                      py: 1,
-                      fontSize: '1rem',
-                      fontWeight: 600,
-                      borderRadius: 1,
+                      px: { xs: 3, sm: 4 },
+                      py: { xs: 1.25, sm: 1.5 },
+                      fontSize: { xs: '0.9375rem', sm: '1rem' },
+                      fontWeight: 700,
+                      borderRadius: 2,
                       textTransform: 'none',
+                      minHeight: { xs: 44, sm: 48 },
                       borderWidth: 2,
                       borderColor: 'white',
                       color: 'white',
+                      backgroundColor: 'transparent',
                       '&:hover': {
                         borderWidth: 2,
-                        backgroundColor: alpha('#fff', 0.1),
+                        backgroundColor: alpha('#fff', 0.15),
                         transform: 'translateY(-2px)',
+                        boxShadow: `0 8px 20px ${alpha('#000', 0.2)}`,
                       },
-                      transition: 'all 0.3s ease',
+                      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                     }}
                   >
                     Sign In
@@ -197,15 +205,15 @@ const CTASection: React.FC = () => {
 
           {/* Right Content - Contact Methods */}
           <Grid item xs={12} md={6}>
-            <Stack spacing={1}>
+            <Stack spacing={{ xs: 1.5, md: 2 }}>
               {contactMethods.map((method, index) => (
                 <Box
                   key={index}
                   onClick={() => method.action && window.open(method.action, '_blank')}
                   sx={{
-                    p: 1.5,
+                    p: { xs: 1.5, md: 2 },
                     backgroundColor: alpha('#fff', 0.1),
-                    borderRadius: 1,
+                    borderRadius: 2,
                     border: `1px solid ${alpha('#fff', 0.2)}`,
                     cursor: method.action ? 'pointer' : 'default',
                     transition: 'all 0.3s ease',
@@ -218,28 +226,30 @@ const CTASection: React.FC = () => {
                       : {},
                   }}
                 >
-                  <Stack direction="row" spacing={1} alignItems="center">
+                  <Stack direction="row" spacing={{ xs: 1.5, md: 2 }} alignItems="center">
                     <Box
                       sx={{
-                        width: 48,
-                        height: 48,
+                        width: { xs: 40, md: 48 },
+                        height: { xs: 40, md: 48 },
                         borderRadius: '50%',
                         backgroundColor: alpha('#fff', 0.2),
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         color: 'white',
+                        flexShrink: 0,
                       }}
                     >
                       {method.icon}
                     </Box>
-                    <Box sx={{ flex: 1 }}>
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
                       <Typography
                         variant="subtitle2"
                         sx={{
                           color: alpha('#fff', 0.8),
                           fontWeight: 600,
                           mb: 0.5,
+                          fontSize: { xs: '0.8125rem', md: '0.875rem' },
                         }}
                       >
                         {method.title}
@@ -249,6 +259,8 @@ const CTASection: React.FC = () => {
                         sx={{
                           color: 'white',
                           fontWeight: 500,
+                          fontSize: { xs: '0.875rem', md: '0.9375rem' },
+                          wordBreak: 'break-word',
                         }}
                       >
                         {method.value}
@@ -266,4 +278,3 @@ const CTASection: React.FC = () => {
 };
 
 export default CTASection;
-

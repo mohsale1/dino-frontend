@@ -67,52 +67,23 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
 
   // Smooth scroll to section
   const scrollToSection = (sectionId: string) => {
-    // console.log('Scrolling to section:', sectionId);
     const element = document.getElementById(sectionId);
-    // console.log('Element found:', element);
     
     if (element) {
-      // Use scrollIntoView for more reliable scrolling
-      const headerOffset = 100;
+      // Calculate proper offset based on navbar height
+      const navbarHeight = 100; // Adjust based on actual navbar height
       const elementPosition = element.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.scrollY - headerOffset;
+      const offsetPosition = elementPosition + window.scrollY - navbarHeight;
 
-      // console.log('Current scroll position:', window.scrollY);
-      // console.log('Element position from top:', elementPosition);
-      // console.log('Target scroll position:', offsetPosition);
-      
-      // Try multiple scroll methods for compatibility
-      try {
-        // Method 1: Direct scrollTo
-        window.scrollTo({
-          top: offsetPosition,
-          behavior: 'smooth'
-        });
-        
-        // Fallback: If smooth scroll doesn't work, use scrollIntoView
-        setTimeout(() => {
-          if (Math.abs(window.scrollY - offsetPosition) > 50) {
-            element.scrollIntoView({ 
-              behavior: 'smooth', 
-              block: 'start',
-              inline: 'nearest'
-            });
-            // Adjust for header after scrollIntoView
-            setTimeout(() => {
-              window.scrollBy({
-                top: -headerOffset,
-                behavior: 'smooth'
-              });
-            }, 100);
-          }
-        }, 500);
-      } catch (error) {
-        console.error('Scroll error:', error);
-        // Final fallback: instant scroll
-        window.scrollTo(0, offsetPosition);
-      }
-      
+      // Set active section immediately for better UX
       setActiveSection(sectionId);
+      
+      // Smooth scroll to position
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
+      
       if (onSectionScroll) {
         onSectionScroll(sectionId);
       }
@@ -128,18 +99,30 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
 
     const handleScroll = () => {
       const sections = homeNavItems.map(item => item.id);
-      const scrollPosition = window.scrollY + 150;
+      const scrollPosition = window.scrollY + 200; // Increased offset for better detection
 
-      for (let i = sections.length - 1; i >= 0; i--) {
+      // Find which section we're currently in
+      let currentSection = sections[0];
+      
+      for (let i = 0; i < sections.length; i++) {
         const section = document.getElementById(sections[i]);
-        if (section && section.offsetTop <= scrollPosition) {
-          setActiveSection(sections[i]);
-          break;
+        if (section) {
+          const sectionTop = section.offsetTop;
+          const sectionBottom = sectionTop + section.offsetHeight;
+          
+          // Check if scroll position is within this section
+          if (scrollPosition >= sectionTop && scrollPosition < sectionBottom) {
+            currentSection = sections[i];
+            break;
+          }
         }
       }
+
+      setActiveSection(currentSection);
     };
 
     window.addEventListener('scroll', handleScroll);
+    handleScroll(); // Call once on mount
     return () => window.removeEventListener('scroll', handleScroll);
   }, [isHomePage]);
 
@@ -161,7 +144,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
   const renderDesktopNavigation = () => {
     if (isHomePage) {
       return (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           {homeNavItems.map((item) => (
             <Button
               key={item.id}
@@ -175,32 +158,33 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
                 cursor: 'pointer',
                 pointerEvents: 'auto',
                 color: activeSection === item.id ? 'primary.main' : 'text.primary',
-                fontWeight: activeSection === item.id ? 700 : 500,
+                fontWeight: activeSection === item.id ? 700 : 600,
                 textTransform: 'none',
-                px: 1,
-                py: 1,
-                borderRadius: 1,
-                fontSize: '0.9375rem',
+                px: 3,
+                py: 1.25,
+                borderRadius: 2.5,
+                fontSize: '1rem',
                 position: 'relative',
-                minHeight: 40,
+                minHeight: 44,
                 backgroundColor: activeSection === item.id 
-                  ? alpha(theme.palette.primary.main, 0.1)
+                  ? alpha(theme.palette.primary.main, 0.12)
                   : 'transparent',
                 '&:hover': {
-                  backgroundColor: alpha(theme.palette.primary.main, 0.12),
+                  backgroundColor: alpha(theme.palette.primary.main, 0.15),
                   color: 'primary.main',
                   cursor: 'pointer',
+                  transform: 'translateY(-2px)',
                 },
                 '&::after': {
                   content: '""',
                   position: 'absolute',
-                  bottom: 8,
+                  bottom: 10,
                   left: '50%',
                   transform: 'translateX(-50%)',
-                  width: activeSection === item.id ? '60%' : '0%',
+                  width: activeSection === item.id ? '70%' : '0%',
                   height: 3,
                   backgroundColor: 'primary.main',
-                  borderRadius: 1,
+                  borderRadius: 2,
                   transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                   pointerEvents: 'none',
                 },
@@ -220,7 +204,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
   const renderUserActions = () => {
     if (user) {
       return (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
           <NotificationCenter />
           
           <Button
@@ -231,30 +215,33 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
                 <Avatar 
                   src={dinoAvatar} 
                   sx={{ 
-                    width: 24, 
-                    height: 24,
+                    width: 26, 
+                    height: 26,
                   }}
                 >
-                  <DinoLogo size={16} animated={false} />
+                  <DinoLogo size={18} animated={false} />
                 </Avatar>
               ) : (
-                <AccountCircle sx={{ fontSize: 12 }} />
+                <AccountCircle sx={{ fontSize: 22 }} />
               )
             }
             sx={{
               textTransform: 'none',
-              fontWeight: 600,
-              px: 1,
-              py: 1,
-              borderRadius: 1,
-              fontSize: '0.9375rem',
+              fontWeight: 700,
+              px: 3,
+              py: 1.25,
+              borderRadius: 2.5,
+              fontSize: '1rem',
+              borderWidth: 2,
               borderColor: 'divider',
               color: 'text.primary',
-              minHeight: 40,
+              minHeight: 44,
               '&:hover': {
+                borderWidth: 2,
                 borderColor: 'primary.main',
-                backgroundColor: alpha(theme.palette.primary.main, 0.08),
+                backgroundColor: alpha(theme.palette.primary.main, 0.1),
                 color: 'primary.main',
+                transform: 'translateY(-2px)',
               },
               transition: 'all 0.3s ease',
             }}
@@ -265,21 +252,24 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
           <Button
             variant="outlined"
             onClick={handleLogout}
-            startIcon={<ExitToApp sx={{ fontSize: 12 }} />}
+            startIcon={<ExitToApp sx={{ fontSize: 22 }} />}
             sx={{
               textTransform: 'none',
-              fontWeight: 600,
-              px: 1,
-              py: 1,
-              borderRadius: 1,
-              fontSize: '0.9375rem',
+              fontWeight: 700,
+              px: 3,
+              py: 1.25,
+              borderRadius: 2.5,
+              fontSize: '1rem',
+              borderWidth: 2,
               borderColor: alpha(theme.palette.error.main, 0.5),
               color: 'error.main',
-              minHeight: 40,
+              minHeight: 44,
               '&:hover': {
+                borderWidth: 2,
                 borderColor: 'error.main',
-                backgroundColor: alpha(theme.palette.error.main, 0.08),
+                backgroundColor: alpha(theme.palette.error.main, 0.1),
                 color: 'error.main',
+                transform: 'translateY(-2px)',
               },
               transition: 'all 0.3s ease',
             }}
@@ -291,25 +281,28 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
     }
 
     return (
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
         <Button
           variant="outlined"
           onClick={() => navigate('/register')}
-          startIcon={<PersonAdd sx={{ fontSize: 12 }} />}
+          startIcon={<PersonAdd sx={{ fontSize: 22 }} />}
           sx={{
             textTransform: 'none',
-            fontWeight: 600,
-            px: 1,
-            py: 1,
-            borderRadius: 1,
-            fontSize: '0.9375rem',
+            fontWeight: 700,
+            px: 3,
+            py: 1.25,
+            borderRadius: 2.5,
+            fontSize: '1rem',
+            borderWidth: 2,
             borderColor: 'divider',
             color: 'text.primary',
-            minHeight: 40,
+            minHeight: 44,
             '&:hover': {
+              borderWidth: 2,
               borderColor: 'primary.main',
-              backgroundColor: alpha(theme.palette.primary.main, 0.08),
+              backgroundColor: alpha(theme.palette.primary.main, 0.1),
               color: 'primary.main',
+              transform: 'translateY(-2px)',
             },
             transition: 'all 0.3s ease',
           }}
@@ -320,20 +313,20 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
         <Button
           variant="contained"
           onClick={() => navigate('/login')}
-          startIcon={<Login sx={{ fontSize: 12 }} />}
+          startIcon={<Login sx={{ fontSize: 22 }} />}
           sx={{
             fontWeight: 700,
             textTransform: 'none',
-            px: 3,
-            py: 1,
-            borderRadius: 1,
-            fontSize: '0.9375rem',
-            minHeight: 40,
+            px: 3.5,
+            py: 1.25,
+            borderRadius: 2.5,
+            fontSize: '1rem',
+            minHeight: 44,
             background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
-            boxShadow: `0 4px 14px ${alpha(theme.palette.primary.main, 0.4)}`,
+            boxShadow: `0 6px 18px ${alpha(theme.palette.primary.main, 0.4)}`,
             '&:hover': {
               background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
-              boxShadow: `0 6px 20px ${alpha(theme.palette.primary.main, 0.5)}`,
+              boxShadow: `0 8px 24px ${alpha(theme.palette.primary.main, 0.5)}`,
               transform: 'translateY(-2px)',
             },
             transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -349,17 +342,22 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
     <>
       <AppBar
         position="fixed"
-        elevation={2}
+        elevation={trigger ? 4 : 0}
         sx={{
-          backgroundColor: 'background.paper',
+          backgroundColor: trigger 
+            ? alpha(theme.palette.background.paper, 0.95)
+            : alpha(theme.palette.background.paper, 0.85),
           backdropFilter: 'blur(20px)',
-          borderBottom: `1px solid ${alpha('#000', 0.08)}`,
+          borderBottom: `1px solid ${alpha('#000', trigger ? 0.12 : 0.06)}`,
           transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
           zIndex: 1200,
+          boxShadow: trigger 
+            ? `0 4px 20px ${alpha('#000', 0.08)}`
+            : 'none',
         }}
       >
-        <Container maxWidth="xl">
-          <Toolbar sx={{ px: { xs: 0, sm: 1 }, minHeight: { xs: 64, md: 72 } }}>
+        <Container maxWidth="lg">
+          <Toolbar sx={{ px: { xs: 0, sm: 2 }, minHeight: { xs: 68, md: 80 } }}>
             {/* Logo and Title */}
             <Box
               sx={{
@@ -367,9 +365,12 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
                 alignItems: 'center',
                 flexGrow: 1,
                 cursor: 'pointer',
-                gap: 1,
+                gap: 2,
                 '&:hover .logo': {
-                  transform: 'scale(1.05)',
+                  transform: 'scale(1.08) rotate(5deg)',
+                },
+                '&:hover .company-name': {
+                  color: 'primary.main',
                 },
                 transition: 'all 0.3s ease',
               }}
@@ -381,18 +382,20 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
                 }
               }}
             >
-              <Box className="logo" sx={{ transition: 'transform 0.3s ease' }}>
-                <DinoLogo size={isMobile ? 40 : 48} animated={true} />
+              <Box className="logo" sx={{ transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)' }}>
+                <DinoLogo size={isMobile ? 44 : 52} animated={true} />
               </Box>
               <Box>
                 <Typography
+                  className="company-name"
                   variant="h6"
                   sx={{
-                    fontWeight: 800,
-                    fontSize: { xs: '0.95rem', md: '1.375rem' },
+                    fontWeight: 900,
+                    fontSize: { xs: '1.25rem', md: '1.5rem' },
                     color: 'text.primary',
                     letterSpacing: '-0.5px',
-                    lineHeight: 1,
+                    lineHeight: 1.1,
+                    transition: 'color 0.3s ease',
                   }}
                 >
                   {COMPANY_INFO.name}
@@ -402,9 +405,11 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
                     variant="caption"
                     sx={{
                       color: 'text.secondary',
-                      fontSize: '0.7rem',
-                      fontWeight: 500,
-                      letterSpacing: '0.5px',
+                      fontSize: '0.8125rem',
+                      fontWeight: 600,
+                      letterSpacing: '0.3px',
+                      mt: 0.5,
+                      display: 'block',
                     }}
                   >
                     {COMPANY_INFO.tagline}
@@ -415,7 +420,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
 
             {/* Desktop Navigation */}
             {!isMobile && (
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                 {renderDesktopNavigation()}
                 {renderUserActions()}
               </Box>

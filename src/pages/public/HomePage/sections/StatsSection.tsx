@@ -17,7 +17,7 @@ const StatsSection: React.FC = () => {
   return (
     <Box
       sx={{
-        py: { xs: 8, md: 12 },
+        py: { xs: 6, sm: 8, md: 10 },
         background: `linear-gradient(135deg, 
           ${alpha(theme.palette.primary.main, 0.05)} 0%, 
           ${alpha(theme.palette.secondary.main, 0.05)} 100%)`,
@@ -26,15 +26,15 @@ const StatsSection: React.FC = () => {
     >
       <Container maxWidth="lg">
         {/* Section Header */}
-        <Box sx={{ textAlign: 'center', mb: 8 }}>
+        <Box sx={{ textAlign: 'center', mb: { xs: 5, md: 7 } }}>
           <Typography
             variant="overline"
             sx={{
               color: 'primary.main',
               fontWeight: 700,
-              fontSize: '0.8rem',
+              fontSize: { xs: '0.75rem', sm: '0.8125rem' },
               letterSpacing: 1.5,
-              mb: 1,
+              mb: 1.5,
               display: 'block',
             }}
           >
@@ -43,9 +43,9 @@ const StatsSection: React.FC = () => {
           <Typography
             variant="h2"
             sx={{
-              fontSize: { xs: '2rem', md: '3rem' },
+              fontSize: { xs: '1.75rem', sm: '2.25rem', md: '2.75rem' },
               fontWeight: 700,
-              mb: 1,
+              mb: 2,
             }}
           >
             Numbers That Speak
@@ -56,8 +56,9 @@ const StatsSection: React.FC = () => {
               color: 'text.secondary',
               maxWidth: 700,
               mx: 'auto',
-              fontSize: { xs: '1rem', md: '1.25rem' },
+              fontSize: { xs: '0.9375rem', sm: '1rem', md: '1.125rem' },
               fontWeight: 400,
+              px: { xs: 2, sm: 0 },
             }}
           >
             Join the growing community of restaurants transforming their business
@@ -65,19 +66,19 @@ const StatsSection: React.FC = () => {
         </Box>
 
         {/* Stats Grid */}
-        <Grid container spacing={4}>
+        <Grid container spacing={{ xs: 2, sm: 2.5, md: 3 }}>
           {COMPANY_STATS.map((stat, index) => (
-            <Grid item xs={12} sm={6} md={3} key={index}>
+            <Grid item xs={6} sm={6} md={3} key={index}>
               <Paper
                 elevation={0}
                 sx={{
-                  p: 1,
+                  p: { xs: 2, sm: 2.5, md: 3 },
                   textAlign: 'center',
                   height: '100%',
                   background: 'background.paper',
                   border: '1px solid',
                   borderColor: 'divider',
-                  borderRadius: 3,
+                  borderRadius: { xs: 2, md: 3 },
                   position: 'relative',
                   overflow: 'hidden',
                   transition: 'all 0.3s ease',
@@ -105,19 +106,19 @@ const StatsSection: React.FC = () => {
                 {/* Icon */}
                 <Box
                   sx={{
-                    width: 64,
-                    height: 64,
+                    width: { xs: 48, sm: 56, md: 64 },
+                    height: { xs: 48, sm: 56, md: 64 },
                     borderRadius: '50%',
                     backgroundColor: alpha(stat.color, 0.1),
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     mx: 'auto',
-                    mb: 1,
+                    mb: { xs: 2, md: 2.5 },
                     color: stat.color,
                   }}
                 >
-                  {React.createElement(stat.icon, { sx: { fontSize: 26 } })}
+                  {React.createElement(stat.icon, { sx: { fontSize: { xs: 24, sm: 28, md: 32 } } })}
                 </Box>
 
                 {/* Counter */}
@@ -130,6 +131,9 @@ const StatsSection: React.FC = () => {
                   variant="h3"
                   color={stat.color}
                   fontWeight="bold"
+                  sx={{
+                    fontSize: { xs: '1.75rem', sm: '2rem', md: '2.5rem' },
+                  }}
                 />
 
                 {/* Label */}
@@ -139,6 +143,7 @@ const StatsSection: React.FC = () => {
                     color: 'text.secondary',
                     fontWeight: 500,
                     mt: 1,
+                    fontSize: { xs: '0.8125rem', sm: '0.875rem', md: '0.9375rem' },
                   }}
                 >
                   {stat.label}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Typography, Box } from '@mui/material';
+import { Typography, Box, SxProps, Theme } from '@mui/material';
 
 interface AnimatedCounterProps {
   end: number;
@@ -11,6 +11,7 @@ interface AnimatedCounterProps {
   variant?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'body1' | 'body2';
   color?: string;
   fontWeight?: string | number;
+  sx?: SxProps<Theme>;
 }
 
 const AnimatedCounter: React.FC<AnimatedCounterProps> = ({
@@ -23,6 +24,7 @@ const AnimatedCounter: React.FC<AnimatedCounterProps> = ({
   variant = 'h3',
   color = 'primary.main',
   fontWeight = 'bold',
+  sx,
 }) => {
   const [count, setCount] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
@@ -96,6 +98,7 @@ const AnimatedCounter: React.FC<AnimatedCounterProps> = ({
           '&:hover': {
             transform: 'scale(1.05)',
           },
+          ...sx,
         }}
       >
         {prefix}{formatNumber(count)}{suffix}

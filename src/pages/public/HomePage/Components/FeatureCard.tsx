@@ -32,14 +32,16 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
       elevation={0}
       sx={{
         height: '100%',
+        width: '100%',
         border: '1px solid',
         borderColor: 'divider',
-        borderRadius: 3,
+        borderRadius: { xs: 2, md: 3 },
         transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
         position: 'relative',
         overflow: 'hidden',
         backgroundColor: 'background.paper',
         animation: `fadeInUp 0.6s ease-out ${delay}ms both`,
+        boxSizing: 'border-box',
         '@keyframes fadeInUp': {
           from: {
             opacity: 0,
@@ -51,7 +53,7 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
           },
         },
         '&:hover': {
-          transform: 'translateY(-12px)',
+          transform: 'translateY(-8px)',
           boxShadow: `0 20px 40px ${alpha(theme.palette.primary.main, 0.15)}`,
           borderColor: 'primary.main',
           '& .feature-icon': {
@@ -75,23 +77,23 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
         },
       }}
     >
-      <CardContent sx={{ p: 1 }}>
+      <CardContent sx={{ p: { xs: 2, sm: 2.5, md: 3 } }}>
         {/* Icon */}
         <Box
           className="feature-icon"
           sx={{
-            width: 64,
-            height: 64,
-            borderRadius: 1,
+            width: { xs: 52, md: 60 },
+            height: { xs: 52, md: 60 },
+            borderRadius: 2,
             backgroundColor: alpha(theme.palette.primary.main, 0.1),
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            mb: 1,
+            mb: { xs: 2, md: 2.5 },
             transition: 'all 0.3s ease',
           }}
         >
-          <Icon sx={{ fontSize: 26, color: 'primary.main' }} />
+          <Icon sx={{ fontSize: { xs: 28, md: 32 }, color: 'primary.main' }} />
         </Box>
 
         {/* Title */}
@@ -99,9 +101,11 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
           variant="h5"
           sx={{
             fontWeight: 700,
-            mb: 1,
-            fontSize: { xs: '1.25rem', md: '1.5rem' },
+            mb: { xs: 1.5, md: 2 },
+            fontSize: { xs: '1.125rem', sm: '1.25rem', md: '1.375rem' },
             color: 'text.primary',
+            wordBreak: 'break-word',
+            overflowWrap: 'break-word',
           }}
         >
           {title}
@@ -112,9 +116,11 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
           variant="body1"
           sx={{
             color: 'text.secondary',
-            mb: 1,
+            mb: { xs: 2, md: 2.5 },
             lineHeight: 1.7,
-            fontSize: { xs: '0.9375rem', md: '1rem' },
+            fontSize: { xs: '0.875rem', sm: '0.9375rem', md: '1rem' },
+            wordBreak: 'break-word',
+            overflowWrap: 'break-word',
           }}
         >
           {description}
@@ -129,7 +135,8 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
             color: 'primary.main',
             fontWeight: 600,
             border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
-            fontSize: '0.7rem',
+            fontSize: { xs: '0.75rem', md: '0.8125rem' },
+            height: { xs: 26, md: 28 },
           }}
         />
       </CardContent>
