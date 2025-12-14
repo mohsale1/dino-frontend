@@ -17,11 +17,12 @@ import { Email, Lock, Visibility, VisibilityOff, Home } from '@mui/icons-materia
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import DinoLogo from '../../components/DinoLogo';
+import { isDinos, isOperator, isAdmin, isSuperAdmin } from '../../constants/roles';
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login } = useAuth();
+  const { login, isAuthenticated } = useAuth();
   const theme = useTheme();
 
   const [loading, setLoading] = useState(false);
@@ -34,6 +35,13 @@ const LoginPage: React.FC = () => {
   });
 
   const successMessage = location.state?.message;
+
+  // Auto-redirect if already authenticated
+  React.useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/admin', { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -72,12 +80,11 @@ const LoginPage: React.FC = () => {
       let redirectPath = location.state?.from?.pathname || '/admin';
       
       if (user?.role) {
-        const userRole = user.role.toLowerCase();
-        if (userRole === 'dino' || userRole === 'dinos') {
+        if (isDinos(user.role)) {
           redirectPath = '/admin/code';
-        } else if (userRole === 'operator') {
+        } else if (isOperator(user.role)) {
           redirectPath = '/admin/orders';
-        } else if (userRole === 'admin' || userRole === 'superadmin' || userRole === 'super_admin') {
+        } else if (isAdmin(user.role) || isSuperAdmin(user.role)) {
           redirectPath = '/admin/orders';
         }
       }
@@ -94,91 +101,89 @@ const LoginPage: React.FC = () => {
     <Box
       sx={{
         minHeight: '100vh',
-        backgroundColor: alpha(theme.palette.primary.main, 0.02),
+        backgroundColor: alpha(theme.palette.primary.main, 0.03),
         display: 'flex',
         flexDirection: 'column',
-        py: { xs: 1, md: 1 },
+        justifyContent: 'center',
+        py: { xs: 4, sm: 6, md: 8 },
+        px: { xs: 2, sm: 3 },
       }}
     >
       {/* Header Section */}
       <Box
         sx={{
-          backgroundColor: 'background.paper',
-          borderBottom: '1px solid',
-          borderColor: 'divider',
-          py: 3,
-          mb: 1,
+          textAlign: 'center',
+          mb: { xs: 4, md: 5 },
         }}
       >
-        <Container maxWidth="lg">
-          <Box
+        {/* Home Button - Top Right */}
+        <Box
+          sx={{
+            position: 'absolute',
+            top: { xs: 16, sm: 24 },
+            right: { xs: 16, sm: 24 },
+          }}
+        >
+          <Button
+            variant="outlined"
+            startIcon={<Home />}
+            onClick={() => navigate('/')}
             sx={{
-              position: 'relative',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: 1,
+              borderRadius: 2,
+              textTransform: 'none',
+              fontWeight: 600,
+              px: { xs: 2, sm: 3 },
+              py: { xs: 1, sm: 1.25 },
+              fontSize: { xs: '0.875rem', sm: '1rem' },
+              borderWidth: 2,
+              '&:hover': {
+                borderWidth: 2,
+              },
             }}
           >
-            {/* Home Button - Absolute positioned on desktop */}
-            <Button
-              variant="outlined"
-              startIcon={<Home />}
-              onClick={() => navigate('/')}
-              sx={{
-                position: 'absolute',
-                right: 0,
-                top: 0,
-                borderRadius: 1,
-                textTransform: 'none',
-                fontWeight: 600,
-                display: { xs: 'none', sm: 'flex' },
-              }}
-            >
-              Home
-            </Button>
+            Home
+          </Button>
+        </Box>
 
-            {/* Centered Content */}
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <DinoLogo size={40} animated={true} />
-              <Typography
-                variant="h4"
-                component="h1"
-                fontWeight="700"
-                sx={{
-                  fontSize: { xs: '1.25rem', sm: '2rem' },
-                  color: 'text.primary',
-                }}
-              >
-                Welcome Back
-              </Typography>
-            </Box>
-            
-            <Typography
-              variant="body1"
-              sx={{
-                fontSize: { xs: '0.9rem', sm: '1rem' },
-                color: 'text.secondary',
-                textAlign: 'center',
-              }}
-            >
-              Sign in to access your restaurant dashboard
-            </Typography>
-          </Box>
-        </Container>
+        {/* Logo and Title */}
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2, mb: 2 }}>
+          <DinoLogo size={48} animated={true} />
+          <Typography
+            variant="h3"
+            component="h1"
+            fontWeight="800"
+            sx={{
+              fontSize: { xs: '1.75rem', sm: '2.25rem', md: '2.5rem' },
+              color: 'text.primary',
+            }}
+          >
+            Welcome Back
+          </Typography>
+        </Box>
+        
+        <Typography
+          variant="h6"
+          sx={{
+            fontSize: { xs: '1rem', sm: '1.125rem' },
+            color: 'text.secondary',
+            fontWeight: 400,
+          }}
+        >
+          Sign in to access your restaurant dashboard
+        </Typography>
       </Box>
 
       {/* Form Content */}
-      <Container maxWidth="sm" sx={{ flex: 1 }}>
+      <Container maxWidth="sm">
         <Paper
-          elevation={12}
+          elevation={0}
           sx={{
-            p: { xs: 3, md: 4, lg: 5 },
+            p: { xs: 3, sm: 4, md: 5 },
             borderRadius: 3,
             backgroundColor: 'background.paper',
-            border: '1px solid',
+            border: '2px solid',
             borderColor: 'divider',
-            boxShadow: '0 12px 48px rgba(0, 0, 0, 0.1)',
+            boxShadow: `0 20px 60px ${alpha(theme.palette.primary.main, 0.08)}`,
           }}
         >
           {/* Form Header */}
@@ -186,9 +191,9 @@ const LoginPage: React.FC = () => {
             <Typography
               variant="h5"
               component="h2"
-              fontWeight="600"
+              fontWeight="700"
               sx={{
-                fontSize: { xs: '1.25rem', sm: '1.25rem' },
+                fontSize: { xs: '1.375rem', sm: '1.5rem' },
                 color: 'text.primary',
                 mb: 1,
               }}
@@ -196,9 +201,9 @@ const LoginPage: React.FC = () => {
               Sign In
             </Typography>
             <Typography
-              variant="body2"
+              variant="body1"
               sx={{
-                fontSize: { xs: '0.8rem', sm: '1rem' },
+                fontSize: { xs: '0.9375rem', sm: '1rem' },
                 color: 'text.secondary',
               }}
             >
@@ -211,8 +216,8 @@ const LoginPage: React.FC = () => {
             <Alert 
               severity="success" 
               sx={{ 
-                mb: 1,
-                borderRadius: 1,
+                mb: 3,
+                borderRadius: 2,
               }}
             >
               {successMessage}
@@ -224,8 +229,8 @@ const LoginPage: React.FC = () => {
             <Alert 
               severity="error" 
               sx={{ 
-                mb: 1,
-                borderRadius: 1,
+                mb: 3,
+                borderRadius: 2,
               }}
             >
               {error}
@@ -247,14 +252,18 @@ const LoginPage: React.FC = () => {
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <Email sx={{ color: 'text.secondary' }} />
+                    <Email sx={{ color: 'text.secondary', fontSize: 22 }} />
                   </InputAdornment>
                 ),
               }}
               sx={{ 
-                mb: 1,
+                mb: 3,
                 '& .MuiOutlinedInput-root': {
-                  borderRadius: 1,
+                  borderRadius: 2,
+                  fontSize: { xs: '0.9375rem', sm: '1rem' },
+                },
+                '& .MuiInputLabel-root': {
+                  fontSize: { xs: '0.9375rem', sm: '1rem' },
                 },
               }}
             />
@@ -271,7 +280,7 @@ const LoginPage: React.FC = () => {
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <Lock sx={{ color: 'text.secondary' }} />
+                    <Lock sx={{ color: 'text.secondary', fontSize: 22 }} />
                   </InputAdornment>
                 ),
                 endAdornment: (
@@ -289,7 +298,11 @@ const LoginPage: React.FC = () => {
               sx={{ 
                 mb: 4,
                 '& .MuiOutlinedInput-root': {
-                  borderRadius: 1,
+                  borderRadius: 2,
+                  fontSize: { xs: '0.9375rem', sm: '1rem' },
+                },
+                '& .MuiInputLabel-root': {
+                  fontSize: { xs: '0.9375rem', sm: '1rem' },
                 },
               }}
             />
@@ -302,12 +315,17 @@ const LoginPage: React.FC = () => {
               size="large"
               disabled={loading}
               sx={{ 
-                py: 1,
-                borderRadius: 1,
-                fontWeight: 600,
+                py: { xs: 1.5, sm: 1.75 },
+                borderRadius: 2.5,
+                fontWeight: 700,
                 textTransform: 'none',
-                fontSize: '1rem',
-                mb: 1,
+                fontSize: { xs: '1rem', sm: '1.0625rem' },
+                mb: 3,
+                minHeight: { xs: 48, sm: 52 },
+                boxShadow: `0 8px 24px ${alpha(theme.palette.primary.main, 0.3)}`,
+                '&:hover': {
+                  boxShadow: `0 12px 32px ${alpha(theme.palette.primary.main, 0.4)}`,
+                },
               }}
             >
               {loading ? (
@@ -322,39 +340,27 @@ const LoginPage: React.FC = () => {
               <Typography 
                 variant="body2" 
                 color="text.secondary"
-                sx={{ fontSize: '0.8rem' }}
+                sx={{ fontSize: { xs: '0.9375rem', sm: '1rem' } }}
               >
                 Don't have an account?{' '}
                 <Button 
                   variant="text" 
                   onClick={() => navigate('/register')}
-                  size="small"
                   sx={{
-                    fontSize: '0.8rem',
+                    fontSize: { xs: '0.9375rem', sm: '1rem' },
                     textTransform: 'none',
-                    fontWeight: 600,
+                    fontWeight: 700,
+                    p: 0,
+                    minWidth: 'auto',
+                    '&:hover': {
+                      backgroundColor: 'transparent',
+                      textDecoration: 'underline',
+                    },
                   }}
                 >
                   Create Account
                 </Button>
               </Typography>
-            </Box>
-
-            {/* Home Link - Mobile Only */}
-            <Box sx={{ textAlign: 'center', mt: 1, display: { xs: 'block', sm: 'none' } }}>
-              <Button
-                variant="text"
-                startIcon={<Home />}
-                onClick={() => navigate('/')}
-                size="small"
-                sx={{
-                  fontSize: '0.8rem',
-                  textTransform: 'none',
-                  fontWeight: 600,
-                }}
-              >
-                Back to Home
-              </Button>
             </Box>
           </Box>
         </Paper>
