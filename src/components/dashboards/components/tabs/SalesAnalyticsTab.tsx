@@ -61,7 +61,7 @@ const SalesAnalyticsTab: React.FC<SalesAnalyticsTabProps> = ({ dashboardData, st
   const categoryPerformance = analyticsData?.category_performance || [];
 
   return (
-    <Grid container spacing={1}>
+    <Grid container spacing={2}>
       {/* Enhanced Performance Chart */}
       <FlagGate flag="dashboard.showAnalyticsCharts">
         <Grid item xs={12} lg={8}>
@@ -73,23 +73,28 @@ const SalesAnalyticsTab: React.FC<SalesAnalyticsTabProps> = ({ dashboardData, st
       {categoryPerformance.length > 0 && (
         <Grid item xs={12} lg={4}>
           <Card sx={{ 
-            borderRadius: 3,
+            borderRadius: 0,
             boxShadow: theme.shadows[2],
             border: '1px solid',
             borderColor: 'divider',
             height: '100%'
           }}>
-            <CardContent sx={{ p: 1.5 }}>
-              <Typography variant="h6" sx={{ fontWeight: 700, mb: 1, color: 'text.primary' }}>
-                Category Performance
-              </Typography>
+            <CardContent sx={{ p: 2.5 }}>
+              <Box sx={{ mb: 3, pb: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <BarChart sx={{ color: 'primary.main', fontSize: 24 }} />
+                  <Typography variant="h6" sx={{ fontWeight: 700, color: 'text.primary' }}>
+                    Category Performance
+                  </Typography>
+                </Box>
+              </Box>
               
-              <Stack spacing={1}>
+              <Stack spacing={2}>
                 {categoryPerformance.slice(0, 5).map((category: any, index: number) => (
                   <Box key={category.category} sx={{ 
-                    p: 1, 
+                    p: 2, 
                     backgroundColor: `hsl(${index * 60}, 70%, 95%)`,
-                    borderRadius: 1,
+                    borderRadius: 0,
                     border: '1px solid',
                     borderColor: `hsl(${index * 60}, 70%, 80%)`
                   }}>
@@ -126,16 +131,16 @@ const SalesAnalyticsTab: React.FC<SalesAnalyticsTabProps> = ({ dashboardData, st
       {/* Top Menu Items */}
       <Grid item xs={12} lg={categoryPerformance.length > 0 ? 12 : 4}>
         <Card sx={{ 
-          borderRadius: 3,
+          borderRadius: 0,
           boxShadow: theme.shadows[2],
           border: '1px solid',
           borderColor: 'divider',
           height: '100%'
         }}>
-          <CardContent sx={{ p: 1.5 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+          <CardContent sx={{ p: 2.5 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, pb: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Restaurant sx={{ color: 'primary.main', fontSize: 12 }} />
+                <Restaurant sx={{ color: 'primary.main', fontSize: 24 }} />
                 <Typography variant="h6" sx={{ fontWeight: 700, color: 'text.primary' }}>
                   Top Selling Items
                 </Typography>
@@ -187,7 +192,7 @@ const SalesAnalyticsTab: React.FC<SalesAnalyticsTabProps> = ({ dashboardData, st
                             />
                             {item.rating && (
                               <Chip
-                                icon={<Star sx={{ fontSize: 12 }} />}
+                                icon={<Star sx={{ fontSize: 14 }} />}
                                 label={item.rating}
                                 size="small"
                                 color={item.rating >= 4.5 ? 'success' : item.rating >= 4.0 ? 'warning' : 'error'}
@@ -225,12 +230,12 @@ const SalesAnalyticsTab: React.FC<SalesAnalyticsTabProps> = ({ dashboardData, st
                 alignItems: 'center', 
                 justifyContent: 'center',
                 backgroundColor: 'grey.50',
-                borderRadius: 1,
+                borderRadius: 0,
                 border: '2px dashed',
                 borderColor: 'grey.300'
               }}>
                 <Box sx={{ textAlign: 'center' }}>
-                  <Restaurant sx={{ fontSize: 12, color: 'grey.400', mb: 1 }} />
+                  <Restaurant sx={{ fontSize: 48, color: 'grey.400', mb: 1 }} />
                   <Typography variant="h6" color="text.secondary">No Menu Data</Typography>
                   <Typography variant="body2" color="text.secondary">
                     Top selling items will appear here

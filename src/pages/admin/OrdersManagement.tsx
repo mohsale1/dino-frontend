@@ -1005,54 +1005,7 @@ const OrdersManagement: React.FC = () => {
           </Box>
         </FlagGate>
 
-        {/* Enhanced Controls - Only show in Tab View */}
-        {viewMode === 'tab' && (
-          <FlagGate flag="orders.showOrderFilters">
-            <Paper 
-              sx={{ 
-                p: 2, 
-                mb: 3, 
-                border: '1px solid', 
-                borderColor: 'divider',
-                backgroundColor: 'background.paper',
-                mx: { xs: 3, sm: 4 }
-              }}
-            >
-              <Grid container spacing={{ xs: 2, sm: 3 }} alignItems="center">
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    placeholder={isMobile ? "Search orders..." : "Search orders by ID, table, or items..."}
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    size={isMobile ? "medium" : "medium"}
-                    InputProps={{
-                      startAdornment: <Search sx={{ mr: 1, color: 'text.secondary' }} />,
-                    }}
-                  />
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <FormControl fullWidth>
-                    <InputLabel>Filter by Status</InputLabel>
-                    <Select
-                      value={statusFilter}
-                      onChange={(e) => setStatusFilter(e.target.value)}
-                      label="Filter by Status"
-                      size={isMobile ? "medium" : "medium"}
-                    >
-                      <MenuItem value="all">All Orders</MenuItem>
-                      <MenuItem value="pending">Pending</MenuItem>
-                      <MenuItem value="confirmed">Confirmed</MenuItem>
-                      <MenuItem value="preparing">Preparing</MenuItem>
-                      <MenuItem value="ready">Ready</MenuItem>
-                      <MenuItem value="served">Served</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
-              </Grid>
-            </Paper>
-          </FlagGate>
-        )}
+
 
         {/* Kanban View */}
         {viewMode === 'kanban' ? (

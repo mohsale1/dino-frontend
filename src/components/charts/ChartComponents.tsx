@@ -159,6 +159,14 @@ export const WeeklyRevenueChart: React.FC<BarChartProps> = ({ data, height = 300
         },
         ticks: {
           color: '#666666',
+          stepSize: 1,
+          precision: 0,
+          callback: function(value: any) {
+            if (Number.isInteger(value)) {
+              return value;
+            }
+            return null;
+          }
         },
         grid: {
           drawOnChartArea: false,
@@ -346,7 +354,7 @@ export const DonutChart: React.FC<PieChartProps> = ({ data, height = 250 }) => {
         zIndex: 10
       }}>
         <div style={{ 
-          fontSize: '14px', 
+          fontSize: '24px', 
           fontWeight: 'bold', 
           color: '#333333',
           lineHeight: '1.2'
@@ -493,16 +501,16 @@ export const EnhancedRevenueChart: React.FC<EnhancedRevenueChartProps> = ({ data
 
   return (
     <Card sx={{ 
-      borderRadius: 3,
+      borderRadius: 0,
       boxShadow: theme.shadows[2],
       border: '1px solid',
       borderColor: 'divider',
       height: '100%'
     }}>
-      <CardContent sx={{ p: 1.5 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+      <CardContent sx={{ p: 2.5 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, pb: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <ShowChart sx={{ color: 'primary.main', fontSize: 12 }} />
+            <ShowChart sx={{ color: 'primary.main', fontSize: 24 }} />
             <Typography variant="h6" sx={{ fontWeight: 700, color: 'text.primary' }}>
               Revenue & Orders Analytics
             </Typography>
@@ -523,9 +531,9 @@ export const EnhancedRevenueChart: React.FC<EnhancedRevenueChartProps> = ({ data
           </Stack>
         </Box>
 
-        <Grid container spacing={1} sx={{ mb: 1 }}>
+        <Grid container spacing={2} sx={{ mb: 3 }}>
           <Grid item xs={4}>
-            <Box sx={{ textAlign: 'center', p: 1.5, backgroundColor: 'success.50', borderRadius: 1 }}>
+            <Box sx={{ textAlign: 'center', p: 1.5, backgroundColor: 'success.50', borderRadius: 0 }}>
               <Typography variant="h6" sx={{ fontWeight: 700, color: 'success.main' }}>
                 ₹{totalRevenue.toLocaleString()}
               </Typography>
@@ -533,7 +541,7 @@ export const EnhancedRevenueChart: React.FC<EnhancedRevenueChartProps> = ({ data
             </Box>
           </Grid>
           <Grid item xs={4}>
-            <Box sx={{ textAlign: 'center', p: 1.5, backgroundColor: 'primary.50', borderRadius: 1 }}>
+            <Box sx={{ textAlign: 'center', p: 1.5, backgroundColor: 'primary.50', borderRadius: 0 }}>
               <Typography variant="h6" sx={{ fontWeight: 700, color: 'primary.main' }}>
                 {totalOrders}
               </Typography>
@@ -541,7 +549,7 @@ export const EnhancedRevenueChart: React.FC<EnhancedRevenueChartProps> = ({ data
             </Box>
           </Grid>
           <Grid item xs={4}>
-            <Box sx={{ textAlign: 'center', p: 1.5, backgroundColor: 'warning.50', borderRadius: 1 }}>
+            <Box sx={{ textAlign: 'center', p: 1.5, backgroundColor: 'warning.50', borderRadius: 0 }}>
               <Typography variant="h6" sx={{ fontWeight: 700, color: 'warning.main' }}>
                 ₹{Math.round(avgOrderValue)}
               </Typography>
@@ -560,12 +568,12 @@ export const EnhancedRevenueChart: React.FC<EnhancedRevenueChartProps> = ({ data
               alignItems: 'center', 
               justifyContent: 'center',
               backgroundColor: 'grey.50',
-              borderRadius: 1,
+              borderRadius: 0,
               border: '2px dashed',
               borderColor: 'grey.300'
             }}>
               <Box sx={{ textAlign: 'center' }}>
-                <ShowChart sx={{ fontSize: 12, color: 'grey.400', mb: 1 }} />
+                <ShowChart sx={{ fontSize: 48, color: 'grey.400', mb: 1 }} />
                 <Typography variant="h6" color="text.secondary">No Revenue Data</Typography>
                 <Typography variant="body2" color="text.secondary">
                   Revenue trends will appear here once data is available
@@ -613,16 +621,16 @@ export const EnhancedOrderStatusChart: React.FC<EnhancedOrderStatusChartProps> =
 
   return (
     <Card sx={{ 
-      borderRadius: 3,
+      borderRadius: 0,
       boxShadow: theme.shadows[2],
       border: '1px solid',
       borderColor: 'divider',
       height: '100%'
     }}>
-      <CardContent sx={{ p: 1.5 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+      <CardContent sx={{ p: 2.5 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, pb: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <PieChart sx={{ color: 'primary.main', fontSize: 12 }} />
+            <PieChart sx={{ color: 'primary.main', fontSize: 24 }} />
             <Typography variant="h6" sx={{ fontWeight: 700, color: 'text.primary' }}>
               Order Status Distribution
             </Typography>
@@ -645,12 +653,12 @@ export const EnhancedOrderStatusChart: React.FC<EnhancedOrderStatusChartProps> =
               alignItems: 'center', 
               justifyContent: 'center',
               backgroundColor: 'grey.50',
-              borderRadius: 1,
+              borderRadius: 0,
               border: '2px dashed',
               borderColor: 'grey.300'
             }}>
               <Box sx={{ textAlign: 'center' }}>
-                <PieChart sx={{ fontSize: 12, color: 'grey.400', mb: 1 }} />
+                <PieChart sx={{ fontSize: 48, color: 'grey.400', mb: 1 }} />
                 <Typography variant="h6" color="text.secondary">No Order Data</Typography>
                 <Typography variant="body2" color="text.secondary">
                   Order status distribution will appear here
@@ -708,24 +716,26 @@ export const EnhancedSalesMetrics: React.FC<EnhancedSalesMetricsProps> = ({ data
 
   return (
     <Card sx={{ 
-      borderRadius: 3,
+      borderRadius: 0,
       boxShadow: theme.shadows[2],
       border: '1px solid',
       borderColor: 'divider',
       height: '100%'
     }}>
-      <CardContent sx={{ p: 1.5 }}>
-        <Typography variant="h6" sx={{ fontWeight: 700, mb: 1, color: 'text.primary' }}>
-          Performance Metrics
-        </Typography>
+      <CardContent sx={{ p: 2.5 }}>
+        <Box sx={{ mb: 3, pb: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
+          <Typography variant="h6" sx={{ fontWeight: 700, color: 'text.primary' }}>
+            Performance Metrics
+          </Typography>
+        </Box>
         
-        <Grid container spacing={1}>
+        <Grid container spacing={2}>
           {metrics.map((metric, index) => (
             <Grid item xs={12} sm={6} key={index}>
               <Box sx={{ 
-                p: 1.5, 
+                p: 2.5, 
                 backgroundColor: metric.bgColor,
-                borderRadius: 1,
+                borderRadius: 0,
                 border: '1px solid',
                 borderColor: metric.color,
                 transition: 'all 0.3s ease',
@@ -737,7 +747,7 @@ export const EnhancedSalesMetrics: React.FC<EnhancedSalesMetricsProps> = ({ data
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
                   <Box sx={{ 
                     p: 1, 
-                    borderRadius: 1, 
+                    borderRadius: 1.5, 
                     backgroundColor: metric.color,
                     color: 'white',
                     display: 'flex',
@@ -747,9 +757,9 @@ export const EnhancedSalesMetrics: React.FC<EnhancedSalesMetricsProps> = ({ data
                   </Box>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                     {metric.changeType === 'positive' ? (
-                      <TrendingUp sx={{ fontSize: 12, color: 'success.main' }} />
+                      <TrendingUp sx={{ fontSize: 16, color: 'success.main' }} />
                     ) : (
-                      <TrendingDown sx={{ fontSize: 12, color: 'error.main' }} />
+                      <TrendingDown sx={{ fontSize: 16, color: 'error.main' }} />
                     )}
                     <Typography 
                       variant="caption" 
@@ -767,7 +777,7 @@ export const EnhancedSalesMetrics: React.FC<EnhancedSalesMetricsProps> = ({ data
                   {metric.value}
                 </Typography>
                 
-                <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.8rem' }}>
+                <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem' }}>
                   {metric.title}
                 </Typography>
               </Box>
@@ -795,16 +805,16 @@ export const EnhancedPerformanceChart: React.FC<EnhancedPerformanceChartProps> =
 
   return (
     <Card sx={{ 
-      borderRadius: 3,
+      borderRadius: 0,
       boxShadow: theme.shadows[2],
       border: '1px solid',
       borderColor: 'divider',
       height: '100%'
     }}>
-      <CardContent sx={{ p: 1.5 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+      <CardContent sx={{ p: 2.5 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, pb: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <BarChart sx={{ color: 'primary.main', fontSize: 12 }} />
+            <BarChart sx={{ color: 'primary.main', fontSize: 24 }} />
             <Typography variant="h6" sx={{ fontWeight: 700, color: 'text.primary' }}>
               Revenue by Category
             </Typography>
@@ -827,12 +837,12 @@ export const EnhancedPerformanceChart: React.FC<EnhancedPerformanceChartProps> =
               alignItems: 'center', 
               justifyContent: 'center',
               backgroundColor: 'grey.50',
-              borderRadius: 1,
+              borderRadius: 0,
               border: '2px dashed',
               borderColor: 'grey.300'
             }}>
               <Box sx={{ textAlign: 'center' }}>
-                <BarChart sx={{ fontSize: 12, color: 'grey.400', mb: 1 }} />
+                <BarChart sx={{ fontSize: 48, color: 'grey.400', mb: 1 }} />
                 <Typography variant="h6" color="text.secondary">No Performance Data</Typography>
                 <Typography variant="body2" color="text.secondary">
                   Revenue breakdown will appear here

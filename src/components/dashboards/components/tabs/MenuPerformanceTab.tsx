@@ -30,6 +30,7 @@ import {
   TrendingDown,
   LocalOffer,
   Assessment,
+  BarChart,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { usePermissions } from '../../../auth';
@@ -104,19 +105,19 @@ const MenuPerformanceTab: React.FC<MenuPerformanceTabProps> = ({ menuPerformance
   }
 
   return (
-    <Grid container spacing={1}>
+    <Grid container spacing={2}>
       {/* Performance Overview */}
       <Grid item xs={12}>
         <Card sx={{ 
-          borderRadius: 3,
+          borderRadius: 0,
           boxShadow: theme.shadows[2],
           border: '1px solid',
           borderColor: 'divider'
         }}>
-          <CardContent sx={{ p: 1.5 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+          <CardContent sx={{ p: 2.5 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, pb: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Assessment sx={{ color: 'primary.main', fontSize: 12 }} />
+                <Assessment sx={{ color: 'primary.main', fontSize: 24 }} />
                 <Typography variant="h6" sx={{ fontWeight: 700, color: 'text.primary' }}>
                   Menu Performance Overview
                 </Typography>
@@ -127,7 +128,7 @@ const MenuPerformanceTab: React.FC<MenuPerformanceTabProps> = ({ menuPerformance
                   startIcon={<Add />}
                   onClick={() => navigate('/admin/menu')}
                   sx={{
-                    borderRadius: 1,
+                    borderRadius: 0,
                     fontWeight: 600,
                     textTransform: 'none',
                     boxShadow: 'none',
@@ -141,12 +142,12 @@ const MenuPerformanceTab: React.FC<MenuPerformanceTabProps> = ({ menuPerformance
               )}
             </Box>
 
-            <Grid container spacing={1} sx={{ mb: 1 }}>
+            <Grid container spacing={2} sx={{ mb: 3 }}>
               <Grid item xs={12} sm={6} md={3}>
                 <Box sx={{ 
-                  p: 1.5, 
+                  p: 2.5, 
                   backgroundColor: 'success.50',
-                  borderRadius: 1,
+                  borderRadius: 0,
                   border: '1px solid',
                   borderColor: 'success.200',
                   textAlign: 'center'
@@ -159,9 +160,9 @@ const MenuPerformanceTab: React.FC<MenuPerformanceTabProps> = ({ menuPerformance
               </Grid>
               <Grid item xs={12} sm={6} md={3}>
                 <Box sx={{ 
-                  p: 1.5, 
+                  p: 2.5, 
                   backgroundColor: 'primary.50',
-                  borderRadius: 1,
+                  borderRadius: 0,
                   border: '1px solid',
                   borderColor: 'primary.200',
                   textAlign: 'center'
@@ -174,9 +175,9 @@ const MenuPerformanceTab: React.FC<MenuPerformanceTabProps> = ({ menuPerformance
               </Grid>
               <Grid item xs={12} sm={6} md={3}>
                 <Box sx={{ 
-                  p: 1.5, 
+                  p: 2.5, 
                   backgroundColor: 'warning.50',
-                  borderRadius: 1,
+                  borderRadius: 0,
                   border: '1px solid',
                   borderColor: 'warning.200',
                   textAlign: 'center'
@@ -189,9 +190,9 @@ const MenuPerformanceTab: React.FC<MenuPerformanceTabProps> = ({ menuPerformance
               </Grid>
               <Grid item xs={12} sm={6} md={3}>
                 <Box sx={{ 
-                  p: 1.5, 
+                  p: 2.5, 
                   backgroundColor: 'info.50',
-                  borderRadius: 1,
+                  borderRadius: 0,
                   border: '1px solid',
                   borderColor: 'info.200',
                   textAlign: 'center'
@@ -210,23 +211,28 @@ const MenuPerformanceTab: React.FC<MenuPerformanceTabProps> = ({ menuPerformance
       {/* Category Performance */}
       <Grid item xs={12} md={4}>
         <Card sx={{ 
-          borderRadius: 3,
+          borderRadius: 0,
           boxShadow: theme.shadows[2],
           border: '1px solid',
           borderColor: 'divider',
           height: '100%'
         }}>
-          <CardContent sx={{ p: 1.5 }}>
-            <Typography variant="h6" sx={{ fontWeight: 700, mb: 1, color: 'text.primary' }}>
-              Category Performance
-            </Typography>
+          <CardContent sx={{ p: 2.5 }}>
+            <Box sx={{ mb: 3, pb: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <BarChart sx={{ color: 'primary.main', fontSize: 24 }} />
+                <Typography variant="h6" sx={{ fontWeight: 700, color: 'text.primary' }}>
+                  Category Performance
+                </Typography>
+              </Box>
+            </Box>
             
-            <Stack spacing={1}>
+            <Stack spacing={2.5}>
               {categoryPerformance.length > 0 ? categoryPerformance.map((category, index) => (
                 <Box key={category.category} sx={{ 
-                  p: 1, 
+                  p: 2, 
                   backgroundColor: `hsl(${index * 60}, 70%, 95%)`,
-                  borderRadius: 1,
+                  borderRadius: 0,
                   border: '1px solid',
                   borderColor: `hsl(${index * 60}, 70%, 80%)`
                 }}>
@@ -254,8 +260,8 @@ const MenuPerformanceTab: React.FC<MenuPerformanceTabProps> = ({ menuPerformance
                   </Box>
                 </Box>
               )) : (
-                <Box sx={{ textAlign: 'center', py: 4 }}>
-                  <Restaurant sx={{ fontSize: 12, color: 'grey.400', mb: 1 }} />
+                <Box sx={{ textAlign: 'center', py: 2.5 }}>
+                  <Restaurant sx={{ fontSize: 48, color: 'grey.400', mb: 1 }} />
                   <Typography variant="body2" color="text.secondary">
                     No category data available
                   </Typography>
@@ -269,16 +275,21 @@ const MenuPerformanceTab: React.FC<MenuPerformanceTabProps> = ({ menuPerformance
       {/* Menu Items Table */}
       <Grid item xs={12} md={8}>
         <Card sx={{ 
-          borderRadius: 3,
+          borderRadius: 0,
           boxShadow: theme.shadows[2],
           border: '1px solid',
           borderColor: 'divider',
           height: '100%'
         }}>
-          <CardContent sx={{ p: 1.5 }}>
-            <Typography variant="h6" sx={{ fontWeight: 700, mb: 1, color: 'text.primary' }}>
-              Menu Item Performance
-            </Typography>
+          <CardContent sx={{ p: 2.5 }}>
+            <Box sx={{ mb: 3, pb: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Restaurant sx={{ color: 'primary.main', fontSize: 24 }} />
+                <Typography variant="h6" sx={{ fontWeight: 700, color: 'text.primary' }}>
+                  Menu Item Performance
+                </Typography>
+              </Box>
+            </Box>
 
             <TableContainer sx={{ maxHeight: 500 }}>
               <Table stickyHeader>
@@ -301,10 +312,10 @@ const MenuPerformanceTab: React.FC<MenuPerformanceTabProps> = ({ menuPerformance
                           display: 'flex', 
                           flexDirection: 'column', 
                           alignItems: 'center', 
-                          gap: 1,
+                          gap: 2,
                           backgroundColor: 'grey.50',
-                          borderRadius: 1,
-                          p: 1,
+                          borderRadius: 0,
+                          p: 2.5,
                           border: '2px dashed',
                           borderColor: 'grey.300'
                         }}>
@@ -330,12 +341,12 @@ const MenuPerformanceTab: React.FC<MenuPerformanceTabProps> = ({ menuPerformance
                           }}
                         >
                           <TableCell>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                               <Avatar sx={{ 
                                 backgroundColor: isTopPerformer ? 'success.main' : 'primary.main',
                                 width: 32,
                                 height: 32,
-                                fontSize: '0.8rem'
+                                fontSize: '0.875rem'
                               }}>
                                 {index + 1}
                               </Avatar>
@@ -375,7 +386,7 @@ const MenuPerformanceTab: React.FC<MenuPerformanceTabProps> = ({ menuPerformance
                           </TableCell>
                           <TableCell align="center">
                             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
-                              <Star sx={{ fontSize: 12, color: 'warning.main' }} />
+                              <Star sx={{ fontSize: 16, color: 'warning.main' }} />
                               <Typography variant="body2" sx={{ fontWeight: 600 }}>
                                 {item.rating || 4.0}
                               </Typography>
@@ -388,10 +399,10 @@ const MenuPerformanceTab: React.FC<MenuPerformanceTabProps> = ({ menuPerformance
                                 value={Math.min(performanceScore, 100)} 
                                 sx={{ 
                                   height: 6,
-                                  borderRadius: 3,
+                                  borderRadius: 0,
                                   backgroundColor: 'grey.200',
                                   '& .MuiLinearProgress-bar': {
-                                    borderRadius: 3,
+                                    borderRadius: 0,
                                     backgroundColor: performanceScore > 20 ? 'success.main' : 
                                                    performanceScore > 10 ? 'warning.main' : 'error.main'
                                   }
@@ -405,10 +416,10 @@ const MenuPerformanceTab: React.FC<MenuPerformanceTabProps> = ({ menuPerformance
                           <TableCell align="center">
                             <Stack direction="row" spacing={0.5} justifyContent="center">
                               <IconButton size="small" color="primary">
-                                <Visibility sx={{ fontSize: 12 }} />
+                                <Visibility sx={{ fontSize: 18 }} />
                               </IconButton>
                               <IconButton size="small" color="secondary">
-                                <Edit sx={{ fontSize: 12 }} />
+                                <Edit sx={{ fontSize: 18 }} />
                               </IconButton>
                             </Stack>
                           </TableCell>

@@ -7,6 +7,8 @@ import {
   Stack,
   Badge,
   LinearProgress,
+  useTheme,
+  useMediaQuery,
 } from '@mui/material';
 import {
   Today,
@@ -50,6 +52,8 @@ interface DashboardStatsProps {
 const DashboardStats: React.FC<DashboardStatsProps> = ({ stats }) => {
   const { isSuperAdmin, isAdmin, isOperator, user } = usePermissions();
   const dashboardFlags = useDashboardFlags();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   // Don't render if flag is disabled
   if (!dashboardFlags.showDashboardStats) {
@@ -175,76 +179,54 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({ stats }) => {
   const statsToRender = getStatsToRender();
 
   return (
-    <Box sx={{ mb: 3 }}>
+    <Box sx={{ mb: 2.5 }}>
       <Grid container spacing={2}>
         {statsToRender.map((stat, index) => (
-          <Grid item xs={6} md={3} key={index}>
+          <Grid item xs={12} sm={6} md={3} key={index}>
             <Card
               sx={{
-                p: 2,
-                borderRadius: 2,
+                p: { xs: 2, sm: 2.5 },
+                borderRadius: 0,
                 backgroundColor: `${stat.color}08`,
                 border: `1px solid ${stat.color}33`,
                 transition: 'all 0.3s ease',
                 '&:hover': {
                   transform: 'translateY(-2px)',
-                  boxShadow: `0 4px 12px ${stat.color}33`,
+                  boxShadow: `0 6px 20px ${stat.color}33`,
                   backgroundColor: `${stat.color}12`,
                 },
               }}
               data-tour="stats-cards"
             >
-              <Stack direction="row" alignItems="center" spacing={1.5}>
-                {/* Icon with Badge for Operator */}
-                {isOperator ? (
-                  <Badge badgeContent={stat.value} color={index === 0 ? 'warning' : index === 1 ? 'primary' : 'success'}>
-                    <Box
-                      sx={{
-                        width: 36,
-                        height: 36,
-                        borderRadius: 1.5,
-                        backgroundColor: stat.color,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        color: 'white',
-                        flexShrink: 0,
-                      }}
-                    >
-                      {React.cloneElement(stat.icon, { 
-                        fontSize: 'small' 
-                      })}
-                    </Box>
-                  </Badge>
-                ) : (
-                  <Box
-                    sx={{
-                      width: 36,
-                      height: 36,
-                      borderRadius: 1.5,
-                      backgroundColor: stat.color,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      color: 'white',
-                      flexShrink: 0,
-                    }}
-                  >
-                    {React.cloneElement(stat.icon, { 
-                      fontSize: 'small' 
-                    })}
-                  </Box>
-                )}
+              <Stack direction="row" alignItems="center" spacing={2}>
+                {/* Icon */}
+                <Box
+                  sx={{
+                    width: { xs: 40, sm: 48 },
+                    height: { xs: 40, sm: 48 },
+                    borderRadius: 1.5,
+                    backgroundColor: stat.color,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'white',
+                    flexShrink: 0,
+                  }}
+                >
+                  {React.cloneElement(stat.icon, { 
+                    fontSize: 'medium' 
+                  })}
+                </Box>
                 
                 <Box sx={{ flex: 1, minWidth: 0 }}>
                   <Typography 
-                    variant="h5" 
+                    variant={isMobile ? "h6" : "h4"} 
                     fontWeight="700" 
                     color="text.primary"
                     sx={{ 
-                      fontSize: { xs: '1.125rem', sm: '1.375rem' },
+                      fontSize: { xs: '1.25rem', sm: '2rem' },
                       lineHeight: 1.2,
-                      mb: 0.25
+                      mb: 0.5
                     }}
                   >
                     {stat.value}
@@ -254,8 +236,8 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({ stats }) => {
                     color="text.secondary"
                     fontWeight="600"
                     sx={{ 
-                      fontSize: '0.75rem',
-                      lineHeight: 1.3,
+                      fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                      lineHeight: 1.2,
                       display: '-webkit-box',
                       WebkitLineClamp: 2,
                       WebkitBoxOrient: 'vertical',
@@ -263,37 +245,6 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({ stats }) => {
                     }}
                   >
                     {stat.label}
-                  </Typography>
-                  
-                  {/* Progress bar for Admin stats */}
-                  {(stat as any).progress !== undefined && (
-                    <LinearProgress 
-                      variant="determinate" 
-                      value={(stat as any).progress} 
-                      sx={{ 
-                        height: 3,
-                        borderRadius: 1.5,
-                        backgroundColor: 'rgba(255,255,255,0.3)',
-                        mt: 0.75,
-                        '& .MuiLinearProgress-bar': {
-                          borderRadius: 1.5,
-                          backgroundColor: stat.color
-                        }
-                      }}
-                    />
-                  )}
-                  
-                  <Typography 
-                    variant="caption" 
-                    color="text.secondary"
-                    sx={{ 
-                      fontSize: '0.6875rem',
-                      lineHeight: 1.3,
-                      mt: 0.25,
-                      display: 'block'
-                    }}
-                  >
-                    {stat.description}
                   </Typography>
                 </Box>
               </Stack>

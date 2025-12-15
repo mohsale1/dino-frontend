@@ -62,25 +62,40 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ dashboardData, stats, analyti
   // Get popular items from analytics or dashboard data
   const popularItems = analyticsData?.popular_items || dashboardData?.analytics?.popular_items || [];
 
-  return (
-    <Grid container spacing={1}>
-      {/* Enhanced Revenue Chart - Full Width */}
-      <FlagGate flag="dashboard.showRevenueChart">
-        <Grid item xs={12}>
-          <EnhancedRevenueChart data={dashboardData} stats={stats} />
-        </Grid>
-      </FlagGate>
+  // Check if we have revenue data
+  const hasRevenueData = dashboardData?.analytics?.revenue_trend && 
+                         dashboardData.analytics.revenue_trend.length > 0;
+  
+  // Check if we have order status data
+  const hasOrderStatusData = dashboardData?.analytics?.order_status_breakdown &&
+                              Object.values(dashboardData.analytics.order_status_breakdown).some((val: any) => {
+                                const count = typeof val === 'object' ? val.count : val;
+                                return count > 0;
+                              });
 
-      {/* Order Status Chart and Sales Metrics */}
-      <FlagGate flag="dashboard.showOrderStatusChart">
-        <Grid item xs={12} lg={6}>
-          <EnhancedOrderStatusChart data={dashboardData} stats={stats} />
-        </Grid>
-      </FlagGate>
+  return (
+    <Grid container spacing={2}>
+      {/* Enhanced Revenue Chart - Full Width - Only show if data exists */}
+      {hasRevenueData && (
+        <FlagGate flag="dashboard.showRevenueChart">
+          <Grid item xs={12}>
+            <EnhancedRevenueChart data={dashboardData} stats={stats} />
+          </Grid>
+        </FlagGate>
+      )}
+
+      {/* Order Status Chart - Only show if data exists */}
+      {hasOrderStatusData && (
+        <FlagGate flag="dashboard.showOrderStatusChart">
+          <Grid item xs={12} lg={6}>
+            <EnhancedOrderStatusChart data={dashboardData} stats={stats} />
+          </Grid>
+        </FlagGate>
+      )}
 
       {/* Sales Metrics */}
       <FlagGate flag="dashboard.showSalesMetrics">
-        <Grid item xs={12} lg={6}>
+        <Grid item xs={12} lg={hasOrderStatusData ? 6 : 12}>
           <EnhancedSalesMetrics data={dashboardData} stats={stats} />
         </Grid>
       </FlagGate>
@@ -89,16 +104,19 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ dashboardData, stats, analyti
       <FlagGate flag="dashboard.showRecentActivity">
         <Grid item xs={12} md={6}>
           <Card sx={{ 
-            borderRadius: 3,
+            borderRadius: 0,
             boxShadow: theme.shadows[2],
             border: '1px solid',
             borderColor: 'divider',
             height: '100%'
           }}>
-            <CardContent sx={{ p: 1.5 }}>
-              <Typography variant="h6" sx={{ fontWeight: 700, mb: 1, color: 'text.primary' }}>
-                Top Menu Items
-              </Typography>
+            <CardContent sx={{ p: 2.5 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3, pb: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
+                <Restaurant sx={{ color: 'primary.main', fontSize: 24 }} />
+                <Typography variant="h6" sx={{ fontWeight: 700, color: 'text.primary' }}>
+                  Top Menu Items
+                </Typography>
+              </Box>
               
               {popularItems && popularItems.length > 0 ? (
                 <List>
@@ -127,11 +145,11 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ dashboardData, stats, analyti
                   flexDirection: 'column', 
                   py: 6,
                   backgroundColor: 'grey.50',
-                  borderRadius: 1,
+                  borderRadius: 0,
                   border: '2px dashed',
                   borderColor: 'grey.300'
                 }}>
-                  <Restaurant sx={{ fontSize: 12, color: 'grey.400', mb: 1 }} />
+                  <Restaurant sx={{ fontSize: 48, color: 'grey.400', mb: 2 }} />
                   <Typography variant="h6" color="text.secondary">No Menu Data</Typography>
                 </Box>
               )}
@@ -144,17 +162,20 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ dashboardData, stats, analyti
       <FlagGate flag="dashboard.showRecentActivity">
         <Grid item xs={12} md={6}>
           <Card sx={{ 
-            borderRadius: 3,
+            borderRadius: 0,
             boxShadow: theme.shadows[2],
             border: '1px solid',
             borderColor: 'divider',
             height: '100%'
           }}>
-            <CardContent sx={{ p: 1.5 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                <Typography variant="h6" sx={{ fontWeight: 700, color: 'text.primary' }}>
-                  Recent Activity
-                </Typography>
+            <CardContent sx={{ p: 2.5 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, pb: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <ShoppingCart sx={{ color: 'primary.main', fontSize: 24 }} />
+                  <Typography variant="h6" sx={{ fontWeight: 700, color: 'text.primary' }}>
+                    Recent Activity
+                  </Typography>
+                </Box>
                 <Chip 
                   label="Live" 
                   color="success" 
@@ -182,10 +203,10 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ dashboardData, stats, analyti
                       <ListItemIcon>
                         <Avatar sx={{ 
                           backgroundColor: 'primary.main', 
-                          width: 22, 
-                          height: 22 
+                          width: 36, 
+                          height: 36 
                         }}>
-                          <ShoppingCart sx={{ fontSize: 12 }} />
+                          <ShoppingCart sx={{ fontSize: 20 }} />
                         </Avatar>
                       </ListItemIcon>
                       <ListItemText
@@ -216,7 +237,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ dashboardData, stats, analyti
                                 ₹{((activity.subtotal || 0) + (activity.tax_amount || 0) - (activity.discount_amount || 0)).toFixed(2)}
                               </Typography>
                               <Box component="span" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                <AccessTime sx={{ fontSize: 12, color: 'text.secondary' }} />
+                                <AccessTime sx={{ fontSize: 14, color: 'text.secondary' }} />
                                 <Typography component="span" variant="caption" color="text.secondary">
                                   {new Date(activity.createdAt).toLocaleTimeString()}
                                 </Typography>
@@ -236,11 +257,11 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ dashboardData, stats, analyti
                   flexDirection: 'column', 
                   py: 6,
                   backgroundColor: 'grey.50',
-                  borderRadius: 1,
+                  borderRadius: 0,
                   border: '2px dashed',
                   borderColor: 'grey.300'
                 }}>
-                  <ShoppingCart sx={{ fontSize: 12, color: 'grey.400', mb: 1 }} />
+                  <ShoppingCart sx={{ fontSize: 48, color: 'grey.400', mb: 2 }} />
                   <Typography variant="h6" color="text.secondary" gutterBottom>
                     No Recent Activity
                   </Typography>
