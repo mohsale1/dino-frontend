@@ -464,34 +464,6 @@ const RegistrationPage: React.FC = () => {
           mb: { xs: 4, md: 5 },
         }}
       >
-        {/* Home Button - Top Right */}
-        <Box
-          sx={{
-            position: 'absolute',
-            top: { xs: 16, sm: 24 },
-            right: { xs: 16, sm: 24 },
-          }}
-        >
-          <Button
-            variant="outlined"
-            startIcon={<Home />}
-            onClick={() => navigate('/')}
-            sx={{
-              borderRadius: 2,
-              textTransform: 'none',
-              fontWeight: 600,
-              px: { xs: 2, sm: 3 },
-              py: { xs: 1, sm: 1.25 },
-              fontSize: { xs: '0.875rem', sm: '1rem' },
-              borderWidth: 2,
-              '&:hover': {
-                borderWidth: 2,
-              },
-            }}
-          >
-            Home
-          </Button>
-        </Box>
 
         {/* Logo and Title */}
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2, mb: 2 }}>

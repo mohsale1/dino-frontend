@@ -88,7 +88,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       const tableId = pathParts[3];
       
       return (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 1 } }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 2 } }}>
           {isThemeToggleEnabled && <ThemeToggle variant="icon" size="small" />}
           
           <IconButton
@@ -114,7 +114,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 '& .MuiBadge-badge': {
                   backgroundColor: 'secondary.main',
                   color: 'white',
-                  fontSize: { xs: '0.75rem', sm: '0.8rem' },
+                  fontSize: { xs: '0.75rem', sm: '0.875rem' },
                   minWidth: { xs: 16, sm: 20 },
                   height: { xs: 16, sm: 20 },
                 },
@@ -225,10 +225,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 justifyContent: 'flex-start',
                 textAlign: 'left',
                 py: 1.25,
-                px: 1,
-                borderRadius: 1,
+                px: 2,
+                borderRadius: 2,
                 minHeight: 44,
-                fontSize: '0.8rem',
+                fontSize: '0.875rem',
                 fontWeight: location.pathname === item.path ? 600 : 500,
                 color: location.pathname === item.path ? 'primary.main' : 'text.primary',
                 backgroundColor: location.pathname === item.path ? 'primary.50' : 'transparent',
@@ -246,7 +246,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 '& .MuiButton-startIcon': {
                   mr: 1.5,
                   color: location.pathname === item.path ? 'primary.main' : 'text.secondary',
-                  fontSize: '0.95rem',
+                  fontSize: '1.125rem',
                 },
               }}
             >
@@ -259,7 +259,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
     if (isHomePage) {
       return (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
           {isThemeToggleEnabled && <ThemeToggle variant="switch" size="small" />}
           {user ? (
             <>
@@ -271,8 +271,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 sx={{
                   color: 'text.primary',
                   fontWeight: 500,
-                  borderRadius: 1,
-                  px: 1,
+                  borderRadius: 2,
+                  px: 2,
                   py: 1,
                   transition: 'all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
                   '&:hover': {
@@ -289,8 +289,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 sx={{
                   color: 'error.main',
                   fontWeight: 500,
-                  borderRadius: 1,
-                  px: 1,
+                  borderRadius: 2,
+                  px: 2,
                   py: 1,
                   transition: 'all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
                   '&:hover': {
@@ -310,8 +310,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 sx={{ 
                   mr: 1,
                   fontWeight: 500,
-                  borderRadius: 1,
-                  px: 1,
+                  borderRadius: 2,
+                  px: 2,
                   py: 1,
                   transition: 'all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
                   '&:hover': {
@@ -327,8 +327,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 onClick={() => navigate('/login')}
                 sx={{
                   fontWeight: 600,
-                  borderRadius: 1,
-                  px: 3,
+                  borderRadius: 2,
+                  px: 2,
                   py: 1,
                   transition: 'all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
                   '&:hover': {
@@ -382,7 +382,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               backgroundColor: 'background.default',
               minHeight: isMobile ? '100vh' : 'calc(100vh - 70px)',
               height: isMobile ? '100vh' : 'calc(100vh - 70px)',
-              marginLeft: isMobile ? 0 : `${getSidebarWidth(isTablet)}px`,
+              marginLeft: isMobile ? 0 : '64px', // Fixed margin for collapsed sidebar width
               marginTop: isMobile ? 0 : '70px',
               marginRight: 0,
               paddingRight: 0,
@@ -390,8 +390,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               flexDirection: 'column',
               position: 'relative',
               overflow: isMobile ? 'visible' : 'auto',
-              width: isMobile ? '100%' : `calc(100% - ${getSidebarWidth(isTablet)}px)`,
+              width: isMobile ? '100%' : 'calc(100% - 64px)', // Fixed width based on collapsed sidebar
               maxWidth: '100%',
+              transition: 'none', // Prevent layout shift
             }}
           >
             {/* Mobile Header for Admin - Now uses MobileMenu */}
@@ -401,7 +402,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  p: 1,
+                  p: 2,
                   backgroundColor: 'background.paper',
                   borderBottom: '1px solid',
                   borderColor: 'divider',
@@ -435,7 +436,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     },
                   }}
                 >
-                  <MenuIcon sx={{ fontSize: 12 }} />
+                  <MenuIcon sx={{ fontSize: 24 }} />
                 </IconButton>
               </Box>
             )}
@@ -470,7 +471,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   flexShrink: 0,
                   textAlign: 'center',
                   py: { xs: 1, lg: 1 },
-                  px: { xs: 1, lg: 1 },
+                  px: { xs: 2, lg: 1 },
                   borderTop: '1px solid',
                   borderColor: 'divider',
                   backgroundColor: 'background.paper',
@@ -481,7 +482,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 variant="body2" 
                 color="text.secondary"
                 sx={{ 
-                  fontSize: { xs: '0.75rem', sm: '0.8rem' },
+                  fontSize: { xs: '0.75rem', sm: '0.875rem' },
                   fontWeight: 500 
                 }}
               >

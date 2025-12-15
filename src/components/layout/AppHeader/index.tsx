@@ -349,6 +349,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
             : alpha(theme.palette.background.paper, 0.85),
           backdropFilter: 'blur(20px)',
           borderBottom: `1px solid ${alpha('#000', trigger ? 0.12 : 0.06)}`,
+          borderRadius: 0,
           transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
           zIndex: 1200,
           boxShadow: trigger 

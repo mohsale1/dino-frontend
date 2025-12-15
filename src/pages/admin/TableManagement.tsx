@@ -458,28 +458,26 @@ const TableManagement = () => {
         }}
       >
         <AnimatedBackground />
-        <Container maxWidth="xl" sx={{ position: 'relative', zIndex: 2 }}>
+        <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 2, pl: { xs: 3, sm: 4, md: 5 } }}>
           <Box
             sx={{
               display: 'flex',
               flexDirection: { xs: 'column', md: 'row' },
               justifyContent: 'space-between',
               alignItems: { xs: 'flex-start', md: 'center' },
-              gap: { xs: 1, md: 1.5 },
-              py: { xs: 1, sm: 4 },
-              px: { xs: 3, sm: 4 },
+              gap: { xs: 1.5, md: 2 },
             }}
           >
             {/* Header Content */}
             <Box sx={{ flex: 1 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                <TableRestaurant sx={{ fontSize: 26, mr: 1.5, color: 'text.primary', opacity: 0.9 }} />
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
+                <TableRestaurant sx={{ fontSize: 24, mr: 1.25, color: 'text.primary', opacity: 0.9 }} />
                 <Typography
                   variant="h4"
                   component="h1"
                   fontWeight="600"
                   sx={{
-                    fontSize: { xs: '1.75rem', sm: '2rem' },
+                    fontSize: { xs: '1.375rem', sm: '1.625rem' },
                     letterSpacing: '-0.01em',
                     lineHeight: 1.2,
                     color: 'text.primary',
@@ -492,35 +490,14 @@ const TableManagement = () => {
               <Typography
                 variant="body1"
                 sx={{
-                  fontSize: { xs: '0.8rem', sm: '1rem' },
+                  fontSize: { xs: '0.8125rem', sm: '0.875rem' },
                   fontWeight: 400,
-                  mb: 1,
                   maxWidth: '500px',
                   color: 'text.secondary',
                 }}
               >
-                Manager - Manage your restaurant's tables, seating areas, and QR codes for seamless dining experience
+                Manage your restaurant's tables, seating areas, and QR codes
               </Typography>
-
-              {getVenue() && (
-                <Box
-                  sx={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                    backdropFilter: 'blur(10px)',
-                    px: 1,
-                    py: 1,
-                    borderRadius: 1,
-                    border: '1px solid rgba(0, 0, 0, 0.1)',
-                  }}
-                >
-                  <Store sx={{ fontSize: 12, mr: 1, color: 'primary.main', opacity: 0.9 }} />
-                  <Typography variant="body2" fontWeight="500" color="text.primary">
-                    {getVenueDisplayName()}
-                  </Typography>
-                </Box>
-              )}
             </Box>
 
             {/* Action Buttons */}
@@ -528,11 +505,40 @@ const TableManagement = () => {
               sx={{
                 display: 'flex',
                 gap: 1,
-                flexDirection: { xs: 'row', sm: 'row' },
-                flexWrap: 'wrap',
-                alignItems: 'center',
+                flexDirection: 'column',
+                alignItems: { xs: 'flex-start', md: 'flex-end' },
               }}
             >
+              {/* Venue Name Badge */}
+              {getVenue() && (
+                <Box
+                  sx={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                    backdropFilter: 'blur(10px)',
+                    px: 1.25,
+                    py: 0.5,
+                    borderRadius: 1.25,
+                    border: '1px solid rgba(0, 0, 0, 0.1)',
+                  }}
+                >
+                  <Store sx={{ fontSize: 14, mr: 0.5, color: 'primary.main', opacity: 0.9 }} />
+                  <Typography variant="body2" fontWeight="500" color="text.primary" sx={{ fontSize: '0.8125rem' }}>
+                    {getVenueDisplayName()}
+                  </Typography>
+                </Box>
+              )}
+
+              {/* Buttons Row */}
+              <Box
+                sx={{
+                  display: 'flex',
+                  gap: 1,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                }}
+              >
               <FlagGate flag="tables.showTableQRCode">
                 <Button
                   variant="outlined"
@@ -545,11 +551,11 @@ const TableManagement = () => {
                     border: '1px solid rgba(0, 0, 0, 0.1)',
                     color: 'text.primary',
                     fontWeight: 600,
-                    px: 3,
+                    px: 2,
                     py: 1,
-                    borderRadius: 1,
+                    borderRadius: 2,
                     textTransform: 'none',
-                    fontSize: '0.8rem',
+                    fontSize: '0.875rem',
                     '&:hover': {
                       backgroundColor: 'rgba(255, 255, 255, 1)',
                       borderColor: 'primary.main',
@@ -567,14 +573,14 @@ const TableManagement = () => {
               <IconButton
                 onClick={refreshData}
                 disabled={loading}
-                size="medium"
+                size="small"
                 sx={{
                   backgroundColor: 'rgba(255, 255, 255, 0.9)',
                   backdropFilter: 'blur(10px)',
                   border: '1px solid rgba(0, 0, 0, 0.1)',
                   color: 'text.secondary',
-                  width: 40,
-                  height: 40,
+                  width: 28,
+                  height: 28,
                   '&:hover': {
                     backgroundColor: 'rgba(255, 255, 255, 1)',
                     color: 'primary.main',
@@ -588,11 +594,12 @@ const TableManagement = () => {
                 title={loading ? 'Refreshing...' : 'Refresh tables'}
               >
                 {loading ? (
-                  <CachedOutlined sx={{ animation: `${spin} 1s linear infinite` }} />
+                  <CachedOutlined sx={{ animation: `${spin} 1s linear infinite`, fontSize: 16 }} />
                 ) : (
-                  <Refresh />
+                  <Refresh sx={{ fontSize: 16 }} />
                 )}
               </IconButton>
+              </Box>
             </Box>
           </Box>
         </Container>
@@ -608,7 +615,7 @@ const TableManagement = () => {
       >
         {/* Error Alert */}
         {error && (
-          <Box sx={{ px: { xs: 3, sm: 4 }, pt: 3, pb: 1 }}>
+          <Box sx={{ px: { xs: 2, sm: 3 }, pt: 3, pb: 1 }}>
             <Alert 
               severity="error" 
               onClose={() => setError(null)}
@@ -619,7 +626,7 @@ const TableManagement = () => {
         )}
 
         <FlagGate flag="tables.showTableStats">
-          <Box sx={{ px: { xs: 3, sm: 4 }, py: 3 }}>
+          <Box sx={{ px: { xs: 2, sm: 3 }, py: 2 }}>
             <TableStats tables={tables} areas={areas} />
           </Box>
         </FlagGate>
@@ -630,7 +637,7 @@ const TableManagement = () => {
           borderColor: 'divider',
           backgroundColor: 'background.paper',
           mx: { xs: 3, sm: 4 },
-          mb: 4
+          mb: 3
         }}>
           <Tabs 
             value={tabValue} 
@@ -641,11 +648,11 @@ const TableManagement = () => {
               borderColor: 'divider',
               '& .MuiTab-root': {
                 minHeight: { xs: 48, sm: 48 },
-                fontSize: { xs: '0.8rem', sm: '0.8rem' },
+                fontSize: { xs: '0.875rem', sm: '0.875rem' },
                 fontWeight: 500,
                 textTransform: 'none',
                 minWidth: { xs: 'auto', sm: 160 },
-                px: { xs: 1, sm: 1 }
+                px: { xs: 1, sm: 2 }
               }
             }}
           >

@@ -172,22 +172,45 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
   };
 
   return (
-    <Box
-      className={`sidebar sidebar-glass ${isCollapsed ? 'sidebar-collapsed' : isTablet ? 'sidebar-tablet' : 'sidebar-expanded'}`}
-      sx={{
-        position: 'fixed',
-        top: 70,
-        left: 0,
-        bottom: 0,
-        width: sidebarWidth,
-        backgroundColor: alpha(theme.palette.background.paper, 0.98),
-        backdropFilter: 'blur(24px)',
-        borderRight: `1px solid ${alpha(theme.palette.divider, 0.12)}`,
-        zIndex: 1200,
-        display: 'flex',
-        flexDirection: 'column',
-        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-        boxShadow: `0 8px 32px ${alpha(theme.palette.common.black, 0.12)}`,
+    <>
+      {/* Backdrop Overlay - Shows when sidebar is expanded */}
+      {!isCollapsed && (
+        <Box
+          className="sidebar-backdrop"
+          onClick={toggleCollapsed}
+          sx={{
+            position: 'fixed',
+            top: 64,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: alpha(theme.palette.common.black, 0.5),
+            backdropFilter: 'blur(4px)',
+            zIndex: 1199,
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            cursor: 'pointer',
+          }}
+        />
+      )}
+
+      <Box
+        className={`sidebar sidebar-glass ${isCollapsed ? 'sidebar-collapsed' : isTablet ? 'sidebar-tablet' : 'sidebar-expanded'}`}
+        sx={{
+          position: 'fixed',
+          top: 64,
+          left: 0,
+          bottom: 0,
+          width: sidebarWidth,
+          backgroundColor: alpha(theme.palette.background.paper, 0.98),
+          backdropFilter: 'blur(24px)',
+          borderRight: `1px solid ${alpha(theme.palette.divider, 0.12)}`,
+          zIndex: 1200,
+          display: 'flex',
+          flexDirection: 'column',
+          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+          boxShadow: !isCollapsed 
+            ? `0 8px 32px ${alpha(theme.palette.common.black, 0.24)}`
+            : `0 8px 32px ${alpha(theme.palette.common.black, 0.12)}`,
         '&::before': {
           content: '""',
           position: 'absolute',
@@ -262,8 +285,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
                 minWidth: showExpanded ? 40 : '100%',
                 width: showExpanded ? 40 : '100%',
                 height: 40,
-                borderRadius: 1,
-                fontSize: '0.7rem',
+                borderRadius: 2,
+                fontSize: '0.8125rem',
                 fontWeight: 500,
                 color: 'text.primary',
                 backgroundColor: 'transparent',
@@ -281,7 +304,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
                 '& .MuiButton-startIcon': {
                   mr: 0,
                   color: 'inherit',
-                  fontSize: '0.95rem',
+                  fontSize: '1.125rem',
                 },
               }}
               startIcon={isCollapsed ? <ChevronRight /> : <ChevronLeft />}
@@ -302,63 +325,77 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
             sx={{
               display: 'flex',
               alignItems: 'center',
-              gap: 1.25,
-              p: 1.25,
-              borderRadius: 1,
+              justifyContent: 'center',
+              p: showExpanded ? 1.25 : 0.75,
+              borderRadius: 2,
               backgroundColor: alpha(theme.palette.primary.main, 0.05),
               border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
+              minHeight: showExpanded ? 'auto' : 48,
+              height: showExpanded ? 'auto' : 48,
             }}
           >
-            <Avatar
+            <Box
               sx={{
-                width: 32,
-                height: 32,
-                backgroundColor: 'primary.main',
-                fontSize: '0.7rem',
-                fontWeight: 600,
+                display: 'flex',
+                flexDirection: showExpanded ? 'column' : 'row',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '100%',
+                gap: showExpanded ? 0.75 : 0,
               }}
             >
-              {getUserFirstName(user)?.charAt(0) || user.email?.charAt(0) || 'U'}
-            </Avatar>
-            
-            <Collapse in={showExpanded} orientation="horizontal">
-              <Box sx={{ minWidth: 0, flex: 1 }}>
-                <Typography
-                  variant="subtitle2"
-                  sx={{
-                    fontWeight: 600,
-                    color: 'text.primary',
-                    fontSize: '0.7rem',
-                    lineHeight: 1.2,
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  {getUserFirstName(user) || user.email}
-                </Typography>
-                <Chip
-                  label={(() => {
-                    const backendRole = PermissionService.getBackendRole();
-                    if (backendRole?.name) {
-                      const roleDefinition = PermissionService.getRoleDefinition(backendRole.name);
-                      return roleDefinition?.displayName || backendRole.name;
-                    }
-                    return user?.role || 'User';
-                  })()}
-                  size="small"
-                  sx={{
-                    height: 16,
-                    fontSize: '0.625rem',
-                    fontWeight: 500,
-                    backgroundColor: alpha(theme.palette.primary.main, 0.1),
-                    color: 'primary.main',
-                    border: 'none',
-                    mt: 0.375,
-                  }}
-                />
-              </Box>
-            </Collapse>
+              <Avatar
+                sx={{
+                  width: 32,
+                  height: 32,
+                  backgroundColor: 'primary.main',
+                  fontSize: '0.8125rem',
+                  fontWeight: 600,
+                  flexShrink: 0,
+                }}
+              >
+                {getUserFirstName(user)?.charAt(0) || user.email?.charAt(0) || 'U'}
+              </Avatar>
+              
+              <Collapse in={showExpanded} orientation="horizontal">
+                <Box sx={{ minWidth: 0, textAlign: 'center' }}>
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      fontWeight: 600,
+                      color: 'text.primary',
+                      fontSize: '0.8125rem',
+                      lineHeight: 1.2,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {getUserFirstName(user) || user.email}
+                  </Typography>
+                  <Chip
+                    label={(() => {
+                      const backendRole = PermissionService.getBackendRole();
+                      if (backendRole?.name) {
+                        const roleDefinition = PermissionService.getRoleDefinition(backendRole.name);
+                        return roleDefinition?.displayName || backendRole.name;
+                      }
+                      return user?.role || 'User';
+                    })()}
+                    size="small"
+                    sx={{
+                      height: 16,
+                      fontSize: '0.625rem',
+                      fontWeight: 500,
+                      backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                      color: 'primary.main',
+                      border: 'none',
+                      mt: 0.375,
+                    }}
+                  />
+                </Box>
+              </Collapse>
+            </Box>
           </Box>
         </Box>
       )}
@@ -375,35 +412,35 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
           <Box
             sx={{
               p: 1.5,
-              borderRadius: 1,
+              borderRadius: 2,
               backgroundColor: alpha(theme.palette.background.default, 0.8),
               border: `1px solid ${alpha(theme.palette.divider, 0.2)}`,
             }}
           >
             {/* Order Status */}
-            <Box sx={{ mb: 1 }}>
+            <Box sx={{ mb: 1.5 }}>
               <Typography
                 variant="body2"
                 sx={{
                   color: 'text.secondary',
-                  fontSize: '0.7rem',
+                  fontSize: '0.75rem',
                   fontWeight: 500,
-                  mb: 0.5,
+                  mb: 0.75,
                 }}
               >
                 Order Status
               </Typography>
               <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 0.75, mb: 1 }}>
                 {venueStatus.isOpen ? (
-                  <CheckCircle sx={{ fontSize: 12, color: 'success.main', mt: 0.1 }} />
+                  <CheckCircle sx={{ fontSize: 14, color: 'success.main', mt: 0.1 }} />
                 ) : (
-                  <Cancel sx={{ fontSize: 12, color: 'error.main', mt: 0.1 }} />
+                  <Cancel sx={{ fontSize: 14, color: 'error.main', mt: 0.1 }} />
                 )}
                 <Typography
                   variant="body2"
                   sx={{
                     color: 'text.primary',
-                    fontSize: '0.7rem',
+                    fontSize: '0.75rem',
                     lineHeight: 1.4,
                   }}
                 >
@@ -473,9 +510,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
               {statusLoading ? (
                 <CircularProgress size={16} />
               ) : venueStatus.isOpen ? (
-                <CheckCircle sx={{ fontSize: 12, color: 'success.main' }} />
+                <CheckCircle sx={{ fontSize: 20, color: 'success.main' }} />
               ) : (
-                <Cancel sx={{ fontSize: 12, color: 'error.main' }} />
+                <Cancel sx={{ fontSize: 20, color: 'error.main' }} />
               )}
             </IconButton>
           </Tooltip>
@@ -511,7 +548,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
             color: 'text.secondary',
             fontWeight: 600,
             fontSize: '0.7rem',
-            mb: 1,
+            mb: 1.5,
             display: showExpanded ? 'block' : 'none',
             px: 1,
           }}
@@ -538,9 +575,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
                     textAlign: 'left',
                     py: 1.25,
                     px: showExpanded ? 1.5 : 1,
-                    borderRadius: 1,
+                    borderRadius: 2,
                     minHeight: 42,
-                    fontSize: '0.7rem',
+                    fontSize: '0.8125rem',
                     fontWeight: isActive ? 600 : 500,
                     color: isActive ? 'primary.main' : 'text.primary',
                     backgroundColor: isActive 
@@ -581,7 +618,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
                     '& .MuiButton-startIcon': {
                       mr: showExpanded ? 1 : 0,
                       color: isActive ? 'primary.main' : 'text.secondary',
-                      fontSize: '0.95rem',
+                      fontSize: '1.125rem',
                       transition: 'color 0.2s ease',
                     },
                   }}
@@ -611,11 +648,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
         sx={{
           flexShrink: 0,
           display: 'flex',
+          flexDirection: 'column',
           justifyContent: 'center',
           alignItems: 'center',
           p: showExpanded ? 1 : 0.5,
           borderTop: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
           mt: 'auto',
+          gap: 0.5,
         }}
       >
         <Box
@@ -634,9 +673,24 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
             },
           }}
         />
+        <Collapse in={showExpanded} orientation="vertical">
+          <Typography
+            variant="caption"
+            sx={{
+              color: 'text.secondary',
+              fontSize: '0.65rem',
+              fontWeight: 500,
+              textAlign: 'center',
+              mt: 0.5,
+            }}
+          >
+            v1.0.0
+          </Typography>
+        </Collapse>
       </Box>
 
-    </Box>
+      </Box>
+    </>
   );
 };
 

@@ -105,7 +105,7 @@ interface TabPanelProps {
 const TabPanel: React.FC<TabPanelProps> = ({ children, value, index }) => {
   return (
     <div hidden={value !== index}>
-      {value === index && <Box sx={{ py: 3 }}>{children}</Box>}
+      {value === index && <Box sx={{ py: 2 }}>{children}</Box>}
     </div>
   );
 };
@@ -614,28 +614,26 @@ const MenuManagement: React.FC = () => {
         }}
       >
         <AnimatedBackground />
-        <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 2 }}>
+        <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 2, pl: { xs: 3, sm: 4, md: 5 } }}>
           <Box
             sx={{
               display: 'flex',
               flexDirection: { xs: 'column', md: 'row' },
               justifyContent: 'space-between',
               alignItems: { xs: 'flex-start', md: 'center' },
-              gap: { xs: 1, md: 1.5 },
-              py: { xs: 1, sm: 3 },
-              px: { xs: 1, sm: 3 },
+              gap: { xs: 1.5, md: 2 },
             }}
           >
             {/* Header Content */}
             <Box sx={{ flex: 1 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                <Restaurant sx={{ fontSize: 26, mr: 1.5, color: 'text.primary', opacity: 0.9 }} />
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
+                <Restaurant sx={{ fontSize: 24, mr: 1.25, color: 'text.primary', opacity: 0.9 }} />
                 <Typography
                   variant="h4"
                   component="h1"
                   fontWeight="600"
                   sx={{
-                    fontSize: { xs: '1.75rem', sm: '2rem' },
+                    fontSize: { xs: '1.375rem', sm: '1.625rem' },
                     letterSpacing: '-0.01em',
                     lineHeight: 1.2,
                     color: 'text.primary',
@@ -648,71 +646,85 @@ const MenuManagement: React.FC = () => {
               <Typography
                 variant="body1"
                 sx={{
-                  fontSize: { xs: '0.8rem', sm: '1rem' },
+                  fontSize: { xs: '0.8125rem', sm: '0.875rem' },
                   fontWeight: 400,
-                  mb: 1,
                   maxWidth: '500px',
                   color: 'text.secondary',
                 }}
               >
-                Manage your restaurant's menu items and categories for {getVenueDisplayName()}
+                Manage your restaurant's menu items and categories
               </Typography>
-
-              <Box
-                sx={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                  backdropFilter: 'blur(10px)',
-                  px: 1,
-                  py: 1,
-                  borderRadius: 1,
-                  border: '1px solid rgba(0, 0, 0, 0.1)',
-                }}
-              >
-                <Store sx={{ fontSize: 12, mr: 1, color: 'primary.main', opacity: 0.9 }} />
-                <Typography variant="body2" fontWeight="500" color="text.primary">
-                  {getVenueDisplayName()}
-                </Typography>
-              </Box>
             </Box>
 
             {/* Action Buttons */}
             <Box
               sx={{
                 display: 'flex',
-                alignItems: 'center',
+                gap: 1,
+                flexDirection: 'column',
+                alignItems: { xs: 'flex-start', md: 'flex-end' },
               }}
             >
-              <IconButton
-                onClick={handleRefreshMenu}
-                disabled={loading}
-                size="medium"
+              {/* Venue Name Badge */}
+              {getVenue() && (
+                <Box
+                  sx={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                    backdropFilter: 'blur(10px)',
+                    px: 1.25,
+                    py: 0.5,
+                    borderRadius: 1.25,
+                    border: '1px solid rgba(0, 0, 0, 0.1)',
+                  }}
+                >
+                  <Store sx={{ fontSize: 14, mr: 0.5, color: 'primary.main', opacity: 0.9 }} />
+                  <Typography variant="body2" fontWeight="500" color="text.primary" sx={{ fontSize: '0.8125rem' }}>
+                    {getVenueDisplayName()}
+                  </Typography>
+                </Box>
+              )}
+
+              {/* Buttons Row */}
+              <Box
                 sx={{
-                  backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                  backdropFilter: 'blur(10px)',
-                  border: '1px solid rgba(0, 0, 0, 0.1)',
-                  color: 'text.secondary',
-                  width: 40,
-                  height: 40,
-                  '&:hover': {
-                    backgroundColor: 'rgba(255, 255, 255, 1)',
-                    color: 'primary.main',
-                    transform: 'translateY(-1px)',
-                  },
-                  '&:disabled': {
-                    opacity: 0.5,
-                  },
-                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                  display: 'flex',
+                  gap: 1,
+                  flexDirection: 'row',
+                  alignItems: 'center',
                 }}
-                title={loading ? 'Refreshing...' : 'Refresh menu'}
               >
-                {loading ? (
-                  <CachedOutlined sx={{ animation: `${spin} 1s linear infinite` }} />
-                ) : (
-                  <Refresh />
-                )}
-              </IconButton>
+                <IconButton
+                  onClick={handleRefreshMenu}
+                  disabled={loading}
+                  size="small"
+                  sx={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                    backdropFilter: 'blur(10px)',
+                    border: '1px solid rgba(0, 0, 0, 0.1)',
+                    color: 'text.secondary',
+                    width: 28,
+                    height: 28,
+                    '&:hover': {
+                      backgroundColor: 'rgba(255, 255, 255, 1)',
+                      color: 'primary.main',
+                      transform: 'translateY(-1px)',
+                    },
+                    '&:disabled': {
+                      opacity: 0.5,
+                    },
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                  }}
+                  title={loading ? 'Refreshing...' : 'Refresh menu'}
+                >
+                  {loading ? (
+                    <CachedOutlined sx={{ animation: `${spin} 1s linear infinite`, fontSize: 16 }} />
+                  ) : (
+                    <Refresh sx={{ fontSize: 16 }} />
+                  )}
+                </IconButton>
+              </Box>
             </Box>
           </Box>
         </Container>
@@ -722,7 +734,7 @@ const MenuManagement: React.FC = () => {
       <Box sx={{ width: '100%', padding: 0, margin: 0 }}>
         {/* Error Alert */}
         {error && (
-          <Box sx={{ px: { xs: 1, sm: 3 }, pt: 3, pb: 1 }}>
+          <Box sx={{ px: { xs: 2, sm: 3 }, pt: 3, pb: 1 }}>
             <Alert 
               severity="error" 
               onClose={() => setError(null)}
@@ -734,7 +746,7 @@ const MenuManagement: React.FC = () => {
 
         {/* Menu Statistics */}
         <FlagGate flag="menu.showMenuStats">
-          <Box sx={{ px: { xs: 1, sm: 3 }, py: 3 }}>
+          <Box sx={{ px: { xs: 2, sm: 3 }, py: 2 }}>
             <MenuStats menuItems={menuItems} categories={categories} />
           </Box>
         </FlagGate>
@@ -745,7 +757,7 @@ const MenuManagement: React.FC = () => {
           borderColor: 'divider',
           backgroundColor: 'background.paper',
           mx: { xs: 3, sm: 4 },
-          mb: 4
+          mb: 3
         }}>
           <Tabs 
             value={tabValue} 
@@ -756,11 +768,11 @@ const MenuManagement: React.FC = () => {
               borderColor: 'divider',
               '& .MuiTab-root': {
                 minHeight: { xs: 48, sm: 48 },
-                fontSize: { xs: '0.8rem', sm: '0.8rem' },
+                fontSize: { xs: '0.875rem', sm: '0.875rem' },
                 fontWeight: 500,
                 textTransform: 'none',
                 minWidth: { xs: 'auto', sm: 160 },
-                px: { xs: 1, sm: 1 }
+                px: { xs: 1, sm: 2 }
               }
             }}
           >
@@ -817,7 +829,7 @@ const MenuManagement: React.FC = () => {
               {/* Categories List - Similar to Tables */}
               <Box sx={{ 
                 backgroundColor: 'white',
-                borderRadius: 1,
+                borderRadius: 2,
                 border: '1px solid',
                 borderColor: 'grey.200',
                 boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
@@ -825,12 +837,12 @@ const MenuManagement: React.FC = () => {
               }}>
                 {/* Header */}
                 <Box sx={{ 
-                  p: 1.5,
+                  p: 2,
                   borderBottom: '1px solid',
                   borderColor: 'grey.200'
                 }}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                       <Box
                         sx={{
                           width: 48,
@@ -842,7 +854,7 @@ const MenuManagement: React.FC = () => {
                           justifyContent: 'center'
                         }}
                       >
-                        <Category sx={{ color: 'white', fontSize: 12 }} />
+                        <Category sx={{ color: 'white', fontSize: 24 }} />
                       </Box>
                       <Box>
                         <Typography variant="h5" fontWeight="700" sx={{ color: 'text.primary', mb: 0.5 }}>
@@ -860,11 +872,11 @@ const MenuManagement: React.FC = () => {
                       onClick={handleAddCategory}
                       size="medium"
                       sx={{
-                        borderRadius: 1,
+                        borderRadius: 2,
                         backgroundColor: 'primary.main',
                         color: 'white',
                         fontWeight: 600,
-                        px: 3,
+                        px: 2,
                         py: 1,
                         '&:hover': {
                           backgroundColor: 'primary.dark',
@@ -880,9 +892,9 @@ const MenuManagement: React.FC = () => {
                 </Box>
 
                 {/* Content */}
-                <Box sx={{ p: 1.5 }}>
+                <Box sx={{ p: 2 }}>
                   {categories.length === 0 ? (
-                    <Box sx={{ textAlign: 'center', py: 4 }}>
+                    <Box sx={{ textAlign: 'center', py: 2.5 }}>
                       <Box
                         sx={{
                           width: 80,
@@ -893,17 +905,17 @@ const MenuManagement: React.FC = () => {
                           alignItems: 'center',
                           justifyContent: 'center',
                           mx: 'auto',
-                          mb: 1
+                          mb: 3
                         }}
                       >
-                        <Category sx={{ fontSize: 26, color: 'text.secondary' }} />
+                        <Category sx={{ fontSize: 40, color: 'text.secondary' }} />
                       </Box>
                       
                       <Typography variant="h6" fontWeight="600" gutterBottom color="text.primary">
                         No Categories Yet
                       </Typography>
                       
-                      <Typography variant="body1" sx={{ mb: 4, color: 'text.secondary', maxWidth: '500px', mx: 'auto' }}>
+                      <Typography variant="body1" sx={{ mb: 3, color: 'text.secondary', maxWidth: '500px', mx: 'auto' }}>
                         Start organizing your menu by creating your first category. Categories help customers navigate your menu more easily.
                       </Typography>
 
@@ -915,10 +927,10 @@ const MenuManagement: React.FC = () => {
                         sx={{
                           backgroundColor: 'primary.main',
                           color: 'white',
-                          borderRadius: 1,
+                          borderRadius: 2,
                           fontWeight: 600,
-                          px: 4,
-                          py: 1,
+                          px: 2.5,
+                          py: 1.5,
                           '&:hover': {
                             backgroundColor: 'primary.dark',
                             transform: 'translateY(-1px)',
@@ -939,17 +951,17 @@ const MenuManagement: React.FC = () => {
                           <React.Fragment key={category.id}>
                             <ListItem
                               sx={{
-                                py: 1,
+                                py: 2.5,
                                 px: 0,
                                 transition: 'all 0.2s ease-in-out',
                                 '&:hover': {
                                   backgroundColor: 'grey.50',
                                   transform: 'translateX(4px)',
-                                  borderRadius: 1
+                                  borderRadius: 2
                                 }
                               }}
                             >
-                              <Stack direction="row" alignItems="center" spacing={1} sx={{ width: '100%' }}>
+                              <Stack direction="row" alignItems="center" spacing={2} sx={{ width: '100%' }}>
                                 {/* Category Icon */}
                                 <Box sx={{ position: 'relative' }}>
                                   <Avatar
@@ -959,7 +971,7 @@ const MenuManagement: React.FC = () => {
                                       backgroundColor: 'primary.main',
                                       border: '3px solid',
                                       borderColor: 'grey.100',
-                                      fontSize: '1rem',
+                                      fontSize: '1.5rem',
                                       fontWeight: 700,
                                       color: 'white'
                                     }}
@@ -1021,7 +1033,7 @@ const MenuManagement: React.FC = () => {
                                     variant="outlined"
                                     sx={{
                                       fontWeight: 600,
-                                      fontSize: '0.7rem'
+                                      fontSize: '0.75rem'
                                     }}
                                   />
                                 </Box>

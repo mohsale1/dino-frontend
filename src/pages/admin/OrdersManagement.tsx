@@ -102,7 +102,7 @@ interface TabPanelProps {
 const TabPanel: React.FC<TabPanelProps> = ({ children, value, index }) => {
   return (
     <div hidden={value !== index}>
-      {value === index && <Box sx={{ py: 3 }}>{children}</Box>}
+      {value === index && <Box sx={{ py: 2 }}>{children}</Box>}
     </div>
   );
 };
@@ -411,7 +411,7 @@ const OrdersManagement: React.FC = () => {
         }}
       >
         <CardContent sx={{ 
-          p: 1.5, 
+          p: 2.5, 
           '&:last-child': { pb: 2.5 },
           display: 'flex',
           flexDirection: 'column',
@@ -446,10 +446,10 @@ const OrdersManagement: React.FC = () => {
                 backgroundColor: getStatusColor(order.status),
                 color: 'white',
                 '& .MuiChip-icon': { color: 'white' },
-                fontSize: '0.7rem',
+                fontSize: '0.75rem',
                 height: 26,
                 fontWeight: 600,
-                borderRadius: 1,
+                borderRadius: 2,
                 px: 1
               }}
             />
@@ -458,10 +458,10 @@ const OrdersManagement: React.FC = () => {
           {/* Table and Time Info */}
           <Box 
             sx={{ 
-              mb: 1, 
+              mb: 2, 
               p: 1.5, 
               backgroundColor: 'rgba(0,0,0,0.02)',
-              borderRadius: 1,
+              borderRadius: 2,
               border: '1px solid',
               borderColor: 'divider'
             }}
@@ -472,7 +472,7 @@ const OrdersManagement: React.FC = () => {
                   sx={{
                     width: 32,
                     height: 32,
-                    borderRadius: 1,
+                    borderRadius: 1.5,
                     backgroundColor: 'primary.main',
                     display: 'flex',
                     alignItems: 'center',
@@ -496,7 +496,7 @@ const OrdersManagement: React.FC = () => {
               
               <Stack direction="row" justifyContent="space-between" alignItems="center">
                 <Stack direction="row" alignItems="center" spacing={0.5}>
-                  <AccessTime fontSize="small" sx={{ fontSize: 12, color: 'text.secondary' }} />
+                  <AccessTime fontSize="small" sx={{ fontSize: 16, color: 'text.secondary' }} />
                   <Typography variant="body2" color="text.secondary" fontSize="0.8rem">
                     {formatTime(order.createdAt)}
                   </Typography>
@@ -540,7 +540,7 @@ const OrdersManagement: React.FC = () => {
                     alignItems: 'center',
                     gap: 1,
                     p: 1,
-                    borderRadius: 1,
+                    borderRadius: 1.5,
                     backgroundColor: 'background.paper',
                     border: '1px solid',
                     borderColor: 'divider'
@@ -555,7 +555,7 @@ const OrdersManagement: React.FC = () => {
                       backgroundColor: 'primary.main',
                       color: 'white',
                       fontWeight: 700,
-                      fontSize: '0.7rem'
+                      fontSize: '0.75rem'
                     }}
                   />
                   <Typography 
@@ -580,7 +580,7 @@ const OrdersManagement: React.FC = () => {
                   size="small"
                   onClick={() => handleViewOrder(order)}
                   sx={{ 
-                    fontSize: '0.7rem',
+                    fontSize: '0.75rem',
                     fontWeight: 600,
                     justifyContent: 'flex-start',
                     pl: 1,
@@ -597,16 +597,16 @@ const OrdersManagement: React.FC = () => {
           </Box>
 
           {/* Actions */}
-          <Stack direction="column" spacing={1} sx={{ mt: 'auto' }}>
+          <Stack direction="column" spacing={1.5} sx={{ mt: 'auto' }}>
             <Button
               fullWidth
               variant="outlined"
               onClick={() => handleViewOrder(order)}
               startIcon={<Visibility />}
               sx={{ 
-                fontSize: '0.8rem', 
+                fontSize: '0.875rem', 
                 py: 1, 
-                borderRadius: 1,
+                borderRadius: 2,
                 fontWeight: 600,
                 borderWidth: 2,
                 '&:hover': {
@@ -626,15 +626,15 @@ const OrdersManagement: React.FC = () => {
                   size="small"
                   disabled={!hasPermission(PERMISSIONS.ORDERS_UPDATE)}
                   sx={{
-                    fontSize: '0.8rem',
-                    borderRadius: 1,
+                    fontSize: '0.875rem',
+                    borderRadius: 2,
                     fontWeight: 600,
                     '& .MuiSelect-select': {
                       py: 1,
                       backgroundColor: getStatusColor(order.status),
                       color: 'white',
                       fontWeight: 700,
-                      borderRadius: 1,
+                      borderRadius: 2,
                     },
                     '& .MuiOutlinedInput-notchedOutline': {
                       border: 'none',
@@ -685,28 +685,26 @@ const OrdersManagement: React.FC = () => {
         }}
       >
         <AnimatedBackground />
-        <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 2 }}>
+        <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 2, pl: { xs: 3, sm: 4, md: 5 } }}>
           <Box
             sx={{
               display: 'flex',
               flexDirection: { xs: 'column', md: 'row' },
               justifyContent: 'space-between',
               alignItems: { xs: 'flex-start', md: 'center' },
-              gap: { xs: 1, md: 1.5 },
-              py: { xs: 1, sm: 3 },
-              px: { xs: 1, sm: 3 },
+              gap: { xs: 1.5, md: 2 },
             }}
           >
             {/* Header Content */}
             <Box sx={{ flex: 1 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                <Kitchen sx={{ fontSize: 26, mr: 1.5, color: 'text.primary', opacity: 0.9 }} />
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
+                <Kitchen sx={{ fontSize: 24, mr: 1.25, color: 'text.primary', opacity: 0.9 }} />
                 <Typography
                   variant="h4"
                   component="h1"
                   fontWeight="600"
                   sx={{
-                    fontSize: { xs: '1.75rem', sm: '2rem' },
+                    fontSize: { xs: '1.375rem', sm: '1.625rem' },
                     letterSpacing: '-0.01em',
                     lineHeight: 1.2,
                     color: 'text.primary',
@@ -719,9 +717,8 @@ const OrdersManagement: React.FC = () => {
               <Typography
                 variant="body1"
                 sx={{
-                  fontSize: { xs: '0.8rem', sm: '1rem' },
+                  fontSize: { xs: '0.8125rem', sm: '0.875rem' },
                   fontWeight: 400,
-                  mb: 1,
                   maxWidth: '500px',
                   color: 'text.secondary',
                 }}
@@ -731,24 +728,6 @@ const OrdersManagement: React.FC = () => {
                   : `Order management for ${getVenueDisplayName()}`
                 }
               </Typography>
-
-              <Box
-                sx={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                  backdropFilter: 'blur(10px)',
-                  px: 1,
-                  py: 1,
-                  borderRadius: 1,
-                  border: '1px solid rgba(0, 0, 0, 0.1)',
-                }}
-              >
-                <Store sx={{ fontSize: 12, mr: 1, color: 'primary.main', opacity: 0.9 }} />
-                <Typography variant="body2" fontWeight="500" color="text.primary">
-                  {getVenueDisplayName()}
-                </Typography>
-              </Box>
             </Box>
 
             {/* Action Buttons */}
@@ -756,11 +735,40 @@ const OrdersManagement: React.FC = () => {
               sx={{
                 display: 'flex',
                 gap: 1,
-                flexDirection: { xs: 'row', sm: 'row' },
-                flexWrap: 'wrap',
-                alignItems: 'center',
+                flexDirection: 'column',
+                alignItems: { xs: 'flex-start', md: 'flex-end' },
               }}
             >
+              {/* Venue Name Badge */}
+              {getVenue() && (
+                <Box
+                  sx={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                    backdropFilter: 'blur(10px)',
+                    px: 1.25,
+                    py: 0.5,
+                    borderRadius: 1.25,
+                    border: '1px solid rgba(0, 0, 0, 0.1)',
+                  }}
+                >
+                  <Store sx={{ fontSize: 14, mr: 0.5, color: 'primary.main', opacity: 0.9 }} />
+                  <Typography variant="body2" fontWeight="500" color="text.primary" sx={{ fontSize: '0.8125rem' }}>
+                    {getVenueDisplayName()}
+                  </Typography>
+                </Box>
+              )}
+
+              {/* Buttons Row */}
+              <Box
+                sx={{
+                  display: 'flex',
+                  gap: 1,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                }}
+              >
               {/* View Mode Toggle */}
               <ToggleButtonGroup
                 value={viewMode}
@@ -771,12 +779,12 @@ const OrdersManagement: React.FC = () => {
                   backgroundColor: 'rgba(255, 255, 255, 0.9)',
                   backdropFilter: 'blur(10px)',
                   border: '1px solid rgba(0, 0, 0, 0.1)',
-                  borderRadius: 1,
+                  borderRadius: 2,
                   '& .MuiToggleButton-root': {
                     border: 'none',
-                    px: { xs: 1, sm: 1 },
+                    px: { xs: 1.5, sm: 2 },
                     py: 0.75,
-                    fontSize: { xs: '0.75rem', sm: '0.8rem' },
+                    fontSize: { xs: '0.75rem', sm: '0.875rem' },
                     fontWeight: 600,
                     textTransform: 'none',
                     color: 'text.secondary',
@@ -814,11 +822,11 @@ const OrdersManagement: React.FC = () => {
                     border: '1px solid rgba(244, 67, 54, 0.3)',
                     color: 'error.main',
                     fontWeight: 600,
-                    px: 3,
+                    px: 2,
                     py: 1,
-                    borderRadius: 1,
+                    borderRadius: 2,
                     textTransform: 'none',
-                    fontSize: '0.8rem',
+                    fontSize: '0.875rem',
                     display: { xs: 'none', sm: 'flex' },
                     '&:hover': {
                       backgroundColor: 'rgba(244, 67, 54, 0.2)',
@@ -836,14 +844,14 @@ const OrdersManagement: React.FC = () => {
               <IconButton
                 onClick={handleRefreshOrders}
                 disabled={loading}
-                size="medium"
+                size="small"
                 sx={{
                   backgroundColor: 'rgba(255, 255, 255, 0.9)',
                   backdropFilter: 'blur(10px)',
                   border: '1px solid rgba(0, 0, 0, 0.1)',
                   color: 'text.secondary',
-                  width: 40,
-                  height: 40,
+                  width: 28,
+                  height: 28,
                   '&:hover': {
                     backgroundColor: 'rgba(255, 255, 255, 1)',
                     color: 'primary.main',
@@ -857,11 +865,12 @@ const OrdersManagement: React.FC = () => {
                 title={loading ? 'Refreshing...' : 'Refresh orders'}
               >
                 {loading ? (
-                  <CachedOutlined sx={{ animation: `${spin} 1s linear infinite` }} />
+                  <CachedOutlined sx={{ animation: `${spin} 1s linear infinite`, fontSize: 16 }} />
                 ) : (
-                  <Refresh />
+                  <Refresh sx={{ fontSize: 16 }} />
                 )}
               </IconButton>
+              </Box>
             </Box>
           </Box>
         </Container>
@@ -871,7 +880,7 @@ const OrdersManagement: React.FC = () => {
       <Box sx={{ width: '100%', padding: 0, margin: 0 }}>
         {/* Error Alert */}
         {error && (
-          <Box sx={{ px: { xs: 1, sm: 3 }, pt: 3, pb: 1 }}>
+          <Box sx={{ px: { xs: 2, sm: 3 }, pt: 3, pb: 1 }}>
             <Alert 
               severity="error" 
               onClose={() => setError(null)}
@@ -882,7 +891,7 @@ const OrdersManagement: React.FC = () => {
         )}
 
         {/* Date Range Picker */}
-        <Box sx={{ px: { xs: 1, sm: 3 }, pt: 3, pb: 1 }}>
+        <Box sx={{ px: { xs: 2, sm: 3 }, pt: 3, pb: 2 }}>
           <DateRangePicker
             value={dateRange}
             onChange={handleDateRangeChange}
@@ -893,7 +902,7 @@ const OrdersManagement: React.FC = () => {
 
         {/* Kitchen Statistics */}
         <FlagGate flag="orders.showOrderStats">
-          <Box sx={{ mb: 4, px: { xs: 1, sm: 3 }, py: 1 }}>
+          <Box sx={{ mb: 3, px: { xs: 2, sm: 3 }, py: 2 }}>
             <Grid container spacing={{ xs: 2, sm: 3 }}>
               {[
                 { 
@@ -929,7 +938,7 @@ const OrdersManagement: React.FC = () => {
                   <Card
                     sx={{
                       p: { xs: 2.5, sm: 3 },
-                      borderRadius: 1,
+                      borderRadius: 2,
                       backgroundColor: `${stat.color}08`,
                       border: `1px solid ${stat.color}33`,
                       transition: 'all 0.3s ease',
@@ -940,12 +949,12 @@ const OrdersManagement: React.FC = () => {
                       },
                     }}
                   >
-                    <Stack direction="row" alignItems="center" spacing={1}>
+                    <Stack direction="row" alignItems="center" spacing={2}>
                       <Box
                         sx={{
                           width: { xs: 40, sm: 48 },
                           height: { xs: 40, sm: 48 },
-                          borderRadius: 1,
+                          borderRadius: 2,
                           backgroundColor: stat.color,
                           display: 'flex',
                           alignItems: 'center',
@@ -977,7 +986,7 @@ const OrdersManagement: React.FC = () => {
                           color="text.secondary"
                           fontWeight="600"
                           sx={{ 
-                            fontSize: { xs: '0.75rem', sm: '0.8rem' },
+                            fontSize: { xs: '0.75rem', sm: '0.875rem' },
                             lineHeight: 1.2,
                             display: '-webkit-box',
                             WebkitLineClamp: 2,
@@ -1001,8 +1010,8 @@ const OrdersManagement: React.FC = () => {
           <FlagGate flag="orders.showOrderFilters">
             <Paper 
               sx={{ 
-                p: 1.5, 
-                mb: 4, 
+                p: 2, 
+                mb: 3, 
                 border: '1px solid', 
                 borderColor: 'divider',
                 backgroundColor: 'background.paper',
@@ -1047,7 +1056,7 @@ const OrdersManagement: React.FC = () => {
 
         {/* Kanban View */}
         {viewMode === 'kanban' ? (
-          <Box sx={{ px: { xs: 1, sm: 3 }, mb: 4 }}>
+          <Box sx={{ px: { xs: 2, sm: 3 }, mb: 3 }}>
             <KanbanBoard
               orders={filteredOrders}
               onStatusUpdate={handleStatusUpdate}
@@ -1071,11 +1080,11 @@ const OrdersManagement: React.FC = () => {
               borderColor: 'divider',
               '& .MuiTab-root': {
                 minHeight: { xs: 48, sm: 48 },
-                fontSize: { xs: '0.8rem', sm: '0.8rem' },
+                fontSize: { xs: '0.875rem', sm: '0.875rem' },
                 fontWeight: 500,
                 textTransform: 'none',
                 minWidth: { xs: 'auto', sm: 160 },
-                px: { xs: 1, sm: 1 }
+                px: { xs: 1, sm: 2 }
               }
             }}
           >
@@ -1110,8 +1119,8 @@ const OrdersManagement: React.FC = () => {
                     borderColor: 'primary.light',
                     background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)',
                     textAlign: 'center',
-                    py: { xs: 1, sm: 6 },
-                    px: { xs: 1, sm: 3 },
+                    py: { xs: 4, sm: 6 },
+                    px: { xs: 2, sm: 3 },
                   }}
                 >
                   <Box
@@ -1124,24 +1133,24 @@ const OrdersManagement: React.FC = () => {
                       alignItems: 'center',
                       justifyContent: 'center',
                       mx: 'auto',
-                      mb: 1,
+                      mb: 3,
                       border: '2px solid',
                       borderColor: 'primary.main',
                     }}
                   >
-                    <Restaurant sx={{ fontSize: 26, color: '#1565c0' }} />
+                    <Restaurant sx={{ fontSize: 40, color: '#1565c0' }} />
                   </Box>
                   
                   <Typography variant="h6" fontWeight="600" gutterBottom color="text.primary">
                     No Active Orders
                   </Typography>
                   
-                  <Typography variant="body1" color="text.secondary" sx={{ mb: 1, maxWidth: '400px', mx: 'auto' }}>
+                  <Typography variant="body1" color="text.secondary" sx={{ mb: 3, maxWidth: '400px', mx: 'auto' }}>
                     All orders have been served or there are no new orders in the selected date range.
                   </Typography>
                 </Card>
               ) : (
-                <Grid container spacing={{ xs: 2, sm: 1 }}>
+                <Grid container spacing={{ xs: 2, sm: 2 }}>
                   {getActiveOrders().map(order => (
                     <Grid item xs={12} sm={6} md={4} lg={3} key={order.id}>
                       {renderCompactOrderCard(order)}
@@ -1163,8 +1172,8 @@ const OrdersManagement: React.FC = () => {
                     borderColor: 'success.light',
                     background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)',
                     textAlign: 'center',
-                    py: { xs: 1, sm: 6 },
-                    px: { xs: 1, sm: 3 },
+                    py: { xs: 4, sm: 6 },
+                    px: { xs: 2, sm: 3 },
                   }}
                 >
                   <Box
@@ -1177,24 +1186,24 @@ const OrdersManagement: React.FC = () => {
                       alignItems: 'center',
                       justifyContent: 'center',
                       mx: 'auto',
-                      mb: 1,
+                      mb: 3,
                       border: '2px solid',
                       borderColor: 'success.main',
                     }}
                   >
-                    <CheckCircle sx={{ fontSize: 26, color: '#2e7d32' }} />
+                    <CheckCircle sx={{ fontSize: 40, color: '#2e7d32' }} />
                   </Box>
                   
                   <Typography variant="h6" fontWeight="600" gutterBottom color="text.primary">
                     No Served Orders
                   </Typography>
                   
-                  <Typography variant="body1" color="text.secondary" sx={{ mb: 1, maxWidth: '400px', mx: 'auto' }}>
+                  <Typography variant="body1" color="text.secondary" sx={{ mb: 3, maxWidth: '400px', mx: 'auto' }}>
                     Completed orders for the selected date range will appear here.
                   </Typography>
                 </Card>
               ) : (
-                <Grid container spacing={{ xs: 2, sm: 1 }}>
+                <Grid container spacing={{ xs: 2, sm: 2 }}>
                   {getServedOrders().map(order => (
                     <Grid item xs={12} sm={6} md={4} lg={3} key={order.id}>
                       {renderCompactOrderCard(order)}
@@ -1207,7 +1216,7 @@ const OrdersManagement: React.FC = () => {
 
             {/* Pagination */}
             {filteredOrders.length > 0 && (
-              <Box sx={{ p: 1.5, borderTop: '1px solid', borderColor: 'divider' }}>
+              <Box sx={{ p: 2, borderTop: '1px solid', borderColor: 'divider' }}>
                 <PaginationControl
                   pagination={pagination}
                   onPageChange={setPage}
@@ -1237,7 +1246,7 @@ const OrdersManagement: React.FC = () => {
           {selectedOrder && (
             <>
               <DialogTitle sx={{ 
-                pb: 1, 
+                pb: 2, 
                 borderBottom: '2px dashed',
                 borderColor: 'divider',
                 backgroundColor: 'grey.50'
@@ -1252,9 +1261,9 @@ const OrdersManagement: React.FC = () => {
                 </Box>
               </DialogTitle>
               
-              <DialogContent sx={{ p: 1.5, backgroundColor: 'white' }}>
+              <DialogContent sx={{ p: 2, backgroundColor: 'white' }}>
                 {/* Bill Header */}
-                <Box sx={{ mb: 1, pb: 1, borderBottom: '1px dashed', borderColor: 'divider' }}>
+                <Box sx={{ mb: 3, pb: 2, borderBottom: '1px dashed', borderColor: 'divider' }}>
                   <Stack direction="row" justifyContent="space-between" mb={1}>
                     <Typography variant="body2" color="text.secondary">Order ID:</Typography>
                     <Typography variant="body2" fontWeight="600">#{getTrimmedOrderId(selectedOrder.id)}</Typography>
@@ -1289,7 +1298,7 @@ const OrdersManagement: React.FC = () => {
                 </Box>
 
                 {/* Items Table */}
-                <Box sx={{ mb: 1 }}>
+                <Box sx={{ mb: 3 }}>
                   <Typography variant="subtitle2" fontWeight="700" mb={2}>
                     Order Items
                   </Typography>
@@ -1297,8 +1306,8 @@ const OrdersManagement: React.FC = () => {
                     <Table size="small">
                       <TableHead>
                         <TableRow sx={{ backgroundColor: 'grey.50' }}>
-                          <TableCell sx={{ fontWeight: 700, fontSize: '0.8rem' }}>Item Name</TableCell>
-                          <TableCell align="center" sx={{ fontWeight: 700, fontSize: '0.8rem' }}>Quantity</TableCell>
+                          <TableCell sx={{ fontWeight: 700, fontSize: '0.875rem' }}>Item Name</TableCell>
+                          <TableCell align="center" sx={{ fontWeight: 700, fontSize: '0.875rem' }}>Quantity</TableCell>
                         </TableRow>
                       </TableHead>
                       <TableBody>
@@ -1334,14 +1343,14 @@ const OrdersManagement: React.FC = () => {
                 </Box>
 
                 {/* Footer */}
-                <Box sx={{ mt: 1, pt: 1, borderTop: '1px dashed', borderColor: 'divider', textAlign: 'center' }}>
+                <Box sx={{ mt: 3, pt: 2, borderTop: '1px dashed', borderColor: 'divider', textAlign: 'center' }}>
                   <Typography variant="caption" color="text.secondary">
                     Thank you for your order!
                   </Typography>
                 </Box>
               </DialogContent>
               
-              <DialogActions sx={{ px: 3, pb: 3, pt: 1, borderTop: '1px solid', borderColor: 'divider' }}>
+              <DialogActions sx={{ px: 2, pb: 3, pt: 1, borderTop: '1px solid', borderColor: 'divider' }}>
                 <Stack direction="row" spacing={1} width="100%" justifyContent="space-between" alignItems="center">
                   <Button
                     onClick={() => setOpenOrderDialog(false)}
