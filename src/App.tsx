@@ -62,7 +62,7 @@ const AppProviders = memo(({ children }: { children: React.ReactNode }) => (
     <FlagProvider>
       <ThemeProvider>
         <ToastProvider>
-          <SidebarProvider defaultCollapsed={false}>
+          <SidebarProvider defaultCollapsed={true}>
             <DinoAvatarProvider>
               <AuthProvider>
                 <TourProvider>

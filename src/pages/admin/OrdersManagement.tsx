@@ -66,7 +66,6 @@ import { orderService, Order, OrderStatus, PaymentStatus, PaymentMethod } from '
 import AnimatedBackground from '../../components/ui/AnimatedBackground';
 import { useOrderFlags } from '../../flags/FlagContext';
 import { FlagGate } from '../../flags/FlagComponent';
-import DateRangePicker, { DateRange } from '../../components/common/DateRangePicker';
 import PaginationControl, { usePagination } from '../../components/common/PaginationControl';
 import { KanbanBoard } from '../../components/orders';
 
@@ -125,42 +124,16 @@ const OrdersManagement: React.FC = () => {
   const [tabValue, setTabValue] = useState(0);
   const [viewMode, setViewMode] = useState<'tab' | 'kanban'>('tab');
   const [orders, setOrders] = useState<Order[]>([]);
-  const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [openOrderDialog, setOpenOrderDialog] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Date Range State - Default to today
-  const getTodayRange = (): DateRange => {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, '0');
-    const day = String(today.getDate()).padStart(2, '0');
-    const dateStr = `${year}-${month}-${day}`;
-    return { startDate: dateStr, endDate: dateStr };
-  };
-
-  const [dateRange, setDateRange] = useState<DateRange>(getTodayRange());
-
   // Pagination
   const { pagination, updateTotalItems, setPage, setPageSize } = usePagination(20);
 
-  // Helper function to check if order is from today
-  const isToday = (dateString: string) => {
-    const orderDate = new Date(dateString);
-    const today = new Date();
-    return (
-      orderDate.getDate() === today.getDate() &&
-      orderDate.getMonth() === today.getMonth() &&
-      orderDate.getFullYear() === today.getFullYear()
-    );
-  };
-
-  // Load orders from API with date filtering
+  // Load orders from API
   const loadOrders = async () => {
     const venue = getVenue();
     
@@ -174,10 +147,8 @@ const OrdersManagement: React.FC = () => {
       setLoading(true);
       setError(null);
 
-      // Call API with date range filter
+      // Call API
       const ordersData = await orderService.getVenueOrders(venue.id, {
-        startDate: dateRange.startDate,
-        endDate: dateRange.endDate,
         page: pagination.page,
         pageSize: pagination.pageSize,
       });
@@ -191,41 +162,19 @@ const OrdersManagement: React.FC = () => {
     }
   };
 
-  // Load orders when date range or pagination changes
+  // Load orders when pagination changes
   useEffect(() => {
     loadOrders();
-  }, [userData?.venue?.id, dateRange, pagination.page, pagination.pageSize]);
+  }, [userData?.venue?.id, pagination.page, pagination.pageSize]);
 
   // Auto-refresh orders every 30 seconds
   useEffect(() => {
     const refreshTimer = setInterval(loadOrders, 30000);
     return () => clearInterval(refreshTimer);
-  }, [dateRange, pagination.page, pagination.pageSize]);
-
-  // Filter orders based on search and status (client-side for current page)
-  useEffect(() => {
-    let filtered = orders;
-
-    if (searchTerm) {
-      filtered = filtered.filter(order =>
-        order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        order.order_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (order.table_id && order.table_id.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        order.items.some(item => 
-          item.menu_item_name.toLowerCase().includes(searchTerm.toLowerCase())
-        )
-      );
-    }
-
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter(order => order.status === statusFilter);
-    }
-
-    setFilteredOrders(filtered);
-  }, [orders, searchTerm, statusFilter]);
+  }, [pagination.page, pagination.pageSize]);
 
   const getActiveOrders = () => {
-    return filteredOrders.filter(order => 
+    return orders.filter(order => 
       order.status === 'pending' || 
       order.status === 'confirmed' || 
       order.status === 'preparing' || 
@@ -234,7 +183,7 @@ const OrdersManagement: React.FC = () => {
   };
 
   const getServedOrders = () => {
-    return filteredOrders.filter(order => order.status === 'served' || order.status === 'delivered');
+    return orders.filter(order => order.status === 'served' || order.status === 'delivered');
   };
 
   const getUrgentOrders = () => {
@@ -369,10 +318,7 @@ const OrdersManagement: React.FC = () => {
     setOpenOrderDialog(true);
   };
 
-  const handleDateRangeChange = (newRange: DateRange) => {
-    setDateRange(newRange);
-    setPage(1); // Reset to first page when changing date range
-  };
+
 
   // Compact order card for active and served orders
   const renderCompactOrderCard = (order: Order) => {
@@ -890,15 +836,7 @@ const OrdersManagement: React.FC = () => {
           </Box>
         )}
 
-        {/* Date Range Picker */}
-        <Box sx={{ px: { xs: 2, sm: 3 }, pt: 3, pb: 2 }}>
-          <DateRangePicker
-            value={dateRange}
-            onChange={handleDateRangeChange}
-            showPresets={true}
-            label="Filter Orders by Date"
-          />
-        </Box>
+
 
         {/* Kitchen Statistics */}
         <FlagGate flag="orders.showOrderStats">
@@ -1011,7 +949,7 @@ const OrdersManagement: React.FC = () => {
         {viewMode === 'kanban' ? (
           <Box sx={{ px: { xs: 2, sm: 3 }, mb: 3 }}>
             <KanbanBoard
-              orders={filteredOrders}
+              orders={orders}
               onStatusUpdate={handleStatusUpdate}
               onViewOrder={handleViewOrder}
             />
@@ -1168,7 +1106,7 @@ const OrdersManagement: React.FC = () => {
           </TabPanel>
 
             {/* Pagination */}
-            {filteredOrders.length > 0 && (
+            {orders.length > 0 && (
               <Box sx={{ p: 2, borderTop: '1px solid', borderColor: 'divider' }}>
                 <PaginationControl
                   pagination={pagination}

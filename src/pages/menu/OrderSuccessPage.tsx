@@ -4,31 +4,25 @@ import {
   Container,
   Typography,
   Button,
-  Paper,
   Stack,
   Divider,
   useTheme,
   useMediaQuery,
-  Card,
-  CardContent,
-  Avatar,
-  alpha,
   CircularProgress,
+  keyframes,
+  Fade,
+  Slide,
 } from '@mui/material';
 import {
   CheckCircle,
   Schedule,
   Restaurant,
-  Share,
-  Home,
   Phone,
   LocationOn,
   Person,
+  Receipt,
 } from '@mui/icons-material';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import CustomerNavbar from '../../components/CustomerNavbar';
-import { OrderStatusUpdate } from '../../components/orders';
-import { OrderStatus } from '../../services/business';
 
 interface OrderSuccessState {
   orderId: string;
@@ -57,6 +51,33 @@ interface OrderSuccessState {
   specialInstructions?: string;
 }
 
+// Animation for the success icon pop-in
+const popIn = keyframes`
+  0% {
+    transform: scale(0) rotate(-180deg);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.2) rotate(10deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+`;
+
+// Circular expansion animation from center
+const circularExpand = keyframes`
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(25);
+    opacity: 1;
+  }
+`;
+
 const OrderSuccessPage: React.FC = () => {
   const { orderId } = useParams<{ orderId: string }>();
   const navigate = useNavigate();
@@ -65,20 +86,29 @@ const OrderSuccessPage: React.FC = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   
   const [orderData, setOrderData] = useState<OrderSuccessState | null>(null);
+  const [showSuccessAnimation, setShowSuccessAnimation] = useState(true);
+  const [showGreenExpansion, setShowGreenExpansion] = useState(false);
+  const [showOrderDetails, setShowOrderDetails] = useState(false);
 
   useEffect(() => {    
     // Get order data from navigation state or localStorage
     const stateData = location.state as OrderSuccessState;
     
-    if (stateData) {      setOrderData(stateData);
+    if (stateData) {      
+      setOrderData(stateData);
       // Store in localStorage for page refresh
       localStorage.setItem(`order_${orderId}`, JSON.stringify(stateData));
     } else {
       // Try to get from localStorage
       const storedData = localStorage.getItem(`order_${orderId}`);
       if (storedData) {
-        const parsedData = JSON.parse(storedData);        setOrderData(parsedData);
-      } else {        // Set a minimal fallback order data
+        const parsedData = JSON.parse(storedData);        
+        setOrderData(parsedData);
+        // If data is from localStorage, skip animation
+        setShowSuccessAnimation(false);
+        setShowOrderDetails(true);
+      } else {        
+        // Set a minimal fallback order data
         setOrderData({
           orderId: orderId || 'UNKNOWN',
           orderNumber: orderId || 'UNKNOWN',
@@ -97,25 +127,30 @@ const OrderSuccessPage: React.FC = () => {
     }
   }, [orderId, location.state]);
 
-  const formatPrice = (price: number) => `₹${price.toFixed(2)}`;
+  // Animation sequence
+  useEffect(() => {
+    if (showSuccessAnimation && orderData) {
+      // Step 1: Show icon animation for 1.5s
+      const timer1 = setTimeout(() => {
+        setShowGreenExpansion(true);
+      }, 1500);
 
-  const handleShare = async () => {
-    const shareData = {
-      title: 'Order Placed Successfully!',
-      text: `My order #${orderId} has been placed successfully at Dino. Total: ${orderData ? formatPrice(orderData.total) : 'N/A'}`,
-      url: window.location.href,
-    };
+      // Step 2: After green expansion (0.8s), transition to order details
+      const timer2 = setTimeout(() => {
+        setShowSuccessAnimation(false);
+        setTimeout(() => {
+          setShowOrderDetails(true);
+        }, 300);
+      }, 2300); // 1500 + 800
 
-    if (navigator.share) {
-      try {
-        await navigator.share(shareData);
-      } catch (err) {      }
-    } else {
-      // Fallback: copy to clipboard
-      navigator.clipboard.writeText(`${shareData.text} - ${shareData.url}`);
-      alert('Order details copied to clipboard!');
+      return () => {
+        clearTimeout(timer1);
+        clearTimeout(timer2);
+      };
     }
-  };
+  }, [showSuccessAnimation, orderData]);
+
+  const formatPrice = (price: number) => `₹${price.toFixed(2)}`;
 
   const handleTrackOrder = () => {
     navigate(`/order-tracking/${orderId}`);
@@ -129,49 +164,26 @@ const OrderSuccessPage: React.FC = () => {
     }
   };
 
-  const handleGoHome = () => {
-    navigate('/');
-  };
-
   // Show loading state while order data is being loaded
   if (!orderData && orderId) {
     return (
       <Box sx={{ 
         minHeight: '100vh', 
-        backgroundColor: theme.palette.background.default, 
-        display: 'flex', 
-        flexDirection: 'column',
-        pt: { xs: '56px', sm: '64px' },
+        backgroundColor: '#1E3A5F',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        p: 2
       }}>
-        <CustomerNavbar 
-          restaurantName="Dino"
-          tableId="Loading..."
-          showBackButton={false}
-          showCart={false}
-        />
-        <Container maxWidth="md" sx={{ 
-          py: { xs: 1, md: 1 }, 
-          px: { xs: 1, sm: 1 },
-          flex: 1, 
-          display: 'flex', 
-          alignItems: 'center' 
-        }}>
-          <Paper sx={{ 
-            p: { xs: 3, sm: 4 }, 
-            textAlign: 'center', 
-            width: '100%',
-            borderRadius: 3,
-            boxShadow: theme.shadows[8],
-          }}>
-            <CircularProgress size={60} sx={{ mb: 1 }} />
-            <Typography variant="h5" gutterBottom>
-              Loading Order Details...
-            </Typography>
-            <Typography variant="body1" color="text.secondary">
-              Please wait while we retrieve your order information.
-            </Typography>
-          </Paper>
-        </Container>
+        <Box sx={{ textAlign: 'center' }}>
+          <CircularProgress size={60} sx={{ mb: 2, color: 'white' }} />
+          <Typography variant="h6" sx={{ mb: 1, fontWeight: 600, color: 'white' }}>
+            Loading Order Details...
+          </Typography>
+          <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)' }}>
+            Please wait while we retrieve your order information.
+          </Typography>
+        </Box>
       </Box>
     );
   }
@@ -179,422 +191,355 @@ const OrderSuccessPage: React.FC = () => {
   return (
     <Box sx={{ 
       minHeight: '100vh', 
-      backgroundColor: theme.palette.background.default, 
-      display: 'flex', 
-      flexDirection: 'column',
-      pt: { xs: '56px', sm: '64px' },
+      backgroundColor: showOrderDetails ? '#1E3A5F' : 'white',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      p: { xs: 2, sm: 3 },
+      position: 'relative',
+      overflow: 'hidden',
+      transition: 'background-color 0.3s ease',
     }}>
-      <CustomerNavbar 
-        restaurantName="Dino"
-        tableId={orderData?.tableId || 'N/A'}
-        showBackButton={false}
-        showCart={false}
-      />
-
-      <Container maxWidth="md" sx={{ 
-        py: { xs: 1, md: 1 }, 
-        px: { xs: 1, sm: 1 },
-        flex: 1, 
-        display: 'flex', 
-        alignItems: 'center' 
-      }}>
-        <Paper sx={{ 
-          p: { xs: 3, sm: 4 }, 
-          textAlign: 'center', 
-          width: '100%',
-          borderRadius: 3,
-          boxShadow: theme.shadows[8],
-          border: '1px solid',
-          borderColor: 'divider',
-          background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)',
-        }}>
-          {/* Success Icon */}
-          <Box sx={{ mb: 1 }}>
-            <Avatar
+      {/* Success Animation Screen */}
+      <Fade in={showSuccessAnimation} timeout={500} unmountOnExit>
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: 'transparent',
+            zIndex: 10,
+          }}
+        >
+          {/* Green circular expansion */}
+          {showGreenExpansion && (
+            <Box
               sx={{
-                width: { xs: 80, sm: 100 },
-                height: { xs: 80, sm: 100 },
-                backgroundColor: 'success.main',
-                mx: 'auto',
-                mb: 1,
-                boxShadow: '0 8px 32px rgba(76, 175, 80, 0.3)',
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                width: { xs: 120, sm: 140 },
+                height: { xs: 120, sm: 140 },
+                borderRadius: '50%',
+                backgroundColor: '#4CAF50',
+                animation: `${circularExpand} 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards`,
+                zIndex: 1,
               }}
-            >
-              <CheckCircle sx={{ fontSize: { xs: 40, sm: 50 }, color: 'white' }} />
-            </Avatar>
-          </Box>
-
-          {/* Success Message */}
-          <Typography 
-            variant="h3" 
-            gutterBottom 
-            fontWeight="bold"
-            sx={{ 
-              fontSize: { xs: '1.75rem', sm: '2.5rem' },
-              background: 'linear-gradient(135deg, #2e7d32 0%, #4caf50 100%)',
-              backgroundClip: 'text',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              mb: 1
-            }}
-          >
-            Order Placed Successfully! 🎉
-          </Typography>
-
-          <Typography 
-            variant="h6" 
-            color="text.secondary" 
-            sx={{ 
-              mb: 1,
-              fontSize: { xs: '1rem', sm: '1.25rem' },
-              fontWeight: 500
-            }}
-          >
-            Thank you for your order!
-          </Typography>
-
-          {/* Order ID */}
-          <Card sx={{ 
-            mb: 4, 
-            backgroundColor: alpha(theme.palette.primary.main, 0.05),
-            border: `2px solid ${alpha(theme.palette.primary.main, 0.1)}`,
-            borderRadius: 1
-          }}>
-            <CardContent sx={{ py: 1 }}>
-              <Typography variant="body2" color="text.secondary" gutterBottom>
-                Order ID
-              </Typography>
-              <Typography 
-                variant="h5" 
-                fontWeight="bold" 
-                color="primary.main"
-                sx={{ fontSize: { xs: '1.25rem', sm: '1.25rem' } }}
-              >
-                #{orderData?.orderNumber || orderId}
-              </Typography>
-            </CardContent>
-          </Card>
-
-          {/* Order Details */}
-          {orderData && (
-            <Card sx={{ 
-              mb: 4, 
-              textAlign: 'left',
-              backgroundColor: 'grey.50',
-              borderRadius: 1
-            }}>
-              <CardContent>
-                <Typography variant="h6" gutterBottom fontWeight="600" sx={{ textAlign: 'center', mb: 1 }}>
-                  Order Summary
-                </Typography>
-                
-                <Stack spacing={1}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Person sx={{ color: 'text.secondary', fontSize: 12 }} />
-                    <Box>
-                      <Typography variant="body2" color="text.secondary">Customer</Typography>
-                      <Typography variant="body1" fontWeight="500">{orderData.customerInfo.name}</Typography>
-                    </Box>
-                  </Box>
-
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Phone sx={{ color: 'text.secondary', fontSize: 12 }} />
-                    <Box>
-                      <Typography variant="body2" color="text.secondary">Phone</Typography>
-                      <Typography variant="body1" fontWeight="500">{orderData.customerInfo.phone}</Typography>
-                    </Box>
-                  </Box>
-
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <LocationOn sx={{ color: 'text.secondary', fontSize: 12 }} />
-                    <Box>
-                      <Typography variant="body2" color="text.secondary">Table</Typography>
-                      <Typography variant="body1" fontWeight="500">Table {orderData.tableId}</Typography>
-                    </Box>
-                  </Box>
-
-                  {orderData.createdAt && (
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Schedule sx={{ color: 'text.secondary', fontSize: 12 }} />
-                      <Box>
-                        <Typography variant="body2" color="text.secondary">Order Time</Typography>
-                        <Typography variant="body1" fontWeight="500">
-                          {new Date(orderData.createdAt).toLocaleString()}
-                        </Typography>
-                      </Box>
-                    </Box>
-                  )}
-
-                  {orderData.status && (
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <CheckCircle sx={{ color: 'success.main', fontSize: 12 }} />
-                      <Box sx={{ flex: 1 }}>
-                        <Typography variant="body2" color="text.secondary">Status</Typography>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
-                          <Typography variant="body1" fontWeight="500" sx={{ textTransform: 'capitalize' }}>
-                            {orderData.status}
-                          </Typography>
-                          {/* Status Update Component - Inline variant for clean display */}
-                          <OrderStatusUpdate
-                            orderId={orderData.orderId}
-                            currentStatus={orderData.status as OrderStatus}
-                            orderNumber={orderData.orderNumber}
-                            onStatusUpdated={(newStatus: OrderStatus) => {
-                              setOrderData(prev => prev ? { ...prev, status: newStatus } : null);
-                              // Update localStorage as well
-                              if (orderId) {
-                                const storedData = localStorage.getItem(`order_${orderId}`);
-                                if (storedData) {
-                                  const parsed = JSON.parse(storedData);
-                                  parsed.status = newStatus;
-                                  localStorage.setItem(`order_${orderId}`, JSON.stringify(parsed));
-                                }
-                              }
-                            }}
-                            onError={(error: string) => {                            }}
-                            variant="inline"
-                            showCurrentStatus={false}
-                          />
-                        </Box>
-                      </Box>
-                    </Box>
-                  )}
-
-                  <Divider />
-
-                  {/* Order Items */}
-                  {orderData.items && orderData.items.length > 0 && (
-                    <Box>
-                      <Typography variant="subtitle1" fontWeight="600" gutterBottom>
-                        Order Items ({orderData.items.length})
-                      </Typography>
-                      <Stack spacing={1}>
-                        {orderData.items.map((item, index) => (
-                          <Box key={index} sx={{ 
-                            display: 'flex', 
-                            justifyContent: 'space-between', 
-                            alignItems: 'center',
-                            py: 1,
-                            px: 1,
-                            backgroundColor: 'background.paper',
-                            borderRadius: 1,
-                            border: '1px solid',
-                            borderColor: 'divider'
-                          }}>
-                            <Box>
-                              <Typography variant="body2" fontWeight="500">{item.name}</Typography>
-                              <Typography variant="caption" color="text.secondary">
-                                Qty: {item.quantity} × {formatPrice(item.price)}
-                              </Typography>
-                            </Box>
-                            <Typography variant="body2" fontWeight="600">
-                              {formatPrice(item.total)}
-                            </Typography>
-                          </Box>
-                        ))}
-                      </Stack>
-                    </Box>
-                  )}
-
-                  <Divider />
-
-                  {/* Bill Breakdown */}
-                  <Box>
-                    <Typography variant="subtitle1" fontWeight="600" gutterBottom>
-                      Bill Details
-                    </Typography>
-                    <Stack spacing={1}>
-                      {orderData.subtotal && (
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                          <Typography variant="body2">Subtotal</Typography>
-                          <Typography variant="body2">{formatPrice(orderData.subtotal)}</Typography>
-                        </Box>
-                      )}
-                      {orderData.tax && (
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                          <Typography variant="body2">Tax</Typography>
-                          <Typography variant="body2">{formatPrice(orderData.tax)}</Typography>
-                        </Box>
-                      )}
-                      {orderData.deliveryFee !== undefined && (
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                          <Typography variant="body2">Delivery Fee</Typography>
-                          <Typography variant="body2" color={orderData.deliveryFee === 0 ? 'success.main' : 'text.primary'}>
-                            {orderData.deliveryFee === 0 ? 'FREE' : formatPrice(orderData.deliveryFee)}
-                          </Typography>
-                        </Box>
-                      )}
-                      <Divider />
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <Typography variant="h6" fontWeight="600">Total Amount</Typography>
-                        <Typography variant="h6" fontWeight="bold" color="primary.main">
-                          {formatPrice(orderData.total)}
-                        </Typography>
-                      </Box>
-                    </Stack>
-                  </Box>
-
-                  {orderData.paymentMethod && (
-                    <Box>
-                      <Typography variant="body2" color="text.secondary">Payment Method</Typography>
-                      <Typography variant="body1" fontWeight="500" sx={{ textTransform: 'capitalize' }}>
-                        {orderData.paymentMethod.replace('_', ' ')}
-                      </Typography>
-                    </Box>
-                  )}
-
-                  {orderData.specialInstructions && (
-                    <Box>
-                      <Typography variant="body2" color="text.secondary">Special Instructions</Typography>
-                      <Typography variant="body1" fontWeight="500">
-                        {orderData.specialInstructions}
-                      </Typography>
-                    </Box>
-                  )}
-                </Stack>
-              </CardContent>
-            </Card>
+            />
           )}
 
-          {/* Status Info */}
-          <Box sx={{ 
-            mb: 4, 
-            p: 1.5, 
-            backgroundColor: alpha(theme.palette.info.main, 0.05),
-            borderRadius: 1,
-            border: `1px solid ${alpha(theme.palette.info.main, 0.2)}`
-          }}>
-            <Stack direction="row" spacing={1} alignItems="center" justifyContent="center" sx={{ mb: 1 }}>
-              <Schedule sx={{ color: 'info.main', fontSize: 12 }} />
-              <Typography variant="h6" color="info.main" fontWeight="600">
-                Estimated Time: {orderData?.estimatedTime ? `${orderData.estimatedTime} minutes` : '25-30 minutes'}
-              </Typography>
-            </Stack>
-            <Typography variant="body2" color="text.secondary">
-              Your order is being prepared. You'll receive updates on the status.
-            </Typography>
-          </Box>
-
-          {/* Action Buttons */}
-          <Stack 
-            direction={{ xs: 'column', sm: 'row' }}
-            spacing={1}
-            justifyContent="center"
-            alignItems="center"
-            sx={{ mb: 1 }}
-          >
-            <Button
-              variant="contained"
-              onClick={handleTrackOrder}
-              startIcon={<Schedule />}
-              size="large"
-              sx={{
-                px: 4,
-                py: 1,
-                fontSize: '1rem',
-                borderRadius: 1,
-                width: { xs: '100%', sm: 'auto' },
-                boxShadow: '0 4px 12px rgba(25, 118, 210, 0.3)',
-                '&:hover': {
-                  boxShadow: '0 6px 20px rgba(25, 118, 210, 0.4)',
-                  transform: 'translateY(-1px)',
-                }
+          <Box sx={{ textAlign: 'center', position: 'relative', zIndex: 2 }}>
+            {/* Animated Success Icon */}
+            <Box 
+              sx={{ 
+                position: 'relative',
+                display: 'inline-block',
+                mb: 3,
               }}
             >
-              Track Order
-            </Button>
+              {/* Main success icon */}
+              <Box
+                sx={{
+                  width: { xs: 120, sm: 140 },
+                  height: { xs: 120, sm: 140 },
+                  margin: '0 auto',
+                  borderRadius: '50%',
+                  backgroundColor: '#4CAF50',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 12px 40px rgba(76, 175, 80, 0.6)',
+                  position: 'relative',
+                  zIndex: 3,
+                  animation: `${popIn} 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55)`,
+                }}
+              >
+                <CheckCircle 
+                  sx={{ 
+                    fontSize: { xs: 70, sm: 80 }, 
+                    color: 'white',
+                  }} 
+                />
+              </Box>
+            </Box>
             
-            <Button
-              variant="outlined"
-              onClick={handleOrderMore}
-              startIcon={<Restaurant />}
-              size="large"
-              sx={{
-                px: 4,
-                py: 1,
-                fontSize: '1rem',
-                borderRadius: 1,
-                width: { xs: '100%', sm: 'auto' }
+            {/* Success Message */}
+            <Typography 
+              variant="h3" 
+              sx={{ 
+                mb: 2, 
+                fontWeight: 700, 
+                color: showGreenExpansion ? 'white' : '#2C3E50',
+                fontSize: { xs: '2rem', sm: '2.5rem' },
+                textShadow: showGreenExpansion ? '0 2px 10px rgba(0, 0, 0, 0.3)' : 'none',
+                transition: 'color 0.3s ease',
               }}
             >
-              Order More
-            </Button>
-          </Stack>
-
-          {/* Secondary Actions */}
-          <Stack 
-            direction={{ xs: 'column', sm: 'row' }}
-            spacing={1}
-            justifyContent="center"
-            alignItems="center"
-          >
-            <Button
-              variant="text"
-              onClick={handleShare}
-              startIcon={<Share />}
-              size="small"
-              sx={{ fontSize: '0.8rem' }}
-            >
-              Share Order
-            </Button>
-            
-            <Button
-              variant="text"
-              onClick={handleGoHome}
-              startIcon={<Home />}
-              size="small"
-              sx={{ fontSize: '0.8rem' }}
-            >
-              Go Home
-            </Button>
-          </Stack>
-
-          {/* Thank You Message */}
-          <Box sx={{ mt: 4, pt: 3, borderTop: '1px solid', borderColor: 'divider' }}>
-            <Typography variant="body1" color="text.secondary" sx={{ fontStyle: 'italic' }}>
-              Thank you for choosing Dino! 🦕
+              Order Placed!
             </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-              We hope you enjoy your meal!
+            <Typography 
+              variant="h6" 
+              sx={{ 
+                fontSize: { xs: '1.1rem', sm: '1.3rem' },
+                fontWeight: 500,
+                color: showGreenExpansion ? 'rgba(255,255,255,0.9)' : 'rgba(0,0,0,0.6)',
+                transition: 'color 0.3s ease',
+              }}
+            >
+              Your order has been confirmed
             </Typography>
           </Box>
-        </Paper>
-      </Container>
+        </Box>
+      </Fade>
 
-      {/* Footer */}
-      <Box 
-        sx={{ 
-          flexShrink: 0,
-          textAlign: 'center',
-          py: { xs: 1, lg: 3 },
-          px: { xs: 1, lg: 3 },
-          borderTop: '1px solid',
-          borderColor: 'divider',
-          backgroundColor: 'background.paper',
-        }}
-      >
-        <Typography 
-          variant="body2" 
-          color="text.secondary"
-          sx={{ 
-            fontSize: { xs: '0.75rem', sm: '0.8rem' },
-            fontWeight: 500 
-          }}
-        >
-          © 2024 Dino. All rights reserved.
-        </Typography>
-        <Typography 
-          variant="caption" 
-          color="text.secondary"
-          sx={{ 
-            fontSize: { xs: '0.65rem', sm: '0.75rem' },
-            display: 'block',
-            mt: 0.5
-          }}
-        >
-          Digital Menu Revolution
-        </Typography>
-      </Box>
+      {/* Order Details Screen */}
+      <Fade in={showOrderDetails} timeout={600}>
+        <Container maxWidth="sm" sx={{ opacity: showOrderDetails ? 1 : 0 }}>
+          <Slide direction="up" in={showOrderDetails} timeout={500}>
+            <Box>
+              {/* Compact Success Header */}
+              <Box sx={{ textAlign: 'center', mb: 3 }}>
+                <Box
+                  sx={{
+                    width: 60,
+                    height: 60,
+                    margin: '0 auto',
+                    borderRadius: '50%',
+                    backgroundColor: '#4CAF50',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 4px 16px rgba(76, 175, 80, 0.4)',
+                    mb: 2,
+                  }}
+                >
+                  <CheckCircle 
+                    sx={{ 
+                      fontSize: 35, 
+                      color: 'white',
+                    }} 
+                  />
+                </Box>
+                
+                <Typography 
+                  variant="h5" 
+                  sx={{ 
+                    mb: 1, 
+                    fontWeight: 700, 
+                    color: 'white',
+                    fontSize: { xs: '1.5rem', sm: '1.75rem' }
+                  }}
+                >
+                  Order Confirmed!
+                </Typography>
+
+                <Typography 
+                  variant="body1" 
+                  sx={{ 
+                    mb: 2,
+                    color: 'rgba(255,255,255,0.8)',
+                    fontSize: '0.95rem'
+                  }}
+                >
+                  Thank you for your order
+                </Typography>
+              </Box>
+
+              {/* Order ID Card */}
+              <Box sx={{ 
+                mb: 3, 
+                p: 2.5,
+                backgroundColor: 'rgba(255,255,255,0.1)',
+                borderRadius: 2,
+                border: '2px solid rgba(255,255,255,0.2)',
+                backdropFilter: 'blur(10px)',
+                textAlign: 'center',
+              }}>
+                <Typography variant="body2" sx={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.7)', mb: 0.5 }}>
+                  Order ID
+                </Typography>
+                <Typography 
+                  variant="h4" 
+                  sx={{ 
+                    fontWeight: 700, 
+                    color: 'white',
+                    fontSize: { xs: '1.75rem', sm: '2rem' },
+                    letterSpacing: 1
+                  }}
+                >
+                  #{orderData?.orderNumber || orderId}
+                </Typography>
+              </Box>
+
+              {/* Estimated Time */}
+              <Box sx={{ 
+                p: 2.5, 
+                backgroundColor: 'rgba(76, 175, 80, 0.15)',
+                borderRadius: 2,
+                mb: 3,
+                border: '1px solid rgba(76, 175, 80, 0.3)',
+                backdropFilter: 'blur(10px)',
+              }}>
+                <Stack direction="row" spacing={1.5} alignItems="center" justifyContent="center">
+                  <Schedule sx={{ color: '#4CAF50', fontSize: 24 }} />
+                  <Box>
+                    <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.75rem' }}>
+                      Estimated Time
+                    </Typography>
+                    <Typography variant="h6" sx={{ color: 'white', fontWeight: 700, fontSize: '1.1rem' }}>
+                      {orderData?.estimatedTime ? `${orderData.estimatedTime} minutes` : '25-30 minutes'}
+                    </Typography>
+                  </Box>
+                </Stack>
+              </Box>
+
+              {/* Minimal Order Summary */}
+              <Box sx={{ 
+                mb: 3, 
+                p: 2.5,
+                backgroundColor: 'rgba(255,255,255,0.08)',
+                borderRadius: 2,
+                backdropFilter: 'blur(10px)',
+              }}>
+                <Stack spacing={2}>
+                  {/* Customer & Table Info */}
+                  <Stack direction="row" spacing={2} alignItems="center">
+                    <Person sx={{ color: 'rgba(255,255,255,0.6)', fontSize: 20 }} />
+                    <Box flex={1}>
+                      <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.75rem' }}>
+                        Customer
+                      </Typography>
+                      <Typography variant="body1" sx={{ color: 'white', fontWeight: 600, fontSize: '0.95rem' }}>
+                        {orderData?.customerInfo.name}
+                      </Typography>
+                    </Box>
+                  </Stack>
+
+                  <Stack direction="row" spacing={2} alignItems="center">
+                    <Phone sx={{ color: 'rgba(255,255,255,0.6)', fontSize: 20 }} />
+                    <Box flex={1}>
+                      <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.75rem' }}>
+                        Phone
+                      </Typography>
+                      <Typography variant="body1" sx={{ color: 'white', fontWeight: 600, fontSize: '0.95rem' }}>
+                        {orderData?.customerInfo.phone}
+                      </Typography>
+                    </Box>
+                  </Stack>
+
+                  <Stack direction="row" spacing={2} alignItems="center">
+                    <LocationOn sx={{ color: 'rgba(255,255,255,0.6)', fontSize: 20 }} />
+                    <Box flex={1}>
+                      <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.75rem' }}>
+                        Table Number
+                      </Typography>
+                      <Typography variant="body1" sx={{ color: 'white', fontWeight: 600, fontSize: '0.95rem' }}>
+                        Table {orderData?.tableId}
+                      </Typography>
+                    </Box>
+                  </Stack>
+
+                  <Divider sx={{ borderColor: 'rgba(255,255,255,0.1)', my: 1 }} />
+
+                  {/* Items Count & Total */}
+                  <Stack direction="row" spacing={2} alignItems="center">
+                    <Receipt sx={{ color: 'rgba(255,255,255,0.6)', fontSize: 20 }} />
+                    <Box flex={1}>
+                      <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.75rem' }}>
+                        Items
+                      </Typography>
+                      <Typography variant="body1" sx={{ color: 'white', fontWeight: 600, fontSize: '0.95rem' }}>
+                        {orderData?.items?.length || 0} {orderData?.items?.length === 1 ? 'item' : 'items'}
+                      </Typography>
+                    </Box>
+                  </Stack>
+
+                  <Divider sx={{ borderColor: 'rgba(255,255,255,0.1)', my: 1 }} />
+
+                  {/* Total Amount */}
+                  <Stack direction="row" justifyContent="space-between" alignItems="center">
+                    <Typography variant="h6" sx={{ color: 'white', fontWeight: 700, fontSize: '1.1rem' }}>
+                      Total Amount
+                    </Typography>
+                    <Typography variant="h5" sx={{ color: '#4CAF50', fontWeight: 700, fontSize: '1.5rem' }}>
+                      {formatPrice(orderData?.total || 0)}
+                    </Typography>
+                  </Stack>
+                </Stack>
+              </Box>
+
+              {/* Action Buttons */}
+              <Stack spacing={2} sx={{ mb: 2 }}>
+                <Button
+                  variant="contained"
+                  onClick={handleTrackOrder}
+                  startIcon={<Schedule />}
+                  fullWidth
+                  size="large"
+                  sx={{
+                    py: 1.5,
+                    fontWeight: 700,
+                    textTransform: 'none',
+                    borderRadius: 2,
+                    fontSize: '1rem',
+                    backgroundColor: '#4CAF50',
+                    boxShadow: '0 4px 12px rgba(76, 175, 80, 0.4)',
+                    '&:hover': {
+                      backgroundColor: '#45a049',
+                      boxShadow: '0 6px 20px rgba(76, 175, 80, 0.5)',
+                      transform: 'translateY(-2px)',
+                    },
+                  }}
+                >
+                  Track Order
+                </Button>
+                
+                <Button
+                  variant="outlined"
+                  onClick={handleOrderMore}
+                  startIcon={<Restaurant />}
+                  fullWidth
+                  size="large"
+                  sx={{
+                    py: 1.5,
+                    fontWeight: 700,
+                    textTransform: 'none',
+                    borderRadius: 2,
+                    fontSize: '1rem',
+                    borderWidth: 2,
+                    borderColor: 'rgba(255,255,255,0.3)',
+                    color: 'white',
+                    '&:hover': {
+                      borderWidth: 2,
+                      borderColor: 'rgba(255,255,255,0.5)',
+                      backgroundColor: 'rgba(255,255,255,0.05)',
+                      transform: 'translateY(-2px)',
+                    },
+                  }}
+                >
+                  Order More
+                </Button>
+              </Stack>
+
+              {/* Thank You Message */}
+              <Box sx={{ 
+                pt: 2,
+                textAlign: 'center',
+              }}>
+                <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem' }}>
+                  Thank you for choosing Dino! We hope you enjoy your meal!
+                </Typography>
+              </Box>
+            </Box>
+          </Slide>
+        </Container>
+      </Fade>
     </Box>
   );
 };

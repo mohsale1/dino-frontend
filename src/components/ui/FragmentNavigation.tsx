@@ -5,7 +5,6 @@ import {
   BottomNavigationAction,
   Paper,
   Badge,
-  alpha,
   useTheme,
 } from '@mui/material';
 import {
@@ -41,31 +40,32 @@ const FragmentNavigation: React.FC<FragmentNavigationProps> = ({
         left: 0,
         right: 0,
         zIndex: 1000,
-        borderTop: `1px solid ${theme.palette.divider}`,
-        boxShadow: `0 -4px 20px ${alpha(theme.palette.common.black, 0.1)}`,
+        borderTop: '1px solid #E0E0E0',
+        boxShadow: 'none',
+        backgroundColor: 'white',
       }}
-      elevation={3}
+      elevation={0}
     >
       <BottomNavigation
         value={activeFragment}
         onChange={handleChange}
         showLabels
         sx={{
-          height: { xs: 64, sm: 72 },
-          backgroundColor: theme.palette.background.paper,
+          height: { xs: 64, sm: 70 },
+          backgroundColor: 'white',
           '& .MuiBottomNavigationAction-root': {
             minWidth: 'auto',
-            padding: { xs: '6px 12px 8px', sm: '8px 12px 10px' },
+            color: '#6C757D',
             '&.Mui-selected': {
-              color: theme.palette.primary.main,
+              color: '#1E3A5F',
               '& .MuiBottomNavigationAction-label': {
                 fontSize: { xs: '0.75rem', sm: '0.8rem' },
-                fontWeight: 600,
+                fontWeight: 700,
               },
             },
             '& .MuiBottomNavigationAction-label': {
-              fontSize: { xs: '0.7rem', sm: '0.8rem' },
-              fontWeight: 500,
+              fontSize: { xs: '0.7rem', sm: '0.75rem' },
+              fontWeight: 600,
             },
           },
         }}
@@ -73,24 +73,12 @@ const FragmentNavigation: React.FC<FragmentNavigationProps> = ({
         <BottomNavigationAction
           label="Home"
           value="home"
-          icon={
-            <Home
-              sx={{
-                fontSize: { xs: 24, sm: 28 },
-              }}
-            />
-          }
+          icon={<Home sx={{ fontSize: { xs: 24, sm: 26 } }} />}
         />
         <BottomNavigationAction
           label="Menu"
           value="menu"
-          icon={
-            <Restaurant
-              sx={{
-                fontSize: { xs: 24, sm: 28 },
-              }}
-            />
-          }
+          icon={<Restaurant sx={{ fontSize: { xs: 24, sm: 26 } }} />}
         />
         <BottomNavigationAction
           label="Orders"
@@ -109,18 +97,10 @@ const FragmentNavigation: React.FC<FragmentNavigationProps> = ({
                   },
                 }}
               >
-                <Receipt
-                  sx={{
-                    fontSize: { xs: 24, sm: 28 },
-                  }}
-                />
+                <Receipt sx={{ fontSize: { xs: 24, sm: 26 } }} />
               </Badge>
             ) : (
-              <Receipt
-                sx={{
-                  fontSize: { xs: 24, sm: 28 },
-                }}
-              />
+              <Receipt sx={{ fontSize: { xs: 24, sm: 26 } }} />
             )
           }
         />

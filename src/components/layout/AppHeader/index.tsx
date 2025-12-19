@@ -209,7 +209,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
           
           <Button
             variant="outlined"
-            onClick={() => navigate(isAdminLevel(user.role) ? '/admin' : '/profile')}
+            onClick={() => navigate('/profile')}
             startIcon={
               dinoAvatar ? (
                 <Avatar 

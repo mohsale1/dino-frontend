@@ -132,8 +132,9 @@ export function useMenuData(options: UseMenuDataOptions = {}): UseMenuDataResult
   }, []);
 
   // Load restaurant data and check venue status
-  const loadRestaurant = useCallback(async () => {
-    if (!venueId) return;
+  // Returns true if venue is accepting orders, false otherwise
+  const loadRestaurant = useCallback(async (): Promise<boolean> => {
+    if (!venueId) return false;
     setRestaurantLoading(true);
     
     try {
@@ -158,7 +159,8 @@ export function useMenuData(options: UseMenuDataOptions = {}): UseMenuDataResult
             venueStatus: 'inactive',
             message: 'This venue is currently not accepting orders. Please try again later.'
           });
-          return;
+          setRestaurantLoading(false);
+          return false;
         }
         
         // Check if venue is open for orders (optional field - default to true if not set)
@@ -174,17 +176,22 @@ export function useMenuData(options: UseMenuDataOptions = {}): UseMenuDataResult
             venueStatus: 'closed',
             message: 'This venue is not serving at the moment. Please check back during operating hours.'
           });
-          return;
+          setRestaurantLoading(false);
+          return false;
         }
         
         console.log('[useMenuData] Venue is available for orders');
+        setRestaurantLoading(false);
+        return true;
       } else {
         setError('Restaurant not found. Please check the QR code or link.');
+        setRestaurantLoading(false);
+        return false;
       }
     } catch (err: any) {
       setError('Restaurant not found. Please check the QR code or link.');
-    } finally {
       setRestaurantLoading(false);
+      return false;
     }
   }, [venueId]);
 
@@ -311,9 +318,16 @@ export function useMenuData(options: UseMenuDataOptions = {}): UseMenuDataResult
     
     try {
       // First, load restaurant and check status
-      await loadRestaurant();
+      const isVenueAcceptingOrders = await loadRestaurant();
       
-      // Load other data in parallel (venue status check is inside loadCategories/loadMenuItems)
+      // If venue is not accepting orders, stop loading other data
+      if (!isVenueAcceptingOrders) {
+        console.log('[useMenuData] Venue not accepting orders, stopping data load');
+        setLoading(false);
+        return;
+      }
+      
+      // Load other data in parallel
       await Promise.all([
         loadCategories(),
         loadMenuItems(),

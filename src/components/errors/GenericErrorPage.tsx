@@ -181,14 +181,15 @@ const GenericErrorPage: React.FC<GenericErrorPageProps> = ({
           title: `${context.venueName || 'This venue'} is Not Accepting Orders`,
           message: 'This venue is currently not accepting orders. Please try again later.',
           color: theme.palette.warning.main,
-          bgColor: alpha(theme.palette.warning.main, 0.1),
-          illustration: '🍽️',
+          bgColor: '#FFFFFF',
+          illustration: '🦕',
           suggestions: [
             'Wait a few minutes and try again',
             'Check the venue\'s operating hours',
             'Contact the venue directly for more information'
           ],
           showStatus: true,
+          isVenueError: true,
         };
       
       case 'venue-closed':
@@ -278,6 +279,7 @@ const GenericErrorPage: React.FC<GenericErrorPageProps> = ({
   const displayTitle = title || config.title;
   const displayMessage = message || config.message;
   const displayCode = errorCode || config.code;
+  const isVenueError = (config as any).isVenueError || false;
 
   const handleRetry = async () => {
     if (onRetry) {
@@ -346,50 +348,54 @@ const GenericErrorPage: React.FC<GenericErrorPageProps> = ({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: `linear-gradient(135deg, ${alpha(config.bgColor, 0.3)} 0%, ${alpha(theme.palette.background.default, 0.9)} 100%)`,
+        background: isVenueError ? '#FFFFFF' : `linear-gradient(135deg, ${alpha(config.bgColor, 0.3)} 0%, ${alpha(theme.palette.background.default, 0.9)} 100%)`,
         position: 'relative',
         overflow: 'hidden',
-        py: { xs: 1, md: 1.5 },
-        px: { xs: 1, md: 1.5 },
+        py: { xs: 2, md: 3 },
+        px: { xs: 2, md: 3 },
       }}
     >
-      {/* Animated Background Elements */}
-      <Box
-        sx={{
-          position: 'absolute',
-          top: '10%',
-          left: '5%',
-          width: { xs: 80, md: 120 },
-          height: { xs: 80, md: 120 },
-          borderRadius: '50%',
-          background: `radial-gradient(circle, ${alpha(config.color, 0.2)} 0%, transparent 70%)`,
-          animation: `${float} 6s ease-in-out infinite`,
-        }}
-      />
-      <Box
-        sx={{
-          position: 'absolute',
-          bottom: '15%',
-          right: '8%',
-          width: { xs: 60, md: 100 },
-          height: { xs: 60, md: 100 },
-          borderRadius: '50%',
-          background: `radial-gradient(circle, ${alpha(config.color, 0.15)} 0%, transparent 70%)`,
-          animation: `${float} 8s ease-in-out infinite 1s`,
-        }}
-      />
-      <Box
-        sx={{
-          position: 'absolute',
-          top: '50%',
-          right: '15%',
-          width: { xs: 40, md: 60 },
-          height: { xs: 40, md: 60 },
-          borderRadius: '50%',
-          background: `radial-gradient(circle, ${alpha(config.color, 0.1)} 0%, transparent 70%)`,
-          animation: `${float} 7s ease-in-out infinite 2s`,
-        }}
-      />
+      {/* Animated Background Elements - Hidden for venue errors */}
+      {!isVenueError && (
+        <>
+          <Box
+            sx={{
+              position: 'absolute',
+              top: '10%',
+              left: '5%',
+              width: { xs: 80, md: 120 },
+              height: { xs: 80, md: 120 },
+              borderRadius: '50%',
+              background: `radial-gradient(circle, ${alpha(config.color, 0.2)} 0%, transparent 70%)`,
+              animation: `${float} 6s ease-in-out infinite`,
+            }}
+          />
+          <Box
+            sx={{
+              position: 'absolute',
+              bottom: '15%',
+              right: '8%',
+              width: { xs: 60, md: 100 },
+              height: { xs: 60, md: 100 },
+              borderRadius: '50%',
+              background: `radial-gradient(circle, ${alpha(config.color, 0.15)} 0%, transparent 70%)`,
+              animation: `${float} 8s ease-in-out infinite 1s`,
+            }}
+          />
+          <Box
+            sx={{
+              position: 'absolute',
+              top: '50%',
+              right: '15%',
+              width: { xs: 40, md: 60 },
+              height: { xs: 40, md: 60 },
+              borderRadius: '50%',
+              background: `radial-gradient(circle, ${alpha(config.color, 0.1)} 0%, transparent 70%)`,
+              animation: `${float} 7s ease-in-out infinite 2s`,
+            }}
+          />
+        </>
+      )}
 
       <Container maxWidth="md">
         <Box
@@ -410,7 +416,7 @@ const GenericErrorPage: React.FC<GenericErrorPageProps> = ({
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',
                 lineHeight: 0.9,
-                mb: 1,
+                mb: 2,
                 letterSpacing: '-0.02em',
                 animation: `${pulse} 3s ease-in-out infinite`,
               }}
@@ -424,66 +430,82 @@ const GenericErrorPage: React.FC<GenericErrorPageProps> = ({
             sx={{
               position: 'relative',
               display: 'inline-block',
-              mb: 4,
+              mb: 3,
             }}
           >
-            {/* Main Icon Circle */}
-            <Box
-              sx={{
-                width: { xs: 140, md: 180 },
-                height: { xs: 140, md: 180 },
-                borderRadius: '50%',
-                background: `linear-gradient(135deg, ${config.bgColor} 0%, ${alpha(config.color, 0.2)} 100%)`,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                position: 'relative',
-                boxShadow: `0 10px 40px ${alpha(config.color, 0.3)}`,
-                animation: retrying ? `${rotate} 1s linear infinite` : `${float} 4s ease-in-out infinite`,
-                '&::before': {
-                  content: '""',
-                  position: 'absolute',
-                  top: -10,
-                  left: -10,
-                  right: -10,
-                  bottom: -10,
-                  borderRadius: '50%',
-                  border: `2px solid ${alpha(config.color, 0.2)}`,
-                  animation: `${pulse} 2s ease-in-out infinite`,
-                },
-              }}
-            >
-              <Box sx={{ color: config.color, position: 'relative', zIndex: 1 }}>
-                {config.icon}
-              </Box>
-            </Box>
+            {isVenueError ? (
+              /* Sad Dino Image for Venue Errors */
+              <Box
+                component="img"
+                src="/img/dino_sad.png"
+                alt="Sad Dino"
+                sx={{
+                  width: { xs: 200, md: 280 },
+                  height: { xs: 200, md: 280 },
+                  objectFit: 'contain',
+                }}
+              />
+            ) : (
+              <>
+                {/* Main Icon Circle */}
+                <Box
+                  sx={{
+                    width: { xs: 140, md: 180 },
+                    height: { xs: 140, md: 180 },
+                    borderRadius: '50%',
+                    background: `linear-gradient(135deg, ${config.bgColor} 0%, ${alpha(config.color, 0.2)} 100%)`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    position: 'relative',
+                    boxShadow: `0 10px 40px ${alpha(config.color, 0.3)}`,
+                    animation: retrying ? `${rotate} 1s linear infinite` : `${float} 4s ease-in-out infinite`,
+                    '&::before': {
+                      content: '""',
+                      position: 'absolute',
+                      top: -10,
+                      left: -10,
+                      right: -10,
+                      bottom: -10,
+                      borderRadius: '50%',
+                      border: `2px solid ${alpha(config.color, 0.2)}`,
+                      animation: `${pulse} 2s ease-in-out infinite`,
+                    },
+                  }}
+                >
+                  <Box sx={{ color: config.color, position: 'relative', zIndex: 1 }}>
+                    {config.icon}
+                  </Box>
+                </Box>
 
-            {/* Illustration Emoji */}
-            <Box
-              sx={{
-                position: 'absolute',
-                bottom: -10,
-                right: -10,
-                fontSize: { xs: '2.5rem', md: '3rem' },
-                animation: `${bounce} 2s ease-in-out infinite`,
-                filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.2))',
-              }}
-            >
-              {config.illustration}
-            </Box>
+                {/* Illustration Emoji */}
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    bottom: -10,
+                    right: -10,
+                    fontSize: { xs: '2.5rem', md: '3rem' },
+                    animation: `${bounce} 2s ease-in-out infinite`,
+                    filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.2))',
+                  }}
+                >
+                  {config.illustration}
+                </Box>
+              </>
+            )}
           </Box>
 
           {/* Venue Status Chip */}
           {config.showStatus && context.venueStatus && (
-            <Box sx={{ mb: 1 }}>
+            <Box sx={{ mb: 3 }}>
               <Chip
                 icon={<Info />}
                 label={getStatusText(context.venueStatus)}
                 color={getStatusColor(context.venueStatus) as any}
                 sx={{
                   fontWeight: 600,
-                  fontSize: { xs: '0.8rem', md: '1rem' },
-                  py: 1,
+                  fontSize: { xs: '0.875rem', md: '1rem' },
+                  py: 2.5,
                   px: 1,
                   borderRadius: 3,
                   boxShadow: 2,
@@ -501,7 +523,7 @@ const GenericErrorPage: React.FC<GenericErrorPageProps> = ({
             sx={{
               fontSize: { xs: '1.75rem', sm: '2.25rem', md: '2.75rem' },
               lineHeight: 1.2,
-              mb: 1,
+              mb: 2,
               letterSpacing: '-0.01em',
             }}
           >
@@ -517,7 +539,7 @@ const GenericErrorPage: React.FC<GenericErrorPageProps> = ({
               lineHeight: 1.6,
               maxWidth: 600,
               mx: 'auto',
-              mb: 4,
+              mb: 3,
               fontWeight: 400,
             }}
           >
@@ -530,10 +552,10 @@ const GenericErrorPage: React.FC<GenericErrorPageProps> = ({
               sx={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: 1,
-                mb: 4,
-                px: 3,
-                py: 1,
+                gap: 1.5,
+                mb: 3,
+                px: 2,
+                py: 2,
                 backgroundColor: alpha(theme.palette.info.main, 0.1),
                 borderRadius: 3,
                 border: `1px solid ${alpha(theme.palette.info.main, 0.3)}`,
@@ -543,14 +565,14 @@ const GenericErrorPage: React.FC<GenericErrorPageProps> = ({
               <Schedule
                 sx={{
                   color: 'info.main',
-                  fontSize: { xs: '1.25rem', md: '1.75rem' },
+                  fontSize: { xs: '1.5rem', md: '1.75rem' },
                 }}
               />
               <Typography
                 variant="body1"
                 color="info.main"
                 fontWeight="600"
-                sx={{ fontSize: { xs: '0.8rem', md: '1rem' } }}
+                sx={{ fontSize: { xs: '0.875rem', md: '1rem' } }}
               >
                 We'll be back soon! Please check again later.
               </Typography>
@@ -562,8 +584,8 @@ const GenericErrorPage: React.FC<GenericErrorPageProps> = ({
             sx={{
               maxWidth: 500,
               mx: 'auto',
-              mb: 4,
-              p: { xs: 2.5, md: 1.5 },
+              mb: 3,
+              p: { xs: 2.5, md: 3 },
               backgroundColor: alpha(theme.palette.background.paper, 0.8),
               backdropFilter: 'blur(10px)',
               borderRadius: 3,
@@ -577,24 +599,24 @@ const GenericErrorPage: React.FC<GenericErrorPageProps> = ({
               fontWeight="700"
               color="text.primary"
               sx={{ 
-                mb: 1, 
+                mb: 2.5, 
                 fontSize: { xs: '1rem', md: '1.125rem' },
                 display: 'flex',
                 alignItems: 'center',
                 gap: 1,
               }}
             >
-              <Box component="span" sx={{ fontSize: '1rem' }}>💡</Box>
+              <Box component="span" sx={{ fontSize: '1.25rem' }}>💡</Box>
               What you can try:
             </Typography>
-            <Stack spacing={1}>
+            <Stack spacing={1.5}>
               {config.suggestions.map((suggestion, index) => (
                 <Box
                   key={index}
                   sx={{
                     display: 'flex',
                     alignItems: 'flex-start',
-                    gap: 1,
+                    gap: 1.5,
                   }}
                 >
                   <Box
@@ -611,7 +633,7 @@ const GenericErrorPage: React.FC<GenericErrorPageProps> = ({
                     variant="body2"
                     color="text.secondary"
                     sx={{
-                      fontSize: { xs: '0.8rem', md: '0.9375rem' },
+                      fontSize: { xs: '0.875rem', md: '0.9375rem' },
                       lineHeight: 1.6,
                       flex: 1,
                     }}
@@ -629,10 +651,10 @@ const GenericErrorPage: React.FC<GenericErrorPageProps> = ({
           {/* Action Buttons */}
           <Stack
             direction={{ xs: 'column', sm: 'row' }}
-            spacing={1}
+            spacing={2}
             justifyContent="center"
             alignItems="center"
-            sx={{ mb: 1 }}
+            sx={{ mb: 3 }}
           >
             {showRetry && (
               <Button
@@ -647,7 +669,7 @@ const GenericErrorPage: React.FC<GenericErrorPageProps> = ({
                   textTransform: 'none',
                   borderRadius: 3,
                   py: 1.75,
-                  px: 4,
+                  px: 2.5,
                   fontSize: '1rem',
                   background: `linear-gradient(135deg, ${config.color} 0%, ${alpha(config.color, 0.8)} 100%)`,
                   boxShadow: `0 8px 24px ${alpha(config.color, 0.4)}`,
@@ -681,7 +703,7 @@ const GenericErrorPage: React.FC<GenericErrorPageProps> = ({
                   textTransform: 'none',
                   borderRadius: 3,
                   py: 1.75,
-                  px: 4,
+                  px: 2.5,
                   fontSize: '1rem',
                   borderWidth: 2,
                   borderColor: alpha(theme.palette.text.primary, 0.2),
@@ -711,7 +733,7 @@ const GenericErrorPage: React.FC<GenericErrorPageProps> = ({
                   textTransform: 'none',
                   borderRadius: 3,
                   py: 1.75,
-                  px: 4,
+                  px: 2.5,
                   fontSize: '1rem',
                   color: 'text.secondary',
                   transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -739,10 +761,10 @@ const GenericErrorPage: React.FC<GenericErrorPageProps> = ({
               variant="caption"
               color="text.secondary"
               sx={{
-                fontSize: { xs: '0.75rem', md: '0.875rem' },
+                fontSize: { xs: '0.8125rem', md: '0.875rem' },
                 fontStyle: 'italic',
                 display: 'block',
-                mt: 1,
+                mt: 2,
               }}
             >
               Thank you for your patience and understanding. 🙏
@@ -755,8 +777,8 @@ const GenericErrorPage: React.FC<GenericErrorPageProps> = ({
               variant="body2"
               color="text.secondary"
               sx={{
-                mt: 1,
-                fontSize: { xs: '0.75rem', md: '0.875rem' },
+                mt: 3,
+                fontSize: { xs: '0.8125rem', md: '0.875rem' },
                 opacity: 0.8,
               }}
             >
