@@ -173,10 +173,10 @@ const OrderSuccessPage: React.FC = () => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        p: 2
+        p: 1.5
       }}>
         <Box sx={{ textAlign: 'center' }}>
-          <CircularProgress size={60} sx={{ mb: 2, color: 'white' }} />
+          <CircularProgress size={60} sx={{ mb: 1.5, color: 'white' }} />
           <Typography variant="h6" sx={{ mb: 1, fontWeight: 600, color: 'white' }}>
             Loading Order Details...
           </Typography>
@@ -240,7 +240,7 @@ const OrderSuccessPage: React.FC = () => {
               sx={{ 
                 position: 'relative',
                 display: 'inline-block',
-                mb: 3,
+                mb: 1.5,
               }}
             >
               {/* Main success icon */}
@@ -273,7 +273,7 @@ const OrderSuccessPage: React.FC = () => {
             <Typography 
               variant="h3" 
               sx={{ 
-                mb: 2, 
+                mb: 1.5, 
                 fontWeight: 700, 
                 color: showGreenExpansion ? 'white' : '#2C3E50',
                 fontSize: { xs: '2rem', sm: '2.5rem' },
@@ -304,11 +304,11 @@ const OrderSuccessPage: React.FC = () => {
           <Slide direction="up" in={showOrderDetails} timeout={500}>
             <Box>
               {/* Compact Success Header */}
-              <Box sx={{ textAlign: 'center', mb: 3 }}>
+              <Box sx={{ textAlign: 'center', mb: 1.5 }}>
                 <Box
                   sx={{
-                    width: 60,
-                    height: 60,
+                    width: 50,
+                    height: 50,
                     margin: '0 auto',
                     borderRadius: '50%',
                     backgroundColor: '#4CAF50',
@@ -316,12 +316,12 @@ const OrderSuccessPage: React.FC = () => {
                     alignItems: 'center',
                     justifyContent: 'center',
                     boxShadow: '0 4px 16px rgba(76, 175, 80, 0.4)',
-                    mb: 2,
+                    mb: 1.5,
                   }}
                 >
                   <CheckCircle 
                     sx={{ 
-                      fontSize: 35, 
+                      fontSize: 12, 
                       color: 'white',
                     }} 
                   />
@@ -342,9 +342,9 @@ const OrderSuccessPage: React.FC = () => {
                 <Typography 
                   variant="body1" 
                   sx={{ 
-                    mb: 2,
+                    mb: 1.5,
                     color: 'rgba(255,255,255,0.8)',
-                    fontSize: '0.95rem'
+                    fontSize: '0.825rem'
                   }}
                 >
                   Thank you for your order
@@ -353,15 +353,15 @@ const OrderSuccessPage: React.FC = () => {
 
               {/* Order ID Card */}
               <Box sx={{ 
-                mb: 3, 
-                p: 2.5,
+                mb: 1.5, 
+                p: 1.5,
                 backgroundColor: 'rgba(255,255,255,0.1)',
                 borderRadius: 2,
                 border: '2px solid rgba(255,255,255,0.2)',
                 backdropFilter: 'blur(10px)',
                 textAlign: 'center',
               }}>
-                <Typography variant="body2" sx={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.7)', mb: 0.5 }}>
+                <Typography variant="body2" sx={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.7)', mb: 0.5 }}>
                   Order ID
                 </Typography>
                 <Typography 
@@ -379,20 +379,20 @@ const OrderSuccessPage: React.FC = () => {
 
               {/* Estimated Time */}
               <Box sx={{ 
-                p: 2.5, 
+                p: 1.5, 
                 backgroundColor: 'rgba(76, 175, 80, 0.15)',
                 borderRadius: 2,
-                mb: 3,
+                mb: 1.5,
                 border: '1px solid rgba(76, 175, 80, 0.3)',
                 backdropFilter: 'blur(10px)',
               }}>
                 <Stack direction="row" spacing={1.5} alignItems="center" justifyContent="center">
-                  <Schedule sx={{ color: '#4CAF50', fontSize: 24 }} />
+                  <Schedule sx={{ color: '#4CAF50', fontSize: 12 }} />
                   <Box>
-                    <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.75rem' }}>
+                    <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.7rem' }}>
                       Estimated Time
                     </Typography>
-                    <Typography variant="h6" sx={{ color: 'white', fontWeight: 700, fontSize: '1.1rem' }}>
+                    <Typography variant="h6" sx={{ color: 'white', fontWeight: 700, fontSize: '0.825rem' }}>
                       {orderData?.estimatedTime ? `${orderData.estimatedTime} minutes` : '25-30 minutes'}
                     </Typography>
                   </Box>
@@ -401,8 +401,8 @@ const OrderSuccessPage: React.FC = () => {
 
               {/* Minimal Order Summary */}
               <Box sx={{ 
-                mb: 3, 
-                p: 2.5,
+                mb: 1.5, 
+                p: 1.5,
                 backgroundColor: 'rgba(255,255,255,0.08)',
                 borderRadius: 2,
                 backdropFilter: 'blur(10px)',
@@ -410,36 +410,36 @@ const OrderSuccessPage: React.FC = () => {
                 <Stack spacing={2}>
                   {/* Customer & Table Info */}
                   <Stack direction="row" spacing={2} alignItems="center">
-                    <Person sx={{ color: 'rgba(255,255,255,0.6)', fontSize: 20 }} />
+                    <Person sx={{ color: 'rgba(255,255,255,0.6)', fontSize: 12 }} />
                     <Box flex={1}>
-                      <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.75rem' }}>
+                      <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.7rem' }}>
                         Customer
                       </Typography>
-                      <Typography variant="body1" sx={{ color: 'white', fontWeight: 600, fontSize: '0.95rem' }}>
+                      <Typography variant="body1" sx={{ color: 'white', fontWeight: 600, fontSize: '0.825rem' }}>
                         {orderData?.customerInfo.name}
                       </Typography>
                     </Box>
                   </Stack>
 
                   <Stack direction="row" spacing={2} alignItems="center">
-                    <Phone sx={{ color: 'rgba(255,255,255,0.6)', fontSize: 20 }} />
+                    <Phone sx={{ color: 'rgba(255,255,255,0.6)', fontSize: 12 }} />
                     <Box flex={1}>
-                      <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.75rem' }}>
+                      <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.7rem' }}>
                         Phone
                       </Typography>
-                      <Typography variant="body1" sx={{ color: 'white', fontWeight: 600, fontSize: '0.95rem' }}>
+                      <Typography variant="body1" sx={{ color: 'white', fontWeight: 600, fontSize: '0.825rem' }}>
                         {orderData?.customerInfo.phone}
                       </Typography>
                     </Box>
                   </Stack>
 
                   <Stack direction="row" spacing={2} alignItems="center">
-                    <LocationOn sx={{ color: 'rgba(255,255,255,0.6)', fontSize: 20 }} />
+                    <LocationOn sx={{ color: 'rgba(255,255,255,0.6)', fontSize: 12 }} />
                     <Box flex={1}>
-                      <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.75rem' }}>
+                      <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.7rem' }}>
                         Table Number
                       </Typography>
-                      <Typography variant="body1" sx={{ color: 'white', fontWeight: 600, fontSize: '0.95rem' }}>
+                      <Typography variant="body1" sx={{ color: 'white', fontWeight: 600, fontSize: '0.825rem' }}>
                         Table {orderData?.tableId}
                       </Typography>
                     </Box>
@@ -449,12 +449,12 @@ const OrderSuccessPage: React.FC = () => {
 
                   {/* Items Count & Total */}
                   <Stack direction="row" spacing={2} alignItems="center">
-                    <Receipt sx={{ color: 'rgba(255,255,255,0.6)', fontSize: 20 }} />
+                    <Receipt sx={{ color: 'rgba(255,255,255,0.6)', fontSize: 12 }} />
                     <Box flex={1}>
-                      <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.75rem' }}>
+                      <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.7rem' }}>
                         Items
                       </Typography>
-                      <Typography variant="body1" sx={{ color: 'white', fontWeight: 600, fontSize: '0.95rem' }}>
+                      <Typography variant="body1" sx={{ color: 'white', fontWeight: 600, fontSize: '0.825rem' }}>
                         {orderData?.items?.length || 0} {orderData?.items?.length === 1 ? 'item' : 'items'}
                       </Typography>
                     </Box>
@@ -464,10 +464,10 @@ const OrderSuccessPage: React.FC = () => {
 
                   {/* Total Amount */}
                   <Stack direction="row" justifyContent="space-between" alignItems="center">
-                    <Typography variant="h6" sx={{ color: 'white', fontWeight: 700, fontSize: '1.1rem' }}>
+                    <Typography variant="h6" sx={{ color: 'white', fontWeight: 700, fontSize: '0.825rem' }}>
                       Total Amount
                     </Typography>
-                    <Typography variant="h5" sx={{ color: '#4CAF50', fontWeight: 700, fontSize: '1.5rem' }}>
+                    <Typography variant="h5" sx={{ color: '#4CAF50', fontWeight: 700, fontSize: '0.7rem' }}>
                       {formatPrice(orderData?.total || 0)}
                     </Typography>
                   </Stack>
@@ -475,7 +475,7 @@ const OrderSuccessPage: React.FC = () => {
               </Box>
 
               {/* Action Buttons */}
-              <Stack spacing={2} sx={{ mb: 2 }}>
+              <Stack spacing={2} sx={{ mb: 1.5 }}>
                 <Button
                   variant="contained"
                   onClick={handleTrackOrder}
@@ -483,11 +483,11 @@ const OrderSuccessPage: React.FC = () => {
                   fullWidth
                   size="large"
                   sx={{
-                    py: 1.5,
+                    py: 1,
                     fontWeight: 700,
                     textTransform: 'none',
                     borderRadius: 2,
-                    fontSize: '1rem',
+                    fontSize: '0.7rem',
                     backgroundColor: '#4CAF50',
                     boxShadow: '0 4px 12px rgba(76, 175, 80, 0.4)',
                     '&:hover': {
@@ -507,11 +507,11 @@ const OrderSuccessPage: React.FC = () => {
                   fullWidth
                   size="large"
                   sx={{
-                    py: 1.5,
+                    py: 1,
                     fontWeight: 700,
                     textTransform: 'none',
                     borderRadius: 2,
-                    fontSize: '1rem',
+                    fontSize: '0.7rem',
                     borderWidth: 2,
                     borderColor: 'rgba(255,255,255,0.3)',
                     color: 'white',
@@ -532,7 +532,7 @@ const OrderSuccessPage: React.FC = () => {
                 pt: 2,
                 textAlign: 'center',
               }}>
-                <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem' }}>
+                <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.7rem' }}>
                   Thank you for choosing Dino! We hope you enjoy your meal!
                 </Typography>
               </Box>

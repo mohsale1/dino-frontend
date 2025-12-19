@@ -103,7 +103,7 @@ const OrderStatusFragment: React.FC<OrderStatusFragmentProps> = ({ venueId, tabl
           sx={{
             backgroundColor: '#1E3A5F',
             color: 'white',
-            py: 2,
+            py: 1,
             borderBottom: '1px solid rgba(255,255,255,0.1)',
           }}
         >
@@ -121,7 +121,7 @@ const OrderStatusFragment: React.FC<OrderStatusFragmentProps> = ({ venueId, tabl
         </Box>
 
         <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3 }, pt: 3 }}>
-          <Typography variant="body1" sx={{ mb: 2, textAlign: 'center', color: '#6C757D' }}>
+          <Typography variant="body1" sx={{ mb: 1.5, textAlign: 'center', color: '#6C757D' }}>
             Loading orders...
           </Typography>
           <LinearProgress />
@@ -144,7 +144,7 @@ const OrderStatusFragment: React.FC<OrderStatusFragmentProps> = ({ venueId, tabl
           sx={{
             backgroundColor: '#1E3A5F',
             color: 'white',
-            py: 2,
+            py: 1,
             borderBottom: '1px solid rgba(255,255,255,0.1)',
           }}
         >
@@ -162,7 +162,7 @@ const OrderStatusFragment: React.FC<OrderStatusFragmentProps> = ({ venueId, tabl
         </Box>
 
         <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3 }, pt: 3 }}>
-          <Alert severity="error" sx={{ mb: 2 }}>
+          <Alert severity="error" sx={{ mb: 1.5 }}>
             {error}
           </Alert>
           <Button 
@@ -197,7 +197,7 @@ const OrderStatusFragment: React.FC<OrderStatusFragmentProps> = ({ venueId, tabl
           sx={{
             backgroundColor: '#1E3A5F',
             color: 'white',
-            py: 2,
+            py: 1,
             borderBottom: '1px solid rgba(255,255,255,0.1)',
           }}
         >
@@ -224,18 +224,18 @@ const OrderStatusFragment: React.FC<OrderStatusFragmentProps> = ({ venueId, tabl
               border: '1px solid #E0E0E0',
             }}
           >
-            <Receipt sx={{ fontSize: 64, color: '#CED4DA', mb: 2 }} />
+            <Receipt sx={{ fontSize: 52, color: '#CED4DA', mb: 1.5 }} />
             <Typography 
               variant="h6" 
               color="text.secondary" 
-              sx={{ mb: 1, fontWeight: 600, fontSize: '1.1rem' }}
+              sx={{ mb: 1, fontWeight: 600, fontSize: '0.825rem' }}
             >
               No Orders Yet
             </Typography>
             <Typography 
               variant="body2" 
               color="text.secondary"
-              sx={{ fontSize: '0.85rem' }}
+              sx={{ fontSize: '0.7rem' }}
             >
               Your order history will appear here
             </Typography>
@@ -259,7 +259,7 @@ const OrderStatusFragment: React.FC<OrderStatusFragmentProps> = ({ venueId, tabl
         sx={{
           backgroundColor: '#1E3A5F',
           color: 'white',
-          py: 2,
+          py: 1,
           borderBottom: '1px solid rgba(255,255,255,0.1)',
         }}
       >
@@ -285,7 +285,7 @@ const OrderStatusFragment: React.FC<OrderStatusFragmentProps> = ({ venueId, tabl
                 },
               }}
             >
-              <Refresh sx={{ fontSize: 20 }} />
+              <Refresh sx={{ fontSize: 12 }} />
             </IconButton>
           </Stack>
         </Container>
@@ -334,7 +334,7 @@ const OrderStatusFragment: React.FC<OrderStatusFragmentProps> = ({ venueId, tabl
                     <Typography 
                       variant="body2" 
                       color="text.secondary"
-                      sx={{ fontSize: '0.75rem' }}
+                      sx={{ fontSize: '0.7rem' }}
                     >
                       {formatTime(order.createdAt)}
                     </Typography>
@@ -347,7 +347,7 @@ const OrderStatusFragment: React.FC<OrderStatusFragmentProps> = ({ venueId, tabl
                       color: 'white',
                       fontWeight: 600,
                       fontSize: '0.7rem',
-                      height: 24,
+                      height: 18,
                     }}
                   />
                 </Stack>
@@ -384,7 +384,7 @@ const OrderStatusFragment: React.FC<OrderStatusFragmentProps> = ({ venueId, tabl
                   fontWeight="600" 
                   sx={{ 
                     mb: 1,
-                    fontSize: '0.85rem',
+                    fontSize: '0.7rem',
                     color: '#2C3E50',
                   }}
                 >
@@ -405,18 +405,18 @@ const OrderStatusFragment: React.FC<OrderStatusFragmentProps> = ({ venueId, tabl
                         alt={item.name}
                         sx={{ 
                           width: 36, 
-                          height: 36,
+                          height: 18,
                           backgroundColor: '#F0F4F8',
                         }}
                       >
-                        <Restaurant sx={{ fontSize: 20, color: '#6C757D' }} />
+                        <Restaurant sx={{ fontSize: 12, color: '#6C757D' }} />
                       </Avatar>
                       <ListItemText
                         primary={
                           <Typography 
                             variant="body2" 
                             fontWeight="500"
-                            sx={{ fontSize: '0.85rem', color: '#2C3E50' }}
+                            sx={{ fontSize: '0.7rem', color: '#2C3E50' }}
                           >
                             {item.name}
                           </Typography>
@@ -435,7 +435,7 @@ const OrderStatusFragment: React.FC<OrderStatusFragmentProps> = ({ venueId, tabl
                         variant="body2" 
                         fontWeight="700" 
                         sx={{ 
-                          fontSize: '0.85rem',
+                          fontSize: '0.7rem',
                           color: '#1E3A5F',
                           minWidth: 'fit-content',
                         }}
@@ -465,14 +465,14 @@ const OrderStatusFragment: React.FC<OrderStatusFragmentProps> = ({ venueId, tabl
                   <Typography 
                     variant="h6" 
                     fontWeight="600"
-                    sx={{ fontSize: '0.95rem', color: '#2C3E50' }}
+                    sx={{ fontSize: '0.825rem', color: '#2C3E50' }}
                   >
                     Total
                   </Typography>
                   <Typography 
                     variant="h6" 
                     fontWeight="700" 
-                    sx={{ fontSize: '1.05rem', color: '#1E3A5F' }}
+                    sx={{ fontSize: '0.7rem', color: '#1E3A5F' }}
                   >
                     {formatPrice((order.pricing.subtotal || 0) + (order.pricing.tax_amount || 0) - (order.pricing.discount_amount || 0))}
                   </Typography>

@@ -194,7 +194,7 @@ const MenuPage: React.FC = () => {
               <Box
                 sx={{
                   width: 14,
-                  height: 20,
+                  height: 18,
                   backgroundColor: theme.palette.primary.main,
                   borderRadius: 0.5,
                 }}
@@ -307,7 +307,7 @@ const MenuPage: React.FC = () => {
           showCart={false}
         />
         
-        <Container maxWidth="lg" sx={{ py: 3 }}>
+        <Container maxWidth="lg" sx={{ py: 1 }}>
           <SmartLoading 
             type="menu" 
             message="Loading delicious menu items for you..."
@@ -348,7 +348,7 @@ const MenuPage: React.FC = () => {
           showCart={false}
         />
         
-        <Container maxWidth="lg" sx={{ py: 3 }}>
+        <Container maxWidth="lg" sx={{ py: 1 }}>
           <Box sx={{ 
             display: 'flex',
             alignItems: 'center',
@@ -542,7 +542,7 @@ const EnhancedMenuItemCard: React.FC<{
                 color: 'white', 
                 fontWeight: 600,
                 fontSize: '0.7rem',
-                height: 24,
+                height: 18,
                 boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
               }}
             />
@@ -557,7 +557,7 @@ const EnhancedMenuItemCard: React.FC<{
                 color: 'white', 
                 fontWeight: 600,
                 fontSize: '0.7rem',
-                height: 24,
+                height: 18,
                 boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
               }}
             />
@@ -572,7 +572,7 @@ const EnhancedMenuItemCard: React.FC<{
                 color: 'white', 
                 fontWeight: 600,
                 fontSize: '0.7rem',
-                height: 24,
+                height: 18,
                 boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
               }}
             />
@@ -655,7 +655,7 @@ const EnhancedMenuItemCard: React.FC<{
                 flex: 1,
                 color: 'text.primary',
                 display: '-webkit-box',
-                WebkitLineClamp: 2,
+                WebkitLineClamp: 1.5,
                 WebkitBoxOrient: 'vertical',
                 overflow: 'hidden',
               }}
@@ -668,7 +668,7 @@ const EnhancedMenuItemCard: React.FC<{
           {item.rating && (
             <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1 }}>
               <Rating value={item.rating} size="small" readOnly precision={0.5} />
-              <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.8rem' }}>
+              <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
                 {item.rating} ({item.reviewCount})
               </Typography>
             </Stack>
@@ -687,7 +687,7 @@ const EnhancedMenuItemCard: React.FC<{
                 sx={{ 
                   textDecoration: 'line-through',
                   color: 'text.disabled',
-                  fontSize: '0.9rem'
+                  fontSize: '0.7rem'
                 }}
               >
                 ₹{item.originalPrice}
@@ -703,9 +703,9 @@ const EnhancedMenuItemCard: React.FC<{
           sx={{ 
             mb: 1,
             lineHeight: 1.5,
-            fontSize: '0.85rem',
+            fontSize: '0.7rem',
             display: '-webkit-box',
-            WebkitLineClamp: 3,
+            WebkitLineClamp: 1.5,
             WebkitBoxOrient: 'vertical',
             overflow: 'hidden',
             flex: 1,
@@ -746,7 +746,7 @@ const EnhancedMenuItemCard: React.FC<{
                 fontWeight: 700,
                 textTransform: 'none',
                 borderRadius: 1,
-                fontSize: '0.9rem',
+                fontSize: '0.7rem',
                 boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
                 '&:hover': {
                   boxShadow: '0 6px 20px rgba(0,0,0,0.2)',

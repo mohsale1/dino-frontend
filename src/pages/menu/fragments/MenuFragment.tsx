@@ -16,6 +16,7 @@ import {
   Card,
   CardMedia,
   Divider,
+  alpha,
 } from '@mui/material';
 import { 
   Search, 
@@ -25,6 +26,7 @@ import {
   LocalFireDepartment,
   Timer,
   Restaurant,
+  Star,
 } from '@mui/icons-material';
 import { MenuItemType, CategoryType } from '../../../hooks/useMenuData';
 import { useCart } from '../../../contexts/CartContext';
@@ -106,7 +108,7 @@ const MenuFragment: React.FC<MenuFragmentProps> = ({
         sx={{
           backgroundColor: '#1E3A5F',
           color: 'white',
-          py: 2,
+          py: 1,
           borderBottom: '1px solid rgba(255,255,255,0.1)',
         }}
       >
@@ -128,7 +130,7 @@ const MenuFragment: React.FC<MenuFragmentProps> = ({
         sx={{
           backgroundColor: 'white',
           borderBottom: '1px solid #E0E0E0',
-          py: 2,
+          py: 1,
         }}
       >
         <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3 } }}>
@@ -157,13 +159,13 @@ const MenuFragment: React.FC<MenuFragmentProps> = ({
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  <Search sx={{ color: '#6C757D', fontSize: 20 }} />
+                  <Search sx={{ color: '#6C757D', fontSize: 12 }} />
                 </InputAdornment>
               ),
               endAdornment: searchQuery && (
                 <InputAdornment position="end">
                   <IconButton onClick={() => setSearchQuery('')} size="small">
-                    <Clear sx={{ fontSize: 18 }} />
+                    <Clear sx={{ fontSize: 12 }} />
                   </IconButton>
                 </InputAdornment>
               ),
@@ -179,7 +181,7 @@ const MenuFragment: React.FC<MenuFragmentProps> = ({
               sx={{
                 textTransform: 'none',
                 fontWeight: 600,
-                fontSize: '0.8rem',
+                fontSize: '0.7rem',
                 borderColor: '#E0E0E0',
                 color: vegFilter === 'all' ? 'white' : '#2C3E50',
                 backgroundColor: vegFilter === 'all' ? '#1E3A5F' : 'transparent',
@@ -220,7 +222,7 @@ const MenuFragment: React.FC<MenuFragmentProps> = ({
               sx={{
                 textTransform: 'none',
                 fontWeight: 600,
-                fontSize: '0.8rem',
+                fontSize: '0.7rem',
                 borderColor: vegFilter === 'veg' ? '#4CAF50' : '#E0E0E0',
                 color: vegFilter === 'veg' ? 'white' : '#2C3E50',
                 backgroundColor: vegFilter === 'veg' ? '#4CAF50' : 'transparent',
@@ -260,7 +262,7 @@ const MenuFragment: React.FC<MenuFragmentProps> = ({
               sx={{
                 textTransform: 'none',
                 fontWeight: 600,
-                fontSize: '0.8rem',
+                fontSize: '0.7rem',
                 borderColor: vegFilter === 'non-veg' ? '#F44336' : '#E0E0E0',
                 color: vegFilter === 'non-veg' ? 'white' : '#2C3E50',
                 backgroundColor: vegFilter === 'non-veg' ? '#F44336' : 'transparent',
@@ -280,7 +282,7 @@ const MenuFragment: React.FC<MenuFragmentProps> = ({
             <Typography
               variant="body2"
               color="text.secondary"
-              sx={{ mt: 1.5, fontWeight: 500, fontSize: '0.8rem' }}
+              sx={{ mt: 1.5, fontWeight: 500, fontSize: '0.7rem' }}
             >
               {filteredGroups.reduce((acc, group) => acc + group.items.length, 0)} items found
             </Typography>
@@ -309,7 +311,7 @@ const MenuFragment: React.FC<MenuFragmentProps> = ({
               '& .MuiTab-root': {
                 textTransform: 'none',
                 fontWeight: 600,
-                fontSize: '0.8rem',
+                fontSize: '0.7rem',
                 color: '#6C757D',
                 minHeight: 42,
                 py: 1,
@@ -336,37 +338,57 @@ const MenuFragment: React.FC<MenuFragmentProps> = ({
       </Box>
 
       {/* Menu Items */}
-      <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3 }, pt: 2.5 }}>
+      <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3 }, pt: 3 }}>
         {filteredGroups.map((group, index) => (
-          <Box key={group.id} sx={{ mb: 3 }}>
+          <Box key={group.id} sx={{ mb: 1.5 }}>
             <Box
               id={group.id}
               ref={(el: HTMLDivElement | null) => (categoryRefs.current[group.id] = el)}
             >
-              {/* Category Header */}
-              <Box sx={{ mb: 2 }}>
-                <Typography 
-                  variant="h6" 
-                  sx={{ 
-                    fontWeight: 700,
-                    color: '#1E3A5F',
-                    fontSize: { xs: '1.1rem', sm: '1.25rem' },
-                    mb: 0.25,
-                  }}
-                >
-                  {group.name}
-                </Typography>
-                <Typography 
-                  variant="body2" 
-                  color="text.secondary"
-                  sx={{ fontSize: '0.8rem' }}
-                >
-                  {group.description || `Explore our ${group.name.toLowerCase()}`}
-                </Typography>
+              {/* Category Header with Enhanced Design */}
+              <Box 
+                sx={{ 
+                  mb: 1.5,
+                  pb: 1.5,
+                  borderBottom: '2px solid #1E3A5F',
+                }}
+              >
+                <Stack direction="row" alignItems="center" justifyContent="space-between">
+                  <Box>
+                    <Typography 
+                      variant="h5" 
+                      sx={{ 
+                        fontWeight: 700,
+                        color: '#1E3A5F',
+                        fontSize: { xs: '1.25rem', sm: '1.5rem' },
+                        mb: 0.5,
+                      }}
+                    >
+                      {group.name}
+                    </Typography>
+                    <Typography 
+                      variant="body2" 
+                      color="text.secondary"
+                      sx={{ fontSize: '0.7rem', fontWeight: 500 }}
+                    >
+                      {group.description || `Explore our ${group.name.toLowerCase()}`}
+                    </Typography>
+                  </Box>
+                  <Chip 
+                    label={`${group.items.length} items`}
+                    size="small"
+                    sx={{
+                      backgroundColor: alpha('#1E3A5F', 0.1),
+                      color: '#1E3A5F',
+                      fontWeight: 600,
+                      fontSize: '0.7rem',
+                    }}
+                  />
+                </Stack>
               </Box>
 
               {/* Menu Items */}
-              <Stack spacing={1.5}>
+              <Stack spacing={2}>
                 {group.items.map((item) => (
                   <MenuItemCard
                     key={item.id}
@@ -379,8 +401,17 @@ const MenuFragment: React.FC<MenuFragmentProps> = ({
               </Stack>
             </Box>
 
+            {/* Category Separator */}
             {index < filteredGroups.length - 1 && (
-              <Divider sx={{ my: 3 }} />
+              <Box sx={{ my: 4 }}>
+                <Divider 
+                  sx={{ 
+                    borderColor: '#1E3A5F',
+                    borderWidth: 1,
+                    opacity: 0.2,
+                  }} 
+                />
+              </Box>
             )}
           </Box>
         ))}
@@ -392,19 +423,19 @@ const MenuFragment: React.FC<MenuFragmentProps> = ({
               textAlign: 'center',
               py: 6,
               backgroundColor: 'white',
-              borderRadius: 1,
+              borderRadius: 2,
               border: '1px solid #E0E0E0',
             }}
           >
-            <Search sx={{ fontSize: 56, color: '#CED4DA', mb: 1.5 }} />
+            <Search sx={{ fontSize: 44, color: '#CED4DA', mb: 1.5 }} />
             <Typography 
               variant="h6" 
               color="text.secondary" 
-              sx={{ mb: 0.75, fontWeight: 600, fontSize: '1.1rem' }}
+              sx={{ mb: 0.75, fontWeight: 600, fontSize: '0.825rem' }}
             >
               No items found
             </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2.5, fontSize: '0.85rem' }}>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5, fontSize: '0.7rem' }}>
               {searchQuery 
                 ? `No results for "${searchQuery}"`
                 : 'Try adjusting your filters'}
@@ -422,7 +453,7 @@ const MenuFragment: React.FC<MenuFragmentProps> = ({
                 fontWeight: 600,
                 borderColor: '#1E3A5F',
                 color: '#1E3A5F',
-                fontSize: '0.85rem',
+                fontSize: '0.7rem',
                 '&:hover': {
                   borderColor: '#2C5282',
                   backgroundColor: 'rgba(30, 58, 95, 0.04)',
@@ -438,7 +469,7 @@ const MenuFragment: React.FC<MenuFragmentProps> = ({
   );
 };
 
-// Menu Item Card Component
+// Restructured Menu Item Card Component
 interface MenuItemCardProps {
   item: MenuItemType;
   onAddToCart: (item: MenuItemType) => void;
@@ -468,8 +499,8 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
   const VegNonVegIcon = ({ isVeg }: { isVeg: boolean }) => (
     <Box
       sx={{
-        width: 14,
-        height: 14,
+        width: 16,
+        height: 16,
         border: `2px solid ${isVeg ? '#4CAF50' : '#F44336'}`,
         display: 'flex',
         alignItems: 'center',
@@ -479,8 +510,8 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
     >
       <Box
         sx={{
-          width: 6,
-          height: 6,
+          width: 7,
+          height: 7,
           borderRadius: isVeg ? '50%' : 0,
           backgroundColor: isVeg ? '#4CAF50' : '#F44336',
         }}
@@ -495,253 +526,302 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
         flexDirection: 'row',
         backgroundColor: 'white',
         border: '1px solid #E0E0E0',
-        boxShadow: 'none',
+        borderRadius: 2,
+        boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+        transition: 'all 0.2s ease',
+        overflow: 'hidden',
         '&:hover': {
           borderColor: '#1E3A5F',
-          boxShadow: '0 1px 4px rgba(30, 58, 95, 0.08)',
+          boxShadow: '0 4px 12px rgba(30, 58, 95, 0.12)',
+          transform: 'translateY(-2px)',
         },
       }}
     >
-      {/* Left - Content */}
-      <Box sx={{ flex: 1, p: { xs: 1.5, sm: 2 }, minWidth: 0 }}>
-        {/* Name and Veg/Non-Veg */}
-        <Stack direction="row" spacing={0.75} alignItems="flex-start" sx={{ mb: 0.75 }}>
-          <VegNonVegIcon isVeg={item.isVeg || false} />
-          <Typography
-            variant="h6"
-            sx={{
-              fontWeight: 600,
-              fontSize: { xs: '0.95rem', sm: '1.05rem' },
-              color: '#2C3E50',
-              flex: 1,
-              lineHeight: 1.3,
-            }}
-          >
-            {item.name}
-          </Typography>
-        </Stack>
-
-        {/* Price */}
-        <Stack direction="row" alignItems="center" spacing={0.75} sx={{ mb: 1 }}>
-          <Typography 
-            variant="h6" 
-            sx={{ 
-              fontWeight: 700,
-              color: '#1E3A5F',
-              fontSize: { xs: '1.05rem', sm: '1.15rem' },
-            }}
-          >
-            ₹{item.price}
-          </Typography>
-          {item.originalPrice && (
-            <>
-              <Typography
-                variant="body2"
-                sx={{
-                  textDecoration: 'line-through',
-                  color: '#6C757D',
-                  fontSize: '0.8rem',
-                }}
-              >
-                ₹{item.originalPrice}
-              </Typography>
-              {item.discount && (
-                <Chip
-                  label={`${item.discount}% OFF`}
-                  size="small"
-                  sx={{
-                    backgroundColor: '#DC3545',
-                    color: 'white',
-                    fontWeight: 600,
-                    height: 18,
-                    fontSize: '0.65rem',
-                  }}
-                />
-              )}
-            </>
-          )}
-        </Stack>
-
-        {/* Description */}
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          sx={{
-            mb: 1,
-            fontSize: '0.8rem',
-            lineHeight: 1.4,
-            display: '-webkit-box',
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: 'vertical',
-            overflow: 'hidden',
-          }}
-        >
-          {item.description}
-        </Typography>
-
-        {/* Meta Info */}
-        <Stack direction="row" spacing={1.5} alignItems="center" flexWrap="wrap" sx={{ gap: 0.75 }}>
-          {item.rating && (
-            <Stack direction="row" spacing={0.5} alignItems="center">
-              <Rating value={item.rating} size="small" readOnly precision={0.5} sx={{ fontSize: '0.9rem' }} />
-              <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
-                ({item.reviewCount})
-              </Typography>
-            </Stack>
-          )}
-
-          <Stack direction="row" spacing={0.25} alignItems="center">
-            <Timer sx={{ fontSize: 14, color: '#6C757D' }} />
-            <Typography variant="caption" color="text.secondary" fontWeight={500} sx={{ fontSize: '0.7rem' }}>
-              {item.preparationTime} min
-            </Typography>
-          </Stack>
-
-          {item.spicyLevel && item.spicyLevel > 0 && (
-            <Stack direction="row" spacing={0.15} alignItems="center">
-              {[...Array(Math.min(item.spicyLevel, 3))].map((_, i) => (
-                <LocalFireDepartment
-                  key={i}
-                  sx={{
-                    fontSize: 14,
-                    color: item.spicyLevel === 1 ? '#FFA726' : item.spicyLevel === 2 ? '#FF7043' : '#F44336',
-                  }}
-                />
-              ))}
-            </Stack>
-          )}
-
-          {item.isNew && (
-            <Chip label="New" size="small" sx={{ backgroundColor: '#28A745', color: 'white', fontWeight: 600, height: 18, fontSize: '0.65rem' }} />
-          )}
-          {item.isPopular && (
-            <Chip label="Popular" size="small" sx={{ backgroundColor: '#FFC107', color: 'white', fontWeight: 600, height: 18, fontSize: '0.65rem' }} />
-          )}
-        </Stack>
-      </Box>
-
-      {/* Right - Image and Add Button */}
+      {/* Left - Image */}
       <Box
         sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          p: { xs: 1.5, sm: 2 },
-          gap: 1,
+          width: { xs: 120, sm: 140 },
+          height: { xs: 140, sm: 160 },
+          flexShrink: 0,
+          position: 'relative',
         }}
       >
-        {/* Image */}
-        <Box
-          sx={{
-            width: { xs: 90, sm: 110 },
-            height: { xs: 90, sm: 110 },
-            borderRadius: 1,
-            overflow: 'hidden',
-            border: '1px solid #E0E0E0',
-            backgroundColor: '#F8F9FA',
-            flexShrink: 0,
-          }}
-        >
-          {imageUrl && !imageError ? (
-            <CardMedia
-              component="img"
-              image={imageUrl}
-              alt={item.name}
-              onError={() => setImageError(true)}
-              sx={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-              }}
+        {imageUrl && !imageError ? (
+          <CardMedia
+            component="img"
+            image={imageUrl}
+            alt={item.name}
+            onError={() => setImageError(true)}
+            sx={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+            }}
+          />
+        ) : (
+          <Box
+            sx={{
+              width: '100%',
+              height: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: '#F8F9FA',
+            }}
+          >
+            <Restaurant sx={{ fontSize: 12, color: '#CED4DA' }} />
+          </Box>
+        )}
+
+        {/* Badges on Image */}
+        <Box sx={{ position: 'absolute', top: 8, left: 8, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+          {item.isNew && (
+            <Chip 
+              label="New" 
+              size="small" 
+              sx={{ 
+                backgroundColor: '#28A745', 
+                color: 'white', 
+                fontWeight: 700, 
+                height: 18, 
+                fontSize: '0.65rem',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+              }} 
             />
-          ) : (
-            <Box
-              sx={{
-                width: '100%',
-                height: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <Restaurant sx={{ fontSize: 40, color: '#CED4DA' }} />
-            </Box>
+          )}
+          {item.isPopular && (
+            <Chip 
+              label="Popular" 
+              size="small" 
+              sx={{ 
+                backgroundColor: '#FFC107', 
+                color: 'white', 
+                fontWeight: 700, 
+                height: 18, 
+                fontSize: '0.65rem',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+              }} 
+            />
           )}
         </Box>
 
-        {/* Add to Cart Button */}
-        <Box sx={{ width: { xs: 90, sm: 110 } }}>
-          {quantityInCart === 0 ? (
-            <Button
-              variant="contained"
-              fullWidth
-              size="small"
-              onClick={() => onAddToCart(item)}
+        {/* Discount Badge */}
+        {item.discount && (
+          <Box
+            sx={{
+              position: 'absolute',
+              top: 8,
+              right: 8,
+              backgroundColor: '#DC3545',
+              color: 'white',
+              px: 1,
+              py: 0.5,
+              borderRadius: 1,
+              fontWeight: 700,
+              fontSize: '0.7rem',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+            }}
+          >
+            {item.discount}% OFF
+          </Box>
+        )}
+      </Box>
+
+      {/* Right - Content and Actions */}
+      <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', p: { xs: 2, sm: 2.5 } }}>
+        {/* Top Section - Name, Rating, Price */}
+        <Box sx={{ mb: 1.5 }}>
+          {/* Veg/Non-Veg and Name */}
+          <Stack direction="row" spacing={1} alignItems="flex-start" sx={{ mb: 1 }}>
+            <VegNonVegIcon isVeg={item.isVeg || false} />
+            <Typography
+              variant="h6"
               sx={{
-                backgroundColor: '#1E3A5F',
-                color: 'white',
-                fontWeight: 600,
-                textTransform: 'none',
-                py: 0.75,
-                fontSize: '0.8rem',
-                '&:hover': {
-                  backgroundColor: '#2C5282',
-                },
+                fontWeight: 700,
+                fontSize: { xs: '1.05rem', sm: '1.15rem' },
+                color: '#2C3E50',
+                flex: 1,
+                lineHeight: 1.3,
               }}
             >
-              Add
-            </Button>
-          ) : (
-            <Stack
-              direction="row"
-              spacing={0.5}
-              alignItems="center"
-              justifyContent="space-between"
-              sx={{
-                backgroundColor: '#F0F4F8',
-                borderRadius: 1,
-                p: 0.5,
-                border: '1px solid #1E3A5F',
-              }}
-            >
-              <IconButton
-                size="small"
-                onClick={handleDecreaseQuantity}
-                sx={{
-                  backgroundColor: 'white',
+              {item.name}
+            </Typography>
+          </Stack>
+
+          {/* Rating and Price Row */}
+          <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
+            {/* Rating */}
+            {item.rating ? (
+              <Stack direction="row" spacing={0.5} alignItems="center">
+                <Star sx={{ fontSize: 12, color: '#FFC107' }} />
+                <Typography variant="body2" fontWeight={600} sx={{ fontSize: '0.7rem', color: '#2C3E50' }}>
+                  {item.rating}
+                </Typography>
+                <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
+                  ({item.reviewCount})
+                </Typography>
+              </Stack>
+            ) : (
+              <Box />
+            )}
+
+            {/* Price */}
+            <Box sx={{ textAlign: 'right' }}>
+              <Typography 
+                variant="h6" 
+                sx={{ 
+                  fontWeight: 700,
                   color: '#1E3A5F',
-                  width: 24,
-                  height: 24,
-                  '&:hover': {
-                    backgroundColor: '#E9ECEF',
-                  },
+                  fontSize: { xs: '1.2rem', sm: '1.35rem' },
+                  lineHeight: 1,
                 }}
               >
-                <Remove sx={{ fontSize: 14 }} />
-              </IconButton>
-
-              <Typography variant="body2" fontWeight={700} color="#1E3A5F" sx={{ fontSize: '0.85rem', minWidth: 20, textAlign: 'center' }}>
-                {quantityInCart}
+                ₹{item.price}
               </Typography>
+              {item.originalPrice && (
+                <Typography
+                  variant="body2"
+                  sx={{
+                    textDecoration: 'line-through',
+                    color: '#6C757D',
+                    fontSize: '0.7rem',
+                    lineHeight: 1,
+                  }}
+                >
+                  ₹{item.originalPrice}
+                </Typography>
+              )}
+            </Box>
+          </Stack>
 
-              <IconButton
-                size="small"
-                onClick={handleIncreaseQuantity}
-                sx={{
-                  backgroundColor: 'white',
-                  color: '#1E3A5F',
-                  width: 24,
-                  height: 24,
-                  '&:hover': {
-                    backgroundColor: '#E9ECEF',
-                  },
-                }}
-              >
-                <Add sx={{ fontSize: 14 }} />
-              </IconButton>
+          {/* Description */}
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{
+              fontSize: '0.7rem',
+              lineHeight: 1.5,
+              display: '-webkit-box',
+              WebkitLineClamp: 1.5,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden',
+            }}
+          >
+            {item.description}
+          </Typography>
+        </Box>
+
+        {/* Bottom Section - Meta Info and Add Button */}
+        <Box sx={{ mt: 'auto' }}>
+          {/* Meta Info */}
+          <Stack 
+            direction="row" 
+            spacing={1.5} 
+            alignItems="center" 
+            justifyContent="space-between"
+            flexWrap="wrap" 
+            sx={{ mb: 1.5 }}
+          >
+            <Stack direction="row" spacing={1.5} alignItems="center" flexWrap="wrap" sx={{ gap: 0.5 }}>
+              <Stack direction="row" spacing={0.25} alignItems="center">
+                <Timer sx={{ fontSize: 12, color: '#6C757D' }} />
+                <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ fontSize: '0.7rem' }}>
+                  {item.preparationTime} min
+                </Typography>
+              </Stack>
+
+              {item.spicyLevel && item.spicyLevel > 0 && (
+                <Stack direction="row" spacing={0.15} alignItems="center">
+                  {[...Array(Math.min(item.spicyLevel, 3))].map((_, i) => (
+                    <LocalFireDepartment
+                      key={i}
+                      sx={{
+                        fontSize: 12,
+                        color: item.spicyLevel === 1 ? '#FFA726' : item.spicyLevel === 2 ? '#FF7043' : '#F44336',
+                      }}
+                    />
+                  ))}
+                </Stack>
+              )}
             </Stack>
-          )}
+
+            {/* Add to Cart Button */}
+            <Box sx={{ minWidth: { xs: '100%', sm: 110 } }}>
+              {quantityInCart === 0 ? (
+                <Button
+                  variant="contained"
+                  fullWidth
+                  size="small"
+                  onClick={() => onAddToCart(item)}
+                  sx={{
+                    backgroundColor: '#1E3A5F',
+                    color: 'white',
+                    fontWeight: 700,
+                    textTransform: 'none',
+                    py: 1,
+                    fontSize: '0.7rem',
+                    borderRadius: 1.5,
+                    boxShadow: '0 2px 8px rgba(30, 58, 95, 0.2)',
+                    '&:hover': {
+                      backgroundColor: '#2C5282',
+                      boxShadow: '0 4px 12px rgba(30, 58, 95, 0.3)',
+                    },
+                  }}
+                >
+                  Add
+                </Button>
+              ) : (
+                <Stack
+                  direction="row"
+                  spacing={0.5}
+                  alignItems="center"
+                  justifyContent="space-between"
+                  sx={{
+                    backgroundColor: alpha('#1E3A5F', 0.08),
+                    borderRadius: 1.5,
+                    p: 0.5,
+                    border: '2px solid #1E3A5F',
+                  }}
+                >
+                  <IconButton
+                    size="small"
+                    onClick={handleDecreaseQuantity}
+                    sx={{
+                      backgroundColor: 'white',
+                      color: '#1E3A5F',
+                      width: 28,
+                      height: 18,
+                      '&:hover': {
+                        backgroundColor: '#F8F9FA',
+                      },
+                    }}
+                  >
+                    <Remove sx={{ fontSize: 12 }} />
+                  </IconButton>
+
+                  <Typography variant="body2" fontWeight={700} color="#1E3A5F" sx={{ fontSize: '0.825rem', minWidth: 24, textAlign: 'center' }}>
+                    {quantityInCart}
+                  </Typography>
+
+                  <IconButton
+                    size="small"
+                    onClick={handleIncreaseQuantity}
+                    sx={{
+                      backgroundColor: 'white',
+                      color: '#1E3A5F',
+                      width: 28,
+                      height: 18,
+                      '&:hover': {
+                        backgroundColor: '#F8F9FA',
+                      },
+                    }}
+                  >
+                    <Add sx={{ fontSize: 12 }} />
+                  </IconButton>
+                </Stack>
+              )}
+            </Box>
+          </Stack>
         </Box>
       </Box>
     </Card>

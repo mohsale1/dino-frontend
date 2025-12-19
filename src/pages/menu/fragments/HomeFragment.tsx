@@ -68,11 +68,11 @@ const HomeFragment: React.FC<HomeFragmentProps> = ({
             <Typography
               variant="h6"
               sx={{
-                mb: 2.5,
+                mb: 1.5,
                 opacity: 0.9,
                 fontWeight: 400,
                 fontSize: { xs: '0.875rem', sm: '1rem' },
-                maxWidth: 700,
+                maxwidth: 580,
               }}
             >
               {restaurant?.description || 'Delicious food awaits you'}
@@ -82,7 +82,7 @@ const HomeFragment: React.FC<HomeFragmentProps> = ({
             <Stack
               direction={{ xs: 'column', sm: 'row' }}
               spacing={1.5}
-              sx={{ mb: 2 }}
+              sx={{ mb: 1.5 }}
             >
               {/* Rating */}
               <Box
@@ -97,11 +97,11 @@ const HomeFragment: React.FC<HomeFragmentProps> = ({
                   border: '1px solid rgba(255, 255, 255, 0.2)',
                 }}
               >
-                <Star sx={{ fontSize: 18, color: '#FFC107' }} />
-                <Typography variant="body2" fontWeight={600} sx={{ fontSize: '0.875rem' }}>
+                <Star sx={{ fontSize: 12, color: '#FFC107' }} />
+                <Typography variant="body2" fontWeight={600} sx={{ fontSize: '0.7rem' }}>
                   {restaurant?.rating?.toFixed(1) || '4.5'}
                 </Typography>
-                <Typography variant="body2" sx={{ opacity: 0.8, fontSize: '0.875rem' }}>
+                <Typography variant="body2" sx={{ opacity: 0.8, fontSize: '0.7rem' }}>
                   ({restaurant?.total_reviews || 0}+)
                 </Typography>
               </Box>
@@ -119,8 +119,8 @@ const HomeFragment: React.FC<HomeFragmentProps> = ({
                   border: '1px solid rgba(255, 255, 255, 0.2)',
                 }}
               >
-                <LocationOn sx={{ fontSize: 18 }} />
-                <Typography variant="body2" fontWeight={600} sx={{ fontSize: '0.875rem' }}>
+                <LocationOn sx={{ fontSize: 12 }} />
+                <Typography variant="body2" fontWeight={600} sx={{ fontSize: '0.7rem' }}>
                   {restaurant?.location.city || 'Location'}
                 </Typography>
               </Box>
@@ -138,8 +138,8 @@ const HomeFragment: React.FC<HomeFragmentProps> = ({
                   border: '1px solid rgba(255, 255, 255, 0.2)',
                 }}
               >
-                <Schedule sx={{ fontSize: 18 }} />
-                <Typography variant="body2" fontWeight={600} sx={{ fontSize: '0.875rem' }}>
+                <Schedule sx={{ fontSize: 12 }} />
+                <Typography variant="body2" fontWeight={600} sx={{ fontSize: '0.7rem' }}>
                   25-30 min
                 </Typography>
               </Box>
@@ -158,8 +158,8 @@ const HomeFragment: React.FC<HomeFragmentProps> = ({
                       color: 'white',
                       fontWeight: 500,
                       border: '1px solid rgba(255, 255, 255, 0.25)',
-                      height: 24,
-                      fontSize: '0.75rem',
+                      height: 18,
+                      fontSize: '0.7rem',
                     }}
                   />
                 ))}
@@ -172,7 +172,7 @@ const HomeFragment: React.FC<HomeFragmentProps> = ({
       {/* Categories Section */}
       <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3 }, mt: 3 }}>
         {/* Section Header */}
-        <Box sx={{ mb: 2.5 }}>
+        <Box sx={{ mb: 1.5 }}>
           <Typography
             variant="h5"
             sx={{
@@ -269,7 +269,7 @@ const HomeFragment: React.FC<HomeFragmentProps> = ({
         <Box
           sx={{
             mt: 3,
-            mb: 2,
+            mb: 1.5,
             p: { xs: 2.5, sm: 3 },
             backgroundColor: 'white',
             border: '1px solid #E0E0E0',
@@ -291,7 +291,7 @@ const HomeFragment: React.FC<HomeFragmentProps> = ({
           <Typography
             variant="body2"
             color="text.secondary"
-            sx={{ mb: 2, fontSize: { xs: '0.8rem', sm: '0.875rem' } }}
+            sx={{ mb: 1.5, fontSize: { xs: '0.8rem', sm: '0.875rem' } }}
           >
             Browse our full menu and add items to your cart
           </Typography>
@@ -302,11 +302,11 @@ const HomeFragment: React.FC<HomeFragmentProps> = ({
             sx={{
               backgroundColor: '#1E3A5F',
               color: 'white',
-              px: 2.5,
+              px: 1.5,
               py: 1,
               fontWeight: 600,
               textTransform: 'none',
-              fontSize: '0.9rem',
+              fontSize: '0.7rem',
               '&:hover': {
                 backgroundColor: '#2C5282',
               },
