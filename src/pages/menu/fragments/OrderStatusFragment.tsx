@@ -224,7 +224,7 @@ const OrderStatusFragment: React.FC<OrderStatusFragmentProps> = ({ venueId, tabl
               border: '1px solid #E0E0E0',
             }}
           >
-            <Receipt sx={{ fontSize: 52, color: '#CED4DA', mb: 1.5 }} />
+            <Receipt sx={{ fontSize: 42, color: '#CED4DA', mb: 1.5 }} />
             <Typography 
               variant="h6" 
               color="text.secondary" 

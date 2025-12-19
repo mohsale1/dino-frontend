@@ -170,7 +170,7 @@ const HomeFragment: React.FC<HomeFragmentProps> = ({
       </Box>
 
       {/* Categories Section */}
-      <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3 }, mt: 3 }}>
+      <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3 }, mt: 2 }}>
         {/* Section Header */}
         <Box sx={{ mb: 1.5 }}>
           <Typography
@@ -268,7 +268,7 @@ const HomeFragment: React.FC<HomeFragmentProps> = ({
         {/* Call to Action */}
         <Box
           sx={{
-            mt: 3,
+            mt: 2,
             mb: 1.5,
             p: { xs: 2.5, sm: 3 },
             backgroundColor: 'white',

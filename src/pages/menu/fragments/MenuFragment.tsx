@@ -427,7 +427,7 @@ const MenuFragment: React.FC<MenuFragmentProps> = ({
               border: '1px solid #E0E0E0',
             }}
           >
-            <Search sx={{ fontSize: 44, color: '#CED4DA', mb: 1.5 }} />
+            <Search sx={{ fontSize: 22, color: '#CED4DA', mb: 1.5 }} />
             <Typography 
               variant="h6" 
               color="text.secondary" 
