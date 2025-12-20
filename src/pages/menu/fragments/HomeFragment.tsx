@@ -8,7 +8,6 @@ import {
 import CompactHero from '../../../components/menu/home/CompactHero';
 import CategoryStrip from '../../../components/menu/home/CategoryStrip';
 import PopularDishes from '../../../components/menu/home/PopularDishes';
-import PromotionalBanner from '../../../components/menu/home/PromotionalBanner';
 import ProgressiveSection from '../../../components/menu/home/ProgressiveSection';
 import DecisionCard from '../../../components/menu/home/DecisionCard';
 
@@ -35,7 +34,6 @@ const HomeFragment: React.FC<HomeFragmentProps> = ({
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [vegFilter, setVegFilter] = useState<'all' | 'veg' | 'non-veg'>('all');
-  const [showPromoBanner, setShowPromoBanner] = useState(true);
 
   // Filter items based on search and veg filter
   const getFilteredItems = () => {
@@ -65,12 +63,6 @@ const HomeFragment: React.FC<HomeFragmentProps> = ({
       .slice(0, 8);
   };
 
-  // Get new arrivals (items added recently - mock logic)
-  const getNewArrivals = () => {
-    return getFilteredItems()
-      .slice(0, 6);
-  };
-
   // Get trending items (high rating items)
   const getTrendingItems = () => {
     return getFilteredItems()
@@ -94,7 +86,6 @@ const HomeFragment: React.FC<HomeFragmentProps> = ({
   };
 
   const popularDishes = getPopularDishes();
-  const newArrivals = getNewArrivals();
   const trendingItems = getTrendingItems();
   const chefsSpecials = getChefsSpecials();
   const verticalFeedItems = getVerticalFeedItems();
@@ -125,12 +116,7 @@ const HomeFragment: React.FC<HomeFragmentProps> = ({
         onCategoryClick={onCategoryClick}
       />
 
-      {/* 3. Promotional Banners - Attention-grabbing, Skippable */}
-      {showPromoBanner && (
-        <PromotionalBanner onDismiss={() => setShowPromoBanner(false)} />
-      )}
-
-      {/* 4. Personalized Recommendations - Horizontal Carousel */}
+      {/* 3. Personalized Recommendations - Horizontal Carousel */}
       <PopularDishes 
         dishes={popularDishes}
         onAddToCart={onAddToCart}
@@ -139,7 +125,7 @@ const HomeFragment: React.FC<HomeFragmentProps> = ({
         getMenuItemImage={getMenuItemImage}
       />
 
-      {/* 5. Vertical Feed of Decision Cards - Core Browsing */}
+      {/* 4. Vertical Feed of Decision Cards - Core Browsing */}
       {verticalFeedItems.length > 0 && (
         <Box sx={{ py: { xs: 3, sm: 4 }, backgroundColor: 'white' }}>
           <Box sx={{ px: { xs: 2, sm: 3 }, maxWidth: 'lg', mx: 'auto' }}>
@@ -181,22 +167,7 @@ const HomeFragment: React.FC<HomeFragmentProps> = ({
         </Box>
       )}
 
-      {/* 6. Progressive Sections - Additional Discovery */}
-      {/* New Arrivals Section */}
-      {newArrivals.length > 0 && (
-        <ProgressiveSection
-          title="New Arrivals"
-          subtitle="Fresh additions to our menu"
-          items={newArrivals}
-          icon="new"
-          variant="carousel"
-          onAddToCart={onAddToCart}
-          onRemoveFromCart={onRemoveFromCart}
-          getItemQuantityInCart={getItemQuantityInCart}
-          getMenuItemImage={getMenuItemImage}
-        />
-      )}
-
+      {/* 5. Progressive Sections - Additional Discovery */}
       {/* Trending Now Section */}
       {trendingItems.length > 0 && (
         <ProgressiveSection
@@ -227,7 +198,7 @@ const HomeFragment: React.FC<HomeFragmentProps> = ({
         />
       )}
 
-      {/* 7. Call to Action - View Full Menu */}
+      {/* 6. Call to Action - View Full Menu */}
       <CallToAction onViewMenu={() => onCategoryClick(categories[0]?.id || '')} />
     </Box>
   );

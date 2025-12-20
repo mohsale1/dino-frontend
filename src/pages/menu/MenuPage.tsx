@@ -26,7 +26,7 @@ const MenuPage: React.FC = () => {
   const { venueId, tableId } = useParams<{ venueId: string; tableId: string }>();
   const theme = useTheme();
   const { theme: venueTheme, setTheme: setVenueTheme } = useVenueTheme();
-  const { addItem, items: cartItems, getTotalItems, getTotalAmount } = useCart();
+  const { addItem, updateQuantity, items: cartItems, getTotalItems, getTotalAmount } = useCart();
 
   // Use the new menu data hook
   const {
@@ -105,6 +105,13 @@ const MenuPage: React.FC = () => {
       order: 0,
     };
     addItem(cartItem, 1);
+  };
+
+  const handleRemoveFromCart = (item: MenuItemType) => {
+    const currentQuantity = getItemQuantityInCart(item.id);
+    if (currentQuantity > 0) {
+      updateQuantity(item.id, currentQuantity - 1);
+    }
   };
 
   const handleCategoryClick = (categoryId: string) => {
@@ -228,6 +235,7 @@ const MenuPage: React.FC = () => {
           onCategoryClick={handleCategoryClick}
           menuItems={menuItems}
           onAddToCart={handleAddToCart}
+          onRemoveFromCart={handleRemoveFromCart}
           getItemQuantityInCart={getItemQuantityInCart}
           getMenuItemImage={(item) => item.image || ''}
         />
