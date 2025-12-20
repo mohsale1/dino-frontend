@@ -45,7 +45,6 @@ import {
   Receipt,
   ArrowBack,
   ArrowForward,
-  Email,
 } from '@mui/icons-material';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useCart } from '../../contexts/CartContext';
@@ -410,7 +409,7 @@ const CheckoutPage: React.FC = () => {
 
   // Main Checkout
   return (
-    <Box sx={{ minHeight: '100vh', backgroundColor: '#F8F9FA', pb: activeStep === 2 ? 15 : 4 }}>
+    <Box sx={{ minHeight: '100vh', backgroundColor: '#F8F9FA', pb: activeStep === 2 ? 10 : 4 }}>
       {/* Header */}
       <Box sx={{ backgroundColor: '#1E3A5F', color: 'white', py: 2, mb: 3 }}>
         <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3 } }}>
@@ -457,7 +456,7 @@ const CheckoutPage: React.FC = () => {
           </Stack>
         </Box>
 
-        <Grid container spacing={3} sx={{ mb: activeStep === 2 ? 2 : 0 }}>
+        <Grid container spacing={3} sx={{ mb: activeStep === 2 ? 0 : 0 }}>
           {/* Main Content */}
           <Grid item xs={12} md={activeStep === 2 ? 8 : 12}>
             <Paper sx={{ backgroundColor: 'white', border: '1px solid #E0E0E0', boxShadow: 'none' }}>
@@ -629,23 +628,6 @@ const CheckoutPage: React.FC = () => {
                     <Grid item xs={12}>
                       <TextField
                         fullWidth
-                        label="Email (Optional)"
-                        name="email"
-                        type="email"
-                        value={customerInfo.email || ''}
-                        onChange={customerValidation.handleChange('email')}
-                        onBlur={customerValidation.handleBlur('email')}
-                        error={customerValidation.touched.email && !!customerValidation.errors.email}
-                        helperText={customerValidation.touched.email && customerValidation.errors.email}
-                        InputProps={{
-                          startAdornment: <Email sx={{ mr: 1, color: '#6C757D', fontSize: 20 }} />
-                        }}
-                        size="small"
-                      />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <TextField
-                        fullWidth
                         label="Special Instructions (Optional)"
                         name="specialInstructions"
                         value={customerInfo.specialInstructions || ''}
@@ -695,7 +677,7 @@ const CheckoutPage: React.FC = () => {
 
               {/* Step 2: Payment Method */}
               {activeStep === 2 && (
-                <Box sx={{ p: { xs: 2, sm: 2.5 }, pb: { xs: 4, sm: 4 } }}>
+                <Box sx={{ p: { xs: 2, sm: 2.5 }, pb: { xs: 2, sm: 2 } }}>
                   <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: '#1E3A5F' }}>
                     Payment Method
                   </Typography>
@@ -765,7 +747,7 @@ const CheckoutPage: React.FC = () => {
           {/* Order Summary Sidebar - Only show in Payment step */}
           {activeStep === 2 && (
             <Grid item xs={12} md={4}>
-              <Paper sx={{ p: 2.5, pb: 4, backgroundColor: 'white', border: '1px solid #E0E0E0', boxShadow: 'none', position: 'sticky', top: 20, mb: { xs: 10, md: 0 } }}>
+              <Paper sx={{ p: 2.5, pb: 2, backgroundColor: 'white', border: '1px solid #E0E0E0', boxShadow: 'none', position: 'sticky', top: 20, mb: { xs: 2, md: 0 } }}>
                 <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: '#1E3A5F' }}>
                   Order Summary
                 </Typography>
