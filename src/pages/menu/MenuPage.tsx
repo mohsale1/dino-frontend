@@ -226,6 +226,10 @@ const MenuPage: React.FC = () => {
           restaurant={restaurant}
           categories={categories}
           onCategoryClick={handleCategoryClick}
+          menuItems={menuItems}
+          onAddToCart={handleAddToCart}
+          getItemQuantityInCart={getItemQuantityInCart}
+          getMenuItemImage={(item) => item.image || ''}
         />
       )}
 

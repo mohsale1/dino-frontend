@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Container,
@@ -7,17 +7,27 @@ import {
   Chip,
   Divider,
   alpha,
+  Tabs,
+  Tab,
+  InputAdornment,
+  TextField,
+  IconButton,
+  Collapse,
+  Badge,
 } from '@mui/material';
+import {
+  Search,
+  FilterList,
+  Close,
+  Restaurant,
+  LocalOffer,
+} from '@mui/icons-material';
 import { MenuItemType, CategoryType } from '../../../hooks/useMenuData';
 import {
-  MenuHeader,
-  SearchBar,
-  FilterButtons,
-  CategoryTabs,
   MenuItemCard,
-  EmptyMenuState,
-  VegFilterType,
 } from '../../../components/menu';
+
+export type VegFilterType = 'all' | 'veg' | 'non-veg';
 
 interface MenuFragmentProps {
   groupedMenuItems: Array<CategoryType & { items: MenuItemType[] }>;
@@ -39,6 +49,7 @@ const MenuFragment: React.FC<MenuFragmentProps> = ({
   const [vegFilter, setVegFilter] = useState<VegFilterType>('all');
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
 
   // Filter items
   const getFilteredGroups = () => {
@@ -55,12 +66,17 @@ const MenuFragment: React.FC<MenuFragmentProps> = ({
           item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
           item.description.toLowerCase().includes(searchQuery.toLowerCase());
         
-        return matchesVegFilter && matchesSearch;
+        const matchesCategory = 
+          activeCategory === 'all' || 
+          group.id === activeCategory;
+        
+        return matchesVegFilter && matchesSearch && matchesCategory;
       }),
     })).filter(group => group.items.length > 0);
   };
 
   const filteredGroups = getFilteredGroups();
+  const totalFilteredItems = filteredGroups.reduce((acc, group) => acc + group.items.length, 0);
 
   const handleCategoryClick = (categoryId: string) => {
     setActiveCategory(categoryId);
@@ -70,7 +86,10 @@ const MenuFragment: React.FC<MenuFragmentProps> = ({
       setTimeout(() => {
         const element = categoryRefs.current[categoryId];
         if (element) {
-          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          const offset = 180; // Account for sticky header
+          const elementPosition = element.getBoundingClientRect().top;
+          const offsetPosition = elementPosition + window.pageYOffset - offset;
+          window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
         }
       }, 100);
     }
@@ -79,7 +98,10 @@ const MenuFragment: React.FC<MenuFragmentProps> = ({
   const handleClearFilters = () => {
     setSearchQuery('');
     setVegFilter('all');
+    setActiveCategory('all');
   };
+
+  const hasActiveFilters = searchQuery !== '' || vegFilter !== 'all' || activeCategory !== 'all';
 
   return (
     <Box 
@@ -87,136 +109,398 @@ const MenuFragment: React.FC<MenuFragmentProps> = ({
         pb: { xs: 10, sm: 12 },
         backgroundColor: '#F8F9FA',
         width: '100%',
-        height: '100%',
-        overflow: 'auto',
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
       }}
     >
-      {/* Header */}
-      <MenuHeader />
-
-      {/* Search & Filters */}
+      {/* Sticky Header with Search and Filters */}
       <Box
         sx={{
+          position: 'sticky',
+          top: 0,
+          zIndex: 100,
           backgroundColor: 'white',
-          borderBottom: '1px solid #E0E0E0',
-          py: 2,
+          borderBottom: '2px solid #E0E0E0',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
         }}
       >
-        <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3 } }}>
-          {/* Search Bar */}
-          <Box sx={{ mb: 1.5 }}>
-            <SearchBar value={searchQuery} onChange={setSearchQuery} />
-          </Box>
+        {/* Title Bar */}
+        <Box
+          sx={{
+            background: 'linear-gradient(135deg, #1E3A5F 0%, #2C5282 100%)',
+            color: 'white',
+            py: 1.5,
+          }}
+        >
+          <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3 } }}>
+            <Stack direction="row" alignItems="center" justifyContent="space-between">
+              <Stack direction="row" alignItems="center" gap={1}>
+                <Restaurant sx={{ fontSize: 24 }} />
+                <Typography
+                  variant="h6"
+                  sx={{
+                    fontWeight: 700,
+                    fontSize: { xs: '1.1rem', sm: '1.25rem' },
+                  }}
+                >
+                  Our Menu
+                </Typography>
+              </Stack>
+              <Chip
+                label={`${totalFilteredItems} items`}
+                size="small"
+                sx={{
+                  backgroundColor: alpha('#FFFFFF', 0.2),
+                  color: 'white',
+                  fontWeight: 700,
+                  border: '1px solid rgba(255,255,255,0.3)',
+                }}
+              />
+            </Stack>
+          </Container>
+        </Box>
 
-          {/* Filter Buttons */}
-          <FilterButtons activeFilter={vegFilter} onFilterChange={setVegFilter} />
+        {/* Search Bar */}
+        <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3 }, py: 1.5 }}>
+          <Stack direction="row" spacing={1} alignItems="center">
+            <TextField
+              fullWidth
+              placeholder="Search for dishes..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              size="small"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Search sx={{ color: '#6C757D', fontSize: 20 }} />
+                  </InputAdornment>
+                ),
+                endAdornment: searchQuery && (
+                  <InputAdornment position="end">
+                    <IconButton size="small" onClick={() => setSearchQuery('')}>
+                      <Close sx={{ fontSize: 18 }} />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  backgroundColor: '#F8F9FA',
+                  borderRadius: 2,
+                  '&:hover': {
+                    backgroundColor: '#F0F4F8',
+                  },
+                  '&.Mui-focused': {
+                    backgroundColor: 'white',
+                  },
+                },
+              }}
+            />
+            <IconButton
+              onClick={() => setShowFilters(!showFilters)}
+              sx={{
+                backgroundColor: showFilters ? '#1E3A5F' : '#F8F9FA',
+                color: showFilters ? 'white' : '#1E3A5F',
+                '&:hover': {
+                  backgroundColor: showFilters ? '#2C5282' : '#E0E0E0',
+                },
+              }}
+            >
+              <Badge badgeContent={hasActiveFilters ? '•' : 0} color="error">
+                <FilterList />
+              </Badge>
+            </IconButton>
+          </Stack>
+        </Container>
 
-          {/* Results Count */}
-          {(searchQuery || vegFilter !== 'all') && (
+        {/* Expandable Filters */}
+        <Collapse in={showFilters}>
+          <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3 }, pb: 1.5 }}>
+            <Box
+              sx={{
+                backgroundColor: '#F8F9FA',
+                borderRadius: 2,
+                p: 1.5,
+              }}
+            >
+              <Typography
+                variant="caption"
+                sx={{
+                  fontWeight: 700,
+                  color: '#6C757D',
+                  textTransform: 'uppercase',
+                  fontSize: '0.7rem',
+                  mb: 1,
+                  display: 'block',
+                }}
+              >
+                Dietary Preference
+              </Typography>
+              <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ gap: 1 }}>
+                <Chip
+                  label="All"
+                  onClick={() => setVegFilter('all')}
+                  sx={{
+                    backgroundColor: vegFilter === 'all' ? '#1E3A5F' : 'white',
+                    color: vegFilter === 'all' ? 'white' : '#2C3E50',
+                    fontWeight: 600,
+                    border: '2px solid',
+                    borderColor: vegFilter === 'all' ? '#1E3A5F' : '#E0E0E0',
+                    '&:hover': {
+                      backgroundColor: vegFilter === 'all' ? '#2C5282' : '#F0F4F8',
+                    },
+                  }}
+                />
+                <Chip
+                  label="🟢 Vegetarian"
+                  onClick={() => setVegFilter('veg')}
+                  sx={{
+                    backgroundColor: vegFilter === 'veg' ? '#4CAF50' : 'white',
+                    color: vegFilter === 'veg' ? 'white' : '#2C3E50',
+                    fontWeight: 600,
+                    border: '2px solid',
+                    borderColor: vegFilter === 'veg' ? '#4CAF50' : '#E0E0E0',
+                    '&:hover': {
+                      backgroundColor: vegFilter === 'veg' ? '#45A049' : '#F0F4F8',
+                    },
+                  }}
+                />
+                <Chip
+                  label="🔴 Non-Vegetarian"
+                  onClick={() => setVegFilter('non-veg')}
+                  sx={{
+                    backgroundColor: vegFilter === 'non-veg' ? '#F44336' : 'white',
+                    color: vegFilter === 'non-veg' ? 'white' : '#2C3E50',
+                    fontWeight: 600,
+                    border: '2px solid',
+                    borderColor: vegFilter === 'non-veg' ? '#F44336' : '#E0E0E0',
+                    '&:hover': {
+                      backgroundColor: vegFilter === 'non-veg' ? '#E53935' : '#F0F4F8',
+                    },
+                  }}
+                />
+              </Stack>
+
+              {hasActiveFilters && (
+                <Box sx={{ mt: 1.5, pt: 1.5, borderTop: '1px solid #E0E0E0' }}>
+                  <Chip
+                    label="Clear All Filters"
+                    onClick={handleClearFilters}
+                    onDelete={handleClearFilters}
+                    size="small"
+                    sx={{
+                      backgroundColor: '#FFF3E0',
+                      color: '#F57C00',
+                      fontWeight: 600,
+                      '&:hover': {
+                        backgroundColor: '#FFE0B2',
+                      },
+                    }}
+                  />
+                </Box>
+              )}
+            </Box>
+          </Container>
+        </Collapse>
+
+        {/* Category Tabs */}
+        <Box
+          sx={{
+            borderBottom: '1px solid #E0E0E0',
+            backgroundColor: 'white',
+            overflowX: 'auto',
+            '&::-webkit-scrollbar': {
+              height: 4,
+            },
+            '&::-webkit-scrollbar-thumb': {
+              backgroundColor: '#1E3A5F',
+              borderRadius: 2,
+            },
+          }}
+        >
+          <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3 } }}>
+            <Tabs
+              value={activeCategory}
+              onChange={(_, value) => handleCategoryClick(value)}
+              variant="scrollable"
+              scrollButtons="auto"
+              sx={{
+                minHeight: 48,
+                '& .MuiTab-root': {
+                  minHeight: 48,
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  fontSize: '0.85rem',
+                  color: '#6C757D',
+                  '&.Mui-selected': {
+                    color: '#1E3A5F',
+                    fontWeight: 700,
+                  },
+                },
+                '& .MuiTabs-indicator': {
+                  backgroundColor: '#1E3A5F',
+                  height: 3,
+                },
+              }}
+            >
+              <Tab label="All Items" value="all" />
+              {allCategories.map((category) => (
+                <Tab
+                  key={category.id}
+                  label={category.name}
+                  value={category.id}
+                />
+              ))}
+            </Tabs>
+          </Container>
+        </Box>
+      </Box>
+
+      {/* Menu Items Content */}
+      <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3 }, pt: 3, flex: 1 }}>
+        {filteredGroups.length > 0 ? (
+          <Stack spacing={4}>
+            {filteredGroups.map((group, groupIndex) => (
+              <Box key={group.id}>
+                {/* Category Header */}
+                <Box
+                  id={group.id}
+                  ref={(el: HTMLDivElement | null) => (categoryRefs.current[group.id] = el)}
+                  sx={{
+                    mb: 2.5,
+                    pb: 1.5,
+                    borderBottom: '3px solid',
+                    borderImage: 'linear-gradient(90deg, #1E3A5F 0%, transparent 100%) 1',
+                  }}
+                >
+                  <Stack direction="row" alignItems="center" justifyContent="space-between" flexWrap="wrap" gap={1}>
+                    <Box>
+                      <Typography
+                        variant="h5"
+                        sx={{
+                          fontWeight: 800,
+                          color: '#1E3A5F',
+                          fontSize: { xs: '1.25rem', sm: '1.5rem' },
+                          mb: 0.5,
+                          letterSpacing: '-0.5px',
+                        }}
+                      >
+                        {group.name}
+                      </Typography>
+                      {group.description && (
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          sx={{ fontSize: '0.85rem', fontWeight: 500 }}
+                        >
+                          {group.description}
+                        </Typography>
+                      )}
+                    </Box>
+                    <Chip
+                      icon={<LocalOffer sx={{ fontSize: 16 }} />}
+                      label={`${group.items.length} ${group.items.length === 1 ? 'item' : 'items'}`}
+                      size="small"
+                      sx={{
+                        backgroundColor: alpha('#1E3A5F', 0.1),
+                        color: '#1E3A5F',
+                        fontWeight: 700,
+                        fontSize: '0.75rem',
+                        height: 28,
+                        '& .MuiChip-icon': {
+                          color: '#1E3A5F',
+                        },
+                      }}
+                    />
+                  </Stack>
+                </Box>
+
+                {/* Menu Items Grid */}
+                <Stack spacing={2}>
+                  {group.items.map((item) => (
+                    <MenuItemCard
+                      key={item.id}
+                      item={item}
+                      onAddToCart={onAddToCart}
+                      quantityInCart={getItemQuantityInCart(item.id)}
+                      imageUrl={getMenuItemImage(item)}
+                    />
+                  ))}
+                </Stack>
+
+                {/* Category Separator */}
+                {groupIndex < filteredGroups.length - 1 && (
+                  <Divider
+                    sx={{
+                      mt: 4,
+                      borderColor: alpha('#1E3A5F', 0.1),
+                      borderWidth: 1,
+                    }}
+                  />
+                )}
+              </Box>
+            ))}
+          </Stack>
+        ) : (
+          // Empty State
+          <Box
+            sx={{
+              textAlign: 'center',
+              py: 8,
+              px: 2,
+            }}
+          >
+            <Box
+              sx={{
+                width: 80,
+                height: 80,
+                borderRadius: '50%',
+                backgroundColor: alpha('#1E3A5F', 0.1),
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                mx: 'auto',
+                mb: 2,
+              }}
+            >
+              <Search sx={{ fontSize: 40, color: '#1E3A5F' }} />
+            </Box>
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 700,
+                color: '#2C3E50',
+                mb: 1,
+              }}
+            >
+              No items found
+            </Typography>
             <Typography
               variant="body2"
               color="text.secondary"
-              sx={{ mt: 1.5, fontWeight: 500, fontSize: '0.8rem' }}
+              sx={{ mb: 3, maxWidth: 400, mx: 'auto' }}
             >
-              {filteredGroups.reduce((acc, group) => acc + group.items.length, 0)} items found
+              {searchQuery
+                ? `No results for "${searchQuery}". Try different keywords or filters.`
+                : 'No items match your current filters. Try adjusting your preferences.'}
             </Typography>
-          )}
-        </Container>
-      </Box>
-
-      {/* Category Tabs */}
-      <CategoryTabs
-        categories={allCategories}
-        activeCategory={activeCategory}
-        onCategoryChange={handleCategoryClick}
-      />
-
-      {/* Menu Items */}
-      <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3 }, pt: 2.5 }}>
-        {filteredGroups.map((group, index) => (
-          <Box key={group.id} sx={{ mb: 3.5 }}>
-            <Box
-              id={group.id}
-              ref={(el: HTMLDivElement | null) => (categoryRefs.current[group.id] = el)}
-            >
-              {/* Category Header */}
-              <Box 
-                sx={{ 
-                  mb: 2,
-                  pb: 1.5,
-                  borderBottom: '2px solid #1E3A5F',
+            {hasActiveFilters && (
+              <Chip
+                label="Clear All Filters"
+                onClick={handleClearFilters}
+                onDelete={handleClearFilters}
+                sx={{
+                  backgroundColor: '#1E3A5F',
+                  color: 'white',
+                  fontWeight: 600,
+                  '&:hover': {
+                    backgroundColor: '#2C5282',
+                  },
                 }}
-              >
-                <Stack direction="row" alignItems="center" justifyContent="space-between">
-                  <Box>
-                    <Typography 
-                      variant="h5" 
-                      sx={{ 
-                        fontWeight: 700,
-                        color: '#1E3A5F',
-                        fontSize: { xs: '1.15rem', sm: '1.35rem' },
-                        mb: 0.5,
-                      }}
-                    >
-                      {group.name}
-                    </Typography>
-                    <Typography 
-                      variant="body2" 
-                      color="text.secondary"
-                      sx={{ fontSize: '0.85rem', fontWeight: 500 }}
-                    >
-                      {group.description || `Explore our ${group.name.toLowerCase()}`}
-                    </Typography>
-                  </Box>
-                  <Chip 
-                    label={`${group.items.length} items`}
-                    size="small"
-                    sx={{
-                      backgroundColor: alpha('#1E3A5F', 0.1),
-                      color: '#1E3A5F',
-                      fontWeight: 600,
-                      fontSize: '0.7rem',
-                      height: 24,
-                    }}
-                  />
-                </Stack>
-              </Box>
-
-              {/* Menu Items */}
-              <Stack spacing={1.5}>
-                {group.items.map((item) => (
-                  <MenuItemCard
-                    key={item.id}
-                    item={item}
-                    onAddToCart={onAddToCart}
-                    quantityInCart={getItemQuantityInCart(item.id)}
-                    imageUrl={getMenuItemImage(item)}
-                  />
-                ))}
-              </Stack>
-            </Box>
-
-            {/* Category Separator */}
-            {index < filteredGroups.length - 1 && (
-              <Box sx={{ my: 3.5 }}>
-                <Divider 
-                  sx={{ 
-                    borderColor: '#1E3A5F',
-                    borderWidth: 1,
-                    opacity: 0.2,
-                  }} 
-                />
-              </Box>
+              />
             )}
           </Box>
-        ))}
-
-        {/* Empty State */}
-        {filteredGroups.length === 0 && (
-          <EmptyMenuState
-            searchQuery={searchQuery}
-            onClearFilters={handleClearFilters}
-          />
         )}
       </Container>
     </Box>

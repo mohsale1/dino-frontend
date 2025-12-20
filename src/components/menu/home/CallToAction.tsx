@@ -4,10 +4,9 @@ import {
   Container,
   Typography,
   Button,
-  alpha,
   Stack,
 } from '@mui/material';
-import { ArrowForward, Restaurant, LocalOffer } from '@mui/icons-material';
+import { ArrowForward } from '@mui/icons-material';
 
 interface CallToActionProps {
   onViewMenu: () => void;
@@ -15,171 +14,68 @@ interface CallToActionProps {
 
 const CallToAction: React.FC<CallToActionProps> = ({ onViewMenu }) => {
   return (
-    <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3 }, pb: { xs: 2, sm: 2.5 } }}>
-      <Box
-        sx={{
-          mt: 2,
-          p: { xs: 3, sm: 4 },
-          background: 'linear-gradient(135deg, #1E3A5F 0%, #2C5282 100%)',
-          borderRadius: 3,
-          textAlign: 'center',
-          position: 'relative',
-          overflow: 'hidden',
-          boxShadow: '0 8px 32px rgba(30, 58, 95, 0.2)',
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: '-50%',
-            right: '-10%',
-            width: '40%',
-            height: '200%',
-            background: 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)',
-            pointerEvents: 'none',
-          },
-        }}
-      >
-        {/* Decorative Icons */}
-        <Box
-          sx={{
-            position: 'absolute',
-            top: 20,
-            left: 20,
-            opacity: 0.1,
-          }}
+    <Box
+      sx={{
+        background: 'linear-gradient(135deg, #1E3A5F 0%, #2C5282 100%)',
+        borderTop: '3px solid rgba(255, 255, 255, 0.1)',
+        py: { xs: 1.5, sm: 2 },
+        mt: 2,
+      }}
+    >
+      <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3 } }}>
+        <Stack
+          direction={{ xs: 'column', sm: 'row' }}
+          alignItems="center"
+          justifyContent="space-between"
+          spacing={{ xs: 1.5, sm: 2 }}
         >
-          <Restaurant sx={{ fontSize: 60, color: 'white' }} />
-        </Box>
-        <Box
-          sx={{
-            position: 'absolute',
-            bottom: 20,
-            right: 20,
-            opacity: 0.1,
-          }}
-        >
-          <LocalOffer sx={{ fontSize: 50, color: 'white' }} />
-        </Box>
-
-        {/* Content */}
-        <Box sx={{ position: 'relative', zIndex: 1 }}>
-          <Typography
-            variant="h5"
-            sx={{
-              fontWeight: 800,
-              color: 'white',
-              mb: 1,
-              fontSize: { xs: '1.25rem', sm: '1.5rem' },
-              letterSpacing: '-0.5px',
-            }}
-          >
-            Ready to Order?
-          </Typography>
-          <Typography
-            variant="body1"
-            sx={{ 
-              mb: 3, 
-              fontSize: { xs: '0.9rem', sm: '1rem' },
-              color: 'rgba(255, 255, 255, 0.9)',
-              maxWidth: 500,
-              mx: 'auto',
-              lineHeight: 1.6,
-            }}
-          >
-            Browse our full menu and discover amazing dishes crafted with love
-          </Typography>
-
-          {/* Features */}
-          <Stack
-            direction={{ xs: 'column', sm: 'row' }}
-            spacing={2}
-            sx={{ mb: 3, justifyContent: 'center' }}
-          >
-            <Box
+          {/* Text Content */}
+          <Box sx={{ textAlign: { xs: 'center', sm: 'left' } }}>
+            <Typography
+              variant="h6"
               sx={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1,
+                fontWeight: 700,
                 color: 'white',
-                fontSize: '0.85rem',
+                fontSize: { xs: '0.95rem', sm: '1.05rem' },
+                mb: 0.25,
               }}
             >
-              <Box
-                sx={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: '50%',
-                  backgroundColor: '#4CAF50',
-                }}
-              />
-              <Typography sx={{ fontSize: '0.85rem', fontWeight: 600 }}>
-                Fresh Ingredients
-              </Typography>
-            </Box>
-            <Box
+              Ready to Order?
+            </Typography>
+            <Typography
+              variant="body2"
               sx={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1,
-                color: 'white',
-                fontSize: '0.85rem',
+                fontSize: { xs: '0.75rem', sm: '0.8rem' },
+                color: 'rgba(255, 255, 255, 0.85)',
               }}
             >
-              <Box
-                sx={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: '50%',
-                  backgroundColor: '#FFC107',
-                }}
-              />
-              <Typography sx={{ fontSize: '0.85rem', fontWeight: 600 }}>
-                Quick Delivery
-              </Typography>
-            </Box>
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1,
-                color: 'white',
-                fontSize: '0.85rem',
-              }}
-            >
-              <Box
-                sx={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: '50%',
-                  backgroundColor: '#2196F3',
-                }}
-              />
-              <Typography sx={{ fontSize: '0.85rem', fontWeight: 600 }}>
-                Best Prices
-              </Typography>
-            </Box>
-          </Stack>
+              Browse our full menu and add items to your cart
+            </Typography>
+          </Box>
 
           {/* CTA Button */}
           <Button
             variant="contained"
-            size="large"
-            endIcon={<ArrowForward />}
+            size="medium"
+            endIcon={<ArrowForward sx={{ fontSize: 18 }} />}
             onClick={onViewMenu}
             sx={{
               backgroundColor: 'white',
               color: '#1E3A5F',
-              px: 4,
-              py: 1.5,
+              px: { xs: 2.5, sm: 3 },
+              py: { xs: 0.75, sm: 1 },
               fontWeight: 700,
               textTransform: 'none',
-              fontSize: { xs: '1rem', sm: '1.1rem' },
-              borderRadius: 2,
-              boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
+              fontSize: { xs: '0.85rem', sm: '0.9rem' },
+              borderRadius: 1.5,
+              boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+              whiteSpace: 'nowrap',
+              minWidth: { xs: '100%', sm: 'auto' },
               transition: 'all 0.3s ease',
               '&:hover': {
-                backgroundColor: alpha('#FFFFFF', 0.95),
+                backgroundColor: 'rgba(255, 255, 255, 0.95)',
                 transform: 'translateY(-2px)',
-                boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
               },
               '&:active': {
                 transform: 'translateY(0)',
@@ -188,10 +84,12 @@ const CallToAction: React.FC<CallToActionProps> = ({ onViewMenu }) => {
           >
             View Full Menu
           </Button>
-        </Box>
-      </Box>
-    </Container>
+        </Stack>
+      </Container>
+    </Box>
   );
 };
 
 export default CallToAction;
+
+
