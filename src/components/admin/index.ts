@@ -4,4 +4,3 @@
  */
 
 export { default as PermissionDashboard } from './PermissionDashboard';
-export { default as PermissionBasedActions } from './PermissionBasedActions';

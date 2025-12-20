@@ -11,10 +11,6 @@ import GenericErrorPage from './GenericErrorPage';
 export { default as GenericErrorPage } from './GenericErrorPage';
 export type { ErrorType } from './GenericErrorPage';
 
-// Re-export existing error components for backward compatibility
-export { default as GlobalErrorBoundary } from '../ErrorBoundary/GlobalErrorBoundary';
-export { default as ErrorBoundary } from '../ErrorBoundary/GlobalErrorBoundary';
-
 // Convenience exports using GenericErrorPage
 
 /**

@@ -22,7 +22,7 @@ const HomeFragment: React.FC<HomeFragmentProps> = ({
   return (
     <Box 
       sx={{ 
-        pb: { xs: 10, sm: 12 },
+        pb: { xs: 8, sm: 9 },
         width: '100%',
         backgroundColor: '#F8F9FA',
         overflowY: 'auto',

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import {
   Box,
@@ -86,7 +85,7 @@ const OrderFragment: React.FC<OrderFragmentProps> = ({ venueId, tableId }) => {
     return (
       <Box 
         sx={{ 
-          pb: { xs: 10, sm: 12 },
+          pb: { xs: 8, sm: 9 },
           backgroundColor: '#F8F9FA',
           width: '100%',
           minHeight: '100vh',
@@ -105,7 +104,7 @@ const OrderFragment: React.FC<OrderFragmentProps> = ({ venueId, tableId }) => {
     return (
       <Box 
         sx={{ 
-          pb: { xs: 10, sm: 12 },
+          pb: { xs: 8, sm: 9 },
           backgroundColor: '#F8F9FA',
           width: '100%',
           minHeight: '100vh',
@@ -139,7 +138,7 @@ const OrderFragment: React.FC<OrderFragmentProps> = ({ venueId, tableId }) => {
     return (
       <Box 
         sx={{ 
-          pb: { xs: 10, sm: 12 },
+          pb: { xs: 8, sm: 9 },
           backgroundColor: '#F8F9FA',
           width: '100%',
           minHeight: '100vh',
@@ -157,7 +156,7 @@ const OrderFragment: React.FC<OrderFragmentProps> = ({ venueId, tableId }) => {
   return (
     <Box 
       sx={{ 
-        pb: { xs: 18, sm: 20 },
+        pb: { xs: 14, sm: 16 },
         backgroundColor: '#F8F9FA',
         width: '100%',
         minHeight: '100vh',

@@ -84,7 +84,7 @@ const MenuFragment: React.FC<MenuFragmentProps> = ({
   return (
     <Box 
       sx={{ 
-        pb: { xs: 14, sm: 16 },
+        pb: { xs: 10, sm: 12 },
         backgroundColor: '#F8F9FA',
         width: '100%',
         height: '100%',

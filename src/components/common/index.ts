@@ -17,4 +17,3 @@ export type { PaginationState } from './PaginationControl';
 export * from '../common/FeatureFlag';
 export * from '../common/PermissionWrapper';
 export * from '../common/VenueAssignmentCheck';
-export * from '../common/WorkspaceErrorBoundary';

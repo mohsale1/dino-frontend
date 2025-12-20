@@ -62,5 +62,4 @@ export {
   NoUserPage,
   AccessDeniedPage,
   ErrorPage,
-  GlobalErrorBoundary,
 } from './errors';
