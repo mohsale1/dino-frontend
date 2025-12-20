@@ -3,33 +3,21 @@ import {
   Box,
   Container,
   Typography,
-  useTheme,
   Stack,
-  Button,
   Chip,
-  TextField,
-  InputAdornment,
-  IconButton,
-  Rating,
-  Tabs,
-  Tab,
-  Card,
-  CardMedia,
   Divider,
   alpha,
 } from '@mui/material';
-import { 
-  Search, 
-  Clear, 
-  Add, 
-  Remove, 
-  LocalFireDepartment,
-  Timer,
-  Restaurant,
-  Star,
-} from '@mui/icons-material';
 import { MenuItemType, CategoryType } from '../../../hooks/useMenuData';
-import { useCart } from '../../../contexts/CartContext';
+import {
+  MenuHeader,
+  SearchBar,
+  FilterButtons,
+  CategoryTabs,
+  MenuItemCard,
+  EmptyMenuState,
+  VegFilterType,
+} from '../../../components/menu';
 
 interface MenuFragmentProps {
   groupedMenuItems: Array<CategoryType & { items: MenuItemType[] }>;
@@ -37,8 +25,6 @@ interface MenuFragmentProps {
   allCategories: CategoryType[];
   onAddToCart: (item: MenuItemType) => void;
   getItemQuantityInCart: (itemId: string) => number;
-  onToggleFavorite: (itemId: string) => void;
-  isFavorite: (itemId: string) => boolean;
   getMenuItemImage: (item: MenuItemType) => string;
 }
 
@@ -48,12 +34,9 @@ const MenuFragment: React.FC<MenuFragmentProps> = ({
   allCategories,
   onAddToCart,
   getItemQuantityInCart,
-  onToggleFavorite,
-  isFavorite,
   getMenuItemImage,
 }) => {
-  const theme = useTheme();
-  const [vegFilter, setVegFilter] = useState<'all' | 'veg' | 'non-veg'>('all');
+  const [vegFilter, setVegFilter] = useState<VegFilterType>('all');
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -93,6 +76,11 @@ const MenuFragment: React.FC<MenuFragmentProps> = ({
     }
   };
 
+  const handleClearFilters = () => {
+    setSearchQuery('');
+    setVegFilter('all');
+  };
+
   return (
     <Box 
       sx={{ 
@@ -104,185 +92,31 @@ const MenuFragment: React.FC<MenuFragmentProps> = ({
       }}
     >
       {/* Header */}
-      <Box
-        sx={{
-          backgroundColor: '#1E3A5F',
-          color: 'white',
-          py: 1,
-          borderBottom: '1px solid rgba(255,255,255,0.1)',
-        }}
-      >
-        <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3 } }}>
-          <Typography
-            variant="h5"
-            sx={{
-              fontWeight: 700,
-              fontSize: { xs: '1.15rem', sm: '1.35rem' },
-            }}
-          >
-            Menu
-          </Typography>
-        </Container>
-      </Box>
+      <MenuHeader />
 
       {/* Search & Filters */}
       <Box
         sx={{
           backgroundColor: 'white',
           borderBottom: '1px solid #E0E0E0',
-          py: 1,
+          py: 2,
         }}
       >
         <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3 } }}>
           {/* Search Bar */}
-          <TextField
-            fullWidth
-            placeholder="Search for dishes..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            size="small"
-            sx={{
-              mb: 1.5,
-              '& .MuiOutlinedInput-root': {
-                backgroundColor: '#F8F9FA',
-                '& fieldset': {
-                  borderColor: '#E0E0E0',
-                },
-                '&:hover fieldset': {
-                  borderColor: '#1E3A5F',
-                },
-                '&.Mui-focused fieldset': {
-                  borderColor: '#1E3A5F',
-                },
-              },
-            }}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Search sx={{ color: '#6C757D', fontSize: 12 }} />
-                </InputAdornment>
-              ),
-              endAdornment: searchQuery && (
-                <InputAdornment position="end">
-                  <IconButton onClick={() => setSearchQuery('')} size="small">
-                    <Clear sx={{ fontSize: 12 }} />
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
-          />
+          <Box sx={{ mb: 1.5 }}>
+            <SearchBar value={searchQuery} onChange={setSearchQuery} />
+          </Box>
 
           {/* Filter Buttons */}
-          <Stack direction="row" spacing={1} sx={{ overflowX: 'auto', pb: 0.5 }}>
-            <Button
-              variant={vegFilter === 'all' ? 'contained' : 'outlined'}
-              onClick={() => setVegFilter('all')}
-              size="small"
-              sx={{
-                textTransform: 'none',
-                fontWeight: 600,
-                fontSize: '0.7rem',
-                borderColor: '#E0E0E0',
-                color: vegFilter === 'all' ? 'white' : '#2C3E50',
-                backgroundColor: vegFilter === 'all' ? '#1E3A5F' : 'transparent',
-                whiteSpace: 'nowrap',
-                '&:hover': {
-                  borderColor: '#1E3A5F',
-                  backgroundColor: vegFilter === 'all' ? '#2C5282' : 'rgba(30, 58, 95, 0.04)',
-                },
-              }}
-            >
-              All Items
-            </Button>
-            <Button
-              variant={vegFilter === 'veg' ? 'contained' : 'outlined'}
-              onClick={() => setVegFilter('veg')}
-              size="small"
-              startIcon={
-                <Box
-                  sx={{
-                    width: 12,
-                    height: 12,
-                    border: `2px solid ${vegFilter === 'veg' ? 'white' : '#4CAF50'}`,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <Box
-                    sx={{
-                      width: 5,
-                      height: 5,
-                      borderRadius: '50%',
-                      backgroundColor: vegFilter === 'veg' ? 'white' : '#4CAF50',
-                    }}
-                  />
-                </Box>
-              }
-              sx={{
-                textTransform: 'none',
-                fontWeight: 600,
-                fontSize: '0.7rem',
-                borderColor: vegFilter === 'veg' ? '#4CAF50' : '#E0E0E0',
-                color: vegFilter === 'veg' ? 'white' : '#2C3E50',
-                backgroundColor: vegFilter === 'veg' ? '#4CAF50' : 'transparent',
-                whiteSpace: 'nowrap',
-                '&:hover': {
-                  borderColor: '#4CAF50',
-                  backgroundColor: vegFilter === 'veg' ? '#45A049' : 'rgba(76, 175, 80, 0.04)',
-                },
-              }}
-            >
-              Veg
-            </Button>
-            <Button
-              variant={vegFilter === 'non-veg' ? 'contained' : 'outlined'}
-              onClick={() => setVegFilter('non-veg')}
-              size="small"
-              startIcon={
-                <Box
-                  sx={{
-                    width: 12,
-                    height: 12,
-                    border: `2px solid ${vegFilter === 'non-veg' ? 'white' : '#F44336'}`,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <Box
-                    sx={{
-                      width: 5,
-                      height: 5,
-                      backgroundColor: vegFilter === 'non-veg' ? 'white' : '#F44336',
-                    }}
-                  />
-                </Box>
-              }
-              sx={{
-                textTransform: 'none',
-                fontWeight: 600,
-                fontSize: '0.7rem',
-                borderColor: vegFilter === 'non-veg' ? '#F44336' : '#E0E0E0',
-                color: vegFilter === 'non-veg' ? 'white' : '#2C3E50',
-                backgroundColor: vegFilter === 'non-veg' ? '#F44336' : 'transparent',
-                whiteSpace: 'nowrap',
-                '&:hover': {
-                  borderColor: '#F44336',
-                  backgroundColor: vegFilter === 'non-veg' ? '#E53935' : 'rgba(244, 67, 54, 0.04)',
-                },
-              }}
-            >
-              Non-Veg
-            </Button>
-          </Stack>
+          <FilterButtons activeFilter={vegFilter} onFilterChange={setVegFilter} />
 
           {/* Results Count */}
           {(searchQuery || vegFilter !== 'all') && (
             <Typography
               variant="body2"
               color="text.secondary"
-              sx={{ mt: 1.5, fontWeight: 500, fontSize: '0.7rem' }}
+              sx={{ mt: 1.5, fontWeight: 500, fontSize: '0.8rem' }}
             >
               {filteredGroups.reduce((acc, group) => acc + group.items.length, 0)} items found
             </Typography>
@@ -291,64 +125,24 @@ const MenuFragment: React.FC<MenuFragmentProps> = ({
       </Box>
 
       {/* Category Tabs */}
-      <Box
-        sx={{
-          backgroundColor: 'white',
-          borderBottom: '1px solid #E0E0E0',
-          position: 'sticky',
-          top: 0,
-          zIndex: 100,
-        }}
-      >
-        <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3 } }}>
-          <Tabs
-            value={activeCategory}
-            onChange={(e, newValue) => handleCategoryClick(newValue)}
-            variant="scrollable"
-            scrollButtons="auto"
-            sx={{
-              minHeight: 42,
-              '& .MuiTab-root': {
-                textTransform: 'none',
-                fontWeight: 600,
-                fontSize: '0.7rem',
-                color: '#6C757D',
-                minHeight: 42,
-                py: 1,
-                '&.Mui-selected': {
-                  color: '#1E3A5F',
-                },
-              },
-              '& .MuiTabs-indicator': {
-                backgroundColor: '#1E3A5F',
-                height: 2,
-              },
-            }}
-          >
-            <Tab label="All" value="all" />
-            {allCategories.map((category) => (
-              <Tab
-                key={category.id}
-                label={`${category.name} (${category.itemCount || 0})`}
-                value={category.id}
-              />
-            ))}
-          </Tabs>
-        </Container>
-      </Box>
+      <CategoryTabs
+        categories={allCategories}
+        activeCategory={activeCategory}
+        onCategoryChange={handleCategoryClick}
+      />
 
       {/* Menu Items */}
-      <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3 }, pt: 3 }}>
+      <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3 }, pt: 2.5 }}>
         {filteredGroups.map((group, index) => (
-          <Box key={group.id} sx={{ mb: 1.5 }}>
+          <Box key={group.id} sx={{ mb: 3.5 }}>
             <Box
               id={group.id}
               ref={(el: HTMLDivElement | null) => (categoryRefs.current[group.id] = el)}
             >
-              {/* Category Header with Enhanced Design */}
+              {/* Category Header */}
               <Box 
                 sx={{ 
-                  mb: 1.5,
+                  mb: 2,
                   pb: 1.5,
                   borderBottom: '2px solid #1E3A5F',
                 }}
@@ -360,7 +154,7 @@ const MenuFragment: React.FC<MenuFragmentProps> = ({
                       sx={{ 
                         fontWeight: 700,
                         color: '#1E3A5F',
-                        fontSize: { xs: '1.25rem', sm: '1.5rem' },
+                        fontSize: { xs: '1.15rem', sm: '1.35rem' },
                         mb: 0.5,
                       }}
                     >
@@ -369,7 +163,7 @@ const MenuFragment: React.FC<MenuFragmentProps> = ({
                     <Typography 
                       variant="body2" 
                       color="text.secondary"
-                      sx={{ fontSize: '0.7rem', fontWeight: 500 }}
+                      sx={{ fontSize: '0.85rem', fontWeight: 500 }}
                     >
                       {group.description || `Explore our ${group.name.toLowerCase()}`}
                     </Typography>
@@ -382,13 +176,14 @@ const MenuFragment: React.FC<MenuFragmentProps> = ({
                       color: '#1E3A5F',
                       fontWeight: 600,
                       fontSize: '0.7rem',
+                      height: 24,
                     }}
                   />
                 </Stack>
               </Box>
 
               {/* Menu Items */}
-              <Stack spacing={2}>
+              <Stack spacing={1.5}>
                 {group.items.map((item) => (
                   <MenuItemCard
                     key={item.id}
@@ -403,7 +198,7 @@ const MenuFragment: React.FC<MenuFragmentProps> = ({
 
             {/* Category Separator */}
             {index < filteredGroups.length - 1 && (
-              <Box sx={{ my: 4 }}>
+              <Box sx={{ my: 3.5 }}>
                 <Divider 
                   sx={{ 
                     borderColor: '#1E3A5F',
@@ -418,413 +213,13 @@ const MenuFragment: React.FC<MenuFragmentProps> = ({
 
         {/* Empty State */}
         {filteredGroups.length === 0 && (
-          <Box
-            sx={{
-              textAlign: 'center',
-              py: 6,
-              backgroundColor: 'white',
-              borderRadius: 2,
-              border: '1px solid #E0E0E0',
-            }}
-          >
-            <Search sx={{ fontSize: 22, color: '#CED4DA', mb: 1.5 }} />
-            <Typography 
-              variant="h6" 
-              color="text.secondary" 
-              sx={{ mb: 0.75, fontWeight: 600, fontSize: '0.825rem' }}
-            >
-              No items found
-            </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5, fontSize: '0.7rem' }}>
-              {searchQuery 
-                ? `No results for "${searchQuery}"`
-                : 'Try adjusting your filters'}
-            </Typography>
-            <Button
-              variant="outlined"
-              startIcon={<Clear />}
-              size="small"
-              onClick={() => {
-                setSearchQuery('');
-                setVegFilter('all');
-              }}
-              sx={{
-                textTransform: 'none',
-                fontWeight: 600,
-                borderColor: '#1E3A5F',
-                color: '#1E3A5F',
-                fontSize: '0.7rem',
-                '&:hover': {
-                  borderColor: '#2C5282',
-                  backgroundColor: 'rgba(30, 58, 95, 0.04)',
-                },
-              }}
-            >
-              Clear Filters
-            </Button>
-          </Box>
+          <EmptyMenuState
+            searchQuery={searchQuery}
+            onClearFilters={handleClearFilters}
+          />
         )}
       </Container>
     </Box>
-  );
-};
-
-// Restructured Menu Item Card Component
-interface MenuItemCardProps {
-  item: MenuItemType;
-  onAddToCart: (item: MenuItemType) => void;
-  quantityInCart: number;
-  imageUrl: string;
-}
-
-const MenuItemCard: React.FC<MenuItemCardProps> = ({
-  item,
-  onAddToCart,
-  quantityInCart,
-  imageUrl,
-}) => {
-  const theme = useTheme();
-  const { updateQuantity, removeItem } = useCart();
-  const [imageError, setImageError] = useState(false);
-
-  const handleIncreaseQuantity = () => updateQuantity(item.id, quantityInCart + 1);
-  const handleDecreaseQuantity = () => {
-    if (quantityInCart > 1) {
-      updateQuantity(item.id, quantityInCart - 1);
-    } else {
-      removeItem(item.id);
-    }
-  };
-
-  const VegNonVegIcon = ({ isVeg }: { isVeg: boolean }) => (
-    <Box
-      sx={{
-        width: 16,
-        height: 16,
-        border: `2px solid ${isVeg ? '#4CAF50' : '#F44336'}`,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        flexShrink: 0,
-      }}
-    >
-      <Box
-        sx={{
-          width: 7,
-          height: 7,
-          borderRadius: isVeg ? '50%' : 0,
-          backgroundColor: isVeg ? '#4CAF50' : '#F44336',
-        }}
-      />
-    </Box>
-  );
-
-  return (
-    <Card
-      sx={{
-        display: 'flex',
-        flexDirection: 'row',
-        backgroundColor: 'white',
-        border: '1px solid #E0E0E0',
-        borderRadius: 2,
-        boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
-        transition: 'all 0.2s ease',
-        overflow: 'hidden',
-        '&:hover': {
-          borderColor: '#1E3A5F',
-          boxShadow: '0 4px 12px rgba(30, 58, 95, 0.12)',
-          transform: 'translateY(-2px)',
-        },
-      }}
-    >
-      {/* Left - Image */}
-      <Box
-        sx={{
-          width: { xs: 120, sm: 140 },
-          height: { xs: 140, sm: 160 },
-          flexShrink: 0,
-          position: 'relative',
-        }}
-      >
-        {imageUrl && !imageError ? (
-          <CardMedia
-            component="img"
-            image={imageUrl}
-            alt={item.name}
-            onError={() => setImageError(true)}
-            sx={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-            }}
-          />
-        ) : (
-          <Box
-            sx={{
-              width: '100%',
-              height: '100%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              backgroundColor: '#F8F9FA',
-            }}
-          >
-            <Restaurant sx={{ fontSize: 12, color: '#CED4DA' }} />
-          </Box>
-        )}
-
-        {/* Badges on Image */}
-        <Box sx={{ position: 'absolute', top: 8, left: 8, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-          {item.isNew && (
-            <Chip 
-              label="New" 
-              size="small" 
-              sx={{ 
-                backgroundColor: '#28A745', 
-                color: 'white', 
-                fontWeight: 700, 
-                height: 18, 
-                fontSize: '0.65rem',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
-              }} 
-            />
-          )}
-          {item.isPopular && (
-            <Chip 
-              label="Popular" 
-              size="small" 
-              sx={{ 
-                backgroundColor: '#FFC107', 
-                color: 'white', 
-                fontWeight: 700, 
-                height: 18, 
-                fontSize: '0.65rem',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
-              }} 
-            />
-          )}
-        </Box>
-
-        {/* Discount Badge */}
-        {item.discount && (
-          <Box
-            sx={{
-              position: 'absolute',
-              top: 8,
-              right: 8,
-              backgroundColor: '#DC3545',
-              color: 'white',
-              px: 1,
-              py: 0.5,
-              borderRadius: 1,
-              fontWeight: 700,
-              fontSize: '0.7rem',
-              boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
-            }}
-          >
-            {item.discount}% OFF
-          </Box>
-        )}
-      </Box>
-
-      {/* Right - Content and Actions */}
-      <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', p: { xs: 2, sm: 2.5 } }}>
-        {/* Top Section - Name, Rating, Price */}
-        <Box sx={{ mb: 1.5 }}>
-          {/* Veg/Non-Veg and Name */}
-          <Stack direction="row" spacing={1} alignItems="flex-start" sx={{ mb: 1 }}>
-            <VegNonVegIcon isVeg={item.isVeg || false} />
-            <Typography
-              variant="h6"
-              sx={{
-                fontWeight: 700,
-                fontSize: { xs: '1.05rem', sm: '1.15rem' },
-                color: '#2C3E50',
-                flex: 1,
-                lineHeight: 1.3,
-              }}
-            >
-              {item.name}
-            </Typography>
-          </Stack>
-
-          {/* Rating and Price Row */}
-          <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
-            {/* Rating */}
-            {item.rating ? (
-              <Stack direction="row" spacing={0.5} alignItems="center">
-                <Star sx={{ fontSize: 12, color: '#FFC107' }} />
-                <Typography variant="body2" fontWeight={600} sx={{ fontSize: '0.7rem', color: '#2C3E50' }}>
-                  {item.rating}
-                </Typography>
-                <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
-                  ({item.reviewCount})
-                </Typography>
-              </Stack>
-            ) : (
-              <Box />
-            )}
-
-            {/* Price */}
-            <Box sx={{ textAlign: 'right' }}>
-              <Typography 
-                variant="h6" 
-                sx={{ 
-                  fontWeight: 700,
-                  color: '#1E3A5F',
-                  fontSize: { xs: '1.2rem', sm: '1.35rem' },
-                  lineHeight: 1,
-                }}
-              >
-                ₹{item.price}
-              </Typography>
-              {item.originalPrice && (
-                <Typography
-                  variant="body2"
-                  sx={{
-                    textDecoration: 'line-through',
-                    color: '#6C757D',
-                    fontSize: '0.7rem',
-                    lineHeight: 1,
-                  }}
-                >
-                  ₹{item.originalPrice}
-                </Typography>
-              )}
-            </Box>
-          </Stack>
-
-          {/* Description */}
-          <Typography
-            variant="body2"
-            color="text.secondary"
-            sx={{
-              fontSize: '0.7rem',
-              lineHeight: 1.5,
-              display: '-webkit-box',
-              WebkitLineClamp: 1.5,
-              WebkitBoxOrient: 'vertical',
-              overflow: 'hidden',
-            }}
-          >
-            {item.description}
-          </Typography>
-        </Box>
-
-        {/* Bottom Section - Meta Info and Add Button */}
-        <Box sx={{ mt: 'auto' }}>
-          {/* Meta Info */}
-          <Stack 
-            direction="row" 
-            spacing={1.5} 
-            alignItems="center" 
-            justifyContent="space-between"
-            flexWrap="wrap" 
-            sx={{ mb: 1.5 }}
-          >
-            <Stack direction="row" spacing={1.5} alignItems="center" flexWrap="wrap" sx={{ gap: 0.5 }}>
-              <Stack direction="row" spacing={0.25} alignItems="center">
-                <Timer sx={{ fontSize: 12, color: '#6C757D' }} />
-                <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ fontSize: '0.7rem' }}>
-                  {item.preparationTime} min
-                </Typography>
-              </Stack>
-
-              {item.spicyLevel && item.spicyLevel > 0 && (
-                <Stack direction="row" spacing={0.15} alignItems="center">
-                  {[...Array(Math.min(item.spicyLevel, 3))].map((_, i) => (
-                    <LocalFireDepartment
-                      key={i}
-                      sx={{
-                        fontSize: 12,
-                        color: item.spicyLevel === 1 ? '#FFA726' : item.spicyLevel === 2 ? '#FF7043' : '#F44336',
-                      }}
-                    />
-                  ))}
-                </Stack>
-              )}
-            </Stack>
-
-            {/* Add to Cart Button */}
-            <Box sx={{ minWidth: { xs: '100%', sm: 110 } }}>
-              {quantityInCart === 0 ? (
-                <Button
-                  variant="contained"
-                  fullWidth
-                  size="small"
-                  onClick={() => onAddToCart(item)}
-                  sx={{
-                    backgroundColor: '#1E3A5F',
-                    color: 'white',
-                    fontWeight: 700,
-                    textTransform: 'none',
-                    py: 1,
-                    fontSize: '0.7rem',
-                    borderRadius: 1.5,
-                    boxShadow: '0 2px 8px rgba(30, 58, 95, 0.2)',
-                    '&:hover': {
-                      backgroundColor: '#2C5282',
-                      boxShadow: '0 4px 12px rgba(30, 58, 95, 0.3)',
-                    },
-                  }}
-                >
-                  Add
-                </Button>
-              ) : (
-                <Stack
-                  direction="row"
-                  spacing={0.5}
-                  alignItems="center"
-                  justifyContent="space-between"
-                  sx={{
-                    backgroundColor: alpha('#1E3A5F', 0.08),
-                    borderRadius: 1.5,
-                    p: 0.5,
-                    border: '2px solid #1E3A5F',
-                  }}
-                >
-                  <IconButton
-                    size="small"
-                    onClick={handleDecreaseQuantity}
-                    sx={{
-                      backgroundColor: 'white',
-                      color: '#1E3A5F',
-                      width: 28,
-                      height: 18,
-                      '&:hover': {
-                        backgroundColor: '#F8F9FA',
-                      },
-                    }}
-                  >
-                    <Remove sx={{ fontSize: 12 }} />
-                  </IconButton>
-
-                  <Typography variant="body2" fontWeight={700} color="#1E3A5F" sx={{ fontSize: '0.825rem', minWidth: 24, textAlign: 'center' }}>
-                    {quantityInCart}
-                  </Typography>
-
-                  <IconButton
-                    size="small"
-                    onClick={handleIncreaseQuantity}
-                    sx={{
-                      backgroundColor: 'white',
-                      color: '#1E3A5F',
-                      width: 28,
-                      height: 18,
-                      '&:hover': {
-                        backgroundColor: '#F8F9FA',
-                      },
-                    }}
-                  >
-                    <Add sx={{ fontSize: 12 }} />
-                  </IconButton>
-                </Stack>
-              )}
-            </Box>
-          </Stack>
-        </Box>
-      </Box>
-    </Card>
   );
 };
 

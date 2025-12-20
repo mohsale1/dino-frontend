@@ -2,38 +2,13 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   Box,
   Container,
-  Typography,
-  Button,
-  Chip,
-  IconButton,
-  Paper,
-  Rating,
   useMediaQuery,
-  Stack,
-  alpha,
-  styled,
-  CardMedia,
-  Avatar,
-  Card,
 } from '@mui/material';
-import {
-  Add,
-  Remove,
-  Restaurant,
-  LocalFireDepartment,
-  Favorite,
-  FavoriteBorder,
-  Whatshot,
-  NewReleases,
-  LocalOffer,
-  Timer,
-} from '@mui/icons-material';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useCart } from '../../contexts/CartContext';
 import { useTheme } from '@mui/material/styles';
 import { useVenueTheme } from '../../contexts/VenueThemeContext';
 
-// MenuItem type is handled by the cart context
 import CustomerNavbar from '../../components/CustomerNavbar';
 import { VenueNotAcceptingOrdersPage, GenericErrorPage } from '../../components/errors';
 import { SmartLoading } from '../../components/ui/LoadingStates';
@@ -42,35 +17,14 @@ import { useMenuData as useMenuData, type MenuItemType } from '../../hooks/useMe
 // Fragment Components
 import HomeFragment from './fragments/HomeFragment';
 import MenuFragment from './fragments/MenuFragment';
-import OrderStatusFragment from './fragments/OrderStatusFragment';
+import OrderFragment from './fragments/OrderFragment';
 import FloatingCartCard from '../../components/menu/FloatingCartCard';
 import FragmentNavigation, { FragmentType } from '../../components/ui/FragmentNavigation';
-
- 
-
-// Styled component for menu item cards (used in EnhancedMenuItemCard)
-const MenuItemCard = styled(Card)(({ theme }) => ({
-  borderRadius: 0,
-  border: `1px solid ${theme.palette.grey[200]}`,
-  boxShadow: theme.shadows[1],
-  transition: 'all 0.2s ease-in-out',
-  overflow: 'hidden',
-  position: 'relative',
-  backgroundColor: theme.palette.background.paper,
-  '&:hover': {
-    boxShadow: theme.shadows[4],
-    transform: 'translateY(-2px)',
-    '& .menu-item-image': {
-      transform: 'scale(1.02)',
-    },
-  },
-}));
+import { DesktopRestrictionOverlay } from '../../components/menu';
 
 const MenuPage: React.FC = () => {
   const { venueId, tableId } = useParams<{ venueId: string; tableId: string }>();
-  const navigate = useNavigate();
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const { theme: venueTheme, setTheme: setVenueTheme } = useVenueTheme();
   const { addItem, items: cartItems, getTotalItems, getTotalAmount } = useCart();
 
@@ -87,8 +41,8 @@ const MenuPage: React.FC = () => {
   } = useMenuData({
     venueId,
     tableId,
-    enableAutoRefresh: false, // Disabled to prevent infinite loops
-    refreshInterval: 60000, // 1 minute auto-refresh (when enabled)
+    enableAutoRefresh: false,
+    refreshInterval: 60000,
   });
 
   // UI state
@@ -110,120 +64,7 @@ const MenuPage: React.FC = () => {
   }, [restaurant, setVenueTheme]);
 
   // Desktop restriction check - more lenient for tablets
-  const isDesktopRestricted = useMediaQuery(theme.breakpoints.up('xl')); // Only restrict on very large screens
-
-  // Enhanced Desktop restriction component with better mobile detection
-  const DesktopRestrictionOverlay = () => {
-    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-    
-    // Don't show restriction if it's a touch device (tablet/touch laptop)
-    if (isTouchDevice) return null;
-
-    return (
-      <Box
-        sx={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: alpha('#000000', 0.85),
-          backdropFilter: 'blur(10px)',
-          zIndex: 9999,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          p: { xs: 2, sm: 3 },
-        }}
-      >
-        <Paper
-          sx={{
-            maxWidth: { xs: '100%', sm: 480 },
-            p: { xs: 2, sm: 3 },
-            textAlign: 'center',
-            borderRadius: 1,
-            background: theme.palette.background.paper,
-            boxShadow: theme.shadows[24],
-          }}
-        >
-          <Box sx={{ mb: 1 }}>
-            <Avatar
-              sx={{
-                width: { xs: 56, sm: 64 },
-                height: { xs: 56, sm: 64 },
-                background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
-                mx: 'auto',
-                mb: 1,
-              }}
-            >
-              <Restaurant sx={{ fontSize: { xs: 28, sm: 32 } }} />
-            </Avatar>
-            <Typography variant="h5" fontWeight="600" sx={{ mb: 1, fontSize: { xs: '1.25rem', sm: '1.25rem' } }}>
-              Mobile Ordering Experience
-            </Typography>
-            <Typography variant="body1" color="text.secondary" sx={{ mb: 1, lineHeight: 1.6 }}>
-              Our menu is optimized for mobile devices to provide the best ordering experience. 
-              Please use your smartphone or tablet to browse and order.
-            </Typography>
-          </Box>
-
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 1,
-              p: 1,
-              backgroundColor: alpha(theme.palette.primary.main, 0.08),
-              borderRadius: 1,
-              mb: 1,
-            }}
-          >
-            <Box
-              sx={{
-                width: 22,
-                height: 42,
-                borderRadius: 1,
-                border: `2px solid ${theme.palette.primary.main}`,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                position: 'relative',
-              }}
-            >
-              <Box
-                sx={{
-                  width: 14,
-                  height: 18,
-                  backgroundColor: theme.palette.primary.main,
-                  borderRadius: 0.5,
-                }}
-              />
-            </Box>
-            <Typography variant="body2" color="primary" fontWeight="500">
-              Scan QR code or visit on mobile device
-            </Typography>
-          </Box>
-
-          <Stack spacing={1} sx={{ textAlign: 'left', mb: 1 }}>
-            <Typography variant="body2" color="text.secondary">
-              • Faster ordering process
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              • Touch-optimized interface
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              • Real-time order updates
-            </Typography>
-          </Stack>
-
-          <Typography variant="caption" color="text.secondary">
-            Need assistance? Please ask your server for help
-          </Typography>
-        </Paper>
-      </Box>
-    );
-  };
+  const isDesktopRestricted = useMediaQuery(theme.breakpoints.up('xl'));
 
   // Group menu items by category
   const groupedMenuItems = categories
@@ -247,7 +88,7 @@ const MenuPage: React.FC = () => {
   };
 
   const handleAddToCart = (item: MenuItemType) => {
-    // Convert MenuItemType to the cart's expected MenuItem format (from types/index.ts)
+    // Convert MenuItemType to the cart's expected MenuItem format
     const cartItem = {
       id: item.id,
       name: item.name,
@@ -268,7 +109,7 @@ const MenuPage: React.FC = () => {
 
   const handleCategoryClick = (categoryId: string) => {
     setActiveCategory(categoryId);
-    setActiveFragment('menu'); // Switch to menu fragment
+    setActiveFragment('menu');
     setTimeout(() => {
       const element = categoryRefs.current[categoryId];
       if (element) {
@@ -307,12 +148,11 @@ const MenuPage: React.FC = () => {
           showCart={false}
         />
         
-        <Container maxWidth="lg" sx={{ py: 1 }}>
+        <Container maxWidth="lg" sx={{ py: 2 }}>
           <SmartLoading 
             type="menu" 
             message="Loading delicious menu items for you..."
           />
-          
         </Container>
       </Box>
     );
@@ -348,7 +188,7 @@ const MenuPage: React.FC = () => {
           showCart={false}
         />
         
-        <Container maxWidth="lg" sx={{ py: 1 }}>
+        <Container maxWidth="lg" sx={{ py: 2 }}>
           <Box sx={{ 
             display: 'flex',
             alignItems: 'center',
@@ -377,8 +217,8 @@ const MenuPage: React.FC = () => {
         pb: { xs: 9, sm: 10 },
         position: 'relative',
         width: '100%',
-        overflowX: 'hidden', // Prevent horizontal scroll
-        maxWidth: '100vw', // Ensure it doesn't exceed viewport width
+        overflowX: 'hidden',
+        maxWidth: '100vw',
       }}>
       {/* Fragment Content */}
       {activeFragment === 'home' && (
@@ -396,14 +236,12 @@ const MenuPage: React.FC = () => {
           categoryRefs={categoryRefs}
           onAddToCart={handleAddToCart}
           getItemQuantityInCart={getItemQuantityInCart}
-          onToggleFavorite={toggleFavorite}
-          isFavorite={(itemId) => favorites.has(itemId)}
           getMenuItemImage={(item) => item.image || ''}
         />
       )}
 
       {activeFragment === 'orders' && (
-        <OrderStatusFragment venueId={venueId} tableId={tableId} />
+        <OrderFragment venueId={venueId} tableId={tableId} />
       )}
 
       {/* Floating Cart Card */}
@@ -427,388 +265,5 @@ const MenuPage: React.FC = () => {
     </Box>
   );
 };
-
-// Enhanced Menu Item Card Component
-const EnhancedMenuItemCard: React.FC<{
-  item: MenuItemType;
-  onAddToCart: (item: MenuItemType) => void;
-  imageOverride?: string;
-  onToggleFavorite: (itemId: string) => void;
-  isFavorite: boolean;
-  quantityInCart: number;
-  isMobile?: boolean;
-}> = React.memo(({ item, onAddToCart, imageOverride, onToggleFavorite, isFavorite, quantityInCart, isMobile = false }) => {
-  const { updateQuantity, removeItem } = useCart();
-  const theme = useTheme();
-
-  const handleIncreaseQuantity = () => updateQuantity(item.id, quantityInCart + 1);
-  const handleDecreaseQuantity = () => {
-    if (quantityInCart > 1) {
-      updateQuantity(item.id, quantityInCart - 1);
-    } else {
-      removeItem(item.id);
-    }
-  };
-
-  const VegNonVegIcon = ({ isVeg }: { isVeg: boolean }) => (
-    <Box
-      sx={{
-        width: 14,
-        height: 14,
-        border: `2px solid ${isVeg ? '#4CAF50' : '#F44336'}`,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        flexShrink: 0,
-      }}
-    >
-      <Box
-        sx={{
-          width: 6,
-          height: 6,
-          borderRadius: isVeg ? '50%' : 0,
-          backgroundColor: isVeg ? '#4CAF50' : '#F44336',
-        }}
-      />
-    </Box>
-  );
-
-  return (
-    <MenuItemCard sx={{ 
-      height: '100%', 
-      display: 'flex', 
-      flexDirection: 'column',
-      borderRadius: 3,
-      overflow: 'hidden',
-      boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
-      border: `1px solid ${theme.palette.grey[100]}`,
-      transition: 'all 0.3s ease',
-      '&:hover': {
-        transform: 'translateY(-4px)',
-        boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
-      }
-    }}>
-      {/* Image Section - Top Half */}
-      <Box sx={{ 
-        position: 'relative', 
-        overflow: 'hidden',
-        height: { xs: 200, sm: 220 }, // Fixed height for top half
-        backgroundColor: 'grey.50'
-      }}>
-        {imageOverride || item.image ? (
-          <CardMedia
-            component="img"
-            image={imageOverride || item.image}
-            alt={item.name}
-            className="menu-item-image"
-            sx={{ 
-              height: '100%',
-              width: '100%',
-              objectFit: 'cover',
-              transition: 'transform 0.3s ease',
-            }}
-          />
-        ) : (
-          <Box
-            sx={{
-              height: '100%',
-              backgroundColor: 'grey.100',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <Restaurant sx={{ fontSize: { xs: 48, sm: 56 }, color: 'grey.400' }} />
-          </Box>
-        )}
-
-        {/* Badges */}
-        <Box sx={{ 
-          position: 'absolute', 
-          top: 12, 
-          left: 12, 
-          display: 'flex', 
-          flexDirection: 'column',
-          gap: 0.5,
-          maxWidth: '60%',
-        }}>
-          {item.isNew && (
-            <Chip
-              icon={<NewReleases sx={{ fontSize: 12 }} />}
-              label="New"
-              size="small"
-              sx={{ 
-                backgroundColor: theme.palette.success.main, 
-                color: 'white', 
-                fontWeight: 600,
-                fontSize: '0.7rem',
-                height: 18,
-                boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
-              }}
-            />
-          )}
-          {item.isPopular && (
-            <Chip
-              icon={<Whatshot sx={{ fontSize: 12 }} />}
-              label="Popular"
-              size="small"
-              sx={{ 
-                backgroundColor: theme.palette.warning.main, 
-                color: 'white', 
-                fontWeight: 600,
-                fontSize: '0.7rem',
-                height: 18,
-                boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
-              }}
-            />
-          )}
-          {item.discount && (
-            <Chip
-              icon={<LocalOffer sx={{ fontSize: 12 }} />}
-              label={`${item.discount}% OFF`}
-              size="small"
-              sx={{ 
-                backgroundColor: theme.palette.error.main, 
-                color: 'white', 
-                fontWeight: 600,
-                fontSize: '0.7rem',
-                height: 18,
-                boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
-              }}
-            />
-          )}
-        </Box>
-
-        {/* Favorite Button */}
-        <IconButton
-          onClick={() => onToggleFavorite(item.id)}
-          sx={{
-            position: 'absolute',
-            top: 12,
-            right: 12,
-            backgroundColor: alpha(theme.palette.background.paper, 0.95),
-            backdropFilter: 'blur(8px)',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-            '&:hover': {
-              backgroundColor: theme.palette.background.paper,
-              transform: 'scale(1.1)',
-            },
-            width: 22,
-            height: 22,
-          }}
-        >
-          {isFavorite ? (
-            <Favorite sx={{ 
-              color: theme.palette.error.main, 
-              fontSize: 12 
-            }} />
-          ) : (
-            <FavoriteBorder sx={{ 
-              color: 'text.secondary', 
-              fontSize: 12 
-            }} />
-          )}
-        </IconButton>
-
-        {/* Preparation Time */}
-        <Box
-          sx={{
-            position: 'absolute',
-            bottom: 12,
-            left: 12,
-            backgroundColor: alpha(theme.palette.common.black, 0.8),
-            color: 'white',
-            px: 1,
-            py: 0.75,
-            borderRadius: 1,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 0.5,
-            backdropFilter: 'blur(8px)',
-          }}
-        >
-          <Timer sx={{ fontSize: 12 }} />
-          <Typography variant="caption" fontWeight="600" sx={{ fontSize: '0.7rem' }}>
-            {item.preparationTime} min
-          </Typography>
-        </Box>
-      </Box>
-
-      {/* Content Section - Bottom Half */}
-      <Box sx={{ 
-        flex: 1, 
-        display: 'flex', 
-        flexDirection: 'column', 
-        p: { xs: 2, sm: 1.5 },
-        backgroundColor: 'background.paper'
-      }}>
-        {/* Header with Veg/Non-Veg and Name */}
-        <Box sx={{ mb: 1 }}>
-          <Stack direction="row" spacing={1} alignItems="flex-start" sx={{ mb: 1 }}>
-            <VegNonVegIcon isVeg={item.isVeg || false} />
-            <Typography 
-              variant="h6" 
-              sx={{ 
-                fontWeight: 700, 
-                fontSize: { xs: '1rem', sm: '1.1rem' },
-                lineHeight: 1.2,
-                flex: 1,
-                color: 'text.primary',
-                display: '-webkit-box',
-                WebkitLineClamp: 1.5,
-                WebkitBoxOrient: 'vertical',
-                overflow: 'hidden',
-              }}
-            >
-              {item.name}
-            </Typography>
-          </Stack>
-
-          {/* Rating */}
-          {item.rating && (
-            <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1 }}>
-              <Rating value={item.rating} size="small" readOnly precision={0.5} />
-              <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
-                {item.rating} ({item.reviewCount})
-              </Typography>
-            </Stack>
-          )}
-        </Box>
-
-        {/* Price Section */}
-        <Box sx={{ mb: 1 }}>
-          <Stack direction="row" alignItems="center" spacing={1}>
-            <Typography variant="h5" fontWeight="700" color="primary.main">
-              ₹{item.price}
-            </Typography>
-            {item.originalPrice && (
-              <Typography 
-                variant="body2" 
-                sx={{ 
-                  textDecoration: 'line-through',
-                  color: 'text.disabled',
-                  fontSize: '0.7rem'
-                }}
-              >
-                ₹{item.originalPrice}
-              </Typography>
-            )}
-          </Stack>
-        </Box>
-
-        {/* Description */}
-        <Typography 
-          variant="body2" 
-          color="text.secondary" 
-          sx={{ 
-            mb: 1,
-            lineHeight: 1.5,
-            fontSize: '0.7rem',
-            display: '-webkit-box',
-            WebkitLineClamp: 1.5,
-            WebkitBoxOrient: 'vertical',
-            overflow: 'hidden',
-            flex: 1,
-          }}
-        >
-          {item.description}
-        </Typography>
-
-        {/* Spicy Level */}
-        {item.spicyLevel && item.spicyLevel > 0 && (
-          <Box sx={{ mb: 1 }}>
-            <Stack direction="row" alignItems="center" spacing={0.5}>
-              {[...Array(Math.min(item.spicyLevel, 3))].map((_, i) => (
-                <LocalFireDepartment 
-                  key={i} 
-                  sx={{ 
-                    fontSize: 12, 
-                    color: item.spicyLevel === 1 ? '#FFA726' : item.spicyLevel === 2 ? '#FF7043' : '#F44336',
-                  }} 
-                />
-              ))}
-              <Typography variant="caption" color="text.secondary" sx={{ ml: 0.5, fontSize: '0.7rem', fontWeight: 500 }}>
-                {item.spicyLevel === 1 ? 'Mild' : item.spicyLevel === 2 ? 'Medium' : 'Hot'}
-              </Typography>
-            </Stack>
-          </Box>
-        )}
-
-        {/* Add to Cart Button */}
-        <Box sx={{ mt: 'auto' }}>
-          {quantityInCart === 0 ? (
-            <Button
-              fullWidth
-              variant="contained"
-              onClick={() => onAddToCart(item)}
-              sx={{
-                py: 1,
-                fontWeight: 700,
-                textTransform: 'none',
-                borderRadius: 1,
-                fontSize: '0.7rem',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                '&:hover': {
-                  boxShadow: '0 6px 20px rgba(0,0,0,0.2)',
-                  transform: 'translateY(-1px)',
-                }
-              }}
-            >
-              Add to Cart
-            </Button>
-          ) : (
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                backgroundColor: alpha(theme.palette.primary.main, 0.1),
-                borderRadius: 1,
-                p: 1.5,
-                border: `2px solid ${theme.palette.primary.main}`,
-              }}
-            >
-              <IconButton
-                size="small"
-                onClick={handleDecreaseQuantity}
-                sx={{ 
-                  color: 'primary.main',
-                  backgroundColor: 'background.paper',
-                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                  '&:hover': { 
-                    backgroundColor: 'background.paper',
-                    transform: 'scale(1.1)',
-                  },
-                }}
-              >
-                <Remove />
-              </IconButton>
-              
-              <Typography variant="h6" fontWeight="700" color="primary.main">
-                {quantityInCart}
-              </Typography>
-              
-              <IconButton
-                size="small"
-                onClick={handleIncreaseQuantity}
-                sx={{ 
-                  color: 'primary.main',
-                  backgroundColor: 'background.paper',
-                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                  '&:hover': { 
-                    backgroundColor: 'background.paper',
-                    transform: 'scale(1.1)',
-                  },
-                }}
-              >
-                <Add />
-              </IconButton>
-            </Box>
-          )}
-        </Box>
-      </Box>
-    </MenuItemCard>
-  );
-});
 
 export default MenuPage;
