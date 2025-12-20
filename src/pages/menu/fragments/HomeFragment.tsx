@@ -24,18 +24,23 @@ const HomeFragment: React.FC<HomeFragmentProps> = ({
       sx={{ 
         pb: { xs: 8, sm: 9 },
         width: '100%',
+        minHeight: '100vh',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
         backgroundColor: '#F8F9FA',
-        overflowY: 'auto',
-        overflowX: 'hidden',
+        overflow: 'auto',
       }}
     >
       {/* Hero Section */}
       <RestaurantHero restaurant={restaurant} />
 
-      {/* Categories Section */}
-      <CategoryGrid categories={categories} onCategoryClick={onCategoryClick} />
+      {/* Categories Section - Flex grow to fill space */}
+      <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <CategoryGrid categories={categories} onCategoryClick={onCategoryClick} />
+      </Box>
 
-      {/* Call to Action */}
+      {/* Call to Action - Always at bottom when content is short */}
       <CallToAction onViewMenu={() => onCategoryClick(categories[0]?.id || '')} />
     </Box>
   );
