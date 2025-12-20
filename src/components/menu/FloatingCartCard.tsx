@@ -35,7 +35,7 @@ const FloatingCartCard: React.FC<FloatingCartCardProps> = ({
       totalAmount={totalAmount}
       backgroundColor="#1E3A5F"
       borderColor="#1E3A5F"
-      bottomPosition={{ xs: 64, sm: 70 }}
+      bottomPosition={{ xs: 56, sm: 60 }}
       onConfirm={handleCheckout}
       show={show}
     />
