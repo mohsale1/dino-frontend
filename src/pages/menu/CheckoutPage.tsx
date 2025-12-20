@@ -363,7 +363,7 @@ const CheckoutPage: React.FC = () => {
     return (
       <Box sx={{ minHeight: '100vh', backgroundColor: '#F8F9FA' }}>
         {/* Header */}
-        <Box sx={{ backgroundColor: '#1E3A5F', color: 'white', py: 1.25 }}>
+        <Box sx={{ backgroundColor: '#1E3A5F', color: 'white', py: 2 }}>
           <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3 } }}>
             <Stack direction="row" alignItems="center" spacing={2}>
               <IconButton onClick={() => navigate(-1)} sx={{ color: 'white' }}>
@@ -378,11 +378,11 @@ const CheckoutPage: React.FC = () => {
 
         <Container maxWidth="md" sx={{ px: { xs: 2, sm: 3 }, py: 6 }}>
           <Box sx={{ textAlign: 'center', py: 6, backgroundColor: 'white', borderRadius: 1, border: '1px solid #E0E0E0' }}>
-            <ShoppingCart sx={{ fontSize: 42, color: '#CED4DA', mb: 1.5 }} />
+            <ShoppingCart sx={{ fontSize: 64, color: '#CED4DA', mb: 2 }} />
             <Typography variant="h6" sx={{ mb: 1, fontWeight: 600, color: '#2C3E50' }}>
               Your cart is empty
             </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
               Add some delicious items to your cart to get started!
             </Typography>
             <Button
@@ -391,7 +391,7 @@ const CheckoutPage: React.FC = () => {
               startIcon={<Restaurant />}
               sx={{
                 backgroundColor: '#1E3A5F',
-                px: 1.5,
+                px: 3,
                 py: 1.25,
                 fontWeight: 600,
                 textTransform: 'none',
@@ -410,9 +410,9 @@ const CheckoutPage: React.FC = () => {
 
   // Main Checkout
   return (
-    <Box sx={{ minHeight: '100vh', backgroundColor: '#F8F9FA', pb: activeStep === 2 ? 12 : 4 }}>
+    <Box sx={{ minHeight: '100vh', backgroundColor: '#F8F9FA', pb: activeStep === 2 ? 15 : 4 }}>
       {/* Header */}
-      <Box sx={{ backgroundColor: '#1E3A5F', color: 'white', py: 1.25, mb: 1.5 }}>
+      <Box sx={{ backgroundColor: '#1E3A5F', color: 'white', py: 2, mb: 3 }}>
         <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3 } }}>
           <Stack direction="row" alignItems="center" spacing={2}>
             <IconButton onClick={() => navigate(-1)} sx={{ color: 'white' }}>
@@ -427,10 +427,10 @@ const CheckoutPage: React.FC = () => {
 
       <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3 } }}>
         {/* Step Indicator */}
-        <Box sx={{ mb: 1.5 }}>
-          <Stack direction="row" spacing={1} justifyContent="center" sx={{ mb: 1.5 }}>
+        <Box sx={{ mb: 3 }}>
+          <Stack direction="row" spacing={1} justifyContent="center" sx={{ mb: 2 }}>
             {steps.map((step, index) => (
-              <Box key={index} sx={{ flex: 1, maxwidth: 95 }}>
+              <Box key={index} sx={{ flex: 1, maxWidth: 120 }}>
                 <Box
                   sx={{
                     width: '100%',
@@ -457,14 +457,14 @@ const CheckoutPage: React.FC = () => {
           </Stack>
         </Box>
 
-        <Grid container spacing={3}>
+        <Grid container spacing={3} sx={{ mb: activeStep === 2 ? 2 : 0 }}>
           {/* Main Content */}
           <Grid item xs={12} md={activeStep === 2 ? 8 : 12}>
             <Paper sx={{ backgroundColor: 'white', border: '1px solid #E0E0E0', boxShadow: 'none' }}>
               {/* Step 0: Review Order */}
               {activeStep === 0 && (
                 <Box sx={{ p: { xs: 2, sm: 2.5 } }}>
-                  <Typography variant="h6" sx={{ fontWeight: 700, mb: 1.5, color: '#1E3A5F' }}>
+                  <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: '#1E3A5F' }}>
                     Review Your Order ({items.length} {items.length === 1 ? 'item' : 'items'})
                   </Typography>
                   
@@ -474,7 +474,7 @@ const CheckoutPage: React.FC = () => {
                         key={item.menuItem.id}
                         sx={{
                           px: 0,
-                          py: 1.25,
+                          py: 2,
                           borderBottom: '1px solid #E0E0E0',
                           '&:last-child': { borderBottom: 'none' },
                         }}
@@ -482,7 +482,7 @@ const CheckoutPage: React.FC = () => {
                         <Stack direction="row" spacing={2} sx={{ width: '100%' }}>
                           <Avatar
                             src={item.menuItem.image}
-                            sx={{ width: 48, height: 48, borderRadius: 1, border: '1px solid #E0E0E0' }}
+                            sx={{ width: 60, height: 60, borderRadius: 1, border: '1px solid #E0E0E0' }}
                           >
                             <Restaurant />
                           </Avatar>
@@ -510,11 +510,11 @@ const CheckoutPage: React.FC = () => {
                                   }}
                                 />
                               </Box>
-                              <Typography variant="subtitle1" sx={{ fontWeight: 600, fontSize: '0.7rem', color: '#2C3E50' }}>
+                              <Typography variant="subtitle1" sx={{ fontWeight: 600, fontSize: '0.95rem', color: '#2C3E50' }}>
                                 {item.menuItem.name}
                               </Typography>
                             </Stack>
-                            <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
+                            <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.85rem' }}>
                               {formatPrice(item.menuItem.price)} each
                             </Typography>
                             {item.specialInstructions && (
@@ -525,19 +525,19 @@ const CheckoutPage: React.FC = () => {
                           </Box>
                           
                           <Stack spacing={1} alignItems="flex-end">
-                            <Typography variant="h6" sx={{ fontWeight: 700, color: '#1E3A5F', fontSize: '0.75rem' }}>
+                            <Typography variant="h6" sx={{ fontWeight: 700, color: '#1E3A5F', fontSize: '1.05rem' }}>
                               {formatPrice(item.menuItem.price * item.quantity)}
                             </Typography>
                             
                             <Stack direction="row" spacing={0.5} alignItems="center" sx={{ border: '1px solid #E0E0E0', borderRadius: 1, p: 0.5 }}>
                               <IconButton size="small" onClick={() => handleQuantityChange(item.menuItem.id, item.quantity - 1)} sx={{ width: 24, height: 24 }}>
-                                <Remove sx={{ fontSize: 12 }} />
+                                <Remove sx={{ fontSize: 16 }} />
                               </IconButton>
-                              <Typography sx={{ minWidth: 20, textAlign: 'center', fontWeight: 700, fontSize: '0.7rem' }}>
+                              <Typography sx={{ minWidth: 20, textAlign: 'center', fontWeight: 700, fontSize: '0.85rem' }}>
                                 {item.quantity}
                               </Typography>
                               <IconButton size="small" onClick={() => handleQuantityChange(item.menuItem.id, item.quantity + 1)} sx={{ width: 24, height: 24 }}>
-                                <Add sx={{ fontSize: 12 }} />
+                                <Add sx={{ fontSize: 16 }} />
                               </IconButton>
                             </Stack>
                           </Stack>
@@ -546,7 +546,7 @@ const CheckoutPage: React.FC = () => {
                     ))}
                   </List>
 
-                  <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mt: 2 }}>
+                  <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mt: 3 }}>
                     <Button
                       variant="contained"
                       onClick={handleNext}
@@ -586,7 +586,7 @@ const CheckoutPage: React.FC = () => {
               {/* Step 1: Customer Information */}
               {activeStep === 1 && (
                 <Box sx={{ p: { xs: 2, sm: 2.5 } }}>
-                  <Typography variant="h6" sx={{ fontWeight: 700, mb: 1.5, color: '#1E3A5F' }}>
+                  <Typography variant="h6" sx={{ fontWeight: 700, mb: 3, color: '#1E3A5F' }}>
                     Customer Information
                   </Typography>
                   
@@ -603,7 +603,7 @@ const CheckoutPage: React.FC = () => {
                         error={customerValidation.touched.name && !!customerValidation.errors.name}
                         helperText={customerValidation.touched.name && customerValidation.errors.name}
                         InputProps={{
-                          startAdornment: <Person sx={{ mr: 1, color: '#6C757D', fontSize: 12 }} />
+                          startAdornment: <Person sx={{ mr: 1, color: '#6C757D', fontSize: 20 }} />
                         }}
                         size="small"
                       />
@@ -620,7 +620,7 @@ const CheckoutPage: React.FC = () => {
                         error={customerValidation.touched.phone && !!customerValidation.errors.phone}
                         helperText={customerValidation.touched.phone ? customerValidation.errors.phone : 'Enter 10-digit phone number'}
                         InputProps={{
-                          startAdornment: <Phone sx={{ mr: 1, color: '#6C757D', fontSize: 12 }} />
+                          startAdornment: <Phone sx={{ mr: 1, color: '#6C757D', fontSize: 20 }} />
                         }}
                         inputProps={{ maxLength: 10, pattern: '[0-9]*', inputMode: 'numeric' }}
                         size="small"
@@ -638,7 +638,7 @@ const CheckoutPage: React.FC = () => {
                         error={customerValidation.touched.email && !!customerValidation.errors.email}
                         helperText={customerValidation.touched.email && customerValidation.errors.email}
                         InputProps={{
-                          startAdornment: <Email sx={{ mr: 1, color: '#6C757D', fontSize: 12 }} />
+                          startAdornment: <Email sx={{ mr: 1, color: '#6C757D', fontSize: 20 }} />
                         }}
                         size="small"
                       />
@@ -659,7 +659,7 @@ const CheckoutPage: React.FC = () => {
                     </Grid>
                   </Grid>
 
-                  <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mt: 2 }} justifyContent="space-between">
+                  <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mt: 3 }} justifyContent="space-between">
                     <Button
                       variant="outlined"
                       onClick={handleBack}
@@ -695,8 +695,8 @@ const CheckoutPage: React.FC = () => {
 
               {/* Step 2: Payment Method */}
               {activeStep === 2 && (
-                <Box sx={{ p: { xs: 2, sm: 2.5 } }}>
-                  <Typography variant="h6" sx={{ fontWeight: 700, mb: 1.5, color: '#1E3A5F' }}>
+                <Box sx={{ p: { xs: 2, sm: 2.5 }, pb: { xs: 4, sm: 4 } }}>
+                  <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: '#1E3A5F' }}>
                     Payment Method
                   </Typography>
                   
@@ -706,27 +706,27 @@ const CheckoutPage: React.FC = () => {
                         <Card
                           key={method.id}
                           sx={{
-                            mb: 1.5,
+                            mb: 2,
                             border: selectedPaymentMethod === method.id ? '2px solid #1E3A5F' : '1px solid #E0E0E0',
                             cursor: 'pointer',
                             boxShadow: 'none',
                           }}
                           onClick={() => setSelectedPaymentMethod(method.id)}
                         >
-                          <CardContent sx={{ p: 1.5 }}>
+                          <CardContent sx={{ p: 2 }}>
                             <FormControlLabel
                               value={method.id}
                               control={<Radio />}
                               label={
                                 <Stack direction="row" spacing={2} alignItems="center">
                                   <Box sx={{ color: selectedPaymentMethod === method.id ? '#1E3A5F' : '#6C757D' }}>
-                                    {React.cloneElement(method.icon as React.ReactElement, { sx: { fontSize: 22 } })}
+                                    {React.cloneElement(method.icon as React.ReactElement, { sx: { fontSize: 28 } })}
                                   </Box>
                                   <Box>
-                                    <Typography variant="subtitle1" sx={{ fontWeight: 600, fontSize: '0.7rem' }}>
+                                    <Typography variant="subtitle1" sx={{ fontWeight: 600, fontSize: '0.95rem' }}>
                                       {method.name}
                                     </Typography>
-                                    <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
+                                    <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.8rem' }}>
                                       {method.description}
                                     </Typography>
                                   </Box>
@@ -741,7 +741,7 @@ const CheckoutPage: React.FC = () => {
                   </FormControl>
 
                   {/* Back Button */}
-                  <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mt: 2 }} justifyContent="space-between">
+                  <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mt: 3 }} justifyContent="space-between">
                     <Button
                       variant="outlined"
                       onClick={handleBack}
@@ -765,14 +765,14 @@ const CheckoutPage: React.FC = () => {
           {/* Order Summary Sidebar - Only show in Payment step */}
           {activeStep === 2 && (
             <Grid item xs={12} md={4}>
-              <Paper sx={{ p: 1.5, backgroundColor: 'white', border: '1px solid #E0E0E0', boxShadow: 'none', position: 'sticky', top: 1.50 }}>
-                <Typography variant="h6" sx={{ fontWeight: 700, mb: 1.5, color: '#1E3A5F' }}>
+              <Paper sx={{ p: 2.5, pb: 4, backgroundColor: 'white', border: '1px solid #E0E0E0', boxShadow: 'none', position: 'sticky', top: 20, mb: { xs: 10, md: 0 } }}>
+                <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: '#1E3A5F' }}>
                   Order Summary
                 </Typography>
                 
-                <Divider sx={{ mb: 1.5 }} />
+                <Divider sx={{ mb: 2 }} />
                 
-                <Stack spacing={1.5} sx={{ mb: 1.5 }}>
+                <Stack spacing={1.5} sx={{ mb: 2 }}>
                   <Stack direction="row" justifyContent="space-between">
                     <Typography variant="body2">Subtotal ({getTotalItems()} items)</Typography>
                     <Typography variant="body2" fontWeight={600}>{formatPrice(subtotal)}</Typography>
@@ -799,9 +799,9 @@ const CheckoutPage: React.FC = () => {
                   )}
                 </Stack>
                 
-                <Divider sx={{ mb: 1.5 }} />
+                <Divider sx={{ mb: 2 }} />
                 
-                <Stack direction="row" justifyContent="space-between" sx={{ mb: 1.5 }}>
+                <Stack direction="row" justifyContent="space-between" sx={{ mb: 2 }}>
                   <Typography variant="h6" fontWeight={700}>Total</Typography>
                   <Typography variant="h6" fontWeight={700} sx={{ color: '#1E3A5F' }}>
                     {formatPrice(total)}
@@ -809,17 +809,17 @@ const CheckoutPage: React.FC = () => {
                 </Stack>
 
                 {/* Promo Code Section */}
-                <Box sx={{ mb: 1.5 }}>
+                <Box sx={{ mb: 2 }}>
                   {appliedPromo ? (
                     <Box sx={{ p: 1.5, backgroundColor: '#E8F5E9', borderRadius: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: '1px solid #28A745' }}>
                       <Stack direction="row" spacing={1} alignItems="center">
-                        <LocalOffer sx={{ color: '#28A745', fontSize: 12 }} />
-                        <Typography variant="body2" sx={{ color: '#28A745', fontWeight: 600, fontSize: '0.7rem' }}>
+                        <LocalOffer sx={{ color: '#28A745', fontSize: 20 }} />
+                        <Typography variant="body2" sx={{ color: '#28A745', fontWeight: 600, fontSize: '0.85rem' }}>
                           {appliedPromo.promo_code?.code} Applied!
                         </Typography>
                       </Stack>
                       <IconButton size="small" onClick={handleRemovePromo} sx={{ color: '#28A745' }}>
-                        <Delete sx={{ fontSize: 12 }} />
+                        <Delete sx={{ fontSize: 18 }} />
                       </IconButton>
                     </Box>
                   ) : (
@@ -834,7 +834,7 @@ const CheckoutPage: React.FC = () => {
                         color: '#1E3A5F',
                         textTransform: 'none',
                         fontWeight: 600,
-                        fontSize: '0.7rem',
+                        fontSize: '0.85rem',
                       }}
                     >
                       Apply Promo Code
@@ -846,8 +846,8 @@ const CheckoutPage: React.FC = () => {
                 <Box sx={{ p: 1.5, backgroundColor: '#F8F9FA', borderRadius: 1, border: '1px solid #E0E0E0' }}>
                   <Stack spacing={1}>
                     <Stack direction="row" spacing={1} alignItems="center">
-                      <LocationOn sx={{ fontSize: 12, color: '#1E3A5F' }} />
-                      <Typography variant="body2" fontWeight={600} sx={{ fontSize: '0.7rem' }}>
+                      <LocationOn sx={{ fontSize: 18, color: '#1E3A5F' }} />
+                      <Typography variant="body2" fontWeight={600} sx={{ fontSize: '0.85rem' }}>
                         Table Number: {tableId}
                       </Typography>
                     </Stack>
@@ -907,7 +907,7 @@ const CheckoutPage: React.FC = () => {
             </Box>
           )}
         </DialogContent>
-        <DialogActions sx={{ p: 1.5 }}>
+        <DialogActions sx={{ p: 2 }}>
           <Button onClick={() => setShowPromoDialog(false)} sx={{ fontWeight: 600 }}>
             Cancel
           </Button>
