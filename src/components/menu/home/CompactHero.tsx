@@ -6,13 +6,12 @@ import {
   Stack,
   TextField,
   InputAdornment,
-  IconButton,
+  Switch,
   alpha,
-  Fade,
+  Zoom,
 } from '@mui/material';
 import {
   Search,
-  Star,
   LocationOn,
 } from '@mui/icons-material';
 import { Venue } from '../../../types/api';
@@ -26,11 +25,11 @@ interface CompactHeroProps {
 }
 
 const animatedTexts = [
-  'Best Food in Town',
-  'Fresh Ingredients',
-  'Quick Delivery',
-  'Best Prices',
-  'Delicious Meals',
+  { text: 'Best Food in Town', emoji: '🍽️' },
+  { text: 'Fresh Ingredients', emoji: '🌿' },
+  { text: 'Quick Delivery', emoji: '⚡' },
+  { text: 'Authentic Flavors', emoji: '✨' },
+  { text: 'Made with Love', emoji: '❤️' },
 ];
 
 const CompactHero: React.FC<CompactHeroProps> = ({
@@ -50,10 +49,19 @@ const CompactHero: React.FC<CompactHeroProps> = ({
         setCurrentTextIndex((prev) => (prev + 1) % animatedTexts.length);
         setShowText(true);
       }, 500);
-    }, 3000);
+    }, 3500);
 
     return () => clearInterval(interval);
   }, []);
+
+  const handleVegToggle = () => {
+    // Toggle between 'veg' and 'all'
+    if (vegFilter === 'veg') {
+      onVegFilterChange('all');
+    } else {
+      onVegFilterChange('veg');
+    }
+  };
 
   return (
     <Box
@@ -63,9 +71,6 @@ const CompactHero: React.FC<CompactHeroProps> = ({
         py: { xs: 4, sm: 5 },
         position: 'relative',
         overflow: 'hidden',
-        minHeight: { xs: '45vh', sm: '50vh' },
-        display: 'flex',
-        alignItems: 'center',
         '&::before': {
           content: '""',
           position: 'absolute',
@@ -89,76 +94,64 @@ const CompactHero: React.FC<CompactHeroProps> = ({
       }}
     >
       <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3 }, position: 'relative', zIndex: 1 }}>
-        {/* Restaurant Info */}
-        <Box sx={{ mb: 3 }}>
+        {/* Top Left: Cafe Details and Address */}
+        <Box sx={{ mb: 4, pb: 2 }}>
           <Typography
-            variant="h3"
+            variant="h4"
             sx={{
               fontWeight: 800,
               fontSize: { xs: '1.75rem', sm: '2.25rem', md: '2.5rem' },
-              mb: 1,
+              mb: 2,
               letterSpacing: '-0.5px',
+              lineHeight: 1.2,
             }}
           >
             {restaurant?.name || 'Restaurant'}
           </Typography>
-          
-          <Stack direction="row" spacing={3} alignItems="center" sx={{ mb: 2 }}>
-            <Stack direction="row" spacing={0.5} alignItems="center">
-              <Star sx={{ fontSize: 18, color: '#FFC107' }} />
-              <Typography sx={{ fontSize: '0.9rem', fontWeight: 600 }}>
-                {restaurant?.rating?.toFixed(1) || '4.5'}
-              </Typography>
-              <Typography sx={{ fontSize: '0.85rem', opacity: 0.8 }}>
-                ({restaurant?.total_reviews || 0}+)
-              </Typography>
-            </Stack>
-            <Stack direction="row" spacing={0.5} alignItems="center">
-              <LocationOn sx={{ fontSize: 18 }} />
-              <Typography sx={{ fontSize: '0.9rem', fontWeight: 600 }}>
-                {restaurant?.location.city || 'Location'}
-              </Typography>
-            </Stack>
-          </Stack>
 
-          {/* Animated Text */}
-          <Box sx={{ height: 40, display: 'flex', alignItems: 'center' }}>
-            <Fade in={showText} timeout={500}>
-              <Typography
-                sx={{
-                  fontSize: { xs: '1.1rem', sm: '1.3rem' },
-                  fontWeight: 700,
-                  color: '#FFC107',
-                  textShadow: '0 2px 4px rgba(0,0,0,0.2)',
-                }}
-              >
-                ✨ {animatedTexts[currentTextIndex]}
-              </Typography>
-            </Fade>
-          </Box>
+          {/* Address */}
+          <Stack direction="row" spacing={1} alignItems="flex-start" sx={{ mb: 2 }}>
+            <LocationOn sx={{ fontSize: 20, mt: 0.25, flexShrink: 0 }} />
+            <Typography
+              sx={{
+                fontSize: { xs: '0.9rem', sm: '0.95rem', md: '1rem' },
+                fontWeight: 500,
+                opacity: 0.95,
+                lineHeight: 1.5,
+              }}
+            >
+              {restaurant?.location?.address || 
+               `${restaurant?.location?.city || 'City'}, ${restaurant?.location?.state || 'State'}`}
+            </Typography>
+          </Stack>
         </Box>
 
-        {/* Search Bar with Vertical Toggle */}
-        <Stack direction="row" spacing={1} alignItems="stretch">
+        {/* Search Bar with Veg Toggle */}
+        <Stack 
+          direction="row" 
+          spacing={1.5} 
+          alignItems="stretch"
+          sx={{ mb: 3 }}
+        >
           {/* Search Field */}
           <TextField
             fullWidth
             placeholder="Search for dishes..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            size="small"
+            size="medium"
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  <Search sx={{ color: '#6C757D', fontSize: 20 }} />
+                  <Search sx={{ color: '#6C757D', fontSize: 22 }} />
                 </InputAdornment>
               ),
             }}
             sx={{
+              flex: 1,
               '& .MuiOutlinedInput-root': {
                 backgroundColor: 'white',
                 borderRadius: 2,
-                height: 120,
                 '& fieldset': {
                   borderColor: 'transparent',
                 },
@@ -167,67 +160,183 @@ const CompactHero: React.FC<CompactHeroProps> = ({
                 },
                 '&.Mui-focused fieldset': {
                   borderColor: '#1E3A5F',
+                  borderWidth: 2,
                 },
+              },
+              '& .MuiInputBase-input': {
+                fontSize: { xs: '0.95rem', sm: '1rem' },
               },
             }}
           />
 
-          {/* Vertical Veg/Non-Veg Toggle */}
-          <Stack
-            spacing={0}
+          {/* Vertical Veg Toggle Switch */}
+          <Box
             sx={{
-              backgroundColor: 'white',
-              borderRadius: 2,
-              overflow: 'hidden',
-              width: 50,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              minWidth: 60,
             }}
           >
-            <IconButton
-              onClick={() => onVegFilterChange('all')}
+            <Switch
+              checked={vegFilter === 'veg'}
+              onChange={handleVegToggle}
+              icon={
+                <Box
+                  sx={{
+                    width: 28,
+                    height: 28,
+                    borderRadius: '50%',
+                    backgroundColor: 'white',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+                  }}
+                >
+                  <Box
+                    sx={{
+                      width: 16,
+                      height: 16,
+                      border: '2px solid #6C757D',
+                      borderRadius: 0.5,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        width: 6,
+                        height: 6,
+                        borderRadius: '50%',
+                        backgroundColor: '#6C757D',
+                      }}
+                    />
+                  </Box>
+                </Box>
+              }
+              checkedIcon={
+                <Box
+                  sx={{
+                    width: 28,
+                    height: 28,
+                    borderRadius: '50%',
+                    backgroundColor: 'white',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+                  }}
+                >
+                  <Box
+                    sx={{
+                      width: 16,
+                      height: 16,
+                      border: '2px solid #4CAF50',
+                      borderRadius: 0.5,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        width: 6,
+                        height: 6,
+                        borderRadius: '50%',
+                        backgroundColor: '#4CAF50',
+                      }}
+                    />
+                  </Box>
+                </Box>
+              }
               sx={{
-                borderRadius: 0,
-                height: 40,
-                backgroundColor: vegFilter === 'all' ? '#1E3A5F' : 'transparent',
-                color: vegFilter === 'all' ? 'white' : '#6C757D',
-                '&:hover': {
-                  backgroundColor: vegFilter === 'all' ? '#2C5282' : alpha('#1E3A5F', 0.1),
+                width: 62,
+                height: 38,
+                padding: 0,
+                transform: 'rotate(90deg)',
+                '& .MuiSwitch-switchBase': {
+                  padding: 0,
+                  margin: '5px',
+                  transitionDuration: '300ms',
+                  '&.Mui-checked': {
+                    transform: 'translateX(24px)',
+                    color: '#fff',
+                    '& + .MuiSwitch-track': {
+                      backgroundColor: '#4CAF50',
+                      opacity: 1,
+                      border: 0,
+                    },
+                  },
+                },
+                '& .MuiSwitch-thumb': {
+                  boxSizing: 'border-box',
+                  width: 28,
+                  height: 28,
+                },
+                '& .MuiSwitch-track': {
+                  borderRadius: 19,
+                  backgroundColor: '#E0E0E0',
+                  opacity: 1,
                 },
               }}
-            >
-              <Typography sx={{ fontSize: '0.7rem', fontWeight: 700 }}>ALL</Typography>
-            </IconButton>
-            <Box sx={{ height: 1, backgroundColor: '#E0E0E0' }} />
-            <IconButton
-              onClick={() => onVegFilterChange('veg')}
-              sx={{
-                borderRadius: 0,
-                height: 40,
-                backgroundColor: vegFilter === 'veg' ? '#4CAF50' : 'transparent',
-                color: vegFilter === 'veg' ? 'white' : '#6C757D',
-                '&:hover': {
-                  backgroundColor: vegFilter === 'veg' ? '#45A049' : alpha('#4CAF50', 0.1),
-                },
-              }}
-            >
-              <Typography sx={{ fontSize: '1.2rem' }}>🟢</Typography>
-            </IconButton>
-            <Box sx={{ height: 1, backgroundColor: '#E0E0E0' }} />
-            <IconButton
-              onClick={() => onVegFilterChange('non-veg')}
-              sx={{
-                borderRadius: 0,
-                height: 40,
-                backgroundColor: vegFilter === 'non-veg' ? '#F44336' : 'transparent',
-                color: vegFilter === 'non-veg' ? 'white' : '#6C757D',
-                '&:hover': {
-                  backgroundColor: vegFilter === 'non-veg' ? '#E53935' : alpha('#F44336', 0.1),
-                },
-              }}
-            >
-              <Typography sx={{ fontSize: '1.2rem' }}>🔴</Typography>
-            </IconButton>
-          </Stack>
+            />
+          </Box>
         </Stack>
+
+        {/* Big Animated Text Section */}
+        <Box
+          sx={{
+            minHeight: { xs: 80, sm: 100 },
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            position: 'relative',
+          }}
+        >
+          <Zoom in={showText} timeout={600}>
+            <Box
+              sx={{
+                textAlign: 'center',
+                position: 'absolute',
+                width: '100%',
+              }}
+            >
+              <Typography
+                sx={{
+                  fontSize: { xs: '2rem', sm: '3rem', md: '3.5rem' },
+                  fontWeight: 900,
+                  background: 'linear-gradient(135deg, #FFC107 0%, #FFD54F 50%, #FFF176 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                  textShadow: '0 4px 12px rgba(255, 193, 7, 0.3)',
+                  letterSpacing: '-1px',
+                  lineHeight: 1.2,
+                  mb: 0.5,
+                }}
+              >
+                {animatedTexts[currentTextIndex].emoji}
+              </Typography>
+              <Typography
+                sx={{
+                  fontSize: { xs: '1.5rem', sm: '2.25rem', md: '2.75rem' },
+                  fontWeight: 900,
+                  background: 'linear-gradient(135deg, #FFFFFF 0%, #E3F2FD 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                  textShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
+                  letterSpacing: '-0.5px',
+                  lineHeight: 1.2,
+                }}
+              >
+                {animatedTexts[currentTextIndex].text}
+              </Typography>
+            </Box>
+          </Zoom>
+        </Box>
       </Container>
     </Box>
   );

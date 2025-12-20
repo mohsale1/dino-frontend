@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   Box,
   Container,
   Typography,
-  Grid,
   Card,
   CardMedia,
   CardContent,
@@ -19,12 +18,15 @@ import {
   Remove,
   Restaurant,
   Star,
+  ChevronLeft,
+  ChevronRight,
 } from '@mui/icons-material';
 import { MenuItemType } from '../../../hooks/useMenuData';
 
 interface PopularDishesProps {
   dishes: MenuItemType[];
   onAddToCart?: (item: MenuItemType) => void;
+  onRemoveFromCart?: (item: MenuItemType) => void;
   getItemQuantityInCart?: (itemId: string) => number;
   getMenuItemImage?: (item: MenuItemType) => string;
 }
@@ -32,10 +34,13 @@ interface PopularDishesProps {
 const PopularDishes: React.FC<PopularDishesProps> = ({
   dishes,
   onAddToCart,
+  onRemoveFromCart,
   getItemQuantityInCart,
   getMenuItemImage,
 }) => {
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
+  const [scrollPosition, setScrollPosition] = useState(0);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   if (dishes.length === 0) {
     return null;
@@ -45,61 +50,147 @@ const PopularDishes: React.FC<PopularDishesProps> = ({
     setImageErrors(prev => ({ ...prev, [itemId]: true }));
   };
 
+  const handleScroll = (direction: 'left' | 'right') => {
+    if (!scrollContainerRef.current) return;
+
+    const scrollAmount = 300;
+    const newPosition =
+      direction === 'left'
+        ? scrollPosition - scrollAmount
+        : scrollPosition + scrollAmount;
+
+    scrollContainerRef.current.scrollTo({
+      left: newPosition,
+      behavior: 'smooth',
+    });
+    setScrollPosition(newPosition);
+  };
+
   return (
-    <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3 }, py: { xs: 3, sm: 4 }, flex: 1 }}>
-      {/* Section Header */}
-      <Box sx={{ mb: 3 }}>
-        <Stack direction="row" alignItems="center" gap={1} sx={{ mb: 1 }}>
-          <Box
-            sx={{
-              width: 40,
-              height: 40,
-              borderRadius: 2,
-              background: 'linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
+    <Box sx={{ py: { xs: 3, sm: 4 }, backgroundColor: 'white' }}>
+      <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3 } }}>
+        {/* Section Header */}
+        <Stack
+          direction="row"
+          alignItems="center"
+          justifyContent="space-between"
+          sx={{ mb: 2.5 }}
+        >
+          <Stack direction="row" alignItems="center" gap={1.5}>
+            <Box
+              sx={{
+                width: 40,
+                height: 40,
+                borderRadius: 2,
+                background: 'linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <LocalFireDepartment sx={{ fontSize: 24, color: 'white' }} />
+            </Box>
+            <Box>
+              <Typography
+                variant="h5"
+                sx={{
+                  fontWeight: 800,
+                  color: '#1E3A5F',
+                  fontSize: { xs: '1.15rem', sm: '1.4rem' },
+                  letterSpacing: '-0.5px',
+                }}
+              >
+                Popular Dishes
+              </Typography>
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{
+                  fontSize: { xs: '0.8rem', sm: '0.85rem' },
+                  fontWeight: 500,
+                }}
+              >
+                Most loved by our customers
+              </Typography>
+            </Box>
+          </Stack>
+
+          {/* Navigation Buttons - Desktop Only */}
+          <Stack
+            direction="row"
+            spacing={1}
+            sx={{ display: { xs: 'none', md: 'flex' } }}
           >
-            <LocalFireDepartment sx={{ fontSize: 24, color: 'white' }} />
-          </Box>
-          <Typography
-            variant="h5"
-            sx={{
-              fontWeight: 800,
-              color: '#1E3A5F',
-              fontSize: { xs: '1.25rem', sm: '1.5rem' },
-              letterSpacing: '-0.5px',
-            }}
-          >
-            Popular Dishes
-          </Typography>
+            <IconButton
+              onClick={() => handleScroll('left')}
+              disabled={scrollPosition <= 0}
+              sx={{
+                backgroundColor: '#F8F9FA',
+                border: '2px solid #E0E0E0',
+                '&:hover': {
+                  backgroundColor: 'white',
+                  borderColor: '#1E3A5F',
+                },
+                '&.Mui-disabled': {
+                  backgroundColor: '#F8F9FA',
+                  borderColor: '#E0E0E0',
+                },
+              }}
+            >
+              <ChevronLeft />
+            </IconButton>
+            <IconButton
+              onClick={() => handleScroll('right')}
+              sx={{
+                backgroundColor: '#F8F9FA',
+                border: '2px solid #E0E0E0',
+                '&:hover': {
+                  backgroundColor: 'white',
+                  borderColor: '#1E3A5F',
+                },
+              }}
+            >
+              <ChevronRight />
+            </IconButton>
+          </Stack>
         </Stack>
-        <Typography
-          variant="body2"
-          color="text.secondary"
+
+        {/* Horizontal Scrolling Carousel */}
+        <Box
+          ref={scrollContainerRef}
           sx={{
-            fontSize: { xs: '0.85rem', sm: '0.9rem' },
-            fontWeight: 500,
-            ml: { xs: 0, sm: 7 },
+            display: 'flex',
+            gap: 2,
+            overflowX: 'auto',
+            pb: 2,
+            scrollBehavior: 'smooth',
+            '&::-webkit-scrollbar': {
+              height: 8,
+            },
+            '&::-webkit-scrollbar-track': {
+              backgroundColor: '#E0E0E0',
+              borderRadius: 4,
+            },
+            '&::-webkit-scrollbar-thumb': {
+              backgroundColor: '#1E3A5F',
+              borderRadius: 4,
+              '&:hover': {
+                backgroundColor: '#2C5282',
+              },
+            },
           }}
         >
-          Most loved by our customers
-        </Typography>
-      </Box>
+          {dishes.map((dish) => {
+            const quantity = getItemQuantityInCart ? getItemQuantityInCart(dish.id) : 0;
+            const imageUrl = getMenuItemImage ? getMenuItemImage(dish) : dish.image || '';
+            const hasImage = imageUrl && !imageErrors[dish.id];
 
-      {/* Dishes Grid - Card View */}
-      <Grid container spacing={{ xs: 2, sm: 2.5 }}>
-        {dishes.map((dish) => {
-          const quantity = getItemQuantityInCart ? getItemQuantityInCart(dish.id) : 0;
-          const imageUrl = getMenuItemImage ? getMenuItemImage(dish) : dish.image || '';
-          const hasImage = imageUrl && !imageErrors[dish.id];
-
-          return (
-            <Grid item xs={12} sm={6} md={4} key={dish.id}>
+            return (
               <Card
+                key={dish.id}
                 sx={{
-                  height: '100%',
+                  minWidth: { xs: 240, sm: 280 },
+                  maxWidth: { xs: 240, sm: 280 },
                   display: 'flex',
                   flexDirection: 'column',
                   borderRadius: 2.5,
@@ -306,6 +397,7 @@ const PopularDishes: React.FC<PopularDishesProps> = ({
                       >
                         <IconButton
                           size="small"
+                          onClick={() => onRemoveFromCart && onRemoveFromCart(dish)}
                           sx={{
                             backgroundColor: 'white',
                             color: '#1E3A5F',
@@ -348,11 +440,11 @@ const PopularDishes: React.FC<PopularDishesProps> = ({
                   </Stack>
                 </CardContent>
               </Card>
-            </Grid>
-          );
-        })}
-      </Grid>
-    </Container>
+            );
+          })}
+        </Box>
+      </Container>
+    </Box>
   );
 };
 
