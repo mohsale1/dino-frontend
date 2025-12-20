@@ -1304,61 +1304,61 @@ const UserManagement: React.FC = () => {
                     borderRadius: 4,
                   },
                 }}>
-                  <Table sx={{ minWidth: { xs: 650, sm: 750 } }}>
+                  <Table>
                     <TableHead>
                       <TableRow>
                         <TableCell sx={{ 
                           fontWeight: 600, 
-                          fontSize: { xs: '0.8125rem', sm: '0.875rem' },
+                          fontSize: '0.875rem',
                           color: 'text.primary',
-                          py: { xs: 1.5, sm: 2 },
-                          px: { xs: 2, sm: 2 },
-                          position: { xs: 'sticky', sm: 'static' },
-                          left: 0,
-                          backgroundColor: 'background.paper',
-                          zIndex: 1,
-                          minWidth: { xs: 200, sm: 'auto' }
+                          py: 2
+                          
+                          
+                          
+                          
+                          
+                          
                         }}>
                           User
                         </TableCell>
                         <TableCell sx={{ 
                           fontWeight: 600, 
-                          fontSize: { xs: '0.8125rem', sm: '0.875rem' },
+                          fontSize: '0.875rem',
                           color: 'text.primary',
-                          py: { xs: 1.5, sm: 2 },
-                          px: { xs: 2, sm: 2 },
-                          minWidth: 100
+                          py: 2
+                          
+                          
                         }}>
                           Role
                         </TableCell>
                         <TableCell sx={{ 
                           fontWeight: 600, 
-                          fontSize: { xs: '0.8125rem', sm: '0.875rem' },
+                          fontSize: '0.875rem',
                           color: 'text.primary',
-                          py: { xs: 1.5, sm: 2 },
-                          px: { xs: 2, sm: 2 },
-                          minWidth: 100
+                          py: 2
+                          
+                          
                         }}>
                           Status
                         </TableCell>
                         <TableCell sx={{ 
                           fontWeight: 600, 
-                          fontSize: { xs: '0.8125rem', sm: '0.875rem' },
+                          fontSize: '0.875rem',
                           color: 'text.primary',
-                          py: { xs: 1.5, sm: 2 },
-                          px: { xs: 2, sm: 2 },
-                          display: { xs: 'none', md: 'table-cell' },
-                          minWidth: 120
+                          py: 2
+                          
+                          
+                          
                         }}>
                           Last Login
                         </TableCell>
                         <TableCell align="center" sx={{ 
                           fontWeight: 600, 
-                          fontSize: { xs: '0.8125rem', sm: '0.875rem' },
+                          fontSize: '0.875rem',
                           color: 'text.primary',
-                          py: { xs: 1.5, sm: 2 },
-                          px: { xs: 2, sm: 2 },
-                          minWidth: 80
+                          py: 2
+                          
+                          
                         }}>
                           Actions
                         </TableCell>
@@ -1386,9 +1386,9 @@ const UserManagement: React.FC = () => {
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1.5, sm: 2 } }}>
                             <Avatar 
                               sx={{ 
-                                width: { xs: 36, sm: 44 }, 
-                                height: { xs: 36, sm: 44 }, 
-                                fontSize: { xs: '0.875rem', sm: '1rem' },
+                                width: 44, 
+                                height: 44, 
+                                fontSize: '1rem',
                                 fontWeight: 600,
                                 bgcolor: 'primary.main'
                               }}
@@ -1400,7 +1400,7 @@ const UserManagement: React.FC = () => {
                                 variant="subtitle2" 
                                 fontWeight="600"
                                 sx={{ 
-                                  fontSize: { xs: '0.875rem', sm: '0.9375rem' },
+                                  fontSize: '0.9375rem',
                                   color: 'text.primary',
                                   mb: 0.5,
                                   lineHeight: 1.3
@@ -1412,7 +1412,7 @@ const UserManagement: React.FC = () => {
                                 variant="body2" 
                                 color="text.secondary"
                                 sx={{ 
-                                  fontSize: { xs: '0.75rem', sm: '0.8125rem' },
+                                  fontSize: '0.8125rem',
                                   lineHeight: 1.4,
                                   mb: user.phone ? 0.25 : 0,
                                   wordBreak: 'break-word'
@@ -1425,7 +1425,7 @@ const UserManagement: React.FC = () => {
                                   variant="body2" 
                                   color="text.secondary"
                                   sx={{ 
-                                    fontSize: { xs: '0.75rem', sm: '0.8125rem' },
+                                    fontSize: '0.8125rem',
                                     lineHeight: 1.4,
                                     display: { xs: 'none', lg: 'block' }
                                   }}
@@ -1436,11 +1436,11 @@ const UserManagement: React.FC = () => {
                             </Box>
                           </Box>
                         </TableCell>
-                        <TableCell sx={{ py: { xs: 2, sm: 2.5 }, px: { xs: 2, sm: 2 } }}>
+                        <TableCell sx={{ py: 2.5 }}>
                           <Typography 
                             variant="body2" 
                             sx={{ 
-                              fontSize: { xs: '0.75rem', sm: '0.8125rem' },
+                              fontSize: '0.8125rem',
                               fontWeight: 600,
                               color: 'text.primary',
                               whiteSpace: 'nowrap'
@@ -1449,15 +1449,15 @@ const UserManagement: React.FC = () => {
                             {user.role_display_name || getDisplayName(user.role)}
                           </Typography>
                         </TableCell>
-                        <TableCell sx={{ py: { xs: 2, sm: 2.5 }, px: { xs: 2, sm: 2 } }}>
+                        <TableCell sx={{ py: 2.5 }}>
                           <Chip
                             label={user.status || (user.isActive ? 'Active' : 'Inactive')}
                             color={user.isActive ? 'success' : 'default'}
                             size="small"
-                            icon={user.isActive ? <CheckCircle sx={{ fontSize: { xs: '0.875rem', sm: '1rem' } }} /> : <Cancel sx={{ fontSize: { xs: '0.875rem', sm: '1rem' } }} />}
+                            icon={user.isActive ? <CheckCircle sx={{ fontSize: '1rem' }} /> : <Cancel sx={{ fontSize: { xs: '0.875rem', sm: '1rem' } }} />}
                             sx={{ 
-                              fontSize: { xs: '0.75rem', sm: '0.8125rem' },
-                              height: { xs: 24, sm: 28 },
+                              fontSize: '0.8125rem',
+                              height: 28,
                               fontWeight: 500,
                               '& .MuiChip-label': {
                                 px: { xs: 1, sm: 1.5 }
@@ -1465,7 +1465,7 @@ const UserManagement: React.FC = () => {
                             }}
                           />
                         </TableCell>
-                        <TableCell sx={{ py: { xs: 2, sm: 2.5 }, px: { xs: 2, sm: 2 }, display: { xs: 'none', md: 'table-cell' } }}>
+                        <TableCell sx={{ py: 2.5, display: { xs: 'none', md: 'table-cell' } }}>
                           <Typography 
                             variant="body2" 
                             sx={{ 
@@ -1477,7 +1477,7 @@ const UserManagement: React.FC = () => {
                             {formatLastLogin(user.last_login || user.updatedAt || user.createdAt)}
                           </Typography>
                         </TableCell>
-                        <TableCell sx={{ textAlign: 'center', py: { xs: 2, sm: 2.5 }, px: { xs: 2, sm: 2 } }}>
+                        <TableCell sx={{ textAlign: 'center', py: 2.5 }}>
                           <IconButton
                             onClick={(e) => handleMenuClick(e, user)}
                             size="small"
@@ -1490,7 +1490,7 @@ const UserManagement: React.FC = () => {
                               }
                             }}
                           >
-                            <MoreVert sx={{ fontSize: { xs: '1.125rem', sm: '1.25rem' } }} />
+                            <MoreVert sx={{ fontSize: '1.25rem' }} />
                           </IconButton>
                         </TableCell>
                       </TableRow>
