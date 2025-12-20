@@ -1311,13 +1311,8 @@ const UserManagement: React.FC = () => {
                           fontWeight: 600, 
                           fontSize: '0.875rem',
                           color: 'text.primary',
-                          py: 2
-                          
-                          
-                          
-                          
-                          
-                          
+                          py: 2,
+                          px: { xs: 2, sm: 2 }
                         }}>
                           User
                         </TableCell>
@@ -1325,9 +1320,8 @@ const UserManagement: React.FC = () => {
                           fontWeight: 600, 
                           fontSize: '0.875rem',
                           color: 'text.primary',
-                          py: 2
-                          
-                          
+                          py: 2,
+                          px: { xs: 2, sm: 2 }
                         }}>
                           Role
                         </TableCell>
@@ -1335,9 +1329,8 @@ const UserManagement: React.FC = () => {
                           fontWeight: 600, 
                           fontSize: '0.875rem',
                           color: 'text.primary',
-                          py: 2
-                          
-                          
+                          py: 2,
+                          px: { xs: 2, sm: 2 }
                         }}>
                           Status
                         </TableCell>
@@ -1345,10 +1338,8 @@ const UserManagement: React.FC = () => {
                           fontWeight: 600, 
                           fontSize: '0.875rem',
                           color: 'text.primary',
-                          py: 2
-                          
-                          
-                          
+                          py: 2,
+                          px: { xs: 2, sm: 2 }
                         }}>
                           Last Login
                         </TableCell>
@@ -1356,9 +1347,8 @@ const UserManagement: React.FC = () => {
                           fontWeight: 600, 
                           fontSize: '0.875rem',
                           color: 'text.primary',
-                          py: 2
-                          
-                          
+                          py: 2,
+                          px: { xs: 2, sm: 2 }
                         }}>
                           Actions
                         </TableCell>
@@ -1372,16 +1362,15 @@ const UserManagement: React.FC = () => {
                           '&:hover': {
                             backgroundColor: 'action.hover',
                           },
+                          '&:hover td': {
+                            backgroundColor: 'action.hover',
+                          },
                           transition: 'background-color 0.2s'
                         }}
                       >
                         <TableCell sx={{ 
                           py: { xs: 2, sm: 2.5 },
                           px: { xs: 2, sm: 2 },
-                          position: { xs: 'sticky', sm: 'static' },
-                          left: 0,
-                          backgroundColor: 'background.paper',
-                          zIndex: 1,
                         }}>
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1.5, sm: 2 } }}>
                             <Avatar 
@@ -1436,7 +1425,7 @@ const UserManagement: React.FC = () => {
                             </Box>
                           </Box>
                         </TableCell>
-                        <TableCell sx={{ py: 2.5 }}>
+                        <TableCell sx={{ py: 2.5, px: { xs: 2, sm: 2 } }}>
                           <Typography 
                             variant="body2" 
                             sx={{ 
@@ -1449,7 +1438,7 @@ const UserManagement: React.FC = () => {
                             {user.role_display_name || getDisplayName(user.role)}
                           </Typography>
                         </TableCell>
-                        <TableCell sx={{ py: 2.5 }}>
+                        <TableCell sx={{ py: 2.5, px: { xs: 2, sm: 2 } }}>
                           <Chip
                             label={user.status || (user.isActive ? 'Active' : 'Inactive')}
                             color={user.isActive ? 'success' : 'default'}
@@ -1465,7 +1454,7 @@ const UserManagement: React.FC = () => {
                             }}
                           />
                         </TableCell>
-                        <TableCell sx={{ py: 2.5, display: { xs: 'none', md: 'table-cell' } }}>
+                        <TableCell sx={{ py: 2.5, px: { xs: 2, sm: 2 }, display: { xs: 'none', md: 'table-cell' } }}>
                           <Typography 
                             variant="body2" 
                             sx={{ 
@@ -1477,7 +1466,7 @@ const UserManagement: React.FC = () => {
                             {formatLastLogin(user.last_login || user.updatedAt || user.createdAt)}
                           </Typography>
                         </TableCell>
-                        <TableCell sx={{ textAlign: 'center', py: 2.5 }}>
+                        <TableCell sx={{ textAlign: 'center', py: 2.5, px: { xs: 2, sm: 2 } }}>
                           <IconButton
                             onClick={(e) => handleMenuClick(e, user)}
                             size="small"
