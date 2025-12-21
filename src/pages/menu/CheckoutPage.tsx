@@ -409,7 +409,7 @@ const CheckoutPage: React.FC = () => {
 
   // Main Checkout
   return (
-    <Box sx={{ minHeight: '100vh', backgroundColor: '#F8F9FA', pb: activeStep === 2 ? 10 : 4 }}>
+    <Box sx={{ minHeight: '100vh', backgroundColor: '#F8F9FA', pb: activeStep === 2 ? 16 : 4 }}>
       {/* Header */}
       <Box sx={{ backgroundColor: '#1E3A5F', color: 'white', py: 2, mb: 3 }}>
         <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3 } }}>
@@ -456,7 +456,7 @@ const CheckoutPage: React.FC = () => {
           </Stack>
         </Box>
 
-        <Grid container spacing={3} sx={{ mb: activeStep === 2 ? 0 : 0 }}>
+        <Grid container spacing={3}>
           {/* Main Content */}
           <Grid item xs={12} md={activeStep === 2 ? 8 : 12}>
             <Paper sx={{ backgroundColor: 'white', border: '1px solid #E0E0E0', boxShadow: 'none' }}>
@@ -677,7 +677,7 @@ const CheckoutPage: React.FC = () => {
 
               {/* Step 2: Payment Method */}
               {activeStep === 2 && (
-                <Box sx={{ p: { xs: 2, sm: 2.5 }, pb: { xs: 2, sm: 2 } }}>
+                <Box sx={{ p: { xs: 2, sm: 2.5 } }}>
                   <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: '#1E3A5F' }}>
                     Payment Method
                   </Typography>
@@ -747,7 +747,7 @@ const CheckoutPage: React.FC = () => {
           {/* Order Summary Sidebar - Only show in Payment step */}
           {activeStep === 2 && (
             <Grid item xs={12} md={4}>
-              <Paper sx={{ p: 2.5, pb: 2, backgroundColor: 'white', border: '1px solid #E0E0E0', boxShadow: 'none', position: 'sticky', top: 20, mb: { xs: 2, md: 0 } }}>
+              <Paper sx={{ p: 2.5, backgroundColor: 'white', border: '1px solid #E0E0E0', boxShadow: 'none', position: 'sticky', top: 20 }}>
                 <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: '#1E3A5F' }}>
                   Order Summary
                 </Typography>

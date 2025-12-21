@@ -317,8 +317,8 @@ const OrderSuccessPage: React.FC = () => {
               <Box sx={{ textAlign: 'center', mb: 2.5 }}>
                 <Box
                   sx={{
-                    width: { xs: 100, sm: 120 },
-                    height: { xs: 100, sm: 120 },
+                    width: { xs: 70, sm: 80 },
+                    height: { xs: 70, sm: 80 },
                     margin: '0 auto',
                     borderRadius: '50%',
                     backgroundColor: '#4CAF50',
@@ -331,7 +331,7 @@ const OrderSuccessPage: React.FC = () => {
                 >
                   <CheckCircle 
                     sx={{ 
-                      fontSize: { xs: 60, sm: 72 }, 
+                      fontSize: { xs: 40, sm: 48 }, 
                       color: 'white',
                     }} 
                   />
@@ -386,7 +386,6 @@ const OrderSuccessPage: React.FC = () => {
                   #{orderData?.orderNumber || orderId}
                 </Typography>
               </Box>
-
 
               {/* Minimal Order Summary */}
               <Box sx={{ 
