@@ -611,6 +611,10 @@ const MenuManagement: React.FC = () => {
           position: 'relative',
           overflow: 'hidden',
           color: 'text.primary',
+          py: { xs: 2.5, sm: 3 },
+          px: { xs: 2, sm: 3 },
+          margin: 0,
+          width: '100%',
         }}
       >
         <AnimatedBackground />

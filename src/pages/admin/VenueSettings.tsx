@@ -567,7 +567,7 @@ const VenueSettings: React.FC = () => {
         }}
       >
         <AnimatedBackground />
-        <Container maxWidth='lg' sx={{ position: 'relative', zIndex: 2, pl: { xs: 3, sm: 4, md: 5 } }}>
+        <Container maxWidth='lg' sx={{ position: 'relative', zIndex: 2, pl: { xs: 4, sm: 5, md: 6 }, pr: { xs: 2, sm: 3 } }}>
           <Box
             sx={{
               display: 'flex',
@@ -578,7 +578,7 @@ const VenueSettings: React.FC = () => {
             }}
           >
             {/* Header Content */}
-            <Box sx={{ flex: 1 }}>
+            <Box sx={{ flex: 1, pl: { xs: 0.5, sm: 1 } }}>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
                 <Settings sx={{ fontSize: 24, mr: 1.25, color: 'text.primary', opacity: 0.9 }} />
                 <Typography
@@ -646,39 +646,6 @@ const VenueSettings: React.FC = () => {
                   alignItems: 'center',
                 }}
               >
-              <Tooltip title={venueActive ? 'Deactivate venue operations' : 'Activate venue operations'}>
-                <Button
-                  variant={venueActive ? 'outlined' : 'contained'}
-                  color={venueActive ? 'error' : 'success'}
-                  onClick={handleToggleVenueStatus}
-                  startIcon={<PowerSettingsNew sx={{ fontSize: 16 }} />}
-                  size='small'
-                  sx={{
-                    backgroundColor: venueActive ? 'transparent' : 'success.main',
-                    color: venueActive ? 'error.main' : 'white',
-                    borderColor: venueActive ? 'error.main' : 'success.main',
-                    fontWeight: 600,
-                    px: 1.5,
-                    py: 0.5,
-                    borderRadius: 1.5,
-                    textTransform: 'none',
-                    fontSize: '0.75rem',
-                    minHeight: 28,
-                    boxShadow: venueActive ? 'none' : '0 2px 8px rgba(0, 0, 0, 0.15)',
-                    '&:hover': {
-                      backgroundColor: venueActive ? 'rgba(211, 47, 47, 0.1)' : 'success.dark',
-                      color: venueActive ? 'error.dark' : 'white',
-                      borderColor: venueActive ? 'error.dark' : 'success.dark',
-                      transform: 'translateY(-1px)',
-                      boxShadow: venueActive ? '0 2px 8px rgba(211, 47, 47, 0.3)' : '0 4px 12px rgba(46, 125, 50, 0.4)',
-                    },
-                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                  }}
-                >
-                  {venueActive ? 'Deactivate' : 'Activate'}
-                </Button>
-              </Tooltip>
-
               <IconButton
                 onClick={handleRefreshSettings}
                 disabled={loading}
@@ -875,9 +842,9 @@ const VenueSettings: React.FC = () => {
             </Tabs>
 
           <TabPanel value={tabValue} index={0}>
-            <Grid container spacing={2}>
+            <Grid container spacing={3}>
               <Grid item xs={12} md={8}>
-                <Card sx={{ boxShadow: 1 }}>
+                <Card sx={{ boxShadow: 1, mb: 3 }}>
                   <CardContent sx={{ p: { xs: 2, sm: 2.5 }, '&:last-child': { pb: { xs: 2, sm: 2.5 } } }}>
                     <Typography variant='h6' gutterBottom fontWeight='600' sx={{ mb: 2.5, fontSize: { xs: '1rem', sm: '1.125rem' } }}>
                       Basic Information
@@ -1130,7 +1097,7 @@ const VenueSettings: React.FC = () => {
                 </Card>
               </Grid>
               <Grid item xs={12} md={4}>
-                <Card sx={{ boxShadow: 1 }}>
+                <Card sx={{ boxShadow: 1, mb: 3 }}>
                   <CardContent sx={{ textAlign: 'center', p: { xs: 2, sm: 2.5 }, '&:last-child': { pb: { xs: 2, sm: 2.5 } } }}>
                     <Typography variant='h6' gutterBottom fontWeight='600' sx={{ mb: 2, fontSize: { xs: '1rem', sm: '1.125rem' } }}>
                       Venue Logo

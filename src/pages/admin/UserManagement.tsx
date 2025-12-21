@@ -233,7 +233,10 @@ const UserManagement: React.FC = () => {
           rolesArray = response;
         }
         
-        rolesArray = rolesArray.filter(role => role.name.toLowerCase() !== 'superadmin');
+        rolesArray = rolesArray.filter(role => 
+          role.name.toLowerCase() !== 'superadmin' && 
+          role.name.toLowerCase() !== 'dinos'
+        );
         
         if (rolesArray.length > 0) {
           setRoles(rolesArray);

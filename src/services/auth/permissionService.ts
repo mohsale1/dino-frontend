@@ -357,7 +357,7 @@ class PermissionService {
           roleDisplayName: user.role_display_name || this.getRoleDisplayName(user.role),
           isActive: user.isActive !== undefined ? user.isActive : (user.status === 'active'),
           status: user.status || (user.isActive ? 'active' : 'inactive'),
-          lastLogin: user.last_logged_in ? new Date(user.last_logged_in) : null,
+          lastLogin: user.last_login ? new Date(user.last_login) : null,
           permissions: [], // Permissions are now fetched per user from backend
           venueId: user.venueId || user.venueId,
           workspaceId: user.workspaceId || user.workspaceId,
@@ -413,9 +413,15 @@ class PermissionService {
       });
       
       const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-      const recentLogins = users.filter(u => 
-        u.lastLogin && new Date(u.lastLogin) > oneDayAgo
-      ).length;
+      const recentLogins = users.filter(u => {
+        if (!u.lastLogin) return false;
+        const loginDate = new Date(u.lastLogin);
+        const isRecent = loginDate > oneDayAgo;
+        console.log(`User ${u.email}: lastLogin=${u.lastLogin}, loginDate=${loginDate}, oneDayAgo=${oneDayAgo}, isRecent=${isRecent}`);
+        return isRecent;
+      }).length;
+      
+      console.log(`Recent logins calculation: ${recentLogins} users logged in within last 24 hours`);
       
       return {
         totalUsers,

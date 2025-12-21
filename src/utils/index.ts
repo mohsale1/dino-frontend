@@ -19,8 +19,6 @@ export * from './api';
 export * from './performance';
 
 // Other utilities
-export * from './formatters';
-export * from './logger';
 export * from './userUtils';
 // Export venueUtils with specific exports to avoid conflicts
 export { 
@@ -32,4 +30,3 @@ export {
   getVenueDisplayName 
 } from './venueUtils';
 export * from './tokenRefreshScheduler';
-export * from './clearWorkspaceVenueCache';

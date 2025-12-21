@@ -112,21 +112,17 @@ const TableManagement = () => {
   // Function to refresh both areas and tables data
   const refreshData = async () => {
     const venue = getVenue();
-    if (!venue?.id) {      return;
+    if (!venue?.id) {
+      return;
     }
 
     try {
       const [areasData, tablesData] = await Promise.all([
         tableService.getAreas(venue.id),
-        tableService.getTables({ venueId: venue.id })
+        tableService.getVenueTables(venue.id)
       ]);      
-      let validTables: Table[] = [];
-      if (tablesData && tablesData.data && Array.isArray(tablesData.data)) {
-        validTables = tablesData.data;
-      } else {
-        validTables = [];
-      }
-      
+      // getVenueTables returns an array directly, not a paginated response
+      const validTables = Array.isArray(tablesData) ? tablesData : [];
       const validAreas = Array.isArray(areasData) ? areasData : [];
 
       setAreas(validAreas);
@@ -158,17 +154,13 @@ const TableManagement = () => {
         setError(null);
         const [areasData, tablesData] = await Promise.all([
           tableService.getAreas(venue.id),
-          tableService.getTables({ venueId: venue.id })
+          tableService.getVenueTables(venue.id)
         ]);
-        let initialTables: Table[] = [];
-        if (Array.isArray(tablesData?.data)) {
-          initialTables = tablesData.data;
-        } else if (Array.isArray(tablesData)) {
-          initialTables = tablesData;
-        } else {
-          initialTables = [];
-        }
-        setAreas(areasData);
+        // getVenueTables returns an array directly
+        const initialTables = Array.isArray(tablesData) ? tablesData : [];
+        const initialAreas = Array.isArray(areasData) ? areasData : [];
+        
+        setAreas(initialAreas);
         setTables(initialTables);
       } catch (error) {
         // API failed - show error alert but keep UI visible        setError('Network error. Please check your connection.');
@@ -452,7 +444,8 @@ const TableManagement = () => {
           position: 'relative',
           overflow: 'hidden',
           color: 'text.primary',
-          padding: 0,
+          py: { xs: 2.5, sm: 3 },
+          px: { xs: 2, sm: 3 },
           margin: 0,
           width: '100%',
         }}
@@ -466,6 +459,7 @@ const TableManagement = () => {
               justifyContent: 'space-between',
               alignItems: { xs: 'flex-start', md: 'center' },
               gap: { xs: 1.5, md: 2 },
+              py: { xs: 2.5, sm: 3 },
             }}
           >
             {/* Header Content */}

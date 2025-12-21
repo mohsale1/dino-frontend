@@ -44,90 +44,76 @@ const TableStats: React.FC<TableStatsProps> = ({ tables, areas }) => {
   if (tables.length === 0 && areas.length === 0) return null;
 
   return (
-    <Box sx={{ 
-      px: { xs: 3, sm: 4 }, 
-      py: { xs: 1, sm: 4 }, 
-      backgroundColor: 'background.paper', 
-      borderRadius: 3, 
-      mb: 4,
-      border: `1px solid ${theme.palette.grey[100]}`,
-      boxShadow: '0 4px 20px rgba(0,0,0,0.08)'
-    }}>
-      <Typography variant="h6" fontWeight="700" color="text.primary" sx={{ mb: 1 }}>
-        Table Overview
-      </Typography>
-      
-      <Grid container spacing={{ xs: 2, sm: 3 }}>
-        {stats.map((stat, index) => (
-          <Grid item xs={12} sm={6} md={3} key={index}>
-            <Box
-              sx={{
-                p: { xs: 2.5, sm: 3 },
-                borderRadius: 1,
-                backgroundColor: alpha(stat.color, 0.05),
-                border: `1px solid ${alpha(stat.color, 0.2)}`,
-                transition: 'all 0.3s ease',
-                '&:hover': {
-                  transform: 'translateY(-2px)',
-                  boxShadow: `0 8px 25px ${alpha(stat.color, 0.2)}`,
-                  backgroundColor: alpha(stat.color, 0.08),
-                },
-              }}
-            >
-              <Stack direction="row" alignItems="center" spacing={1}>
-                {/* Icon on the left */}
-                <Box
-                  sx={{
-                    width: 48,
-                    height: 48,
-                    borderRadius: 1,
-                    backgroundColor: stat.color,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: 'white',
-                    flexShrink: 0,
+    <Grid container spacing={2} sx={{ mb: 2.5 }}>
+      {stats.map((stat, index) => (
+        <Grid item xs={12} sm={6} md={3} key={index}>
+          <Box
+            sx={{
+              p: { xs: 2, sm: 2.5 },
+              borderRadius: 1.5,
+              backgroundColor: alpha(stat.color, 0.05),
+              border: `1px solid ${alpha(stat.color, 0.2)}`,
+              transition: 'all 0.3s ease',
+              '&:hover': {
+                transform: 'translateY(-2px)',
+                boxShadow: `0 6px 20px ${alpha(stat.color, 0.2)}`,
+                backgroundColor: alpha(stat.color, 0.08),
+              },
+            }}
+          >
+            <Stack direction="row" alignItems="center" spacing={2}>
+              {/* Icon on the left */}
+              <Box
+                sx={{
+                  width: { xs: 40, sm: 48 },
+                  height: { xs: 40, sm: 48 },
+                  borderRadius: 1.5,
+                  backgroundColor: stat.color,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'white',
+                  flexShrink: 0,
+                }}
+              >
+                {React.cloneElement(stat.icon, { fontSize: 'medium' })}
+              </Box>
+              
+              {/* Text content on the right */}
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Typography 
+                  variant="h4" 
+                  fontWeight="700" 
+                  color="text.primary" 
+                  sx={{ 
+                    fontSize: { xs: '1.25rem', sm: '2rem' },
+                    lineHeight: 1.2,
+                    mb: 0.5
                   }}
                 >
-                  {React.cloneElement(stat.icon, { fontSize: 'medium' })}
-                </Box>
-                
-                {/* Text content on the right */}
-                <Box sx={{ flex: 1, minWidth: 0 }}>
-                  <Typography 
-                    variant="h4" 
-                    fontWeight="700" 
-                    color="text.primary" 
-                    sx={{ 
-                      fontSize: { xs: '1.25rem', sm: '2rem' },
-                      lineHeight: 1.2,
-                      mb: 0.5
-                    }}
-                  >
-                    {stat.value}
-                  </Typography>
-                  <Typography 
-                    variant="body2" 
-                    color="text.secondary" 
-                    fontWeight="600"
-                    sx={{ 
-                      fontSize: { xs: '0.75rem', sm: '0.8rem' },
-                      lineHeight: 1.2,
-                      display: '-webkit-box',
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: 'vertical',
-                      overflow: 'hidden',
-                    }}
-                  >
-                    {stat.label}
-                  </Typography>
-                </Box>
-              </Stack>
-            </Box>
-          </Grid>
-        ))}
-      </Grid>
-    </Box>
+                  {stat.value}
+                </Typography>
+                <Typography 
+                  variant="body2" 
+                  color="text.secondary" 
+                  fontWeight="600"
+                  sx={{ 
+                    fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                    lineHeight: 1.2,
+                    display: '-webkit-box',
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical',
+                    overflow: 'hidden',
+                  }}
+                >
+                  {stat.label}
+                </Typography>
+              </Box>
+            </Stack>
+          </Box>
+        </Grid>
+      ))}
+    </Grid>
   );
 };
 
