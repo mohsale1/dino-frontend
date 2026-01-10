@@ -67,30 +67,34 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
 
   // Smooth scroll to section
   const scrollToSection = (sectionId: string) => {
-    const element = document.getElementById(sectionId);
+    console.log('Scrolling to section:', sectionId);
     
-    if (element) {
-      // Calculate proper offset based on navbar height
-      const navbarHeight = 100; // Adjust based on actual navbar height
-      const elementPosition = element.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.scrollY - navbarHeight;
-
-      // Set active section immediately for better UX
-      setActiveSection(sectionId);
-      
-      // Smooth scroll to position
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: 'smooth'
-      });
-      
-      if (onSectionScroll) {
-        onSectionScroll(sectionId);
-      }
-    } else {
-      console.error('Section not found:', sectionId);
-    }
+    // Close mobile menu first
     setMobileMenuOpen(false);
+    
+    // Small delay to allow menu to close before scrolling
+    setTimeout(() => {
+      const element = document.getElementById(sectionId);
+      
+      if (element) {
+        console.log('Element found:', element);
+        
+        // Set active section immediately for better UX
+        setActiveSection(sectionId);
+        
+        // Use scrollIntoView for better mobile compatibility
+        element.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+        });
+        
+        if (onSectionScroll) {
+          onSectionScroll(sectionId);
+        }
+      } else {
+        console.error('Section not found:', sectionId);
+      }
+    }, 300);
   };
 
   // Track active section on scroll
