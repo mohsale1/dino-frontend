@@ -17,24 +17,23 @@ const TestimonialsSection: React.FC = () => {
     <Box
       id="testimonials"
       sx={{
-        py: { xs: 10, sm: 8, md: 10 },
+        py: { xs: 8, sm: 10, md: 12 },
         backgroundColor: 'background.default',
         position: 'relative',
-        overflowX: 'hidden',
-        overflowY: 'visible',
         width: '100%',
-        scrollMarginTop: { xs: '80px', sm: '90px', md: '100px' },
+        scrollMarginTop: { xs: '100px', sm: '110px', md: '120px' },
       }}
     >
       <Container 
         maxWidth="lg"
+        disableGutters
         sx={{
           px: { xs: 2, sm: 3, md: 3 },
-          maxWidth: '100%',
+          pb: { xs: 3, sm: 0, md: 0 },
         }}
       >
         {/* Section Header */}
-        <Box sx={{ textAlign: 'center', mb: { xs: 8, md: 7 } }}>
+        <Box sx={{ textAlign: 'center', mb: { xs: 6, md: 7 } }}>
           <Typography
             variant="overline"
             sx={{
@@ -81,13 +80,7 @@ const TestimonialsSection: React.FC = () => {
         {/* Testimonial Cards */}
         <Grid 
           container 
-          spacing={{ xs: 3, sm: 2.5, md: 3 }}
-          sx={{
-            width: '100%',
-            margin: 0,
-            marginLeft: 0,
-            marginRight: 0,
-          }}
+          spacing={{ xs: 2, sm: 3, md: 3 }}
         >
           {TESTIMONIALS.slice(0, 3).map((testimonial, index) => (
             <Grid 
@@ -96,11 +89,6 @@ const TestimonialsSection: React.FC = () => {
               sm={6} 
               md={4} 
               key={index}
-              sx={{
-                display: 'flex',
-                paddingLeft: { xs: 0, sm: '12px' },
-                paddingRight: { xs: 0, sm: '12px' },
-              }}
             >
               <TestimonialCard
                 name={testimonial.name}
