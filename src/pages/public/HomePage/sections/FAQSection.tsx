@@ -29,6 +29,7 @@ const FAQSection: React.FC = () => {
         background: `linear-gradient(135deg, 
           ${alpha(theme.palette.primary.main, 0.03)} 0%, 
           ${alpha(theme.palette.secondary.main, 0.03)} 100%)`,
+        scrollMarginTop: { xs: '80px', sm: '90px', md: '100px' },
       }}
     >
       <Container maxWidth="lg">

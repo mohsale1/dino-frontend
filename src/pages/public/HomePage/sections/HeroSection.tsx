@@ -47,8 +47,9 @@ const HeroSection: React.FC = () => {
         display: 'flex',
         alignItems: 'center',
         overflow: 'hidden',
-        pt: { xs: 10, sm: 12, md: 0 },
+        pt: { xs: 20, sm: 20, md: 0 },
         pb: { xs: 6, sm: 8, md: 0 },
+        scrollMarginTop: { xs: '100px', sm: '110px', md: '120px' },
         background: `linear-gradient(135deg, 
           ${alpha(theme.palette.primary.main, 0.05)} 0%, 
           ${alpha(theme.palette.background.default, 1)} 50%,
@@ -182,7 +183,7 @@ const HeroSection: React.FC = () => {
           <Grid item xs={12} md={6}>
             <Stack spacing={{ xs: 2.5, md: 3 }} sx={{ alignItems: { xs: 'center', md: 'flex-start' }, textAlign: { xs: 'center', md: 'left' } }}>
               {/* Badge */}
-              <Box sx={{ display: 'flex', justifyContent: { xs: 'center', md: 'flex-start' }, width: '100%' }}>
+              <Box sx={{ display: 'flex', justifyContent: { xs: 'center', md: 'flex-start' }, width: '100%', mt: { xs: 8, sm: 4, md: 0 } }}>
                 <Chip
                   icon={isMobile ? undefined : <AutoAwesome sx={{ fontSize: 18 }} />}
                   label={isMobile ? "500+ Restaurants" : "Trusted by 500+ Restaurants"}

@@ -37,6 +37,17 @@ import {
   CheckCircle,
   Cancel,
   Code,
+  Home,
+  MenuBook,
+  ShoppingCart,
+  LocalOffer,
+  Info,
+  ContactMail,
+  Star,
+  Fastfood,
+  AutoAwesome,
+  RateReview,
+  HelpOutline,
 } from '@mui/icons-material';
 import DinoLogo from '../../DinoLogo';
 import { getUserFirstName } from '../../../utils/userUtils';
@@ -157,6 +168,35 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
     setLogoutModalOpen(false);
   };
 
+  // Get icon for navigation item based on label or id
+  const getNavigationIcon = (item: { label: string; id: string }) => {
+    const label = item.label.toLowerCase();
+    const id = item.id.toLowerCase();
+    
+    // Match by specific IDs first (more accurate)
+    if (id === 'hero' || id === 'home') return <Home />;
+    if (id === 'features') return <AutoAwesome />;
+    if (id === 'testimonials' || id === 'reviews') return <RateReview />;
+    if (id === 'faq') return <HelpOutline />;
+    if (id === 'contact') return <ContactMail />;
+    
+    // Match by label keywords
+    if (label.includes('home')) return <Home />;
+    if (label.includes('feature')) return <AutoAwesome />;
+    if (label.includes('review') || label.includes('testimonial')) return <RateReview />;
+    if (label.includes('faq') || label.includes('question')) return <HelpOutline />;
+    if (label.includes('contact')) return <ContactMail />;
+    if (label.includes('menu')) return <MenuBook />;
+    if (label.includes('order')) return <ShoppingCart />;
+    if (label.includes('offer') || label.includes('promo')) return <LocalOffer />;
+    if (label.includes('about')) return <Info />;
+    if (label.includes('popular') || label.includes('featured')) return <Star />;
+    if (label.includes('dish') || label.includes('food')) return <Fastfood />;
+    
+    // Default icon
+    return <Restaurant />;
+  };
+
   // Force drawer to take full height from top
   useEffect(() => {
     if (open) {
@@ -235,7 +275,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
         {/* Header */}
         <Box
           sx={{
-            p: { xs: 2, sm: 1.5 },
+            p: { xs: 2, sm: 2.5 },
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -243,10 +283,10 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
             borderColor: 'divider',
             minHeight: { xs: 60, sm: 64 },
             // Add safe area for mobile devices with notches
-            paddingTop: { xs: 'max(16px, env(safe-area-inset-top))', sm: 1.5 },
+            paddingTop: { xs: 'max(16px, env(safe-area-inset-top))', sm: 2.5 },
           }}
         >
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 1 } }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1.5, sm: 2 } }}>
             <DinoLogo size={isMobile ? 28 : 32} animated={false} />
             <Box>
               <Typography 
@@ -282,17 +322,17 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
 
         {/* User Section */}
         {user && (
-          <Box sx={{ p: { xs: 1.5, sm: 1 }, borderBottom: '1px solid', borderColor: 'divider' }}>
+          <Box sx={{ p: { xs: 1.5, sm: 2 }, borderBottom: '1px solid', borderColor: 'divider' }}>
             <Paper
               elevation={0}
               sx={{
-                p: { xs: 1.5, sm: 1 },
+                p: { xs: 1.5, sm: 2 },
                 backgroundColor: '#E3F2FD',
                 border: 'none',
-                borderRadius: 1,
+                borderRadius: 2,
               }}
             >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
                 <Avatar
                   src={dinoAvatar || undefined}
                   sx={{
@@ -358,7 +398,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                 <Button
                   size="small"
                   variant="outlined"
-                  startIcon={<AccountCircle sx={{ fontSize: 12 }} />}
+                  startIcon={<AccountCircle sx={{ fontSize: 16 }} />}
                   onClick={() => handleNavigate('/profile')}
                   sx={{ 
                     flex: 1, 
@@ -372,7 +412,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                   size="small"
                   variant="outlined"
                   color="error"
-                  startIcon={<ExitToApp sx={{ fontSize: 12 }} />}
+                  startIcon={<ExitToApp sx={{ fontSize: 16 }} />}
                   onClick={handleLogout}
                   sx={{ 
                     flex: 1, 
@@ -389,38 +429,38 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
 
         {/* Venue Status Display - Only for Admin and SuperAdmin */}
         {user && (isAdmin() || isSuperAdmin()) && (
-          <Box sx={{ p: 1, borderBottom: '1px solid', borderColor: 'divider' }}>
+          <Box sx={{ p: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
             <Paper
               elevation={0}
               sx={{
-                p: 1,
+                p: 2,
                 backgroundColor: venueStatus?.isOpen ? 'success.50' : 'warning.50',
                 border: '1px solid',
                 borderColor: venueStatus?.isOpen ? 'success.200' : 'warning.200',
-                borderRadius: 1,
+                borderRadius: 2,
               }}
             >
               <Typography
                 variant="subtitle2"
                 fontWeight={600}
                 color="text.primary"
-                sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}
+                sx={{ mb: 1.5, display: 'flex', alignItems: 'center', gap: 1 }}
               >
-                <Store sx={{ fontSize: 12, color: venueStatus?.isOpen ? 'success.main' : 'error.main' }} />
+                <Store sx={{ fontSize: 16, color: venueStatus?.isOpen ? 'success.main' : 'error.main' }} />
                 Venue Status
               </Typography>
               
               {venueStatus ? (
                 <>
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
                     <Typography variant="body2" fontWeight={500} color="text.primary">
                       {venueStatus.venueName}
                     </Typography>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                       {venueStatus.isOpen ? (
-                        <CheckCircle sx={{ fontSize: 12, color: 'success.main' }} />
+                        <CheckCircle sx={{ fontSize: 16, color: 'success.main' }} />
                       ) : (
-                        <Cancel sx={{ fontSize: 12, color: 'error.main' }} />
+                        <Cancel sx={{ fontSize: 16, color: 'error.main' }} />
                       )}
                       <Typography 
                         variant="caption" 
@@ -468,7 +508,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                       {userData?.venue?.name || 'Current Venue'}
                     </Typography>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                      <Cancel sx={{ fontSize: 12, color: 'warning.main' }} />
+                      <Cancel sx={{ fontSize: 16, color: 'warning.main' }} />
                       <Typography 
                         variant="caption" 
                         fontWeight={600}
@@ -496,13 +536,13 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
         }}>
           {/* Home Navigation */}
           {isHomePage && homeNavItems.length > 0 && (
-            <Box sx={{ p: 1 }}>
+            <Box sx={{ p: 2 }}>
               <Typography
                 variant="overline"
                 sx={{
                   color: 'text.secondary',
                   fontWeight: 600,
-                  fontSize: '0.7rem',
+                  fontSize: '0.75rem',
                   mb: 1,
                   display: 'block',
                 }}
@@ -524,14 +564,14 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                       }}
                     >
                       <ListItemIcon sx={{ color: activeSection === item.id ? 'primary.main' : 'text.secondary', minWidth: 36 }}>
-                        {/* Icon removed for simplicity */}
+                        {getNavigationIcon(item)}
                       </ListItemIcon>
                       <ListItemText
                         primary={item.label}
                         primaryTypographyProps={{
                           fontWeight: activeSection === item.id ? 600 : 400,
                           color: activeSection === item.id ? 'primary.main' : 'text.primary',
-                          fontSize: '0.8rem',
+                          fontSize: '0.875rem',
                         }}
                       />
                     </ListItemButton>
@@ -542,13 +582,13 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
           )}
 
           {/* Quick Actions */}
-          <Box sx={{ p: 1 }}>
+          <Box sx={{ p: 2 }}>
             <Typography
               variant="overline"
               sx={{
                 color: 'text.secondary',
                 fontWeight: 600,
-                fontSize: '0.7rem',
+                fontSize: '0.75rem',
                 mb: 1,
                 display: 'block',
               }}
@@ -580,7 +620,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                           primaryTypographyProps={{
                             fontWeight: 500,
                             color: 'text.primary',
-                            fontSize: '0.8rem',
+                            fontSize: '0.875rem',
                           }}
                         />
                       </ListItemButton>
@@ -608,7 +648,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                           primaryTypographyProps={{
                             fontWeight: 500,
                             color: 'text.primary',
-                            fontSize: '0.8rem',
+                            fontSize: '0.875rem',
                           }}
                         />
                       </ListItemButton>
@@ -636,7 +676,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                           primaryTypographyProps={{
                             fontWeight: 500,
                             color: 'text.primary',
-                            fontSize: '0.8rem',
+                            fontSize: '0.875rem',
                           }}
                         />
                       </ListItemButton>
@@ -664,7 +704,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                           primaryTypographyProps={{
                             fontWeight: 500,
                             color: 'text.primary',
-                            fontSize: '0.8rem',
+                            fontSize: '0.875rem',
                           }}
                         />
                       </ListItemButton>
@@ -692,7 +732,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                           primaryTypographyProps={{
                             fontWeight: 500,
                             color: 'text.primary',
-                            fontSize: '0.8rem',
+                            fontSize: '0.875rem',
                           }}
                         />
                       </ListItemButton>
@@ -720,7 +760,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                           primaryTypographyProps={{
                             fontWeight: 500,
                             color: 'text.primary',
-                            fontSize: '0.8rem',
+                            fontSize: '0.875rem',
                           }}
                         />
                       </ListItemButton>
@@ -748,7 +788,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                           primaryTypographyProps={{
                             fontWeight: 500,
                             color: 'text.primary',
-                            fontSize: '0.8rem',
+                            fontSize: '0.875rem',
                           }}
                         />
                       </ListItemButton>
@@ -776,7 +816,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                           primaryTypographyProps={{
                             fontWeight: 500,
                             color: 'text.primary',
-                            fontSize: '0.8rem',
+                            fontSize: '0.875rem',
                           }}
                         />
                       </ListItemButton>
@@ -808,7 +848,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                           primaryTypographyProps={{
                             fontWeight: 500,
                             color: 'text.primary',
-                            fontSize: '0.8rem',
+                            fontSize: '0.875rem',
                           }}
                         />
                       </ListItemButton>
@@ -839,7 +879,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                         primaryTypographyProps={{
                           fontWeight: 500,
                           color: 'text.primary',
-                          fontSize: '0.8rem',
+                          fontSize: '0.875rem',
                         }}
                       />
                     </ListItemButton>
@@ -863,7 +903,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                         primaryTypographyProps={{
                           fontWeight: 500,
                           color: 'text.primary',
-                          fontSize: '0.8rem',
+                          fontSize: '0.875rem',
                         }}
                       />
                     </ListItemButton>

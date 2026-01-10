@@ -57,6 +57,7 @@ const CTASection: React.FC = () => {
         color: 'white',
         position: 'relative',
         overflow: 'hidden',
+        scrollMarginTop: { xs: '80px', sm: '90px', md: '100px' },
       }}
     >
       {/* Background Pattern */}

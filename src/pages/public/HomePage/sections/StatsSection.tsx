@@ -17,11 +17,13 @@ const StatsSection: React.FC = () => {
   return (
     <Box
       sx={{
-        py: { xs: 6, sm: 8, md: 10 },
+        pt: { xs: 10, sm: 8, md: 10 },
+        pb: { xs: 6, sm: 8, md: 10 },
         background: `linear-gradient(135deg, 
           ${alpha(theme.palette.primary.main, 0.05)} 0%, 
           ${alpha(theme.palette.secondary.main, 0.05)} 100%)`,
         position: 'relative',
+        scrollMarginTop: { xs: '80px', sm: '90px', md: '100px' },
       }}
     >
       <Container maxWidth="lg">

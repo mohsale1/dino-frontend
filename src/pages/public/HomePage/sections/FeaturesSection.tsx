@@ -23,6 +23,7 @@ const FeaturesSection: React.FC = () => {
         overflowX: 'hidden',
         overflowY: 'visible',
         width: '100%',
+        scrollMarginTop: { xs: '80px', sm: '90px', md: '100px' },
       }}
     >
       <Container 
