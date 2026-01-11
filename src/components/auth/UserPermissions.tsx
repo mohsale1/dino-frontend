@@ -5,7 +5,6 @@ import {
   Chip,
   List,
   ListItem,
-  ListItemIcon,
   ListItemText,
   Paper,
   Grid,
@@ -27,66 +26,76 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 
 const UserPermissions: React.FC = () => {
-  const { user, getUserWithRole, isAdmin, isOperator, isSuperAdmin } = useAuth();
+  const { user, getUserWithRole, isAdmin, isOperator, isSuperAdmin, userPermissions } = useAuth();
+
+  if (!user) {
+    return (
+      <Alert severity="info">
+        Please log in to view your permissions.
+      </Alert>
+    );
+  }
 
   const authUser = getUserWithRole();
-  const permissions = authUser?.permissions || [];
-  const role = authUser?.role;
+  
+  // Use backend permissions if available, otherwise fall back to role-based permissions
+  const permissions = userPermissions?.permissions || authUser?.permissions || [];
+  const role = userPermissions?.role || authUser?.role;
 
   const permissionCategories = [
     {
       name: 'Dashboard',
       icon: <Business />,
       color: '#1976d2',
-      permissions: permissions.filter(p => p.resource === 'dashboard' || p.name?.includes('dashboard'))
+      permissions: permissions.filter((p: any) => p.resource === 'dashboard' || p.name?.includes('dashboard'))
     },
     {
       name: 'Orders',
       icon: <ShoppingCart />,
       color: '#388e3c',
-      permissions: permissions.filter(p => p.resource === 'order' || p.resource === 'orders' || p.name?.includes('order'))
+      permissions: permissions.filter((p: any) => p.resource === 'order' || p.resource === 'orders' || p.name?.includes('order'))
     },
     {
       name: 'Menu',
       icon: <MenuBook />,
       color: '#f57c00',
-      permissions: permissions.filter(p => p.resource === 'menu' || p.name?.includes('menu'))
+      permissions: permissions.filter((p: any) => p.resource === 'menu' || p.name?.includes('menu'))
     },
     {
       name: 'Coupons',
       icon: <MenuBook />,
       color: '#e91e63',
-      permissions: permissions.filter(p => p.resource === 'coupon' || p.name?.includes('coupon'))
+      permissions: permissions.filter((p: any) => p.resource === 'coupon' || p.name?.includes('coupon'))
     },
     {
       name: 'Tables',
       icon: <TableRestaurant />,
       color: '#7b1fa2',
-      permissions: permissions.filter(p => p.resource === 'table' || p.resource === 'tables' || p.name?.includes('table'))
+      permissions: permissions.filter((p: any) => p.resource === 'table' || p.resource === 'tables' || p.name?.includes('table'))
     },
     {
       name: 'Settings',
       icon: <Settings />,
       color: '#d32f2f',
-      permissions: permissions.filter(p => p.resource === 'settings' || p.name?.includes('settings'))
+      permissions: permissions.filter((p: any) => p.resource === 'settings' || p.name?.includes('settings'))
     },
     {
       name: 'Users',
       icon: <People />,
       color: '#0288d1',
-      permissions: permissions.filter(p => p.resource === 'user' || p.resource === 'users' || p.name?.includes('user'))
+      permissions: permissions.filter((p: any) => p.resource === 'user' || p.resource === 'users' || p.name?.includes('user'))
     },
     {
       name: 'Workspace',
       icon: <Business />,
       color: '#5d4037',
-      permissions: permissions.filter(p => p.resource === 'workspace' || p.name?.includes('workspace'))
+      permissions: permissions.filter((p: any) => p.resource === 'workspace' || p.name?.includes('workspace'))
     },
     {
       name: 'Venue Management',
       icon: <Restaurant />,
       color: '#00796b',
-      permissions: permissions.filter(p => p.resource === 'venue' || p.resource === 'cafe' || p.name?.includes('venue'))
+      permissions: permissions.filter((p: any) => p.resource === 'venue' || p.resource === 'cafe' || p.name?.includes('venue'))
     }
   ];
 
@@ -124,7 +133,7 @@ const UserPermissions: React.FC = () => {
       return {
         title: 'Super Administrator',
         description: 'Full system access with workspace management capabilities',
-        color: 'error',
+        color: 'primary',
         icon: <Security />
       };
     } else if (isAdmin()) {
@@ -153,10 +162,10 @@ const UserPermissions: React.FC = () => {
 
   const roleInfo = getRoleInfo();
 
-  if (!user || !authUser) {
+  if (!authUser) {
     return (
-      <Alert severity="info">
-        Please log in to view your permissions.
+      <Alert severity="warning">
+        Unable to load user permissions. Please try refreshing the page.
       </Alert>
     );
   }
@@ -164,8 +173,8 @@ const UserPermissions: React.FC = () => {
   return (
     <Box>
       {/* Role Information */}
-      <Paper elevation={1} sx={{ p: 1.5, mb: 1, border: '1px solid', borderColor: 'divider' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+      <Paper elevation={1} sx={{ p: 2, mb: 3, border: '1px solid', borderColor: 'divider' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
           <Avatar
             sx={{
               bgcolor: `${roleInfo.color}.main`,
@@ -202,7 +211,7 @@ const UserPermissions: React.FC = () => {
       </Paper>
 
       {/* Permissions by Category */}
-      <Typography variant="h6" gutterBottom fontWeight="600">
+      <Typography variant="h6" gutterBottom fontWeight="600" sx={{ mb: 2 }}>
         Your Permissions
       </Typography>
       
@@ -211,15 +220,15 @@ const UserPermissions: React.FC = () => {
           No specific permissions assigned. Contact your administrator if you need access to additional features.
         </Alert>
       ) : (
-        <Grid container spacing={1}>
+        <Grid container spacing={2}>
           {permissionCategories
             .filter(category => category.permissions.length > 0)
             .map((category) => (
-              <Grid item xs={12} sm={6} md={4} key={category.name}>
+              <Grid item xs={12} sm={6} lg={4} key={category.name}>
                 <Paper
                   elevation={1}
                   sx={{
-                    p: 1,
+                    p: 2,
                     height: '100%',
                     border: '1px solid',
                     borderColor: 'divider',
@@ -228,7 +237,7 @@ const UserPermissions: React.FC = () => {
                     },
                   }}
                 >
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                     <Avatar
                       sx={{
                         bgcolor: category.color,
@@ -246,8 +255,8 @@ const UserPermissions: React.FC = () => {
 
                   <List dense>
                     {category.permissions.map((permission: any, index: number) => (
-                      <ListItem key={index} sx={{ px: 0, py: 0.5 }}>
-                        <ListItemIcon sx={{ minWidth: 48, mr: 1 }}>
+                      <ListItem key={index} sx={{ px: 0, py: 0.5, alignItems: 'flex-start' }}>
+                        <Box sx={{ minWidth: 80, mr: 1, mt: 0.5 }}>
                           <Chip
                             icon={getActionIcon(permission.action || '')}
                             label={permission.action || 'view'}
@@ -256,14 +265,13 @@ const UserPermissions: React.FC = () => {
                             variant="outlined"
                             sx={{ fontSize: '0.7rem', height: 20 }}
                           />
-                        </ListItemIcon>
+                        </Box>
                         <ListItemText
                           primary={permission.description || permission.name || 'Access granted'}
                           primaryTypographyProps={{
                             variant: 'body2',
-                            fontSize: '0.8rem'
+                            fontSize: '0.875rem'
                           }}
-                          sx={{ ml: 1 }}
                         />
                       </ListItem>
                     ))}
@@ -274,25 +282,7 @@ const UserPermissions: React.FC = () => {
         </Grid>
       )}
 
-      {/* Permission Summary */}
-      <Paper elevation={1} sx={{ p: 1, mt: 1, backgroundColor: 'grey.50' }}>
-        <Typography variant="subtitle2" gutterBottom fontWeight="600">
-          Permission Summary
-        </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-          You have access to <strong>{permissions.length}</strong> specific permissions across{' '}
-          <strong>{permissionCategories.filter(cat => cat.permissions.length > 0).length}</strong> categories.
-          {permissions.length === 0 && ' Contact your administrator to request additional access.'}
-        </Typography>
-        {permissionCategories.filter(cat => cat.permissions.length > 0).length > 0 && (
-          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
-            Categories: {permissionCategories
-              .filter(cat => cat.permissions.length > 0)
-              .map(cat => `${cat.name} (${cat.permissions.length})`)
-              .join(', ')}
-          </Typography>
-        )}
-      </Paper>
+
     </Box>
   );
 };

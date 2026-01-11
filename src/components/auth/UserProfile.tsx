@@ -22,7 +22,6 @@ import {
   ListItem,
   ListItemText,
   ListItemIcon,
-  ListItemSecondaryAction,
   CircularProgress
 } from '@mui/material';
 import {
@@ -36,7 +35,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useDinoAvatar } from '../../contexts/DinoAvatarContext';
 import { authService } from '../../services/auth';
 import UserPermissions from './UserPermissions';
-import { getUserFirstName, getUserLastName, getUserProfileImageUrl, getUserCreatedAt } from '../../utils/userUtils';
+import { getUserFirstName, getUserLastName, getUserCreatedAt } from '../../utils/userUtils';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -54,7 +53,7 @@ function TabPanel(props: TabPanelProps) {
       aria-labelledby={`profile-tab-${index}`}
       {...other}
     >
-      {value === index && <Box sx={{ p: 1.5 }}>{children}</Box>}
+      {value === index && <Box sx={{ p: { xs: 2, sm: 3 } }}>{children}</Box>}
     </div>
   );
 }
@@ -167,15 +166,15 @@ const UserProfile: React.FC = () => {
       <Box
         sx={{
           position: 'fixed',
-          bottom: { xs: 0, sm: 0, md: 0 },
-          right: { xs: 0, sm: 0, md: 0 },
-          width: { xs: 300, sm: 400, md: 500 },
-          height: { xs: 300, sm: 400, md: 500 },
+          bottom: { xs: -20, sm: -20, md: 0 },
+          right: { xs: -20, sm: -20, md: 0 },
+          width: { xs: 250, sm: 350, md: 450 },
+          height: { xs: 250, sm: 350, md: 450 },
           backgroundImage: 'url(/img/dino_hello.png)',
           backgroundSize: 'contain',
           backgroundRepeat: 'no-repeat',
           backgroundPosition: 'bottom right',
-          opacity: 1,
+          opacity: 0.9,
           zIndex: 0,
           pointerEvents: 'none',
           transition: 'all 0.3s ease',
@@ -187,32 +186,32 @@ const UserProfile: React.FC = () => {
       />
       
       <Container 
-        maxWidth="lg" 
+        maxWidth="md" 
         sx={{ 
           position: 'relative', 
           zIndex: 1,
           ml: { xs: 0, sm: 0, md: 0 },
-          mr: { xs: 0, sm: 6, md: 12 },
-          maxWidth: { xs: 'md', sm: 'md', md: 'lg' },
-          pl: { xs: 2, sm: 3, md: 1 },
-          pr: { xs: 2, sm: 2, md: 1 }
+          mr: { xs: 0, sm: 0, md: 0 },
+          maxWidth: { xs: '100%', sm: '90%', md: '850px' },
+          pl: { xs: 2, sm: 3, md: 4 },
+          pr: { xs: 2, sm: 3, md: 4 }
         }}
       >
       {/* Header */}
-      <Paper elevation={2} sx={{ p: 1.5, mb: 1 }}>
-        <Grid container spacing={1} alignItems="center">
-          <Grid item>
-            <Box sx={{ position: 'relative' }}>
+      <Paper elevation={2} sx={{ p: { xs: 2, sm: 3 }, mb: 3, borderRadius: 2 }}>
+        <Grid container spacing={3} alignItems="center">
+          <Grid item xs={12} sm="auto">
+            <Box sx={{ position: 'relative', display: 'flex', justifyContent: { xs: 'center', sm: 'flex-start' } }}>
               <Avatar
                 src={dinoAvatar}
                 sx={{ 
-                  width: 100, 
-                  height: 100,
+                  width: { xs: 80, sm: 100 }, 
+                  height: { xs: 80, sm: 100 },
                   border: '3px solid',
                   borderColor: 'primary.main',
                   boxShadow: 3,
                   backgroundColor: '#4CAF50',
-                  fontSize: '1rem'
+                  fontSize: '2rem'
                 }}
                 onLoad={() => {                }}
                 onError={() => {                  // Don't clear avatar, just show fallback
@@ -252,35 +251,37 @@ const UserProfile: React.FC = () => {
               </IconButton>
             </Box>
           </Grid>
-          <Grid item xs>
-            <Typography variant="h4" gutterBottom>
-              {getUserFirstName(user)} {getUserLastName(user)}
-            </Typography>
-            <Typography variant="body1" color="text.secondary">
-              {user?.email}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Member since {getUserCreatedAt(user)?.toLocaleDateString() || 'N/A'}
-            </Typography>
+          <Grid item xs={12} sm>
+            <Box sx={{ textAlign: { xs: 'center', sm: 'left' } }}>
+              <Typography variant="h4" gutterBottom sx={{ fontSize: { xs: '1.75rem', sm: '2.125rem' } }}>
+                {getUserFirstName(user)} {getUserLastName(user)}
+              </Typography>
+              <Typography variant="body1" color="text.secondary" sx={{ wordBreak: 'break-word' }}>
+                {user?.email}
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                Member since {getUserCreatedAt(user)?.toLocaleDateString() || 'N/A'}
+              </Typography>
+            </Box>
           </Grid>
         </Grid>
       </Paper>
 
       {/* Alerts */}
       {error && (
-        <Alert severity="error" sx={{ mb: 1 }} onClose={() => setError(null)}>
+        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
           {error}
         </Alert>
       )}
       
       {success && (
-        <Alert severity="success" sx={{ mb: 1 }} onClose={() => setSuccess(null)}>
+        <Alert severity="success" sx={{ mb: 2 }} onClose={() => setSuccess(null)}>
           {success}
         </Alert>
       )}
 
       {/* Tabs */}
-      <Paper elevation={2}>
+      <Paper elevation={2} sx={{ borderRadius: 2 }}>
         <Tabs value={tabValue} onChange={handleTabChange} variant="scrollable" scrollButtons="auto">
           <Tab icon={<Person />} label="Personal Info" />
           <Tab icon={<Security />} label="Security" />
@@ -289,7 +290,14 @@ const UserProfile: React.FC = () => {
 
         {/* Personal Info Tab */}
         <TabPanel value={tabValue} index={0}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+          <Box sx={{ 
+            display: 'flex', 
+            flexDirection: { xs: 'column', sm: 'row' },
+            justifyContent: 'space-between', 
+            alignItems: { xs: 'stretch', sm: 'center' }, 
+            mb: 3,
+            gap: 2
+          }}>
             <Typography variant="h6">Personal Information</Typography>
             <Button
               variant={editing ? "outlined" : "contained"}
@@ -300,12 +308,13 @@ const UserProfile: React.FC = () => {
                 }
                 setEditing(!editing);
               }}
+              sx={{ minWidth: { xs: '100%', sm: 'auto' } }}
             >
               {editing ? 'Cancel' : 'Edit'}
             </Button>
           </Box>
 
-          <Grid container spacing={1}>
+          <Grid container spacing={3}>
             <Grid item xs={12} sm={6}>
               <TextField
                 fullWidth
@@ -313,6 +322,7 @@ const UserProfile: React.FC = () => {
                 value={profileData.firstName || ''}
                 onChange={(e) => setProfileData(prev => ({ ...prev, firstName: e.target.value }))}
                 disabled={!editing}
+                variant="outlined"
               />
             </Grid>
             
@@ -323,6 +333,7 @@ const UserProfile: React.FC = () => {
                 value={profileData.lastName || ''}
                 onChange={(e) => setProfileData(prev => ({ ...prev, lastName: e.target.value }))}
                 disabled={!editing}
+                variant="outlined"
               />
             </Grid>
             
@@ -333,6 +344,7 @@ const UserProfile: React.FC = () => {
                 value={profileData.email || ''}
                 disabled={true}
                 type="email"
+                variant="outlined"
                 helperText="Email cannot be changed"
               />
             </Grid>
@@ -351,6 +363,7 @@ const UserProfile: React.FC = () => {
                   }
                 }}
                 disabled={!editing}
+                variant="outlined"
                 inputProps={{
                   maxLength: 10,
                   pattern: '[0-9]*',
@@ -363,7 +376,7 @@ const UserProfile: React.FC = () => {
           </Grid>
 
           {editing && (
-            <Box sx={{ mt: 1, display: 'flex', gap: 1 }}>
+            <Box sx={{ mt: 3, display: 'flex', gap: 2 }}>
               <Button
                 variant="contained"
                 onClick={handleProfileUpdate}
@@ -387,8 +400,8 @@ const UserProfile: React.FC = () => {
               sx={{ 
                 flexDirection: { xs: 'column', sm: 'row' },
                 alignItems: { xs: 'flex-start', sm: 'center' },
-                gap: { xs: 1, sm: 0 },
-                py: 1
+                gap: { xs: 2, sm: 0 },
+                py: 2
               }}
             >
               <Box sx={{ display: 'flex', alignItems: 'center', flex: 1, minWidth: 0 }}>
@@ -399,12 +412,12 @@ const UserProfile: React.FC = () => {
                   primary="Password"
                   secondary="Change your account password"
                   sx={{ 
-                    pr: { xs: 0, sm: 1 },
+                    pr: { xs: 0, sm: 2 },
                     '& .MuiListItemText-primary': {
                       fontSize: { xs: '1rem', sm: '1rem' }
                     },
                     '& .MuiListItemText-secondary': {
-                      fontSize: { xs: '0.8rem', sm: '0.8rem' }
+                      fontSize: { xs: '0.875rem', sm: '0.875rem' }
                     }
                   }}
                 />
@@ -430,8 +443,8 @@ const UserProfile: React.FC = () => {
               sx={{ 
                 flexDirection: { xs: 'column', sm: 'row' },
                 alignItems: { xs: 'flex-start', sm: 'center' },
-                gap: { xs: 1, sm: 0 },
-                py: 1
+                gap: { xs: 2, sm: 0 },
+                py: 2
               }}
             >
               <Box sx={{ display: 'flex', alignItems: 'center', flex: 1, minWidth: 0 }}>
@@ -442,12 +455,12 @@ const UserProfile: React.FC = () => {
                   primary="Account Status"
                   secondary={user?.isVerified ? "Verified account" : "Unverified account"}
                   sx={{ 
-                    pr: { xs: 0, sm: 1 },
+                    pr: { xs: 0, sm: 2 },
                     '& .MuiListItemText-primary': {
                       fontSize: { xs: '1rem', sm: '1rem' }
                     },
                     '& .MuiListItemText-secondary': {
-                      fontSize: { xs: '0.8rem', sm: '0.8rem' }
+                      fontSize: { xs: '0.875rem', sm: '0.875rem' }
                     }
                   }}
                 />
@@ -490,11 +503,11 @@ const UserProfile: React.FC = () => {
         <DialogTitle>Change Password</DialogTitle>
         <DialogContent>
           {passwordError && (
-            <Alert severity="error" sx={{ mb: 1, mt: 1 }} onClose={() => setPasswordError(null)}>
+            <Alert severity="error" sx={{ mb: 2, mt: 2 }} onClose={() => setPasswordError(null)}>
               {passwordError}
             </Alert>
           )}
-          <Grid container spacing={1} sx={{ mt: 1 }}>
+          <Grid container spacing={2} sx={{ mt: 1 }}>
             <Grid item xs={12}>
               <TextField
                 fullWidth
