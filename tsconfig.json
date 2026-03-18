@@ -1,25 +1,46 @@
 {
   "compilerOptions": {
-    "target": "es2015",
-    "downlevelIteration": true,
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "es6"
-    ],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "strict": true,
-    "forceConsistentCasingInFileNames": true,
-    "noFallthroughCasesInSwitch": true,
-    "module": "esnext",
+    /* Language and Environment */
+    "target": "ES2020",
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "jsx": "react-jsx",
+    
+    /* Modules */
+    "module": "ESNext",
     "moduleResolution": "node",
     "resolveJsonModule": true,
-    "isolatedModules": true,
+    
+    /* JavaScript Support */
+    "allowJs": true,
+    "checkJs": false,
+    
+    /* Emit */
     "noEmit": true,
-    "jsx": "react-jsx",
+    "removeComments": true,
+    "importHelpers": true,
+    "downlevelIteration": true,
+    "sourceMap": true,
+    
+    /* Interop Constraints */
+    "isolatedModules": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    
+    /* Type Checking */
+    "strict": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitOverride": true,
+    "allowUnusedLabels": false,
+    "allowUnreachableCode": false,
+    
+    /* Completeness */
+    "skipLibCheck": true,
+    
+    /* Path Mapping */
     "baseUrl": "src",
     "paths": {
       "@/*": ["*"],
@@ -28,10 +49,26 @@
       "@/services/*": ["services/*"],
       "@/types/*": ["types/*"],
       "@/utils/*": ["utils/*"],
-      "@/hooks/*": ["hooks/*"]
+      "@/hooks/*": ["hooks/*"],
+      "@/contexts/*": ["contexts/*"],
+      "@/config/*": ["config/*"],
+      "@/constants/*": ["constants/*"],
+      "@/features/*": ["features/*"]
     }
   },
   "include": [
-    "src"
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.d.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "build",
+    "dist",
+    "scripts",
+    "**/*.spec.ts",
+    "**/*.test.ts",
+    "**/*.spec.tsx",
+    "**/*.test.tsx"
   ]
 }

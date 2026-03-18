@@ -5,7 +5,7 @@
 
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { API_CONFIG } from '../../config/api';
-import { authService } from '../../services/auth';
+import { authService } from '../../services/common/auth';
 
 // Data transformation utilities
 class DataTransformer {
