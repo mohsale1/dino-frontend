@@ -50,9 +50,5 @@ cypress
 .eslintcache
 .node_repl_history
 
-# Docker itself
-Dockerfile
-.dockerignore
-
 # Deployment scripts (not needed in image)
 deployment/
