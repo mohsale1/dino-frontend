@@ -1,6 +1,6 @@
 import React from 'react';
-import { useAuth } from '../../contexts/AuthContext';
-import { useUserData } from '../../contexts/UserDataContext';
+import { useAuth } from '../../contexts/common/Auth';
+import { useUserData } from '../../contexts/application/UserData';
 import { usePermissions } from '../auth';
 import UnifiedDashboard from './UnifiedDashboard';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
@@ -16,7 +16,7 @@ interface DashboardRouterProps {
 const DashboardRouter: React.FC<DashboardRouterProps> = ({ className }) => {
   const { user, isAuthenticated } = useAuth();
   const { userData, loading: userDataLoading } = useUserData();
-  const { isSuperAdmin, isAdmin, isOperator } = usePermissions();
+  const { isOwner, isManager, isUser } = usePermissions();
 
   // Don't block UI with loading state
   // Show dashboard immediately even if loading

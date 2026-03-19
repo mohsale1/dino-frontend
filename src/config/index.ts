@@ -27,6 +27,9 @@ export {
 // Storage configuration
 export { STORAGE_KEYS, STORAGE_CONFIG, CACHE_TTL, type StorageKey } from './storage';
 
+// Application Constants
+export { DEFAULT_STATS } from './constants';
+
 // Default export for convenience
 export { RUNTIME_CONFIG as default } from './runtime';
 
@@ -56,7 +59,6 @@ export const getConfigSummary = () => {
       analytics: config.ENABLE_ANALYTICS,
       notifications: config.ENABLE_NOTIFICATIONS,
       qrCodes: config.ENABLE_QR_CODES,
-      themeToggle: config.ENABLE_THEME_TOGGLE,
       animations: config.ENABLE_ANIMATIONS
     },
     api: {

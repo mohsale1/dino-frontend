@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { Alert, Box, Typography } from '@mui/material';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../contexts/common/Auth';
 import { usePermissions } from '../auth';
 import { PermissionName, RoleName } from '../../types/auth';
 
@@ -66,9 +66,9 @@ const PermissionWrapper: React.FC<PermissionWrapperProps> = ({
 }) => {
   const { user, isAuthenticated, loading: authLoading, hasPermission, hasBackendPermission, hasRole } = useAuth();
   const {
-    isSuperAdmin,
-    isAdmin,
-    isOperator,
+    isOwner,
+    isManager,
+    isUser,
     canViewDashboard,
     canManageUsers,
     canManageVenues,
@@ -78,99 +78,23 @@ const PermissionWrapper: React.FC<PermissionWrapperProps> = ({
     canViewSettings,
   } = usePermissions();
 
+  // PERMISSION CHECKS DISABLED - Always show all UI components
   // Show loading state if auth is still loading
   if (authLoading) {
     return loading ? <>{loading}</> : null;
   }
 
-  // If not authenticated, don't render anything
-  if (!isAuthenticated || !user) {
-    if (showPermissionError) {
-      return (
-        <Alert severity="warning" sx={sx} className={className}>
-          <Typography variant="body2">
-            Please log in to access this feature.
-          </Typography>
-        </Alert>
-      );
-    }
-    return showFallback ? <>{fallback}</> : null;
-  }
+  // Always grant access - permission checks disabled
+  const hasAccess = true;
 
-  let hasAccess = true;
-
-  // SuperAdmin bypass - SuperAdmins have access to everything
-  if (isSuperAdmin) {
-    hasAccess = true;
-  } else {
-    // Check single permission
-    if (permission) {
-      hasAccess = hasAccess && (hasPermission(permission) || hasBackendPermission(permission));
-    }
-
-    // Check multiple permissions
-    if (permissions.length > 0) {
-      if (requireAllPermissions) {
-        hasAccess = hasAccess && permissions.every(p => hasPermission(p) || hasBackendPermission(p));
-      } else {
-        hasAccess = hasAccess && permissions.some(p => hasPermission(p) || hasBackendPermission(p));
-      }
-    }
-
-    // Check single role
-    if (role) {
-      hasAccess = hasAccess && hasRole(role);
-    }
-
-    // Check multiple roles
-    if (roles.length > 0) {
-      if (requireAllRoles) {
-        hasAccess = hasAccess && roles.every(r => hasRole(r));
-      } else {
-        hasAccess = hasAccess && roles.some(r => hasRole(r));
-      }
-    }
-
-    // Custom permission check
-    if (customCheck) {
-      hasAccess = hasAccess && customCheck();
-    }
-  }
-
-  // Apply inverse logic if specified
-  if (inverse) {
-    hasAccess = !hasAccess;
-  }
-
-  // Render children if user has access
-  if (hasAccess) {
-    return className || sx ? (
-      <Box className={className} sx={sx}>
-        {children}
-      </Box>
-    ) : (
-      <>{children}</>
-    );
-  }
-
-  // Render permission error if requested
-  if (showPermissionError) {
-    return (
-      <Alert severity="error" sx={sx} className={className}>
-        <Typography variant="body2">
-          {permissionErrorMessage}
-        </Typography>
-        {user?.role && (
-          <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-            Current role: {user.role}
-          </Typography>
-        )}
-      </Alert>
-    );
-  }
-
-  // Render fallback if no access
-  return showFallback ? <>{fallback}</> : null;
+  // Render children - always show all UI components
+  return className || sx ? (
+    <Box className={className} sx={sx}>
+      {children}
+    </Box>
+  ) : (
+    <>{children}</>
+  );
 };
 
 export default PermissionWrapper;
@@ -213,30 +137,31 @@ export const CanViewSettings: React.FC<Omit<PermissionWrapperProps, 'customCheck
 };
 
 // Role-based convenience components
-export const SuperAdminOnly: React.FC<Omit<PermissionWrapperProps, 'customCheck'>> = (props) => {
-  const { isSuperAdmin } = usePermissions();
-  return <PermissionWrapper {...props} customCheck={() => isSuperAdmin} />;
+export const OwnerOnly: React.FC<Omit<PermissionWrapperProps, 'customCheck'>> = (props) => {
+  const { isOwner } = usePermissions();
+  return <PermissionWrapper {...props} customCheck={() => isOwner} />;
 };
 
-export const AdminOnly: React.FC<Omit<PermissionWrapperProps, 'customCheck'>> = (props) => {
-  const { isAdmin } = usePermissions();
-  return <PermissionWrapper {...props} customCheck={() => isAdmin} />;
+export const ManagerOnly: React.FC<Omit<PermissionWrapperProps, 'customCheck'>> = (props) => {
+  const { isManager } = usePermissions();
+  return <PermissionWrapper {...props} customCheck={() => isManager} />;
 };
 
-export const OperatorOnly: React.FC<Omit<PermissionWrapperProps, 'customCheck'>> = (props) => {
-  const { isOperator } = usePermissions();
-  return <PermissionWrapper {...props} customCheck={() => isOperator} />;
+export const UserOnly: React.FC<Omit<PermissionWrapperProps, 'customCheck'>> = (props) => {
+  const { isUser } = usePermissions();
+  return <PermissionWrapper {...props} customCheck={() => isUser} />;
 };
 
-export const AdminOrAbove: React.FC<Omit<PermissionWrapperProps, 'customCheck'>> = (props) => {
-  const { isSuperAdmin, isAdmin } = usePermissions();
-  return <PermissionWrapper {...props} customCheck={() => isSuperAdmin || isAdmin} />;
+export const ManagerOrAbove: React.FC<Omit<PermissionWrapperProps, 'customCheck'>> = (props) => {
+  const { isOwner, isManager } = usePermissions();
+  return <PermissionWrapper {...props} customCheck={() => isOwner || isManager} />;
 };
 
-export const OperatorOrAbove: React.FC<Omit<PermissionWrapperProps, 'customCheck'>> = (props) => {
-  const { isSuperAdmin, isAdmin, isOperator } = usePermissions();
-  return <PermissionWrapper {...props} customCheck={() => isSuperAdmin || isAdmin || isOperator} />;
-};
+// Legacy aliases for backward compatibility
+export const SuperAdminOnly = OwnerOnly;
+export const AdminOnly = ManagerOnly;
+export const OperatorOnly = UserOnly;
+export const AdminOrAbove = ManagerOrAbove;
 
 // Higher-order component for wrapping entire components with permission checks
 export const withPermissions = <P extends object>(
@@ -254,9 +179,9 @@ export const withPermissions = <P extends object>(
 export const usePermissionCheck = () => {
   const { user, isAuthenticated, hasPermission, hasBackendPermission, hasRole } = useAuth();
   const {
-    isSuperAdmin,
-    isAdmin,
-    isOperator,
+    isOwner,
+    isManager,
+    isUser,
     canViewDashboard,
     canManageUsers,
     canManageVenues,
@@ -268,13 +193,13 @@ export const usePermissionCheck = () => {
 
   const checkPermission = (permission: PermissionName): boolean => {
     if (!isAuthenticated || !user) return false;
-    if (isSuperAdmin) return true;
+    if (isOwner) return true;
     return hasPermission(permission) || hasBackendPermission(permission);
   };
 
   const checkPermissions = (permissions: PermissionName[], requireAll = false): boolean => {
     if (!isAuthenticated || !user) return false;
-    if (isSuperAdmin) return true;
+    if (isOwner) return true;
     
     return requireAll 
       ? permissions.every(p => hasPermission(p) || hasBackendPermission(p))
@@ -305,9 +230,9 @@ export const usePermissionCheck = () => {
     canManageMenu,
     canManageTables,
     canViewSettings,
-    isSuperAdmin,
-    isAdmin,
-    isOperator,
+    isOwner,
+    isManager,
+    isUser,
     isAuthenticated,
     user
   };

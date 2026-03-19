@@ -1,240 +1,103 @@
 /**
  * Coupon Service
- * 
- * Handles all API interactions for coupon management
+ * Handles API calls for coupon operations
  */
 
 import { apiService } from '../../../utils/api';
-import { Coupon, 
-  CouponCreate, 
-  CouponUpdate, 
-  CouponFilters,
-  CouponsResponse,
-  CouponResponse,
-  CouponStats,
-  CouponStatsResponse,
-  CouponUsage
-} from '../types/coupon';
+import type { Coupon, CouponCreate, CouponUpdate, CouponValidationRequest, CouponValidationResponse } from '../types';
 
 class CouponService {
-  private readonly baseUrl = '/api/coupons';
+  private baseUrl = '/application/coupons';
 
-  /**
-   * Get all coupons with optional filters
-   */
-  async getCoupons(filters?: CouponFilters & { page?: number; limit?: number }): Promise<CouponsResponse> {
-    try {
-      const params = new URLSearchParams();
-      
-      if (filters) {
-        Object.entries(filters).forEach(([key, value]) => {
-          if (value !== undefined && value !== null && value !== '') {
-            params.append(key, value.toString());
-          }
-        });
-      }
-
-      const response = await apiService.get<CouponsResponse['data']>(
-        `${this.baseUrl}?${params.toString()}`
-      );
-
-      return {
-        success: response.success,
-        data: response.data || { coupons: [], total: 0, page: 1, limit: 10 },
-        message: response.message
-      };
-    } catch (error: any) {      throw new Error(error.message || 'Failed to fetch coupons');
+  // ==================== Coupons ====================
+  
+  async getCoupons(workspaceId: string, page: number = 1, pageSize: number = 100, isAvailable?: boolean): Promise<Coupon[]> {
+    const params: any = {
+      workspace_id: workspaceId,
+      page,
+      page_size: pageSize,
+      order_by: 'created_at',
+      order_direction: 'desc'
+    };
+    
+    if (isAvailable !== undefined) {
+      params.is_available = isAvailable;
     }
+    
+    const response = await apiService.get(this.baseUrl, { params });
+    return response.data as any || [];
   }
 
-  /**
-   * Get coupon by ID
-   */
-  async getCouponById(id: string): Promise<CouponResponse> {
-    try {
-      const response = await apiService.get<Coupon>(`${this.baseUrl}/${id}`);
-      
-      return {
-        success: response.success,
-        data: response.data!,
-        message: response.message
-      };
-    } catch (error: any) {      throw new Error(error.message || 'Failed to fetch coupon');
-    }
+  async getCoupon(id: string): Promise<Coupon> {
+    const response = await apiService.get(`${this.baseUrl}/${id}`);
+    return response.data as any;
   }
 
-  /**
-   * Create a new coupon
-   */
-  async createCoupon(couponData: CouponCreate): Promise<CouponResponse> {
-    try {
-      const response = await apiService.post<Coupon>(this.baseUrl, couponData);
-      
-      return {
-        success: response.success,
-        data: response.data!,
-        message: response.message || 'Coupon created successfully'
-      };
-    } catch (error: any) {      throw new Error(error.message || 'Failed to create coupon');
-    }
+  async getCouponByCode(code: string, workspaceId: string): Promise<Coupon> {
+    const response = await apiService.get(`${this.baseUrl}/code/${code}`, {
+      params: { workspace_id: workspaceId }
+    });
+    return response.data as any;
   }
 
-  /**
-   * Update an existing coupon
-   */
-  async updateCoupon(id: string, couponData: CouponUpdate): Promise<CouponResponse> {
-    try {
-      const response = await apiService.put<Coupon>(`${this.baseUrl}/${id}`, couponData);
-      
-      return {
-        success: response.success,
-        data: response.data!,
-        message: response.message || 'Coupon updated successfully'
-      };
-    } catch (error: any) {      throw new Error(error.message || 'Failed to update coupon');
-    }
+  async createCoupon(data: CouponCreate): Promise<Coupon> {
+    const response = await apiService.post(this.baseUrl, {
+      code: data.code,
+      name: data.name,
+      description: data.description,
+      workspace_id: data.workspaceId,
+      discount_type: data.discountType,
+      discount_value: data.discountValue,
+      max_discount_amount: data.maxDiscountAmount,
+      min_order_amount: data.minOrderAmount,
+      usage_limit: data.usageLimit,
+      usage_limit_per_user: data.usageLimitPerUser,
+      valid_from: data.validFrom,
+      valid_until: data.validUntil,
+      is_available: data.isAvailable ?? true,
+    });
+    return response.data as any;
   }
 
-  /**
-   * Delete a coupon
-   */
-  async deleteCoupon(id: string): Promise<{ success: boolean; message: string }> {
-    try {
-      const response = await apiService.delete(`${this.baseUrl}/${id}`);
-      
-      return {
-        success: response.success,
-        message: response.message || 'Coupon deleted successfully'
-      };
-    } catch (error: any) {      throw new Error(error.message || 'Failed to delete coupon');
-    }
+  async updateCoupon(id: string, data: CouponUpdate): Promise<Coupon> {
+    const payload: any = {};
+    if (data.name !== undefined) payload.name = data.name;
+    if (data.description !== undefined) payload.description = data.description;
+    if (data.discountType !== undefined) payload.discount_type = data.discountType;
+    if (data.discountValue !== undefined) payload.discount_value = data.discountValue;
+    if (data.maxDiscountAmount !== undefined) payload.max_discount_amount = data.maxDiscountAmount;
+    if (data.minOrderAmount !== undefined) payload.min_order_amount = data.minOrderAmount;
+    if (data.usageLimit !== undefined) payload.usage_limit = data.usageLimit;
+    if (data.usageLimitPerUser !== undefined) payload.usage_limit_per_user = data.usageLimitPerUser;
+    if (data.validFrom !== undefined) payload.valid_from = data.validFrom;
+    if (data.validUntil !== undefined) payload.valid_until = data.validUntil;
+    if (data.isAvailable !== undefined) payload.is_available = data.isAvailable;
+    
+    const response = await apiService.put(`${this.baseUrl}/${id}`, payload);
+    return response.data as any;
   }
 
-  /**
-   * Toggle coupon active status
-   */
-  async toggleCouponStatus(id: string, isActive: boolean): Promise<CouponResponse> {
-    try {
-      const response = await apiService.put<Coupon>(`${this.baseUrl}/${id}/status`, { 
-        isActive 
-      });
-      
-      return {
-        success: response.success,
-        data: response.data!,
-        message: response.message || `Coupon ${isActive ? 'activated' : 'deactivated'} successfully`
-      };
-    } catch (error: any) {      throw new Error(error.message || 'Failed to update coupon status');
-    }
+  async deleteCoupon(id: string): Promise<void> {
+    await apiService.delete(`${this.baseUrl}/${id}`);
   }
 
-  /**
-   * Validate coupon code uniqueness
-   */
-  async validateCouponCode(code: string, venueId: string, excludeId?: string): Promise<{ isValid: boolean; message?: string }> {
-    try {
-      const params = new URLSearchParams({
-        code,
-        venueId,
-        ...(excludeId && { excludeId })
-      });
-
-      const response = await apiService.get<{ isValid: boolean; message?: string }>(
-        `${this.baseUrl}/validate-code?${params.toString()}`
-      );
-      
-      return response.data || { isValid: false, message: 'Validation failed' };
-    } catch (error: any) {      return { isValid: false, message: error.message || 'Failed to validate coupon code' };
-    }
+  async restoreCoupon(id: string): Promise<void> {
+    await apiService.put(`${this.baseUrl}/${id}/restore`, {});
   }
 
-  /**
-   * Get coupon statistics
-   */
-  async getCouponStats(venueId?: string): Promise<CouponStatsResponse> {
-    try {
-      const params = venueId ? `?venueId=${venueId}` : '';
-      const response = await apiService.get<CouponStats>(`${this.baseUrl}/stats${params}`);
-      
-      return {
-        success: response.success,
-        data: response.data!,
-        message: response.message
-      };
-    } catch (error: any) {      throw new Error(error.message || 'Failed to fetch coupon statistics');
-    }
+  async validateCoupon(request: CouponValidationRequest): Promise<CouponValidationResponse> {
+    const response = await apiService.post(`${this.baseUrl}/validate`, {
+      code: request.code,
+      workspace_id: request.workspaceId,
+      order_amount: request.orderAmount,
+    });
+    return response.data as any;
   }
 
-  /**
-   * Get coupon usage history
-   */
-  async getCouponUsage(couponId: string, page = 1, limit = 10): Promise<{ 
-    success: boolean; 
-    data: { usage: CouponUsage[]; total: number; page: number; limit: number }; 
-    message?: string 
-  }> {
-    try {
-      const response = await apiService.get<{ usage: CouponUsage[]; total: number; page: number; limit: number }>(
-        `${this.baseUrl}/${couponId}/usage?page=${page}&limit=${limit}`
-      );
-      
-      return {
-        success: response.success,
-        data: response.data || { usage: [], total: 0, page: 1, limit: 10 },
-        message: response.message
-      };
-    } catch (error: any) {      throw new Error(error.message || 'Failed to fetch coupon usage');
-    }
-  }
-
-  /**
-   * Bulk operations
-   */
-  async bulkUpdateCoupons(ids: string[], updates: Partial<CouponUpdate>): Promise<{ 
-    success: boolean; 
-    message: string; 
-    updated: number 
-  }> {
-    try {
-      const response = await apiService.put<{ updated: number }>(`${this.baseUrl}/bulk`, {
-        ids,
-        updates
-      });
-      
-      return {
-        success: response.success,
-        message: response.message || 'Coupons updated successfully',
-        updated: response.data?.updated || 0
-      };
-    } catch (error: any) {      throw new Error(error.message || 'Failed to update coupons');
-    }
-  }
-
-  /**
-   * Export coupons to CSV
-   */
-  async exportCoupons(filters?: CouponFilters): Promise<Blob> {
-    try {
-      const params = new URLSearchParams();
-      
-      if (filters) {
-        Object.entries(filters).forEach(([key, value]) => {
-          if (value !== undefined && value !== null && value !== '') {
-            params.append(key, value.toString());
-          }
-        });
-      }
-
-      const response = await apiService.get(`${this.baseUrl}/export?${params.toString()}`, {
-        responseType: 'blob'
-      });
-
-      return response.data as Blob;
-    } catch (error: any) {      throw new Error(error.message || 'Failed to export coupons');
-    }
+  async applyCoupon(id: string): Promise<void> {
+    await apiService.post(`${this.baseUrl}/${id}/apply`, {});
   }
 }
 
-// Export singleton instance
 export const couponService = new CouponService();
 export default couponService;

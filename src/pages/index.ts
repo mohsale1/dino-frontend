@@ -3,18 +3,18 @@
  * Centralized exports for all pages organized by category
  */
 
-// Public pages
-export * from './public/HomePage';
+// Common pages (public/auth)
+export * from './common';
 
-// Authentication pages
-export * from './auth';
+// System pages (with prefixes to avoid conflicts)
+export { Dashboard as SystemDashboard } from './system';
 
-// Menu pages
-export * from './menu';
-
-// Admin pages (specific exports)
-export { default as AdminDashboard } from './admin/AdminDashboard';
-export { default as UserManagement } from './admin/UserManagement';
-export { default as MenuManagement } from './admin/MenuManagement';
-export { default as OrdersManagement } from './admin/OrdersManagement';
-export { default as TableManagement } from './admin/TableManagement';
+// Application pages (business)
+export { 
+  Dashboard as ApplicationDashboard,
+  Catalog,
+  Locations,
+  Orders,
+  Users,
+  Settings,
+} from './application';

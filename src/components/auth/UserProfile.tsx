@@ -31,11 +31,9 @@ import {
   Cancel,
   Save
 } from '@mui/icons-material';
-import { useAuth } from '../../contexts/AuthContext';
-import { useDinoAvatar } from '../../contexts/DinoAvatarContext';
+import { useAuth } from '../../contexts/common/Auth';
 import { authService } from '../../services/auth';
-import UserPermissions from './UserPermissions';
-import { getUserFirstName, getUserLastName, getUserCreatedAt } from '../../utils/userUtils';
+import { getUserFirstName, getUserLastName, getUserCreatedAt } from '../../utils/data/userUtils';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -60,7 +58,6 @@ function TabPanel(props: TabPanelProps) {
 
 const UserProfile: React.FC = () => {
   const { user, updateUser } = useAuth();
-  const { dinoAvatar, dinoName, generateNewAvatar, isLoading: avatarLoading } = useDinoAvatar();
   const [tabValue, setTabValue] = useState(0);
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -83,8 +80,9 @@ const UserProfile: React.FC = () => {
 
   // Handle avatar generation with success message
   const handleGenerateNewAvatar = () => {
-    generateNewAvatar();
-    setSuccess(`🦕 New ${dinoName} avatar generated!`);
+    // TODO: Implement avatar generation
+    // generateNewAvatar();
+    setSuccess(`🦕 New avatar will be generated!`);
   };
 
   useEffect(() => {
@@ -203,7 +201,7 @@ const UserProfile: React.FC = () => {
           <Grid item xs={12} sm="auto">
             <Box sx={{ position: 'relative', display: 'flex', justifyContent: { xs: 'center', sm: 'flex-start' } }}>
               <Avatar
-                src={dinoAvatar}
+                src={undefined}
                 sx={{ 
                   width: { xs: 80, sm: 100 }, 
                   height: { xs: 80, sm: 100 },
@@ -217,7 +215,7 @@ const UserProfile: React.FC = () => {
                 onError={() => {                  // Don't clear avatar, just show fallback
                 }}
               >
-                {avatarLoading ? '⏳' : '🦕'}
+                {'🦕'}
               </Avatar>
               <Chip
                 label="🦕 Dino"
@@ -232,7 +230,7 @@ const UserProfile: React.FC = () => {
               />
               <IconButton
                 onClick={handleGenerateNewAvatar}
-                disabled={avatarLoading}
+                disabled={false}
                 sx={{
                   position: 'absolute',
                   top: -8,
@@ -481,7 +479,41 @@ const UserProfile: React.FC = () => {
 
         {/* Permissions Tab */}
         <TabPanel value={tabValue} index={2}>
-          <UserPermissions />
+          <Typography variant="h6" gutterBottom>
+            User Permissions
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+            Your account permissions and access levels
+          </Typography>
+          
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <Paper variant="outlined" sx={{ p: 2 }}>
+                <Typography variant="subtitle2" gutterBottom>
+                  Role
+                </Typography>
+                <Chip 
+                  label={user?.role || 'User'} 
+                  color="primary" 
+                  size="small"
+                  sx={{ textTransform: 'capitalize' }}
+                />
+              </Paper>
+            </Grid>
+            
+            <Grid item xs={12}>
+              <Paper variant="outlined" sx={{ p: 2 }}>
+                <Typography variant="subtitle2" gutterBottom>
+                  Access Level
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {user?.role === 'admin' ? 'Full administrative access' : 
+                   user?.role === 'operator' ? 'Standard user access' : 
+                   'Basic user access'}
+                </Typography>
+              </Paper>
+            </Grid>
+          </Grid>
         </TabPanel>
       </Paper>
 

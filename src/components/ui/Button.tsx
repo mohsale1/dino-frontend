@@ -7,7 +7,6 @@ import {
   useTheme,
   useMediaQuery,
 } from '@mui/material';
-import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 
 // Enhanced Button interface with professional variants and responsive features
 interface ButtonProps extends Omit<MuiButtonProps, 'variant' | 'size'> {
@@ -40,10 +39,9 @@ export const Button: React.FC<ButtonProps> = ({
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const animationsEnabled = useFeatureFlag('animatedComponents');
   
   // Use feature flag for animations unless explicitly overridden
-  const shouldAnimate = animated !== undefined ? animated : animationsEnabled;
+  const shouldAnimate = animated !== undefined ? animated : true; // Animations always enabled
   
   // Responsive size adjustment
   const getResponsiveSize = () => {
@@ -87,25 +85,25 @@ export const Button: React.FC<ButtonProps> = ({
         return {
           ...baseStyles,
           minHeight: 32,
-          px: 1,
+          px: 2,
           py: 0.75,
-          fontSize: '0.7rem',
+          fontSize: '0.8125rem',
         };
       case 'large':
         return {
           ...baseStyles,
           minHeight: 48,
-          px: 4,
-          py: 1,
+          px: 2.5,
+          py: 1.5,
           fontSize: '1rem',
         };
       default: // medium
         return {
           ...baseStyles,
           minHeight: 40,
-          px: 3,
+          px: 2,
           py: 1.25,
-          fontSize: '0.8rem',
+          fontSize: '0.875rem',
         };
     }
   };

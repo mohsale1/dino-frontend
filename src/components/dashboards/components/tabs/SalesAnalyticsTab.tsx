@@ -1,4 +1,5 @@
 import React from 'react';
+import { RevenueChart, OrderStatusChart, PeakHoursChart } from '../../charts';
 import {
   Grid,
   Card,
@@ -22,10 +23,9 @@ import {
   Star,
   LocalOffer,
 } from '@mui/icons-material';
-import { EnhancedPerformanceChart, SimpleBarChart } from '../../../charts/ChartComponents';
+// TODO: Re-enable when charts are implemented
+// import { EnhancedPerformanceChart, SimpleBarChart } from '../../../charts/ChartComponents';
 import { usePermissions } from '../../../auth';
-import { useDashboardFlags } from '../../../../flags/FlagContext';
-import { FlagGate } from '../../../../flags/FlagComponent';
 
 interface VenueDashboardStats {
   total_orders: number;
@@ -53,8 +53,7 @@ interface SalesAnalyticsTabProps {
 
 const SalesAnalyticsTab: React.FC<SalesAnalyticsTabProps> = ({ dashboardData, stats, analyticsData }) => {
   const theme = useTheme();
-  const { isSuperAdmin } = usePermissions();
-  const dashboardFlags = useDashboardFlags();
+  const { isOwner } = usePermissions();
   
   // Get top menu items and category performance from analytics
   const topMenuItems = analyticsData?.popular_items || dashboardData?.top_menu_items || [];
@@ -62,12 +61,10 @@ const SalesAnalyticsTab: React.FC<SalesAnalyticsTabProps> = ({ dashboardData, st
 
   return (
     <Grid container spacing={2}>
-      {/* Enhanced Performance Chart */}
-      <FlagGate flag="dashboard.showAnalyticsCharts">
-        <Grid item xs={12} lg={8}>
+      {/* Enhanced Performance Chart - TODO: Implement chart component */}
+      {/* <Grid item xs={12} lg={8}>
           <EnhancedPerformanceChart data={dashboardData} stats={stats} />
-        </Grid>
-      </FlagGate>
+        </Grid> */}
 
       {/* Category Performance Chart */}
       {categoryPerformance.length > 0 && (

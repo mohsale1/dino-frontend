@@ -21,7 +21,6 @@ import {
   alpha,
 } from '@mui/material';
 import { MoreVert as MoreVertIcon } from '@mui/icons-material';
-import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 
 interface CardProps extends Omit<MuiCardProps, 'variant'> {
   /**
@@ -137,15 +136,14 @@ export const Card: React.FC<CardProps> = ({
   ...props
 }) => {
   const theme = useTheme();
-  const animationsEnabled = useFeatureFlag('animatedComponents');
   
   // Use feature flag for animations unless explicitly overridden
-  const shouldAnimate = animated !== undefined ? animated : animationsEnabled;
+  const shouldAnimate = animated !== undefined ? animated : true; // Animations always enabled
 
   // Get variant-specific styles
   const getVariantStyles = () => {
     const baseStyles = {
-      borderRadius: 1,
+      borderRadius: 2,
       transition: shouldAnimate ? 'all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)' : 'none',
     };
 
@@ -203,9 +201,9 @@ export const Card: React.FC<CardProps> = ({
       case 'small':
         return { p: 1 };
       case 'large':
-        return { p: 1.5 };
+        return { p: 2 };
       default: // 'medium'
-        return { p: 1 };
+        return { p: 2 };
     }
   };
 
@@ -298,7 +296,7 @@ export const Card: React.FC<CardProps> = ({
     >
       {/* Custom header or standard header */}
       {header ? (
-        <Box sx={{ p: 1, pb: 0 }}>
+        <Box sx={{ p: 2, pb: 0 }}>
           {header}
         </Box>
       ) : (title || subtitle || avatar || showHeaderAction || headerAction) ? (
@@ -338,7 +336,7 @@ export const Card: React.FC<CardProps> = ({
       
       {/* Actions */}
       {actions && (
-        <CardActions sx={{ px: 1, pb: 1 }}>
+        <CardActions sx={{ px: 2, pb: 2 }}>
           {actions}
         </CardActions>
       )}

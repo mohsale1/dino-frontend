@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { useUserData } from '../contexts/UserDataContext';
+import { useAuth } from '../contexts/common/Auth';
+import { useUserData } from '../contexts/application/UserData';
 
 /**
  * Hook to ensure UserData is properly initialized
@@ -46,8 +46,7 @@ export const useUserDataInitializer = () => {
           if (!userData && !loading && retryCount.current < maxRetries) {            retryCount.current++;
             
             refreshUserData().catch(error => {              
-              if (retryCount.current < maxRetries) {
-                setTimeout(() => {
+              if (retryCount.current < maxRetries) {                setTimeout(() => {
                   initializeUserData();
                 }, 2000);
               } else {              }

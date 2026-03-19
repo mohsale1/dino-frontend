@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../contexts/common/Auth';
 
 interface PermissionSyncProps {
   children: React.ReactNode;

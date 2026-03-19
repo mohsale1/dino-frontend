@@ -1,0 +1,1 @@
+export { catalogService, catalogService as default } from './catalogService';

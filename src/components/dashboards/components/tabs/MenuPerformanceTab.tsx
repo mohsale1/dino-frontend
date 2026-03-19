@@ -105,7 +105,8 @@ const MenuPerformanceTab: React.FC<MenuPerformanceTabProps> = ({ menuPerformance
   }
 
   return (
-    <Grid container spacing={2}>
+    <Box>
+      <Grid container spacing={3} sx={{ mb: 5 }}>
       {/* Performance Overview */}
       <Grid item xs={12}>
         <Card sx={{ 
@@ -122,24 +123,22 @@ const MenuPerformanceTab: React.FC<MenuPerformanceTabProps> = ({ menuPerformance
                   Menu Performance Overview
                 </Typography>
               </Box>
-              {canManageMenu && (
-                <Button
-                  variant="contained"
-                  startIcon={<Add />}
-                  onClick={() => navigate('/admin/menu')}
-                  sx={{
-                    borderRadius: 0,
-                    fontWeight: 600,
-                    textTransform: 'none',
-                    boxShadow: 'none',
-                    '&:hover': {
-                      boxShadow: theme.shadows[2]
-                    }
-                  }}
-                >
-                  Manage Menu
-                </Button>
-              )}
+              <Button
+                variant="contained"
+                startIcon={<Add />}
+                onClick={() => navigate('/admin/menu')}
+                sx={{
+                  borderRadius: 0,
+                  fontWeight: 600,
+                  textTransform: 'none',
+                  boxShadow: 'none',
+                  '&:hover': {
+                    boxShadow: theme.shadows[2]
+                  }
+                }}
+              >
+                Manage Menu
+              </Button>
             </Box>
 
             <Grid container spacing={2} sx={{ mb: 3 }}>
@@ -433,7 +432,8 @@ const MenuPerformanceTab: React.FC<MenuPerformanceTabProps> = ({ menuPerformance
           </CardContent>
         </Card>
       </Grid>
-    </Grid>
+      </Grid>
+    </Box>
   );
 };
 

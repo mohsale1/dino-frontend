@@ -58,7 +58,6 @@ export const FEATURES = {
   ANALYTICS: true,
   NOTIFICATIONS: true,
   MULTI_LANGUAGE: false,
-  DARK_MODE: true, // Now enabled
 } as const;
 
 // Business Rules (Indian Market)

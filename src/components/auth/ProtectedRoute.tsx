@@ -1,8 +1,8 @@
 import React, { ReactNode } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { Box, CircularProgress, Typography } from '@mui/material';
-import { useAuth } from '../../contexts/AuthContext';
-import { isAdminLevel } from '../../types/auth';
+import { useAuth } from '../../contexts/common/Auth';
+import { isAdminLevel } from '../../types/auth/roles';
 import { GenericErrorPage } from '../errors';
 
 interface ProtectedRouteProps {

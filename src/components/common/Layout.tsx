@@ -23,20 +23,16 @@ import {
   Security,
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../contexts/common/Auth';
 import PermissionService from '../../services/auth';
-import { useCart } from '../../contexts/CartContext';
 import { PERMISSIONS } from '../../types/auth';
 import NotificationCenter from './NotificationCenter';
-import ThemeToggle from './ThemeToggle';
-import { useFeatureFlag } from '../../hooks/useFeatureFlag';
-import { useSidebar } from '../../contexts/SidebarContext';
+import { useSidebar } from '../../contexts/common/Sidebar';
 import AppHeader from '../layout/AppHeader';
 import MobileMenu from '../layout/MobileMenu';
 import Sidebar from '../layout/Sidebar';
-// import VenueStatusControl from './VenueStatusControl'; // Unused
-// import DinoLogo from './DinoLogo'; // Unused
-import { getUserFirstName } from '../../utils/userUtils';
+// Removed unused imports: VenueStatusControl, DinoLogo
+import { getUserFirstName } from '../../utils/data/userUtils';
 
 interface LayoutProps {
   children: ReactNode;
@@ -48,16 +44,24 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const isTablet = useMediaQuery(theme.breakpoints.between('md', 'lg'));
+
+  const isAdminRouteCheck = location.pathname.startsWith('/admin');
+  React.useEffect(() => {
+    if (isAdminRouteCheck) {
+      document.body.classList.add('admin-layout');
+    } else {
+      document.body.classList.remove('admin-layout');
+    }
+    return () => {
+      document.body.classList.remove('admin-layout');
+    };
+  }, [isAdminRouteCheck]);
   // const isSmallMobile = useMediaQuery(theme.breakpoints.down('sm')); // Unused
   const { user, logout, hasPermission, isOperator } = useAuth();
-  const { getTotalItems } = useCart();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [venueOpen, setVenueOpen] = useState(true);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   // const [logoutModalOpen, setLogoutModalOpen] = useState(false);
-  
-  // Feature flags
-  const isThemeToggleEnabled = useFeatureFlag('themeToggle');
   
   // Sidebar state
   const { getSidebarWidth } = useSidebar();
@@ -89,14 +93,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       
       return (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 2 } }}>
-          {isThemeToggleEnabled && <ThemeToggle variant="icon" size="small" />}
-          
           <IconButton
             color="primary"
             onClick={() => navigate(`/checkout/${venueId}/${tableId}`)}
-            disabled={getTotalItems() === 0}
+            disabled={false}
             sx={{
-              backgroundColor: getTotalItems() > 0 ? 'primary.50' : 'transparent',
+              backgroundColor: 'transparent',
               minWidth: { xs: 44, sm: 48 },
               minHeight: { xs: 44, sm: 48 },
               '&:hover': {
@@ -108,7 +110,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             }}
           >
             <Badge 
-              badgeContent={getTotalItems()} 
+              badgeContent={0} 
               color="secondary"
               sx={{
                 '& .MuiBadge-badge': {
@@ -133,58 +135,58 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       const allAdminNavItems = [
         { 
           label: 'Dashboard', 
-          path: '/admin', 
+          path: '/admin/dashboard', 
           icon: <Dashboard />, 
-          permission: PERMISSIONS.DASHBOARD_VIEW,
+          permission: PERMISSIONS.DASHBOARD_READ,
           roles: ['admin'] 
         },
         { 
           label: 'Orders', 
           path: '/admin/orders', 
           icon: <Assignment />, 
-          permission: PERMISSIONS.ORDERS_VIEW,
+          permission: PERMISSIONS.ORDERS_READ,
           roles: ['admin', 'operator'] 
         },
         { 
           label: 'Menu', 
           path: '/admin/menu', 
           icon: <Restaurant />, 
-          permission: PERMISSIONS.MENU_VIEW,
+          permission: PERMISSIONS.ITEMS_READ,
           roles: ['admin'] 
         },
         { 
           label: 'Tables', 
           path: '/admin/tables', 
           icon: <TableRestaurant />, 
-          permission: PERMISSIONS.TABLES_VIEW,
+          permission: PERMISSIONS.TABLES_READ,
           roles: ['admin'] 
         },
         { 
           label: 'Users', 
           path: '/admin/users', 
           icon: <People />, 
-          permission: PERMISSIONS.USERS_VIEW,
+          permission: PERMISSIONS.USERS_READ,
           roles: ['admin', 'superadmin'] 
         },
         { 
           label: 'Permissions', 
           path: '/admin/permissions', 
           icon: <Security />, 
-          permission: PERMISSIONS.USERS_VIEW,
+          permission: PERMISSIONS.USERS_READ,
           roles: ['admin', 'superadmin'] 
         },
         { 
           label: 'Settings', 
           path: '/admin/settings', 
           icon: <Settings />, 
-          permission: PERMISSIONS.SETTINGS_VIEW,
+          permission: PERMISSIONS.WORKSPACE_READ,
           roles: ['admin'] 
         },
         { 
           label: 'Workspace', 
           path: '/admin/workspace', 
           icon: <Business />, 
-          permission: PERMISSIONS.WORKSPACE_VIEW,
+          permission: PERMISSIONS.WORKSPACE_READ,
           roles: ['superadmin'] 
         },
       ];
@@ -260,13 +262,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     if (isHomePage) {
       return (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          {isThemeToggleEnabled && <ThemeToggle variant="switch" size="small" />}
           {user ? (
             <>
               <NotificationCenter />
               <Button
                 color="inherit"
-                onClick={() => navigate('/admin')}
+                onClick={() => navigate('/admin/dashboard')}
                 startIcon={<AccountCircle />}
                 sx={{
                   color: 'text.primary',
@@ -359,15 +360,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: isAdminRoute ? '100vh' : 'auto', minHeight: '100vh', margin: 0, padding: 0, width: '100%', maxWidth: '100%', overflow: isAdminRoute ? 'hidden' : 'visible' }}>
-      {/* Enhanced AppHeader - Hidden for customer facing pages and mobile admin routes */}
-      {!isCustomerFacingRoute && !(isAdminRoute && isMobile) && (
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: isAdminRoute ? '100vh' : 'auto', minHeight: isAdminRoute ? 'unset' : '100vh', overflow: isAdminRoute ? 'hidden' : 'visible', margin: 0, padding: 0, width: '100%', maxWidth: '100%' }}>
+      {/* Enhanced AppHeader - Hidden for customer facing pages and admin routes */}
+      {!isCustomerFacingRoute && !isAdminRoute && (
         <AppHeader />
       )}
 
       {/* Admin Layout with Responsive Sidebar */}
       {isAdminRoute && user ? (
-        <Box sx={{ display: 'flex', minHeight: isMobile ? '100vh' : 'calc(100vh - 70px)', position: 'relative', height: isMobile ? '100vh' : 'calc(100vh - 70px)', margin: 0, padding: 0, width: '100%', maxWidth: '100%' }}>
+        <Box sx={{ display: 'flex', height: '100vh', overflow: 'hidden', position: 'relative', margin: 0, padding: 0, width: '100%', maxWidth: '100%' }}>
           {/* Enhanced Desktop Sidebar Navigation */}
           {!isMobile && (
             <Sidebar isTablet={isTablet} />
@@ -380,10 +381,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             sx={{
               flex: 1,
               backgroundColor: 'background.default',
-              minHeight: isMobile ? '100vh' : 'calc(100vh - 70px)',
-              height: isMobile ? '100vh' : 'calc(100vh - 70px)',
+              minHeight: '100vh',
+              height: '100vh',
               marginLeft: isMobile ? 0 : '64px', // Fixed margin for collapsed sidebar width
-              marginTop: isMobile ? 0 : '70px',
+              marginTop: 0,
               marginRight: 0,
               paddingRight: 0,
               display: 'flex',
@@ -446,9 +447,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 flex: 1,
                 display: 'flex',
                 flexDirection: 'column',
-                overflow: 'visible',
-                height: 'auto',
-                minHeight: 'auto',
               }}
             >
               <Fade in timeout={300}>
@@ -456,50 +454,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   sx={{ 
                     flex: 1,
                     p: 0,
-                    overflow: 'visible',
-                    minHeight: 'auto',
-                    height: 'auto',
                   }}
                 >
                   {children}
                 </Box>
               </Fade>
-              
-              {/* Footer for Admin Routes */}
-              <Box 
-                sx={{ 
-                  flexShrink: 0,
-                  textAlign: 'center',
-                  py: { xs: 1, lg: 1 },
-                  px: { xs: 2, lg: 1 },
-                  borderTop: '1px solid',
-                  borderColor: 'divider',
-                  backgroundColor: 'background.paper',
-                  mt: 'auto',
-                }}
-              >
-              <Typography 
-                variant="body2" 
-                color="text.secondary"
-                sx={{ 
-                  fontSize: { xs: '0.75rem', sm: '0.875rem' },
-                  fontWeight: 500 
-                }}
-              >
-                © 2025 Dino. All rights reserved.
-              </Typography>
-              <Typography 
-                variant="caption" 
-                color="text.secondary"
-                sx={{ 
-                  fontSize: { xs: '0.65rem', sm: '0.75rem' },
-                  display: 'block',
-                  mt: 0.5
-                }}
-              >
-                Digital Menu Revolution
-              </Typography>
-              </Box>
             </Box>
           </Box>
 
@@ -536,7 +495,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             scrollBehavior: 'smooth',
             width: '100%',
             maxWidth: '100%',
-            overflow: 'auto',
             WebkitOverflowScrolling: 'touch', // Enable momentum scrolling on iOS
           }}
         >
@@ -545,7 +503,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               sx={{ 
                 width: '100%',
                 maxWidth: '100%',
-                overflow: 'auto',
               }}
             >
               {children}

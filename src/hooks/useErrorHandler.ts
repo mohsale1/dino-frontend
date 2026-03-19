@@ -5,14 +5,14 @@
  */
 
 import { useCallback } from 'react';
-import { useToast } from '../contexts/ToastContext';
+import { useToast } from '../contexts/common/Toast';
 import { 
   getUserFriendlyErrorMessage, 
   getErrorDetails,
   isAuthError,
   isNetworkError,
   formatErrorForDisplay 
-} from '../utils/errorMessages';
+} from '../config/errorMessages';
 
 export interface UseErrorHandlerOptions {
   showToast?: boolean;

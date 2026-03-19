@@ -422,10 +422,6 @@ export const VALIDATION_PATTERNS = {
   NUMERIC_ONLY: /^\\d+$/,
 } as const;
 
-// Re-export specialized validation modules
-export * from './registrationValidation';
-export * from './customerValidation';
-
 /**
  * Common validation limits
  */

@@ -16,39 +16,8 @@ export * from './app';
 // USER-FACING CONTENT
 // ===================================================================
 
-export {
-  // UI Messages
-  PAGE_TITLES,
-  APP_TITLES,
-  SUCCESS_MESSAGES,
-  ERROR_MESSAGES,
-  WARNING_MESSAGES,
-  INFO_MESSAGES,
-  BUTTON_LABELS,
-  PLACEHOLDERS,
-  FORM_LABELS,
-  ACCESS_MESSAGES,
-  STATUS_LABELS,
-  NOTIFICATION_MESSAGES,
-  
-  // Company & Content Information
-  COMPANY_INFO,
-  COMPANY_STATS,
-  CORE_FEATURES,
-  MANAGEMENT_FEATURES,
-  ADVANCED_FEATURES,
-  TESTIMONIALS,
-  SUCCESS_STORIES,
-  BENEFITS,
-  INTEGRATIONS,
-  CONTACT_DEPARTMENTS,
-  CONTACT_INFO,
-  FAQS,
-  NAVIGATION,
-  FOOTER_FEATURES,
-  CONTENT,
-  TESTIMONIAL_STATS,
-} from '../data/info';
+// NOTE: Static content removed - should be fetched from backend API
+// If you need these constants, fetch them from the backend or define them locally
 
 // ===================================================================
 // UTILITY FUNCTIONS

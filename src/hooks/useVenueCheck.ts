@@ -1,6 +1,6 @@
-import { useAuth } from '../contexts/AuthContext';
-import { useUserData } from '../contexts/UserDataContext';
-import { validateVenueAccess, requiresVenueAssignment, debugVenueAssignment } from '../utils/venueUtils';
+import { useAuth } from '../contexts/common/Auth';
+import { useUserData } from '../contexts/application/UserData';
+import { validateVenueAccess, requiresVenueAssignment, debugVenueAssignment } from '../utils/data/venueUtils';
 
 interface VenueCheckResult {
   hasVenueAssigned: boolean;
@@ -10,7 +10,7 @@ interface VenueCheckResult {
 }
 
 export const useVenueCheck = (): VenueCheckResult => {
-  const { isSuperAdmin, user } = useAuth();
+  const { isOwner, user } = useAuth();
   const { userData } = useUserData();
   
   // Use centralized venue validation
@@ -21,7 +21,7 @@ export const useVenueCheck = (): VenueCheckResult => {
   
   const hasVenueAssigned = validation.hasVenue;
   const venueId = validation.venueId;
-  const canBypassVenueCheck = isSuperAdmin();
+  const canBypassVenueCheck = isOwner();
   const requiresAssignment = requiresVenueAssignment(userData, user);
   
   return {

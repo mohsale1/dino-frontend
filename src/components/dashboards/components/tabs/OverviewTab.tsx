@@ -24,12 +24,11 @@ import {
   MonetizationOn,
 } from '@mui/icons-material';
 import { 
-  EnhancedRevenueChart, 
-  EnhancedOrderStatusChart, 
-  EnhancedSalesMetrics 
-} from '../../../charts/ChartComponents';
-import { useDashboardFlags } from '../../../../flags/FlagContext';
-import { FlagGate } from '../../../../flags/FlagComponent';
+  RevenueChart,
+  OrderStatusChart,
+  MenuPerformanceChart,
+  PeakHoursChart,
+} from '../../charts';
 
 interface VenueDashboardStats {
   total_orders: number;
@@ -57,7 +56,6 @@ interface OverviewTabProps {
 
 const OverviewTab: React.FC<OverviewTabProps> = ({ dashboardData, stats, analyticsData }) => {
   const theme = useTheme();
-  const dashboardFlags = useDashboardFlags();
   
   // Get popular items from analytics or dashboard data
   const popularItems = analyticsData?.popular_items || dashboardData?.analytics?.popular_items || [];
@@ -73,35 +71,61 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ dashboardData, stats, analyti
                                 return count > 0;
                               });
 
+  // Prepare trend data for line chart
+  const trendData = dashboardData?.analytics?.revenue_trend?.map((item: any) => ({
+    label: item.period || item.date || 'N/A',
+    revenue: item.revenue || 0,
+    orders: item.orders || 0
+  })) || [];
+
   return (
-    <Grid container spacing={2}>
-      {/* Enhanced Revenue Chart - Full Width - Only show if data exists */}
-      {hasRevenueData && (
-        <FlagGate flag="dashboard.showRevenueChart">
-          <Grid item xs={12}>
-            <EnhancedRevenueChart data={dashboardData} stats={stats} />
-          </Grid>
-        </FlagGate>
-      )}
-
-      {/* Order Status Chart - Only show if data exists */}
-      {hasOrderStatusData && (
-        <FlagGate flag="dashboard.showOrderStatusChart">
-          <Grid item xs={12} lg={6}>
-            <EnhancedOrderStatusChart data={dashboardData} stats={stats} />
-          </Grid>
-        </FlagGate>
-      )}
-
-      {/* Sales Metrics */}
-      <FlagGate flag="dashboard.showSalesMetrics">
-        <Grid item xs={12} lg={hasOrderStatusData ? 6 : 12}>
-          <EnhancedSalesMetrics data={dashboardData} stats={stats} />
+    <Box>
+      <Grid container spacing={3}>
+      {/* Revenue Trend Chart - Full Width */}
+      {trendData.length > 0 && (
+        <Grid item xs={12}>
+          <RevenueChart 
+            data={trendData}
+            title="Revenue & Orders Trend"
+            height={400}
+            showOrders={true}
+          />
         </Grid>
-      </FlagGate>
+      )}
+
+      {/* Order Status Distribution */}
+      {hasOrderStatusData && (
+        <Grid item xs={12} lg={6}>
+          <OrderStatusChart 
+            data={dashboardData?.analytics?.order_status_breakdown || {}}
+            title="Order Status Distribution"
+            height={350}
+          />
+        </Grid>
+      )}
+
+      {/* Peak Hours Analysis */}
+      <Grid item xs={12} lg={6}>
+        <PeakHoursChart 
+          title="Peak Hours Analysis"
+          height={350}
+        />
+      </Grid>
+
+      {/* Menu Performance Chart */}
+      {popularItems && popularItems.length > 0 && (
+        <Grid item xs={12}>
+          <MenuPerformanceChart 
+            data={popularItems}
+            title="Top Menu Items Performance"
+            height={400}
+            maxItems={10}
+            sortBy="revenue"
+          />
+        </Grid>
+      )}
 
       {/* Popular Items */}
-      <FlagGate flag="dashboard.showRecentActivity">
         <Grid item xs={12} md={6}>
           <Card sx={{ 
             borderRadius: 0,
@@ -156,10 +180,8 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ dashboardData, stats, analyti
             </CardContent>
           </Card>
         </Grid>
-      </FlagGate>
 
       {/* Recent Activity */}
-      <FlagGate flag="dashboard.showRecentActivity">
         <Grid item xs={12} md={6}>
           <Card sx={{ 
             borderRadius: 0,
@@ -274,8 +296,8 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ dashboardData, stats, analyti
             </CardContent>
           </Card>
         </Grid>
-      </FlagGate>
-    </Grid>
+      </Grid>
+    </Box>
   );
 };
 

@@ -49,16 +49,14 @@ import {
   RateReview,
   HelpOutline,
 } from '@mui/icons-material';
-import DinoLogo from '../../DinoLogo';
-import { getUserFirstName } from '../../../utils/userUtils';
-import { useAuth } from '../../../contexts/AuthContext';
-import { useDinoAvatar } from '../../../contexts/DinoAvatarContext';
+import DinoLogo from '../../ui/DinoLogo';
+import { getUserFirstName } from '../../../utils/data/userUtils';
+import { useAuth } from '../../../contexts/common/Auth';
 import { PermissionService } from '../../../services/auth';
-import { useUserData } from '../../../contexts/UserDataContext';
-import { venueService } from '../../../services/business';
+import { useUserData } from '../../../contexts/application/UserData';
+import { venueService } from '../../../services/application';
 import { usePermissionCheck } from '../../common/PermissionWrapper';
 import { PERMISSIONS } from '../../../types/auth';
-import { LogoutConfirmationModal } from '../../modals';
 
 interface MobileMenuProps {
   open: boolean;
@@ -76,6 +74,8 @@ interface MobileMenuProps {
   isAdminRoute?: boolean;
 }
 
+const dinoAvatar = null; // TODO: Add user avatar support
+
 const MobileMenu: React.FC<MobileMenuProps> = ({
   open,
   onClose,
@@ -88,9 +88,8 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
   isHomePage,
   isAdminRoute = false,
 }) => {
-  const { dinoAvatar } = useDinoAvatar();
   const { userData } = useUserData();
-  const { isAdmin, isSuperAdmin } = useAuth();
+  const { isOwner, isManager } = useAuth();
   const { checkPermission } = usePermissionCheck();
   const [venueStatus, setVenueStatus] = useState<{
     isActive: boolean;
@@ -98,13 +97,12 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
     venueName: string;
   } | null>(null);
   const [statusLoading, setStatusLoading] = useState(false);
-  const [logoutModalOpen, setLogoutModalOpen] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   // Load venue status from UserDataContext
   useEffect(() => {
-    const userIsAdmin = isAdmin() || isSuperAdmin();
+    const userIsAdmin = isOwner() || isManager();
 
     if (!user || !userIsAdmin) {
       setVenueStatus(null);
@@ -127,7 +125,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
       venueName: userData.venue.name || 'Current Venue'
     };
     setVenueStatus(statusData);
-  }, [user, userData?.venue, isAdmin, isSuperAdmin]);
+  }, [user, userData?.venue, isOwner, isManager]);
 
   // Handle venue status toggle
   const handleToggleVenueOpen = async () => {
@@ -160,13 +158,22 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
   };
 
   const handleLogout = () => {
-    setLogoutModalOpen(true);
+    if (window.confirm('Are you sure you want to logout?')) {
+      onLogout();
+    }
   };
 
-  const confirmLogout = () => {
-    onLogout();
-    setLogoutModalOpen(false);
-  };
+  // Admin menu items
+  const adminMenuItems = [
+    { label: 'Dashboard', path: '/admin', icon: <Dashboard /> },
+    { label: 'Menu', path: '/admin/menu', icon: <MenuBook /> },
+    { label: 'Location', path: '/admin/locations', icon: <Store /> },
+    { label: 'Orders', path: '/admin/orders', icon: <ShoppingCart /> },
+    { label: 'Catalog', path: '/admin/catalog', icon: <Star /> },
+    { label: 'Coupons', path: '/admin/coupons', icon: <LocalOffer /> },
+    { label: 'Users', path: '/admin/users', icon: <People /> },
+    { label: 'Settings', path: '/admin/settings', icon: <Settings /> },
+  ];
 
   // Get icon for navigation item based on label or id
   const getNavigationIcon = (item: { label: string; id: string }) => {
@@ -334,16 +341,16 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
             >
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
                 <Avatar
-                  src={dinoAvatar || undefined}
+                  src={undefined}
                   sx={{
-                    backgroundColor: dinoAvatar ? 'transparent' : 'primary.main',
+                    backgroundColor: "primary.main",
                     width: 40,
                     height: 40,
-                    border: dinoAvatar ? '2px solid' : 'none',
+                    border: "none",
                     borderColor: 'primary.main',
                   }}
                 >
-                  {dinoAvatar ? '🦕' : <AccountCircle />}
+                  {<AccountCircle />}
                 </Avatar>
                 <Box sx={{ flex: 1 }}>
                   <Typography variant="subtitle1" fontWeight={600} color="text.primary">
@@ -398,20 +405,19 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                 <Button
                   size="small"
                   variant="outlined"
-                  startIcon={<AccountCircle sx={{ fontSize: 16 }} />}
-                  onClick={() => handleNavigate('/profile')}
+                  startIcon={<Settings sx={{ fontSize: 16 }} />}
+                  onClick={() => handleNavigate('/admin/settings')}
                   sx={{ 
                     flex: 1, 
                     textTransform: 'none',
                     fontSize: '0.8rem',
                   }}
                 >
-                  Profile
+                  Settings
                 </Button>
                 <Button
                   size="small"
                   variant="outlined"
-                  color="error"
                   startIcon={<ExitToApp sx={{ fontSize: 16 }} />}
                   onClick={handleLogout}
                   sx={{ 
@@ -427,8 +433,8 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
           </Box>
         )}
 
-        {/* Venue Status Display - Only for Admin and SuperAdmin */}
-        {user && (isAdmin() || isSuperAdmin()) && (
+        {/* Venue Status Display - Only for Owner and Manager */}
+        {user && (isOwner() || isManager()) && (
           <Box sx={{ p: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
             <Paper
               elevation={0}
@@ -596,266 +602,32 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
               Quick Actions
             </Typography>
             <List sx={{ p: 0 }}>
-              {/* Admin Menu Items - Permission-based rendering */}
-              {user && (
-                <>
-                  {/* Dashboard */}
-                  {checkPermission(PERMISSIONS.DASHBOARD_VIEW) && (
-                    <ListItem disablePadding sx={{ mb: 0.5 }}>
-                      <ListItemButton
-                        onClick={() => handleNavigate('/admin')}
-                        sx={{
-                          borderRadius: 1,
-                          minHeight: 44,
-                          '&:hover': {
-                            backgroundColor: 'action.hover',
-                          },
-                        }}
-                      >
-                        <ListItemIcon sx={{ color: 'text.secondary', minWidth: 36 }}>
-                          <Dashboard />
-                        </ListItemIcon>
-                        <ListItemText
-                          primary="Dashboard"
-                          primaryTypographyProps={{
-                            fontWeight: 500,
-                            color: 'text.primary',
-                            fontSize: '0.875rem',
-                          }}
-                        />
-                      </ListItemButton>
-                    </ListItem>
-                  )}
-
-                  {/* Orders */}
-                  {checkPermission(PERMISSIONS.ORDERS_VIEW) && (
-                    <ListItem disablePadding sx={{ mb: 0.5 }}>
-                      <ListItemButton
-                        onClick={() => handleNavigate('/admin/orders')}
-                        sx={{
-                          borderRadius: 1,
-                          minHeight: 44,
-                          '&:hover': {
-                            backgroundColor: 'action.hover',
-                          },
-                        }}
-                      >
-                        <ListItemIcon sx={{ color: 'text.secondary', minWidth: 36 }}>
-                          <Assignment />
-                        </ListItemIcon>
-                        <ListItemText
-                          primary="Orders"
-                          primaryTypographyProps={{
-                            fontWeight: 500,
-                            color: 'text.primary',
-                            fontSize: '0.875rem',
-                          }}
-                        />
-                      </ListItemButton>
-                    </ListItem>
-                  )}
-
-                  {/* Menu */}
-                  {checkPermission(PERMISSIONS.MENU_VIEW) && (
-                    <ListItem disablePadding sx={{ mb: 0.5 }}>
-                      <ListItemButton
-                        onClick={() => handleNavigate('/admin/menu')}
-                        sx={{
-                          borderRadius: 1,
-                          minHeight: 44,
-                          '&:hover': {
-                            backgroundColor: 'action.hover',
-                          },
-                        }}
-                      >
-                        <ListItemIcon sx={{ color: 'text.secondary', minWidth: 36 }}>
-                          <Restaurant />
-                        </ListItemIcon>
-                        <ListItemText
-                          primary="Menu"
-                          primaryTypographyProps={{
-                            fontWeight: 500,
-                            color: 'text.primary',
-                            fontSize: '0.875rem',
-                          }}
-                        />
-                      </ListItemButton>
-                    </ListItem>
-                  )}
-
-                  {/* Tables */}
-                  {checkPermission(PERMISSIONS.TABLES_VIEW) && (
-                    <ListItem disablePadding sx={{ mb: 0.5 }}>
-                      <ListItemButton
-                        onClick={() => handleNavigate('/admin/tables')}
-                        sx={{
-                          borderRadius: 1,
-                          minHeight: 44,
-                          '&:hover': {
-                            backgroundColor: 'action.hover',
-                          },
-                        }}
-                      >
-                        <ListItemIcon sx={{ color: 'text.secondary', minWidth: 36 }}>
-                          <TableRestaurant />
-                        </ListItemIcon>
-                        <ListItemText
-                          primary="Tables"
-                          primaryTypographyProps={{
-                            fontWeight: 500,
-                            color: 'text.primary',
-                            fontSize: '0.875rem',
-                          }}
-                        />
-                      </ListItemButton>
-                    </ListItem>
-                  )}
-
-                  {/* Users */}
-                  {checkPermission(PERMISSIONS.USERS_VIEW) && (
-                    <ListItem disablePadding sx={{ mb: 0.5 }}>
-                      <ListItemButton
-                        onClick={() => handleNavigate('/admin/users')}
-                        sx={{
-                          borderRadius: 1,
-                          minHeight: 44,
-                          '&:hover': {
-                            backgroundColor: 'action.hover',
-                          },
-                        }}
-                      >
-                        <ListItemIcon sx={{ color: 'text.secondary', minWidth: 36 }}>
-                          <People />
-                        </ListItemIcon>
-                        <ListItemText
-                          primary="Users"
-                          primaryTypographyProps={{
-                            fontWeight: 500,
-                            color: 'text.primary',
-                            fontSize: '0.875rem',
-                          }}
-                        />
-                      </ListItemButton>
-                    </ListItem>
-                  )}
-
-                  {/* Permissions */}
-                  {checkPermission(PERMISSIONS.USERS_UPDATE) && (
-                    <ListItem disablePadding sx={{ mb: 0.5 }}>
-                      <ListItemButton
-                        onClick={() => handleNavigate('/admin/permissions')}
-                        sx={{
-                          borderRadius: 1,
-                          minHeight: 44,
-                          '&:hover': {
-                            backgroundColor: 'action.hover',
-                          },
-                        }}
-                      >
-                        <ListItemIcon sx={{ color: 'text.secondary', minWidth: 36 }}>
-                          <Security />
-                        </ListItemIcon>
-                        <ListItemText
-                          primary="Permissions"
-                          primaryTypographyProps={{
-                            fontWeight: 500,
-                            color: 'text.primary',
-                            fontSize: '0.875rem',
-                          }}
-                        />
-                      </ListItemButton>
-                    </ListItem>
-                  )}
-
-                  {/* Settings */}
-                  {checkPermission(PERMISSIONS.SETTINGS_VIEW) && (
-                    <ListItem disablePadding sx={{ mb: 0.5 }}>
-                      <ListItemButton
-                        onClick={() => handleNavigate('/admin/settings')}
-                        sx={{
-                          borderRadius: 1,
-                          minHeight: 44,
-                          '&:hover': {
-                            backgroundColor: 'action.hover',
-                          },
-                        }}
-                      >
-                        <ListItemIcon sx={{ color: 'text.secondary', minWidth: 36 }}>
-                          <Settings />
-                        </ListItemIcon>
-                        <ListItemText
-                          primary="Settings"
-                          primaryTypographyProps={{
-                            fontWeight: 500,
-                            color: 'text.primary',
-                            fontSize: '0.875rem',
-                          }}
-                        />
-                      </ListItemButton>
-                    </ListItem>
-                  )}
-
-                  {/* Workspace */}
-                  {checkPermission(PERMISSIONS.WORKSPACE_VIEW) && (
-                    <ListItem disablePadding sx={{ mb: 0.5 }}>
-                      <ListItemButton
-                        onClick={() => handleNavigate('/admin/workspace')}
-                        sx={{
-                          borderRadius: 1,
-                          minHeight: 44,
-                          '&:hover': {
-                            backgroundColor: 'action.hover',
-                          },
-                        }}
-                      >
-                        <ListItemIcon sx={{ color: 'text.secondary', minWidth: 36 }}>
-                          <Business />
-                        </ListItemIcon>
-                        <ListItemText
-                          primary="Workspace"
-                          primaryTypographyProps={{
-                            fontWeight: 500,
-                            color: 'text.primary',
-                            fontSize: '0.875rem',
-                          }}
-                        />
-                      </ListItemButton>
-                    </ListItem>
-                  )}
-
-                  {/* Code Management - Only for dino/dinos role */}
-                  {(() => {
-                    const backendRole = PermissionService.getBackendRole();
-                    const userRole = backendRole?.name || user?.role || '';
-                    return userRole.toLowerCase() === 'dino' || userRole.toLowerCase() === 'dinos';
-                  })() && (
-                    <ListItem disablePadding sx={{ mb: 0.5 }}>
-                      <ListItemButton
-                        onClick={() => handleNavigate('/admin/code')}
-                        sx={{
-                          borderRadius: 1,
-                          minHeight: 44,
-                          '&:hover': {
-                            backgroundColor: 'action.hover',
-                          },
-                        }}
-                      >
-                        <ListItemIcon sx={{ color: 'text.secondary', minWidth: 36 }}>
-                          <Code />
-                        </ListItemIcon>
-                        <ListItemText
-                          primary="Code Management"
-                          primaryTypographyProps={{
-                            fontWeight: 500,
-                            color: 'text.primary',
-                            fontSize: '0.875rem',
-                          }}
-                        />
-                      </ListItemButton>
-                    </ListItem>
-                  )}
-                </>
-              )}
+              {user && adminMenuItems.map((item) => (
+                <ListItem key={item.path} disablePadding sx={{ mb: 0.5 }}>
+                  <ListItemButton
+                    onClick={() => handleNavigate(item.path)}
+                    sx={{
+                      borderRadius: 1,
+                      minHeight: 44,
+                      '&:hover': {
+                        backgroundColor: 'action.hover',
+                      },
+                    }}
+                  >
+                    <ListItemIcon sx={{ color: 'text.secondary', minWidth: 36 }}>
+                      {item.icon}
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={item.label}
+                      primaryTypographyProps={{
+                        fontWeight: 500,
+                        color: 'text.primary',
+                        fontSize: '0.875rem',
+                      }}
+                    />
+                  </ListItemButton>
+                </ListItem>
+              ))}
 
               {/* Login/Register for non-authenticated users */}
               {!user && (
@@ -915,14 +687,6 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
         </Box>
 
       </Box>
-
-      {/* Logout Confirmation Modal */}
-      <LogoutConfirmationModal
-        open={logoutModalOpen}
-        onClose={() => setLogoutModalOpen(false)}
-        onConfirm={confirmLogout}
-        userName={getUserFirstName(user) || user?.email}
-      />
     </Drawer>
   );
 };

@@ -180,7 +180,7 @@ const PaymentsTab: React.FC<PaymentsTabProps> = ({ stats, analyticsData }) => {
             </Box>
 
             <Grid container spacing={2}>
-              {paymentStats.map((stat, index) => (
+              {paymentStats.map((stat: any, index: number) => (
                 <Grid item xs={12} sm={6} md={3} key={index}>
                   <Box sx={{ 
                     p: 2.5, 

@@ -13,35 +13,39 @@ import {
   Switch,
   FormControlLabel,
   CircularProgress,
+  Divider,
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  ListItemText,
 } from '@mui/material';
 import {
   ChevronLeft,
   ChevronRight,
+  MenuBook,
   Dashboard,
-  Assignment,
-  Restaurant,
-  TableRestaurant,
+  LocationOn,
+  ShoppingCart,
+  Category,
+  LocalOffer,
   People,
-  Security,
   Settings,
-  Business,
   CheckCircle,
   Cancel,
-  LocalOffer,
-  Palette,
+  Logout,
+  MoreVert,
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../../../contexts/AuthContext';
-import { useUserData } from '../../../contexts/UserDataContext';
-import { useSidebar } from '../../../contexts/SidebarContext';
-import { venueService } from '../../../services/business';
+import { useAuth } from '../../../contexts/common/Auth';
+import { useUserData } from '../../../contexts/application/UserData';
+import { useSidebar } from '../../../contexts/common/Sidebar';
+// UIConfig removed - using simple role/permission based menu
+import { venueService } from '../../../services/application';
 import PermissionService from '../../../services/auth';
-import { PermissionRegistry } from '../../../services/auth/permissionRegistry';
-import { usePermissions } from '../../../hooks/usePermissions';
+import { ConfirmationDialog } from '../../dialogs/ConfirmationDialog';
 
-import { getUserFirstName } from '../../../utils/userUtils';
-import { useSidebarFlags } from '../../../flags/FlagContext';
-import { FlagGate } from '../../../flags/FlagComponent';
+import { getUserFirstName } from '../../../utils/data/userUtils';
+// Feature flags removed - using simple permission-based access
 import './Sidebar.css';
 
 interface NavigationItem {
@@ -52,6 +56,14 @@ interface NavigationItem {
   requiredRoles?: string[];
   badge?: string | number;
   flagKey?: string;
+  category?: string;
+  description?: string;
+}
+
+interface MenuCategory {
+  name: string;
+  label: string;
+  order: number;
 }
 
 interface SidebarProps {
@@ -62,85 +74,49 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const theme = useTheme();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const { userData, refreshUserData } = useUserData();
   const { isCollapsed, toggleCollapsed, getSidebarWidth } = useSidebar();
-  const sidebarFlags = useSidebarFlags();
-  const { getAccessibleModules, userRole } = usePermissions();
   
   const [statusLoading, setStatusLoading] = useState(false);
+  const [profileMenuAnchor, setProfileMenuAnchor] = useState<null | HTMLElement>(null);
+  const [showLogoutConfirmation, setShowLogoutConfirmation] = useState(false);
 
   // Determine if sidebar should show expanded content
   const showExpanded = !isCollapsed;
-  
-  // Icon mapping for modules
-  const iconMap: Record<string, React.ReactNode> = {
-    'dashboard': <Dashboard />,
-    'orders': <Assignment />,
-    'menu': <Restaurant />,
-    'tables': <TableRestaurant />,
-    'coupons': <LocalOffer />,
-    'menu-template': <Palette />,
-    'users': <People />,
-    'permissions': <Security />,
-    'settings': <Settings />,
-    'workspace': <Business />,
-  };
 
-  // Flag key mapping for modules
-  const flagKeyMap: Record<string, string> = {
-    'dashboard': 'showDashboardNav',
-    'orders': 'showOrdersNav',
-    'menu': 'showMenuNav',
-    'tables': 'showTablesNav',
-    'coupons': 'showCouponsNav',
-    'menu-template': 'showMenuNav',
-    'users': 'showUsersNav',
-    'permissions': 'showPermissionsNav',
-    'settings': 'showSettingsNav',
-    'workspace': 'showWorkspaceNav',
-    'code': 'showCodeNav',
-  };
+  // Simple static menu configuration
+  const menuCategories: MenuCategory[] = [
+    { name: 'main', label: 'Main', order: 1 },
+    { name: 'management', label: 'Management', order: 2 },
+    { name: 'settings', label: 'Settings', order: 3 },
+  ];
 
-  // Get accessible modules from registry (dynamic based on stored permissions)
-  // includeChildren=false ensures only top-level modules are returned
-  const accessibleModules = getAccessibleModules();
-  
-  // Debug logging for sidebar modules
-  React.useEffect(() => {
-    if (accessibleModules.length > 0) {
-      console.log('[Sidebar] Accessible modules (top-level only):', accessibleModules.map(m => ({
-        id: m.id,
-        label: m.label,
-        path: m.path,
-        requiredPermissions: m.requiredPermissions,
-        requiredRoles: m.requiredRoles,
-        hasChildren: !!m.children
-      })));
-      console.log('[Sidebar] User role:', userRole);
-      console.log('[Sidebar] Sidebar flags:', sidebarFlags);
-    }
-  }, [accessibleModules.length, userRole]);
-  
-  // Convert to NavigationItem format and add icons
-  // Note: accessibleModules already excludes child modules, no need to filter again
-  const adminNavItems: NavigationItem[] = accessibleModules
-    .map(module => ({
-      label: module.label,
-      path: module.path,
-      icon: iconMap[module.id] || <Dashboard />,
-      requiredPermissions: module.requiredPermissions,
-      requiredRoles: module.requiredRoles,
-      flagKey: flagKeyMap[module.id],
-    }))
-    .filter(item => {
-      // Check feature flag
-      if (item.flagKey && !sidebarFlags[item.flagKey as keyof typeof sidebarFlags]) {
-        console.log(`[Sidebar] Filtering out ${item.label} due to feature flag: ${item.flagKey}`);
-        return false;
-      }
-      return true;
-    });
+  // Define all menu items with their permissions
+  const allMenuItems: NavigationItem[] = [
+    // Main
+    { label: 'Menu', path: '/admin/pos', icon: <MenuBook />, requiredPermissions: ['orders.create'], requiredRoles: [], category: 'main', description: 'Manual order entry' },
+    { label: 'Dashboard', path: '/admin', icon: <Dashboard />, requiredPermissions: ['dashboard.view'], requiredRoles: [], category: 'main' },
+    { label: 'Order', path: '/admin/orders', icon: <ShoppingCart />, requiredPermissions: ['orders.view'], requiredRoles: [], category: 'main' },
+    
+    // Management
+    { label: 'Catalog', path: '/admin/catalog', icon: <Category />, requiredPermissions: ['menu.view'], requiredRoles: [], category: 'management' },
+    { label: 'Location', path: '/admin/locations', icon: <LocationOn />, requiredPermissions: ['tables.view'], requiredRoles: [], category: 'management' },
+    { label: 'Coupon', path: '/admin/coupons', icon: <LocalOffer />, requiredPermissions: ['coupons.view'], requiredRoles: [], category: 'management' },
+    { label: 'Users', path: '/admin/users', icon: <People />, requiredPermissions: ['users.view'], requiredRoles: [], category: 'management' },
+    
+    // Settings
+    { label: 'Settings', path: '/admin/settings', icon: <Settings />, requiredPermissions: ['settings.view'], requiredRoles: [], category: 'settings' },
+  ];
+
+  // PERMISSION CHECKS DISABLED - Show all menu items to all users
+  const adminNavItems = allMenuItems;
+
+  // Group items by category
+  const groupedNavItems = menuCategories.map(category => ({
+    ...category,
+    items: adminNavItems.filter(item => item.category === category.name),
+  })).filter(group => group.items.length > 0);
 
   // Get venue status for display (using standardized camelCase)
   const venueStatus = userData?.venue ? {
@@ -160,15 +136,46 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
       const newStatus = !venueStatus.isOpen;      
       // Update venue status directly using updateVenue - more efficient than openVenue/closeVenue
       // which try non-existent endpoints first before falling back to updateVenue
-      const response = await venueService.updateVenue(userData.venue.id, { 
+      await venueService.updateVenue(userData.venue.id, { 
         is_open: newStatus 
       });
       // Refresh user data to get updated venue status
-      await refreshUserData();    } catch (error) {      // Show error message to user
+      await refreshUserData();
+    } catch (error) {
+      // Show error message to user
       alert('Failed to update venue status. Please try again.');
     } finally {
       setStatusLoading(false);
     }
+  };
+
+  // Handle profile menu
+  const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setProfileMenuAnchor(event.currentTarget);
+  };
+
+  const handleProfileMenuClose = () => {
+    setProfileMenuAnchor(null);
+  };
+
+  const handleLogoutClick = () => {
+    handleProfileMenuClose();
+    setShowLogoutConfirmation(true);
+  };
+
+  const handleLogoutConfirm = () => {
+    setShowLogoutConfirmation(false);
+    logout();
+    navigate('/login');
+  };
+
+  const handleLogoutCancel = () => {
+    setShowLogoutConfirmation(false);
+  };
+
+  const handleSettings = () => {
+    handleProfileMenuClose();
+    navigate('/admin/settings');
   };
 
   return (
@@ -180,7 +187,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
           onClick={toggleCollapsed}
           sx={{
             position: 'fixed',
-            top: 64,
+            top: 0,
             left: 0,
             right: 0,
             bottom: 0,
@@ -197,86 +204,87 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
         className={`sidebar sidebar-glass ${isCollapsed ? 'sidebar-collapsed' : isTablet ? 'sidebar-tablet' : 'sidebar-expanded'}`}
         sx={{
           position: 'fixed',
-          top: 64,
+          top: 0,
           left: 0,
           bottom: 0,
           width: sidebarWidth,
-          backgroundColor: alpha(theme.palette.background.paper, 0.98),
-          backdropFilter: 'blur(24px)',
-          borderRight: `1px solid ${alpha(theme.palette.divider, 0.12)}`,
+          backgroundColor: '#0f172a',
           zIndex: 1200,
           display: 'flex',
           flexDirection: 'column',
           transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-          boxShadow: !isCollapsed 
-            ? `0 8px 32px ${alpha(theme.palette.common.black, 0.24)}`
-            : `0 8px 32px ${alpha(theme.palette.common.black, 0.12)}`,
-        '&::before': {
-          content: '""',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.03)} 0%, ${alpha(theme.palette.secondary.main, 0.02)} 50%, ${alpha(theme.palette.primary.main, 0.01)} 100%)`,
-          pointerEvents: 'none',
-        },
-        '&::after': {
-          content: '""',
-          position: 'absolute',
-          top: 0,
-          right: 0,
-          width: 1,
-          height: '100%',
-          background: `linear-gradient(180deg, transparent 0%, ${alpha(theme.palette.primary.main, 0.1)} 50%, transparent 100%)`,
-          pointerEvents: 'none',
-        },
-      }}
-    >
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+        }}
+      >
       {/* Header Section */}
       <Box
         sx={{
-          p: 1.25,
-          borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
-          minHeight: 56,
+          p: 2,
+          borderBottom: `1px solid rgba(255, 255, 255, 0.1)`,
+          minHeight: 64,
           display: 'flex',
           alignItems: 'center',
           justifyContent: showExpanded ? 'space-between' : 'center',
+          backgroundColor: 'rgba(0, 0, 0, 0.1)',
         }}
       >
         {showExpanded && (
-          <Box>
-            <Typography
-              variant="h6"
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <Box
               sx={{
-                fontWeight: 700,
-                fontSize: '1rem',
-                background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
-                backgroundClip: 'text',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                lineHeight: 1.2,
+                width: 36,
+                height: 36,
+                borderRadius: 2,
+                backgroundColor: '#3b82f6',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)',
+                flexShrink: 0,
               }}
             >
-              Dino Admin
-            </Typography>
-            <Typography
-              variant="caption"
-              sx={{
-                color: 'text.secondary',
-                fontSize: '0.65rem',
-                fontWeight: 500,
-                display: 'block',
-                lineHeight: 1,
-              }}
-            >
-              Control Panel
-            </Typography>
+              <Typography
+                sx={{
+                  color: '#ffffff',
+                  fontSize: '1.25rem',
+                  fontWeight: 800,
+                }}
+              >
+                D
+              </Typography>
+            </Box>
+            <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 700,
+                  fontSize: '1.125rem',
+                  color: '#ffffff',
+                  lineHeight: 1.3,
+                  letterSpacing: '-0.02em',
+                  mb: 0.25,
+                }}
+              >
+                Dino
+              </Typography>
+              <Typography
+                variant="caption"
+                sx={{
+                  color: 'rgba(255, 255, 255, 0.6)',
+                  fontSize: '0.6875rem',
+                  fontWeight: 500,
+                  lineHeight: 1,
+                  letterSpacing: '0.5px',
+                  textTransform: 'uppercase',
+                }}
+              >
+                Admin Panel
+              </Typography>
+            </Box>
           </Box>
         )}
         
         {/* Expand/Collapse Button */}
-        <FlagGate flag="sidebar.enableSidebarCollapse">
           <Tooltip title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'} placement="right">
             <Button
               onClick={toggleCollapsed}
@@ -288,14 +296,14 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
                 borderRadius: 2,
                 fontSize: '0.8125rem',
                 fontWeight: 500,
-                color: 'text.primary',
+                color: '#ffffff',
                 backgroundColor: 'transparent',
                 border: '1px solid transparent',
                 transition: 'all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
                 '&:hover': {
-                  backgroundColor: alpha(theme.palette.primary.main, 0.1),
-                  borderColor: alpha(theme.palette.primary.main, 0.2),
-                  color: 'black',
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  borderColor: 'rgba(255, 255, 255, 0.2)',
+                  color: '#ffffff',
                   transform: 'translateX(2px)',
                 },
                 '&:active': {
@@ -310,98 +318,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
               startIcon={isCollapsed ? <ChevronRight /> : <ChevronLeft />}
             />
           </Tooltip>
-        </FlagGate>
       </Box>
 
-      {/* User Info Section */}
-      {user && sidebarFlags.showUserProfile && (
-        <Box
-          sx={{
-            p: 1.5,
-            borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
-          }}
-        >
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              p: showExpanded ? 1.25 : 0.75,
-              borderRadius: 2,
-              backgroundColor: alpha(theme.palette.primary.main, 0.05),
-              border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
-              minHeight: showExpanded ? 'auto' : 48,
-              height: showExpanded ? 'auto' : 48,
-            }}
-          >
-            <Box
-              sx={{
-                display: 'flex',
-                flexDirection: showExpanded ? 'column' : 'row',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: '100%',
-                gap: showExpanded ? 0.75 : 0,
-              }}
-            >
-              <Avatar
-                sx={{
-                  width: 32,
-                  height: 32,
-                  backgroundColor: 'primary.main',
-                  fontSize: '0.8125rem',
-                  fontWeight: 600,
-                  flexShrink: 0,
-                }}
-              >
-                {getUserFirstName(user)?.charAt(0) || user.email?.charAt(0) || 'U'}
-              </Avatar>
-              
-              <Collapse in={showExpanded} orientation="horizontal">
-                <Box sx={{ minWidth: 0, textAlign: 'center' }}>
-                  <Typography
-                    variant="subtitle2"
-                    sx={{
-                      fontWeight: 600,
-                      color: 'text.primary',
-                      fontSize: '0.8125rem',
-                      lineHeight: 1.2,
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    {getUserFirstName(user) || user.email}
-                  </Typography>
-                  <Chip
-                    label={(() => {
-                      const backendRole = PermissionService.getBackendRole();
-                      if (backendRole?.name) {
-                        const roleDefinition = PermissionService.getRoleDefinition(backendRole.name);
-                        return roleDefinition?.displayName || backendRole.name;
-                      }
-                      return user?.role || 'User';
-                    })()}
-                    size="small"
-                    sx={{
-                      height: 16,
-                      fontSize: '0.625rem',
-                      fontWeight: 500,
-                      backgroundColor: alpha(theme.palette.primary.main, 0.1),
-                      color: 'primary.main',
-                      border: 'none',
-                      mt: 0.375,
-                    }}
-                  />
-                </Box>
-              </Collapse>
-            </Box>
-          </Box>
-        </Box>
-      )}
 
       {/* Venue Status */}
-      {venueStatus && showExpanded && sidebarFlags.showVenueStatus && (
+      {venueStatus && showExpanded &&  (
         <Box
           sx={{
             p: 1.5,
@@ -478,7 +399,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
       )}
 
       {/* Collapsed Venue Status Indicator */}
-      {venueStatus && !showExpanded && sidebarFlags.showVenueStatus && (
+      {venueStatus && !showExpanded &&  (
         <Box
           sx={{
             p: 1,
@@ -525,7 +446,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
           flex: 1,
           overflowY: 'auto',
           overflowX: 'hidden',
-          p: 1.5,
+          py: 2,
+          px: showExpanded ? 2 : 1,
           '&::-webkit-scrollbar': {
             width: '4px',
           },
@@ -533,163 +455,361 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
             backgroundColor: 'transparent',
           },
           '&::-webkit-scrollbar-thumb': {
-            backgroundColor: alpha(theme.palette.text.secondary, 0.2),
+            backgroundColor: 'rgba(255, 255, 255, 0.2)',
             borderRadius: '2px',
             '&:hover': {
-              backgroundColor: alpha(theme.palette.text.secondary, 0.3),
+              backgroundColor: 'rgba(255, 255, 255, 0.3)',
             },
           },
         }}
         data-tour="sidebar-navigation"
       >
-        <Typography
-          variant="overline"
+        {/* Render grouped navigation */}
+        {groupedNavItems.map((group, groupIndex) => (
+          <Box key={group.name} sx={{ mb: groupIndex < groupedNavItems.length - 1 ? 3 : 0 }}>
+            {/* Category Header */}
+            {showExpanded && (
+              <Typography
+                variant="overline"
+                sx={{
+                  color: 'rgba(255, 255, 255, 0.4)',
+                  fontWeight: 700,
+                  fontSize: '0.6875rem',
+                  mb: 1.5,
+                  display: 'block',
+                  px: 1,
+                  letterSpacing: '1px',
+                }}
+              >
+                {group.label}
+              </Typography>
+            )}
+
+            {/* Category Divider for Collapsed State */}
+            {!showExpanded && groupIndex > 0 && (
+              <Divider 
+                sx={{ 
+                  my: 1.5, 
+                  borderColor: 'rgba(255, 255, 255, 0.1)',
+                }} 
+              />
+            )}
+
+            {/* Menu Items */}
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+              {group.items.map((item) => {
+                const isActive = location.pathname === item.path;
+                
+                return (
+                  <Tooltip
+                    key={item.label}
+                    title={isCollapsed ? item.label : ''}
+                    placement="right"
+                    disableHoverListener={showExpanded}
+                    arrow
+                  >
+                    <Button
+                      onClick={() => navigate(item.path)}
+                      fullWidth
+                      sx={{
+                        justifyContent: showExpanded ? 'flex-start' : 'center',
+                        textAlign: 'left',
+                        py: 1.25,
+                        px: showExpanded ? 1.5 : 1,
+                        borderRadius: 2,
+                        minHeight: 44,
+                        fontSize: '0.875rem',
+                        fontWeight: isActive ? 600 : 500,
+                        color: isActive ? '#ffffff' : 'rgba(255, 255, 255, 0.8)',
+                        backgroundColor: isActive 
+                          ? 'rgba(255, 255, 255, 0.1)'
+                          : 'transparent',
+                        border: '1px solid transparent',
+                        transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                        position: 'relative',
+                        overflow: 'hidden',
+                        '&:hover': {
+                          backgroundColor: isActive 
+                            ? 'rgba(255, 255, 255, 0.15)'
+                            : 'rgba(255, 255, 255, 0.08)',
+                          color: '#ffffff',
+                          transform: 'none',
+                          '& .MuiButton-startIcon': {
+                            color: '#ffffff',
+                          },
+                        },
+                        '&:active': {
+                          transform: 'scale(0.98)',
+                        },
+                        '&::before': isActive ? {
+                          content: '""',
+                          position: 'absolute',
+                          left: 0,
+                          top: 0,
+                          bottom: 0,
+                          width: 3,
+                          backgroundColor: '#ffffff',
+                          borderRadius: '0 2px 2px 0',
+                        } : {},
+                        '& .MuiButton-startIcon': {
+                          mr: showExpanded ? 1.5 : 0,
+                          color: isActive ? '#ffffff' : 'rgba(255, 255, 255, 0.7)',
+                          fontSize: '1.25rem',
+                          transition: 'all 0.2s ease',
+                        },
+                      }}
+                      startIcon={item.icon}
+                    >
+                      <Collapse in={showExpanded} orientation="horizontal">
+                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', minWidth: 0 }}>
+                          <Typography
+                            variant="inherit"
+                            sx={{
+                              fontWeight: 'inherit',
+                              fontSize: 'inherit',
+                              whiteSpace: 'nowrap',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              flex: 1,
+                            }}
+                          >
+                            {item.label}
+                          </Typography>
+                          {item.badge && (
+                            <Chip
+                              label={item.badge}
+                              size="small"
+                              sx={{
+                                ml: 1,
+                                height: 20,
+                                fontSize: '0.6875rem',
+                                fontWeight: 700,
+                                backgroundColor: isActive ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.15)',
+                                color: 'rgba(255, 255, 255, 0.9)',
+                                border: `1px solid rgba(255, 255, 255, 0.2)`,
+                                '& .MuiChip-label': {
+                                  px: 1,
+                                },
+                              }}
+                            />
+                          )}
+                        </Box>
+                      </Collapse>
+                    </Button>
+                  </Tooltip>
+                );
+              })}
+            </Box>
+          </Box>
+        ))}
+      </Box>
+
+      {/* User Profile Section at Bottom */}
+      {user && (
+        <Box
           sx={{
-            color: 'text.secondary',
-            fontWeight: 600,
-            fontSize: '0.7rem',
-            mb: 1.5,
-            display: showExpanded ? 'block' : 'none',
-            px: 1,
+            flexShrink: 0,
+            mt: 'auto',
+            borderTop: `1px solid rgba(255, 255, 255, 0.1)`,
+            backgroundColor: 'rgba(0, 0, 0, 0.2)',
           }}
         >
-          Navigation
-        </Typography>
-
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-          {adminNavItems.map((item) => {
-            const isActive = location.pathname === item.path;
-            
-            return (
-              <Tooltip
-                key={item.label}
-                title={isCollapsed ? item.label : ''}
-                placement="right"
-                disableHoverListener={showExpanded}
-              >
-                <Button
-                  onClick={() => navigate(item.path)}
-                  fullWidth
-                  sx={{
-                    justifyContent: showExpanded ? 'flex-start' : 'center',
-                    textAlign: 'left',
-                    py: 1.25,
-                    px: showExpanded ? 1.5 : 1,
-                    borderRadius: 2,
-                    minHeight: 42,
-                    fontSize: '0.8125rem',
-                    fontWeight: isActive ? 600 : 500,
-                    color: isActive ? 'primary.main' : 'text.primary',
-                    backgroundColor: isActive 
-                      ? alpha(theme.palette.primary.main, 0.1)
-                      : 'transparent',
-                    border: isActive 
-                      ? `1px solid ${alpha(theme.palette.primary.main, 0.2)}`
-                      : '1px solid transparent',
-                    transition: 'all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-                    position: 'relative',
-                    overflow: 'hidden',
-                    '&:hover': {
-                      backgroundColor: isActive 
-                        ? alpha(theme.palette.primary.main, 0.2)
-                        : alpha(theme.palette.primary.main, 0.1),
-                      borderColor: isActive 
-                        ? alpha(theme.palette.primary.main, 0.3)
-                        : alpha(theme.palette.primary.main, 0.2),
-                      color: 'black',
-                      transform: 'translateX(4px)',
-                      '& .MuiButton-startIcon': {
-                        color: 'black',
-                      },
-                    },
-                    '&:active': {
-                      transform: 'translateX(2px)',
-                    },
-                    '&::before': isActive ? {
-                      content: '""',
-                      position: 'absolute',
-                      left: 0,
-                      top: 0,
-                      bottom: 0,
-                      width: 3,
-                      backgroundColor: 'primary.main',
-                      borderRadius: '0 2px 2px 0',
-                    } : {},
-                    '& .MuiButton-startIcon': {
-                      mr: showExpanded ? 1 : 0,
-                      color: isActive ? 'primary.main' : 'text.secondary',
-                      fontSize: '1.125rem',
-                      transition: 'color 0.2s ease',
-                    },
-                  }}
-                  startIcon={item.icon}
-                >
-                  <Collapse in={showExpanded} orientation="horizontal">
-                    <Typography
-                      variant="inherit"
-                      sx={{
-                        fontWeight: 'inherit',
-                        fontSize: 'inherit',
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
-                      {item.label}
-                    </Typography>
-                  </Collapse>
-                </Button>
-              </Tooltip>
-            );
-          })}
-        </Box>
-      </Box>
-
-      {/* Dino Victory Image at Bottom Center */}
-      <Box
-        sx={{
-          flexShrink: 0,
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          alignItems: 'center',
-          p: showExpanded ? 1 : 0.5,
-          borderTop: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
-          mt: 'auto',
-          gap: 0.5,
-        }}
-      >
-        <Box
-          component="img"
-          src="/img/dino_victory.png"
-          alt="Dino Victory"
-          sx={{
-            width: showExpanded ? (isTablet ? 50 : 60) : 36,
-            height: showExpanded ? (isTablet ? 50 : 60) : 36,
-            objectFit: 'contain',
-            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-            filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.1))',
-            '&:hover': {
-              transform: 'scale(1.1) rotate(5deg)',
-              filter: 'drop-shadow(0 4px 16px rgba(0,0,0,0.2)) brightness(1.1)',
-            },
-          }}
-        />
-        <Collapse in={showExpanded} orientation="vertical">
-          <Typography
-            variant="caption"
+          {/* Profile Info */}
+          <Box
+            onClick={showExpanded ? handleProfileMenuOpen : undefined}
             sx={{
-              color: 'text.secondary',
-              fontSize: '0.65rem',
-              fontWeight: 500,
-              textAlign: 'center',
-              mt: 0.5,
+              p: showExpanded ? 2 : 1.5,
+              display: 'flex',
+              alignItems: 'center',
+              gap: showExpanded ? 1.5 : 0,
+              justifyContent: showExpanded ? 'space-between' : 'center',
+              cursor: showExpanded ? 'pointer' : 'default',
+              transition: 'all 0.2s ease',
+              '&:hover': showExpanded ? {
+                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+              } : {},
             }}
           >
-            v1.0.0
-          </Typography>
-        </Collapse>
-      </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, minWidth: 0, flex: 1 }}>
+              <Avatar
+                sx={{
+                  width: showExpanded ? 40 : 36,
+                  height: showExpanded ? 40 : 36,
+                  backgroundColor: '#3b82f6',
+                  fontSize: '1rem',
+                  fontWeight: 700,
+                  flexShrink: 0,
+                  border: '2px solid rgba(255, 255, 255, 0.2)',
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+                }}
+              >
+                {getUserFirstName(user)?.charAt(0) || user.email?.charAt(0) || 'U'}
+              </Avatar>
+              
+              <Collapse in={showExpanded} orientation="horizontal">
+                <Box sx={{ minWidth: 0, flex: 1 }}>
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      fontWeight: 700,
+                      color: '#ffffff',
+                      fontSize: '0.875rem',
+                      lineHeight: 1.2,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                      mb: 0.25,
+                    }}
+                  >
+                    {getUserFirstName(user) || user.email}
+                  </Typography>
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: 'rgba(255, 255, 255, 0.6)',
+                      fontSize: '0.75rem',
+                      fontWeight: 500,
+                      display: 'block',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {(() => {
+                      const backendRole = PermissionService.getBackendRole();
+                      if (backendRole?.name) {
+                        const roleDefinition = PermissionService.getRoleDefinition(backendRole.name);
+                        return roleDefinition?.displayName || backendRole.name;
+                      }
+                      return user?.role || 'User';
+                    })()}
+                  </Typography>
+                </Box>
+              </Collapse>
+            </Box>
+
+            {showExpanded && (
+              <IconButton
+                size="small"
+                sx={{
+                  color: 'rgba(255, 255, 255, 0.6)',
+                  '&:hover': {
+                    color: '#ffffff',
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  },
+                }}
+              >
+                <MoreVert fontSize="small" />
+              </IconButton>
+            )}
+          </Box>
+
+          {/* Quick Actions - Collapsed State */}
+          {!showExpanded && (
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 0.5,
+                p: 1,
+                borderTop: `1px solid rgba(255, 255, 255, 0.05)`,
+              }}
+            >
+              <Tooltip title="Settings" placement="right">
+                <IconButton
+                  size="small"
+                  onClick={handleSettings}
+                  sx={{
+                    color: 'rgba(255, 255, 255, 0.7)',
+                    '&:hover': {
+                      color: '#ffffff',
+                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                    },
+                  }}
+                >
+                  <Settings fontSize="small" />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Logout" placement="right">
+                <IconButton
+                  size="small"
+                  onClick={handleLogoutClick}
+                  sx={{
+                    color: 'rgba(255, 255, 255, 0.7)',
+                    '&:hover': {
+                      color: '#ef4444',
+                      backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                    },
+                  }}
+                >
+                  <Logout fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            </Box>
+          )}
+
+          {/* Profile Menu - Expanded State */}
+          <Menu
+            anchorEl={profileMenuAnchor}
+            open={Boolean(profileMenuAnchor)}
+            onClose={handleProfileMenuClose}
+            anchorOrigin={{
+              vertical: 'top',
+              horizontal: 'right',
+            }}
+            transformOrigin={{
+              vertical: 'bottom',
+              horizontal: 'left',
+            }}
+            PaperProps={{
+              sx: {
+                mt: -1,
+                ml: 1,
+                minWidth: 200,
+                borderRadius: 2,
+                boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15)',
+                border: '1px solid rgba(0, 0, 0, 0.05)',
+              },
+            }}
+          >
+            <MenuItem onClick={handleSettings}>
+              <ListItemIcon>
+                <Settings fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>Settings</ListItemText>
+            </MenuItem>
+            <Divider sx={{ my: 0.5 }} />
+            <MenuItem 
+              onClick={handleLogoutClick}
+              sx={{
+                color: 'error.main',
+                '&:hover': {
+                  backgroundColor: 'rgba(239, 68, 68, 0.08)',
+                },
+              }}
+            >
+              <ListItemIcon>
+                <Logout fontSize="small" color="error" />
+              </ListItemIcon>
+              <ListItemText>Logout</ListItemText>
+            </MenuItem>
+          </Menu>
+        </Box>
+      )}
 
       </Box>
+
+      {/* Logout Confirmation Dialog */}
+      <ConfirmationDialog
+        open={showLogoutConfirmation}
+        onClose={handleLogoutCancel}
+        onConfirm={handleLogoutConfirm}
+        title="Logout"
+        message="Are you sure you want to logout? You will need to sign in again to access your account."
+        confirmLabel="Logout"
+        cancelLabel="Cancel"
+        severity="info"
+      />
     </>
   );
 };

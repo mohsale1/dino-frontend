@@ -1,0 +1,1 @@
+export { locationService, locationService as default } from './locationService';

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { TableOccupancyChart } from '../../charts';
 import {
   Grid,
   Card,
@@ -39,9 +40,9 @@ import {
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { usePermissions } from '../../../auth';
-import { dashboardService, tableService } from '../../../../services/business';
-import { useUserData } from '../../../../contexts/UserDataContext';
-import { useAuth } from '../../../../contexts/AuthContext';
+import { dashboardService, tableService } from '../../../../services/application';
+import { useUserData } from '../../../../contexts/application/UserData';
+import { useAuth } from '../../../../contexts/common/Auth';
 
 interface TableStatus {
   id: string;
@@ -260,6 +261,17 @@ const TablesOrdersTab: React.FC<TablesOrdersTabProps> = ({ tableStatuses: propTa
         </Grid>
       )}
 
+      {/* Table Occupancy Chart - Full Width */}
+      {tableStatuses.length > 0 && (
+        <Grid item xs={12}>
+          <TableOccupancyChart 
+            tables={tableStatuses}
+            title="Table Status Overview"
+            height={350}
+          />
+        </Grid>
+      )}
+
       {/* Status Distribution */}
       <Grid item xs={12} md={4}>
         <Card sx={{ 
@@ -391,20 +403,18 @@ const TablesOrdersTab: React.FC<TablesOrdersTabProps> = ({ tableStatuses: propTa
                   Table Status Grid
                 </Typography>
               </Box>
-              {canManageTables && (
-                <Chip
-                  label="Manage Tables"
-                  onClick={() => navigate('/admin/tables')}
-                  sx={{
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    '&:hover': {
-                      backgroundColor: 'primary.main',
-                      color: 'white'
-                    }
-                  }}
-                />
-              )}
+              <Chip
+                label="Manage Tables"
+                onClick={() => navigate('/admin/tables')}
+                sx={{
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  '&:hover': {
+                    backgroundColor: 'primary.main',
+                    color: 'white'
+                  }
+                }}
+              />
             </Box>
 
             {loading && tableStatuses.length === 0 ? (

@@ -22,15 +22,19 @@ import {
   Dashboard as DashboardIcon,
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../../../contexts/AuthContext';
-import { useDinoAvatar } from '../../../contexts/DinoAvatarContext';
-import DinoLogo from '../../DinoLogo';
+import { useAuth } from '../../../contexts/common/Auth';
+import DinoLogo from '../../ui/DinoLogo';
 import { NotificationCenter } from '../../common';
 import MobileMenu from '../MobileMenu';
-import { COMPANY_INFO } from '../../../data/info';
-import { getUserFirstName } from '../../../utils/userUtils';
+import { getUserFirstName } from '../../../utils/data/userUtils';
 import { isAdminLevel } from '../../../types/auth';
-import { LogoutConfirmationModal } from '../../modals';
+import { ConfirmationDialog } from '../../dialogs';
+
+// Company info (previously from data/info)
+const COMPANY_INFO = {
+  name: 'Dino',
+  tagline: 'Smart Ordering Solutions',
+};
 
 interface AppHeaderProps {
   onSectionScroll?: (sectionId: string) => void;
@@ -42,15 +46,16 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const { user, logout } = useAuth();
-  const { dinoAvatar } = useDinoAvatar();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('hero');
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
 
   // Scroll trigger for navbar background
   const trigger = useScrollTrigger({
     disableHysteresis: true,
-    threshold: 50,
+    threshold: 20,
   });
 
   const isHomePage = location.pathname === '/' || location.pathname === '/home';
@@ -67,8 +72,6 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
 
   // Smooth scroll to section
   const scrollToSection = (sectionId: string) => {
-    console.log('Scrolling to section:', sectionId);
-    
     // Close mobile menu first
     setMobileMenuOpen(false);
     
@@ -77,8 +80,6 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
       const element = document.getElementById(sectionId);
       
       if (element) {
-        console.log('Element found:', element);
-        
         // Set active section immediately for better UX
         setActiveSection(sectionId);
         
@@ -91,11 +92,41 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
         if (onSectionScroll) {
           onSectionScroll(sectionId);
         }
-      } else {
-        console.error('Section not found:', sectionId);
       }
     }, 300);
   };
+
+  // Handle header visibility on scroll (hide on scroll down, show on scroll up)
+  // Only applies to homepage for better UX
+  useEffect(() => {
+    // Only enable auto-hide on homepage
+    if (!isHomePage) {
+      setIsVisible(true);
+      return;
+    }
+
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      // Show header when at top of page
+      if (currentScrollY < 10) {
+        setIsVisible(true);
+      }
+      // Hide header when scrolling down, show when scrolling up
+      else if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        // Scrolling down & past threshold
+        setIsVisible(false);
+      } else if (currentScrollY < lastScrollY) {
+        // Scrolling up
+        setIsVisible(true);
+      }
+      
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY, isHomePage]);
 
   // Track active section on scroll
   useEffect(() => {
@@ -103,7 +134,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
 
     const handleScroll = () => {
       const sections = homeNavItems.map(item => item.id);
-      const scrollPosition = window.scrollY + 200; // Increased offset for better detection
+      const scrollPosition = window.scrollY + 200;
 
       // Find which section we're currently in
       let currentSection = sections[0];
@@ -148,51 +179,39 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
   const renderDesktopNavigation = () => {
     if (isHomePage) {
       return (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
           {homeNavItems.map((item) => (
             <Button
               key={item.id}
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                // console.log('Button clicked:', item.id);
                 scrollToSection(item.id);
               }}
               sx={{
                 cursor: 'pointer',
                 pointerEvents: 'auto',
-                color: activeSection === item.id ? 'primary.main' : 'text.primary',
-                fontWeight: activeSection === item.id ? 700 : 600,
+                color: !trigger 
+                  ? (activeSection === item.id ? '#ffffff' : alpha('#ffffff', 0.8))
+                  : (activeSection === item.id ? '#0f172a' : '#64748b'),
+                fontWeight: activeSection === item.id ? 600 : 500,
                 textTransform: 'none',
-                px: 3,
-                py: 1.25,
-                borderRadius: 2.5,
-                fontSize: '1rem',
+                px: 2,
+                py: 1,
+                borderRadius: 2,
+                fontSize: '0.9375rem',
                 position: 'relative',
-                minHeight: 44,
-                backgroundColor: activeSection === item.id 
-                  ? alpha(theme.palette.primary.main, 0.12)
+                minHeight: 40,
+                backgroundColor: activeSection === item.id && trigger 
+                  ? alpha('#0f172a', 0.06) 
                   : 'transparent',
                 '&:hover': {
-                  backgroundColor: alpha(theme.palette.primary.main, 0.15),
-                  color: 'primary.main',
+                  backgroundColor: !trigger ? alpha('#ffffff', 0.12) : alpha('#0f172a', 0.08),
+                  color: !trigger ? '#ffffff' : '#0f172a',
                   cursor: 'pointer',
-                  transform: 'translateY(-2px)',
+                  transform: 'translateY(-1px)',
                 },
-                '&::after': {
-                  content: '""',
-                  position: 'absolute',
-                  bottom: 10,
-                  left: '50%',
-                  transform: 'translateX(-50%)',
-                  width: activeSection === item.id ? '70%' : '0%',
-                  height: 3,
-                  backgroundColor: 'primary.main',
-                  borderRadius: 2,
-                  transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                  pointerEvents: 'none',
-                },
-                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                transition: 'all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
               }}
             >
               {item.label}
@@ -207,23 +226,25 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
 
   const renderUserActions = () => {
     if (user) {
+      const dinoAvatar = null; // TODO: Add user avatar support
+      
       return (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
           <NotificationCenter />
           
           <Button
             variant="outlined"
-            onClick={() => navigate('/profile')}
+            onClick={() => navigate('/admin/settings')}
             startIcon={
               dinoAvatar ? (
                 <Avatar 
                   src={dinoAvatar} 
                   sx={{ 
-                    width: 20, 
-                    height: 20,
+                    width: 18, 
+                    height: 18,
                   }}
                 >
-                  <DinoLogo size={14} animated={false} />
+                  <DinoLogo size={12} animated={false} />
                 </Avatar>
               ) : (
                 <AccountCircle sx={{ fontSize: 18 }} />
@@ -231,26 +252,24 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
             }
             sx={{
               textTransform: 'none',
-              fontWeight: 600,
+              fontWeight: 500,
               px: 2,
               py: 0.75,
-              borderRadius: 2,
+              borderRadius: 1.5,
               fontSize: '0.875rem',
-              borderWidth: 1.5,
-              borderColor: 'divider',
-              color: 'text.primary',
+              borderWidth: 1,
+              borderColor: '#e2e8f0',
+              color: '#475569',
               minHeight: 36,
               '&:hover': {
-                borderWidth: 1.5,
-                borderColor: 'primary.main',
-                backgroundColor: alpha(theme.palette.primary.main, 0.08),
-                color: 'primary.main',
-                transform: 'translateY(-1px)',
+                borderWidth: 1,
+                borderColor: '#cbd5e1',
+                backgroundColor: alpha('#0f172a', 0.04),
               },
-              transition: 'all 0.3s ease',
+              transition: 'all 0.2s ease',
             }}
           >
-            {getUserFirstName(user) || 'Profile'}
+            {getUserFirstName(user) || 'Settings'}
           </Button>
           
           <Button
@@ -259,23 +278,22 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
             startIcon={<ExitToApp sx={{ fontSize: 18 }} />}
             sx={{
               textTransform: 'none',
-              fontWeight: 600,
+              fontWeight: 500,
               px: 2,
               py: 0.75,
-              borderRadius: 2,
+              borderRadius: 1.5,
               fontSize: '0.875rem',
-              borderWidth: 1.5,
-              borderColor: alpha(theme.palette.error.main, 0.5),
-              color: 'error.main',
+              borderWidth: 1,
+              borderColor: '#e2e8f0',
+              color: '#475569',
               minHeight: 36,
               '&:hover': {
-                borderWidth: 1.5,
-                borderColor: 'error.main',
-                backgroundColor: alpha(theme.palette.error.main, 0.08),
-                color: 'error.main',
-                transform: 'translateY(-1px)',
+                borderWidth: 1,
+                borderColor: '#1976d2',
+                backgroundColor: alpha('#1976d2', 0.04),
+                color: '#1976d2',
               },
-              transition: 'all 0.3s ease',
+              transition: 'all 0.2s ease',
             }}
           >
             Logout
@@ -285,58 +303,53 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
     }
 
     return (
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
         <Button
-          variant="outlined"
-          onClick={() => navigate('/register')}
-          startIcon={<PersonAdd sx={{ fontSize: 22 }} />}
+          variant="text"
+          onClick={() => navigate('/login')}
           sx={{
             textTransform: 'none',
-            fontWeight: 700,
-            px: 3,
-            py: 1.25,
-            borderRadius: 2.5,
-            fontSize: '1rem',
-            borderWidth: 2,
-            borderColor: 'divider',
-            color: 'text.primary',
-            minHeight: 44,
+            fontWeight: 500,
+            px: 2.5,
+            py: 1,
+            borderRadius: 1.5,
+            fontSize: '0.9375rem',
+            color: isHomePage && !trigger ? alpha('#ffffff', 0.9) : '#475569',
+            minHeight: 40,
             '&:hover': {
-              borderWidth: 2,
-              borderColor: 'primary.main',
-              backgroundColor: alpha(theme.palette.primary.main, 0.1),
-              color: 'primary.main',
-              transform: 'translateY(-2px)',
+              backgroundColor: isHomePage && !trigger ? alpha('#ffffff', 0.1) : alpha('#0f172a', 0.06),
+              color: isHomePage && !trigger ? '#ffffff' : '#0f172a',
             },
-            transition: 'all 0.3s ease',
+            transition: 'all 0.2s ease',
           }}
         >
-          Sign Up
+          Sign In
         </Button>
         
         <Button
           variant="contained"
-          onClick={() => navigate('/login')}
-          startIcon={<Login sx={{ fontSize: 22 }} />}
+          onClick={() => navigate('/register')}
           sx={{
-            fontWeight: 700,
+            fontWeight: 600,
             textTransform: 'none',
-            px: 3.5,
-            py: 1.25,
-            borderRadius: 2.5,
-            fontSize: '1rem',
-            minHeight: 44,
-            background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
-            boxShadow: `0 6px 18px ${alpha(theme.palette.primary.main, 0.4)}`,
+            px: 3,
+            py: 1,
+            borderRadius: 1.5,
+            fontSize: '0.9375rem',
+            minHeight: 40,
+            backgroundColor: isHomePage && !trigger ? '#ffffff' : '#0f172a',
+            color: isHomePage && !trigger ? '#0f172a' : '#ffffff',
+            boxShadow: 'none',
             '&:hover': {
-              background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
-              boxShadow: `0 8px 24px ${alpha(theme.palette.primary.main, 0.5)}`,
-              transform: 'translateY(-2px)',
+              backgroundColor: isHomePage && !trigger ? '#f8fafc' : '#1e293b',
+              boxShadow: isHomePage && !trigger 
+                ? '0 4px 12px rgba(255, 255, 255, 0.25)' 
+                : '0 4px 12px rgba(37, 99, 235, 0.25)',
             },
-            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            transition: 'all 0.2s ease',
           }}
         >
-          Sign In
+          Get Started
         </Button>
       </Box>
     );
@@ -346,23 +359,24 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
     <>
       <AppBar
         position="fixed"
-        elevation={trigger ? 4 : 0}
+        elevation={0}
         sx={{
-          backgroundColor: trigger 
-            ? alpha(theme.palette.background.paper, 0.95)
-            : alpha(theme.palette.background.paper, 0.85),
-          backdropFilter: 'blur(20px)',
-          borderBottom: `1px solid ${alpha('#000', trigger ? 0.12 : 0.06)}`,
-          borderRadius: 0,
+          backgroundColor: isHomePage && !trigger
+            ? 'transparent'
+            : trigger 
+              ? 'rgba(255, 255, 255, 0.98)'
+              : 'rgba(255, 255, 255, 0.95)',
+          backdropFilter: isHomePage && !trigger ? 'none' : 'blur(20px)',
+          WebkitBackdropFilter: isHomePage && !trigger ? 'none' : 'blur(20px)',
+          borderBottom: `1px solid ${trigger ? 'rgba(15, 23, 42, 0.08)' : 'transparent'}`,
+          boxShadow: trigger ? '0 2px 8px rgba(15, 23, 42, 0.04)' : 'none',
+          transform: isVisible ? 'translateY(0)' : 'translateY(-100%)',
           transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
           zIndex: 1200,
-          boxShadow: trigger 
-            ? `0 4px 20px ${alpha('#000', 0.08)}`
-            : 'none',
         }}
       >
-        <Container maxWidth="lg">
-          <Toolbar sx={{ px: { xs: 0, sm: 2 }, minHeight: { xs: 60, md: 64 } }}>
+        <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3, md: 3 } }}>
+          <Toolbar sx={{ px: 0, minHeight: { xs: 64, md: 70 } }}>
             {/* Logo and Title */}
             <Box
               sx={{
@@ -370,35 +384,32 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
                 alignItems: 'center',
                 flexGrow: 1,
                 cursor: 'pointer',
-                gap: 2,
+                gap: 1.5,
                 '&:hover .logo': {
-                  transform: 'scale(1.08) rotate(5deg)',
+                  transform: 'scale(1.05)',
                 },
-                '&:hover .company-name': {
-                  color: 'primary.main',
-                },
-                transition: 'all 0.3s ease',
+                transition: 'all 0.2s ease',
               }}
               onClick={() => {
                 if (user) {
-                  navigate('/admin');
+                  navigate('/admin/dashboard');
                 } else {
                   navigate('/');
                 }
               }}
             >
-              <Box className="logo" sx={{ transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)' }}>
-                <DinoLogo size={isMobile ? 36 : 40} animated={true} />
+              <Box className="logo" sx={{ transition: 'transform 0.3s ease' }}>
+                <DinoLogo size={isMobile ? 32 : 36} animated={true} />
               </Box>
               <Box>
                 <Typography
                   className="company-name"
                   variant="h6"
                   sx={{
-                    fontWeight: 800,
+                    fontWeight: 700,
                     fontSize: { xs: '1.125rem', md: '1.25rem' },
-                    color: 'text.primary',
-                    letterSpacing: '-0.5px',
+                    color: isHomePage && !trigger ? '#ffffff' : '#0f172a',
+                    letterSpacing: '-0.02em',
                     lineHeight: 1.1,
                     transition: 'color 0.3s ease',
                   }}
@@ -409,12 +420,13 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
                   <Typography
                     variant="caption"
                     sx={{
-                      color: 'text.secondary',
-                      fontSize: '0.75rem',
+                      color: isHomePage && !trigger ? alpha('#ffffff', 0.8) : '#64748b',
+                      fontSize: '0.6875rem',
                       fontWeight: 500,
-                      letterSpacing: '0.3px',
+                      letterSpacing: '0.02em',
                       mt: 0.25,
                       display: 'block',
+                      transition: 'color 0.3s ease',
                     }}
                   >
                     {COMPANY_INFO.tagline}
@@ -436,10 +448,12 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
               <IconButton
                 onClick={handleMobileMenuToggle}
                 sx={{
-                  color: 'text.primary',
+                  color: isHomePage && !trigger ? '#ffffff' : '#475569',
                   '&:hover': {
-                    backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                    backgroundColor: isHomePage && !trigger ? alpha('#ffffff', 0.1) : alpha('#0f172a', 0.06),
+                    color: isHomePage && !trigger ? '#ffffff' : '#0f172a',
                   },
+                  transition: 'all 0.2s ease',
                 }}
               >
                 <MenuIcon />
@@ -467,11 +481,15 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
       />
 
       {/* Logout Confirmation Modal */}
-      <LogoutConfirmationModal
+      <ConfirmationDialog
         open={logoutModalOpen}
         onClose={() => setLogoutModalOpen(false)}
         onConfirm={confirmLogout}
-        userName={getUserFirstName(user) || user?.email}
+        title="Confirm Logout"
+        message={`Are you sure you want to logout${user ? `, ${getUserFirstName(user) || user.email}` : ''}?`}
+        confirmText="Logout"
+        cancelLabel="Cancel"
+        severity="info"
       />
     </>
   );

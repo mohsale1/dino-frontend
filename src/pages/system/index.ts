@@ -1,0 +1,9 @@
+export { default as Dashboard } from './Dashboard';
+export { default as RolesPermissions } from './RolesPermissions';
+export { default as UserManagement } from './UserManagement';
+export { default as Workspaces } from './Workspaces';
+export { default as Appearance } from './Appearance';
+export { default as Billing } from './Billing';
+export { default as RegistrationCodes } from './RegistrationCodes';
+export { default as Profile } from './Profile';
+export { default as Settings } from './Settings';

@@ -43,15 +43,40 @@ export {
   default as LoadingStates
 } from './LoadingStates';
 
-export { default as FragmentNavigation } from './FragmentNavigation';
+// Logo Component
+export { default as DinoLogo } from './DinoLogo';
+
+// Form Components
+export { FormField } from './FormField';
+export type { FormFieldProps } from './FormField';
+
+// Navigation Components
+export { Breadcrumbs } from './Breadcrumbs';
+export type { BreadcrumbsProps, BreadcrumbItem } from './Breadcrumbs';
+export { Tabs } from './Tabs';
+export type { TabsProps, TabItem } from './Tabs';
+
+// Data Display Components
+export { DataGrid } from './DataGrid';
+export type { DataGridProps } from './DataGrid';
+
+// Layout Components
+export { PageContainer } from './PageContainer';
+export type { PageContainerProps } from './PageContainer';
+
+// Input Components
+export { SearchField } from './SearchField';
+export type { SearchFieldProps } from './SearchField';
 
 // ===================================================================
 // MOLECULES - Component combinations
 // ===================================================================
 
 // Animated Components
-export { default as AnimatedBackground } from './AnimatedBackground';
 export { default as AnimatedCounter } from './AnimatedCounter';
+
+// Stats Components
+export { default as StatsCards } from './StatsCards';
 
 // ===================================================================
 // LEGACY EXPORTS (for backward compatibility)

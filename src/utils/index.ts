@@ -1,32 +1,21 @@
 /**
  * Utils index
- * Centralized exports for all utilities organized by category
+ * Centralized exports for all utility functions
  */
 
-// Security utilities
-export * from './security';
-
-// Validation utilities
+// Core utilities
+export * from './api';
+export * from './auth';
+export * from './storage';
 export * from './validation';
 
-// Storage utilities
-export * from './storage';
+// Helper utilities
+export * from './helpers';
 
-// API utilities
-export * from './api';
+// Error messages
+export * from '../config/errorMessages';
 
-// Performance utilities
+// Legacy exports for backward compatibility
+export * from './data';
 export * from './performance';
-
-// Other utilities
-export * from './userUtils';
-// Export venueUtils with specific exports to avoid conflicts
-export { 
-  validateVenueAccess,
-  canUserAccessVenue,
-  getUserVenueId,
-  requiresVenueAssignment,
-  debugVenueAssignment,
-  getVenueDisplayName 
-} from './venueUtils';
-export * from './tokenRefreshScheduler';
+export * from './security';

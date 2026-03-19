@@ -13,7 +13,6 @@ import {
 } from '@mui/icons-material';
 import { usePermissions } from '../../auth';
 import PermissionService from '../../../services/auth';
-import { useDashboardFlags } from '../../../flags/FlagContext';
 
 interface DashboardTabsProps {
   currentTab: number;
@@ -24,15 +23,14 @@ const DashboardTabs: React.FC<DashboardTabsProps> = ({
   currentTab,
   onTabChange,
 }) => {
-  const { isSuperAdmin, isAdmin, user } = usePermissions();
-  const dashboardFlags = useDashboardFlags();
+  const { isOwner, isManager, user } = usePermissions();
 
   // Use the same role detection as control panel
   const backendRole = PermissionService.getBackendRole();
   const detectedRole = backendRole?.name || user?.role || 'unknown';
   
-  // Only show tabs for SuperAdmin and Admin
-  const shouldShowTabs = detectedRole === 'superadmin' || detectedRole === 'super_admin' || detectedRole === 'admin' || isSuperAdmin || isAdmin;
+  // Only show tabs for Owner and Manager
+  const shouldShowTabs = detectedRole === 'owner' || detectedRole === 'manager' || detectedRole === 'admin' || isOwner || isManager;
   
   if (!shouldShowTabs) {
     return null;
@@ -72,10 +70,8 @@ const DashboardTabs: React.FC<DashboardTabsProps> = ({
     }
   ];
 
-  // Filter tabs based on flags
-  const visibleTabs = allTabs.filter(tab => 
-    dashboardFlags[tab.flag as keyof typeof dashboardFlags]
-  );
+  // Feature flags removed - show all tabs
+  const visibleTabs = allTabs;
 
   // If no tabs are visible, don't render anything
   if (visibleTabs.length === 0) {
@@ -95,7 +91,7 @@ const DashboardTabs: React.FC<DashboardTabsProps> = ({
   };
 
   return (
-    <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 1 }} data-tour="quick-actions">
+    <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }} data-tour="quick-actions">
       <Tabs 
         value={safeCurrentTab} 
         onChange={handleTabChange}

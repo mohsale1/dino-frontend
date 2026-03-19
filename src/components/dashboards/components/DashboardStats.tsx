@@ -1,14 +1,15 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   Grid,
   Card,
   Typography,
   Stack,
-  Badge,
   LinearProgress,
   useTheme,
   useMediaQuery,
+  Chip,
+  Tooltip,
 } from '@mui/material';
 import {
   Today,
@@ -20,12 +21,10 @@ import {
   Pending,
   Kitchen,
   CheckCircle,
-  People,
 } from '@mui/icons-material';
 import { usePermissions } from '../../auth';
 import PermissionService from '../../../services/auth';
-import { useDashboardFlags } from '../../../flags/FlagContext';
-import { ROLES, isSuperAdmin as isSuperAdminRole, isAdmin as isAdminRole, isOperator as isOperatorRole } from '../../../types/auth';
+import { isOwner as isOwnerRole, isManager as isManagerRole, isUser as isUserRole } from '../../../types/auth/roles';
 
 interface VenueDashboardStats {
   total_orders: number;
@@ -47,71 +46,116 @@ interface VenueDashboardStats {
 
 interface DashboardStatsProps {
   stats: VenueDashboardStats | null;
+  isLive?: boolean;
+  lastUpdated?: string;
 }
 
-const DashboardStats: React.FC<DashboardStatsProps> = ({ stats }) => {
-  const { isSuperAdmin, isAdmin, isOperator, user } = usePermissions();
-  const dashboardFlags = useDashboardFlags();
+interface StatCard {
+  label: string;
+  value: string | number;
+  color: string;
+  icon: React.ReactElement;
+  description: string;
+  progress?: number;
+}
+
+// Animated Counter Component
+const AnimatedCounter: React.FC<{ value: number; duration?: number; prefix?: string; suffix?: string }> = ({ 
+  value, 
+  duration = 1000,
+  prefix = '',
+  suffix = ''
+}) => {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    let startTime: number;
+    let animationFrame: number;
+
+    const animate = (currentTime: number) => {
+      if (!startTime) startTime = currentTime;
+      const progress = Math.min((currentTime - startTime) / duration, 1);
+      
+      setCount(Math.floor(progress * value));
+
+      if (progress < 1) {
+        animationFrame = requestAnimationFrame(animate);
+      } else {
+        setCount(value);
+      }
+    };
+
+    animationFrame = requestAnimationFrame(animate);
+
+    return () => {
+      if (animationFrame) {
+        cancelAnimationFrame(animationFrame);
+      }
+    };
+  }, [value, duration]);
+
+  return <>{prefix}{count.toLocaleString()}{suffix}</>;
+};
+
+const DashboardStats: React.FC<DashboardStatsProps> = ({ stats, isLive = false, lastUpdated }) => {
+  const { isOwner, isManager, isUser, user } = usePermissions();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
-  // Don't render if flag is disabled
-  if (!dashboardFlags.showDashboardStats) {
-    return null;
-  }
+  // Feature flags removed - always show stats
 
-  // SuperAdmin Stats
-  const superAdminStats = [
+  // Owner Stats
+  const ownerStats: StatCard[] = [
     { 
       label: 'Today\'s Revenue', 
       value: `₹${(stats?.todays_revenue || 0).toLocaleString()}`, 
-      color: '#2196F3', 
+      color: '#3b82f6', 
       icon: <Today />,
       description: `${stats?.todays_orders || 0} orders today`
     },
     { 
       label: 'Active Orders', 
       value: stats?.active_orders || 0, 
-      color: '#4CAF50', 
+      color: '#10b981', 
       icon: <ShoppingCart />,
       description: 'Currently processing'
     },
     { 
       label: 'Table Occupancy', 
       value: `${stats?.table_occupancy_rate || 0}%`, 
-      color: '#FF9800', 
+      color: '#f59e0b', 
       icon: <TableRestaurant />,
       description: `${stats?.total_tables || 0} total tables`
     },
     { 
       label: 'Avg Order Value', 
       value: `₹${stats?.avg_order_value || 0}`, 
-      color: '#9C27B0', 
+      color: '#8b5cf6', 
       icon: <MonetizationOn />,
       description: `${stats?.total_orders || 0} total orders`
     },
   ];
 
-  // Admin Stats
-  const adminStats = [
+  // Manager Stats
+  const managerStats: StatCard[] = [
     { 
       label: 'Today\'s Orders', 
       value: stats?.todays_orders || 0, 
-      color: '#2196F3', 
+      color: '#3b82f6', 
       icon: <Today />,
       description: 'Total orders received today'
     },
     { 
       label: 'Today\'s Revenue', 
       value: `₹${(stats?.todays_revenue || 0).toLocaleString()}`, 
-      color: '#4CAF50', 
+      color: '#10b981', 
       icon: <TrendingUp />,
       description: 'Revenue generated today'
     },
     { 
       label: 'Tables Occupied', 
       value: `${stats?.occupied_tables || 0}/${stats?.total_tables || 0}`, 
-      color: '#FF9800', 
+      color: '#f59e0b', 
       icon: <TableRestaurant />,
       description: 'Current table occupancy',
       progress: stats?.table_occupancy_rate || 0
@@ -119,40 +163,40 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({ stats }) => {
     { 
       label: 'Menu Items Active', 
       value: `${stats?.active_menu_items || 0}/${stats?.total_menu_items || 0}`, 
-      color: '#9C27B0', 
+      color: '#8b5cf6', 
       icon: <Restaurant />,
       description: 'Available menu items',
       progress: Math.round((stats?.active_menu_items || 0) / Math.max(stats?.total_menu_items || 1, 1) * 100)
     },
   ];
 
-  // Operator Stats
-  const operatorStats = [
+  // User Stats
+  const userStats: StatCard[] = [
     { 
       label: 'Pending Orders', 
       value: stats?.pending_orders || 0, 
-      color: '#FF9800', 
+      color: '#f59e0b', 
       icon: <Pending />,
       description: 'Awaiting confirmation'
     },
     { 
       label: 'Preparing', 
       value: stats?.preparing_orders || 0, 
-      color: '#2196F3', 
+      color: '#3b82f6', 
       icon: <Kitchen />,
       description: 'Currently in kitchen'
     },
     { 
       label: 'Ready to Serve', 
       value: stats?.ready_orders || 0, 
-      color: '#4CAF50', 
+      color: '#10b981', 
       icon: <CheckCircle />,
       description: 'Ready for pickup'
     },
     { 
       label: 'Tables Occupied', 
       value: `${stats?.occupied_tables || 0}/${stats?.total_tables || 0}`, 
-      color: '#9C27B0', 
+      color: '#8b5cf6', 
       icon: <TableRestaurant />,
       description: 'Current occupancy'
     },
@@ -160,95 +204,185 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({ stats }) => {
 
   const getStatsToRender = () => {
     // Use permission hooks first (most reliable)
-    if (isSuperAdmin) return superAdminStats;
-    if (isAdmin) return adminStats;
-    if (isOperator) return operatorStats;
+    if (isOwner) return ownerStats;
+    if (isManager) return managerStats;
+    if (isUser) return userStats;
     
     // Fallback to role detection using constants
     const backendRole = PermissionService.getBackendRole();
     const detectedRole = backendRole?.name || user?.role;
     
-    if (isSuperAdminRole(detectedRole)) return superAdminStats;
-    if (isAdminRole(detectedRole)) return adminStats;
-    if (isOperatorRole(detectedRole)) return operatorStats;
+    if (isOwnerRole(detectedRole)) return ownerStats;
+    if (isManagerRole(detectedRole)) return managerStats;
+    if (isUserRole(detectedRole)) return userStats;
     
     // Default fallback
-    return adminStats;
+    return managerStats;
   };
 
   const statsToRender = getStatsToRender();
 
   return (
-    <Box sx={{ mb: 2.5 }}>
-      <Grid container spacing={2}>
+    <Box sx={{ mb: 3 }}>
+      {/* Live Indicator */}
+      {isLive && (
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+          <Chip
+            label="Live Data"
+            size="small"
+            sx={{
+              backgroundColor: '#10b981',
+              color: '#ffffff',
+              fontWeight: 600,
+              fontSize: '0.75rem',
+              height: 24,
+              '& .MuiChip-icon': {
+                color: '#ffffff',
+              },
+            }}
+            icon={
+              <Box
+                sx={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: '50%',
+                  backgroundColor: '#ffffff',
+                  animation: 'pulse 2s infinite',
+                  '@keyframes pulse': {
+                    '0%, 100%': { opacity: 1 },
+                    '50%': { opacity: 0.5 },
+                  },
+                }}
+              />
+            }
+          />
+          {lastUpdated && (
+            <Typography variant="caption" color="#64748b" sx={{ ml: 1.5, alignSelf: 'center', fontSize: '0.75rem' }}>
+              Updated {new Date(lastUpdated).toLocaleTimeString()}
+            </Typography>
+          )}
+        </Box>
+      )}
+
+      <Grid container spacing={3}>
         {statsToRender.map((stat, index) => (
           <Grid item xs={12} sm={6} md={3} key={index}>
-            <Card
-              sx={{
-                p: { xs: 2, sm: 2.5 },
-                borderRadius: 0,
-                backgroundColor: `${stat.color}08`,
-                border: `1px solid ${stat.color}33`,
-                transition: 'all 0.3s ease',
-                '&:hover': {
-                  transform: 'translateY(-2px)',
-                  boxShadow: `0 6px 20px ${stat.color}33`,
-                  backgroundColor: `${stat.color}12`,
-                },
-              }}
-              data-tour="stats-cards"
-            >
-              <Stack direction="row" alignItems="center" spacing={2}>
-                {/* Icon */}
-                <Box
-                  sx={{
-                    width: { xs: 40, sm: 48 },
-                    height: { xs: 40, sm: 48 },
-                    borderRadius: 1.5,
-                    backgroundColor: stat.color,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: 'white',
-                    flexShrink: 0,
-                  }}
-                >
-                  {React.cloneElement(stat.icon, { 
-                    fontSize: 'medium' 
-                  })}
-                </Box>
-                
-                <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Tooltip title={stat.description} arrow placement="top">
+              <Card
+                sx={{
+                  p: 3,
+                  borderRadius: 2,
+                  backgroundColor: '#ffffff',
+                  border: '1px solid #e2e8f0',
+                  transition: 'all 0.2s ease',
+                  position: 'relative',
+                  overflow: 'hidden',
+                  '&:hover': {
+                    transform: 'translateY(-4px)',
+                    boxShadow: '0 8px 24px rgba(15, 23, 42, 0.12)',
+                    borderColor: stat.color,
+                  },
+                }}
+                data-tour="stats-cards"
+              >
+                <Stack spacing={2}>
+                  {/* Icon and Value Row */}
+                  <Stack direction="row" alignItems="flex-start" spacing={2}>
+                    {/* Icon */}
+                    <Box
+                      sx={{
+                        width: 56,
+                        height: 56,
+                        borderRadius: 2,
+                        backgroundColor: stat.color,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: '#ffffff',
+                        flexShrink: 0,
+                      }}
+                    >
+                      {React.cloneElement(stat.icon, { 
+                        sx: { fontSize: 28 }
+                      })}
+                    </Box>
+                    
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                      {/* Big Number */}
+                      <Typography 
+                        variant="h3" 
+                        fontWeight="700" 
+                        color="#0f172a"
+                        sx={{ 
+                          fontSize: { xs: '1.75rem', sm: '2rem' },
+                          lineHeight: 1,
+                          mb: 0.5,
+                          letterSpacing: '-0.02em',
+                        }}
+                      >
+                        {typeof stat.value === 'string' && stat.value.includes('₹') ? (
+                          stat.value
+                        ) : typeof stat.value === 'number' ? (
+                          <AnimatedCounter value={stat.value} />
+                        ) : (
+                          stat.value
+                        )}
+                      </Typography>
+                      
+                      {/* Label */}
+                      <Typography 
+                        variant="subtitle2" 
+                        color="#64748b"
+                        fontWeight="600"
+                        sx={{ 
+                          fontSize: '0.75rem',
+                          lineHeight: 1.3,
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.5px',
+                        }}
+                      >
+                        {stat.label}
+                      </Typography>
+                    </Box>
+                  </Stack>
+
+                  {/* Description */}
                   <Typography 
-                    variant={isMobile ? "h6" : "h4"} 
-                    fontWeight="700" 
-                    color="text.primary"
+                    variant="caption" 
+                    color="#64748b"
                     sx={{ 
-                      fontSize: { xs: '1.25rem', sm: '2rem' },
-                      lineHeight: 1.2,
-                      mb: 0.5
+                      fontSize: '0.75rem',
+                      lineHeight: 1.4,
+                      display: 'block',
                     }}
                   >
-                    {stat.value}
+                    {stat.description}
                   </Typography>
-                  <Typography 
-                    variant="body2" 
-                    color="text.secondary"
-                    fontWeight="600"
-                    sx={{ 
-                      fontSize: { xs: '0.75rem', sm: '0.875rem' },
-                      lineHeight: 1.2,
-                      display: '-webkit-box',
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: 'vertical',
-                      overflow: 'hidden',
-                    }}
-                  >
-                    {stat.label}
-                  </Typography>
-                </Box>
-              </Stack>
-            </Card>
+
+                  {/* Progress Bar (if applicable) */}
+                  {stat.progress !== undefined && (
+                    <Box>
+                      <LinearProgress 
+                        variant="determinate" 
+                        value={stat.progress} 
+                        sx={{
+                          height: 6,
+                          borderRadius: 3,
+                          backgroundColor: '#f8fafc',
+                          '& .MuiLinearProgress-bar': {
+                            backgroundColor: stat.color,
+                            borderRadius: 3,
+                          },
+                        }}
+                      />
+                      <Typography variant="caption" color="#64748b" sx={{ mt: 0.5, display: 'block', textAlign: 'right', fontSize: '0.75rem' }}>
+                        {stat.progress}%
+                      </Typography>
+                    </Box>
+                  )}
+                </Stack>
+              </Card>
+            </Tooltip>
           </Grid>
         ))}
       </Grid>

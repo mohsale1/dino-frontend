@@ -3,11 +3,11 @@
  * Centralized exports for all services organized by category
  */
 
-// Authentication services
-export * from './auth';
+// Common services
+export * from './common';
 
-// Business logic services  
-export * from './business';
+// Application services
+export * from './application';
 
-// API services
-export * from '../utils/api';
+// System services
+export * from './system';
