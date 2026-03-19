@@ -79,7 +79,7 @@ export const API_ENDPOINTS = {
       CODES: '/system/registration/codes',
       BY_CODE: (code: string) => `/system/registration/codes/${code}`,
       RESTORE: (id: string) => `/system/registration/codes/${id}/restore`,
-      VALIDATE: '/system/registration/codes/validate',
+      VALIDATE: '/application/auth/validate-referral',
     },
     
     // UI Config
@@ -98,7 +98,8 @@ export const API_ENDPOINTS = {
       ME: '/application/auth/me',
       REFRESH: '/application/auth/refresh',
       LOGOUT: '/application/auth/logout',
-      CHANGE_PASSWORD: '/application/auth/change-password',
+      VALIDATE_REFERRAL: '/application/auth/validate-referral',
+      ME_DATA: '/application/auth/me/data',
     },
     
     // Users
@@ -112,6 +113,7 @@ export const API_ENDPOINTS = {
       BY_ROLE: (roleId: string) => `/application/users/role/${roleId}`,
       BY_WORKSPACE: (workspaceId: string) => `/application/users/workspace/${workspaceId}`,
       BY_ORGANIZATION: (orgId: string) => `/application/users/organization/${orgId}`,
+      ME_DATA: '/application/users/me/data',
     },
     
     // Dashboard
@@ -119,18 +121,12 @@ export const API_ENDPOINTS = {
       BASE: '/application/dashboard',
       STATS: '/application/dashboard/stats',
       ANALYTICS: '/application/dashboard/analytics',
-      ADMIN: '/application/dashboard/admin',
-      SUPERADMIN: '/application/dashboard/superadmin',
-      OPERATOR: '/application/dashboard/operator',
-      VENUE: (id: string) => `/application/dashboard/venue/${id}`,
     },
     
     // Organizations (Venues)
     ORGANIZATIONS: {
       BASE: '/application/organizations',
       BY_ID: (id: string) => `/application/organizations/${id}`,
-      OPEN: (id: string) => `/application/organizations/${id}/open`,
-      CLOSE: (id: string) => `/application/organizations/${id}/close`,
     },
     
     // Categories
@@ -138,6 +134,7 @@ export const API_ENDPOINTS = {
       BASE: '/application/categories',
       BY_ID: (id: string) => `/application/categories/${id}`,
       RESTORE: (id: string) => `/application/categories/${id}/restore`,
+      AVAILABILITY: (id: string) => `/application/categories/${id}/availability`,
     },
     
     // Items (Menu Items)
@@ -146,6 +143,9 @@ export const API_ENDPOINTS = {
       BY_ID: (id: string) => `/application/items/${id}`,
       RESTORE: (id: string) => `/application/items/${id}/restore`,
       IMAGE: (id: string) => `/application/items/${id}/image`,
+      AVAILABILITY: (id: string) => `/application/items/${id}/availability`,
+      BULK_AVAILABILITY: '/application/items/bulk-update-availability',
+      BULK_DELETE: '/application/items/bulk-delete',
     },
     
     // Areas
@@ -160,10 +160,11 @@ export const API_ENDPOINTS = {
       BASE: '/application/tables',
       BY_ID: (id: string) => `/application/tables/${id}`,
       RESTORE: (id: string) => `/application/tables/${id}/restore`,
-      STATUS: (id: string) => `/application/tables/${id}/table-status`,
+      STATUS: (id: string) => `/application/tables/${id}/status`,
       QR_CODE: (id: string) => `/application/tables/${id}/qr-code`,
       QR_PRINT: (id: string) => `/application/tables/${id}/qr-code/print`,
       STATISTICS: '/application/tables/statistics',
+      BULK_STATUS: '/application/tables/bulk-update-status',
     },
     
     // Orders
@@ -174,6 +175,7 @@ export const API_ENDPOINTS = {
       STATUS: (id: string) => `/application/orders/${id}/status`,
       CANCEL: (id: string) => `/application/orders/${id}/cancel`,
       STATISTICS: '/application/orders/statistics',
+      BULK_STATUS: '/application/orders/bulk-update-status',
       // Public endpoints
       PUBLIC_CREATE: (orgId: string, tableId: string) => 
         `/application/orders/public/${orgId}/${tableId}/create`,
@@ -189,6 +191,7 @@ export const API_ENDPOINTS = {
       RESTORE: (id: string) => `/application/coupons/${id}/restore`,
       VALIDATE: '/application/coupons/validate',
       APPLY: (id: string) => `/application/coupons/${id}/apply`,
+      STATS: '/system/billing/stats',
     },
     
     // Reviews
@@ -202,11 +205,11 @@ export const API_ENDPOINTS = {
   PUBLIC: {
     // Home Page
     HOME: {
-      ALL: '/public/home/all',
-      STATS: '/public/home/stats',
-      TESTIMONIALS: '/public/home/testimonials',
-      CONTACT: '/public/home/contact',
-      COMPANY: '/public/home/company',
+      ALL: '/application/home/all',
+      STATS: '/application/home/stats',
+      TESTIMONIALS: '/application/home/testimonials',
+      CONTACT: '/application/home/contact',
+      COMPANY: '/application/home/company',
     },
   },
   

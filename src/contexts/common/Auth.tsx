@@ -80,19 +80,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             if (savedPermissions) {
               setUserPermissions(savedPermissions);
             } else {
-              const userRole = (currentUser as any).role;
-              const rolePermissions = userRole?.permissions || [];
-              const roleName = typeof userRole === 'string' ? userRole : userRole?.name;
-              
-              const basicPermissions = {
-                role: { name: roleName },
-                permissions: rolePermissions.map((p: any) => 
-                  typeof p === 'string' ? { name: p } : p
-                ),
-                capabilities: {}
-              };
-              setUserPermissions(basicPermissions);
-              StorageManager.setPermissions(basicPermissions);
+              const permissions = derivePermissionsFromUser(currentUser);
+              setUserPermissions(permissions);
+              StorageManager.setPermissions(permissions);
             }
             
             tokenRefreshScheduler.start();
@@ -122,6 +112,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     initializeAuth();
   }, []);
+
+  /**
+   * Derive a permissions object from the user's role data returned by the backend.
+   * Used in place of a dedicated /auth/permissions endpoint which does not exist.
+   */
+  const derivePermissionsFromUser = (userData: any) => {
+    const userRole = userData?.role;
+    const rolePermissions = userRole?.permissions || [];
+    const roleName = typeof userRole === 'string' ? userRole : userRole?.name;
+    return {
+      role: { name: roleName },
+      permissions: rolePermissions.map((p: any) =>
+        typeof p === 'string' ? { name: p } : p
+      ),
+      capabilities: {},
+    };
+  };
 
   const login = async (email: string, password: string, isSystemUser: boolean = false): Promise<{ user: UserProfile }> => {
     try {
@@ -156,19 +163,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       StorageManager.setUserData(localUser);
       
       try {
-        const userRole = (response.user as any).role;
-        const rolePermissions = userRole?.permissions || [];
-        const roleName = typeof userRole === 'string' ? userRole : userRole?.name;
-        
-        const basicPermissions = {
-          role: { name: roleName },
-          permissions: rolePermissions.map((p: any) => 
-            typeof p === 'string' ? { name: p } : p
-          ),
-          capabilities: {}
-        };
-        setUserPermissions(basicPermissions);
-        StorageManager.setPermissions(basicPermissions);
+        const permissions = derivePermissionsFromUser(response.user);
+        setUserPermissions(permissions);
+        StorageManager.setPermissions(permissions);
       } catch (permError: any) {
         console.warn('Failed to set permissions from user role:', permError);
       }
@@ -196,7 +193,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const register = async (userData: UserRegistration): Promise<void> => {
     try {
       setLoading(true);
-      await authService.register(userData);
+      await authService.signup(userData as any);
     } finally {
       setLoading(false);
     }
@@ -223,19 +220,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const updateUser = async (userData: Partial<UserProfile>): Promise<void> => {
     try {
-      const apiUserData: Partial<UserProfile> = {
-        firstName: userData.firstName,
-        lastName: userData.lastName,
+      if (!user?.id) {
+        throw new Error('No authenticated user found');
+      }
+
+      // Use PUT /application/users/{id} to update profile fields
+      const response = await apiService.put(`/application/users/${user.id}`, {
+        first_name: userData.firstName,
+        last_name: userData.lastName,
         phone: userData.phone,
-        dateOfBirth: userData.dateOfBirth,
-        isActive: userData.isActive
-      };
-      
-      const updatedUser = await authService.updateProfile(apiUserData);
-      const localUser = normalizeUserData(updatedUser);
-      
-      setUser(localUser);
-      StorageManager.setUserData(localUser);
+      });
+
+      const updatedUser = normalizeUserData(response.data || userData);
+      setUser(updatedUser as UserProfile);
+      StorageManager.setUserData(updatedUser as UserProfile);
     } catch (error) {
       throw error;
     }
@@ -339,9 +337,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       lastRefreshAttempt.current = now;
       refreshPermissionsRef.current = (async () => {
-        const permissionsData = await authService.refreshUserPermissions();
-        setUserPermissions(permissionsData);
-        StorageManager.setPermissions(permissionsData);
+        // Re-fetch the current user to get fresh role/permissions data
+        const currentUser = await authService.getCurrentUser();
+        const permissions = derivePermissionsFromUser(currentUser);
+        setUserPermissions(permissions);
+        StorageManager.setPermissions(permissions);
       })();
       
       await refreshPermissionsRef.current;
@@ -373,9 +373,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           const token = StorageManager.getItem(StorageManager.KEYS.TOKEN);
           if (token && typeof token === 'string' && !isTokenExpired(token)) {
             try {
-              const permissionsData = await authService.getUserPermissions();
-              setUserPermissions(permissionsData);
-              StorageManager.setPermissions(permissionsData);
+              // Derive permissions from the current user's role data
+              const currentUser = await authService.getCurrentUser();
+              const permissions = derivePermissionsFromUser(currentUser);
+              setUserPermissions(permissions);
+              StorageManager.setPermissions(permissions);
             } catch (error) {
               // Silent fail
             }
@@ -420,6 +422,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     </AuthContext.Provider>
   );
 };
+
 
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);

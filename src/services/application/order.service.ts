@@ -1,5 +1,3 @@
-
-
 /**
  * Order Service
  * Handles order-related API operations
@@ -106,17 +104,16 @@ class OrderService {
     }
   }
 
-  /**
-   * Update order status
-   */
   async updateOrderStatus(
     orderId: string,
     status: Order['status']
   ): Promise<ApiResponse<Order>> {
     try {
-      const response = await apiService.put<Order>(`/application/orders/${orderId}/status`, {
-        status,
-      });
+      const response = await apiService.put<Order>(
+        `/application/orders/${orderId}/status`,
+        null,
+        { params: { new_status: status } }
+      );
       return {
         success: true,
         data: response.data,
@@ -125,6 +122,7 @@ class OrderService {
       throw new Error(error.message || 'Failed to update order status');
     }
   }
+
 
   /**
    * Cancel order

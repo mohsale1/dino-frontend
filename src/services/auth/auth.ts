@@ -1,4 +1,4 @@
-import { AuthToken, UserProfile, UserRegistration, WorkspaceRegistration, ApiResponse } from '../../types';
+import { AuthToken, UserProfile, WorkspaceRegistration, ApiResponse } from '../../types';
 import { apiService } from '../../utils/api';
 import StorageManager from '../../utils/storage';
 
@@ -46,20 +46,6 @@ class AuthService {
       
       return authToken;
     } catch (error: any) {      throw new Error(error.response?.data?.detail || error.message || 'Login failed');
-    }
-  }
-
-  async register(userData: UserRegistration): Promise<ApiResponse<UserProfile>> {
-    try {
-      const response = await apiService.post<UserProfile>('/auth/register', userData);
-      
-      if (response.success && response.data) {
-        return response;
-      }
-      
-      throw new Error(response.message || 'Registration failed');
-    } catch (error: any) {
-      throw new Error(error.response?.data?.detail || error.message || 'Registration failed');
     }
   }
 
@@ -170,81 +156,6 @@ class AuthService {
     }
   }
 
-  async getUserPermissions(): Promise<any> {
-    try {
-      const response = await apiService.get<any>('/auth/permissions');
-      
-      if (response.success && response.data) {
-        return response.data;
-      }
-      
-      throw new Error('Failed to get user permissions');
-    } catch (error: any) {
-      // If unauthorized, clear tokens
-      if (error.response?.status === 401) {
-        // Temporarily disable automatic logout to debug the issue
-        // this.clearTokens();
-      }
-      throw new Error(error.response?.data?.detail || error.message || 'Failed to get user permissions');
-    }
-  }
-
-  async refreshUserPermissions(): Promise<any> {
-    try {
-      const response = await apiService.post<any>('/auth/refresh-permissions');
-      
-      if (response.success && response.data) {
-        return response.data;
-      }
-      
-      throw new Error('Failed to refresh user permissions');
-    } catch (error: any) {
-      // If unauthorized, clear tokens
-      if (error.response?.status === 401) {
-        // Temporarily disable automatic logout to debug the issue
-        // this.clearTokens();
-      }
-      throw new Error(error.response?.data?.detail || error.message || 'Failed to refresh user permissions');
-    }
-  }
-
-  async updateProfile(userData: Partial<UserProfile>): Promise<UserProfile> {
-    try {
-      const response = await apiService.put<UserProfile>('/auth/me', userData);
-      
-      if (response.success && response.data) {
-        // Update stored user data
-        StorageManager.setUserData(response.data);
-        return response.data;
-      }
-      
-      throw new Error(response.message || 'Failed to update profile');
-    } catch (error: any) {
-      throw new Error(error.response?.data?.detail || error.message || 'Failed to update profile');
-    }
-  }
-
-  async uploadProfileImage(file: File): Promise<{ fileUrl: string }> {
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
-      
-      const response = await apiService.post<{ fileUrl: string }>('/users/profile/image', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      });
-      
-      if (response.success && response.data) {
-        return response.data;
-      }
-      
-      throw new Error(response.message || 'Failed to upload image');
-    } catch (error: any) {
-      throw new Error(error.response?.data?.detail || error.message || 'Failed to upload image');
-    }
-  }
-
   async changePassword(currentPassword: string, newPassword: string): Promise<void> {
     try {      
       const token = this.getToken();
@@ -269,96 +180,6 @@ class AuthService {
         throw new Error(response.message || 'Password change failed');
       }
     } catch (error: any) {      throw new Error(error.response?.data?.detail || error.message || 'Failed to change password');
-    }
-  }
-
-  async addAddress(address: any): Promise<void> {
-    try {
-      const response = await apiService.post('/users/addresses', address);
-      
-      if (!response.success) {
-        throw new Error(response.message || 'Failed to add address');
-      }
-    } catch (error: any) {
-      throw new Error(error.response?.data?.detail || error.message || 'Failed to add address');
-    }
-  }
-
-  async updateAddress(addressId: string, address: any): Promise<void> {
-    try {
-      const response = await apiService.put(`/users/addresses/${addressId}`, address);
-      
-      if (!response.success) {
-        throw new Error(response.message || 'Failed to update address');
-      }
-    } catch (error: any) {
-      throw new Error(error.response?.data?.detail || error.message || 'Failed to update address');
-    }
-  }
-
-  async deleteAddress(addressId: string): Promise<void> {
-    try {
-      const response = await apiService.delete(`/users/addresses/${addressId}`);
-      
-      if (!response.success) {
-        throw new Error(response.message || 'Failed to delete address');
-      }
-    } catch (error: any) {
-      throw new Error(error.response?.data?.detail || error.message || 'Failed to delete address');
-    }
-  }
-
-  async getAddresses(): Promise<any[]> {
-    try {
-      const response = await apiService.get<any[]>('/users/addresses');
-      
-      if (response.success && response.data) {
-        return response.data;
-      }
-      
-      return [];
-    } catch (error: any) {
-      return [];
-    }
-  }
-
-  async updatePreferences(preferences: any): Promise<void> {
-    try {
-      const response = await apiService.put('/users/preferences', preferences);
-      
-      if (!response.success) {
-        throw new Error(response.message || 'Failed to update preferences');
-      }
-    } catch (error: any) {
-      throw new Error(error.response?.data?.detail || error.message || 'Failed to update preferences');
-    }
-  }
-
-  async getPreferences(): Promise<any> {
-    try {
-      const response = await apiService.get('/users/preferences');
-      
-      if (response.success && response.data) {
-        return response.data;
-      }
-      
-      return {};
-    } catch (error: any) {
-      return {};
-    }
-  }
-
-  async deactivateAccount(): Promise<void> {
-    try {
-      const response = await apiService.post('/users/deactivate');
-      
-      if (response.success) {
-        this.clearTokens();
-      } else {
-        throw new Error(response.message || 'Failed to deactivate account');
-      }
-    } catch (error: any) {
-      throw new Error(error.response?.data?.detail || error.message || 'Failed to deactivate account');
     }
   }
 
@@ -388,7 +209,12 @@ class AuthService {
         try {
           // Import axios directly to bypass interceptors
           const axios = (await import('axios')).default;
-          const response = await axios.post(`${(apiService as any).axiosInstance.defaults.baseURL}/auth/refresh`, {
+          const baseURL = (apiService as any).axiosInstance.defaults.baseURL;
+          const storedUserType = StorageManager.getItem<string>('user_type');
+          const refreshEndpoint = storedUserType === 'system'
+            ? '/system/auth/refresh'
+            : '/application/auth/refresh';
+          const response = await axios.post(`${baseURL}${refreshEndpoint}`, {
             refresh_token: refreshToken
           }, {
             headers: {

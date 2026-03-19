@@ -115,18 +115,24 @@ class LocationService {
   }
 
   async toggleLocationStatus(id: string, isActive: boolean): Promise<ServiceLocation> {
-    const response = await apiService.put(`${this.tablesUrl}/${id}`, {
-      status: isActive ? 'available' : 'maintenance',
-    });
+    const response = await apiService.put(
+      `${this.tablesUrl}/${id}/status`,
+      null,
+      { params: { table_status: isActive ? 'available' : 'maintenance' } }
+    );
     return response.data as any;
   }
 
+
   async updateLocationStatus(id: string, status: string): Promise<ServiceLocation> {
-    const response = await apiService.put(`${this.tablesUrl}/${id}`, {
-      status: status,
-    });
+    const response = await apiService.put(
+      `${this.tablesUrl}/${id}/status`,
+      null,
+      { params: { table_status: status } }
+    );
     return response.data as any;
   }
+
 
   async generateQRCode(id: string): Promise<string> {
     const response = await apiService.post(`${this.tablesUrl}/${id}/qr-code`);

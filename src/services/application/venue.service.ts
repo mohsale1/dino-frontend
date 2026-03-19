@@ -120,47 +120,15 @@ class VenueService {
     }
   }
 
-  /**
-   * Open venue for orders
-   */
   async openVenue(venueId: string): Promise<ApiResponse<Venue>> {
-    try {
-      // Try dedicated endpoint first
-      try {
-        const response = await apiService.put<Venue>(`/application/organizations/${venueId}/open`, {});
-        return {
-          success: true,
-          data: response.data,
-        };
-      } catch {
-        // Fallback to update endpoint
-        return await this.updateVenue(venueId, { is_open: true });
-      }
-    } catch (error: any) {
-      throw new Error(error.message || 'Failed to open venue');
-    }
+    return this.updateVenue(venueId, { is_open: true });
   }
 
-  /**
-   * Close venue for orders
-   */
+
   async closeVenue(venueId: string): Promise<ApiResponse<Venue>> {
-    try {
-      // Try dedicated endpoint first
-      try {
-        const response = await apiService.put<Venue>(`/application/organizations/${venueId}/close`, {});
-        return {
-          success: true,
-          data: response.data,
-        };
-      } catch {
-        // Fallback to update endpoint
-        return await this.updateVenue(venueId, { is_open: false });
-      }
-    } catch (error: any) {
-      throw new Error(error.message || 'Failed to close venue');
-    }
+    return this.updateVenue(venueId, { is_open: false });
   }
+
 }
 
 export const venueService = new VenueService();

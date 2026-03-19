@@ -70,17 +70,14 @@ export interface HomePageData {
 }
 
 class HomePageService {
-  /**
-   * Get home page statistics
-   */
   async getStats(): Promise<HomePageStat[]> {
     try {
-      const response = await apiService.get<HomePageStat[]>('/public/home/stats');
-      
+      const response = await apiService.get<HomePageStat[]>('/application/home/stats');
+
       if (response.success && response.data) {
         return response.data;
       }
-      
+
       return [];
     } catch (error: any) {
       console.error('[HomePage] Error fetching stats:', error);
@@ -88,18 +85,15 @@ class HomePageService {
     }
   }
 
-  /**
-   * Get testimonials
-   * @param limit - Maximum number of testimonials to return (default: 3)
-   */
+
   async getTestimonials(limit: number = 4): Promise<Testimonial[]> {
     try {
-      const response = await apiService.get<Testimonial[]>(`/public/home/testimonials?limit=${limit}`);
-      
+      const response = await apiService.get<Testimonial[]>(`/application/home/testimonials?limit=${limit}`);
+
       if (response.success && response.data) {
         return response.data;
       }
-      
+
       return [];
     } catch (error: any) {
       console.error('[HomePage] Error fetching testimonials:', error);
@@ -107,17 +101,15 @@ class HomePageService {
     }
   }
 
-  /**
-   * Get contact information
-   */
+
   async getContactInfo(): Promise<ContactInfo> {
     try {
-      const response = await apiService.get<ContactInfo>('/public/home/contact');
-      
+      const response = await apiService.get<ContactInfo>('/application/home/contact');
+
       if (response.success && response.data) {
         return response.data;
       }
-      
+
       throw new Error('No contact info available');
     } catch (error: any) {
       console.error('[HomePage] Error fetching contact info:', error);
@@ -125,17 +117,15 @@ class HomePageService {
     }
   }
 
-  /**
-   * Get company information
-   */
+
   async getCompanyInfo(): Promise<CompanyInfo> {
     try {
-      const response = await apiService.get<CompanyInfo>('/public/home/company');
-      
-      if (response.success && response.data) {
-        return response.data;
+      const response = await apiService.get<HomePageData>('/application/home/all');
+
+      if (response.success && response.data?.company) {
+        return response.data.company;
       }
-      
+
       throw new Error('No company info available');
     } catch (error: any) {
       console.error('[HomePage] Error fetching company info:', error);
@@ -143,17 +133,15 @@ class HomePageService {
     }
   }
 
-  /**
-   * Get all home page data in one call
-   */
+
   async getAllHomeData(): Promise<HomePageData> {
     try {
-      const response = await apiService.get<HomePageData>('/public/home/all');
-      
+      const response = await apiService.get<HomePageData>('/application/home/all');
+
       if (response.success && response.data) {
         return response.data;
       }
-      
+
       throw new Error('No home page data available');
     } catch (error: any) {
       console.error('[HomePage] Error fetching all home data:', error);
@@ -161,17 +149,15 @@ class HomePageService {
     }
   }
 
-  /**
-   * Update stats
-   */
+
   async updateStats(stats: any[]): Promise<any> {
     try {
-      const response = await apiService.put('/public/home/stats', { stats });
-      
+      const response = await apiService.put('/application/home/stats', { stats });
+
       if (response.success) {
         return response.data;
       }
-      
+
       throw new Error('Failed to update stats');
     } catch (error: any) {
       console.error('[HomePage] Error updating stats:', error);
@@ -179,17 +165,15 @@ class HomePageService {
     }
   }
 
-  /**
-   * Update testimonials
-   */
+
   async updateTestimonials(testimonials: any[]): Promise<any> {
     try {
-      const response = await apiService.put('/public/home/testimonials', { testimonials });
-      
+      const response = await apiService.put('/application/home/testimonials', { testimonials });
+
       if (response.success) {
         return response.data;
       }
-      
+
       throw new Error('Failed to update testimonials');
     } catch (error: any) {
       console.error('[HomePage] Error updating testimonials:', error);
@@ -197,17 +181,15 @@ class HomePageService {
     }
   }
 
-  /**
-   * Update contact information
-   */
+
   async updateContact(contact: any): Promise<any> {
     try {
-      const response = await apiService.put('/public/home/contact', { contact });
-      
+      const response = await apiService.put('/application/home/contact', { contact });
+
       if (response.success) {
         return response.data;
       }
-      
+
       throw new Error('Failed to update contact information');
     } catch (error: any) {
       console.error('[HomePage] Error updating contact:', error);
@@ -215,23 +197,22 @@ class HomePageService {
     }
   }
 
-  /**
-   * Update all homepage data
-   */
+
   async updateAllHomeData(data: Partial<HomePageData>): Promise<any> {
     try {
-      const response = await apiService.put('/public/home/all', data);
-      
+      const response = await apiService.put('/application/home/all', data);
+
       if (response.success) {
         return response.data;
       }
-      
+
       throw new Error('Failed to update homepage data');
     } catch (error: any) {
       console.error('[HomePage] Error updating all home data:', error);
       throw error;
     }
   }
+
 }
 
 export const homePageService = new HomePageService();

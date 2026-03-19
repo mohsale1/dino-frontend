@@ -111,12 +111,9 @@ class RegistrationCodeService {
     }
   }
 
-  /**
-   * Validate registration code
-   */
   async validateCode(code: string): Promise<ApiResponse<{ valid: boolean; message?: string }>> {
     try {
-      const response = await apiService.post<{ valid: boolean; message?: string }>('/system/registration/codes/validate', { code });
+      const response = await apiService.get<{ valid: boolean; message?: string }>('/application/auth/validate-referral', { params: { code } });
       return {
         success: true,
         data: response.data,
@@ -129,6 +126,7 @@ class RegistrationCodeService {
       };
     }
   }
+
 }
 
 export const registrationCodeService = new RegistrationCodeService();
