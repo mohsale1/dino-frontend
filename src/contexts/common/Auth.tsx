@@ -80,7 +80,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             if (savedPermissions) {
               setUserPermissions(savedPermissions);
             } else {
-              const permissions = derivePermissionsFromUser(currentUser);
+              const permissions = await derivePermissionsFromUser(currentUser);
               setUserPermissions(permissions);
               StorageManager.setPermissions(permissions);
             }
@@ -114,18 +114,68 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, []);
 
   /**
-   * Derive a permissions object from the user's role data returned by the backend.
-   * Used in place of a dedicated /auth/permissions endpoint which does not exist.
+   * Resolve permission IDs stored on the role into full permission objects
+   * by calling GET /system/permissions?page_size=100.
+   * Falls back to raw IDs if the API call fails.
    */
-  const derivePermissionsFromUser = (userData: any) => {
+  const resolvePermissionNames = async (permissionIds: string[]): Promise<{ name: string }[]> => {
+    if (!permissionIds.length) return [];
+    try {
+      const endpoint = '/system/permissions';
+      let allPerms: any[] = [];
+      let page = 1;
+      let hasNext = true;
+
+      while (hasNext) {
+        const response = await apiService.get<any>(endpoint, {
+          params: { page, page_size: 100 }
+        });
+        const items: any[] = response.data?.data ?? response.data ?? [];
+        allPerms = allPerms.concat(items);
+        hasNext = response.data?.pagination?.has_next ?? false;
+        page++;
+      }
+
+      // Build id → name map
+      const idToName: Record<string, string> = {};
+      allPerms.forEach((p: any) => {
+        if (p.id && p.name) idToName[p.id] = p.name;
+      });
+
+      // Map each permission ID to its name; keep raw ID as fallback
+      return permissionIds.map(id => ({
+        name: idToName[id] ?? id,
+      }));
+    } catch {
+      // Fallback: return raw IDs so the app doesn't break
+      return permissionIds.map(id => ({ name: id }));
+    }
+  };
+
+  /**
+   * Derive a permissions object from the user's role data returned by the backend.
+   * The role.permissions field contains permission IDs — we resolve them to names
+   * via the permissions API so hasBackendPermission() can match dot-notation strings.
+   */
+  const derivePermissionsFromUser = async (userData: any) => {
     const userRole = userData?.role;
-    const rolePermissions = userRole?.permissions || [];
+    const rolePermissions: any[] = userRole?.permissions || [];
     const roleName = typeof userRole === 'string' ? userRole : userRole?.name;
+
+    // Separate IDs (strings) from already-resolved objects
+    const ids = rolePermissions
+      .filter((p: any) => typeof p === 'string')
+      .map((p: string) => p);
+
+    const alreadyResolved = rolePermissions
+      .filter((p: any) => typeof p === 'object' && p?.name)
+      .map((p: any) => ({ name: p.name }));
+
+    const resolved = ids.length > 0 ? await resolvePermissionNames(ids) : [];
+
     return {
       role: { name: roleName },
-      permissions: rolePermissions.map((p: any) =>
-        typeof p === 'string' ? { name: p } : p
-      ),
+      permissions: [...alreadyResolved, ...resolved],
       capabilities: {},
     };
   };
@@ -163,7 +213,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       StorageManager.setUserData(localUser);
       
       try {
-        const permissions = derivePermissionsFromUser(response.user);
+        const permissions = await derivePermissionsFromUser(response.user);
         setUserPermissions(permissions);
         StorageManager.setPermissions(permissions);
       } catch (permError: any) {
@@ -339,7 +389,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       refreshPermissionsRef.current = (async () => {
         // Re-fetch the current user to get fresh role/permissions data
         const currentUser = await authService.getCurrentUser();
-        const permissions = derivePermissionsFromUser(currentUser);
+        const permissions = await derivePermissionsFromUser(currentUser);
         setUserPermissions(permissions);
         StorageManager.setPermissions(permissions);
       })();
@@ -375,7 +425,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             try {
               // Derive permissions from the current user's role data
               const currentUser = await authService.getCurrentUser();
-              const permissions = derivePermissionsFromUser(currentUser);
+              const permissions = await derivePermissionsFromUser(currentUser);
               setUserPermissions(permissions);
               StorageManager.setPermissions(permissions);
             } catch (error) {

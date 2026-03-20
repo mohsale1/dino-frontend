@@ -47,7 +47,7 @@ interface MenuItem {
 const SystemLayout: React.FC<SystemLayoutProps> = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, logout } = useAuth();
+  const { user, logout, hasBackendPermission } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
@@ -73,9 +73,7 @@ const SystemLayout: React.FC<SystemLayoutProps> = ({ children }) => {
 
   // Check if user has permission
   const hasPermission = (permission: string) => {
-    return userRole.permissions.some((p: string) =>
-      p === permission || p === 'system:*' || p.startsWith(permission.split(':')[0] + ':*')
-    );
+    return hasBackendPermission(permission);
   };
 
   // Define menu items with permission requirements
@@ -83,49 +81,49 @@ const SystemLayout: React.FC<SystemLayoutProps> = ({ children }) => {
     {
       title: 'Dashboard',
       icon: <DashboardIcon fontSize="small" />,
-      permission: 'system:*',
+      permission: 'system.workspaces.read',
       path: '/system/dashboard',
     },
     {
       title: 'Users',
       icon: <People fontSize="small" />,
-      permission: 'system:users',
+      permission: 'system.users.read',
       path: '/system/users',
     },
     {
       title: 'Billing',
       icon: <Payment fontSize="small" />,
-      permission: 'system:billing',
+      permission: 'system.billing.read',
       path: '/system/billing',
     },
     {
       title: 'Workspaces',
       icon: <Business fontSize="small" />,
-      permission: 'system:workspaces',
+      permission: 'system.workspaces.read',
       path: '/system/workspaces',
     },
     {
       title: 'Roles & Permissions',
       icon: <AdminPanelSettings fontSize="small" />,
-      permission: 'system:roles',
+      permission: 'system.roles.read',
       path: '/system/roles',
     },
     {
       title: 'Appearance',
       icon: <Palette fontSize="small" />,
-      permission: 'system:*',
+      permission: 'system.workspaces.read',
       path: '/system/appearance',
     },
     {
       title: 'Profile',
       icon: <AccountCircle fontSize="small" />,
-      permission: 'system:*',
+      permission: 'system.users.read',
       path: '/system/profile',
     },
     {
       title: 'Settings',
       icon: <Settings fontSize="small" />,
-      permission: 'system:settings',
+      permission: 'system.workspaces.read',
       path: '/system/settings',
     },
   ];

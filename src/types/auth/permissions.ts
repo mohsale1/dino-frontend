@@ -1,141 +1,126 @@
 /**
  * Permission Types and Constants
- * 
- * Defines all permission types and constants using colon notation
+ *
+ * Defines all permission types and constants using dot notation (scope.module.action)
  * to match backend permission structure.
  */
 
 export interface Permission {
   id: string;
   name: string;
-  resource: string;
+  resource: string; // Format: scope.module.action (e.g. application.items.read)
   action: string;
   description: string;
   category: 'system' | 'application';
 }
 
 // ============================================================================
-// PERMISSION CONSTANTS (using colon notation to match backend)
+// PERMISSION CONSTANTS (using dot notation: scope.module.action)
 // ============================================================================
 
 export const PERMISSIONS = {
   // ==================== SYSTEM PERMISSIONS ====================
-  
-  // System wildcard
-  SYSTEM_ALL: 'system:*',
-  
+
   // Workspace permissions (system level)
-  SYSTEM_WORKSPACES_ALL: 'system:workspaces:*',
-  SYSTEM_WORKSPACES_READ: 'system:workspaces:read',
-  SYSTEM_WORKSPACES_CREATE: 'system:workspaces:create',
-  SYSTEM_WORKSPACES_UPDATE: 'system:workspaces:update',
-  SYSTEM_WORKSPACES_DELETE: 'system:workspaces:delete',
-  
+  SYSTEM_WORKSPACES_READ: 'system.workspaces.read',
+  SYSTEM_WORKSPACES_CREATE: 'system.workspaces.create',
+  SYSTEM_WORKSPACES_UPDATE: 'system.workspaces.update',
+  SYSTEM_WORKSPACES_DELETE: 'system.workspaces.delete',
+
   // Billing permissions
-  SYSTEM_BILLING_ALL: 'system:billing:*',
-  SYSTEM_BILLING_READ: 'system:billing:read',
-  SYSTEM_BILLING_UPDATE: 'system:billing:update',
-  SYSTEM_BILLING_SUBSCRIPTION: 'system:billing:subscription',
-  
+  SYSTEM_BILLING_READ: 'system.billing.read',
+  SYSTEM_BILLING_UPDATE: 'system.billing.update',
+  SYSTEM_BILLING_SUBSCRIPTION: 'system.billing.subscription',
+
   // Registration permissions
-  SYSTEM_REGISTRATION_ALL: 'system:registration:*',
-  SYSTEM_REGISTRATION_READ: 'system:registration:read',
-  SYSTEM_REGISTRATION_CREATE: 'system:registration:create',
-  SYSTEM_REGISTRATION_DELETE: 'system:registration:delete',
-  
+  SYSTEM_REGISTRATION_READ: 'system.registration.read',
+  SYSTEM_REGISTRATION_CREATE: 'system.registration.create',
+  SYSTEM_REGISTRATION_DELETE: 'system.registration.delete',
+
   // Role permissions
-  SYSTEM_ROLES_ALL: 'system:roles:*',
-  SYSTEM_ROLES_READ: 'system:roles:read',
-  SYSTEM_ROLES_CREATE: 'system:roles:create',
-  SYSTEM_ROLES_UPDATE: 'system:roles:update',
-  SYSTEM_ROLES_DELETE: 'system:roles:delete',
-  
+  SYSTEM_ROLES_READ: 'system.roles.read',
+  SYSTEM_ROLES_CREATE: 'system.roles.create',
+  SYSTEM_ROLES_UPDATE: 'system.roles.update',
+  SYSTEM_ROLES_DELETE: 'system.roles.delete',
+
   // User permissions (system)
-  SYSTEM_USERS_ALL: 'system:users:*',
-  SYSTEM_USERS_READ: 'system:users:read',
-  SYSTEM_USERS_CREATE: 'system:users:create',
-  SYSTEM_USERS_UPDATE: 'system:users:update',
-  SYSTEM_USERS_DELETE: 'system:users:delete',
-  
+  SYSTEM_USERS_READ: 'system.users.read',
+  SYSTEM_USERS_CREATE: 'system.users.create',
+  SYSTEM_USERS_UPDATE: 'system.users.update',
+  SYSTEM_USERS_DELETE: 'system.users.delete',
+
   // Permission permissions
-  SYSTEM_PERMISSIONS_ALL: 'system:permissions:*',
-  SYSTEM_PERMISSIONS_READ: 'system:permissions:read',
-  SYSTEM_PERMISSIONS_CREATE: 'system:permissions:create',
-  SYSTEM_PERMISSIONS_UPDATE: 'system:permissions:update',
-  SYSTEM_PERMISSIONS_DELETE: 'system:permissions:delete',
-  
+  SYSTEM_PERMISSIONS_READ: 'system.permissions.read',
+  SYSTEM_PERMISSIONS_CREATE: 'system.permissions.create',
+  SYSTEM_PERMISSIONS_UPDATE: 'system.permissions.update',
+  SYSTEM_PERMISSIONS_DELETE: 'system.permissions.delete',
+
   // ==================== APPLICATION PERMISSIONS ====================
-  
-  // Application wildcard
-  WORKSPACE_ALL: 'workspace:*',
-  
+
   // Workspace permissions (application level)
-  WORKSPACE_READ: 'workspace:read',
-  WORKSPACE_UPDATE: 'workspace:update',
-  WORKSPACE_MANAGE: 'workspace:manage',
-  
+  WORKSPACE_READ: 'application.workspace.read',
+  WORKSPACE_UPDATE: 'application.workspace.update',
+  WORKSPACE_MANAGE: 'application.workspace.manage',
+
   // Organization permissions
-  ORGANIZATION_ALL: 'organization:*',
-  ORGANIZATION_READ: 'organization:read',
-  ORGANIZATION_CREATE: 'organization:create',
-  ORGANIZATION_UPDATE: 'organization:update',
-  ORGANIZATION_DELETE: 'organization:delete',
-  
+  ORGANIZATION_READ: 'application.organization.read',
+  ORGANIZATION_CREATE: 'application.organization.create',
+  ORGANIZATION_UPDATE: 'application.organization.update',
+  ORGANIZATION_DELETE: 'application.organization.delete',
+
   // Item permissions (menu items)
-  ITEMS_ALL: 'items:*',
-  ITEMS_READ: 'items:read',
-  ITEMS_CREATE: 'items:create',
-  ITEMS_UPDATE: 'items:update',
-  ITEMS_DELETE: 'items:delete',
-  
+  ITEMS_READ: 'application.items.read',
+  ITEMS_CREATE: 'application.items.create',
+  ITEMS_UPDATE: 'application.items.update',
+  ITEMS_DELETE: 'application.items.delete',
+
   // Category permissions
-  CATEGORIES_ALL: 'categories:*',
-  CATEGORIES_READ: 'categories:read',
-  CATEGORIES_CREATE: 'categories:create',
-  CATEGORIES_UPDATE: 'categories:update',
-  CATEGORIES_DELETE: 'categories:delete',
-  
+  CATEGORIES_READ: 'application.categories.read',
+  CATEGORIES_CREATE: 'application.categories.create',
+  CATEGORIES_UPDATE: 'application.categories.update',
+  CATEGORIES_DELETE: 'application.categories.delete',
+
   // Area permissions (service areas)
-  AREAS_ALL: 'areas:*',
-  AREAS_READ: 'areas:read',
-  AREAS_CREATE: 'areas:create',
-  AREAS_UPDATE: 'areas:update',
-  AREAS_DELETE: 'areas:delete',
-  
+  AREAS_READ: 'application.areas.read',
+  AREAS_CREATE: 'application.areas.create',
+  AREAS_UPDATE: 'application.areas.update',
+  AREAS_DELETE: 'application.areas.delete',
+
   // Table permissions
-  TABLES_ALL: 'tables:*',
-  TABLES_READ: 'tables:read',
-  TABLES_CREATE: 'tables:create',
-  TABLES_UPDATE: 'tables:update',
-  TABLES_DELETE: 'tables:delete',
-  
+  TABLES_READ: 'application.tables.read',
+  TABLES_CREATE: 'application.tables.create',
+  TABLES_UPDATE: 'application.tables.update',
+  TABLES_DELETE: 'application.tables.delete',
+
   // Review permissions
-  REVIEWS_ALL: 'reviews:*',
-  REVIEWS_READ: 'reviews:read',
-  REVIEWS_CREATE: 'reviews:create',
-  REVIEWS_UPDATE: 'reviews:update',
-  REVIEWS_DELETE: 'reviews:delete',
-  REVIEWS_MODERATE: 'reviews:moderate',
-  
+  REVIEWS_READ: 'application.reviews.read',
+  REVIEWS_CREATE: 'application.reviews.create',
+  REVIEWS_UPDATE: 'application.reviews.update',
+  REVIEWS_DELETE: 'application.reviews.delete',
+  REVIEWS_MODERATE: 'application.reviews.moderate',
+
   // Order permissions
-  ORDERS_ALL: 'orders:*',
-  ORDERS_READ: 'orders:read',
-  ORDERS_CREATE: 'orders:create',
-  ORDERS_UPDATE: 'orders:update',
-  ORDERS_DELETE: 'orders:delete',
-  ORDERS_STATUS: 'orders:status',
-  ORDERS_PAYMENT: 'orders:payment',
-  
+  ORDERS_READ: 'application.orders.read',
+  ORDERS_CREATE: 'application.orders.create',
+  ORDERS_UPDATE: 'application.orders.update',
+  ORDERS_DELETE: 'application.orders.delete',
+  ORDERS_STATUS: 'application.orders.status',
+  ORDERS_PAYMENT: 'application.orders.payment',
+
   // User permissions (application)
-  USERS_ALL: 'users:*',
-  USERS_READ: 'users:read',
-  USERS_CREATE: 'users:create',
-  USERS_UPDATE: 'users:update',
-  USERS_DELETE: 'users:delete',
-  
+  USERS_READ: 'application.users.read',
+  USERS_CREATE: 'application.users.create',
+  USERS_UPDATE: 'application.users.update',
+  USERS_DELETE: 'application.users.delete',
+
   // Dashboard permissions
-  DASHBOARD_ALL: 'dashboard:*',
-  DASHBOARD_READ: 'dashboard:read',
+  DASHBOARD_READ: 'application.dashboard.read',
+
+  // Coupon permissions
+  COUPONS_READ: 'application.coupons.read',
+  COUPONS_CREATE: 'application.coupons.create',
+  COUPONS_UPDATE: 'application.coupons.update',
+  COUPONS_DELETE: 'application.coupons.delete',
 } as const;
 
 export type PermissionName = typeof PERMISSIONS[keyof typeof PERMISSIONS];
@@ -148,19 +133,33 @@ export const PERMISSION_GROUPS = {
   SYSTEM: {
     label: 'System Permissions',
     permissions: [
-      PERMISSIONS.SYSTEM_ALL,
-      PERMISSIONS.SYSTEM_WORKSPACES_ALL,
-      PERMISSIONS.SYSTEM_BILLING_ALL,
-      PERMISSIONS.SYSTEM_REGISTRATION_ALL,
-      PERMISSIONS.SYSTEM_ROLES_ALL,
-      PERMISSIONS.SYSTEM_USERS_ALL,
-      PERMISSIONS.SYSTEM_PERMISSIONS_ALL,
+      PERMISSIONS.SYSTEM_WORKSPACES_READ,
+      PERMISSIONS.SYSTEM_WORKSPACES_CREATE,
+      PERMISSIONS.SYSTEM_WORKSPACES_UPDATE,
+      PERMISSIONS.SYSTEM_WORKSPACES_DELETE,
+      PERMISSIONS.SYSTEM_BILLING_READ,
+      PERMISSIONS.SYSTEM_BILLING_UPDATE,
+      PERMISSIONS.SYSTEM_BILLING_SUBSCRIPTION,
+      PERMISSIONS.SYSTEM_REGISTRATION_READ,
+      PERMISSIONS.SYSTEM_REGISTRATION_CREATE,
+      PERMISSIONS.SYSTEM_REGISTRATION_DELETE,
+      PERMISSIONS.SYSTEM_ROLES_READ,
+      PERMISSIONS.SYSTEM_ROLES_CREATE,
+      PERMISSIONS.SYSTEM_ROLES_UPDATE,
+      PERMISSIONS.SYSTEM_ROLES_DELETE,
+      PERMISSIONS.SYSTEM_USERS_READ,
+      PERMISSIONS.SYSTEM_USERS_CREATE,
+      PERMISSIONS.SYSTEM_USERS_UPDATE,
+      PERMISSIONS.SYSTEM_USERS_DELETE,
+      PERMISSIONS.SYSTEM_PERMISSIONS_READ,
+      PERMISSIONS.SYSTEM_PERMISSIONS_CREATE,
+      PERMISSIONS.SYSTEM_PERMISSIONS_UPDATE,
+      PERMISSIONS.SYSTEM_PERMISSIONS_DELETE,
     ]
   },
   WORKSPACE: {
     label: 'Workspace Management',
     permissions: [
-      PERMISSIONS.WORKSPACE_ALL,
       PERMISSIONS.WORKSPACE_READ,
       PERMISSIONS.WORKSPACE_UPDATE,
       PERMISSIONS.WORKSPACE_MANAGE,
@@ -169,7 +168,6 @@ export const PERMISSION_GROUPS = {
   ORGANIZATION: {
     label: 'Organization Management',
     permissions: [
-      PERMISSIONS.ORGANIZATION_ALL,
       PERMISSIONS.ORGANIZATION_READ,
       PERMISSIONS.ORGANIZATION_CREATE,
       PERMISSIONS.ORGANIZATION_UPDATE,
@@ -179,7 +177,6 @@ export const PERMISSION_GROUPS = {
   ITEMS: {
     label: 'Item Management',
     permissions: [
-      PERMISSIONS.ITEMS_ALL,
       PERMISSIONS.ITEMS_READ,
       PERMISSIONS.ITEMS_CREATE,
       PERMISSIONS.ITEMS_UPDATE,
@@ -189,7 +186,6 @@ export const PERMISSION_GROUPS = {
   CATEGORIES: {
     label: 'Category Management',
     permissions: [
-      PERMISSIONS.CATEGORIES_ALL,
       PERMISSIONS.CATEGORIES_READ,
       PERMISSIONS.CATEGORIES_CREATE,
       PERMISSIONS.CATEGORIES_UPDATE,
@@ -199,7 +195,6 @@ export const PERMISSION_GROUPS = {
   AREAS: {
     label: 'Area Management',
     permissions: [
-      PERMISSIONS.AREAS_ALL,
       PERMISSIONS.AREAS_READ,
       PERMISSIONS.AREAS_CREATE,
       PERMISSIONS.AREAS_UPDATE,
@@ -209,7 +204,6 @@ export const PERMISSION_GROUPS = {
   TABLES: {
     label: 'Table Management',
     permissions: [
-      PERMISSIONS.TABLES_ALL,
       PERMISSIONS.TABLES_READ,
       PERMISSIONS.TABLES_CREATE,
       PERMISSIONS.TABLES_UPDATE,
@@ -219,7 +213,6 @@ export const PERMISSION_GROUPS = {
   REVIEWS: {
     label: 'Review Management',
     permissions: [
-      PERMISSIONS.REVIEWS_ALL,
       PERMISSIONS.REVIEWS_READ,
       PERMISSIONS.REVIEWS_CREATE,
       PERMISSIONS.REVIEWS_UPDATE,
@@ -230,7 +223,6 @@ export const PERMISSION_GROUPS = {
   ORDERS: {
     label: 'Order Management',
     permissions: [
-      PERMISSIONS.ORDERS_ALL,
       PERMISSIONS.ORDERS_READ,
       PERMISSIONS.ORDERS_CREATE,
       PERMISSIONS.ORDERS_UPDATE,
@@ -242,7 +234,6 @@ export const PERMISSION_GROUPS = {
   USERS: {
     label: 'User Management',
     permissions: [
-      PERMISSIONS.USERS_ALL,
       PERMISSIONS.USERS_READ,
       PERMISSIONS.USERS_CREATE,
       PERMISSIONS.USERS_UPDATE,
@@ -252,8 +243,16 @@ export const PERMISSION_GROUPS = {
   DASHBOARD: {
     label: 'Dashboard & Analytics',
     permissions: [
-      PERMISSIONS.DASHBOARD_ALL,
       PERMISSIONS.DASHBOARD_READ,
+    ]
+  },
+  COUPONS: {
+    label: 'Coupon Management',
+    permissions: [
+      PERMISSIONS.COUPONS_READ,
+      PERMISSIONS.COUPONS_CREATE,
+      PERMISSIONS.COUPONS_UPDATE,
+      PERMISSIONS.COUPONS_DELETE,
     ]
   },
 } as const;
@@ -263,33 +262,11 @@ export const PERMISSION_GROUPS = {
 // ============================================================================
 
 /**
- * Check if a permission grants access to another permission
- * Supports wildcard matching (e.g., "items:*" grants "items:read")
+ * Check if a user's permission set includes the required permission.
+ * Uses exact match only — no wildcards.
  */
 export const hasPermission = (userPermissions: string[], requiredPermission: string): boolean => {
-  // Check for exact match
-  if (userPermissions.includes(requiredPermission)) {
-    return true;
-  }
-
-  // Check for wildcard permissions
-  const [resource] = requiredPermission.split(':');
-  const wildcardPermission = `${resource}:*`;
-  if (userPermissions.includes(wildcardPermission)) {
-    return true;
-  }
-
-  // Check for system:* (grants all system permissions)
-  if (requiredPermission.startsWith('system:') && userPermissions.includes('system:*')) {
-    return true;
-  }
-
-  // Check for workspace:* (grants all application permissions)
-  if (!requiredPermission.startsWith('system:') && userPermissions.includes('workspace:*')) {
-    return true;
-  }
-
-  return false;
+  return userPermissions.includes(requiredPermission);
 };
 
 /**
@@ -307,19 +284,20 @@ export const hasAllPermissions = (userPermissions: string[], requiredPermissions
 };
 
 /**
- * Get permission resource and action from permission name
+ * Parse a dot-notation permission string (scope.module.action) into its parts.
  */
-export const parsePermission = (permission: string): { resource: string; action: string } => {
-  const [resource, action] = permission.split(':');
-  return { resource, action };
+export const parsePermission = (permission: string): { scope: string; module: string; action: string } => {
+  const [scope, module, action] = permission.split('.');
+  return { scope, module, action };
 };
 
 /**
- * Format permission name for display
+ * Format a dot-notation permission string for display.
+ * e.g. 'application.items.read' -> 'Items - Read'
  */
 export const formatPermissionName = (permission: string): string => {
-  const { resource, action } = parsePermission(permission);
-  const resourceName = resource.charAt(0).toUpperCase() + resource.slice(1);
-  const actionName = action === '*' ? 'All' : action.charAt(0).toUpperCase() + action.slice(1);
-  return `${resourceName} - ${actionName}`;
+  const { module, action } = parsePermission(permission);
+  const moduleName = module ? module.charAt(0).toUpperCase() + module.slice(1) : '';
+  const actionName = action ? action.charAt(0).toUpperCase() + action.slice(1) : '';
+  return `${moduleName} - ${actionName}`;
 };

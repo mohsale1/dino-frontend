@@ -63,10 +63,14 @@ export const ROLE_ASSIGNMENT_PERMISSIONS: Record<RoleName, readonly RoleName[]> 
 /**
  * Normalize role name to standard format
  */
-export const normalizeRole = (role?: string | null): RoleName | null => {
+export const normalizeRole = (role?: string | object | null): RoleName | null => {
   if (!role) return null;
-  
-  const normalized = role.trim().toLowerCase();
+
+  // Backend may pass the full role object — extract the name string
+  const roleStr = typeof role === 'object' ? (role as any)?.name : role;
+  if (!roleStr || typeof roleStr !== 'string') return null;
+
+  const normalized = roleStr.trim().toLowerCase();
   
   // Map various formats to standard roles
   if (normalized === 'owner') return ROLES.OWNER;

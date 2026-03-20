@@ -121,19 +121,17 @@ const Appearance: React.FC = () => {
       setStats(mappedStats);
       setTestimonials(data.testimonials || []);
       
-      // Map API contact to component contact format
+      // Contact is stored flat: { email, phone, address, city, state, country, postal_code }
       const apiContact: any = data.contact || {};
-      const mappedContact = {
-        email: typeof apiContact.email === 'string' ? apiContact.email : apiContact.email?.primary || '',
-        phone: typeof apiContact.phone === 'string' ? apiContact.phone : apiContact.phone?.primary || '',
-        address: typeof apiContact.address === 'string' ? apiContact.address : apiContact.address?.full || '',
-        city: apiContact.city || apiContact.address?.city || '',
-        state: apiContact.state || apiContact.address?.state || '',
-        country: apiContact.country || apiContact.address?.country || '',
-        postal_code: apiContact.postal_code || apiContact.address?.pincode || '',
-      };
-      
-      setContact(mappedContact);
+      setContact({
+        email: apiContact.email || '',
+        phone: apiContact.phone || '',
+        address: apiContact.address || '',
+        city: apiContact.city || '',
+        state: apiContact.state || '',
+        country: apiContact.country || '',
+        postal_code: apiContact.postal_code || '',
+      });
     } catch (err: any) {
       console.error('Failed to fetch homepage data:', err);
       setSnackbar({

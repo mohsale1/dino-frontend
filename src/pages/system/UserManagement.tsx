@@ -116,10 +116,10 @@ const UserManagement: React.FC = () => {
       setLoading(true);
       console.log('🔄 Fetching users, roles, and workspaces...');
       const [systemUsersData, applicationUsersData, roles, workspaces] = await Promise.all([
-        systemUserService.getUsers(1, 1000),
-        applicationUserService.getUsers(1, 1000),
-        systemRoleService.getRoles(1, 1000),
-        systemWorkspaceService.getWorkspaces(1, 1000),
+        systemUserService.getUsers(1, 100),
+        applicationUserService.getUsers(1, 100),
+        systemRoleService.getRoles(1, 100),
+        systemWorkspaceService.getWorkspaces(1, 100),
       ]);
       
       console.log('✅ Raw API responses:', { 

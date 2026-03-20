@@ -74,7 +74,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const theme = useTheme();
-  const { user, logout } = useAuth();
+  const { user, logout, hasBackendPermission } = useAuth();
   const { userData, refreshUserData } = useUserData();
   const { isCollapsed, toggleCollapsed, getSidebarWidth } = useSidebar();
   
@@ -95,22 +95,24 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
   // Define all menu items with their permissions
   const allMenuItems: NavigationItem[] = [
     // Main
-    { label: 'Menu', path: '/admin/pos', icon: <MenuBook />, requiredPermissions: ['orders.create'], requiredRoles: [], category: 'main', description: 'Manual order entry' },
-    { label: 'Dashboard', path: '/admin', icon: <Dashboard />, requiredPermissions: ['dashboard.view'], requiredRoles: [], category: 'main' },
-    { label: 'Order', path: '/admin/orders', icon: <ShoppingCart />, requiredPermissions: ['orders.view'], requiredRoles: [], category: 'main' },
+    { label: 'Menu', path: '/admin/pos', icon: <MenuBook />, requiredPermissions: ['application.orders.create'], requiredRoles: [], category: 'main', description: 'Manual order entry' },
+    { label: 'Dashboard', path: '/admin', icon: <Dashboard />, requiredPermissions: ['application.dashboard.read'], requiredRoles: [], category: 'main' },
+    { label: 'Order', path: '/admin/orders', icon: <ShoppingCart />, requiredPermissions: ['application.orders.read'], requiredRoles: [], category: 'main' },
     
     // Management
-    { label: 'Catalog', path: '/admin/catalog', icon: <Category />, requiredPermissions: ['menu.view'], requiredRoles: [], category: 'management' },
-    { label: 'Location', path: '/admin/locations', icon: <LocationOn />, requiredPermissions: ['tables.view'], requiredRoles: [], category: 'management' },
-    { label: 'Coupon', path: '/admin/coupons', icon: <LocalOffer />, requiredPermissions: ['coupons.view'], requiredRoles: [], category: 'management' },
-    { label: 'Users', path: '/admin/users', icon: <People />, requiredPermissions: ['users.view'], requiredRoles: [], category: 'management' },
+    { label: 'Catalog', path: '/admin/catalog', icon: <Category />, requiredPermissions: ['application.items.read'], requiredRoles: [], category: 'management' },
+    { label: 'Location', path: '/admin/locations', icon: <LocationOn />, requiredPermissions: ['application.areas.read'], requiredRoles: [], category: 'management' },
+    { label: 'Coupon', path: '/admin/coupons', icon: <LocalOffer />, requiredPermissions: ['application.coupons.read'], requiredRoles: [], category: 'management' },
+    { label: 'Users', path: '/admin/users', icon: <People />, requiredPermissions: ['application.users.read'], requiredRoles: [], category: 'management' },
     
     // Settings
-    { label: 'Settings', path: '/admin/settings', icon: <Settings />, requiredPermissions: ['settings.view'], requiredRoles: [], category: 'settings' },
+    { label: 'Settings', path: '/admin/settings', icon: <Settings />, requiredPermissions: ['application.workspace.read'], requiredRoles: [], category: 'settings' },
   ];
 
-  // PERMISSION CHECKS DISABLED - Show all menu items to all users
-  const adminNavItems = allMenuItems;
+  const adminNavItems = allMenuItems.filter(item =>
+    item.requiredPermissions.length === 0 ||
+    item.requiredPermissions.some(p => hasBackendPermission(p))
+  );
 
   // Group items by category
   const groupedNavItems = menuCategories.map(category => ({
