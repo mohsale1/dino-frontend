@@ -89,17 +89,14 @@ interface ApiResponse<T = any> {
 class ApiService {
   private axiosInstance: AxiosInstance;
   private requestQueue: Map<string, Promise<any>> = new Map();
-  
-  // Add debugConfiguration method signature
+
   debugConfiguration?: () => void;
 
   constructor() {
-    // Log configuration during initialization    
-    // Force verification of the base URL
-    if (API_CONFIG.BASE_URL.includes('localhost')) {    } else {    }
-    
+    // Use a placeholder baseURL — the request interceptor resolves the real
+    // one lazily so window.APP_CONFIG is guaranteed to be loaded by then.
     this.axiosInstance = axios.create({
-      baseURL: API_CONFIG.BASE_URL,
+      baseURL: '/',
       timeout: API_CONFIG.TIMEOUT,
       headers: API_CONFIG.DEFAULT_HEADERS,
     });
@@ -107,36 +104,53 @@ class ApiService {
     this.setupInterceptors();
   }
 
+  /**
+   * Resolve the correct base URL at request time.
+   * Priority: window.APP_CONFIG.API_BASE_URL > API_CONFIG.BASE_URL
+   * This ensures the runtime config injected by docker-entrypoint.sh is used
+   * instead of the value baked in at build time.
+   */
+  private resolveBaseUrl(): string {
+    if (typeof window !== 'undefined' && (window as any).APP_CONFIG?.API_BASE_URL) {
+      return (window as any).APP_CONFIG.API_BASE_URL;
+    }
+    return API_CONFIG.BASE_URL;
+  }
+
   private setupInterceptors(): void {
     // Request interceptor
     this.axiosInstance.interceptors.request.use(
       async (config) => {
+        // Always resolve base URL at request time so runtime config is respected
+        config.baseURL = this.resolveBaseUrl();
+
         // Skip token refresh for auth endpoints to prevent loops
         const isAuthEndpoint = config.url?.includes('/auth/');
-        
+
         // Only check token refresh for non-auth endpoints
         if (!isAuthEndpoint && authService.shouldRefreshToken()) {
-          try {            await authService.refreshToken();
+          try {
+            await authService.refreshToken();
           } catch (error) {
-      // Error handled silently
-    }
+            // Error handled silently
+          }
         }
-        
+
         // Add authentication token
         const token = authService.getToken();
         if (token) {
-          config.headers.Authorization = `Bearer ${token}`;        } else {        }
+          config.headers.Authorization = `Bearer ${token}`;
+        }
 
         // Convert request data to snake_case
         if (config.data && typeof config.data === 'object') {
           config.data = DataTransformer.toSnakeCase(config.data);
         }
 
-        // Log request with detailed URL info for debugging
-        const fullUrl = `${config.baseURL}${config.url}`;
         return config;
       },
-      (error) => {        return Promise.reject(error);
+      (error) => {
+        return Promise.reject(error);
       }
     );
 
@@ -147,8 +161,6 @@ class ApiService {
         if (response.data) {
           response.data = DataTransformer.toCamelCase(response.data);
         }
-
-        // Log response
         return response;
       },
       async (error) => {
@@ -158,31 +170,29 @@ class ApiService {
         if (error.response?.status === 401 && !originalRequest._retry) {
           // Skip retry for auth endpoints to prevent infinite loops
           const isAuthEndpoint = originalRequest.url?.includes('/auth/');
-          if (isAuthEndpoint) {            return Promise.reject(error);
+          if (isAuthEndpoint) {
+            return Promise.reject(error);
           }
 
           originalRequest._retry = true;
           try {
             const newToken = await authService.refreshToken();
-            if (newToken && newToken.access_token) {              // Update the authorization header with new token
+            if (newToken && newToken.access_token) {
               originalRequest.headers.Authorization = `Bearer ${newToken.access_token}`;
-              // Also update the default headers for future requests
               this.axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${newToken.access_token}`;
-              // Retry the original request
               return this.axiosInstance(originalRequest);
-            } else {              // No valid token received, logout
+            } else {
               authService.logout();
               window.location.href = '/login';
               return Promise.reject(new Error('Token refresh failed'));
             }
-          } catch (refreshError) {            // Refresh failed, redirect to login
+          } catch (refreshError) {
             authService.logout();
             window.location.href = '/login';
             return Promise.reject(refreshError);
           }
         }
 
-        // Log error
         return Promise.reject(error);
       }
     );
@@ -194,17 +204,16 @@ class ApiService {
   async get<T>(url: string, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
     try {
       const cacheKey = `GET:${url}:${JSON.stringify(config?.params || {})}`;
-      
-      // Check if request is already in progress
-      if (this.requestQueue.has(cacheKey)) {        return await this.requestQueue.get(cacheKey);
+
+      if (this.requestQueue.has(cacheKey)) {
+        return await this.requestQueue.get(cacheKey);
       }
 
-      // Make request and process response
       const requestPromise = (async () => {
         const response = await this.axiosInstance.get<ApiResponse<T>>(url, config);
         return this.handleResponse(response);
       })();
-      
+
       this.requestQueue.set(cacheKey, requestPromise);
 
       try {
@@ -260,8 +269,8 @@ class ApiService {
    * File upload with progress tracking
    */
   async uploadFile<T>(
-    url: string, 
-    file: File, 
+    url: string,
+    file: File,
     onProgress?: (progress: number) => void
   ): Promise<ApiResponse<T>> {
     try {
@@ -292,14 +301,10 @@ class ApiService {
   private handleResponse<T>(response: AxiosResponse<ApiResponse<T>>): ApiResponse<T> {
     const data = response.data;
 
-    // Handle different response formats
     if (data && typeof data === 'object') {
-      // Standard API response format
       if ('success' in data) {
         return data;
       }
-
-      // Direct data response (for some endpoints)
       return {
         success: true,
         data: data as T,
@@ -307,7 +312,6 @@ class ApiService {
       };
     }
 
-    // Fallback for unexpected response format
     return {
       success: true,
       data: data as T,
@@ -323,16 +327,13 @@ class ApiService {
     let errorCode = 'UNKNOWN_ERROR';
 
     if (error.response) {
-      // Server responded with error status
       const responseData = error.response.data;
-      
+
       if (responseData) {
         if (typeof responseData === 'string') {
           errorMessage = responseData;
         } else if (responseData.detail) {
-          // Handle Pydantic validation errors
           if (Array.isArray(responseData.detail)) {
-            // Pydantic validation error format
             const validationErrors = responseData.detail.map((err: any) => {
               const field = err.loc ? err.loc.join('.') : 'field';
               const message = err.msg || 'Invalid value';
@@ -340,7 +341,6 @@ class ApiService {
             }).join(', ');
             errorMessage = `Validation error: ${validationErrors}`;
           } else if (typeof responseData.detail === 'object') {
-            // Handle object detail (convert [object Object] to readable format)
             try {
               errorMessage = JSON.stringify(responseData.detail);
             } catch {
@@ -354,7 +354,6 @@ class ApiService {
         } else if (responseData.error) {
           errorMessage = responseData.error;
         } else if (typeof responseData === 'object') {
-          // Handle cases where the entire response is an error object
           try {
             errorMessage = JSON.stringify(responseData);
           } catch {
@@ -368,11 +367,9 @@ class ApiService {
         errorCode = `HTTP_${error.response.status}`;
       }
     } else if (error.request) {
-      // Network error
       errorMessage = 'Network error. Please check your connection.';
       errorCode = 'NETWORK_ERROR';
     } else {
-      // Other error
       errorMessage = error.message || errorMessage;
       errorCode = 'CLIENT_ERROR';
     }
@@ -395,7 +392,7 @@ class ApiService {
    * Get current base URL
    */
   getBaseURL(): string {
-    return this.axiosInstance.defaults.baseURL || '';
+    return this.resolveBaseUrl();
   }
 
   /**
@@ -409,14 +406,7 @@ class ApiService {
    * Refresh configuration from runtime config
    */
   refreshConfiguration(): void {
-    const runtimeConfig = (window as any).APP_CONFIG;
-    if (runtimeConfig && runtimeConfig.API_BASE_URL) {
-      if (this.axiosInstance.defaults.baseURL !== runtimeConfig.API_BASE_URL) {
-        this.setBaseURL(runtimeConfig.API_BASE_URL);
-        } else {
-        }
-    } else {
-      }
+    // No-op — base URL is now resolved lazily on every request
   }
 
   /**
@@ -425,9 +415,9 @@ class ApiService {
   setAuthorizationHeader(token: string | null): void {
     if (token) {
       this.axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      } else {
+    } else {
       delete this.axiosInstance.defaults.headers.common['Authorization'];
-      }
+    }
   }
 
   /**
@@ -437,10 +427,12 @@ class ApiService {
     try {
       const response = await this.get('/health');
       return response.success;
-    } catch (error) {      return false;
+    } catch (error) {
+      return false;
     }
   }
 }
+
 
 // Export singleton instance
 export const apiService = new ApiService();

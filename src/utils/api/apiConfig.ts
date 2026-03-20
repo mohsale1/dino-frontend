@@ -3,16 +3,15 @@
  */
 
 /**
- * Get the base API URL
+ * Get the base API URL.
+ * Priority: window.APP_CONFIG (runtime, injected by docker-entrypoint.sh) > fallback
+ * Never reads build-time env vars — those are absolute URLs that bypass nginx.
  */
 export function getApiBaseUrl(): string {
-  // Check for environment variable first
-  if (process.env.REACT_APP_API_BASE_URL) {
-    return process.env.REACT_APP_API_BASE_URL;
+  if (typeof window !== 'undefined' && (window as any).APP_CONFIG?.API_BASE_URL) {
+    return (window as any).APP_CONFIG.API_BASE_URL;
   }
-    
-  // In production, use current origin
-  return window.location.origin;
+  return '/api/v1';
 }
 
 /**
