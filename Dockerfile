@@ -35,12 +35,12 @@ RUN rm -f /etc/nginx/conf.d/default.conf
 # Copy built static assets from build stage
 COPY --from=build /app/build /usr/share/nginx/html
 
-# Copy nginx config template
-COPY nginx/nginx.conf.template /etc/nginx/nginx.conf.template
-
 # Copy and register entrypoint
 COPY nginx/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+# Copy nginx config template
+COPY nginx/nginx.conf.template /etc/nginx/nginx.conf.template
 
 # Set correct permissions on static files
 RUN chmod -R 755 /usr/share/nginx/html

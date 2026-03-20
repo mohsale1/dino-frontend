@@ -5,7 +5,7 @@ set -e
 #
 # BACKEND_URL  — Internal URL nginx uses to proxy /api/ requests.
 #                Never exposed to the browser.
-#                Default: https://api.myapp.com
+#                Default: https://dino-backend-prod-781503667260.us-central1.run.app
 #
 # API_BASE_URL — Relative path the React app prefixes every API call with.
 #                Must stay as /api/v1 (relative) so browser requests go through
@@ -14,7 +14,7 @@ set -e
 #
 # ─────────────────────────────────────────────────────────────────────────────
 
-BACKEND_URL="${BACKEND_URL:-https://api.myapp.com}"
+BACKEND_URL="${BACKEND_URL:-https://dino-backend-prod-781503667260.us-central1.run.app}"
 API_BASE_URL="${API_BASE_URL:-/api/v1}"
 
 echo "[entrypoint] BACKEND_URL  = ${BACKEND_URL}  (nginx proxy target)"

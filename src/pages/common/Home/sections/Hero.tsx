@@ -265,28 +265,6 @@ const HeroSection: React.FC = () => {
                 animation: `${slideInLeft} 0.8s ease-out`,
               }}
             >
-              {/* Badge */}
-              <Box sx={{ display: 'flex', justifyContent: { xs: 'center', md: 'flex-start' }, width: '100%' }}>
-                <Chip
-                  icon={<CheckCircleOutline sx={{ fontSize: 18 }} />}
-                  label="Trusted by 500+ Businesses"
-                  sx={{
-                    backgroundColor: alpha('#ffffff', 0.1),
-                    color: '#ffffff',
-                    fontWeight: 600,
-                    fontSize: { xs: '0.8125rem', sm: '0.875rem' },
-                    height: { xs: 32, sm: 36 },
-                    px: { xs: 1.5, sm: 2 },
-                    border: `1px solid ${alpha('#ffffff', 0.2)}`,
-                    '& .MuiChip-icon': {
-                      color: '#ffffff',
-                      marginLeft: '8px',
-                    },
-                    animation: `${fadeIn} 1s ease-out 0.3s both`,
-                  }}
-                />
-              </Box>
-
               {/* Main Heading */}
               <Typography
                 variant="h1"

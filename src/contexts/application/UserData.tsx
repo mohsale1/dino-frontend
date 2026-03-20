@@ -61,6 +61,15 @@ export const UserDataProvider: React.FC<UserDataProviderProps> = ({ children }) 
       return;
     }
 
+    // System users do not have application venue data — skip this fetch entirely
+    const userType = StorageManager.getItem<string>('user_type');
+    if (userType === 'system') {
+      setUserData(null);
+      setInitialized(true);
+      loadingRef.current = false;
+      return;
+    }
+
     // Check if we have a token
     const token = StorageManager.getItem<string>(StorageManager.KEYS.TOKEN);
     if (!token) {
