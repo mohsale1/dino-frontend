@@ -62,19 +62,15 @@ ChartJS.register(
 );
 
 const SystemDashboard: React.FC = () => {
-  const { user } = useAuth();
+  const { user, getPermissionsList, hasBackendPermission } = useAuth();
   const [loading, setLoading] = useState(true);
   const [dashboardData, setDashboardData] = useState<SystemDashboardData | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // Get user role information
-  const userRole = useMemo(() => {
+  // Get user role name for display
+  const userRoleName = useMemo(() => {
     const role = (user as any)?.role;
-    return {
-      name: typeof role === 'string' ? role : role?.name || 'User',
-      permissions: role?.permissions || [],
-      roleType: role?.role_type,
-    };
+    return typeof role === 'string' ? role : role?.name || 'User';
   }, [user]);
 
   // Load dashboard data
@@ -96,20 +92,28 @@ const SystemDashboard: React.FC = () => {
     loadDashboardData();
   }, []);
 
-  // Check if user has permission
-  const hasPermission = (permission: string) => {
-    return userRole.permissions.some((p: string) =>
-      p === permission || p === 'system:*' || p.startsWith(permission.split(':')[0] + ':*')
-    );
+  // Check if user has any permission matching the given resource prefix.
+  // Uses resolved dot-notation names from Auth context (e.g. "system.workspaces.read").
+  // Privileged roles (admin, owner, manager) bypass the permission check entirely.
+  const isPrivilegedRole = useMemo(() => {
+    const role = (user as any)?.role;
+    const roleName = (typeof role === 'string' ? role : role?.name || '').toLowerCase();
+    return ['admin', 'owner', 'manager'].includes(roleName);
+  }, [user]);
+
+  const hasPermission = (resource: string): boolean => {
+    if (isPrivilegedRole) return true;
+    const list = getPermissionsList();
+    return list.some(p => p === '*' || p.startsWith(resource));
   };
 
   const stats = useMemo(() => {
     if (!dashboardData) return [];
-    
+
     const baseStats = [];
     const { stats: apiStats, subscription_stats, registration_code_stats } = dashboardData;
 
-    if (hasPermission('system:workspaces')) {
+    if (hasPermission('system.workspaces')) {
       baseStats.push({
         label: 'Total Workspaces',
         value: apiStats.total_workspaces.toString(),
@@ -118,7 +122,7 @@ const SystemDashboard: React.FC = () => {
         trend: apiStats.workspace_growth.startsWith('+') ? 'up' : 'down',
       });
     }
-    if (hasPermission('system:users')) {
+    if (hasPermission('system.users')) {
       baseStats.push({
         label: 'System Users',
         value: apiStats.total_system_users.toString(),
@@ -127,7 +131,7 @@ const SystemDashboard: React.FC = () => {
         trend: apiStats.user_growth.startsWith('+') ? 'up' : 'down',
       });
     }
-    if (hasPermission('system:billing')) {
+    if (hasPermission('system.billing')) {
       baseStats.push({
         label: 'Active Subscriptions',
         value: subscription_stats.active_subscriptions.toString(),
@@ -136,7 +140,7 @@ const SystemDashboard: React.FC = () => {
         trend: 'up',
       });
     }
-    if (hasPermission('system:registration')) {
+    if (hasPermission('system.registration')) {
       baseStats.push({
         label: 'Active Codes',
         value: registration_code_stats.active_codes.toString(),
@@ -147,7 +151,7 @@ const SystemDashboard: React.FC = () => {
     }
 
     return baseStats;
-  }, [dashboardData, userRole]);
+  }, [dashboardData, getPermissionsList]);
 
   // Chart data from API
   const workspaceGrowthData = useMemo(() => {
@@ -379,7 +383,7 @@ const SystemDashboard: React.FC = () => {
             System Dashboard
           </Typography>
           <Typography variant="body1" sx={{ color: '#64748b' }}>
-            Welcome back, {userRole.name}
+            Welcome back, {userRoleName}
           </Typography>
         </Box>
 
@@ -447,7 +451,7 @@ const SystemDashboard: React.FC = () => {
         {/* Charts Section */}
         <Grid container spacing={3} sx={{ mb: 4 }}>
           {/* Workspace Growth Chart */}
-          {hasPermission('system:workspaces') && (
+          {hasPermission('system.workspaces') && (
             <Grid item xs={12} md={8}>
               <Card elevation={0} sx={{ border: '1px solid #e2e8f0', borderRadius: 2 }}>
                 <CardContent>
@@ -463,7 +467,7 @@ const SystemDashboard: React.FC = () => {
           )}
 
           {/* User Distribution Chart */}
-          {hasPermission('system:users') && (
+          {hasPermission('system.users') && (
             <Grid item xs={12} md={4}>
               <Card elevation={0} sx={{ border: '1px solid #e2e8f0', borderRadius: 2 }}>
                 <CardContent>
@@ -479,7 +483,7 @@ const SystemDashboard: React.FC = () => {
           )}
 
           {/* Top Onboarders Chart */}
-          {hasPermission('system:users') && (
+          {hasPermission('system.users') && (
             <Grid item xs={12} md={6}>
               <Card elevation={0} sx={{ border: '1px solid #e2e8f0', borderRadius: 2, height: '100%', display: 'flex', flexDirection: 'column' }}>
                 <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>

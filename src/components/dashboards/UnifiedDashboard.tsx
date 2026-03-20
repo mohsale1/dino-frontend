@@ -65,6 +65,13 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({ className }) => {
   const { user, hasPermission, hasBackendPermission, userPermissions } = useAuth();
   const { userData } = useUserData();
   const currentVenue = userData?.venue;
+
+  // Resolve workspace ID from multiple sources — required by the analytics API
+  const workspaceId =
+    userData?.workspace?.id ||
+    (user as any)?.workspaceId ||
+    (user as any)?.workspace_id ||
+    null;
   
   // Permission hooks
   const {
@@ -253,14 +260,14 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({ className }) => {
 
       // Use permission hooks to determine which dashboard to load
       if (isSuperAdmin) {
-        data = await dashboardService.getSuperAdminDashboard(dateParams);
+        data = await dashboardService.getSuperAdminDashboard(dateParams, workspaceId ?? undefined);
       } else if (isAdmin) {
-        data = await dashboardService.getAdminDashboard(dateParams);
+        data = await dashboardService.getAdminDashboard(dateParams, workspaceId ?? undefined);
       } else if (isOperator) {
-        data = await dashboardService.getOperatorDashboard();
+        data = await dashboardService.getOperatorDashboard(workspaceId ?? undefined);
       } else {
         // Default to admin dashboard
-        data = await dashboardService.getAdminDashboard(dateParams);
+        data = await dashboardService.getAdminDashboard(dateParams, workspaceId ?? undefined);
       }
       
       
@@ -566,7 +573,7 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({ className }) => {
     } finally {
       setLoading(false);
     }
-  }, [isSuperAdmin, isAdmin, isOperator, user, dateRange]);
+  }, [isSuperAdmin, isAdmin, isOperator, user, dateRange, workspaceId]);
 
   const refreshDashboard = async () => {
     setRefreshing(true);
@@ -586,8 +593,9 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({ className }) => {
       return;
     }
 
-    // Load dashboard data for authenticated users
-    if (currentVenue?.id || isSuperAdmin) {
+    // Load dashboard data for authenticated users.
+    // Trigger when we have either a venue ID, a workspace ID, or superAdmin access.
+    if (currentVenue?.id || workspaceId || isSuperAdmin) {
       loadDashboardData();
     } else {
       setLoading(false);
@@ -598,11 +606,11 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({ className }) => {
     return () => {
       document.documentElement.style.scrollBehavior = 'auto';
     };
-  }, [currentVenue?.id, user, loadDashboardData, isSuperAdmin]);
+  }, [currentVenue?.id, workspaceId, user, loadDashboardData, isSuperAdmin]);
 
   // Live data polling - refresh every 30 seconds
   useEffect(() => {
-    if (!user || !(currentVenue?.id || isSuperAdmin)) {
+    if (!user || !(currentVenue?.id || workspaceId || isSuperAdmin)) {
       return;
     }
 
@@ -612,7 +620,7 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({ className }) => {
     }, 30000); // 30 seconds
 
     return () => clearInterval(interval);
-  }, [user, currentVenue?.id, isSuperAdmin, loadDashboardData]);
+  }, [user, currentVenue?.id, workspaceId, isSuperAdmin, loadDashboardData]);
 
   // Don't block UI with loading or error states
   // Show dashboard immediately with empty/default data

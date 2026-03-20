@@ -21,7 +21,7 @@ export function normalizeUserData(apiUser: any): UserProfile {
     phone: apiUser.phone || '',
     firstName: apiUser.firstName || apiUser.first_name || '',
     lastName: apiUser.lastName || apiUser.last_name || '',
-    role: (typeof apiUser.role === 'object' ? apiUser.role?.name : apiUser.role) || 'operator',
+    role: (typeof apiUser.role === 'object' ? apiUser.role?.name : apiUser.role) || '',
     workspaceId: apiUser.workspaceId || apiUser.workspace_id || null,
     venueId: venueId,
     venueIds: venueIds,

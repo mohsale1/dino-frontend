@@ -77,13 +77,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             setUser(localUser);
             StorageManager.setUserData(localUser);
             
-            if (savedPermissions) {
-              setUserPermissions(savedPermissions);
-            } else {
-              const permissions = await derivePermissionsFromUser(currentUser);
-              setUserPermissions(permissions);
-              StorageManager.setPermissions(permissions);
-            }
+            // Always re-derive permissions from the fresh API user data so the
+            // role is never stale (e.g. a previously cached 'operator' fallback).
+            const permissions = await derivePermissionsFromUser(currentUser);
+            setUserPermissions(permissions);
+            StorageManager.setPermissions(permissions);
             
             tokenRefreshScheduler.start();
           } catch (error) {

@@ -74,7 +74,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const theme = useTheme();
-  const { user, logout, hasBackendPermission } = useAuth();
+  const { user, logout, hasBackendPermission, userPermissions } = useAuth();
   const { userData, refreshUserData } = useUserData();
   const { isCollapsed, toggleCollapsed, getSidebarWidth } = useSidebar();
   
@@ -85,6 +85,14 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
   // Determine if sidebar should show expanded content
   const showExpanded = !isCollapsed;
 
+  // Resolve role name from Auth context userPermissions (reactive) with fallbacks
+  const detectedRole = (
+    userPermissions?.role?.name ||
+    PermissionService.getBackendRole()?.name ||
+    (user as any)?.role ||
+    ''
+  ).toLowerCase();
+
   // Simple static menu configuration
   const menuCategories: MenuCategory[] = [
     { name: 'main', label: 'Main', order: 1 },
@@ -92,23 +100,84 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
     { name: 'settings', label: 'Settings', order: 3 },
   ];
 
-  // Define all menu items with their permissions
+  // Define all menu items mapped to their exact permission keys from the reference.
+  // Each item lists ALL permissions that grant access to it — any match shows the item.
   const allMenuItems: NavigationItem[] = [
     // Main
-    { label: 'Menu', path: '/admin/pos', icon: <MenuBook />, requiredPermissions: ['application.orders.create'], requiredRoles: [], category: 'main', description: 'Manual order entry' },
-    { label: 'Dashboard', path: '/admin', icon: <Dashboard />, requiredPermissions: ['application.dashboard.read'], requiredRoles: [], category: 'main' },
-    { label: 'Order', path: '/admin/orders', icon: <ShoppingCart />, requiredPermissions: ['application.orders.read'], requiredRoles: [], category: 'main' },
-    
+    {
+      label: 'Menu',
+      path: '/admin/pos',
+      icon: <MenuBook />,
+      requiredPermissions: ['application.orders.create'],
+      requiredRoles: [],
+      category: 'main',
+      description: 'Manual order entry',
+    },
+    {
+      label: 'Dashboard',
+      path: '/admin',
+      icon: <Dashboard />,
+      requiredPermissions: ['application.dashboard.read'],
+      requiredRoles: [],
+      category: 'main',
+    },
+    {
+      label: 'Order',
+      path: '/admin/orders',
+      icon: <ShoppingCart />,
+      requiredPermissions: ['application.orders.read'],
+      requiredRoles: [],
+      category: 'main',
+    },
+
     // Management
-    { label: 'Catalog', path: '/admin/catalog', icon: <Category />, requiredPermissions: ['application.items.read'], requiredRoles: [], category: 'management' },
-    { label: 'Location', path: '/admin/locations', icon: <LocationOn />, requiredPermissions: ['application.areas.read'], requiredRoles: [], category: 'management' },
-    { label: 'Coupon', path: '/admin/coupons', icon: <LocalOffer />, requiredPermissions: ['application.coupons.read'], requiredRoles: [], category: 'management' },
-    { label: 'Users', path: '/admin/users', icon: <People />, requiredPermissions: ['application.users.read'], requiredRoles: [], category: 'management' },
-    
+    {
+      label: 'Catalog',
+      path: '/admin/catalog',
+      icon: <Category />,
+      requiredPermissions: ['application.items.read', 'application.categories.read'],
+      requiredRoles: [],
+      category: 'management',
+    },
+    {
+      label: 'Location',
+      path: '/admin/locations',
+      icon: <LocationOn />,
+      requiredPermissions: ['application.areas.read', 'application.tables.read'],
+      requiredRoles: [],
+      category: 'management',
+    },
+    {
+      label: 'Coupon',
+      path: '/admin/coupons',
+      icon: <LocalOffer />,
+      requiredPermissions: ['application.coupons.read'],
+      requiredRoles: [],
+      category: 'management',
+    },
+    {
+      label: 'Users',
+      path: '/admin/users',
+      icon: <People />,
+      requiredPermissions: ['application.users.read'],
+      requiredRoles: [],
+      category: 'management',
+    },
+
     // Settings
-    { label: 'Settings', path: '/admin/settings', icon: <Settings />, requiredPermissions: ['application.workspace.read'], requiredRoles: [], category: 'settings' },
+    {
+      label: 'Settings',
+      path: '/admin/settings',
+      icon: <Settings />,
+      requiredPermissions: ['application.workspace.read'],
+      requiredRoles: [],
+      category: 'settings',
+    },
   ];
 
+  // Filter nav items strictly by backend permissions.
+  // Owner and Manager have all relevant application permissions so they naturally
+  // pass the filter — no role-based bypass needed.
   const adminNavItems = allMenuItems.filter(item =>
     item.requiredPermissions.length === 0 ||
     item.requiredPermissions.some(p => hasBackendPermission(p))
@@ -135,16 +204,12 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
 
     try {
       setStatusLoading(true);
-      const newStatus = !venueStatus.isOpen;      
-      // Update venue status directly using updateVenue - more efficient than openVenue/closeVenue
-      // which try non-existent endpoints first before falling back to updateVenue
+      const newStatus = !venueStatus.isOpen;
       await venueService.updateVenue(userData.venue.id, { 
         is_open: newStatus 
       });
-      // Refresh user data to get updated venue status
       await refreshUserData();
     } catch (error) {
-      // Show error message to user
       alert('Failed to update venue status. Please try again.');
     } finally {
       setStatusLoading(false);
@@ -179,6 +244,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
     handleProfileMenuClose();
     navigate('/admin/settings');
   };
+
+  // Resolve display name for the role label
+  const roleDisplayName = (() => {
+    if (!detectedRole) return 'User';
+    const roleDefinition = PermissionService.getRoleDefinition(detectedRole);
+    return roleDefinition?.displayName || detectedRole;
+  })();
 
   return (
     <>
@@ -677,14 +749,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
                       whiteSpace: 'nowrap',
                     }}
                   >
-                    {(() => {
-                      const backendRole = PermissionService.getBackendRole();
-                      if (backendRole?.name) {
-                        const roleDefinition = PermissionService.getRoleDefinition(backendRole.name);
-                        return roleDefinition?.displayName || backendRole.name;
-                      }
-                      return user?.role || 'User';
-                    })()}
+                    {roleDisplayName}
                   </Typography>
                 </Box>
               </Collapse>
@@ -815,5 +880,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isTablet = false }) => {
     </>
   );
 };
+
 
 export default Sidebar;

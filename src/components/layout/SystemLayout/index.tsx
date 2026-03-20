@@ -47,7 +47,7 @@ interface MenuItem {
 const SystemLayout: React.FC<SystemLayoutProps> = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, logout, hasBackendPermission } = useAuth();
+  const { user, logout, hasBackendPermission, userPermissions } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
@@ -61,22 +61,17 @@ const SystemLayout: React.FC<SystemLayoutProps> = ({ children }) => {
 
   const drawerWidth = sidebarCollapsed ? 70 : DRAWER_WIDTH;
 
-  // Get user role information
-  const userRole = useMemo(() => {
-    const role = (user as any)?.role;
-    return {
-      name: typeof role === 'string' ? role : role?.name || 'User',
-      permissions: role?.permissions || [],
-      roleType: role?.role_type,
-    };
-  }, [user]);
+  // Resolve role name from Auth context userPermissions (reactive) with fallbacks
+  const roleName = useMemo(() => {
+    const name =
+      userPermissions?.role?.name ||
+      (user as any)?.role?.name ||
+      (user as any)?.role ||
+      '';
+    return typeof name === 'string' ? name : '';
+  }, [userPermissions, user]);
 
-  // Check if user has permission
-  const hasPermission = (permission: string) => {
-    return hasBackendPermission(permission);
-  };
-
-  // Define menu items with permission requirements
+  // Define menu items with their exact permission requirements per the reference
   const menuItems: MenuItem[] = [
     {
       title: 'Dashboard',
@@ -109,6 +104,12 @@ const SystemLayout: React.FC<SystemLayoutProps> = ({ children }) => {
       path: '/system/roles',
     },
     {
+      title: 'Registration Codes',
+      icon: <Settings fontSize="small" />,
+      permission: 'system.registration.read',
+      path: '/system/registration',
+    },
+    {
       title: 'Appearance',
       icon: <Palette fontSize="small" />,
       permission: 'system.workspaces.read',
@@ -128,10 +129,12 @@ const SystemLayout: React.FC<SystemLayoutProps> = ({ children }) => {
     },
   ];
 
-  // Filter menu items based on user permissions
+  // Filter menu items reactively based on userPermissions from Auth context.
+  // userPermissions updates whenever the Auth state changes, so this is always current.
   const availableMenuItems = useMemo(() => {
-    return menuItems.filter((item) => hasPermission(item.permission));
-  }, [userRole]);
+    return menuItems.filter(item => hasBackendPermission(item.permission));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userPermissions]);
 
   const handleLogout = () => {
     logout();
@@ -181,7 +184,7 @@ const SystemLayout: React.FC<SystemLayoutProps> = ({ children }) => {
               System Admin
             </Typography>
             <Chip
-              label={userRole.name}
+              label={roleName || 'System User'}
               size="small"
               sx={{
                 mt: 1,
@@ -190,6 +193,7 @@ const SystemLayout: React.FC<SystemLayoutProps> = ({ children }) => {
                 fontWeight: 600,
                 fontSize: '0.75rem',
                 height: 24,
+                textTransform: 'capitalize',
               }}
             />
           </>
@@ -439,5 +443,6 @@ const SystemLayout: React.FC<SystemLayoutProps> = ({ children }) => {
     </Box>
   );
 };
+
 
 export default SystemLayout;

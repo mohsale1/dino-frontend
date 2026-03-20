@@ -16,12 +16,14 @@ export interface DateRange {
 }
 
 class DashboardService {
-  async getAdminDashboard(dateRange?: DateRange): Promise<AdminDashboardResponse> {
+  async getAdminDashboard(dateRange?: DateRange, workspaceId?: string): Promise<AdminDashboardResponse> {
     try {
-      const params = dateRange ? {
-        start_date: dateRange.startDate,
-        end_date: dateRange.endDate,
-      } : {};
+      const params: Record<string, string> = {};
+      if (workspaceId) params.workspace_id = workspaceId;
+      if (dateRange) {
+        params.start_date = dateRange.startDate;
+        params.end_date = dateRange.endDate;
+      }
 
       const response = await apiService.get<AdminDashboardResponse>('/application/dashboard', { params });
       if (!response.data) {
@@ -35,12 +37,14 @@ class DashboardService {
   }
 
 
-  async getSuperAdminDashboard(dateRange?: DateRange): Promise<SuperAdminDashboardResponse> {
+  async getSuperAdminDashboard(dateRange?: DateRange, workspaceId?: string): Promise<SuperAdminDashboardResponse> {
     try {
-      const params = dateRange ? {
-        start_date: dateRange.startDate,
-        end_date: dateRange.endDate,
-      } : {};
+      const params: Record<string, string> = {};
+      if (workspaceId) params.workspace_id = workspaceId;
+      if (dateRange) {
+        params.start_date = dateRange.startDate;
+        params.end_date = dateRange.endDate;
+      }
 
       const response = await apiService.get<SuperAdminDashboardResponse>('/application/dashboard/analytics', { params });
       if (!response.data) {
@@ -54,9 +58,12 @@ class DashboardService {
   }
 
 
-  async getOperatorDashboard(): Promise<OperatorDashboardResponse> {
+  async getOperatorDashboard(workspaceId?: string): Promise<OperatorDashboardResponse> {
     try {
-      const response = await apiService.get<OperatorDashboardResponse>('/application/dashboard/stats');
+      const params: Record<string, string> = {};
+      if (workspaceId) params.workspace_id = workspaceId;
+
+      const response = await apiService.get<OperatorDashboardResponse>('/application/dashboard/stats', { params });
       if (!response.data) {
         throw new Error('No data returned from API');
       }
@@ -85,5 +92,6 @@ class DashboardService {
   }
 
 }
+
 
 export const dashboardService = new DashboardService();
