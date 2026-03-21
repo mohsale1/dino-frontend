@@ -8,50 +8,20 @@ class PermissionService {
   private static readonly CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
   
   /**
-   * Fetch user permissions from backend API
+   * Get user permissions — reads from localStorage cache populated by Auth context.
+   * The Auth context derives permissions from user.role.permissions (IDs resolved via
+   * /system/permissions) on every login and page load. This method simply reads that
+   * cached result so other parts of the app can access it synchronously.
+   *
+   * NOTE: The /auth/permissions endpoint does not exist on the backend.
+   * Permissions are embedded in the login/me response as user.role.permissions.
    */
   static async fetchUserPermissions(forceRefresh: boolean = false): Promise<{ permissions: any[], role: any } | null> {
-    try {
-      const userId = StorageManager.getUserId();
-      if (!userId) {
-        return null;
-      }
-
-      // Check cache first
-      const cached = this.permissionsCache.get(userId);
-      if (!forceRefresh && cached && (Date.now() - cached.timestamp < this.CACHE_DURATION)) {
-        return { permissions: cached.permissions, role: cached.role };
-      }
-
-      // Fetch from API
-      const response = await apiService.get<{ permissions: any[], role: any }>('/auth/permissions');
-      
-      if (response.success && response.data) {
-        const { permissions, role } = response.data;
-        
-        // Cache the result
-        this.permissionsCache.set(userId, {
-          permissions: permissions || [],
-          role: role || null,
-          timestamp: Date.now()
-        });
-
-        // Store in localStorage for offline access
-        StorageManager.setPermissions({
-          permissions: permissions || [],
-          role: role || null,
-          userId,
-          timestamp: new Date().toISOString()
-        });
-
-        return { permissions: permissions || [], role: role || null };
-      }
-
-      return null;
-    } catch (error) {
-      return this.getStoredPermissions();
-    }
+    // Always read from the localStorage cache that Auth context maintains.
+    // forceRefresh is a no-op here — the Auth context handles re-fetching via refreshPermissions().
+    return this.getStoredPermissions();
   }
+
 
   /**
    * Get stored permissions from localStorage

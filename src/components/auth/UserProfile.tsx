@@ -507,9 +507,7 @@ const UserProfile: React.FC = () => {
                   Access Level
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  {user?.role === 'admin' ? 'Full administrative access' : 
-                   user?.role === 'operator' ? 'Standard user access' : 
-                   'Basic user access'}
+                  Access level determined by your assigned permissions
                 </Typography>
               </Paper>
             </Grid>

@@ -92,7 +92,13 @@
 }
 
 @media (max-width: 768px) {
-  .sidebar {
-    display: none !important;
+  .sidebar-collapsed {
+    transform: translateX(-100%) !important;
+    width: 280px !important;
+  }
+
+  .sidebar-expanded {
+    transform: translateX(0) !important;
+    width: 280px !important;
   }
 }

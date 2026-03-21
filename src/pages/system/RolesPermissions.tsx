@@ -1,7 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Box,
-  Container,
   Typography,
   Grid,
   Card,
@@ -16,7 +15,6 @@ import {
   Alert,
   Snackbar,
   Dialog,
-  DialogTitle,
   DialogContent,
   DialogActions,
   TextField,
@@ -32,6 +30,7 @@ import {
   ListItemText,
   Divider,
   InputAdornment,
+  Paper,
 } from '@mui/material';
 import {
   Add,
@@ -42,25 +41,130 @@ import {
   Close,
   Security,
   Search,
+  CalendarToday,
+  AdminPanelSettingsOutlined,
+  StoreOutlined,
+  SecurityOutlined,
 } from '@mui/icons-material';
 import { systemRoleService } from '../../services/system/role';
 import { systemPermissionService } from '../../services/system/permission';
 import { DeleteConfirmationDialog } from '../../components/dialogs';
 
+// ---------------------------------------------------------------------------
+// Design tokens
+// ---------------------------------------------------------------------------
+const COLORS = {
+  indigo:  '#6366f1',
+  dark0:   '#0f172a',
+  dark1:   '#1e293b',
+  violet:  '#8b5cf6',
+  border:  '#e2e8f0',
+  surface: '#ffffff',
+  bg:      '#f1f5f9',
+  slate:   '#64748b',
+  muted:   '#94a3b8',
+};
+
+// ---------------------------------------------------------------------------
+// useCountUp hook
+// ---------------------------------------------------------------------------
+function useCountUp(target: number, duration = 900) {
+  const [value, setValue] = useState(0);
+  const raf = useRef<number | null>(null);
+  const start = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (target === 0) { setValue(0); return; }
+    start.current = null;
+    const step = (ts: number) => {
+      if (start.current === null) start.current = ts;
+      const progress = Math.min((ts - start.current) / duration, 1);
+      setValue(Math.floor(progress * target));
+      if (progress < 1) raf.current = requestAnimationFrame(step);
+      else setValue(target);
+    };
+    raf.current = requestAnimationFrame(step);
+    return () => { if (raf.current !== null) cancelAnimationFrame(raf.current); };
+  }, [target, duration]);
+
+  return value;
+}
+
+// ---------------------------------------------------------------------------
+// HeroStat component
+// ---------------------------------------------------------------------------
+interface HeroStatProps {
+  icon: React.ReactNode;
+  value: number;
+  label: string;
+}
+
+const HeroStat: React.FC<HeroStatProps> = ({ icon, value, label }) => {
+  const count = useCountUp(value);
+  return (
+    <Box
+      sx={{
+        flex: '1 1 140px',
+        px: 2.5,
+        py: 2,
+        borderRadius: 2.5,
+        bgcolor: 'rgba(255,255,255,0.07)',
+        border: '1px solid rgba(255,255,255,0.12)',
+        backdropFilter: 'blur(8px)',
+      }}
+    >
+      <Box
+        sx={{
+          width: 36,
+          height: 36,
+          borderRadius: 1.5,
+          bgcolor: 'rgba(255,255,255,0.1)',
+          border: '1px solid rgba(255,255,255,0.15)',
+          color: 'rgba(199,210,254,0.9)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          mb: 1,
+        }}
+      >
+        {icon}
+      </Box>
+      <Typography
+        sx={{
+          color: '#ffffff',
+          fontWeight: 700,
+          fontSize: { xs: '1.35rem', md: '1.6rem' },
+          letterSpacing: '-0.03em',
+          lineHeight: 1,
+        }}
+      >
+        {count}
+      </Typography>
+      <Typography sx={{ color: 'rgba(199,210,254,0.65)', fontSize: '0.75rem', mt: 0.25 }}>
+        {label}
+      </Typography>
+    </Box>
+  );
+};
+
+// ---------------------------------------------------------------------------
+// TabPanel
+// ---------------------------------------------------------------------------
 interface TabPanelProps {
   children?: React.ReactNode;
   index: number;
   value: number;
 }
 
-const TabPanel: React.FC<TabPanelProps> = ({ children, value, index }) => {
-  return (
-    <div role="tabpanel" hidden={value !== index}>
-      {value === index && <Box sx={{ py: 3 }}>{children}</Box>}
-    </div>
-  );
-};
+const TabPanel: React.FC<TabPanelProps> = ({ children, value, index }) => (
+  <div role="tabpanel" hidden={value !== index}>
+    {value === index && <Box sx={{ py: 3 }}>{children}</Box>}
+  </div>
+);
 
+// ---------------------------------------------------------------------------
+// Main component
+// ---------------------------------------------------------------------------
 const RolesPermissions: React.FC = () => {
   const [tabValue, setTabValue] = useState(0);
   const [systemRoles, setSystemRoles] = useState<any[]>([]);
@@ -79,17 +183,15 @@ const RolesPermissions: React.FC = () => {
   const [managingPermissionsRole, setManagingPermissionsRole] = useState<any | null>(null);
 
   // Form states
-  const [roleForm, setRoleForm] = useState({
-    name: '',
-    description: '',
-    roleType: 0,
-  });
+  const [roleForm, setRoleForm] = useState({ name: '', description: '', roleType: 0 });
 
   // Permission management states
   const [selectedPermissions, setSelectedPermissions] = useState<string[]>([]);
   const [permissionSearch, setPermissionSearch] = useState('');
 
-  // Fetch all data
+  // ---------------------------------------------------------------------------
+  // Data fetching
+  // ---------------------------------------------------------------------------
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
@@ -110,32 +212,24 @@ const RolesPermissions: React.FC = () => {
     }
   }, []);
 
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+  useEffect(() => { fetchData(); }, [fetchData]);
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
   };
 
-  // Role CRUD operations
+  // ---------------------------------------------------------------------------
+  // Role CRUD
+  // ---------------------------------------------------------------------------
   const handleCreateRole = () => {
     setEditingRole(null);
-    setRoleForm({
-      name: '',
-      description: '',
-      roleType: tabValue === 0 ? 0 : 1,
-    });
+    setRoleForm({ name: '', description: '', roleType: tabValue === 0 ? 0 : 1 });
     setRoleDialogOpen(true);
   };
 
   const handleEditRole = (role: any) => {
     setEditingRole(role);
-    setRoleForm({
-      name: role.name,
-      description: role.description || '',
-      roleType: role.roleType,
-    });
+    setRoleForm({ name: role.name, description: role.description || '', roleType: role.roleType });
     setRoleDialogOpen(true);
   };
 
@@ -147,40 +241,17 @@ const RolesPermissions: React.FC = () => {
   const handleSaveRole = async () => {
     try {
       if (editingRole) {
-        // Update role
-        await systemRoleService.updateRole(editingRole.id, {
-          description: roleForm.description,
-        });
-
-        setSnackbar({
-          open: true,
-          message: 'Role updated successfully',
-          severity: 'success',
-        });
+        await systemRoleService.updateRole(editingRole.id, { description: roleForm.description });
+        setSnackbar({ open: true, message: 'Role updated successfully', severity: 'success' });
       } else {
-        // Create role
-        await systemRoleService.createRole({
-          name: roleForm.name,
-          description: roleForm.description,
-          roleType: roleForm.roleType,
-        });
-
-        setSnackbar({
-          open: true,
-          message: 'Role created successfully',
-          severity: 'success',
-        });
+        await systemRoleService.createRole({ name: roleForm.name, description: roleForm.description, roleType: roleForm.roleType });
+        setSnackbar({ open: true, message: 'Role created successfully', severity: 'success' });
       }
-
       setRoleDialogOpen(false);
       setEditingRole(null);
       await fetchData();
     } catch (err: any) {
-      setSnackbar({
-        open: true,
-        message: err.message || 'Failed to save role',
-        severity: 'error',
-      });
+      setSnackbar({ open: true, message: err.message || 'Failed to save role', severity: 'error' });
     }
   };
 
@@ -193,251 +264,215 @@ const RolesPermissions: React.FC = () => {
 
   const handleSavePermissions = async () => {
     if (!managingPermissionsRole) return;
-
     try {
       const currentPerms = new Set(managingPermissionsRole.permissions || []);
       const newPerms = new Set(selectedPermissions);
-      
       const toAdd = selectedPermissions.filter(p => !currentPerms.has(p));
       const toRemove = (managingPermissionsRole.permissions || []).filter((p: string) => !newPerms.has(p));
-
-      if (toAdd.length > 0) {
-        await systemRoleService.addPermissions(managingPermissionsRole.id, toAdd);
-      }
-      if (toRemove.length > 0) {
-        await systemRoleService.removePermissions(managingPermissionsRole.id, toRemove);
-      }
-
-      setSnackbar({
-        open: true,
-        message: 'Permissions updated successfully',
-        severity: 'success',
-      });
+      if (toAdd.length > 0) await systemRoleService.addPermissions(managingPermissionsRole.id, toAdd);
+      if (toRemove.length > 0) await systemRoleService.removePermissions(managingPermissionsRole.id, toRemove);
+      setSnackbar({ open: true, message: 'Permissions updated successfully', severity: 'success' });
       setPermissionDialogOpen(false);
       setManagingPermissionsRole(null);
       await fetchData();
     } catch (err: any) {
-      setSnackbar({
-        open: true,
-        message: err.message || 'Failed to update permissions',
-        severity: 'error',
-      });
+      setSnackbar({ open: true, message: err.message || 'Failed to update permissions', severity: 'error' });
     }
   };
 
   const handleTogglePermission = (permissionName: string) => {
-    setSelectedPermissions(prev => 
-      prev.includes(permissionName)
-        ? prev.filter(p => p !== permissionName)
-        : [...prev, permissionName]
+    setSelectedPermissions(prev =>
+      prev.includes(permissionName) ? prev.filter(p => p !== permissionName) : [...prev, permissionName]
     );
   };
 
   const handleConfirmDelete = async () => {
     if (!deletingRole) return;
-
     try {
       await systemRoleService.deleteRole(deletingRole.id);
-      setSnackbar({
-        open: true,
-        message: 'Role deactivated successfully. You can restore it later if needed.',
-        severity: 'success',
-      });
+      setSnackbar({ open: true, message: 'Role deactivated successfully. You can restore it later if needed.', severity: 'success' });
       setDeleteDialogOpen(false);
       setDeletingRole(null);
       await fetchData();
     } catch (err: any) {
-      setSnackbar({
-        open: true,
-        message: err.message || 'Failed to deactivate role',
-        severity: 'error',
-      });
+      setSnackbar({ open: true, message: err.message || 'Failed to deactivate role', severity: 'error' });
     }
   };
 
-
-  const getRoleColor = (roleType: number, index: number) => {
-    if (roleType === 0) {
-      // System roles - dark colors
-      const colors = ['#0f172a', '#1e293b', '#334155', '#475569'];
-      return colors[index % colors.length];
-    } else {
-      // Application roles - vibrant colors
-      const colors = ['#7c3aed', '#2563eb', '#059669', '#dc2626'];
-      return colors[index % colors.length];
-    }
-  };
-
-  const renderRoleCard = (role: any, index: number) => {
-    const color = getRoleColor(role.roleType, index);
-    
-    return (
-      <Grid item xs={12} md={6} lg={4} key={role.id}>
-        <Card
-          elevation={0}
-          sx={{
-            border: '1px solid #e2e8f0',
-            borderRadius: 2,
-            transition: 'all 0.2s',
-            height: '100%',
-            '&:hover': {
-              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
-              transform: 'translateY(-2px)',
-            },
-          }}
-        >
-          <CardContent sx={{ p: 3 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-              <Box
-                sx={{
-                  width: 48,
-                  height: 48,
-                  borderRadius: 2,
-                  bgcolor: alpha(color, 0.1),
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  mr: 2,
-                }}
-              >
-                {role.roleType === 0 ? (
-                  <Business sx={{ fontSize: 24, color }} />
-                ) : (
-                  <Store sx={{ fontSize: 24, color }} />
-                )}
-              </Box>
-              <Box sx={{ flexGrow: 1 }}>
-                <Typography variant="h6" sx={{ fontWeight: 700, color: '#0f172a' }}>
-                  {role.name}
-                </Typography>
+  // ---------------------------------------------------------------------------
+  // Role card renderer
+  // ---------------------------------------------------------------------------
+  const renderRoleCard = (role: any, _index: number) => (
+    <Grid item xs={12} md={6} lg={4} key={role.id}>
+      <Card
+        elevation={0}
+        sx={{
+          border: '1px solid #e2e8f0',
+          borderRadius: 3,
+          height: '100%',
+          transition: 'all 0.2s',
+          '&:hover': {
+            boxShadow: '0 4px 16px rgba(0,0,0,0.06)',
+            transform: 'translateY(-1px)',
+          },
+        }}
+      >
+        <CardContent sx={{ p: 3 }}>
+          {/* Header row */}
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+            <Box
+              sx={{
+                width: 48,
+                height: 48,
+                borderRadius: 2,
+                bgcolor: '#f1f5f9',
+                border: '1px solid #e2e8f0',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                mr: 2,
+                flexShrink: 0,
+              }}
+            >
+              {role.roleType === 0 ? (
+                <Business sx={{ fontSize: 24, color: '#64748b' }} />
+              ) : (
+                <Store sx={{ fontSize: 24, color: '#64748b' }} />
+              )}
+            </Box>
+            <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+              <Typography variant="h6" sx={{ fontWeight: 700, color: '#0f172a', lineHeight: 1.2 }}>
+                {role.name}
+              </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mt: 0.5, flexWrap: 'wrap' }}>
                 <Chip
                   label={role.roleType === 0 ? 'System' : 'Application'}
                   size="small"
                   sx={{
-                    fontSize: '0.75rem',
+                    fontSize: '0.72rem',
                     height: 20,
-                    mt: 0.5,
-                    bgcolor: alpha(color, 0.08),
-                    color: color,
+                    bgcolor: alpha('#0f172a', 0.06),
+                    color: '#334155',
+                    border: '1px solid #e2e8f0',
                   }}
                 />
+                {role.isSystem && (
+                  <Chip
+                    label="Protected"
+                    size="small"
+                    sx={{
+                      fontSize: '0.72rem',
+                      height: 20,
+                      bgcolor: alpha('#f43f5e', 0.08),
+                      color: '#f43f5e',
+                      border: '1px solid rgba(244,63,94,0.25)',
+                    }}
+                  />
+                )}
               </Box>
             </Box>
+          </Box>
 
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2, minHeight: 40 }}>
-              {role.description || 'No description provided'}
+          {/* Description */}
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2, minHeight: 40 }}>
+            {role.description || 'No description provided'}
+          </Typography>
+
+          <Divider sx={{ my: 2 }} />
+
+          {/* Permissions */}
+          <Box sx={{ mb: 2 }}>
+            <Typography
+              variant="caption"
+              sx={{ color: '#64748b', fontWeight: 600, mb: 1, display: 'block', letterSpacing: '0.05em' }}
+            >
+              PERMISSIONS ({(role.permissions || []).length})
             </Typography>
-
-            {role.isSystem && (
-              <Chip
-                label="Protected"
-                size="small"
-                sx={{
-                  fontSize: '0.7rem',
-                  height: 20,
-                  mb: 2,
-                  bgcolor: alpha('#ef4444', 0.1),
-                  color: '#ef4444',
-                  border: '1px solid rgba(239, 68, 68, 0.3)',
-                }}
-              />
-            )}
-
-            <Divider sx={{ my: 2 }} />
-
-            <Box sx={{ mb: 2 }}>
-              <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 600, mb: 1, display: 'block' }}>
-                PERMISSIONS ({(role.permissions || []).length})
+            {(role.permissions || []).length > 0 ? (
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, maxHeight: 80, overflowY: 'auto' }}>
+                {((role.permissions || []) as string[]).slice(0, 6).map((perm: string, idx: number) => (
+                  <Chip
+                    key={idx}
+                    label={perm}
+                    size="small"
+                    sx={{
+                      fontSize: '0.7rem',
+                      height: 20,
+                      bgcolor: '#f1f5f9',
+                      border: '1px solid #e2e8f0',
+                      color: '#334155',
+                    }}
+                  />
+                ))}
+                {(role.permissions || []).length > 6 && (
+                  <Chip
+                    label={`+${(role.permissions || []).length - 6} more`}
+                    size="small"
+                    sx={{
+                      fontSize: '0.7rem',
+                      height: 20,
+                      bgcolor: '#f1f5f9',
+                      border: '1px solid #e2e8f0',
+                      color: '#334155',
+                    }}
+                  />
+                )}
+              </Box>
+            ) : (
+              <Typography variant="caption" color="text.secondary">
+                No permissions assigned
               </Typography>
-              {(role.permissions || []).length > 0 ? (
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, maxHeight: 80, overflowY: 'auto' }}>
-                  {((role.permissions || []) as string[]).slice(0, 6).map((perm: string, idx: number) => (
-                    <Chip
-                      key={idx}
-                      label={perm}
-                      size="small"
-                      sx={{
-                        fontSize: '0.7rem',
-                        height: 20,
-                        bgcolor: alpha(color, 0.05),
-                        border: `1px solid ${alpha(color, 0.2)}`,
-                        color: color,
-                      }}
-                    />
-                  ))}
-                  {(role.permissions || []).length > 6 && (
-                    <Chip
-                      label={`+${(role.permissions || []).length - 6} more`}
-                      size="small"
-                      sx={{
-                        fontSize: '0.7rem',
-                        height: 20,
-                        bgcolor: alpha(color, 0.05),
-                        border: `1px solid ${alpha(color, 0.2)}`,
-                        color: color,
-                      }}
-                    />
-                  )}
-                </Box>
-              ) : (
-                <Typography variant="caption" color="text.secondary">
-                  No permissions assigned
-                </Typography>
-              )}
-            </Box>
+            )}
+          </Box>
 
-            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+          {/* Actions */}
+          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+            <Button
+              size="small"
+              startIcon={<Security sx={{ fontSize: 15 }} />}
+              onClick={() => handleManagePermissions(role)}
+              variant="outlined"
+              sx={{
+                textTransform: 'none',
+                fontSize: '0.8rem',
+                borderRadius: 2,
+                borderColor: '#e2e8f0',
+                color: '#0f172a',
+                '&:hover': {
+                  borderColor: '#0f172a',
+                  bgcolor: alpha('#0f172a', 0.04),
+                },
+              }}
+            >
+              Permissions
+            </Button>
+            <Button
+              size="small"
+              startIcon={<Edit sx={{ fontSize: 15 }} />}
+              onClick={() => handleEditRole(role)}
+              sx={{ textTransform: 'none', color: '#64748b', fontSize: '0.8rem' }}
+            >
+              Edit
+            </Button>
+            {!role.isSystem && (
               <Button
                 size="small"
-                startIcon={<Security sx={{ fontSize: 16 }} />}
-                onClick={() => handleManagePermissions(role)}
-                variant="outlined"
-                sx={{
-                  textTransform: 'none',
-                  fontSize: '0.875rem',
-                  borderColor: alpha(color, 0.3),
-                  color: color,
-                  '&:hover': {
-                    borderColor: color,
-                    bgcolor: alpha(color, 0.05),
-                  },
-                }}
+                startIcon={<Delete sx={{ fontSize: 15 }} />}
+                onClick={() => handleDeleteRole(role)}
+                sx={{ textTransform: 'none', color: '#94a3b8', fontSize: '0.8rem' }}
               >
-                Permissions
+                Deactivate
               </Button>
-              <Button
-                size="small"
-                startIcon={<Edit sx={{ fontSize: 16 }} />}
-                onClick={() => handleEditRole(role)}
-                sx={{
-                  textTransform: 'none',
-                  color: '#0f172a',
-                  fontSize: '0.875rem',
-                }}
-              >
-                Edit
-              </Button>
-              {!role.isSystem && (
-                <Button
-                  size="small"
-                  startIcon={<Delete sx={{ fontSize: 16 }} />}
-                  onClick={() => handleDeleteRole(role)}
-                  sx={{
-                    textTransform: 'none',
-                    color: '#f59e0b',
-                    fontSize: '0.875rem',
-                  }}
-                >
-                  Deactivate
-                </Button>
-              )}
-            </Box>
-          </CardContent>
-        </Card>
-      </Grid>
-    );
-  };
+            )}
+          </Box>
+        </CardContent>
+      </Card>
+    </Grid>
+  );
 
+  // ---------------------------------------------------------------------------
+  // Loading / error states
+  // ---------------------------------------------------------------------------
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
@@ -454,99 +489,239 @@ const RolesPermissions: React.FC = () => {
     );
   }
 
+  // ---------------------------------------------------------------------------
+  // Render
+  // ---------------------------------------------------------------------------
   return (
-    <Box sx={{ width: '100%', minHeight: '100vh', p: { xs: 2, sm: 3, md: 4 } }}>
-      <Container maxWidth="xl" disableGutters sx={{ px: { xs: 0, sm: 2 } }}>
-        {/* Page Header */}
-        <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+    <Box sx={{ width: '100%', minHeight: '100vh', bgcolor: COLORS.bg }}>
+
+      {/* ------------------------------------------------------------------ */}
+      {/* Hero Header                                                         */}
+      {/* ------------------------------------------------------------------ */}
+      <Box
+        sx={{
+          background: `linear-gradient(135deg, ${COLORS.dark0} 0%, #1e1b4b 45%, #312e81 100%)`,
+          px: { xs: 2.5, sm: 4, md: 6 },
+          pt: { xs: 3, md: 4 },
+          pb: { xs: 4, md: 5 },
+          position: 'relative',
+          overflow: 'hidden',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: -100,
+            right: -60,
+            width: 360,
+            height: 360,
+            borderRadius: '50%',
+            background: `radial-gradient(circle, ${alpha('#6366f1', 0.22)} 0%, transparent 70%)`,
+            pointerEvents: 'none',
+          },
+          '&::after': {
+            content: '""',
+            position: 'absolute',
+            bottom: -80,
+            left: '25%',
+            width: 280,
+            height: 280,
+            borderRadius: '50%',
+            background: `radial-gradient(circle, ${alpha('#8b5cf6', 0.15)} 0%, transparent 70%)`,
+            pointerEvents: 'none',
+          },
+        }}
+      >
+        {/* Grid overlay */}
+        <Box
+          sx={{
+            position: 'absolute',
+            inset: 0,
+            backgroundImage: `linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)`,
+            backgroundSize: '40px 40px',
+            pointerEvents: 'none',
+          }}
+        />
+
+        {/* Title row */}
+        <Box
+          sx={{
+            position: 'relative',
+            display: 'flex',
+            alignItems: 'flex-start',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: 2,
+            mb: 3,
+          }}
+        >
           <Box>
-            <Typography variant="h4" sx={{ fontWeight: 700, color: '#0f172a', mb: 1 }}>
-              Roles Management
+            <Typography
+              variant="overline"
+              sx={{ color: 'rgba(199,210,254,0.75)', fontWeight: 700, letterSpacing: 3, fontSize: '0.65rem' }}
+            >
+              SYSTEM CONTROL CENTER
             </Typography>
-            <Typography variant="body1" sx={{ color: '#64748b' }}>
-              Manage system and application roles
+            <Typography
+              variant="h4"
+              sx={{
+                color: '#ffffff',
+                fontWeight: 800,
+                mt: 0.5,
+                fontSize: { xs: '1.5rem', md: '2rem' },
+                letterSpacing: '-0.025em',
+                lineHeight: 1.2,
+              }}
+            >
+              Roles &amp; Permissions
             </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mt: 1.5 }}>
+              <CalendarToday sx={{ fontSize: 13, color: 'rgba(199,210,254,0.6)' }} />
+              <Typography variant="caption" sx={{ color: 'rgba(199,210,254,0.6)', fontWeight: 500, fontSize: '0.75rem' }}>
+                {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+              </Typography>
+            </Box>
           </Box>
+
           <Button
             variant="contained"
             startIcon={<Add />}
             onClick={handleCreateRole}
             sx={{
-              bgcolor: '#0f172a',
-              '&:hover': { bgcolor: '#1e293b' },
-              textTransform: 'none',
+              mt: 1,
+              bgcolor: 'rgba(255,255,255,0.15)',
+              color: '#ffffff',
+              border: '1px solid rgba(255,255,255,0.25)',
+              backdropFilter: 'blur(8px)',
+              borderRadius: 2,
               fontWeight: 600,
+              textTransform: 'none',
+              '&:hover': { bgcolor: 'rgba(255,255,255,0.25)' },
             }}
           >
             Create Role
           </Button>
         </Box>
 
-        {/* Tabs */}
-        <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
-          <Tabs value={tabValue} onChange={handleTabChange}>
-            <Tab label={`System Roles (${systemRoles.length})`} sx={{ textTransform: 'none', fontWeight: 600 }} />
-            <Tab label={`Application Roles (${applicationRoles.length})`} sx={{ textTransform: 'none', fontWeight: 600 }} />
-          </Tabs>
+        {/* Hero stats */}
+        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', position: 'relative' }}>
+          <HeroStat
+            icon={<AdminPanelSettingsOutlined sx={{ fontSize: 18 }} />}
+            value={systemRoles.length}
+            label="System Roles"
+          />
+          <HeroStat
+            icon={<StoreOutlined sx={{ fontSize: 18 }} />}
+            value={applicationRoles.length}
+            label="App Roles"
+          />
+          <HeroStat
+            icon={<SecurityOutlined sx={{ fontSize: 18 }} />}
+            value={allPermissions.length}
+            label="Total Permissions"
+          />
         </Box>
+      </Box>
 
-        {/* System Roles Tab */}
-        <TabPanel value={tabValue} index={0}>
-          <Grid container spacing={3}>
-            {systemRoles.map((role, index) => renderRoleCard(role, index))}
-          </Grid>
-        </TabPanel>
+      {/* ------------------------------------------------------------------ */}
+      {/* Content area                                                        */}
+      {/* ------------------------------------------------------------------ */}
+      <Box sx={{ pt: 4, pb: 6, px: { xs: 2, sm: 3, md: 5 } }}>
 
-        {/* Application Roles Tab */}
-        <TabPanel value={tabValue} index={1}>
-          <Grid container spacing={3}>
-            {applicationRoles.map((role, index) => renderRoleCard(role, index))}
-          </Grid>
-        </TabPanel>
-      </Container>
+        {/* Tabs toolbar */}
+        <Paper
+          elevation={0}
+          sx={{
+            borderRadius: 0,
+            border: 'none',
+            borderTop: '1px solid #e2e8f0',
+            borderBottom: '1px solid #e2e8f0',
+            bgcolor: '#ffffff',
+          }}
+        >
+          <Tabs
+            value={tabValue}
+            onChange={handleTabChange}
+            sx={{
+              px: 2,
+              minHeight: 44,
+              '& .MuiTab-root': {
+                textTransform: 'none',
+                fontWeight: 600,
+                fontSize: '0.875rem',
+                minHeight: 44,
+                color: '#64748b',
+              },
+              '& .Mui-selected': { color: '#0f172a' },
+              '& .MuiTabs-indicator': { bgcolor: '#0f172a', height: 2, borderRadius: 2 },
+            }}
+          >
+            <Tab label={`System Roles (${systemRoles.length})`} />
+            <Tab label={`Application Roles (${applicationRoles.length})`} />
+          </Tabs>
+        </Paper>
 
-      {/* Permission Management Dialog */}
+        {/* Tab panels */}
+        <Box sx={{ mt: 3 }}>
+          <TabPanel value={tabValue} index={0}>
+            <Grid container spacing={3}>
+              {systemRoles.map((role, index) => renderRoleCard(role, index))}
+            </Grid>
+          </TabPanel>
+
+          <TabPanel value={tabValue} index={1}>
+            <Grid container spacing={3}>
+              {applicationRoles.map((role, index) => renderRoleCard(role, index))}
+            </Grid>
+          </TabPanel>
+        </Box>
+      </Box>
+
+      {/* ------------------------------------------------------------------ */}
+      {/* Permission Management Dialog                                        */}
+      {/* ------------------------------------------------------------------ */}
       <Dialog
         open={permissionDialogOpen}
         onClose={() => setPermissionDialogOpen(false)}
         maxWidth="md"
         fullWidth
-        PaperProps={{
-          sx: {
-            borderRadius: 2,
-            maxHeight: '80vh',
-          },
-        }}
+        PaperProps={{ sx: { borderRadius: 3, overflow: 'hidden', maxHeight: '80vh' } }}
       >
-        <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pb: 2 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Box
-              sx={{
-                width: 44,
-                height: 44,
-                borderRadius: '50%',
-                bgcolor: alpha('#7c3aed', 0.1),
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <Security sx={{ fontSize: 22, color: '#7c3aed' }} />
-            </Box>
+        {/* Gradient header */}
+        <Box
+          sx={{
+            background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 60%, #312e81 100%)',
+            px: 3,
+            pt: 3,
+            pb: 3,
+            position: 'relative',
+            overflow: 'hidden',
+            '&::before': {
+              content: '""',
+              position: 'absolute',
+              top: -60,
+              right: -40,
+              width: 180,
+              height: 180,
+              borderRadius: '50%',
+              background: `radial-gradient(circle, ${alpha('#6366f1', 0.25)} 0%, transparent 70%)`,
+              pointerEvents: 'none',
+            },
+          }}
+        >
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'relative' }}>
             <Box>
-              <Typography variant="h6" sx={{ fontWeight: 700 }}>
+              <Typography variant="h6" sx={{ color: '#ffffff', fontWeight: 700 }}>
                 Manage Permissions
               </Typography>
-              <Typography variant="caption" color="text.secondary">
+              <Typography variant="caption" sx={{ color: 'rgba(199,210,254,0.7)' }}>
                 {managingPermissionsRole?.name}
               </Typography>
             </Box>
+            <IconButton onClick={() => setPermissionDialogOpen(false)} size="small" sx={{ color: 'rgba(255,255,255,0.7)' }}>
+              <Close />
+            </IconButton>
           </Box>
-          <IconButton onClick={() => setPermissionDialogOpen(false)} size="small">
-            <Close />
-          </IconButton>
-        </DialogTitle>
-        <Divider />
+        </Box>
+
         <DialogContent sx={{ p: 0 }}>
           {/* Search */}
           <Box sx={{ p: 3, pb: 2 }}>
@@ -566,11 +741,11 @@ const RolesPermissions: React.FC = () => {
             />
           </Box>
 
-          {/* Permission List */}
+          {/* Permission list */}
           <List sx={{ px: 2, pb: 2, maxHeight: 400, overflowY: 'auto' }}>
             {allPermissions
-              .filter(perm => 
-                permissionSearch === '' || 
+              .filter(perm =>
+                permissionSearch === '' ||
                 perm.name.toLowerCase().includes(permissionSearch.toLowerCase()) ||
                 perm.description?.toLowerCase().includes(permissionSearch.toLowerCase()) ||
                 perm.category?.toLowerCase().includes(permissionSearch.toLowerCase())
@@ -579,12 +754,7 @@ const RolesPermissions: React.FC = () => {
                 <ListItem key={permission.id} disablePadding sx={{ mb: 0.5 }}>
                   <ListItemButton
                     onClick={() => handleTogglePermission(permission.name)}
-                    sx={{
-                      borderRadius: 1,
-                      '&:hover': {
-                        bgcolor: alpha('#7c3aed', 0.05),
-                      },
-                    }}
+                    sx={{ borderRadius: 1, '&:hover': { bgcolor: alpha('#6366f1', 0.05) } }}
                   >
                     <ListItemIcon sx={{ minWidth: 40 }}>
                       <Checkbox
@@ -592,12 +762,7 @@ const RolesPermissions: React.FC = () => {
                         checked={selectedPermissions.includes(permission.name)}
                         tabIndex={-1}
                         disableRipple
-                        sx={{
-                          color: alpha('#7c3aed', 0.3),
-                          '&.Mui-checked': {
-                            color: '#7c3aed',
-                          },
-                        }}
+                        sx={{ color: alpha('#6366f1', 0.3), '&.Mui-checked': { color: '#6366f1' } }}
                       />
                     </ListItemIcon>
                     <ListItemText
@@ -613,84 +778,103 @@ const RolesPermissions: React.FC = () => {
                               sx={{
                                 height: 18,
                                 fontSize: '0.65rem',
-                                bgcolor: alpha('#7c3aed', 0.1),
-                                color: '#7c3aed',
+                                bgcolor: '#f1f5f9',
+                                border: '1px solid #e2e8f0',
+                                color: '#334155',
                               }}
                             />
                           )}
                         </Box>
                       }
                       secondary={permission.description}
-                      secondaryTypographyProps={{
-                        variant: 'caption',
-                        color: 'text.secondary',
-                      }}
+                      secondaryTypographyProps={{ variant: 'caption', color: 'text.secondary' }}
                     />
                   </ListItemButton>
                 </ListItem>
               ))}
-            {allPermissions.filter(perm => 
-              permissionSearch === '' || 
+            {allPermissions.filter(perm =>
+              permissionSearch === '' ||
               perm.name.toLowerCase().includes(permissionSearch.toLowerCase()) ||
               perm.description?.toLowerCase().includes(permissionSearch.toLowerCase()) ||
               perm.category?.toLowerCase().includes(permissionSearch.toLowerCase())
             ).length === 0 && (
               <Box sx={{ textAlign: 'center', py: 4 }}>
-                <Typography variant="body2" color="text.secondary">
-                  No permissions found
-                </Typography>
+                <Typography variant="body2" color="text.secondary">No permissions found</Typography>
               </Box>
             )}
           </List>
 
-          {/* Selected Count */}
-          <Box sx={{ px: 3, py: 2, bgcolor: alpha('#7c3aed', 0.05), borderTop: '1px solid', borderColor: 'divider' }}>
-            <Typography variant="body2" sx={{ fontWeight: 600, color: '#7c3aed' }}>
+          {/* Selected count */}
+          <Box sx={{ px: 3, py: 2, bgcolor: '#f8fafc', borderTop: '1px solid #e2e8f0' }}>
+            <Typography variant="body2" sx={{ fontWeight: 600, color: '#334155' }}>
               {selectedPermissions.length} permission{selectedPermissions.length !== 1 ? 's' : ''} selected
             </Typography>
           </Box>
         </DialogContent>
-        <DialogActions sx={{ px: 3, py: 2, borderTop: '1px solid', borderColor: 'divider' }}>
-          <Button onClick={() => setPermissionDialogOpen(false)} sx={{ textTransform: 'none' }}>
+
+        <DialogActions sx={{ px: 3, py: 2, borderTop: '1px solid #e2e8f0' }}>
+          <Button onClick={() => setPermissionDialogOpen(false)} sx={{ textTransform: 'none', color: '#64748b' }}>
             Cancel
           </Button>
           <Button
             onClick={handleSavePermissions}
             variant="contained"
-            sx={{
-              textTransform: 'none',
-              bgcolor: '#7c3aed',
-              '&:hover': { bgcolor: '#6d28d9' },
-            }}
+            sx={{ textTransform: 'none', bgcolor: '#0f172a', '&:hover': { bgcolor: '#1e293b' } }}
           >
             Save Permissions
           </Button>
         </DialogActions>
       </Dialog>
 
-      {/* Role Create/Edit Dialog */}
+      {/* ------------------------------------------------------------------ */}
+      {/* Role Create / Edit Dialog                                           */}
+      {/* ------------------------------------------------------------------ */}
       <Dialog
         open={roleDialogOpen}
         onClose={() => setRoleDialogOpen(false)}
         maxWidth="md"
         fullWidth
-        PaperProps={{
-          sx: {
-            borderRadius: 2,
-          },
-        }}
+        PaperProps={{ sx: { borderRadius: 3, overflow: 'hidden' } }}
       >
-        <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography variant="h6" sx={{ fontWeight: 700 }}>
-            {editingRole ? 'Edit Role' : 'Create New Role'}
-          </Typography>
-          <IconButton onClick={() => setRoleDialogOpen(false)} size="small">
-            <Close />
-          </IconButton>
-        </DialogTitle>
+        {/* Gradient header */}
+        <Box
+          sx={{
+            background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 60%, #312e81 100%)',
+            px: 3,
+            pt: 3,
+            pb: 3,
+            position: 'relative',
+            overflow: 'hidden',
+            '&::before': {
+              content: '""',
+              position: 'absolute',
+              top: -60,
+              right: -40,
+              width: 180,
+              height: 180,
+              borderRadius: '50%',
+              background: `radial-gradient(circle, ${alpha('#6366f1', 0.25)} 0%, transparent 70%)`,
+              pointerEvents: 'none',
+            },
+          }}
+        >
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'relative' }}>
+            <Box>
+              <Typography variant="h6" sx={{ color: '#ffffff', fontWeight: 700 }}>
+                {editingRole ? 'Edit Role' : 'Create New Role'}
+              </Typography>
+              <Typography variant="caption" sx={{ color: 'rgba(199,210,254,0.7)' }}>
+                {editingRole ? `Editing ${editingRole.name}` : 'Define a new role and its type'}
+              </Typography>
+            </Box>
+            <IconButton onClick={() => setRoleDialogOpen(false)} size="small" sx={{ color: 'rgba(255,255,255,0.7)' }}>
+              <Close />
+            </IconButton>
+          </Box>
+        </Box>
+
         <DialogContent dividers>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-            {/* Basic Info */}
             <Box>
               <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2 }}>
                 Basic Information
@@ -703,7 +887,7 @@ const RolesPermissions: React.FC = () => {
                   disabled={!!editingRole}
                   fullWidth
                   required
-                  helperText={editingRole ? "Role name cannot be changed" : "Enter a descriptive name (e.g., 'Manager', 'Cashier', 'Waiter')"}
+                  helperText={editingRole ? 'Role name cannot be changed' : "Enter a descriptive name (e.g., 'Manager', 'Cashier', 'Waiter')"}
                   placeholder="e.g., Manager"
                 />
                 <TextField
@@ -733,32 +917,28 @@ const RolesPermissions: React.FC = () => {
             </Box>
           </Box>
         </DialogContent>
+
         <DialogActions sx={{ px: 3, py: 2 }}>
-          <Button onClick={() => setRoleDialogOpen(false)} sx={{ textTransform: 'none' }}>
+          <Button onClick={() => setRoleDialogOpen(false)} sx={{ textTransform: 'none', color: '#64748b' }}>
             Cancel
           </Button>
           <Button
             onClick={handleSaveRole}
             variant="contained"
             disabled={!roleForm.name}
-            sx={{
-              textTransform: 'none',
-              bgcolor: '#0f172a',
-              '&:hover': { bgcolor: '#1e293b' },
-            }}
+            sx={{ textTransform: 'none', bgcolor: '#0f172a', '&:hover': { bgcolor: '#1e293b' } }}
           >
             {editingRole ? 'Update Role' : 'Create Role'}
           </Button>
         </DialogActions>
       </Dialog>
 
-      {/* Delete Confirmation */}
+      {/* ------------------------------------------------------------------ */}
+      {/* Delete Confirmation                                                 */}
+      {/* ------------------------------------------------------------------ */}
       <DeleteConfirmationDialog
         open={deleteDialogOpen}
-        onClose={() => {
-          setDeleteDialogOpen(false);
-          setDeletingRole(null);
-        }}
+        onClose={() => { setDeleteDialogOpen(false); setDeletingRole(null); }}
         onConfirm={handleConfirmDelete}
         title="Deactivate Role"
         itemName={deletingRole?.name || ''}
@@ -769,11 +949,13 @@ const RolesPermissions: React.FC = () => {
         additionalWarnings={[
           'The role will be hidden from role selection',
           'Existing users with this role will retain it until reassigned',
-          'You can restore this role later from the system settings'
+          'You can restore this role later from the system settings',
         ]}
       />
 
-      {/* Snackbar */}
+      {/* ------------------------------------------------------------------ */}
+      {/* Snackbar                                                            */}
+      {/* ------------------------------------------------------------------ */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={6000}
@@ -783,10 +965,7 @@ const RolesPermissions: React.FC = () => {
         <Alert
           severity={snackbar.severity}
           onClose={() => setSnackbar({ ...snackbar, open: false })}
-          sx={{
-            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-            borderRadius: 1.5,
-          }}
+          sx={{ boxShadow: '0 4px 12px rgba(0,0,0,0.15)', borderRadius: 1.5 }}
         >
           {snackbar.message}
         </Alert>

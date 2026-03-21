@@ -11,8 +11,7 @@ import {
   TableRestaurant,
   Payment,
 } from '@mui/icons-material';
-import { usePermissions } from '../../auth';
-import PermissionService from '../../../services/auth';
+import { useAuth } from '../../../contexts/common/Auth';
 
 interface DashboardTabsProps {
   currentTab: number;
@@ -23,15 +22,10 @@ const DashboardTabs: React.FC<DashboardTabsProps> = ({
   currentTab,
   onTabChange,
 }) => {
-  const { isOwner, isManager, user } = usePermissions();
+  const { hasBackendPermission } = useAuth();
 
-  // Use the same role detection as control panel
-  const backendRole = PermissionService.getBackendRole();
-  const detectedRole = backendRole?.name || user?.role || 'unknown';
-  
-  // Only show tabs for Owner and Manager
-  const shouldShowTabs = detectedRole === 'owner' || detectedRole === 'manager' || detectedRole === 'admin' || isOwner || isManager;
-  
+  const shouldShowTabs = hasBackendPermission('application.dashboard.read');
+
   if (!shouldShowTabs) {
     return null;
   }
@@ -92,17 +86,17 @@ const DashboardTabs: React.FC<DashboardTabsProps> = ({
 
   return (
     <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }} data-tour="quick-actions">
-      <Tabs 
-        value={safeCurrentTab} 
+      <Tabs
+        value={safeCurrentTab}
         onChange={handleTabChange}
         variant="scrollable"
         scrollButtons="auto"
       >
-        {visibleTabs.map((tab, index) => (
-          <Tab 
+        {visibleTabs.map((tab) => (
+          <Tab
             key={tab.originalIndex}
-            icon={tab.icon} 
-            label={tab.label} 
+            icon={tab.icon}
+            label={tab.label}
           />
         ))}
       </Tabs>

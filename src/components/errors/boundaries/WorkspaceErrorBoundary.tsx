@@ -62,14 +62,12 @@ const WorkspaceErrorBoundary = ({
             <p className="text-gray-700 mt-1">
               You need to select a workspace first to manage users. Please select or create a workspace to continue.
             </p>
-            {user?.role === 'superadmin' && (
-              <button 
-                onClick={() => window.location.href = '/register'}
-                className="mt-3 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-              >
-                Create Workspace
-              </button>
-            )}
+            <button 
+              onClick={() => window.location.href = '/register'}
+              className="mt-3 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            >
+              Create Workspace
+            </button>
           </div>
         </div>
       </div>

@@ -10,7 +10,7 @@ interface VenueCheckResult {
 }
 
 export const useVenueCheck = (): VenueCheckResult => {
-  const { isOwner, user } = useAuth();
+  const { hasBackendPermission, user } = useAuth();
   const { userData } = useUserData();
   
   // Use centralized venue validation
@@ -21,7 +21,8 @@ export const useVenueCheck = (): VenueCheckResult => {
   
   const hasVenueAssigned = validation.hasVenue;
   const venueId = validation.venueId;
-  const canBypassVenueCheck = isOwner();
+  // Owners/admins can bypass venue check
+  const canBypassVenueCheck = hasBackendPermission('application.workspace.manage') || hasBackendPermission('system.workspaces.read');
   const requiresAssignment = requiresVenueAssignment(userData, user);
   
   return {
@@ -31,5 +32,6 @@ export const useVenueCheck = (): VenueCheckResult => {
     canBypassVenueCheck,
   };
 };
+
 
 export default useVenueCheck;

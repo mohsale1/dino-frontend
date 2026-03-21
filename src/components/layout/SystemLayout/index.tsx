@@ -30,6 +30,7 @@ import {
 import { useNavigate, useLocation } from 'react-router-dom';
 import { DinoLogo } from '../../ui';
 import { useAuth } from '../../../contexts/common/Auth';
+import { ConfirmationDialog } from '../../dialogs';
 
 const DRAWER_WIDTH = 280;
 
@@ -50,6 +51,7 @@ const SystemLayout: React.FC<SystemLayoutProps> = ({ children }) => {
   const { user, logout, hasBackendPermission, userPermissions } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [showLogoutConfirmation, setShowLogoutConfirmation] = useState(false);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -130,15 +132,23 @@ const SystemLayout: React.FC<SystemLayoutProps> = ({ children }) => {
   ];
 
   // Filter menu items reactively based on userPermissions from Auth context.
-  // userPermissions updates whenever the Auth state changes, so this is always current.
   const availableMenuItems = useMemo(() => {
     return menuItems.filter(item => hasBackendPermission(item.permission));
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userPermissions]);
 
-  const handleLogout = () => {
+  const handleLogoutClick = () => {
+    setShowLogoutConfirmation(true);
+  };
+
+  const handleLogoutConfirm = () => {
+    setShowLogoutConfirmation(false);
     logout();
     navigate('/login');
+  };
+
+  const handleLogoutCancel = () => {
+    setShowLogoutConfirmation(false);
   };
 
   // Sidebar content
@@ -201,7 +211,7 @@ const SystemLayout: React.FC<SystemLayoutProps> = ({ children }) => {
       </Box>
 
       {/* Navigation */}
-      <List sx={{ flexGrow: 1, py: 1.5, px: sidebarCollapsed ? 0.5 : 1 }}>
+      <List sx={{ flexGrow: 1, overflowY: 'auto', overflowX: 'hidden', py: 1.5, px: sidebarCollapsed ? 0.5 : 1, '&::-webkit-scrollbar': { width: '4px' }, '&::-webkit-scrollbar-thumb': { backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: '2px' } }}>
         {sidebarCollapsed && (
           <ListItemButton
             onClick={toggleSidebar}
@@ -318,7 +328,7 @@ const SystemLayout: React.FC<SystemLayoutProps> = ({ children }) => {
               fullWidth
               variant="outlined"
               startIcon={<Logout fontSize="small" />}
-              onClick={handleLogout}
+              onClick={handleLogoutClick}
               sx={{
                 borderColor: alpha('#ffffff', 0.3),
                 color: '#ffffff',
@@ -337,7 +347,7 @@ const SystemLayout: React.FC<SystemLayoutProps> = ({ children }) => {
           </>
         ) : (
           <IconButton
-            onClick={handleLogout}
+            onClick={handleLogoutClick}
             sx={{
               color: '#ffffff',
               width: '100%',
@@ -354,95 +364,129 @@ const SystemLayout: React.FC<SystemLayoutProps> = ({ children }) => {
   );
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh', width: '100%', margin: 0, padding: 0 }}>
-      {/* Mobile drawer */}
-      <Drawer
-        variant="temporary"
-        open={mobileOpen}
-        onClose={handleDrawerToggle}
-        ModalProps={{ keepMounted: true }}
-        sx={{
-          display: { xs: 'block', md: 'none' },
-          '& .MuiDrawer-paper': { 
-            boxSizing: 'border-box', 
-            width: DRAWER_WIDTH,
-            border: 'none',
-          },
-        }}
-      >
-        {drawer}
-      </Drawer>
-
-      {/* Desktop drawer */}
-      <Drawer
-        variant="permanent"
-        sx={{
-          display: { xs: 'none', md: 'block' },
-          width: 0,
-          flexShrink: 0,
-          '& .MuiDrawer-paper': {
-            boxSizing: 'border-box',
-            width: drawerWidth,
-            border: 'none',
-            borderRight: 'none',
-            transition: 'width 0.3s ease',
-            overflowX: 'hidden',
-            overflowY: 'auto',
-            position: 'fixed',
-            height: '100vh',
-            top: 0,
-            left: 0,
-            margin: 0,
-            padding: 0,
-          },
-        }}
-        open
-      >
-        {drawer}
-      </Drawer>
-
-      {/* Main Content */}
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          height: '100vh',
-          bgcolor: '#f8fafc',
-          overflowY: 'auto',
-          overflowX: 'hidden',
-          width: { xs: '100%', md: `calc(100% - ${drawerWidth}px)` },
-          marginLeft: { xs: 0, md: `${drawerWidth}px` },
-          transition: 'margin-left 0.3s ease',
-        }}
-      >
-        {/* Mobile Menu Button */}
-        <IconButton
-          onClick={handleDrawerToggle}
+    <>
+      <Box sx={{ display: 'flex', minHeight: '100vh', width: '100%', margin: 0, padding: 0 }}>
+        {/* Mobile drawer */}
+        <Drawer
+          variant="temporary"
+          open={mobileOpen}
+          onClose={handleDrawerToggle}
+          ModalProps={{ keepMounted: true }}
           sx={{
-            display: { xs: 'flex', md: 'none' },
-            position: 'fixed',
-            bottom: 16,
-            right: 16,
-            bgcolor: '#0f172a',
-            color: '#ffffff',
-            width: 56,
-            height: 56,
-            boxShadow: 3,
-            zIndex: 1000,
-            '&:hover': {
-              bgcolor: '#1e293b',
+            display: { xs: 'block', md: 'none' },
+            '& .MuiDrawer-paper': { 
+              boxSizing: 'border-box', 
+              width: DRAWER_WIDTH,
+              border: 'none',
             },
           }}
         >
-          <MenuIcon />
-        </IconButton>
+          {drawer}
+        </Drawer>
 
-        {/* Content Area */}
-        {children}
+        {/* Desktop drawer */}
+        <Drawer
+          variant="permanent"
+          sx={{
+            display: { xs: 'none', md: 'block' },
+            width: 0,
+            flexShrink: 0,
+            '& .MuiDrawer-paper': {
+              boxSizing: 'border-box',
+              width: drawerWidth,
+              border: 'none',
+              borderRight: 'none',
+              transition: 'width 0.3s ease',
+              overflowX: 'hidden',
+              overflowY: 'hidden',
+              position: 'fixed',
+              height: '100vh',
+              top: 0,
+              left: 0,
+              margin: 0,
+              padding: 0,
+            },
+          }}
+          open
+        >
+          {drawer}
+        </Drawer>
+
+        {/* Main Content */}
+        <Box
+          component="main"
+          sx={{
+            flexGrow: 1,
+            height: '100vh',
+            bgcolor: '#f8fafc',
+            overflowY: 'auto',
+            overflowX: 'hidden',
+            width: { xs: '100%', md: `calc(100% - ${drawerWidth}px)` },
+            marginLeft: { xs: 0, md: `${drawerWidth}px` },
+            transition: 'margin-left 0.3s ease',
+            pt: { xs: '56px', md: 0 },
+          }}
+        >
+          {/* Mobile Top Navbar */}
+          <Box
+            sx={{
+              display: { xs: 'flex', md: 'none' },
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              height: 56,
+              bgcolor: '#0f172a',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              px: 2,
+              zIndex: 1100,
+              boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+            }}
+          >
+            <IconButton onClick={handleDrawerToggle} sx={{ color: '#ffffff', p: 1 }}>
+              <MenuIcon />
+            </IconButton>
+            <Typography variant="subtitle1" sx={{ color: '#ffffff', fontWeight: 700, fontSize: '0.9375rem' }}>
+              System Admin
+            </Typography>
+            <Box
+              sx={{
+                width: 32,
+                height: 32,
+                borderRadius: '50%',
+                bgcolor: 'rgba(255,255,255,0.15)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <Typography sx={{ color: '#ffffff', fontWeight: 700, fontSize: '0.875rem' }}>
+                {user?.email?.charAt(0).toUpperCase() || 'S'}
+              </Typography>
+            </Box>
+          </Box>
+
+          {/* Content Area */}
+          {children}
+        </Box>
       </Box>
-    </Box>
+
+      {/* Logout Confirmation Dialog */}
+      <ConfirmationDialog
+        open={showLogoutConfirmation}
+        onClose={handleLogoutCancel}
+        onConfirm={handleLogoutConfirm}
+        title="Logout"
+        message="Are you sure you want to logout? You will need to sign in again to access your account."
+        confirmLabel="Logout"
+        cancelLabel="Cancel"
+        severity="info"
+      />
+    </>
   );
 };
+
 
 
 export default SystemLayout;

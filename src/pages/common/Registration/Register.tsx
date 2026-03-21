@@ -556,12 +556,15 @@ const RegisterPage: React.FC = () => {
           flex: 1,
           display: 'flex',
           flexDirection: 'column',
-          justifyContent: 'center',
+          justifyContent: { xs: 'flex-start', md: 'center' },
           alignItems: 'center',
-          p: { xs: 3, sm: 4, md: 6 },
+          pt: { xs: 10, sm: 10, md: 6 },
+          pb: { xs: 4, md: 6 },
+          px: { xs: 3, sm: 4, md: 6 },
           backgroundColor: '#ffffff',
           position: 'relative',
           overflowY: 'auto',
+          minHeight: '100vh',
         }}
       >
         {/* Home Button */}
@@ -600,7 +603,7 @@ const RegisterPage: React.FC = () => {
 
         {/* Mobile Logo & Progress */}
         {isMobile && (
-          <Box sx={{ mb: 4, textAlign: 'center', width: '100%' }}>
+          <Box sx={{ mb: 3, textAlign: 'center', width: '100%' }}>
             <DinoLogo size={48} animated={true} />
             <Typography
               variant="h4"

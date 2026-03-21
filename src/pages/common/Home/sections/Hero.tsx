@@ -7,8 +7,6 @@ import {
   Grid,
   Stack,
   Chip,
-  useTheme,
-  useMediaQuery,
   alpha,
   keyframes,
 } from '@mui/material';
@@ -56,16 +54,10 @@ const fadeIn = keyframes`
   to { opacity: 1; }
 `;
 
-const rotate = keyframes`
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-`;
 
 const HeroSection: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const features = [
     { icon: <TrendingUp sx={{ fontSize: 16 }} />, text: '3x Faster' },
@@ -81,11 +73,9 @@ const HeroSection: React.FC = () => {
         minHeight: '100vh',
         width: '100%',
         display: 'flex',
-        alignItems: 'center',
-        overflow: 'visible',
-        pt: { xs: 0, sm: 0, md: 0 },
-        pb: { xs: 0, sm: 0, md: 0 },
-        scrollMarginTop: 0,
+        alignItems: { xs: 'flex-start', md: 'center' },
+        overflow: 'hidden',
+        pt: { xs: '64px', md: '70px' },
         background: '#0f172a',
       }}
     >
@@ -247,11 +237,11 @@ const HeroSection: React.FC = () => {
         sx={{ 
           position: 'relative', 
           zIndex: 2, 
-          py: { xs: 0, sm: 0, md: 8 },
+          py: { xs: 4, sm: 5, md: 8 },
           px: { xs: 2, sm: 3, md: 3 },
           height: '100%',
           display: 'flex',
-          alignItems: 'center',
+          alignItems: { xs: 'flex-start', md: 'center' },
         }}
       >
         <Grid container spacing={{ xs: 4, md: 8 }} alignItems="center">
@@ -265,6 +255,28 @@ const HeroSection: React.FC = () => {
                 animation: `${slideInLeft} 0.8s ease-out`,
               }}
             >
+              {/* Badge */}
+              <Box sx={{ display: 'flex', justifyContent: { xs: 'center', md: 'flex-start' }, width: '100%' }}>
+                <Chip
+                  icon={<CheckCircleOutline sx={{ fontSize: 18 }} />}
+                  label="Trusted by 500+ Businesses"
+                  sx={{
+                    backgroundColor: alpha('#ffffff', 0.1),
+                    color: '#ffffff',
+                    fontWeight: 600,
+                    fontSize: { xs: '0.8125rem', sm: '0.875rem' },
+                    height: { xs: 32, sm: 36 },
+                    px: { xs: 1.5, sm: 2 },
+                    border: `1px solid ${alpha('#ffffff', 0.2)}`,
+                    '& .MuiChip-icon': {
+                      color: '#ffffff',
+                      marginLeft: '8px',
+                    },
+                    animation: `${fadeIn} 1s ease-out 0.3s both`,
+                  }}
+                />
+              </Box>
+
               {/* Main Heading */}
               <Typography
                 variant="h1"
@@ -444,7 +456,7 @@ const HeroSection: React.FC = () => {
             <Box
               sx={{
                 position: 'relative',
-                height: { xs: 360, sm: 420, md: 500 },
+                height: { xs: 'auto', sm: 'auto', md: 500 },
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',

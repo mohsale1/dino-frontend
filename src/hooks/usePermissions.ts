@@ -1,6 +1,7 @@
 /**
- * usePermissions Hook - SIMPLIFIED (Permissions Disabled)
- * All permission checks now return true
+ * usePermissions Hook
+ * Delegates all permission checks to the Auth context via hasBackendPermission.
+ * No role-based logic. No hardcoded booleans.
  */
 
 import { useMemo, useCallback } from 'react';
@@ -10,16 +11,9 @@ export interface UsePermissionsReturn {
   hasPermission: (permission: string) => boolean;
   hasAnyPermission: (permissions: string[]) => boolean;
   hasAllPermissions: (permissions: string[]) => boolean;
-  hasRole: (role: string) => boolean;
-  isOwner: boolean;
-  isManager: boolean;
-  isUser: boolean;
-  isSuperAdmin: boolean;
-  isAdmin: boolean;
-  isOperator: boolean;
   canAccessRoute: (route: string) => boolean;
-  getAccessibleRoutes: () => string[];
   canPerformAction: (action: string) => boolean;
+  getAccessibleRoutes: () => string[];
   getUserActions: () => string[];
   getAccessibleModules: () => any[];
   canViewDashboard: boolean;
@@ -36,46 +30,122 @@ export interface UsePermissionsReturn {
 }
 
 export const usePermissions = (): UsePermissionsReturn => {
-  const { user } = useAuth();
+  const {
+    user,
+    hasBackendPermission,
+    getPermissionsList,
+    userPermissions,
+  } = useAuth();
 
-  // All permission checks return true
-  const hasPermission = useCallback(() => true, []);
-  const hasAnyPermission = useCallback(() => true, []);
-  const hasAllPermissions = useCallback(() => true, []);
-  const hasRole = useCallback(() => true, []);
-  const canAccessRoute = useCallback(() => true, []);
-  const canPerformAction = useCallback(() => true, []);
-  
-  const getAccessibleRoutes = useCallback(() => [], []);
-  const getUserActions = useCallback(() => [], []);
-  const getAccessibleModules = useCallback(() => [], []);
+  // --- Core permission checks ---
+
+  const hasPermission = useCallback(
+    (permission: string): boolean => hasBackendPermission(permission),
+    [hasBackendPermission]
+  );
+
+  const hasAnyPermission = useCallback(
+    (permissions: string[]): boolean => permissions.some((p) => hasBackendPermission(p)),
+    [hasBackendPermission]
+  );
+
+  const hasAllPermissions = useCallback(
+    (permissions: string[]): boolean => permissions.every((p) => hasBackendPermission(p)),
+    [hasBackendPermission]
+  );
+
+  // --- Route / action / module helpers ---
+
+  const canAccessRoute = useCallback(
+    (route: string): boolean => hasBackendPermission(route),
+    [hasBackendPermission]
+  );
+
+  const canPerformAction = useCallback(
+    (action: string): boolean => hasBackendPermission(action),
+    [hasBackendPermission]
+  );
+
+  const getAccessibleRoutes = useCallback(
+    (): string[] => getPermissionsList(),
+    [getPermissionsList]
+  );
+
+  const getUserActions = useCallback(
+    (): string[] => getPermissionsList(),
+    [getPermissionsList]
+  );
+
+  const getAccessibleModules = useCallback((): any[] => [], []);
+
+  // --- Capability flags (single source of truth: backend permissions) ---
+
+  const canViewDashboard = useMemo(
+    () => hasBackendPermission('application.dashboard.read'),
+    [hasBackendPermission]
+  );
+
+  const canManageUsers = useMemo(
+    () => hasBackendPermission('application.users.read'),
+    [hasBackendPermission]
+  );
+
+  const canManageVenues = useMemo(
+    () => hasBackendPermission('application.workspace.update'),
+    [hasBackendPermission]
+  );
+
+  const canManageOrders = useMemo(
+    () => hasBackendPermission('application.orders.read'),
+    [hasBackendPermission]
+  );
+
+  const canManageMenu = useMemo(
+    () => hasBackendPermission('application.items.read'),
+    [hasBackendPermission]
+  );
+
+  const canManageTables = useMemo(
+    () => hasBackendPermission('application.tables.read'),
+    [hasBackendPermission]
+  );
+
+  const canViewSettings = useMemo(
+    () => hasBackendPermission('application.workspace.read'),
+    [hasBackendPermission]
+  );
+
+  // --- Derived data ---
+
+  const userPermissionsList = useMemo(
+    () => getPermissionsList(),
+    [getPermissionsList]
+  );
+
+  const userRole = useMemo(
+    () => (userPermissions as any)?.role?.name ?? null,
+    [userPermissions]
+  );
 
   return {
     hasPermission,
     hasAnyPermission,
     hasAllPermissions,
-    hasRole,
-    isOwner: true,
-    isManager: true,
-    isUser: true,
-    isSuperAdmin: true,
-    isAdmin: true,
-    isOperator: true,
     canAccessRoute,
-    getAccessibleRoutes,
     canPerformAction,
+    getAccessibleRoutes,
     getUserActions,
     getAccessibleModules,
-    canViewDashboard: true,
-    canManageUsers: true,
-    canManageVenues: true,
-    canManageOrders: true,
-    canManageMenu: true,
-    canManageTables: true,
-    canViewSettings: true,
-    userPermissions: [],
-    userRole: null,
-    permissionsData: null,
+    canViewDashboard,
+    canManageUsers,
+    canManageVenues,
+    canManageOrders,
+    canManageMenu,
+    canManageTables,
+    canViewSettings,
+    userPermissions: userPermissionsList,
+    userRole,
+    permissionsData: userPermissions,
     user,
   };
 };

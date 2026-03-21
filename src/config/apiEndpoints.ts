@@ -116,6 +116,11 @@ export const API_ENDPOINTS = {
       ME_DATA: '/application/users/me/data',
     },
     
+    // Permissions
+    PERMISSIONS: {
+      MY_PERMISSIONS: '/application/permissions',
+    },
+    
     // Dashboard
     DASHBOARD: {
       BASE: '/application/dashboard',

@@ -1,8 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import {
   Box,
-  Container,
-  Paper,
   TextField,
   Button,
   Typography,
@@ -33,7 +31,6 @@ import {
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../../contexts/common/Auth';
 import { DinoLogo } from '../../../components/ui';
-import { isUser, isManager, isOwner } from '../../../types/auth/roles';
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
@@ -61,7 +58,7 @@ const LoginPage: React.FC = () => {
     }
   }, [isAuthenticated, navigate]);
 
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
     setError('');
     setFormData({ email: '', password: '' });
@@ -97,47 +94,11 @@ const LoginPage: React.FC = () => {
     setError('');
 
     try {
-      // Determine if this is a system user login (tab index 1)
       const isSystemUser = tabValue === 1;
 
-      const response = await login(formData.email, formData.password, isSystemUser);
-      
-      // Determine redirect path based on user role
-      const user = response?.user;
-      let redirectPath = location.state?.from?.pathname || '/admin';
-      
-      if (user?.role) {
-        // Get role name and type (handle both string and object)
-        const roleName = typeof user.role === 'string' 
-          ? user.role 
-          : (user.role as any)?.name || user.role;
-        
-        const roleType = (user.role as any)?.role_type;
-        
-        // System User Login (role_type = 0)
-        if (tabValue === 1 || roleType === 0) {
-          // System users go to system dashboard
-          if (roleName === 'Owner' || roleName === 'SuperAdmin') {
-            redirectPath = '/system/dashboard';
-          } else if (roleName === 'BillingManager') {
-            redirectPath = '/system/billing';
-          } else if (roleName === 'MarketingAgent') {
-            redirectPath = '/system/registration';
-          } else {
-            redirectPath = '/system/dashboard';
-          }
-        } else {
-          // Application users (role_type = 1) go to workspace dashboard
-          if (isUser(roleName)) {
-            redirectPath = '/admin/orders';
-          } else if (isManager(roleName) || isOwner(roleName)) {
-            redirectPath = '/admin/orders';
-          } else {
-            redirectPath = '/admin/orders';
-          }
-        }
-      }
-      
+      await login(formData.email, formData.password, isSystemUser);
+
+      const redirectPath = tabValue === 1 ? '/system/dashboard' : '/admin';
       navigate(redirectPath, { replace: true });
     } catch (err: any) {
       setError(err.response?.data?.detail || err.message || 'Invalid email or password');
@@ -288,11 +249,15 @@ const LoginPage: React.FC = () => {
           flex: 1,
           display: 'flex',
           flexDirection: 'column',
-          justifyContent: 'center',
+          justifyContent: { xs: 'flex-start', md: 'center' },
           alignItems: 'center',
-          p: { xs: 3, sm: 4, md: 6 },
+          pt: { xs: 10, sm: 10, md: 6 },
+          pb: { xs: 4, md: 6 },
+          px: { xs: 3, sm: 4, md: 6 },
           backgroundColor: '#ffffff',
           position: 'relative',
+          overflowY: 'auto',
+          minHeight: '100vh',
         }}
       >
         {/* Home Button */}
@@ -331,7 +296,7 @@ const LoginPage: React.FC = () => {
 
         {/* Mobile Logo */}
         {isMobile && (
-          <Box sx={{ mb: 4, textAlign: 'center' }}>
+          <Box sx={{ mb: 3, textAlign: 'center' }}>
             <DinoLogo size={48} animated={true} />
             <Typography
               variant="h4"
@@ -462,9 +427,9 @@ const LoginPage: React.FC = () => {
                 textAlign: 'center',
               }}
             >
-              {tabValue === 0 
-                ? 'For workspace owners, admins, and operators'
-                : 'For Dinos platform administrators only'
+              {tabValue === 0
+                ? 'Sign in to your business account'
+                : 'For platform administrators only'
               }
             </Typography>
           </Box>

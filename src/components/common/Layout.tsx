@@ -1,4 +1,4 @@
-import React, { ReactNode, useState } from 'react';
+import React, { ReactNode } from 'react';
 import { 
   Box, 
   Button, 
@@ -24,14 +24,10 @@ import {
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/common/Auth';
-import PermissionService from '../../services/auth';
-import { PERMISSIONS } from '../../types/auth';
 import NotificationCenter from './NotificationCenter';
 import { useSidebar } from '../../contexts/common/Sidebar';
 import AppHeader from '../layout/AppHeader';
-import MobileMenu from '../layout/MobileMenu';
 import Sidebar from '../layout/Sidebar';
-// Removed unused imports: VenueStatusControl, DinoLogo
 import { getUserFirstName } from '../../utils/data/userUtils';
 
 interface LayoutProps {
@@ -56,15 +52,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       document.body.classList.remove('admin-layout');
     };
   }, [isAdminRouteCheck]);
-  // const isSmallMobile = useMediaQuery(theme.breakpoints.down('sm')); // Unused
-  const { user, logout, hasPermission, isOperator } = useAuth();
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [venueOpen, setVenueOpen] = useState(true);
-  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
-  // const [logoutModalOpen, setLogoutModalOpen] = useState(false);
-  
+
+  const { user, logout, hasBackendPermission } = useAuth();
+
   // Sidebar state
-  const { getSidebarWidth } = useSidebar();
+  const { toggleCollapsed: toggleSidebar } = useSidebar();
 
   const isAdminRoute = location.pathname.startsWith('/admin');
   const isPublicMenuRoute = location.pathname.includes('/menu/');
@@ -76,11 +68,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const handleLogout = () => {
     logout();
     navigate('/');
-    setMobileDrawerOpen(false);
   };
 
   const handleMobileDrawerToggle = () => {
-    setMobileDrawerOpen(!mobileDrawerOpen);
+    toggleSidebar();
   };
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -130,89 +121,56 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     }
 
     if (isAdminRoute && user) {
-      // Define all possible admin navigation items with their required permissions
-      // Reordered according to user request: Dashboard, Orders, Menu, Tables, Users, Permissions, Settings, Workspace
-      const allAdminNavItems = [
+      const adminNavItems = [
         { 
           label: 'Dashboard', 
           path: '/admin/dashboard', 
           icon: <Dashboard />, 
-          permission: PERMISSIONS.DASHBOARD_READ,
-          roles: ['admin'] 
+          permission: 'application.dashboard.read',
         },
         { 
           label: 'Orders', 
           path: '/admin/orders', 
           icon: <Assignment />, 
-          permission: PERMISSIONS.ORDERS_READ,
-          roles: ['admin', 'operator'] 
+          permission: 'application.orders.read',
         },
         { 
           label: 'Menu', 
           path: '/admin/menu', 
           icon: <Restaurant />, 
-          permission: PERMISSIONS.ITEMS_READ,
-          roles: ['admin'] 
+          permission: 'application.items.read',
         },
         { 
           label: 'Tables', 
           path: '/admin/tables', 
           icon: <TableRestaurant />, 
-          permission: PERMISSIONS.TABLES_READ,
-          roles: ['admin'] 
+          permission: 'application.tables.read',
         },
         { 
           label: 'Users', 
           path: '/admin/users', 
           icon: <People />, 
-          permission: PERMISSIONS.USERS_READ,
-          roles: ['admin', 'superadmin'] 
+          permission: 'application.users.read',
         },
         { 
           label: 'Permissions', 
           path: '/admin/permissions', 
           icon: <Security />, 
-          permission: PERMISSIONS.USERS_READ,
-          roles: ['admin', 'superadmin'] 
+          permission: 'application.users.read',
         },
         { 
           label: 'Settings', 
           path: '/admin/settings', 
           icon: <Settings />, 
-          permission: PERMISSIONS.WORKSPACE_READ,
-          roles: ['admin'] 
+          permission: 'application.workspace.read',
         },
         { 
           label: 'Workspace', 
           path: '/admin/workspace', 
           icon: <Business />, 
-          permission: PERMISSIONS.WORKSPACE_READ,
-          roles: ['superadmin'] 
+          permission: 'application.workspace.manage',
         },
-      ];
-
-      // Filter navigation items based on user permissions and roles
-      const adminNavItems = allAdminNavItems.filter(item => {
-        // Check multiple possible role locations
-        const backendRole = PermissionService.getBackendRole();
-        const userRole = backendRole?.name || user.role || (user as any).role || 'unknown';
-        // For superadmin, show all items
-        if (userRole === 'superadmin') {
-          return true;
-        }
-        
-        // Check if user has required role
-        if (item.roles && item.roles.length > 0) {
-          const hasRequiredRole = item.roles.includes(userRole as string);
-          if (!hasRequiredRole) {
-            return false;
-          }
-        }
-        
-        // Check permission (fallback)
-        const hasPermissionResult = hasPermission(item.permission);
-        return hasPermissionResult;
-      });
+      ].filter(item => hasBackendPermission(item.permission));
 
       return (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }} data-tour="sidebar-navigation">
@@ -352,15 +310,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const getPageTitle = () => {
     if (isPublicMenuRoute) return 'Dino';
     if (isCheckoutRoute) return 'Checkout';
-    if (isAdminRoute) {
-      if (isOperator()) return 'Dino Operator';
-      return 'Dino Admin';
-    }
+    if (isAdminRoute) return 'Admin Panel';
     return 'Dino';
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: isAdminRoute ? '100vh' : 'auto', minHeight: isAdminRoute ? 'unset' : '100vh', overflow: isAdminRoute ? 'hidden' : 'visible', margin: 0, padding: 0, width: '100%', maxWidth: '100%' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: isAdminRoute ? '100vh' : 'auto', minHeight: isAdminRoute ? 'unset' : '100vh', overflow: 'visible', margin: 0, padding: 0, width: '100%', maxWidth: '100%' }}>
       {/* Enhanced AppHeader - Hidden for customer facing pages and admin routes */}
       {!isCustomerFacingRoute && !isAdminRoute && (
         <AppHeader />
@@ -368,11 +323,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
       {/* Admin Layout with Responsive Sidebar */}
       {isAdminRoute && user ? (
-        <Box sx={{ display: 'flex', height: '100vh', overflow: 'hidden', position: 'relative', margin: 0, padding: 0, width: '100%', maxWidth: '100%' }}>
-          {/* Enhanced Desktop Sidebar Navigation */}
-          {!isMobile && (
-            <Sidebar isTablet={isTablet} />
-          )}
+        <Box sx={{ display: 'flex', height: '100vh', overflow: 'visible', position: 'relative', margin: 0, padding: 0, width: '100%', maxWidth: '100%' }}>
+          {/* Sidebar — always rendered; collapsed by default on mobile */}
+          <Sidebar isTablet={isTablet} />
 
           {/* Main Content */}
           <Box
@@ -383,17 +336,18 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               backgroundColor: 'background.default',
               minHeight: '100vh',
               height: '100vh',
-              marginLeft: isMobile ? 0 : '64px', // Fixed margin for collapsed sidebar width
+              marginLeft: isMobile ? 0 : '64px',
               marginTop: 0,
               marginRight: 0,
               paddingRight: 0,
               display: 'flex',
               flexDirection: 'column',
               position: 'relative',
-              overflow: isMobile ? 'visible' : 'auto',
-              width: isMobile ? '100%' : 'calc(100% - 64px)', // Fixed width based on collapsed sidebar
+              overflowY: 'auto',
+              overflowX: 'hidden',
+              width: isMobile ? '100%' : 'calc(100% - 64px)',
               maxWidth: '100%',
-              transition: 'none', // Prevent layout shift
+              transition: 'none',
             }}
           >
             {/* Mobile Header for Admin - Now uses MobileMenu */}
@@ -418,7 +372,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 {/* Title only */}
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
                   <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '1rem' }}>
-                    {isOperator() ? 'Operator Panel' : 'Admin Panel'}
+                    Admin Panel
                   </Typography>
                 </Box>
                 
@@ -462,24 +416,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             </Box>
           </Box>
 
-          {/* Mobile Menu for Admin Routes */}
-          {isMobile && (
-            <MobileMenu
-              open={mobileDrawerOpen}
-              onClose={() => setMobileDrawerOpen(false)}
-              homeNavItems={[]}
-              activeSection=""
-              onSectionClick={() => {}}
-              user={user}
-              onLogout={handleLogout}
-              onNavigate={(path) => {
-                navigate(path);
-                setMobileDrawerOpen(false);
-              }}
-              isHomePage={false}
-              isAdminRoute={true}
-            />
-          )}
         </Box>
       ) : (
         /* Non-admin routes */

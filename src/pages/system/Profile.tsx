@@ -14,12 +14,14 @@ import {
   InputAdornment,
   IconButton,
 } from '@mui/material';
+import { alpha } from '@mui/material/styles';
 import {
   Visibility,
   VisibilityOff,
   Lock,
   AccountCircle,
   Email,
+  CalendarToday,
 } from '@mui/icons-material';
 import { useAuth } from '../../contexts/common/Auth';
 import { authService } from '../../services/auth/auth';
@@ -43,7 +45,6 @@ const ProfilePage: React.FC = () => {
     setError('');
     setSuccess('');
 
-    // Validation
     if (!oldPassword || !newPassword || !confirmPassword) {
       setError('All fields are required');
       return;
@@ -79,215 +80,307 @@ const ProfilePage: React.FC = () => {
   };
 
   return (
-    <Box sx={{ p: 3 }}>
-      {/* Header */}
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" sx={{ fontWeight: 700, color: '#0f172a', mb: 1 }}>
-          Profile
-        </Typography>
-        <Typography variant="body2" sx={{ color: '#64748b' }}>
-          Manage your account settings and password
-        </Typography>
+    <Box sx={{ width: '100%', minHeight: '100vh', bgcolor: '#f1f5f9' }}>
+      {/* Hero */}
+      <Box
+        sx={{
+          background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 45%, #312e81 100%)',
+          px: { xs: 2.5, sm: 4, md: 6 },
+          pt: { xs: 3, md: 4 },
+          pb: { xs: 4, md: 5 },
+          position: 'relative',
+          overflow: 'hidden',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: -100,
+            right: -60,
+            width: 360,
+            height: 360,
+            borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(99,102,241,0.22) 0%, transparent 70%)',
+            pointerEvents: 'none',
+          },
+          '&::after': {
+            content: '""',
+            position: 'absolute',
+            bottom: -80,
+            left: '25%',
+            width: 280,
+            height: 280,
+            borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(139,92,246,0.15) 0%, transparent 70%)',
+            pointerEvents: 'none',
+          },
+        }}
+      >
+        <Box
+          sx={{
+            position: 'absolute',
+            inset: 0,
+            backgroundImage:
+              'linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)',
+            backgroundSize: '40px 40px',
+            pointerEvents: 'none',
+          }}
+        />
+        <Box sx={{ position: 'relative' }}>
+          <Typography
+            variant="overline"
+            sx={{ color: 'rgba(199,210,254,0.75)', fontWeight: 700, letterSpacing: 3, fontSize: '0.65rem' }}
+          >
+            SYSTEM CONTROL CENTER
+          </Typography>
+          <Typography
+            variant="h4"
+            sx={{
+              color: '#fff',
+              fontWeight: 800,
+              mt: 0.5,
+              fontSize: { xs: '1.5rem', md: '2rem' },
+              letterSpacing: '-0.025em',
+              lineHeight: 1.2,
+            }}
+          >
+            My Profile
+          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mt: 1 }}>
+            <CalendarToday sx={{ fontSize: 13, color: 'rgba(199,210,254,0.6)' }} />
+            <Typography
+              variant="caption"
+              sx={{ color: 'rgba(199,210,254,0.6)', fontWeight: 500, fontSize: '0.75rem' }}
+            >
+              {new Date().toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              })}
+            </Typography>
+          </Box>
+        </Box>
       </Box>
 
-      <Grid container spacing={3}>
-        {/* Profile Information */}
-        <Grid item xs={12} md={4}>
-          <Card sx={{ borderRadius: 3, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-            <CardContent sx={{ textAlign: 'center', py: 4 }}>
-              <Avatar
-                sx={{
-                  width: 100,
-                  height: 100,
-                  bgcolor: '#3b82f6',
-                  fontSize: '2.5rem',
-                  fontWeight: 700,
-                  margin: '0 auto',
-                  mb: 2,
-                }}
-              >
-                {user?.email?.charAt(0).toUpperCase() || 'U'}
-              </Avatar>
-              <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5 }}>
-                {user?.email?.split('@')[0] || 'User'}
-              </Typography>
-              <Typography variant="body2" sx={{ color: '#64748b', mb: 2 }}>
-                {user?.email}
-              </Typography>
-              <Typography
-                variant="caption"
-                sx={{
-                  display: 'inline-block',
-                  px: 2,
-                  py: 0.5,
-                  borderRadius: 1,
-                  bgcolor: '#f1f5f9',
-                  color: '#0f172a',
-                  fontWeight: 600,
-                }}
-              >
-                System User
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        {/* Account Details */}
-        <Grid item xs={12} md={8}>
-          <Card sx={{ borderRadius: 3, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', mb: 3 }}>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
-                <AccountCircle sx={{ color: '#64748b' }} />
-                <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                  Account Information
+      {/* Content */}
+      <Box sx={{ px: { xs: 2, sm: 3, md: 5 }, pt: 4, pb: 6 }}>
+        <Grid container spacing={3}>
+          {/* Profile Information */}
+          <Grid item xs={12} md={4}>
+            <Card
+              elevation={0}
+              sx={{
+                borderRadius: 3,
+                border: '1px solid #e2e8f0',
+                boxShadow: 'none',
+              }}
+            >
+              <CardContent sx={{ textAlign: 'center', py: 4 }}>
+                <Avatar
+                  sx={{
+                    width: 100,
+                    height: 100,
+                    bgcolor: alpha('#0f172a', 0.08),
+                    color: '#0f172a',
+                    fontSize: '2.5rem',
+                    fontWeight: 700,
+                    margin: '0 auto',
+                    mb: 2,
+                  }}
+                >
+                  {user?.email?.charAt(0).toUpperCase() || 'U'}
+                </Avatar>
+                <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5 }}>
+                  {user?.email?.split('@')[0] || 'User'}
                 </Typography>
-              </Box>
-
-              <Grid container spacing={2}>
-                <Grid item xs={12}>
-                  <TextField
-                    fullWidth
-                    label="Email Address"
-                    value={user?.email || ''}
-                    disabled
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <Email fontSize="small" sx={{ color: '#64748b' }} />
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-                </Grid>
-              </Grid>
-            </CardContent>
-          </Card>
-
-          {/* Change Password */}
-          <Card sx={{ borderRadius: 3, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
-                <Lock sx={{ color: '#64748b' }} />
-                <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                  Change Password
+                <Typography variant="body2" sx={{ color: '#64748b', mb: 2 }}>
+                  {user?.email}
                 </Typography>
-              </Box>
+                <Typography
+                  variant="caption"
+                  sx={{
+                    display: 'inline-block',
+                    px: 2,
+                    py: 0.5,
+                    borderRadius: 1,
+                    bgcolor: '#f1f5f9',
+                    color: '#334155',
+                    border: '1px solid #e2e8f0',
+                    fontWeight: 600,
+                  }}
+                >
+                  System User
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
 
-              {success && (
-                <Alert severity="success" sx={{ mb: 3 }} onClose={() => setSuccess('')}>
-                  {success}
-                </Alert>
-              )}
+          {/* Account Details */}
+          <Grid item xs={12} md={8}>
+            <Card
+              elevation={0}
+              sx={{
+                borderRadius: 3,
+                border: '1px solid #e2e8f0',
+                boxShadow: 'none',
+                mb: 3,
+              }}
+            >
+              <CardContent>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
+                  <AccountCircle sx={{ color: '#64748b' }} />
+                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                    Account Information
+                  </Typography>
+                </Box>
 
-              {error && (
-                <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError('')}>
-                  {error}
-                </Alert>
-              )}
-
-              <form onSubmit={handlePasswordChange}>
                 <Grid container spacing={2}>
                   <Grid item xs={12}>
                     <TextField
                       fullWidth
-                      label="Current Password"
-                      type={showOldPassword ? 'text' : 'password'}
-                      value={oldPassword}
-                      onChange={(e) => setOldPassword(e.target.value)}
-                      required
+                      label="Email Address"
+                      value={user?.email || ''}
+                      disabled
                       InputProps={{
-                        endAdornment: (
-                          <InputAdornment position="end">
-                            <IconButton
-                              onClick={() => setShowOldPassword(!showOldPassword)}
-                              edge="end"
-                            >
-                              {showOldPassword ? <VisibilityOff /> : <Visibility />}
-                            </IconButton>
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <Email fontSize="small" sx={{ color: '#64748b' }} />
                           </InputAdornment>
                         ),
                       }}
                     />
-                  </Grid>
-
-                  <Grid item xs={12}>
-                    <Divider sx={{ my: 1 }} />
-                  </Grid>
-
-                  <Grid item xs={12}>
-                    <TextField
-                      fullWidth
-                      label="New Password"
-                      type={showNewPassword ? 'text' : 'password'}
-                      value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
-                      required
-                      helperText="Must be at least 8 characters"
-                      InputProps={{
-                        endAdornment: (
-                          <InputAdornment position="end">
-                            <IconButton
-                              onClick={() => setShowNewPassword(!showNewPassword)}
-                              edge="end"
-                            >
-                              {showNewPassword ? <VisibilityOff /> : <Visibility />}
-                            </IconButton>
-                          </InputAdornment>
-                        ),
-                      }}
-                    />
-                  </Grid>
-
-                  <Grid item xs={12}>
-                    <TextField
-                      fullWidth
-                      label="Confirm New Password"
-                      type={showConfirmPassword ? 'text' : 'password'}
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      required
-                      InputProps={{
-                        endAdornment: (
-                          <InputAdornment position="end">
-                            <IconButton
-                              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                              edge="end"
-                            >
-                              {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
-                            </IconButton>
-                          </InputAdornment>
-                        ),
-                      }}
-                    />
-                  </Grid>
-
-                  <Grid item xs={12}>
-                    <Button
-                      type="submit"
-                      variant="contained"
-                      fullWidth
-                      disabled={loading}
-                      sx={{
-                        py: 1.5,
-                        bgcolor: '#0f172a',
-                        '&:hover': {
-                          bgcolor: '#1e293b',
-                        },
-                      }}
-                    >
-                      {loading ? (
-                        <CircularProgress size={24} sx={{ color: '#ffffff' }} />
-                      ) : (
-                        'Update Password'
-                      )}
-                    </Button>
                   </Grid>
                 </Grid>
-              </form>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+
+            {/* Change Password */}
+            <Card
+              elevation={0}
+              sx={{
+                borderRadius: 3,
+                border: '1px solid #e2e8f0',
+                boxShadow: 'none',
+              }}
+            >
+              <CardContent>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
+                  <Lock sx={{ color: '#64748b' }} />
+                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                    Change Password
+                  </Typography>
+                </Box>
+
+                {success && (
+                  <Alert severity="success" sx={{ mb: 3 }} onClose={() => setSuccess('')}>
+                    {success}
+                  </Alert>
+                )}
+
+                {error && (
+                  <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError('')}>
+                    {error}
+                  </Alert>
+                )}
+
+                <form onSubmit={handlePasswordChange}>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12}>
+                      <TextField
+                        fullWidth
+                        label="Current Password"
+                        type={showOldPassword ? 'text' : 'password'}
+                        value={oldPassword}
+                        onChange={(e) => setOldPassword(e.target.value)}
+                        required
+                        InputProps={{
+                          endAdornment: (
+                            <InputAdornment position="end">
+                              <IconButton onClick={() => setShowOldPassword(!showOldPassword)} edge="end">
+                                {showOldPassword ? <VisibilityOff /> : <Visibility />}
+                              </IconButton>
+                            </InputAdornment>
+                          ),
+                        }}
+                      />
+                    </Grid>
+
+                    <Grid item xs={12}>
+                      <Divider sx={{ my: 1 }} />
+                    </Grid>
+
+                    <Grid item xs={12}>
+                      <TextField
+                        fullWidth
+                        label="New Password"
+                        type={showNewPassword ? 'text' : 'password'}
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        required
+                        helperText="Must be at least 8 characters"
+                        InputProps={{
+                          endAdornment: (
+                            <InputAdornment position="end">
+                              <IconButton onClick={() => setShowNewPassword(!showNewPassword)} edge="end">
+                                {showNewPassword ? <VisibilityOff /> : <Visibility />}
+                              </IconButton>
+                            </InputAdornment>
+                          ),
+                        }}
+                      />
+                    </Grid>
+
+                    <Grid item xs={12}>
+                      <TextField
+                        fullWidth
+                        label="Confirm New Password"
+                        type={showConfirmPassword ? 'text' : 'password'}
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        required
+                        InputProps={{
+                          endAdornment: (
+                            <InputAdornment position="end">
+                              <IconButton
+                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                edge="end"
+                              >
+                                {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                              </IconButton>
+                            </InputAdornment>
+                          ),
+                        }}
+                      />
+                    </Grid>
+
+                    <Grid item xs={12}>
+                      <Button
+                        type="submit"
+                        variant="contained"
+                        fullWidth
+                        disabled={loading}
+                        sx={{
+                          py: 1.5,
+                          bgcolor: '#0f172a',
+                          textTransform: 'none',
+                          fontWeight: 600,
+                          borderRadius: 2,
+                          '&:hover': { bgcolor: '#1e293b' },
+                        }}
+                      >
+                        {loading ? (
+                          <CircularProgress size={24} sx={{ color: '#ffffff' }} />
+                        ) : (
+                          'Update Password'
+                        )}
+                      </Button>
+                    </Grid>
+                  </Grid>
+                </form>
+              </CardContent>
+            </Card>
+          </Grid>
         </Grid>
-      </Grid>
+      </Box>
     </Box>
   );
 };

@@ -17,8 +17,6 @@ interface UserDataContextType {
   // Convenience methods
   hasPermission: (permission: string) => boolean;
   getUserRole: () => string;
-  isOwner: () => boolean;
-  isManager: () => boolean;
   isUser: () => boolean;
   getVenueDisplayName: () => string;
   hasVenue: () => boolean;
@@ -128,13 +126,8 @@ export const UserDataProvider: React.FC<UserDataProviderProps> = ({ children }) 
     return userDataService.getUserRole(userData);
   };
 
-  const isOwner = (): boolean => {
-    return userDataService.isOwner(userData);
-  };
-
-  const isManager = (): boolean => {
-    return userDataService.isManager(userData);
-  };
+  // NOTE: isOwner() and isManager() have been intentionally removed from this context.
+  // Role-based access checks must use hasBackendPermission() from the Auth context instead.
 
   const isUser = (): boolean => {
     return userDataService.isUser(userData);
@@ -178,8 +171,6 @@ export const UserDataProvider: React.FC<UserDataProviderProps> = ({ children }) 
     refreshUserData,
     hasPermission,
     getUserRole,
-    isOwner,
-    isManager,
     isUser,
     getVenueDisplayName,
     getWorkspaceDisplayName,

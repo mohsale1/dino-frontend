@@ -1,4 +1,3 @@
-
 /**
  * Application User Service
  * Handles API calls for application user management
@@ -83,10 +82,10 @@ class ApplicationUserService {
       if (filters.search) params.search = filters.search;
     }
 
-    console.log('[ApplicationUserService] Calling API:', this.baseUrl, 'with params:', params);
     const response = await apiService.get(this.baseUrl, { params });
-    console.log('[ApplicationUserService] API Response:', response);
-    return (response.data as any) || [];
+    const raw = response.data as any;
+    // Handle paginated response: { data: [...], pagination: {...} } or a plain array
+    return (Array.isArray(raw) ? raw : raw?.data ?? raw) || [];
   }
 
   /**

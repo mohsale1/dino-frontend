@@ -25,8 +25,6 @@ import {
 } from '@mui/icons-material';
 // TODO: Re-enable when charts are implemented
 // import { EnhancedPerformanceChart, SimpleBarChart } from '../../../charts/ChartComponents';
-import { usePermissions } from '../../../auth';
-
 interface VenueDashboardStats {
   total_orders: number;
   total_revenue: number;
@@ -53,7 +51,6 @@ interface SalesAnalyticsTabProps {
 
 const SalesAnalyticsTab: React.FC<SalesAnalyticsTabProps> = ({ dashboardData, stats, analyticsData }) => {
   const theme = useTheme();
-  const { isOwner } = usePermissions();
   
   // Get top menu items and category performance from analytics
   const topMenuItems = analyticsData?.popular_items || dashboardData?.top_menu_items || [];

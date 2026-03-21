@@ -17,9 +17,6 @@ import {
   Menu as MenuIcon,
   AccountCircle,
   ExitToApp,
-  Login,
-  PersonAdd,
-  Dashboard as DashboardIcon,
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../../contexts/common/Auth';
@@ -27,7 +24,6 @@ import DinoLogo from '../../ui/DinoLogo';
 import { NotificationCenter } from '../../common';
 import MobileMenu from '../MobileMenu';
 import { getUserFirstName } from '../../../utils/data/userUtils';
-import { isAdminLevel } from '../../../types/auth';
 import { ConfirmationDialog } from '../../dialogs';
 
 // Company info (previously from data/info)
@@ -49,8 +45,6 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('hero');
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
-  const [isVisible, setIsVisible] = useState(true);
-  const [lastScrollY, setLastScrollY] = useState(0);
 
   // Scroll trigger for navbar background
   const trigger = useScrollTrigger({
@@ -95,38 +89,6 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
       }
     }, 300);
   };
-
-  // Handle header visibility on scroll (hide on scroll down, show on scroll up)
-  // Only applies to homepage for better UX
-  useEffect(() => {
-    // Only enable auto-hide on homepage
-    if (!isHomePage) {
-      setIsVisible(true);
-      return;
-    }
-
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      
-      // Show header when at top of page
-      if (currentScrollY < 10) {
-        setIsVisible(true);
-      }
-      // Hide header when scrolling down, show when scrolling up
-      else if (currentScrollY > lastScrollY && currentScrollY > 100) {
-        // Scrolling down & past threshold
-        setIsVisible(false);
-      } else if (currentScrollY < lastScrollY) {
-        // Scrolling up
-        setIsVisible(true);
-      }
-      
-      setLastScrollY(currentScrollY);
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [lastScrollY, isHomePage]);
 
   // Track active section on scroll
   useEffect(() => {
@@ -176,6 +138,8 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
     setMobileMenuOpen(!mobileMenuOpen);
   };
 
+  const isTransparent = isHomePage && !trigger;
+
   const renderDesktopNavigation = () => {
     if (isHomePage) {
       return (
@@ -191,7 +155,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
               sx={{
                 cursor: 'pointer',
                 pointerEvents: 'auto',
-                color: !trigger 
+                color: isTransparent
                   ? (activeSection === item.id ? '#ffffff' : alpha('#ffffff', 0.8))
                   : (activeSection === item.id ? '#0f172a' : '#64748b'),
                 fontWeight: activeSection === item.id ? 600 : 500,
@@ -202,12 +166,12 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
                 fontSize: '0.9375rem',
                 position: 'relative',
                 minHeight: 40,
-                backgroundColor: activeSection === item.id && trigger 
-                  ? alpha('#0f172a', 0.06) 
+                backgroundColor: activeSection === item.id && !isTransparent
+                  ? alpha('#0f172a', 0.06)
                   : 'transparent',
                 '&:hover': {
-                  backgroundColor: !trigger ? alpha('#ffffff', 0.12) : alpha('#0f172a', 0.08),
-                  color: !trigger ? '#ffffff' : '#0f172a',
+                  backgroundColor: isTransparent ? alpha('#ffffff', 0.12) : alpha('#0f172a', 0.08),
+                  color: isTransparent ? '#ffffff' : '#0f172a',
                   cursor: 'pointer',
                   transform: 'translateY(-1px)',
                 },
@@ -314,11 +278,11 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
             py: 1,
             borderRadius: 1.5,
             fontSize: '0.9375rem',
-            color: isHomePage && !trigger ? alpha('#ffffff', 0.9) : '#475569',
+            color: isTransparent ? alpha('#ffffff', 0.9) : '#475569',
             minHeight: 40,
             '&:hover': {
-              backgroundColor: isHomePage && !trigger ? alpha('#ffffff', 0.1) : alpha('#0f172a', 0.06),
-              color: isHomePage && !trigger ? '#ffffff' : '#0f172a',
+              backgroundColor: isTransparent ? alpha('#ffffff', 0.1) : alpha('#0f172a', 0.06),
+              color: isTransparent ? '#ffffff' : '#0f172a',
             },
             transition: 'all 0.2s ease',
           }}
@@ -337,13 +301,13 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
             borderRadius: 1.5,
             fontSize: '0.9375rem',
             minHeight: 40,
-            backgroundColor: isHomePage && !trigger ? '#ffffff' : '#0f172a',
-            color: isHomePage && !trigger ? '#0f172a' : '#ffffff',
+            backgroundColor: isTransparent ? '#ffffff' : '#0f172a',
+            color: isTransparent ? '#0f172a' : '#ffffff',
             boxShadow: 'none',
             '&:hover': {
-              backgroundColor: isHomePage && !trigger ? '#f8fafc' : '#1e293b',
-              boxShadow: isHomePage && !trigger 
-                ? '0 4px 12px rgba(255, 255, 255, 0.25)' 
+              backgroundColor: isTransparent ? '#f8fafc' : '#1e293b',
+              boxShadow: isTransparent
+                ? '0 4px 12px rgba(255, 255, 255, 0.25)'
                 : '0 4px 12px rgba(37, 99, 235, 0.25)',
             },
             transition: 'all 0.2s ease',
@@ -361,16 +325,11 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
         position="fixed"
         elevation={0}
         sx={{
-          backgroundColor: isHomePage && !trigger
-            ? 'transparent'
-            : trigger 
-              ? 'rgba(255, 255, 255, 0.98)'
-              : 'rgba(255, 255, 255, 0.95)',
-          backdropFilter: isHomePage && !trigger ? 'none' : 'blur(20px)',
-          WebkitBackdropFilter: isHomePage && !trigger ? 'none' : 'blur(20px)',
-          borderBottom: `1px solid ${trigger ? 'rgba(15, 23, 42, 0.08)' : 'transparent'}`,
-          boxShadow: trigger ? '0 2px 8px rgba(15, 23, 42, 0.04)' : 'none',
-          transform: isVisible ? 'translateY(0)' : 'translateY(-100%)',
+          backgroundColor: isTransparent ? 'transparent' : 'rgba(255, 255, 255, 0.98)',
+          backdropFilter: isTransparent ? 'none' : 'blur(20px)',
+          WebkitBackdropFilter: isTransparent ? 'none' : 'blur(20px)',
+          borderBottom: `1px solid ${isTransparent ? 'transparent' : 'rgba(15, 23, 42, 0.08)'}`,
+          boxShadow: isTransparent ? 'none' : '0 2px 8px rgba(15, 23, 42, 0.04)',
           transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
           zIndex: 1200,
         }}
@@ -408,7 +367,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
                   sx={{
                     fontWeight: 700,
                     fontSize: { xs: '1.125rem', md: '1.25rem' },
-                    color: isHomePage && !trigger ? '#ffffff' : '#0f172a',
+                    color: isTransparent ? '#ffffff' : '#0f172a',
                     letterSpacing: '-0.02em',
                     lineHeight: 1.1,
                     transition: 'color 0.3s ease',
@@ -420,7 +379,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
                   <Typography
                     variant="caption"
                     sx={{
-                      color: isHomePage && !trigger ? alpha('#ffffff', 0.8) : '#64748b',
+                      color: isTransparent ? alpha('#ffffff', 0.8) : '#64748b',
                       fontSize: '0.6875rem',
                       fontWeight: 500,
                       letterSpacing: '0.02em',
@@ -448,10 +407,10 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
               <IconButton
                 onClick={handleMobileMenuToggle}
                 sx={{
-                  color: isHomePage && !trigger ? '#ffffff' : '#475569',
+                  color: isTransparent ? '#ffffff' : '#475569',
                   '&:hover': {
-                    backgroundColor: isHomePage && !trigger ? alpha('#ffffff', 0.1) : alpha('#0f172a', 0.06),
-                    color: isHomePage && !trigger ? '#ffffff' : '#0f172a',
+                    backgroundColor: isTransparent ? alpha('#ffffff', 0.1) : alpha('#0f172a', 0.06),
+                    color: isTransparent ? '#ffffff' : '#0f172a',
                   },
                   transition: 'all 0.2s ease',
                 }}

@@ -51,32 +51,14 @@ const UserManagement: React.FC = () => {
   const [deleteModal, setDeleteModal] = useState({ open: false, userId: '', userName: '', loading: false });
 
   const loadUsers = useCallback(async () => {
-    if (!currentWorkspace?.id) {
-      console.log('[Users] No workspace ID, skipping load');
-      return;
-    }
-
     try {
       setLoading(true);
-      console.log('[Users] Loading users for workspace:', currentWorkspace.id);
-      console.log('[Users] Current venue:', currentVenue);
-      
-      // Use the new application user service with workspace filter
-      const usersData = await applicationUserService.getUsers(1, 1000, {
-        workspaceId: currentWorkspace.id,
-        organizationId: currentVenue?.id, // Filter by venue if available
-      });
-      
-      console.log('[Users] Loaded users:', usersData);
-      console.log('[Users] Number of users:', usersData?.length || 0);
+      const filters: any = {};
+      if (currentWorkspace?.id) filters.workspaceId = currentWorkspace.id;
+      if (currentVenue?.id) filters.organizationId = currentVenue.id;
+      const usersData = await applicationUserService.getUsers(1, 100, filters);
       setUsers(usersData);
     } catch (error: any) {
-      console.error('[Users] Error loading users:', error);
-      console.error('[Users] Error details:', {
-        message: error?.message,
-        response: error?.response,
-        stack: error?.stack
-      });
       setSnackbar({
         open: true,
         message: error?.message || 'Failed to load users',
@@ -491,4 +473,3 @@ const UserManagement: React.FC = () => {
 };
 
 export default UserManagement;
-

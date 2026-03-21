@@ -26,17 +26,12 @@ import {
   Login,
   PersonAdd,
   Dashboard,
-  TableRestaurant,
   Restaurant,
   People,
   Settings,
-  Assignment,
-  Business,
-  Security,
   Store,
   CheckCircle,
   Cancel,
-  Code,
   Home,
   MenuBook,
   ShoppingCart,
@@ -56,7 +51,6 @@ import { PermissionService } from '../../../services/auth';
 import { useUserData } from '../../../contexts/application/UserData';
 import { venueService } from '../../../services/application';
 import { usePermissionCheck } from '../../common/PermissionWrapper';
-import { PERMISSIONS } from '../../../types/auth';
 
 interface MobileMenuProps {
   open: boolean;
@@ -74,8 +68,6 @@ interface MobileMenuProps {
   isAdminRoute?: boolean;
 }
 
-const dinoAvatar = null; // TODO: Add user avatar support
-
 const MobileMenu: React.FC<MobileMenuProps> = ({
   open,
   onClose,
@@ -86,11 +78,10 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
   onLogout,
   onNavigate,
   isHomePage,
-  isAdminRoute = false,
 }) => {
   const { userData } = useUserData();
-  const { isOwner, isManager } = useAuth();
-  const { checkPermission } = usePermissionCheck();
+  const { hasBackendPermission } = useAuth();
+  usePermissionCheck();
   const [venueStatus, setVenueStatus] = useState<{
     isActive: boolean;
     isOpen: boolean;
@@ -100,11 +91,11 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
+  const canManageVenue = hasBackendPermission('application.workspace.update');
+
   // Load venue status from UserDataContext
   useEffect(() => {
-    const userIsAdmin = isOwner() || isManager();
-
-    if (!user || !userIsAdmin) {
+    if (!user || !canManageVenue) {
       setVenueStatus(null);
       return;
     }
@@ -113,19 +104,17 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
       setVenueStatus({
         isActive: false,
         isOpen: false,
-        venueName: 'No Venue Selected'
+        venueName: 'No Venue Selected',
       });
       return;
     }
 
-    // Use venue data from UserDataContext
-    const statusData = {
+    setVenueStatus({
       isActive: userData.venue.isActive || false,
       isOpen: userData.venue.isOpen || false,
-      venueName: userData.venue.name || 'Current Venue'
-    };
-    setVenueStatus(statusData);
-  }, [user, userData?.venue, isOwner, isManager]);
+      venueName: userData.venue.name || 'Current Venue',
+    });
+  }, [user, userData?.venue, canManageVenue]);
 
   // Handle venue status toggle
   const handleToggleVenueOpen = async () => {
@@ -134,12 +123,12 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
     try {
       setStatusLoading(true);
       const newStatus = !venueStatus.isOpen;
-      
-      await venueService.updateVenue(userData.venue.id, { 
-        status: newStatus ? 'active' : 'closed' 
+
+      await venueService.updateVenue(userData.venue.id, {
+        status: newStatus ? 'active' : 'closed',
       });
 
-      setVenueStatus(prev => prev ? { ...prev, isOpen: newStatus } : null);
+      setVenueStatus(prev => (prev ? { ...prev, isOpen: newStatus } : null));
     } catch (error) {
       // Handle error silently or show user notification
     } finally {
@@ -158,36 +147,36 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
   };
 
   const handleLogout = () => {
-    if (window.confirm('Are you sure you want to logout?')) {
-      onLogout();
-    }
+    onLogout();
   };
 
-  // Admin menu items
-  const adminMenuItems = [
-    { label: 'Dashboard', path: '/admin', icon: <Dashboard /> },
-    { label: 'Menu', path: '/admin/menu', icon: <MenuBook /> },
-    { label: 'Location', path: '/admin/locations', icon: <Store /> },
-    { label: 'Orders', path: '/admin/orders', icon: <ShoppingCart /> },
-    { label: 'Catalog', path: '/admin/catalog', icon: <Star /> },
-    { label: 'Coupons', path: '/admin/coupons', icon: <LocalOffer /> },
-    { label: 'Users', path: '/admin/users', icon: <People /> },
-    { label: 'Settings', path: '/admin/settings', icon: <Settings /> },
+  // Admin menu items — each mapped to its required backend permission
+  const allAdminMenuItems = [
+    { label: 'Dashboard', path: '/admin',           icon: <Dashboard />,  permission: 'application.dashboard.read' },
+    { label: 'Menu',      path: '/admin/menu',      icon: <MenuBook />,   permission: 'application.items.read' },
+    { label: 'Location',  path: '/admin/locations', icon: <Store />,      permission: 'application.areas.read' },
+    { label: 'Orders',    path: '/admin/orders',    icon: <ShoppingCart />, permission: 'application.orders.read' },
+    { label: 'Catalog',   path: '/admin/catalog',   icon: <Star />,       permission: 'application.categories.read' },
+    { label: 'Coupons',   path: '/admin/coupons',   icon: <LocalOffer />, permission: 'application.coupons.read' },
+    { label: 'Users',     path: '/admin/users',     icon: <People />,     permission: 'application.users.read' },
+    { label: 'Settings',  path: '/admin/settings',  icon: <Settings />,   permission: 'application.workspace.read' },
   ];
+
+  const adminMenuItems = allAdminMenuItems.filter(item =>
+    hasBackendPermission(item.permission)
+  );
 
   // Get icon for navigation item based on label or id
   const getNavigationIcon = (item: { label: string; id: string }) => {
     const label = item.label.toLowerCase();
     const id = item.id.toLowerCase();
-    
-    // Match by specific IDs first (more accurate)
+
     if (id === 'hero' || id === 'home') return <Home />;
     if (id === 'features') return <AutoAwesome />;
     if (id === 'testimonials' || id === 'reviews') return <RateReview />;
     if (id === 'faq') return <HelpOutline />;
     if (id === 'contact') return <ContactMail />;
-    
-    // Match by label keywords
+
     if (label.includes('home')) return <Home />;
     if (label.includes('feature')) return <AutoAwesome />;
     if (label.includes('review') || label.includes('testimonial')) return <RateReview />;
@@ -199,41 +188,9 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
     if (label.includes('about')) return <Info />;
     if (label.includes('popular') || label.includes('featured')) return <Star />;
     if (label.includes('dish') || label.includes('food')) return <Fastfood />;
-    
-    // Default icon
+
     return <Restaurant />;
   };
-
-  // Force drawer to take full height from top
-  useEffect(() => {
-    if (open) {
-      const drawerPaper = document.querySelector('.MuiDrawer-paper');
-      const modal = document.querySelector('.MuiModal-root');
-      const backdrop = document.querySelector('.MuiBackdrop-root');
-      
-      if (drawerPaper) {
-        (drawerPaper as HTMLElement).style.height = '100vh';
-        (drawerPaper as HTMLElement).style.minHeight = '100vh';
-        (drawerPaper as HTMLElement).style.maxHeight = '100vh';
-        (drawerPaper as HTMLElement).style.top = '0';
-        (drawerPaper as HTMLElement).style.bottom = '0';
-        (drawerPaper as HTMLElement).style.margin = '0';
-        (drawerPaper as HTMLElement).style.position = 'fixed';
-      }
-      
-      if (modal) {
-        (modal as HTMLElement).style.top = '0';
-        (modal as HTMLElement).style.height = '100vh';
-        (modal as HTMLElement).style.position = 'fixed';
-      }
-      
-      if (backdrop) {
-        (backdrop as HTMLElement).style.top = '0';
-        (backdrop as HTMLElement).style.height = '100vh';
-        (backdrop as HTMLElement).style.position = 'fixed';
-      }
-    }
-  }, [open]);
 
   return (
     <Drawer
@@ -243,42 +200,22 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
       sx={{
         zIndex: 1300,
         '& .MuiDrawer-paper': {
-          width: { xs: '80vw', sm: 360, md: 320 },
-          maxWidth: { xs: '80vw', sm: 360 },
+          width: { xs: '85vw', sm: 360 },
+          height: '100vh',
+          top: 0,
+          position: 'fixed',
           backgroundColor: 'background.paper',
-          borderLeft: { xs: 'none', sm: '1px solid' },
+          borderLeft: '1px solid',
           borderColor: 'divider',
-          borderRadius: '0 !important',
-          height: '100vh !important',
-          minHeight: '100vh !important',
-          maxHeight: '100vh !important',
-          top: '0 !important',
-          bottom: '0 !important',
-          position: 'fixed !important',
-          margin: '0 !important',
-          transform: 'none !important',
-          // Better mobile performance
           willChange: 'transform',
           backfaceVisibility: 'hidden',
         },
-        '& .MuiModal-root': {
-          top: '0 !important',
-          height: '100vh !important',
-          position: 'fixed !important',
-        },
         '& .MuiBackdrop-root': {
-          top: '0 !important',
-          height: '100vh !important',
-          position: 'fixed !important',
-          backgroundColor: { xs: 'rgba(0, 0, 0, 0.8)', sm: 'rgba(0, 0, 0, 0.5)' },
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
         },
       }}
     >
-      <Box sx={{ 
-        height: '100vh',
-        display: 'flex', 
-        flexDirection: 'column',
-      }}>
+      <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
         {/* Header */}
         <Box
           sx={{
@@ -289,23 +226,22 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
             borderBottom: '1px solid',
             borderColor: 'divider',
             minHeight: { xs: 60, sm: 64 },
-            // Add safe area for mobile devices with notches
             paddingTop: { xs: 'max(16px, env(safe-area-inset-top))', sm: 2.5 },
           }}
         >
           <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1.5, sm: 2 } }}>
             <DinoLogo size={isMobile ? 28 : 32} animated={false} />
             <Box>
-              <Typography 
-                variant="h6" 
-                fontWeight={600} 
+              <Typography
+                variant="h6"
+                fontWeight={600}
                 color="text.primary"
                 sx={{ fontSize: { xs: '1.1rem', sm: '1.25rem' } }}
               >
                 Dino
               </Typography>
-              <Typography 
-                variant="caption" 
+              <Typography
+                variant="caption"
                 color="text.secondary"
                 sx={{ fontSize: { xs: '0.7rem', sm: '0.75rem' } }}
               >
@@ -318,9 +254,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
             size={isMobile ? 'small' : 'medium'}
             sx={{
               color: 'text.secondary',
-              '&:hover': {
-                backgroundColor: 'action.hover',
-              },
+              '&:hover': { backgroundColor: 'action.hover' },
             }}
           >
             <Close />
@@ -343,10 +277,10 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                 <Avatar
                   src={undefined}
                   sx={{
-                    backgroundColor: "primary.main",
+                    backgroundColor: 'primary.main',
                     width: 40,
                     height: 40,
-                    border: "none",
+                    border: 'none',
                     borderColor: 'primary.main',
                   }}
                 >
@@ -358,40 +292,29 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                   </Typography>
                   <Chip
                     label={(() => {
-                      // Use the same logic as UserPermissionsDashboard
                       const getUserRoleDisplayName = (role: string | any) => {
-                        // Handle role object (from getUserWithRole)
                         if (typeof role === 'object' && role !== null) {
                           if (role.displayName) return String(role.displayName);
                           if (role.name) return String(role.name);
                         }
-                        
-                        // Handle string role
                         if (!role || (typeof role !== 'string' && typeof role !== 'object')) {
                           return 'Unknown Role';
                         }
-                        
                         if (typeof role === 'string') {
                           const roleDefinition = PermissionService.getRoleDefinition(role);
-                          
-                          // Ensure we always return a string
                           if (typeof roleDefinition === 'object' && roleDefinition?.displayName) {
                             return String(roleDefinition.displayName);
                           }
-                          
                           return String(role);
                         }
-                        
                         return 'Unknown Role';
                       };
 
-                      // First try to get backend role
                       const backendRole = PermissionService.getBackendRole();
                       if (backendRole && backendRole.name) {
                         return getUserRoleDisplayName(backendRole.name);
                       }
 
-                      // Fallback to user.role
                       return getUserRoleDisplayName(user?.role || '');
                     })()}
                     size="small"
@@ -407,11 +330,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                   variant="outlined"
                   startIcon={<Settings sx={{ fontSize: 16 }} />}
                   onClick={() => handleNavigate('/admin/settings')}
-                  sx={{ 
-                    flex: 1, 
-                    textTransform: 'none',
-                    fontSize: '0.8rem',
-                  }}
+                  sx={{ flex: 1, textTransform: 'none', fontSize: '0.8rem' }}
                 >
                   Settings
                 </Button>
@@ -420,11 +339,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                   variant="outlined"
                   startIcon={<ExitToApp sx={{ fontSize: 16 }} />}
                   onClick={handleLogout}
-                  sx={{ 
-                    flex: 1, 
-                    textTransform: 'none',
-                    fontSize: '0.8rem',
-                  }}
+                  sx={{ flex: 1, textTransform: 'none', fontSize: '0.8rem' }}
                 >
                   Logout
                 </Button>
@@ -433,8 +348,8 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
           </Box>
         )}
 
-        {/* Venue Status Display - Only for Owner and Manager */}
-        {user && (isOwner() || isManager()) && (
+        {/* Venue Status — only for users with workspace update permission */}
+        {user && canManageVenue && (
           <Box sx={{ p: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
             <Paper
               elevation={0}
@@ -455,7 +370,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                 <Store sx={{ fontSize: 16, color: venueStatus?.isOpen ? 'success.main' : 'error.main' }} />
                 Venue Status
               </Typography>
-              
+
               {venueStatus ? (
                 <>
                   <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
@@ -468,8 +383,8 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                       ) : (
                         <Cancel sx={{ fontSize: 16, color: 'error.main' }} />
                       )}
-                      <Typography 
-                        variant="caption" 
+                      <Typography
+                        variant="caption"
                         fontWeight={600}
                         color={venueStatus.isOpen ? 'success.main' : 'error.main'}
                       >
@@ -477,7 +392,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                       </Typography>
                     </Box>
                   </Box>
-                  
+
                   <FormControlLabel
                     control={
                       <Switch
@@ -495,11 +410,16 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                           <Typography variant="caption" fontWeight={500}>
                             {venueStatus.isOpen ? 'Open for Orders' : 'Closed for Orders'}
                           </Typography>
-                          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', fontSize: '0.65rem' }}>
-                            {venueStatus.isActive 
-                              ? (venueStatus.isOpen ? 'Customers can place orders' : 'Orders are disabled')
-                              : 'Venue is inactive'
-                            }
+                          <Typography
+                            variant="caption"
+                            color="text.secondary"
+                            sx={{ display: 'block', fontSize: '0.65rem' }}
+                          >
+                            {venueStatus.isActive
+                              ? venueStatus.isOpen
+                                ? 'Customers can place orders'
+                                : 'Orders are disabled'
+                              : 'Venue is inactive'}
                           </Typography>
                         </Box>
                       </Box>
@@ -515,16 +435,11 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                     </Typography>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                       <Cancel sx={{ fontSize: 16, color: 'warning.main' }} />
-                      <Typography 
-                        variant="caption" 
-                        fontWeight={600}
-                        color="warning.main"
-                      >
+                      <Typography variant="caption" fontWeight={600} color="warning.main">
                         LOADING...
                       </Typography>
                     </Box>
                   </Box>
-                  
                   <Typography variant="caption" color="text.secondary">
                     Loading venue status...
                   </Typography>
@@ -535,11 +450,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
         )}
 
         {/* Navigation Items - Scrollable */}
-        <Box sx={{ 
-          flex: 1, 
-          overflowY: 'auto',
-          overflowX: 'hidden',
-        }}>
+        <Box sx={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
           {/* Home Navigation */}
           {isHomePage && homeNavItems.length > 0 && (
             <Box sx={{ p: 2 }}>
@@ -564,12 +475,15 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                         borderRadius: 1,
                         minHeight: 44,
                         backgroundColor: activeSection === item.id ? 'primary.100' : 'transparent',
-                        '&:hover': {
-                          backgroundColor: 'primary.50',
-                        },
+                        '&:hover': { backgroundColor: 'primary.50' },
                       }}
                     >
-                      <ListItemIcon sx={{ color: activeSection === item.id ? 'primary.main' : 'text.secondary', minWidth: 36 }}>
+                      <ListItemIcon
+                        sx={{
+                          color: activeSection === item.id ? 'primary.main' : 'text.secondary',
+                          minWidth: 36,
+                        }}
+                      >
                         {getNavigationIcon(item)}
                       </ListItemIcon>
                       <ListItemText
@@ -609,9 +523,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                     sx={{
                       borderRadius: 1,
                       minHeight: 44,
-                      '&:hover': {
-                        backgroundColor: 'action.hover',
-                      },
+                      '&:hover': { backgroundColor: 'action.hover' },
                     }}
                   >
                     <ListItemIcon sx={{ color: 'text.secondary', minWidth: 36 }}>
@@ -638,9 +550,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                       sx={{
                         borderRadius: 1,
                         minHeight: 44,
-                        '&:hover': {
-                          backgroundColor: 'action.hover',
-                        },
+                        '&:hover': { backgroundColor: 'action.hover' },
                       }}
                     >
                       <ListItemIcon sx={{ color: 'text.secondary', minWidth: 36 }}>
@@ -662,9 +572,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                       sx={{
                         borderRadius: 1,
                         minHeight: 44,
-                        '&:hover': {
-                          backgroundColor: 'action.hover',
-                        },
+                        '&:hover': { backgroundColor: 'action.hover' },
                       }}
                     >
                       <ListItemIcon sx={{ color: 'text.secondary', minWidth: 36 }}>
@@ -685,7 +593,6 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
             </List>
           </Box>
         </Box>
-
       </Box>
     </Drawer>
   );

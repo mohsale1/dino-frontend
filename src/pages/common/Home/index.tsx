@@ -55,18 +55,21 @@ const HomePage: React.FC = () => {
       <Zoom in={trigger}>
         <Fab
           onClick={scrollToTop}
-          color="primary"
           size="medium"
           sx={{
             position: 'fixed',
             bottom: { xs: 24, md: 32 },
             right: { xs: 24, md: 32 },
             zIndex: 1000,
-            boxShadow: 3,
+            backgroundColor: '#0f172a',
+            color: '#ffffff',
+            boxShadow: '0 4px 14px rgba(15, 23, 42, 0.4)',
             '&:hover': {
-              transform: 'scale(1.1)',
+              backgroundColor: '#1e293b',
+              transform: 'translateY(-2px)',
+              boxShadow: '0 6px 20px rgba(15, 23, 42, 0.5)',
             },
-            transition: 'transform 0.2s ease',
+            transition: 'all 0.2s ease',
           }}
         >
           <KeyboardArrowUp />

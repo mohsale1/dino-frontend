@@ -5,36 +5,38 @@ import {
 } from '@mui/material';
 import { useAuth } from '../../../contexts/common/Auth';
 import { getUserFirstName } from '../../../utils/data/userUtils';
-import { usePermissions } from '../../auth';
 
 interface DashboardHeaderProps {
   // No props needed - simplified header
 }
 
 const DashboardHeader: React.FC<DashboardHeaderProps> = () => {
-  const { user } = useAuth();
-  const { isSuperAdmin, isAdmin, isOperator } = usePermissions();
+  const { user, hasBackendPermission } = useAuth();
 
-  // Get dashboard title based on role
+  const canAccessSystem = hasBackendPermission('system.workspaces.read');
+  const canManageWorkspace = hasBackendPermission('application.workspace.manage');
+  const canManageOrders = hasBackendPermission('application.orders.read') && !canManageWorkspace && !canAccessSystem;
+
+  // Get dashboard title based on access level
   const getDashboardTitle = (): string => {
-    if (isSuperAdmin) return 'SuperAdmin Dashboard';
-    if (isAdmin) return 'Admin Dashboard';
-    if (isOperator) return 'Operator Dashboard';
+    if (canAccessSystem) return 'SuperAdmin Dashboard';
+    if (canManageWorkspace) return 'Admin Dashboard';
+    if (canManageOrders) return 'Operator Dashboard';
     return 'Dashboard';
   };
 
-  // Get dashboard description based on role
+  // Get dashboard description based on access level
   const getDashboardDescription = (): string => {
-    if (isSuperAdmin) return 'Here\'s your system-wide performance overview and analytics.';
-    if (isAdmin) return 'Here\'s your comprehensive venue overview and analytics.';
-    if (isOperator) return 'Here\'s your order management and operations overview.';
+    if (canAccessSystem) return 'Here\'s your system-wide performance overview and analytics.';
+    if (canManageWorkspace) return 'Here\'s your comprehensive venue overview and analytics.';
+    if (canManageOrders) return 'Here\'s your order management and operations overview.';
     return 'Here\'s your dashboard overview.';
   };
 
   const getSubtitle = (): string => {
-    if (isSuperAdmin) return 'System-wide Analytics & Management';
-    if (isAdmin) return 'Real-time Analytics & Management';
-    if (isOperator) return 'Order Management & Operations';
+    if (canAccessSystem) return 'System-wide Analytics & Management';
+    if (canManageWorkspace) return 'Real-time Analytics & Management';
+    if (canManageOrders) return 'Order Management & Operations';
     return 'Dashboard Overview';
   };
 
@@ -66,5 +68,6 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = () => {
     </Box>
   );
 };
+
 
 export default DashboardHeader;

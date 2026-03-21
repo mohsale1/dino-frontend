@@ -1,8 +1,9 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useMemo, useCallback, useRef } from 'react';
 import { UserProfile, UserRegistration } from '../../types';
 import { AuthUser, ROLES, PermissionName, RoleName } from '../../types/auth';
-import { isOwner, isManager, isUser, isOperator, normalizeRole } from '../../types/auth/roles';
+import { normalizeRole } from '../../types/auth/roles';
 import { authService, PermissionService } from '../../services/common/auth';
+// PermissionService used only for getBackendRole / getRoleDefinition / hasPermission / hasRole / canAccessRoute
 import { cacheUtils } from '../../utils/storage';
 import { StorageManager } from '../../utils/storage';
 import { tokenRefreshScheduler } from '../../utils/auth/tokenRefreshScheduler';
@@ -18,16 +19,10 @@ interface AuthContextType {
   refreshUser: () => Promise<void>;
   loading: boolean;
   isAuthenticated: boolean;
-  // Role-based access control methods
   hasPermission: (permission: PermissionName) => boolean;
   hasRole: (role: string) => boolean;
   canAccessRoute: (route: string) => boolean;
-  isOwner: () => boolean;
-  isManager: () => boolean;
-  isUser: () => boolean;
-  isOperator: () => boolean;
   getUserWithRole: () => AuthUser | null;
-  // Permission management
   userPermissions: any | null;
   refreshPermissions: () => Promise<void>;
   getPermissionsList: () => string[];
@@ -45,17 +40,109 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [userPermissions, setUserPermissions] = useState<any | null>(null);
 
+const derivePermissionsFromUser = async (userData: any, isSystemUser?: boolean): Promise<any> => {
+    const userRole = userData?.role;
+    const roleName = typeof userRole === 'string' ? userRole : userRole?.name;
+
+    const userType = isSystemUser !== undefined
+      ? isSystemUser
+      : StorageManager.getItem<string>('user_type') === 'system';
+
+    let permissionsState: any;
+
+    if (!userType) {
+      // Application user — fetch from dedicated application permissions endpoint
+      try {
+        const response = await apiService.get<any>('/application/permissions');
+        const payload = response.data as any;
+        // Response shape: { role: {...}, permissions: [...] }
+        const role = payload?.role ?? { name: roleName };
+        const permissions: any[] = payload?.permissions ?? [];
+        permissionsState = {
+          role,
+          permissions,
+          capabilities: {},
+        };
+      } catch {
+        // Fallback: derive from embedded role permissions if API fails
+        const rolePermissions: any[] = userRole?.permissions || [];
+        const resolved = rolePermissions
+          .filter((p: any) => typeof p === 'object' && p?.name)
+          .map((p: any) => ({ name: p.name, id: p.id, resource: p.resource, action: p.action, description: p.description }));
+        permissionsState = {
+          role: { name: roleName },
+          permissions: resolved,
+          capabilities: {},
+        };
+      }
+    } else {
+      // System user — resolve from /system/permissions (paginated)
+      const rolePermissions: any[] = userRole?.permissions || [];
+      const alreadyResolved = rolePermissions
+        .filter((p: any) => typeof p === 'object' && p?.name)
+        .map((p: any) => ({ name: p.name, id: p.id, resource: p.resource, action: p.action, description: p.description }));
+      const ids = rolePermissions.filter((p: any) => typeof p === 'string');
+
+      let resolved: { name: string }[] = [];
+      if (ids.length > 0) {
+        try {
+          let allPerms: any[] = [];
+          let page = 1;
+          let hasNext = true;
+          while (hasNext) {
+            const response = await apiService.get<any>('/system/permissions', {
+              params: { page, page_size: 100 },
+            });
+            const items: any[] = response.data?.data ?? response.data ?? [];
+            allPerms = allPerms.concat(items);
+            hasNext = response.data?.pagination?.hasNext ?? response.data?.pagination?.has_next ?? false;
+            page++;
+          }
+          const idToName: Record<string, any> = {};
+          allPerms.forEach((p: any) => { if (p.id) idToName[p.id] = p; });
+          resolved = ids.map(id => {
+            const perm = idToName[id];
+            return perm
+              ? { name: perm.name, id: perm.id, resource: perm.resource, action: perm.action, description: perm.description }
+              : { name: id };
+          });
+        } catch {
+          resolved = ids.map(id => ({ name: id }));
+        }
+      }
+      permissionsState = {
+        role: { name: roleName },
+        permissions: [...alreadyResolved, ...resolved],
+        capabilities: {},
+      };
+    }
+
+    StorageManager.setPermissions(permissionsState);
+    return permissionsState;
+  };
+
+
+
+
+  const isTokenExpired = (token: string): boolean => {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const currentTime = Date.now() / 1000;
+      return payload.exp < currentTime;
+    } catch {
+      return true;
+    }
+  };
+
   useEffect(() => {
-    // Check for existing token on app load
     const initializeAuth = async () => {
       try {
         const token = StorageManager.getItem<string>(StorageManager.KEYS.TOKEN);
         const savedUser = StorageManager.getUserData();
         const savedPermissions = StorageManager.getPermissions();
         const userType = StorageManager.getItem<string>('user_type');
-        
+
         if (token && savedUser) {
-          // Check if token is expired
           if (typeof token === 'string' && isTokenExpired(token)) {
             StorageManager.removeItem(StorageManager.KEYS.TOKEN);
             StorageManager.removeItem(StorageManager.KEYS.USER);
@@ -68,23 +155,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           }
 
           apiService.setAuthorizationHeader(token);
-          
+
           try {
             const isSystemUser = userType === 'system';
             const currentUser = await authService.getCurrentUser(isSystemUser);
             const localUser = normalizeUserData(currentUser);
-            
+
             setUser(localUser);
             StorageManager.setUserData(localUser);
-            
-            // Always re-derive permissions from the fresh API user data so the
-            // role is never stale (e.g. a previously cached 'operator' fallback).
-            const permissions = await derivePermissionsFromUser(currentUser);
+
+            const permissions = await derivePermissionsFromUser(currentUser, isSystemUser);
             setUserPermissions(permissions);
             StorageManager.setPermissions(permissions);
-            
+
             tokenRefreshScheduler.start();
-          } catch (error) {
+          } catch {
+            // Fall back to cached data on network failure
             setUser(savedUser);
             if (savedPermissions) {
               setUserPermissions(savedPermissions);
@@ -95,7 +181,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           setUserPermissions(null);
           apiService.setAuthorizationHeader(null);
         }
-      } catch (error) {
+      } catch {
         StorageManager.removeItem(StorageManager.KEYS.TOKEN);
         StorageManager.removeItem(StorageManager.KEYS.USER);
         StorageManager.removeItem(StorageManager.KEYS.PERMISSIONS);
@@ -111,127 +197,62 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     initializeAuth();
   }, []);
 
-  /**
-   * Resolve permission IDs stored on the role into full permission objects
-   * by calling GET /system/permissions?page_size=100.
-   * Falls back to raw IDs if the API call fails.
-   */
-  const resolvePermissionNames = async (permissionIds: string[]): Promise<{ name: string }[]> => {
-    if (!permissionIds.length) return [];
-    try {
-      const endpoint = '/system/permissions';
-      let allPerms: any[] = [];
-      let page = 1;
-      let hasNext = true;
-
-      while (hasNext) {
-        const response = await apiService.get<any>(endpoint, {
-          params: { page, page_size: 100 }
-        });
-        const items: any[] = response.data?.data ?? response.data ?? [];
-        allPerms = allPerms.concat(items);
-        hasNext = response.data?.pagination?.has_next ?? false;
-        page++;
-      }
-
-      // Build id → name map
-      const idToName: Record<string, string> = {};
-      allPerms.forEach((p: any) => {
-        if (p.id && p.name) idToName[p.id] = p.name;
-      });
-
-      // Map each permission ID to its name; keep raw ID as fallback
-      return permissionIds.map(id => ({
-        name: idToName[id] ?? id,
-      }));
-    } catch {
-      // Fallback: return raw IDs so the app doesn't break
-      return permissionIds.map(id => ({ name: id }));
-    }
-  };
-
-  /**
-   * Derive a permissions object from the user's role data returned by the backend.
-   * The role.permissions field contains permission IDs — we resolve them to names
-   * via the permissions API so hasBackendPermission() can match dot-notation strings.
-   */
-  const derivePermissionsFromUser = async (userData: any) => {
-    const userRole = userData?.role;
-    const rolePermissions: any[] = userRole?.permissions || [];
-    const roleName = typeof userRole === 'string' ? userRole : userRole?.name;
-
-    // Separate IDs (strings) from already-resolved objects
-    const ids = rolePermissions
-      .filter((p: any) => typeof p === 'string')
-      .map((p: string) => p);
-
-    const alreadyResolved = rolePermissions
-      .filter((p: any) => typeof p === 'object' && p?.name)
-      .map((p: any) => ({ name: p.name }));
-
-    const resolved = ids.length > 0 ? await resolvePermissionNames(ids) : [];
-
-    return {
-      role: { name: roleName },
-      permissions: [...alreadyResolved, ...resolved],
-      capabilities: {},
-    };
-  };
-
   const login = async (email: string, password: string, isSystemUser: boolean = false): Promise<{ user: UserProfile }> => {
     try {
       setLoading(true);
-      
+
       apiService.refreshConfiguration();
-      
+
       if (typeof apiService.debugConfiguration === 'function') {
         apiService.debugConfiguration();
       }
-      
+
       const response = await authService.login(email, password, false, isSystemUser);
-      
+
       StorageManager.setItem(StorageManager.KEYS.TOKEN, response.access_token);
       apiService.setAuthorizationHeader(response.access_token);
-      
+
+      StorageManager.setItem('user_type', isSystemUser ? 'system' : 'application');
+
       if (!response.user) {
         throw new Error('Failed to retrieve user data');
       }
-      
+
       const localUser = normalizeUserData(response.user);
-      
+
       if ((response.user as any).venue) {
         StorageManager.setItem('current_venue', (response.user as any).venue);
       }
-      
+
       if ((response.user as any).workspace) {
         StorageManager.setItem('current_workspace', (response.user as any).workspace);
       }
-      
+
       setUser(localUser);
       StorageManager.setUserData(localUser);
-      
+
       try {
-        const permissions = await derivePermissionsFromUser(response.user);
+        const permissions = await derivePermissionsFromUser(response.user, isSystemUser);
         setUserPermissions(permissions);
         StorageManager.setPermissions(permissions);
       } catch (permError: any) {
-        console.warn('Failed to set permissions from user role:', permError);
+        console.warn('Failed to derive permissions from login response:', permError);
       }
 
       tokenRefreshScheduler.start();
-      
+
       setTimeout(() => {
         cacheUtils.preloadCriticalData(localUser.id, localUser.venueId);
       }, 100);
-      
+
       return { user: localUser };
     } catch (error: any) {
       StorageManager.removeItem(StorageManager.KEYS.TOKEN);
       StorageManager.removeItem(StorageManager.KEYS.USER);
       StorageManager.removeItem(StorageManager.KEYS.PERMISSIONS);
+      StorageManager.removeItem('user_type');
       setUser(null);
       setUserPermissions(null);
-      
       throw error;
     } finally {
       setLoading(false);
@@ -256,42 +277,26 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setUserPermissions(null);
   };
 
-  const isTokenExpired = (token: string): boolean => {
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      const currentTime = Date.now() / 1000;
-      return payload.exp < currentTime;
-    } catch (error) {
-      return true;
-    }
-  };
-
   const updateUser = async (userData: Partial<UserProfile>): Promise<void> => {
-    try {
-      if (!user?.id) {
-        throw new Error('No authenticated user found');
-      }
-
-      // Use PUT /application/users/{id} to update profile fields
-      const response = await apiService.put(`/application/users/${user.id}`, {
-        first_name: userData.firstName,
-        last_name: userData.lastName,
-        phone: userData.phone,
-      });
-
-      const updatedUser = normalizeUserData(response.data || userData);
-      setUser(updatedUser as UserProfile);
-      StorageManager.setUserData(updatedUser as UserProfile);
-    } catch (error) {
-      throw error;
+    if (!user?.id) {
+      throw new Error('No authenticated user found');
     }
+
+    const response = await apiService.put(`/application/users/${user.id}`, {
+      first_name: userData.firstName,
+      last_name: userData.lastName,
+      phone: userData.phone,
+    });
+
+    const updatedUser = normalizeUserData(response.data || userData);
+    setUser(updatedUser as UserProfile);
+    StorageManager.setUserData(updatedUser as UserProfile);
   };
 
   const refreshUser = async (): Promise<void> => {
     try {
       const currentUser = await authService.getCurrentUser();
       const localUser = normalizeUserData(currentUser);
-      
       setUser(localUser);
       StorageManager.setUserData(localUser);
     } catch (error) {
@@ -304,8 +309,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     if (!user) return null;
 
     const backendRole = PermissionService.getBackendRole();
-    let roleName: RoleName = ROLES.USER; // Default fallback
-    
+    let roleName: RoleName = ROLES.USER;
+
     if (backendRole && backendRole.name) {
       const normalized = normalizeRole(backendRole.name);
       roleName = normalized || ROLES.USER;
@@ -337,14 +342,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const hasRole = useCallback((role: string): boolean => {
     const backendRole = PermissionService.getBackendRole();
-    
+
     if (backendRole && backendRole.name) {
-      const roleName = typeof backendRole.name === 'string' 
-        ? backendRole.name 
+      const roleName = typeof backendRole.name === 'string'
+        ? backendRole.name
         : String(backendRole.name);
       return roleName.toLowerCase() === role.toLowerCase();
     }
-    
+
     return PermissionService.hasRole(getUserWithRole, role);
   }, [getUserWithRole]);
 
@@ -352,26 +357,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return PermissionService.canAccessRoute(getUserWithRole, route);
   }, [getUserWithRole]);
 
-  const checkIsOwner = (): boolean => {
-    return isOwner(getUserWithRole?.role);
-  };
-
-  const checkIsManager = (): boolean => {
-    return isManager(getUserWithRole?.role);
-  };
-
-  const checkIsUser = (): boolean => {
-    return isUser(getUserWithRole?.role);
-  };
-
-  const checkIsOperator = (): boolean => {
-    return isOperator(getUserWithRole?.role);
-  };
-
   const refreshPermissionsRef = useRef<Promise<void> | null>(null);
   const lastRefreshAttempt = useRef<number>(0);
   const refreshCooldown = 30000;
-  
+
   const refreshPermissions = useCallback(async (): Promise<void> => {
     const now = Date.now();
     if (now - lastRefreshAttempt.current < refreshCooldown) {
@@ -385,13 +374,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       lastRefreshAttempt.current = now;
       refreshPermissionsRef.current = (async () => {
-        // Re-fetch the current user to get fresh role/permissions data
-        const currentUser = await authService.getCurrentUser();
-        const permissions = await derivePermissionsFromUser(currentUser);
+        const userType = StorageManager.getItem<string>('user_type');
+        const isSystemUser = userType === 'system';
+        const currentUser = await authService.getCurrentUser(isSystemUser);
+        const permissions = await derivePermissionsFromUser(currentUser, isSystemUser);
         setUserPermissions(permissions);
         StorageManager.setPermissions(permissions);
       })();
-      
+
       await refreshPermissionsRef.current;
     } finally {
       refreshPermissionsRef.current = null;
@@ -408,39 +398,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return userPermissions.permissions.some((p: any) => p.name === permission);
   };
 
-  useEffect(() => {
-    const initializePermissions = async () => {
-      try {
-        const savedPermissions = StorageManager.getPermissions();
-        if (savedPermissions) {
-          setUserPermissions(savedPermissions);
-          return;
-        }
-        
-        if (user && !savedPermissions && !userPermissions) {
-          const token = StorageManager.getItem(StorageManager.KEYS.TOKEN);
-          if (token && typeof token === 'string' && !isTokenExpired(token)) {
-            try {
-              // Derive permissions from the current user's role data
-              const currentUser = await authService.getCurrentUser();
-              const permissions = await derivePermissionsFromUser(currentUser);
-              setUserPermissions(permissions);
-              StorageManager.setPermissions(permissions);
-            } catch (error) {
-              // Silent fail
-            }
-          }
-        }
-      } catch (error) {
-        // Silent fail
-      }
-    };
-
-    if (!loading) {
-      initializePermissions();
-    }
-  }, [user, loading]);
-
   const value: AuthContextType = {
     user,
     login,
@@ -453,10 +410,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     hasPermission,
     hasRole,
     canAccessRoute,
-    isOwner: checkIsOwner,
-    isManager: checkIsManager,
-    isUser: checkIsUser,
-    isOperator: checkIsOperator,
     getUserWithRole: () => getUserWithRole,
     userPermissions,
     refreshPermissions,
@@ -470,6 +423,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     </AuthContext.Provider>
   );
 };
+
 
 
 export const useAuth = (): AuthContextType => {

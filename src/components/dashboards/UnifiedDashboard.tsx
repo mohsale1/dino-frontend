@@ -75,15 +75,16 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({ className }) => {
   
   // Permission hooks
   const {
-    isSuperAdmin,
-    isAdmin,
-    isOperator,
     canViewDashboard,
     canManageUsers,
-    canManageOrders,
+    canManageOrders: canManageOrdersPermission,
     canManageMenu,
     canManageTables,
   } = usePermissions();
+
+  const canAccessSystem = hasBackendPermission('system.workspaces.read');
+  const canManageWorkspace = hasBackendPermission('application.workspace.manage') && !canAccessSystem;
+  const canManageOrders = hasBackendPermission('application.orders.read') && !canManageWorkspace && !canAccessSystem;
 
   // Helper function to get 30-day date range (1 month default)
   const getLast30DaysRange = (): DateRange => {
@@ -129,7 +130,7 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({ className }) => {
       {
         /* REMOVED MOCK DATA - NOW USING REAL API
         /* OLD MOCK DATA - REPLACED WITH COMPREHENSIVE DATA
-        if (isAdmin) {
+        if (canManageWorkspace) {
           data = {
             summary: {
               total_orders: 856,
@@ -203,7 +204,7 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({ className }) => {
               { id: '15', table_number: 'T-15', status: 'available', capacity: 8, area_id: 'Private Room' },
             ],
           };
-        } else if (isOperator) {
+        } else if (canManageOrders) {
           // Operator mock data
           data = {
             venueId: 'venue-1',
@@ -259,11 +260,11 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({ className }) => {
       };
 
       // Use permission hooks to determine which dashboard to load
-      if (isSuperAdmin) {
+      if (canAccessSystem) {
         data = await dashboardService.getSuperAdminDashboard(dateParams, workspaceId ?? undefined);
-      } else if (isAdmin) {
+      } else if (canManageWorkspace) {
         data = await dashboardService.getAdminDashboard(dateParams, workspaceId ?? undefined);
-      } else if (isOperator) {
+      } else if (canManageOrders) {
         data = await dashboardService.getOperatorDashboard(workspaceId ?? undefined);
       } else {
         // Default to admin dashboard
@@ -573,7 +574,7 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({ className }) => {
     } finally {
       setLoading(false);
     }
-  }, [isSuperAdmin, isAdmin, isOperator, user, dateRange, workspaceId]);
+  }, [canAccessSystem, canManageWorkspace, canManageOrders, user, dateRange, workspaceId]);
 
   const refreshDashboard = async () => {
     setRefreshing(true);
@@ -595,7 +596,7 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({ className }) => {
 
     // Load dashboard data for authenticated users.
     // Trigger when we have either a venue ID, a workspace ID, or superAdmin access.
-    if (currentVenue?.id || workspaceId || isSuperAdmin) {
+    if (currentVenue?.id || workspaceId || canAccessSystem) {
       loadDashboardData();
     } else {
       setLoading(false);
@@ -606,11 +607,11 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({ className }) => {
     return () => {
       document.documentElement.style.scrollBehavior = 'auto';
     };
-  }, [currentVenue?.id, workspaceId, user, loadDashboardData, isSuperAdmin]);
+  }, [currentVenue?.id, workspaceId, user, loadDashboardData, canAccessSystem]);
 
   // Live data polling - refresh every 30 seconds
   useEffect(() => {
-    if (!user || !(currentVenue?.id || workspaceId || isSuperAdmin)) {
+    if (!user || !(currentVenue?.id || workspaceId || canAccessSystem)) {
       return;
     }
 
@@ -620,7 +621,7 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({ className }) => {
     }, 30000); // 30 seconds
 
     return () => clearInterval(interval);
-  }, [user, currentVenue?.id, workspaceId, isSuperAdmin, loadDashboardData]);
+  }, [user, currentVenue?.id, workspaceId, canAccessSystem, loadDashboardData]);
 
   // Don't block UI with loading or error states
   // Show dashboard immediately with empty/default data
@@ -636,7 +637,7 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({ className }) => {
   // }
 
   return (
-    <VenueAssignmentCheck showFullPage={!isSuperAdmin}>
+    <VenueAssignmentCheck showFullPage={!canAccessSystem}>
       <Box
         className={className}
         sx={{

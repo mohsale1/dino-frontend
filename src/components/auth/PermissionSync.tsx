@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '../../contexts/common/Auth';
+import { StorageManager } from '../../utils/storage';
 
 interface PermissionSyncProps {
   children: React.ReactNode;
@@ -63,7 +64,7 @@ const PermissionSync: React.FC<PermissionSyncProps> = ({
   // Listen for permission changes in other tabs
   useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'dino_permissions' && e.newValue) {
+      if (e.key === StorageManager.KEYS.PERMISSIONS && e.newValue) {
         try {
           // Permissions updated in another tab, refresh local state
           handleManualRefresh();
@@ -112,7 +113,7 @@ const PermissionSync: React.FC<PermissionSyncProps> = ({
               )}
               {userPermissions && (
                 <div style={{ color: '#666', fontSize: '10px' }}>
-                  {userPermissions.permission_count || 0} permissions loaded
+                  {userPermissions?.permissions?.length || 0} permissions loaded
                 </div>
               )}
             </div>
@@ -167,7 +168,7 @@ export const usePermissionSync = () => {
     isSyncing,
     lastSync,
     syncError,
-    permissionCount: userPermissions?.permission_count || 0,
+    permissionCount: userPermissions?.permissions?.length || 0,
     hasPermissions: !!userPermissions?.permissions?.length
   };
 };

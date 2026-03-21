@@ -22,9 +22,7 @@ import {
   Kitchen,
   CheckCircle,
 } from '@mui/icons-material';
-import { usePermissions } from '../../auth';
-import PermissionService from '../../../services/auth';
-import { isOwner as isOwnerRole, isManager as isManagerRole, isUser as isUserRole } from '../../../types/auth/roles';
+import { useAuth } from '../../../contexts/common/Auth';
 
 interface VenueDashboardStats {
   total_orders: number;
@@ -98,11 +96,9 @@ const AnimatedCounter: React.FC<{ value: number; duration?: number; prefix?: str
 };
 
 const DashboardStats: React.FC<DashboardStatsProps> = ({ stats, isLive = false, lastUpdated }) => {
-  const { isOwner, isManager, isUser, user } = usePermissions();
+  const { hasBackendPermission } = useAuth();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-
-  // Feature flags removed - always show stats
 
   // Owner Stats
   const ownerStats: StatCard[] = [
@@ -202,22 +198,10 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({ stats, isLive = false, 
     },
   ];
 
-  const getStatsToRender = () => {
-    // Use permission hooks first (most reliable)
-    if (isOwner) return ownerStats;
-    if (isManager) return managerStats;
-    if (isUser) return userStats;
-    
-    // Fallback to role detection using constants
-    const backendRole = PermissionService.getBackendRole();
-    const detectedRole = backendRole?.name || user?.role;
-    
-    if (isOwnerRole(detectedRole)) return ownerStats;
-    if (isManagerRole(detectedRole)) return managerStats;
-    if (isUserRole(detectedRole)) return userStats;
-    
-    // Default fallback
-    return managerStats;
+  const getStatsToRender = (): StatCard[] => {
+    if (hasBackendPermission('application.workspace.manage')) return ownerStats;
+    if (hasBackendPermission('application.users.read')) return managerStats;
+    return userStats;
   };
 
   const statsToRender = getStatsToRender();
