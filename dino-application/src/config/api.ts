@@ -51,40 +51,40 @@ export const getBackendUrl = (): string => {
  * All services should import and use this configuration
  * Now uses runtime configuration for all values
  */
-export const API_CONFIG = {
-  // URLs - from runtime config
-  BASE_URL: getApiBaseUrl(),
-  WS_URL: getWebSocketUrl(),
-  BASE_DOMAIN: getBaseUrl(),
-  BACKEND_URL: getBackendUrl(),
-  
-  // Timeouts - from runtime config
-  TIMEOUT: getConfigValue('API_TIMEOUT'),
-  WS_TIMEOUT: 5000, // 5 seconds for WebSocket connection
-  
-  // Retry configuration
-  RETRY_ATTEMPTS: 3,
-  RETRY_DELAY: 1000, // 1 second
-  
-  // Headers
-  DEFAULT_HEADERS: {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json',
-  },
-  
-  // Authentication
-  TOKEN_KEY: 'dino_token',
-  REFRESH_TOKEN_KEY: 'dino_refresh_token',
-  USER_KEY: 'dino_user',
-  
-  // WebSocket configuration
-  WS_RECONNECT_ATTEMPTS: 5,
-  WS_RECONNECT_DELAY: 1000,
-  WS_HEARTBEAT_INTERVAL: 30000, // 30 seconds
-  
-  // Rate limiting
-  RATE_LIMIT: getConfigValue('API_RATE_LIMIT'),
-} as const;
+// Use a Proxy so URL values are resolved fresh on every access,
+// preventing stale config frozen at module-load time.
+export const API_CONFIG = new Proxy(
+  {
+    // Static / non-runtime values
+    WS_TIMEOUT: 5000,
+    RETRY_ATTEMPTS: 3,
+    RETRY_DELAY: 1000,
+    DEFAULT_HEADERS: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+    TOKEN_KEY: 'dino_token',
+    REFRESH_TOKEN_KEY: 'dino_refresh_token',
+    USER_KEY: 'dino_user',
+    WS_RECONNECT_ATTEMPTS: 5,
+    WS_RECONNECT_DELAY: 1000,
+    WS_HEARTBEAT_INTERVAL: 30000,
+  } as any,
+  {
+    get(target, prop: string) {
+      // Dynamic runtime values resolved on every access
+      switch (prop) {
+        case 'BASE_URL':    return getApiBaseUrl();
+        case 'WS_URL':      return getWebSocketUrl();
+        case 'BASE_DOMAIN': return getBaseUrl();
+        case 'BACKEND_URL': return getBackendUrl();
+        case 'TIMEOUT':     return getConfigValue('API_TIMEOUT');
+        case 'RATE_LIMIT':  return getConfigValue('API_RATE_LIMIT');
+        default:            return target[prop];
+      }
+    },
+  }
+);
 
 // =============================================================================
 // DEVELOPMENT HELPERS

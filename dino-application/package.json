@@ -45,7 +45,7 @@
     "zlib-browserify": "^0.0.1"
   },
   "scripts": {
-    "start": "PORT=3000 craco start",
+    "start": "craco start",
     "build": "craco build",
     "test": "craco test",
     "eject": "react-scripts eject"

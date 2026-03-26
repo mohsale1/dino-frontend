@@ -2,14 +2,6 @@ const path = require('path');
 const webpack = require('webpack');
 
 module.exports = {
-  devServer: {
-    hot: true,
-    port: 3001,
-    historyApiFallback: true,
-    client: {
-      overlay: { errors: true, warnings: false },
-    },
-  },
   webpack: {
     alias: {
       '@': path.resolve(__dirname, 'src'),
@@ -59,6 +51,6 @@ module.exports = {
     },
   },
   typescript: {
-    enableTypeChecking: false,
+    enableTypeChecking: true,
   },
 };

@@ -10,16 +10,16 @@ const isDevelopment = window.location.hostname === 'localhost' ||
 if (isDevelopment) {
   // In development, don't set window.APP_CONFIG
   // Let the React app use process.env variables directly
-  console.log('Development mode detected - using environment variables from .env files');
+  console.log('🔧 Development mode detected - using environment variables from .env files');
   
   // Optional: Log that config.js is not overriding in development
   if (window.APP_CONFIG) {
-    console.warn('window.APP_CONFIG was already set - this should not happen in development');
+    console.warn('⚠️ window.APP_CONFIG was already set - this should not happen in development');
   }
 } else {
   // In production, this file will be replaced by generate-config.sh
   // This is a fallback configuration
-  console.log('Production fallback configuration loaded');
+  console.log('🏭 Production fallback configuration loaded');
   
   window.APP_CONFIG = {
     // API Configuration

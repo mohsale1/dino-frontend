@@ -198,8 +198,15 @@ export const logRuntimeConfig = (): void => {
   }
 };
 
-// Export the runtime configuration instance
-export const RUNTIME_CONFIG = getRuntimeConfig();
+// Use a Proxy so every property access calls getRuntimeConfig() fresh.
+// This prevents the config from being frozen at module-load time before
+// window.APP_CONFIG or process.env values are fully available.
+export const RUNTIME_CONFIG: RuntimeConfig = new Proxy({} as RuntimeConfig, {
+  get(_target, prop: string) {
+    return getRuntimeConfig()[prop as keyof RuntimeConfig];
+  },
+});
+
 
 if (typeof window !== 'undefined') {
   // Delay logging to ensure window.APP_CONFIG is loaded
