@@ -59,6 +59,7 @@ const AppLayout: React.FC = () => {
   const isCheckoutRoute = location.pathname.includes('/checkout/');
   const isOrderTrackingRoute = location.pathname.includes('/order-tracking/') || location.pathname.includes('/order/');
   const isHomePage = location.pathname === '/' || location.pathname === '/home';
+  const isLoginRoute = location.pathname === '/login' || location.pathname === '/register';
   const isCustomerFacingRoute = isPublicMenuRoute || isCheckoutRoute || isOrderTrackingRoute;
 
   const handleLogout = () => {
@@ -312,15 +313,15 @@ const AppLayout: React.FC = () => {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: isAdminRoute ? '100vh' : 'auto', minHeight: isAdminRoute ? 'unset' : '100vh', overflow: 'visible', margin: 0, padding: 0, width: '100%', maxWidth: '100%' }}>
-      {/* Enhanced AppHeader - Hidden for customer facing pages and admin routes */}
-      {!isCustomerFacingRoute && !isAdminRoute && (
+      {/* Enhanced AppHeader - Hidden for customer facing pages, admin routes, and auth pages */}
+      {!isCustomerFacingRoute && !isAdminRoute && !isLoginRoute && (
         <AppHeader />
       )}
 
       {/* Admin Layout with Responsive Sidebar */}
       {isAdminRoute && user ? (
         <Box sx={{ display: 'flex', height: '100vh', overflow: 'visible', position: 'relative', margin: 0, padding: 0, width: '100%', maxWidth: '100%' }}>
-          {/* Sidebar â€” always rendered; collapsed by default on mobile */}
+          {/* Sidebar — always rendered; collapsed by default on mobile */}
           <AppSidebar isTablet={isTablet} />
 
           {/* Main Content */}
