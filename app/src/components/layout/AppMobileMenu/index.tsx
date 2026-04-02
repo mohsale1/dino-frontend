@@ -51,6 +51,7 @@ import PermissionService from '../../../services/auth/permission';
 import { useUserData } from '../../../contexts/application/UserData';
 import { venueService } from '../../../services/application/venue.service';
 import { usePermissionCheck } from '../../common/PermissionWrapper';
+import { PERMISSIONS } from '../../../types/auth/permissions';
 
 interface AppMobileMenuProps {
   open: boolean;
@@ -91,7 +92,7 @@ const AppMobileMenu: React.FC<AppMobileMenuProps> = ({
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-  const canManageVenue = hasBackendPermission('application.workspace.update');
+  const canManageVenue = hasBackendPermission(PERMISSIONS.WORKSPACE_UPDATE);
 
   // Load venue status from UserDataContext
   useEffect(() => {
@@ -150,16 +151,16 @@ const AppMobileMenu: React.FC<AppMobileMenuProps> = ({
     onLogout();
   };
 
-  // Admin menu items â€” each mapped to its required backend permission
+  // Admin menu items — each mapped to its required backend permission
   const allAdminMenuItems = [
-    { label: 'Dashboard', path: '/admin',           icon: <Dashboard />,    permission: 'application.dashboard.read' },
-    { label: 'Menu',      path: '/admin/menu',      icon: <MenuBook />,     permission: 'application.items.read' },
-    { label: 'Location',  path: '/admin/locations', icon: <Store />,        permission: 'application.areas.read' },
-    { label: 'Orders',    path: '/admin/orders',    icon: <ShoppingCart />, permission: 'application.orders.read' },
-    { label: 'Catalog',   path: '/admin/catalog',   icon: <Star />,         permission: 'application.categories.read' },
-    { label: 'Coupons',   path: '/admin/coupons',   icon: <LocalOffer />,   permission: 'application.coupons.read' },
-    { label: 'Users',     path: '/admin/users',     icon: <People />,       permission: 'application.users.read' },
-    { label: 'Settings',  path: '/admin/settings',  icon: <Settings />,     permission: 'application.workspace.read' },
+    { label: 'Dashboard', path: '/admin',           icon: <Dashboard />,    permission: PERMISSIONS.APPLICATION_DASHBOARD_VIEW },
+    { label: 'Menu',      path: '/admin/menu',      icon: <MenuBook />,     permission: PERMISSIONS.APPLICATION_POS_VIEW },
+    { label: 'Location',  path: '/admin/locations', icon: <Store />,        permission: PERMISSIONS.APPLICATION_LOCATIONS_VIEW },
+    { label: 'Orders',    path: '/admin/orders',    icon: <ShoppingCart />, permission: PERMISSIONS.APPLICATION_ORDERS_VIEW },
+    { label: 'Catalog',   path: '/admin/catalog',   icon: <Star />,         permission: PERMISSIONS.APPLICATION_CATALOG_VIEW },
+    { label: 'Coupons',   path: '/admin/coupons',   icon: <LocalOffer />,   permission: PERMISSIONS.APPLICATION_COUPONS_VIEW },
+    { label: 'Users',     path: '/admin/users',     icon: <People />,       permission: PERMISSIONS.APPLICATION_USERS_VIEW },
+    { label: 'Settings',  path: '/admin/settings',  icon: <Settings />,     permission: PERMISSIONS.APPLICATION_SETTINGS_VIEW },
   ];
 
   const adminMenuItems = allAdminMenuItems.filter(item =>
@@ -348,7 +349,7 @@ const AppMobileMenu: React.FC<AppMobileMenuProps> = ({
           </Box>
         )}
 
-        {/* Venue Status â€” only for users with workspace update permission */}
+        {/* Venue Status — only for users with workspace update permission */}
         {user && canManageVenue && (
           <Box sx={{ p: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
             <Paper

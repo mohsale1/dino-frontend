@@ -84,6 +84,7 @@ html {
   width: 100%;
   max-width: 100%;
   height: 100%;
+  overscroll-behavior: none;
 }
 
 body {
@@ -100,6 +101,7 @@ body {
   width: 100%;
   max-width: 100%;
   height: 100%;
+  overscroll-behavior: none;
 }
 
 /* Root container */

@@ -34,7 +34,7 @@ const AreaCard: React.FC<AreaCardProps> = ({
     <Paper
       elevation={0}
       sx={{
-        p: 3,
+        p: { xs: 2, sm: 3 },
         backgroundColor: '#ffffff',
         border: '1px solid #e2e8f0',
         borderRadius: 2,
@@ -49,11 +49,11 @@ const AreaCard: React.FC<AreaCardProps> = ({
       }}
       onClick={() => onEdit(area)}
     >
-      <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, mb: 2 }}>
+      <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: { xs: 1.5, sm: 2 }, mb: { xs: 1.5, sm: 2 } }}>
         <Box
           sx={{
-            width: 48,
-            height: 48,
+            width: { xs: 40, sm: 48 },
+            height: { xs: 40, sm: 48 },
             borderRadius: 1.5,
             bgcolor: 'rgba(25,118,210,0.08)',
             display: 'flex',
@@ -105,7 +105,7 @@ const AreaCard: React.FC<AreaCardProps> = ({
           gap: 1,
           justifyContent: 'flex-end',
           mt: 'auto',
-          pt: 2,
+          pt: { xs: 1.5, sm: 2 },
           borderTop: '1px solid #f1f5f9',
         }}
         onClick={(e) => e.stopPropagation()}
@@ -120,12 +120,12 @@ const AreaCard: React.FC<AreaCardProps> = ({
             sx={{
               color: '#64748b',
               '&:hover': {
-                bgcolor: 'rgba(25,118,210,0.08)',
-                color: '#1976d2',
+                color: '#0f172a',
+                bgcolor: 'rgba(15,23,42,0.06)',
               },
             }}
           >
-            <EditIcon fontSize="small" />
+            <EditIcon sx={{ fontSize: 16 }} />
           </IconButton>
         </Tooltip>
         <Tooltip title="Delete area">
@@ -138,12 +138,12 @@ const AreaCard: React.FC<AreaCardProps> = ({
             sx={{
               color: '#64748b',
               '&:hover': {
-                bgcolor: 'rgba(239,68,68,0.08)',
-                color: '#dc2626',
+                color: '#f43f5e',
+                bgcolor: 'rgba(244,63,94,0.08)',
               },
             }}
           >
-            <DeleteIcon fontSize="small" />
+            <DeleteIcon sx={{ fontSize: 16 }} />
           </IconButton>
         </Tooltip>
       </Box>

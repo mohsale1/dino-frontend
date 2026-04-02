@@ -10,6 +10,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../contexts/common/Auth';
 import DinoLogo from '../../../components/ui/DinoLogo';
+import { PageTransitionLoader } from '../../../components/ui/PageTransitionLoader';
 
 const BRAND = {
   primary:      '#1976D2',
@@ -44,6 +45,7 @@ const SystemLoginPage: React.FC = () => {
   const [password,     setPassword]     = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading,      setLoading]      = useState(false);
+  const [navigating,   setNavigating]   = useState(false);
   const [error,        setError]        = useState<string | null>(null);
 
   React.useEffect(() => {
@@ -60,6 +62,7 @@ const SystemLoginPage: React.FC = () => {
     setError(null);
     try {
       await login(email.trim(), password, true);
+      setNavigating(true);
       navigate('/system/dashboard', { replace: true });
     } catch (err: any) {
       setError(err?.message || 'Invalid credentials. Please try again.');
@@ -68,7 +71,6 @@ const SystemLoginPage: React.FC = () => {
     }
   }, [email, password, login, navigate]);
 
-  // ── Shared form ───────────────────────────────────────────────────────────────
   const form = (
     <Box component="form" onSubmit={handleSubmit} display="flex" flexDirection="column" gap={2.5}>
       {error && (
@@ -76,7 +78,6 @@ const SystemLoginPage: React.FC = () => {
           {error}
         </Alert>
       )}
-
       <TextField
         label="Email Address"
         type="email"
@@ -86,7 +87,6 @@ const SystemLoginPage: React.FC = () => {
         disabled={loading}
         sx={fieldSx}
       />
-
       <TextField
         label="Password"
         type={showPassword ? 'text' : 'password'}
@@ -105,7 +105,6 @@ const SystemLoginPage: React.FC = () => {
           ),
         }}
       />
-
       <Button
         type="submit"
         variant="contained"
@@ -120,7 +119,7 @@ const SystemLoginPage: React.FC = () => {
           borderRadius: 2,
           textTransform: 'none',
           boxShadow: '0 4px 14px rgba(25,118,210,0.35)',
-          '&:hover:not(:disabled)': { bgcolor: BRAND.primaryHover, boxShadow: '0 6px 20px rgba(25,118,210,0.45)' },
+          '&:hover:not(:disabled)': { bgcolor: BRAND.primaryHover },
           '&:disabled': { bgcolor: 'rgba(25,118,210,0.4)' },
         }}
       >
@@ -130,11 +129,11 @@ const SystemLoginPage: React.FC = () => {
   );
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: BRAND.panelBg }}>
+    <>
+    <PageTransitionLoader visible={navigating} message="Signing in to System..." />
+    <Box sx={{ display: 'flex', height: '100vh', overflow: 'hidden', bgcolor: BRAND.panelBg }}>
 
-      {/* ════════════════════════════════════════════════════════════════════════
-          LEFT BRANDING PANEL — desktop only (md+)
-      ════════════════════════════════════════════════════════════════════════ */}
+      {/* LEFT BRANDING PANEL — desktop only (md+) */}
       <Box sx={{
         display: { xs: 'none', md: 'flex' },
         flex: 1,
@@ -175,9 +174,7 @@ const SystemLoginPage: React.FC = () => {
         </Typography>
       </Box>
 
-      {/* ════════════════════════════════════════════════════════════════════════
-          RIGHT FORM PANEL — desktop (md+)
-      ════════════════════════════════════════════════════════════════════════ */}
+      {/* RIGHT FORM PANEL — desktop (md+) */}
       <Box sx={{
         display: { xs: 'none', md: 'flex' },
         flexDirection: 'column',
@@ -185,12 +182,10 @@ const SystemLoginPage: React.FC = () => {
         alignItems: 'center',
         width: { md: 460, lg: 500 },
         px: { md: 6, lg: 7 },
-        py: 8,
         bgcolor: '#ffffff',
-        minHeight: '100vh',
+        overflow: 'hidden',
       }}>
         <Box width="100%" maxWidth={380}>
-          {/* Desktop title */}
           <Box display="flex" flexDirection="column" mb={4}>
             <Box sx={{ width: 44, height: 44, borderRadius: 2, bgcolor: 'rgba(25,118,210,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 2 }}>
               <LockOutlined sx={{ color: BRAND.primary, fontSize: 22 }} />
@@ -207,24 +202,23 @@ const SystemLoginPage: React.FC = () => {
         </Box>
       </Box>
 
-      {/* ════════════════════════════════════════════════════════════════════════
-          MOBILE LAYOUT — full-page dark header + white card form
-      ════════════════════════════════════════════════════════════════════════ */}
+      {/* MOBILE LAYOUT — dark header + white card */}
       <Box sx={{
         display: { xs: 'flex', md: 'none' },
         flexDirection: 'column',
-        minHeight: '100vh',
+        height: '100vh',
+        overflow: 'hidden',
         width: '100%',
         bgcolor: BRAND.panelBg,
       }}>
-
-        {/* ── Dark branded header ── */}
+        {/* Dark branded header — compact, flexShrink: 0 */}
         <Box sx={{
+          flexShrink: 0,
           position: 'relative',
           overflow: 'hidden',
           px: 3,
-          pt: 6,
-          pb: 5,
+          pt: 4,
+          pb: 3,
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
@@ -238,45 +232,32 @@ const SystemLoginPage: React.FC = () => {
             background: 'radial-gradient(circle, rgba(66,165,245,0.12) 0%, transparent 70%)',
             pointerEvents: 'none',
           },
-          '&::after': {
-            content: '""',
-            position: 'absolute',
-            bottom: -40, left: -30,
-            width: 180, height: 180,
-            borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(25,118,210,0.1) 0%, transparent 70%)',
-            pointerEvents: 'none',
-          },
         }}>
-          {/* Grid overlay */}
           <Box sx={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px)', backgroundSize: '32px 32px', pointerEvents: 'none' }} />
 
           <Box sx={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <DinoLogo size={56} animated />
-
-            <Typography variant="h5" fontWeight={700} color="white" mt={2.5} textAlign="center" sx={{ letterSpacing: '-0.3px' }}>
+            <DinoLogo size={48} animated />
+            <Typography variant="h6" fontWeight={700} color="white" mt={1.5} textAlign="center" sx={{ letterSpacing: '-0.3px' }}>
               System Administration
             </Typography>
-            <Typography variant="body2" color="rgba(255,255,255,0.5)" mt={1} textAlign="center" maxWidth={260} lineHeight={1.6}>
+            <Typography variant="caption" color="rgba(255,255,255,0.5)" mt={0.5} textAlign="center" maxWidth={260} lineHeight={1.5}>
               Secure access for authorised administrators
             </Typography>
-
-            {/* Feature chips row */}
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 3, justifyContent: 'center' }}>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75, mt: 2, justifyContent: 'center' }}>
               {SYSTEM_FEATURES.map(({ icon: Icon, text }, i) => (
                 <Chip
                   key={i}
-                  icon={<Icon sx={{ fontSize: '14px !important', color: `${BRAND.primaryLight} !important` }} />}
+                  icon={<Icon sx={{ fontSize: '13px !important', color: `${BRAND.primaryLight} !important` }} />}
                   label={text}
                   size="small"
                   sx={{
                     bgcolor: BRAND.accent,
                     border: `1px solid ${BRAND.accentBorder}`,
                     color: 'rgba(255,255,255,0.8)',
-                    fontSize: '0.72rem',
+                    fontSize: '0.7rem',
                     fontWeight: 500,
-                    height: 28,
-                    '& .MuiChip-icon': { ml: 0.75 },
+                    height: 26,
+                    '& .MuiChip-icon': { ml: 0.5 },
                   }}
                 />
               ))}
@@ -284,43 +265,43 @@ const SystemLoginPage: React.FC = () => {
           </Box>
         </Box>
 
-        {/* ── White form card — pulls up over the dark header ── */}
+        {/* White form card */}
         <Box sx={{
           flex: 1,
           bgcolor: '#ffffff',
-          borderRadius: '24px 24px 0 0',
+          borderRadius: '20px 20px 0 0',
           px: { xs: 3, sm: 5 },
-          pt: 4,
-          pb: 5,
+          pt: 3.5,
+          pb: 3,
           mt: -2,
           position: 'relative',
           zIndex: 1,
           boxShadow: '0 -4px 24px rgba(0,0,0,0.15)',
+          overflowY: 'auto',
+          '&::-webkit-scrollbar': { width: 4 },
+          '&::-webkit-scrollbar-track': { background: 'transparent' },
+          '&::-webkit-scrollbar-thumb': { background: 'rgba(0,0,0,0.15)', borderRadius: 2 },
         }}>
-          {/* Form header */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3.5 }}>
-            <Box sx={{ width: 38, height: 38, borderRadius: 2, bgcolor: 'rgba(25,118,210,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              <LockOutlined sx={{ color: BRAND.primary, fontSize: 20 }} />
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
+            <Box sx={{ width: 36, height: 36, borderRadius: 2, bgcolor: 'rgba(25,118,210,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <LockOutlined sx={{ color: BRAND.primary, fontSize: 18 }} />
             </Box>
             <Box>
-              <Typography variant="h6" fontWeight={700} color="#0d1b2e" lineHeight={1.2}>
-                Sign In
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                Administrator access only
-              </Typography>
+              <Typography variant="h6" fontWeight={700} color="#0d1b2e" lineHeight={1.2}>Sign In</Typography>
+              <Typography variant="caption" color="text.secondary">Administrator access only</Typography>
             </Box>
           </Box>
 
           {form}
 
-          <Typography variant="caption" color="text.disabled" display="block" textAlign="center" mt={3.5}>
+          <Typography variant="caption" color="text.disabled" display="block" textAlign="center" mt={3}>
             Restricted access. Unauthorised login attempts are logged.
           </Typography>
         </Box>
       </Box>
 
     </Box>
+    </>
   );
 };
 

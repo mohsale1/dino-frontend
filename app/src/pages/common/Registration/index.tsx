@@ -1,6 +1,6 @@
 /**
  * Business Registration Page
- * 
+ *
  * Multi-step registration form for new business accounts
  * UI matches the login page design with split layout
  */
@@ -52,13 +52,20 @@ import {
 import { RegistrationFormData, initialFormData } from './types';
 
 const steps = [
-  { label: 'Code', icon: <VpnKey />, description: 'Enter registration code' },
-  { label: 'Workspace', icon: <BusinessIcon />, description: 'Create your workspace' },
-  { label: 'Billing', icon: <Payment />, description: 'Billing information' },
-  { label: 'Organization', icon: <Store />, description: 'Add organization details' },
-  { label: 'Admin Account', icon: <Person />, description: 'Set up admin account' },
-  { label: 'Review', icon: <Preview />, description: 'Review and submit' },
+  { label: 'Code',         icon: <VpnKey />,       description: 'Enter registration code' },
+  { label: 'Workspace',    icon: <BusinessIcon />,  description: 'Create your workspace' },
+  { label: 'Billing',      icon: <Payment />,       description: 'Billing information' },
+  { label: 'Organization', icon: <Store />,         description: 'Add organization details' },
+  { label: 'Admin Account',icon: <Person />,        description: 'Set up admin account' },
+  { label: 'Review',       icon: <Preview />,       description: 'Review and submit' },
 ];
+
+// Thin scrollbar mixin reused in multiple panels
+const thinScrollbar = {
+  '&::-webkit-scrollbar':       { width: 4 },
+  '&::-webkit-scrollbar-track': { background: 'transparent' },
+  '&::-webkit-scrollbar-thumb': { background: 'rgba(0,0,0,0.15)', borderRadius: 2 },
+};
 
 const RegisterPage: React.FC = () => {
   const navigate = useNavigate();
@@ -67,12 +74,12 @@ const RegisterPage: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
-  const [activeStep, setActiveStep] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [formData, setFormData] = useState<RegistrationFormData>(initialFormData);
-  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
-  const [showPassword, setShowPassword] = useState(false);
+  const [activeStep,          setActiveStep]          = useState(0);
+  const [loading,             setLoading]             = useState(false);
+  const [error,               setError]               = useState('');
+  const [formData,            setFormData]            = useState<RegistrationFormData>(initialFormData);
+  const [validationErrors,    setValidationErrors]    = useState<Record<string, string>>({});
+  const [showPassword,        setShowPassword]        = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // Auto-redirect if already authenticated
@@ -99,7 +106,7 @@ const RegisterPage: React.FC = () => {
         [field]: value,
       }));
     }
-    
+
     // Clear validation error for this field
     if (validationErrors[field]) {
       setValidationErrors(prev => {
@@ -125,15 +132,15 @@ const RegisterPage: React.FC = () => {
           try {
             setLoading(true);
             const response = await apiService.get(`/application/auth/validate-referral?code=${formData.referralCode}`);
-            
+
             if (response.success && response.data) {
               const data = response.data as any;
               const firstName = data.firstName || data.first_name || '';
-              const lastName = data.lastName || data.last_name || '';
+              const lastName  = data.lastName  || data.last_name  || '';
               const referredByName = `${firstName} ${lastName}`.trim() || data.email;
               handleInputChange('referralCodeValid', true);
               handleInputChange('referredByName', referredByName);
-              
+
               // Show success toast with referred by info
               showToast(`Referral code validated! Referred by: ${referredByName}`, 'success');
             } else {
@@ -238,14 +245,12 @@ const RegisterPage: React.FC = () => {
   const handleNext = async () => {
     if (await validateStep(activeStep)) {
       setActiveStep(prev => prev + 1);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
   const handleBack = () => {
     setActiveStep(prev => prev - 1);
     setError('');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleSubmit = async () => {
@@ -260,43 +265,43 @@ const RegisterPage: React.FC = () => {
       // Prepare registration data according to new backend API
       const registrationData = {
         referral_code: formData.referralCode,
-        
+
         // Workspace
-        workspace_name: formData.workspaceName,
+        workspace_name:        formData.workspaceName,
         workspace_description: formData.workspaceDescription,
-        
+
         // Billing Information
-        billing_name: formData.billingName,
-        billing_email: formData.billingEmail,
-        billing_phone: formData.billingPhone,
-        billing_address: formData.billingAddress.address,
-        billing_city: formData.billingAddress.city,
-        billing_state: formData.billingAddress.state,
+        billing_name:        formData.billingName,
+        billing_email:       formData.billingEmail,
+        billing_phone:       formData.billingPhone,
+        billing_address:     formData.billingAddress.address,
+        billing_city:        formData.billingAddress.city,
+        billing_state:       formData.billingAddress.state,
         billing_postal_code: formData.billingAddress.postal_code,
-        billing_country: formData.billingAddress.country,
-        
+        billing_country:     formData.billingAddress.country,
+
         // Organization
         organization: {
-          name: formData.organizationName,
-          description: formData.organizationDescription,
-          address: formData.organizationLocation.address,
-          city: formData.organizationLocation.city,
-          state: formData.organizationLocation.state,
-          country: formData.organizationLocation.country,
-          postal_code: formData.organizationLocation.postal_code,
-          phone: formData.organizationPhone,
-          email: formData.organizationEmail,
+          name:              formData.organizationName,
+          description:       formData.organizationDescription,
+          address:           formData.organizationLocation.address,
+          city:              formData.organizationLocation.city,
+          state:             formData.organizationLocation.state,
+          country:           formData.organizationLocation.country,
+          postal_code:       formData.organizationLocation.postal_code,
+          phone:             formData.organizationPhone,
+          email:             formData.organizationEmail,
           organization_type: formData.organizationType,
-          order_type: formData.orderType,
+          order_type:        formData.orderType,
         },
-        
+
         // Admin User
         admin_user: {
-          email: formData.adminEmail,
-          password: formData.adminPassword,
+          email:      formData.adminEmail,
+          password:   formData.adminPassword,
           first_name: formData.adminFirstName,
-          last_name: formData.adminLastName,
-          phone: formData.adminPhone,
+          last_name:  formData.adminLastName,
+          phone:      formData.adminPhone,
         },
       };
 
@@ -307,22 +312,22 @@ const RegisterPage: React.FC = () => {
         replace: true,
         state: {
           message: 'Registration successful! Please sign in to continue.',
-          email: formData.adminEmail,
+          email:   formData.adminEmail,
         },
       });
     } catch (err: any) {
       const errorMessage = err.response?.data?.detail || err.message || 'Registration failed. Please try again.';
       setError(errorMessage);
-      
+
       // If error is related to a specific field, scroll to that step
       if (errorMessage.toLowerCase().includes('referral') || errorMessage.toLowerCase().includes('code')) {
-        setActiveStep(0); // Referral code step
+        setActiveStep(0);
       } else if (errorMessage.toLowerCase().includes('workspace')) {
-        setActiveStep(1); // Workspace step
+        setActiveStep(1);
       } else if (errorMessage.toLowerCase().includes('organization') || errorMessage.toLowerCase().includes('venue')) {
-        setActiveStep(2); // Organization step
+        setActiveStep(2);
       } else if (errorMessage.toLowerCase().includes('email') || errorMessage.toLowerCase().includes('admin')) {
-        setActiveStep(3); // Admin account step
+        setActiveStep(3);
       }
     } finally {
       setLoading(false);
@@ -390,494 +395,569 @@ const RegisterPage: React.FC = () => {
 
   const features = [
     { icon: <CheckCircle sx={{ fontSize: 20 }} />, text: 'Quick 5-Step Setup' },
-    { icon: <Speed sx={{ fontSize: 20 }} />, text: 'Start Selling in Minutes' },
-    { icon: <Security sx={{ fontSize: 20 }} />, text: 'Secure & Reliable' },
+    { icon: <Speed     sx={{ fontSize: 20 }} />, text: 'Start Selling in Minutes' },
+    { icon: <Security  sx={{ fontSize: 20 }} />, text: 'Secure & Reliable' },
   ];
 
-  return (
-    <Box
-      sx={{
-        minHeight: '100vh',
-        display: 'flex',
-        position: 'relative',
-      }}
-    >
-      {/* Left Side - Branding */}
-      {!isMobile && (
+  // ─── Shared: navigation buttons + login link (rendered inside scrollable area) ───
+  const navigationButtons = (
+    <>
+      <Stack direction="row" spacing={2} justifyContent="space-between" sx={{ mt: 3 }}>
+        <Button
+          variant="outlined"
+          startIcon={<ArrowBack />}
+          onClick={handleBack}
+          disabled={activeStep === 0 || loading}
+          sx={{
+            borderRadius: 2,
+            textTransform: 'none',
+            fontWeight: 600,
+            px: 3,
+            py: 1.5,
+            fontSize: '1rem',
+            borderWidth: 1.5,
+            borderColor: '#e2e8f0',
+            color: '#64748b',
+            '&:hover': {
+              borderWidth: 1.5,
+              borderColor: '#0f172a',
+              backgroundColor: '#f8fafc',
+              color: '#0f172a',
+            },
+            '&:disabled': {
+              borderColor: '#e2e8f0',
+              color: '#cbd5e1',
+            },
+          }}
+        >
+          Back
+        </Button>
+
+        {activeStep < steps.length - 1 ? (
+          <Button
+            variant="contained"
+            endIcon={<ArrowForward />}
+            onClick={handleNext}
+            disabled={loading}
+            sx={{
+              flex: 1,
+              borderRadius: 2,
+              textTransform: 'none',
+              fontWeight: 700,
+              px: 4,
+              py: 1.5,
+              fontSize: '1rem',
+              backgroundColor: '#0f172a',
+              color: '#ffffff',
+              boxShadow: '0 4px 14px rgba(15,23,42,0.25)',
+              '&:hover': {
+                backgroundColor: '#1e293b',
+                boxShadow: '0 6px 20px rgba(15,23,42,0.35)',
+                transform: 'translateY(-1px)',
+              },
+              transition: 'all 0.2s ease',
+            }}
+          >
+            Continue
+          </Button>
+        ) : (
+          <Button
+            variant="contained"
+            endIcon={loading ? undefined : <CheckCircle />}
+            onClick={handleSubmit}
+            disabled={loading}
+            sx={{
+              flex: 1,
+              borderRadius: 2,
+              textTransform: 'none',
+              fontWeight: 700,
+              px: 4,
+              py: 1.5,
+              fontSize: '1rem',
+              backgroundColor: '#10b981',
+              color: '#ffffff',
+              boxShadow: '0 4px 14px rgba(16,185,129,0.25)',
+              '&:hover': {
+                backgroundColor: '#059669',
+                boxShadow: '0 6px 20px rgba(16,185,129,0.35)',
+                transform: 'translateY(-1px)',
+              },
+              '&:disabled': {
+                backgroundColor: '#cbd5e1',
+                color: '#64748b',
+              },
+              transition: 'all 0.2s ease',
+            }}
+          >
+            {loading ? <CircularProgress size={24} sx={{ color: '#ffffff' }} /> : 'Create Account'}
+          </Button>
+        )}
+      </Stack>
+
+      <Divider sx={{ my: 2.5, borderColor: '#e2e8f0' }} />
+      <Box sx={{ textAlign: 'center', pb: 1 }}>
+        <Typography variant="body2" sx={{ color: '#64748b' }}>
+          Already have an account?{' '}
+          <Button
+            variant="text"
+            onClick={() => navigate('/login')}
+            sx={{
+              textTransform: 'none',
+              fontWeight: 700,
+              p: 0,
+              minWidth: 'auto',
+              color: '#0f172a',
+              '&:hover': { backgroundColor: 'transparent', textDecoration: 'underline' },
+            }}
+          >
+            Sign In
+          </Button>
+        </Typography>
+      </Box>
+    </>
+  );
+
+  // ─── Shared: progress bar ────────────────────────────────────────────────────
+  const progressBar = (light: boolean) => (
+    <Box sx={{ mt: light ? 0 : 1 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 0.5 }}>
         <Box
           sx={{
             flex: 1,
-            background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
-            p: 6,
-            position: 'relative',
+            height: 6,
+            borderRadius: 3,
+            backgroundColor: light ? '#e2e8f0' : alpha('#ffffff', 0.15),
             overflow: 'hidden',
           }}
         >
-          {/* Background Pattern */}
           <Box
             sx={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              backgroundImage: `
-                radial-gradient(circle at 20% 30%, ${alpha('#ffffff', 0.05)} 0%, transparent 50%),
-                radial-gradient(circle at 80% 70%, ${alpha('#ffffff', 0.03)} 0%, transparent 50%)
-              `,
+              height: '100%',
+              width: `${progress}%`,
+              backgroundColor: light ? '#0f172a' : '#10b981',
+              transition: 'width 0.3s ease',
+              borderRadius: 3,
             }}
           />
-          
-          {/* Grid Pattern */}
-          <Box
-            sx={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              backgroundImage: `
-                linear-gradient(${alpha('#ffffff', 0.02)} 1px, transparent 1px),
-                linear-gradient(90deg, ${alpha('#ffffff', 0.02)} 1px, transparent 1px)
-              `,
-              backgroundSize: '60px 60px',
-            }}
-          />
-
-          <Box sx={{ position: 'relative', zIndex: 2, textAlign: 'center', maxWidth: 500 }}>
-            {/* Logo */}
-            <Box sx={{ mb: 4, display: 'flex', justifyContent: 'center' }}>
-              <DinoLogo size={64} animated={true} />
-            </Box>
-
-            {/* Title */}
-            <Typography
-              variant="h3"
-              sx={{
-                color: '#ffffff',
-                fontWeight: 800,
-                mb: 2,
-                fontSize: { md: '2.5rem', lg: '3rem' },
-              }}
-            >
-              Join Dino Today
-            </Typography>
-
-            <Typography
-              variant="h6"
-              sx={{
-                color: alpha('#ffffff', 0.8),
-                mb: 5,
-                fontWeight: 400,
-                lineHeight: 1.6,
-              }}
-            >
-              Start your digital transformation journey
-            </Typography>
-
-            {/* Features */}
-            <Stack spacing={2.5} sx={{ mt: 6 }}>
-              {features.map((feature, index) => (
-                <Box
-                  key={index}
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 2,
-                    p: 2,
-                    borderRadius: 2,
-                    backgroundColor: alpha('#ffffff', 0.05),
-                    border: `1px solid ${alpha('#ffffff', 0.1)}`,
-                  }}
-                >
-                  <Box
-                    sx={{
-                      width: 40,
-                      height: 40,
-                      borderRadius: '50%',
-                      backgroundColor: alpha('#ffffff', 0.1),
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      color: '#ffffff',
-                    }}
-                  >
-                    {feature.icon}
-                  </Box>
-                  <Typography
-                    variant="body1"
-                    sx={{
-                      color: '#ffffff',
-                      fontWeight: 500,
-                    }}
-                  >
-                    {feature.text}
-                  </Typography>
-                </Box>
-              ))}
-            </Stack>
-
-            {/* Progress Indicator */}
-            <Box sx={{ mt: 6, p: 3, borderRadius: 2, backgroundColor: alpha('#ffffff', 0.05), border: `1px solid ${alpha('#ffffff', 0.1)}` }}>
-              <Typography variant="body2" sx={{ color: alpha('#ffffff', 0.7), mb: 1 }}>
-                Registration Progress
-              </Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Box sx={{ flex: 1, height: 8, borderRadius: 4, backgroundColor: alpha('#ffffff', 0.1), overflow: 'hidden' }}>
-                  <Box
-                    sx={{
-                      height: '100%',
-                      width: `${progress}%`,
-                      backgroundColor: '#10b981',
-                      transition: 'width 0.3s ease',
-                      borderRadius: 4,
-                    }}
-                  />
-                </Box>
-                <Typography variant="body2" sx={{ color: '#ffffff', fontWeight: 700, minWidth: 45 }}>
-                  {Math.round(progress)}%
-                </Typography>
-              </Box>
-              <Typography variant="caption" sx={{ color: alpha('#ffffff', 0.6), mt: 1, display: 'block' }}>
-                Step {activeStep + 1} of {steps.length}: {steps[activeStep].description}
-              </Typography>
-            </Box>
-          </Box>
         </Box>
-      )}
-
-      {/* Right Side - Form */}
-      <Box
-        sx={{
-          flex: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: { xs: 'flex-start', md: 'center' },
-          alignItems: 'center',
-          pt: { xs: 10, sm: 10, md: 6 },
-          pb: { xs: 4, md: 6 },
-          px: { xs: 3, sm: 4, md: 6 },
-          backgroundColor: '#ffffff',
-          position: 'relative',
-          overflowY: 'auto',
-          minHeight: '100vh',
-        }}
-      >
-        {/* Home Button */}
-        <Box
-          sx={{
-            position: 'absolute',
-            top: { xs: 16, sm: 24 },
-            right: { xs: 16, sm: 24 },
-          }}
+        <Typography
+          variant="caption"
+          sx={{ color: light ? '#0f172a' : '#ffffff', fontWeight: 700, minWidth: 36 }}
         >
-          <Button
-            variant="outlined"
-            startIcon={<Home />}
-            onClick={() => navigate('/')}
+          {Math.round(progress)}%
+        </Typography>
+      </Box>
+      <Typography variant="caption" sx={{ color: light ? '#64748b' : alpha('#ffffff', 0.6) }}>
+        Step {activeStep + 1} of {steps.length}: {steps[activeStep].description}
+      </Typography>
+    </Box>
+  );
+
+  // ─── Shared: compact stepper ─────────────────────────────────────────────────
+  const compactStepper = (
+    <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 0 }}>
+      {steps.map((step, index) => (
+        <Step key={step.label}>
+          <StepLabel
+            StepIconComponent={() => (
+              <Box
+                sx={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor:
+                    index < activeStep
+                      ? '#10b981'
+                      : index === activeStep
+                      ? '#0f172a'
+                      : '#e2e8f0',
+                  color: index <= activeStep ? '#ffffff' : '#94a3b8',
+                  transition: 'all 0.3s ease',
+                  flexShrink: 0,
+                }}
+              >
+                {index < activeStep
+                  ? <CheckCircle sx={{ fontSize: 18 }} />
+                  : React.cloneElement(step.icon, { sx: { fontSize: 16 } })}
+              </Box>
+            )}
             sx={{
-              borderRadius: 2,
-              textTransform: 'none',
-              fontWeight: 600,
-              px: 3,
-              py: 1,
-              fontSize: '0.9375rem',
-              borderWidth: 1.5,
-              borderColor: '#e2e8f0',
-              color: '#64748b',
-              '&:hover': {
-                borderWidth: 1.5,
-                borderColor: '#0f172a',
-                backgroundColor: '#f8fafc',
-                color: '#0f172a',
+              '& .MuiStepLabel-label': {
+                color: index <= activeStep ? '#0f172a' : '#94a3b8',
+                fontWeight: index === activeStep ? 700 : 500,
+                fontSize: '0.75rem',
+                mt: 0.5,
               },
             }}
           >
-            Home
-          </Button>
-        </Box>
+            {step.label}
+          </StepLabel>
+        </Step>
+      ))}
+    </Stepper>
+  );
 
-        {/* Mobile Logo & Progress */}
-        {isMobile && (
-          <Box sx={{ mb: 3, textAlign: 'center', width: '100%' }}>
-            <DinoLogo size={48} animated={true} />
-            <Typography
-              variant="h4"
-              sx={{
-                color: '#0f172a',
-                fontWeight: 800,
-                mt: 2,
-                mb: 3,
-              }}
-            >
-              Create Account
-            </Typography>
-            
-            {/* Mobile Progress */}
-            <Box sx={{ mb: 2 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
-                <Box sx={{ flex: 1, height: 8, borderRadius: 4, backgroundColor: '#e2e8f0', overflow: 'hidden' }}>
-                  <Box
-                    sx={{
-                      height: '100%',
-                      width: `${progress}%`,
-                      backgroundColor: '#0f172a',
-                      transition: 'width 0.3s ease',
-                      borderRadius: 4,
-                    }}
-                  />
+  // ─── Home button ─────────────────────────────────────────────────────────────
+  const homeButton = (
+    <Button
+      variant="outlined"
+      startIcon={<Home />}
+      onClick={() => navigate('/')}
+      size="small"
+      sx={{
+        borderRadius: 2,
+        textTransform: 'none',
+        fontWeight: 600,
+        px: 2,
+        py: 0.75,
+        fontSize: '0.875rem',
+        borderWidth: 1.5,
+        borderColor: '#e2e8f0',
+        color: '#64748b',
+        '&:hover': {
+          borderWidth: 1.5,
+          borderColor: '#0f172a',
+          backgroundColor: '#f8fafc',
+          color: '#0f172a',
+        },
+      }}
+    >
+      Home
+    </Button>
+  );
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // DESKTOP LAYOUT (md+)
+  // ═══════════════════════════════════════════════════════════════════════════
+  const desktopLayout = (
+    <Box sx={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
+
+      {/* LEFT BRANDING PANEL */}
+      <Box
+        sx={{
+          flex: 1,
+          background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+          p: 6,
+          position: 'relative',
+          overflow: 'hidden',
+        }}
+      >
+        {/* Background radial glow */}
+        <Box
+          sx={{
+            position: 'absolute',
+            inset: 0,
+            backgroundImage: `
+              radial-gradient(circle at 20% 30%, ${alpha('#ffffff', 0.05)} 0%, transparent 50%),
+              radial-gradient(circle at 80% 70%, ${alpha('#ffffff', 0.03)} 0%, transparent 50%)
+            `,
+            pointerEvents: 'none',
+          }}
+        />
+        {/* Grid pattern */}
+        <Box
+          sx={{
+            position: 'absolute',
+            inset: 0,
+            backgroundImage: `
+              linear-gradient(${alpha('#ffffff', 0.02)} 1px, transparent 1px),
+              linear-gradient(90deg, ${alpha('#ffffff', 0.02)} 1px, transparent 1px)
+            `,
+            backgroundSize: '60px 60px',
+            pointerEvents: 'none',
+          }}
+        />
+
+        <Box sx={{ position: 'relative', zIndex: 2, textAlign: 'center', maxWidth: 420, width: '100%' }}>
+          <Box sx={{ mb: 3, display: 'flex', justifyContent: 'center' }}>
+            <DinoLogo size={64} animated />
+          </Box>
+
+          <Typography
+            variant="h4"
+            sx={{ color: '#ffffff', fontWeight: 800, mb: 1.5, letterSpacing: '-0.5px' }}
+          >
+            Join Dino Today
+          </Typography>
+
+          <Typography
+            variant="body1"
+            sx={{ color: alpha('#ffffff', 0.7), mb: 4, lineHeight: 1.6 }}
+          >
+            Start your digital transformation journey
+          </Typography>
+
+          {/* Features */}
+          <Stack spacing={2} sx={{ mb: 4 }}>
+            {features.map((feature, index) => (
+              <Box
+                key={index}
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 2,
+                  px: 2,
+                  py: 1.25,
+                  borderRadius: 2,
+                  backgroundColor: alpha('#ffffff', 0.05),
+                  border: `1px solid ${alpha('#ffffff', 0.1)}`,
+                }}
+              >
+                <Box
+                  sx={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: '50%',
+                    backgroundColor: alpha('#ffffff', 0.1),
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#ffffff',
+                    flexShrink: 0,
+                  }}
+                >
+                  {feature.icon}
                 </Box>
-                <Typography variant="body2" sx={{ color: '#0f172a', fontWeight: 700, minWidth: 45 }}>
-                  {Math.round(progress)}%
+                <Typography variant="body2" sx={{ color: '#ffffff', fontWeight: 500 }}>
+                  {feature.text}
                 </Typography>
               </Box>
-              <Typography variant="caption" sx={{ color: '#64748b' }}>
-                Step {activeStep + 1} of {steps.length}: {steps[activeStep].description}
-              </Typography>
-            </Box>
+            ))}
+          </Stack>
+
+          {/* Progress indicator */}
+          <Box
+            sx={{
+              p: 2.5,
+              borderRadius: 2,
+              backgroundColor: alpha('#ffffff', 0.05),
+              border: `1px solid ${alpha('#ffffff', 0.1)}`,
+              textAlign: 'left',
+            }}
+          >
+            <Typography variant="body2" sx={{ color: alpha('#ffffff', 0.7), mb: 1 }}>
+              Registration Progress
+            </Typography>
+            {progressBar(false)}
           </Box>
-        )}
+        </Box>
+      </Box>
 
-        {/* Form Container */}
-        <Box sx={{ width: '100%', maxWidth: 520 }}>
-          {/* Header - Desktop Only */}
-          {!isMobile && (
-            <Box sx={{ mb: 4 }}>
-              <Typography
-                variant="h4"
-                sx={{
-                  color: '#0f172a',
-                  fontWeight: 800,
-                  mb: 1,
-                }}
-              >
-                Create Your Account
-              </Typography>
-              <Typography
-                variant="body1"
-                sx={{
-                  color: '#64748b',
-                }}
-              >
-                Step {activeStep + 1} of {steps.length}: {steps[activeStep].label}
-              </Typography>
-            </Box>
-          )}
+      {/* RIGHT FORM PANEL */}
+      <Box
+        sx={{
+          width: { md: 480, lg: 520 },
+          display: 'flex',
+          flexDirection: 'column',
+          backgroundColor: '#ffffff',
+          overflow: 'hidden',
+        }}
+      >
+        {/* Top bar — home button + title */}
+        <Box
+          sx={{
+            flexShrink: 0,
+            display: 'flex',
+            alignItems: 'flex-start',
+            justifyContent: 'space-between',
+            px: { md: 5, lg: 6 },
+            pt: 3.5,
+            pb: 0,
+          }}
+        >
+          <Box>
+            <Typography variant="h5" fontWeight={800} color="#0f172a" letterSpacing="-0.3px">
+              Create Your Account
+            </Typography>
+            <Typography variant="body2" color="#64748b" mt={0.5}>
+              Step {activeStep + 1} of {steps.length}: {steps[activeStep].label}
+            </Typography>
+          </Box>
+          {homeButton}
+        </Box>
 
-          {/* Stepper - Desktop Only */}
-          {!isMobile && (
-            <Box sx={{ mb: 4 }}>
-              <Stepper activeStep={activeStep} alternativeLabel>
-                {steps.map((step, index) => (
-                  <Step key={step.label}>
-                    <StepLabel
-                      StepIconComponent={() => (
-                        <Box
-                          sx={{
-                            width: 40,
-                            height: 40,
-                            borderRadius: '50%',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            backgroundColor:
-                              index < activeStep
-                                ? '#10b981'
-                                : index === activeStep
-                                ? '#0f172a'
-                                : '#e2e8f0',
-                            color: index <= activeStep ? '#ffffff' : '#94a3b8',
-                            transition: 'all 0.3s ease',
-                          }}
-                        >
-                          {index < activeStep ? (
-                            <CheckCircle sx={{ fontSize: 24 }} />
-                          ) : (
-                            React.cloneElement(step.icon, { sx: { fontSize: 20 } })
-                          )}
-                        </Box>
-                      )}
-                      sx={{
-                        '& .MuiStepLabel-label': {
-                          color: index <= activeStep ? '#0f172a' : '#94a3b8',
-                          fontWeight: index === activeStep ? 700 : 500,
-                          fontSize: '0.875rem',
-                          mt: 1,
-                        },
-                      }}
-                    >
-                      {step.label}
-                    </StepLabel>
-                  </Step>
-                ))}
-              </Stepper>
-            </Box>
-          )}
+        {/* Stepper */}
+        <Box sx={{ flexShrink: 0, px: { md: 5, lg: 6 }, pt: 2.5, pb: 1 }}>
+          {compactStepper}
+        </Box>
 
-          {/* Error Alert */}
+        {/* Scrollable form area */}
+        <Box
+          sx={{
+            flex: 1,
+            overflowY: 'auto',
+            display: 'flex',
+            flexDirection: 'column',
+            px: { md: 5, lg: 6 },
+            pt: 2,
+            pb: 3,
+            ...thinScrollbar,
+          }}
+        >
           {error && (
             <Alert
               severity="error"
               onClose={() => setError('')}
               sx={{
-                mb: 3,
+                mb: 2.5,
                 borderRadius: 2,
                 backgroundColor: alpha('#ef4444', 0.1),
                 color: '#dc2626',
                 border: `1px solid ${alpha('#ef4444', 0.3)}`,
-                '& .MuiAlert-icon': {
-                  color: '#ef4444',
-                },
+                '& .MuiAlert-icon': { color: '#ef4444' },
               }}
             >
               {error}
             </Alert>
           )}
 
-          {/* Form Content */}
-          <Box sx={{ mb: 4 }}>
+          <Box sx={{ mb: 1 }}>
             {renderStepContent(activeStep)}
           </Box>
 
-          {/* Navigation Buttons */}
-          <Stack
-            direction="row"
-            spacing={2}
-            justifyContent="space-between"
-            sx={{ mb: 3 }}
-          >
-            <Button
-              variant="outlined"
-              startIcon={<ArrowBack />}
-              onClick={handleBack}
-              disabled={activeStep === 0 || loading}
-              sx={{
-                borderRadius: 2,
-                textTransform: 'none',
-                fontWeight: 600,
-                px: 3,
-                py: 1.5,
-                fontSize: '1rem',
-                borderWidth: 1.5,
-                borderColor: '#e2e8f0',
-                color: '#64748b',
-                '&:hover': {
-                  borderWidth: 1.5,
-                  borderColor: '#0f172a',
-                  backgroundColor: '#f8fafc',
-                  color: '#0f172a',
-                },
-                '&:disabled': {
-                  borderColor: '#e2e8f0',
-                  color: '#cbd5e1',
-                },
-              }}
-            >
-              Back
-            </Button>
-
-            {activeStep < steps.length - 1 ? (
-              <Button
-                variant="contained"
-                endIcon={<ArrowForward />}
-                onClick={handleNext}
-                disabled={loading}
-                sx={{
-                  flex: 1,
-                  borderRadius: 2,
-                  textTransform: 'none',
-                  fontWeight: 700,
-                  px: 4,
-                  py: 1.5,
-                  fontSize: '1rem',
-                  backgroundColor: '#0f172a',
-                  color: '#ffffff',
-                  boxShadow: '0 4px 14px rgba(15, 23, 42, 0.25)',
-                  '&:hover': {
-                    backgroundColor: '#1e293b',
-                    boxShadow: '0 6px 20px rgba(15, 23, 42, 0.35)',
-                    transform: 'translateY(-1px)',
-                  },
-                  transition: 'all 0.2s ease',
-                }}
-              >
-                Continue
-              </Button>
-            ) : (
-              <Button
-                variant="contained"
-                endIcon={loading ? null : <CheckCircle />}
-                onClick={handleSubmit}
-                disabled={loading}
-                sx={{
-                  flex: 1,
-                  borderRadius: 2,
-                  textTransform: 'none',
-                  fontWeight: 700,
-                  px: 4,
-                  py: 1.5,
-                  fontSize: '1rem',
-                  backgroundColor: '#10b981',
-                  color: '#ffffff',
-                  boxShadow: '0 4px 14px rgba(16, 185, 129, 0.25)',
-                  '&:hover': {
-                    backgroundColor: '#059669',
-                    boxShadow: '0 6px 20px rgba(16, 185, 129, 0.35)',
-                    transform: 'translateY(-1px)',
-                  },
-                  '&:disabled': {
-                    backgroundColor: '#cbd5e1',
-                    color: '#64748b',
-                  },
-                  transition: 'all 0.2s ease',
-                }}
-              >
-                {loading ? (
-                  <CircularProgress size={24} sx={{ color: '#ffffff' }} />
-                ) : (
-                  'Create Account'
-                )}
-              </Button>
-            )}
-          </Stack>
-
-          {/* Login Link */}
-          <Divider sx={{ my: 3, borderColor: '#e2e8f0' }} />
-          <Box sx={{ textAlign: 'center' }}>
-            <Typography
-              variant="body2"
-              sx={{
-                color: '#64748b',
-              }}
-            >
-              Already have an account?{' '}
-              <Button
-                variant="text"
-                onClick={() => navigate('/login')}
-                sx={{
-                  textTransform: 'none',
-                  fontWeight: 700,
-                  p: 0,
-                  minWidth: 'auto',
-                  color: '#0f172a',
-                  '&:hover': {
-                    backgroundColor: 'transparent',
-                    textDecoration: 'underline',
-                  },
-                }}
-              >
-                Sign In
-              </Button>
-            </Typography>
-          </Box>
+          {navigationButtons}
         </Box>
       </Box>
     </Box>
   );
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // MOBILE LAYOUT (xs–sm)
+  // ═══════════════════════════════════════════════════════════════════════════
+  const mobileLayout = (
+    <Box
+      sx={{
+        height: '100vh',
+        overflow: 'hidden',
+        display: 'flex',
+        flexDirection: 'column',
+        bgcolor: '#0f172a',
+      }}
+    >
+      {/* Dark branded header */}
+      <Box
+        sx={{
+          flexShrink: 0,
+          position: 'relative',
+          overflow: 'hidden',
+          px: 3,
+          pt: 3.5,
+          pb: 2.5,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: -60,
+            right: -40,
+            width: 220,
+            height: 220,
+            borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(16,185,129,0.1) 0%, transparent 70%)',
+            pointerEvents: 'none',
+          },
+        }}
+      >
+        {/* Grid overlay */}
+        <Box
+          sx={{
+            position: 'absolute',
+            inset: 0,
+            backgroundImage: `
+              linear-gradient(${alpha('#ffffff', 0.025)} 1px, transparent 1px),
+              linear-gradient(90deg, ${alpha('#ffffff', 0.025)} 1px, transparent 1px)
+            `,
+            backgroundSize: '32px 32px',
+            pointerEvents: 'none',
+          }}
+        />
+
+        <Box sx={{ position: 'relative', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <DinoLogo size={44} animated />
+          <Typography
+            variant="h6"
+            fontWeight={700}
+            color="white"
+            mt={1.25}
+            textAlign="center"
+            sx={{ letterSpacing: '-0.3px' }}
+          >
+            Create Account
+          </Typography>
+          <Box sx={{ mt: 1.5, width: '100%', maxWidth: 320 }}>
+            {progressBar(false)}
+          </Box>
+        </Box>
+      </Box>
+
+      {/* White card — scrollable */}
+      <Box
+        sx={{
+          flex: 1,
+          bgcolor: '#ffffff',
+          borderRadius: '20px 20px 0 0',
+          mt: -1.5,
+          position: 'relative',
+          zIndex: 1,
+          boxShadow: '0 -4px 24px rgba(0,0,0,0.15)',
+          overflowY: 'auto',
+          display: 'flex',
+          flexDirection: 'column',
+          px: { xs: 3, sm: 5 },
+          pt: 3,
+          pb: 3,
+          ...thinScrollbar,
+        }}
+      >
+        {/* Home button + step label */}
+        <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 2 }}>
+          <Box>
+            <Typography variant="subtitle1" fontWeight={700} color="#0f172a" lineHeight={1.2}>
+              {steps[activeStep].label}
+            </Typography>
+            <Typography variant="caption" color="#64748b">
+              Step {activeStep + 1} of {steps.length}
+            </Typography>
+          </Box>
+          {homeButton}
+        </Box>
+
+        {error && (
+          <Alert
+            severity="error"
+            onClose={() => setError('')}
+            sx={{
+              mb: 2,
+              borderRadius: 2,
+              backgroundColor: alpha('#ef4444', 0.1),
+              color: '#dc2626',
+              border: `1px solid ${alpha('#ef4444', 0.3)}`,
+              '& .MuiAlert-icon': { color: '#ef4444' },
+            }}
+          >
+            {error}
+          </Alert>
+        )}
+
+        <Box sx={{ mb: 1 }}>
+          {renderStepContent(activeStep)}
+        </Box>
+
+        {navigationButtons}
+      </Box>
+    </Box>
+  );
+
+  return isMobile ? mobileLayout : desktopLayout;
 };
 
 export default RegisterPage;

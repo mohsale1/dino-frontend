@@ -116,6 +116,12 @@ export const API_ENDPOINTS = {
       ME_DATA: '/application/users/me/data',
     },
     
+    // Roles
+    ROLES: {
+      BASE: '/application/roles',
+      BY_ID: (id: string) => `/application/roles/${id}`,
+    },
+
     // Permissions
     PERMISSIONS: {
       MY_PERMISSIONS: '/application/permissions',

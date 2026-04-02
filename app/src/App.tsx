@@ -7,7 +7,7 @@ import { ProtectedRoute, PermissionSync } from './components/auth';
 import AppLayout from './components/layout/AppLayout';
 import { AppInitializer } from './components/common';
 
-import { AuthProvider } from './contexts/common/Auth';
+import { AuthProvider, useAuth } from './contexts/common/Auth';
 import { ToastProvider } from './contexts/common/Toast';
 import { SidebarProvider } from './contexts/common/Sidebar';
 import { NotificationProvider } from './contexts/common/Notification';
@@ -31,6 +31,8 @@ import { StorageCleanup } from './utils/storage';
 import { tokenRefreshScheduler } from './utils/auth';
 import { apiService } from './utils/api';
 import { initializePerformanceMonitoring } from './utils/performance';
+import { PageTransitionLoader, usePageTransition } from './components/ui/PageTransitionLoader';
+import { ROLE_COLORS } from './constants/app';
 
 const theme = createTheme({
   palette: {
@@ -38,53 +40,29 @@ const theme = createTheme({
   },
 });
 
-const LoadingFallback = memo(() => (
-  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-    <div className="loading-spinner" />
-  </div>
-));
-LoadingFallback.displayName = 'LoadingFallback';
-
-const AppProviders = memo(({ children }: { children: React.ReactNode }) => (
-  <GlobalErrorBoundary>
-    <MuiThemeProvider theme={theme}>
-      <CssBaseline />
-      <ToastProvider>
-        <SidebarProvider>
-          <AuthProvider>
-            <PermissionSync>
-              <UserDataProvider>
-                <AppInitializer>
-                  <WorkspaceProvider>
-                    <NotificationProvider>
-                      {children}
-                    </NotificationProvider>
-                  </WorkspaceProvider>
-                </AppInitializer>
-              </UserDataProvider>
-            </PermissionSync>
-          </AuthProvider>
-        </SidebarProvider>
-      </ToastProvider>
-    </MuiThemeProvider>
-  </GlobalErrorBoundary>
-));
-AppProviders.displayName = 'AppProviders';
-
 const PublicMenu = React.lazy(() => import('./pages/public/Menu'));
 
-function App() {
-  useEffect(() => {
-    StorageCleanup.performCleanup();
-    setTimeout(() => apiService.refreshConfiguration(), 200);
-    tokenRefreshScheduler.start();
-    initializePerformanceMonitoring();
-    return () => { tokenRefreshScheduler.stop(); };
-  }, []);
+// Inner component — has access to both AuthContext and RouterContext
+const AppContent = memo(() => {
+  const { loading, userPermissions } = useAuth();
+  const { transitioning } = usePageTransition();
+
+  const rawRole = (userPermissions?.role?.name || '').toLowerCase();
+  const roleKey: keyof typeof ROLE_COLORS = rawRole.includes('owner') || rawRole.includes('super')
+    ? 'Owner'
+    : rawRole.includes('manager') || rawRole.includes('admin')
+    ? 'Manager'
+    : 'User';
+  const loaderColor = ROLE_COLORS[roleKey].primary;
 
   return (
-    <AppProviders>
-      <Suspense fallback={<LoadingFallback />}>
+    <>
+      <PageTransitionLoader
+        visible={loading || transitioning}
+        message={loading ? 'Initialising...' : 'Loading...'}
+        color={loaderColor}
+      />
+      <Suspense fallback={null}>
         <Routes>
           {/* Public routes */}
           <Route element={<AppLayout />}>
@@ -112,6 +90,49 @@ function App() {
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>
+    </>
+  );
+});
+AppContent.displayName = 'AppContent';
+
+const AppProviders = memo(({ children }: { children: React.ReactNode }) => (
+  <GlobalErrorBoundary>
+    <MuiThemeProvider theme={theme}>
+      <CssBaseline />
+      <ToastProvider>
+        <SidebarProvider>
+          <AuthProvider>
+            <PermissionSync>
+              <UserDataProvider>
+                <AppInitializer>
+                  <WorkspaceProvider>
+                    <NotificationProvider>
+                      {children}
+                    </NotificationProvider>
+                  </WorkspaceProvider>
+                </AppInitializer>
+              </UserDataProvider>
+            </PermissionSync>
+          </AuthProvider>
+        </SidebarProvider>
+      </ToastProvider>
+    </MuiThemeProvider>
+  </GlobalErrorBoundary>
+));
+AppProviders.displayName = 'AppProviders';
+
+function App() {
+  useEffect(() => {
+    StorageCleanup.performCleanup();
+    setTimeout(() => apiService.refreshConfiguration(), 200);
+    tokenRefreshScheduler.start();
+    initializePerformanceMonitoring();
+    return () => { tokenRefreshScheduler.stop(); };
+  }, []);
+
+  return (
+    <AppProviders>
+      <AppContent />
     </AppProviders>
   );
 }

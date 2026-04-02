@@ -6,8 +6,10 @@
 
 import { useMemo, useCallback } from 'react';
 import { useAuth } from '../contexts/common/Auth';
+import { PERMISSIONS } from '../types/auth/permissions';
 
 export interface UsePermissionsReturn {
+  // --- Core helpers ---
   hasPermission: (permission: string) => boolean;
   hasAnyPermission: (permissions: string[]) => boolean;
   hasAllPermissions: (permissions: string[]) => boolean;
@@ -16,13 +18,51 @@ export interface UsePermissionsReturn {
   getAccessibleRoutes: () => string[];
   getUserActions: () => string[];
   getAccessibleModules: () => any[];
+
+  // --- Module-visibility flags (system.*.view) ---
   canViewDashboard: boolean;
+  canViewWorkspaces: boolean;
+  canViewUsers: boolean;
+  canViewRoles: boolean;
+  canViewBilling: boolean;
+  canViewRegistration: boolean;
+  canViewSettings: boolean;
+
+  // --- Workspace action flags ---
+  canCreateWorkspaces: boolean;
+  canUpdateWorkspaces: boolean;
+  canDeleteWorkspaces: boolean;
+
+  // --- User action flags ---
+  canCreateUsers: boolean;
+  canUpdateUsers: boolean;
+  canDeleteUsers: boolean;
+
+  // --- Role action flags ---
+  canCreateRoles: boolean;
+  canUpdateRoles: boolean;
+  canDeleteRoles: boolean;
+
+  // --- Billing action flags ---
+  canManageBilling: boolean;
+
+  // --- Registration action flags ---
+  canCreateRegistration: boolean;
+  canDeleteRegistration: boolean;
+
+  // --- Permission action flags ---
+  canCreatePermissions: boolean;
+  canUpdatePermissions: boolean;
+  canDeletePermissions: boolean;
+
+  // --- Legacy flags (kept for backward compatibility) ---
   canManageUsers: boolean;
   canManageVenues: boolean;
   canManageOrders: boolean;
   canManageMenu: boolean;
   canManageTables: boolean;
-  canViewSettings: boolean;
+
+  // --- Derived data ---
   userPermissions: string[];
   userRole: string | null;
   permissionsData: any;
@@ -78,40 +118,154 @@ export const usePermissions = (): UsePermissionsReturn => {
 
   const getAccessibleModules = useCallback((): any[] => [], []);
 
-  // --- Capability flags (single source of truth: backend permissions) ---
+  // --- Module-visibility flags (system.*.view) ---
 
   const canViewDashboard = useMemo(
-    () => hasBackendPermission('application.dashboard.read'),
+    () => hasBackendPermission(PERMISSIONS.SYSTEM_DASHBOARD_VIEW),
     [hasBackendPermission]
   );
 
-  const canManageUsers = useMemo(
-    () => hasBackendPermission('application.users.read'),
+  const canViewWorkspaces = useMemo(
+    () => hasBackendPermission(PERMISSIONS.SYSTEM_WORKSPACES_VIEW),
     [hasBackendPermission]
   );
 
-  const canManageVenues = useMemo(
-    () => hasBackendPermission('application.workspace.update'),
+  const canViewUsers = useMemo(
+    () => hasBackendPermission(PERMISSIONS.SYSTEM_USERS_VIEW),
     [hasBackendPermission]
   );
 
-  const canManageOrders = useMemo(
-    () => hasBackendPermission('application.orders.read'),
+  const canViewRoles = useMemo(
+    () => hasBackendPermission(PERMISSIONS.SYSTEM_ROLES_VIEW),
     [hasBackendPermission]
   );
 
-  const canManageMenu = useMemo(
-    () => hasBackendPermission('application.items.read'),
+  const canViewBilling = useMemo(
+    () => hasBackendPermission(PERMISSIONS.SYSTEM_BILLING_VIEW),
     [hasBackendPermission]
   );
 
-  const canManageTables = useMemo(
-    () => hasBackendPermission('application.tables.read'),
+  const canViewRegistration = useMemo(
+    () => hasBackendPermission(PERMISSIONS.SYSTEM_REGISTRATION_VIEW),
     [hasBackendPermission]
   );
 
   const canViewSettings = useMemo(
-    () => hasBackendPermission('application.workspace.read'),
+    () => hasBackendPermission(PERMISSIONS.SYSTEM_SETTINGS_VIEW),
+    [hasBackendPermission]
+  );
+
+  // --- Workspace action flags ---
+
+  const canCreateWorkspaces = useMemo(
+    () => hasBackendPermission(PERMISSIONS.SYSTEM_WORKSPACES_CREATE),
+    [hasBackendPermission]
+  );
+
+  const canUpdateWorkspaces = useMemo(
+    () => hasBackendPermission(PERMISSIONS.SYSTEM_WORKSPACES_UPDATE),
+    [hasBackendPermission]
+  );
+
+  const canDeleteWorkspaces = useMemo(
+    () => hasBackendPermission(PERMISSIONS.SYSTEM_WORKSPACES_DELETE),
+    [hasBackendPermission]
+  );
+
+  // --- User action flags ---
+
+  const canCreateUsers = useMemo(
+    () => hasBackendPermission(PERMISSIONS.SYSTEM_USERS_CREATE),
+    [hasBackendPermission]
+  );
+
+  const canUpdateUsers = useMemo(
+    () => hasBackendPermission(PERMISSIONS.SYSTEM_USERS_UPDATE),
+    [hasBackendPermission]
+  );
+
+  const canDeleteUsers = useMemo(
+    () => hasBackendPermission(PERMISSIONS.SYSTEM_USERS_DELETE),
+    [hasBackendPermission]
+  );
+
+  // --- Role action flags ---
+
+  const canCreateRoles = useMemo(
+    () => hasBackendPermission(PERMISSIONS.SYSTEM_ROLES_CREATE),
+    [hasBackendPermission]
+  );
+
+  const canUpdateRoles = useMemo(
+    () => hasBackendPermission(PERMISSIONS.SYSTEM_ROLES_UPDATE),
+    [hasBackendPermission]
+  );
+
+  const canDeleteRoles = useMemo(
+    () => hasBackendPermission(PERMISSIONS.SYSTEM_ROLES_DELETE),
+    [hasBackendPermission]
+  );
+
+  // --- Billing action flags ---
+
+  const canManageBilling = useMemo(
+    () => hasBackendPermission(PERMISSIONS.SYSTEM_BILLING_SUBSCRIPTION),
+    [hasBackendPermission]
+  );
+
+  // --- Registration action flags ---
+
+  const canCreateRegistration = useMemo(
+    () => hasBackendPermission(PERMISSIONS.SYSTEM_REGISTRATION_CREATE),
+    [hasBackendPermission]
+  );
+
+  const canDeleteRegistration = useMemo(
+    () => hasBackendPermission(PERMISSIONS.SYSTEM_REGISTRATION_DELETE),
+    [hasBackendPermission]
+  );
+
+  // --- Permission action flags ---
+
+  const canCreatePermissions = useMemo(
+    () => hasBackendPermission(PERMISSIONS.SYSTEM_PERMISSIONS_CREATE),
+    [hasBackendPermission]
+  );
+
+  const canUpdatePermissions = useMemo(
+    () => hasBackendPermission(PERMISSIONS.SYSTEM_PERMISSIONS_UPDATE),
+    [hasBackendPermission]
+  );
+
+  const canDeletePermissions = useMemo(
+    () => hasBackendPermission(PERMISSIONS.SYSTEM_PERMISSIONS_DELETE),
+    [hasBackendPermission]
+  );
+
+  // --- Legacy flags (kept for backward compatibility) ---
+
+  const canManageUsers = useMemo(
+    () => hasBackendPermission(PERMISSIONS.SYSTEM_USERS_VIEW),
+    [hasBackendPermission]
+  );
+
+  const canManageVenues = useMemo(
+    () => hasBackendPermission(PERMISSIONS.SYSTEM_WORKSPACES_UPDATE),
+    [hasBackendPermission]
+  );
+
+  const canManageOrders = useMemo(
+    () => hasBackendPermission(PERMISSIONS.SYSTEM_WORKSPACES_VIEW),
+    [hasBackendPermission]
+  );
+
+  const canManageMenu = useMemo(
+    () => hasBackendPermission(PERMISSIONS.SYSTEM_WORKSPACES_VIEW),
+    [hasBackendPermission]
+  );
+
+  const canManageTables = useMemo(
+    () => hasBackendPermission(PERMISSIONS.SYSTEM_WORKSPACES_VIEW),
     [hasBackendPermission]
   );
 
@@ -137,12 +291,32 @@ export const usePermissions = (): UsePermissionsReturn => {
     getUserActions,
     getAccessibleModules,
     canViewDashboard,
+    canViewWorkspaces,
+    canViewUsers,
+    canViewRoles,
+    canViewBilling,
+    canViewRegistration,
+    canViewSettings,
+    canCreateWorkspaces,
+    canUpdateWorkspaces,
+    canDeleteWorkspaces,
+    canCreateUsers,
+    canUpdateUsers,
+    canDeleteUsers,
+    canCreateRoles,
+    canUpdateRoles,
+    canDeleteRoles,
+    canManageBilling,
+    canCreateRegistration,
+    canDeleteRegistration,
+    canCreatePermissions,
+    canUpdatePermissions,
+    canDeletePermissions,
     canManageUsers,
     canManageVenues,
     canManageOrders,
     canManageMenu,
     canManageTables,
-    canViewSettings,
     userPermissions: userPermissionsList,
     userRole,
     permissionsData: userPermissions,

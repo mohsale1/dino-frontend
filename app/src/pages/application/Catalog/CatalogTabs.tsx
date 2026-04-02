@@ -1,23 +1,18 @@
 /**
- * CatalogTabs Component - Blue System Palette
+ * CatalogTabs Component - System Dark Palette
  *
  * Tabs for items and categories
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Box,
-  Paper,
   Tabs,
   Tab,
   Grid,
-  TextField,
-  InputAdornment,
-  MenuItem,
   Typography,
 } from '@mui/material';
 import {
-  Search as SearchIcon,
   Inventory as InventoryIcon,
   Category as CategoryIcon,
 } from '@mui/icons-material';
@@ -36,21 +31,10 @@ interface CatalogTabsProps {
   onDeleteCategory: (category: Category) => void;
   onToggleAvailability: (itemId: string) => void;
   onImageUpload: (itemId: string, file: File) => void;
+  searchQuery?: string;
+  filterCategory?: string;
+  filterAvailability?: string;
 }
-
-const textFieldSx = {
-  '& .MuiOutlinedInput-root': {
-    '&:hover fieldset': {
-      borderColor: '#94a3b8',
-    },
-    '&.Mui-focused fieldset': {
-      borderColor: '#1976d2',
-    },
-  },
-  '& .MuiInputLabel-root.Mui-focused': {
-    color: '#1976d2',
-  },
-};
 
 const CatalogTabs: React.FC<CatalogTabsProps> = ({
   activeTab,
@@ -63,36 +47,30 @@ const CatalogTabs: React.FC<CatalogTabsProps> = ({
   onDeleteCategory,
   onToggleAvailability,
   onImageUpload,
+  searchQuery = '',
+  filterCategory = 'all',
+  filterAvailability = 'all',
 }) => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filterCategory, setFilterCategory] = useState('all');
-  const [filterAvailability, setFilterAvailability] = useState('all');
-
   const filteredItems = items.filter(item => {
-    const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         item.description?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch =
+      item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.description?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = filterCategory === 'all' || item.categoryId === filterCategory;
-    const matchesAvailability = filterAvailability === 'all' ||
-                               (filterAvailability === 'available' && item.isAvailable) ||
-                               (filterAvailability === 'unavailable' && !item.isAvailable);
+    const matchesAvailability =
+      filterAvailability === 'all' ||
+      (filterAvailability === 'available' && item.isAvailable) ||
+      (filterAvailability === 'unavailable' && !item.isAvailable);
     return matchesSearch && matchesCategory && matchesAvailability;
   });
 
-  const filteredCategories = categories.filter(category =>
-    category.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    category.description?.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredCategories = categories.filter(
+    category =>
+      category.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      category.description?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
-    <Paper
-      elevation={0}
-      sx={{
-        backgroundColor: '#ffffff',
-        border: '1px solid #e2e8f0',
-        borderRadius: 2,
-        overflow: 'visible',
-      }}
-    >
+    <Box sx={{ bgcolor: '#ffffff' }}>
       {/* Tab bar */}
       <Box sx={{ borderBottom: '1px solid #e2e8f0' }}>
         <Tabs
@@ -107,78 +85,32 @@ const CatalogTabs: React.FC<CatalogTabsProps> = ({
               color: '#64748b',
               px: { xs: 2, sm: 3 },
               '&.Mui-selected': {
-                color: '#1976d2',
+                color: '#0f172a',
               },
             },
             '& .MuiTabs-indicator': {
-              backgroundColor: '#1976d2',
+              backgroundColor: '#0f172a',
               height: 3,
             },
           }}
         >
-          <Tab label="Items" value="items" />
-          <Tab label="Categories" value="categories" />
+          <Tab
+            icon={<InventoryIcon sx={{ fontSize: 16 }} />}
+            iconPosition="start"
+            label="Items"
+            value="items"
+          />
+          <Tab
+            icon={<CategoryIcon sx={{ fontSize: 16 }} />}
+            iconPosition="start"
+            label="Categories"
+            value="categories"
+          />
         </Tabs>
       </Box>
 
-      {/* Filter bar */}
-      <Box sx={{ p: { xs: 2, sm: 3 }, borderBottom: '1px solid #e2e8f0' }}>
-        <Box sx={{ display: 'flex', gap: { xs: 1.5, sm: 2 }, flexWrap: 'wrap' }}>
-          <TextField
-            placeholder={`Search ${activeTab}...`}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon sx={{ color: '#94a3b8', fontSize: 20 }} />
-                </InputAdornment>
-              ),
-            }}
-            sx={{
-              flexGrow: 1,
-              minWidth: { xs: '100%', sm: 250 },
-              ...textFieldSx,
-            }}
-          />
-          {activeTab === 'items' && (
-            <>
-              <TextField
-                select
-                label="Category"
-                value={filterCategory}
-                onChange={(e) => setFilterCategory(e.target.value)}
-                sx={{
-                  minWidth: { xs: '100%', sm: 150 },
-                  ...textFieldSx,
-                }}
-              >
-                <MenuItem value="all">All Categories</MenuItem>
-                {categories.map(cat => (
-                  <MenuItem key={cat.id} value={cat.id}>{cat.name}</MenuItem>
-                ))}
-              </TextField>
-              <TextField
-                select
-                label="Availability"
-                value={filterAvailability}
-                onChange={(e) => setFilterAvailability(e.target.value)}
-                sx={{
-                  minWidth: { xs: '100%', sm: 150 },
-                  ...textFieldSx,
-                }}
-              >
-                <MenuItem value="all">All Items</MenuItem>
-                <MenuItem value="available">Available</MenuItem>
-                <MenuItem value="unavailable">Unavailable</MenuItem>
-              </TextField>
-            </>
-          )}
-        </Box>
-      </Box>
-
       {/* Content area */}
-      <Box sx={{ p: { xs: 2, sm: 3 } }}>
+      <Box sx={{ p: { xs: 2, sm: 3 }, bgcolor: '#f1f5f9' }}>
         {activeTab === 'items' && (
           <Grid container spacing={{ xs: 1.5, sm: 2 }} alignItems="stretch">
             {filteredItems.length === 0 ? (
@@ -189,7 +121,7 @@ const CatalogTabs: React.FC<CatalogTabsProps> = ({
                       width: 56,
                       height: 56,
                       borderRadius: 2,
-                      bgcolor: 'rgba(25,118,210,0.08)',
+                      bgcolor: 'rgba(15,23,42,0.06)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -197,7 +129,7 @@ const CatalogTabs: React.FC<CatalogTabsProps> = ({
                       mb: 2,
                     }}
                   >
-                    <InventoryIcon sx={{ color: '#1976d2', fontSize: 28 }} />
+                    <InventoryIcon sx={{ color: '#0f172a', fontSize: 28 }} />
                   </Box>
                   <Typography variant="h6" sx={{ color: '#0f172a', fontWeight: 600, mb: 0.5 }}>
                     No items found
@@ -234,7 +166,7 @@ const CatalogTabs: React.FC<CatalogTabsProps> = ({
                       width: 56,
                       height: 56,
                       borderRadius: 2,
-                      bgcolor: 'rgba(25,118,210,0.08)',
+                      bgcolor: 'rgba(15,23,42,0.06)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -242,7 +174,7 @@ const CatalogTabs: React.FC<CatalogTabsProps> = ({
                       mb: 2,
                     }}
                   >
-                    <CategoryIcon sx={{ color: '#1976d2', fontSize: 28 }} />
+                    <CategoryIcon sx={{ color: '#0f172a', fontSize: 28 }} />
                   </Box>
                   <Typography variant="h6" sx={{ color: '#0f172a', fontWeight: 600, mb: 0.5 }}>
                     No categories found
@@ -267,7 +199,7 @@ const CatalogTabs: React.FC<CatalogTabsProps> = ({
           </Grid>
         )}
       </Box>
-    </Paper>
+    </Box>
   );
 };
 

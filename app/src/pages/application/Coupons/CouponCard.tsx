@@ -91,7 +91,7 @@ const CouponCard: React.FC<CouponCardProps> = ({
     <Paper
       elevation={0}
       sx={{
-        p: 3,
+        p: { xs: 2, sm: 3 },
         backgroundColor: '#ffffff',
         border: '1px solid #e2e8f0',
         borderRadius: 2,
@@ -101,14 +101,22 @@ const CouponCard: React.FC<CouponCardProps> = ({
         },
       }}
     >
-      <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 2 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'flex-start',
+          justifyContent: 'space-between',
+          gap: { xs: 1.5, sm: 2 },
+          flexWrap: { xs: 'wrap', sm: 'nowrap' },
+        }}
+      >
         {/* Left Section */}
-        <Box sx={{ display: 'flex', gap: 3, flex: 1 }}>
+        <Box sx={{ display: 'flex', gap: { xs: 1.5, sm: 2.5 }, flex: 1, width: '100%' }}>
           {/* Icon */}
           <Box
             sx={{
-              width: 56,
-              height: 56,
+              width: { xs: 44, sm: 56 },
+              height: { xs: 44, sm: 56 },
               borderRadius: 2,
               backgroundColor: typeColor.bg,
               border: `1px solid ${typeColor.border}`,
@@ -124,7 +132,16 @@ const CouponCard: React.FC<CouponCardProps> = ({
 
           {/* Info */}
           <Box sx={{ flex: 1 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
+            {/* Chips Row */}
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                gap: { xs: 0.75, sm: 2 },
+                mb: 1,
+              }}
+            >
               <Typography variant="h6" sx={{ fontWeight: 700, color: '#0f172a', fontSize: '1.125rem' }}>
                 {coupon.name}
               </Typography>
@@ -207,7 +224,7 @@ const CouponCard: React.FC<CouponCardProps> = ({
             )}
 
             {/* Usage Stats */}
-            <Box sx={{ display: 'flex', gap: 3, mt: 2 }}>
+            <Box sx={{ display: 'flex', gap: { xs: 2, sm: 3 }, mt: { xs: 1.5, sm: 2 } }}>
               <Box>
                 <Typography variant="caption" sx={{ color: '#94a3b8', fontSize: '0.75rem', display: 'block' }}>
                   Used
@@ -231,7 +248,7 @@ const CouponCard: React.FC<CouponCardProps> = ({
         </Box>
 
         {/* Actions */}
-        <Box sx={{ display: 'flex', gap: 1 }}>
+        <Box sx={{ display: 'flex', gap: 0.5, flexShrink: 0 }}>
           <Tooltip title="Edit coupon">
             <IconButton
               size="small"
@@ -239,12 +256,12 @@ const CouponCard: React.FC<CouponCardProps> = ({
               sx={{
                 color: '#94a3b8',
                 '&:hover': {
-                  bgcolor: 'rgba(25,118,210,0.08)',
-                  color: '#1976d2',
+                  color: '#0f172a',
+                  bgcolor: 'rgba(15,23,42,0.06)',
                 },
               }}
             >
-              <EditIcon fontSize="small" />
+              <EditIcon sx={{ fontSize: 16 }} />
             </IconButton>
           </Tooltip>
           <Tooltip title="Delete coupon">
@@ -254,12 +271,12 @@ const CouponCard: React.FC<CouponCardProps> = ({
               sx={{
                 color: '#94a3b8',
                 '&:hover': {
-                  bgcolor: 'rgba(239,68,68,0.08)',
-                  color: '#dc2626',
+                  color: '#f43f5e',
+                  bgcolor: 'rgba(244,63,94,0.08)',
                 },
               }}
             >
-              <DeleteIcon fontSize="small" />
+              <DeleteIcon sx={{ fontSize: 16 }} />
             </IconButton>
           </Tooltip>
         </Box>

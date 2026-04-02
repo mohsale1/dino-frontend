@@ -11,6 +11,7 @@ import {
 } from '@mui/icons-material';
 import ReactECharts from 'echarts-for-react';
 import { useAuth } from '../../contexts/common/Auth';
+import { PERMISSIONS } from '../../types/auth/permissions';
 import { systemDashboardService, SystemDashboardData } from '../../services/system/dashboard';
 
 // ─── Brand / design tokens ────────────────────────────────────────────────────
@@ -128,7 +129,7 @@ const ChartCard: React.FC<{ title: string; subtitle?: string; badge?: string; ch
   );
 
 const SystemDashboard: React.FC = () => {
-  const { user, getPermissionsList } = useAuth();
+  const { user, hasBackendPermission } = useAuth();
   const [loading,       setLoading]       = useState(true);
   const [dashboardData, setDashboardData] = useState<SystemDashboardData | null>(null);
   const [error,         setError]         = useState<string | null>(null);
@@ -137,16 +138,6 @@ const SystemDashboard: React.FC = () => {
     const role = (user as any)?.role;
     return typeof role === 'string' ? role : role?.name || 'Admin';
   }, [user]);
-
-  const isPrivileged = useMemo(() => {
-    const role = (user as any)?.role;
-    return ['admin', 'owner', 'manager'].includes((typeof role === 'string' ? role : role?.name || '').toLowerCase());
-  }, [user]);
-
-  const hasPerm = useCallback((resource: string) => {
-    if (isPrivileged) return true;
-    return getPermissionsList().some(p => p === '*' || p.startsWith(resource));
-  }, [isPrivileged, getPermissionsList]);
 
   const loadData = useCallback(async () => {
     try {
@@ -167,12 +158,12 @@ const SystemDashboard: React.FC = () => {
     if (!dashboardData) return [];
     const { stats: s, subscription_stats: ss, registration_code_stats: rs } = dashboardData;
     const cards: HeroStatProps[] = [];
-    if (hasPerm('system.workspaces')) cards.push({ label: 'Total Workspaces', value: s.total_workspaces, icon: <WorkspacesOutlined />, change: s.workspace_growth, trend: s.workspace_growth?.startsWith('+') ? 'up' : 'down' });
-    if (hasPerm('system.users'))      cards.push({ label: 'System Users',     value: s.total_system_users, icon: <GroupOutlined />, change: s.user_growth, trend: s.user_growth?.startsWith('+') ? 'up' : 'down' });
-    if (hasPerm('system.billing'))    cards.push({ label: 'Active Subs',      value: ss.active_subscriptions, icon: <AttachMoneyOutlined />, change: ss.monthly_recurring_revenue > 0 ? `$${fmt(ss.monthly_recurring_revenue)} MRR` : '', trend: 'neutral' });
-    if (hasPerm('system.registration')) cards.push({ label: 'Active Codes',   value: rs.active_codes, icon: <QrCodeOutlined />, change: `${rs.total_uses} uses`, trend: 'neutral' });
+    if (hasBackendPermission(PERMISSIONS.SYSTEM_WORKSPACES_VIEW)) cards.push({ label: 'Total Workspaces', value: s.total_workspaces, icon: <WorkspacesOutlined />, change: s.workspace_growth, trend: s.workspace_growth?.startsWith('+') ? 'up' : 'down' });
+    if (hasBackendPermission(PERMISSIONS.SYSTEM_USERS_VIEW))      cards.push({ label: 'System Users',     value: s.total_system_users, icon: <GroupOutlined />, change: s.user_growth, trend: s.user_growth?.startsWith('+') ? 'up' : 'down' });
+    if (hasBackendPermission(PERMISSIONS.SYSTEM_BILLING_VIEW))    cards.push({ label: 'Active Subs',      value: ss.active_subscriptions, icon: <AttachMoneyOutlined />, change: ss.monthly_recurring_revenue > 0 ? `$${fmt(ss.monthly_recurring_revenue)} MRR` : '', trend: 'neutral' });
+    if (hasBackendPermission(PERMISSIONS.SYSTEM_REGISTRATION_VIEW)) cards.push({ label: 'Active Codes',   value: rs.active_codes, icon: <QrCodeOutlined />, change: `${rs.total_uses} uses`, trend: 'neutral' });
     return cards;
-  }, [dashboardData, hasPerm]);
+  }, [dashboardData, hasBackendPermission]);
 
   // ── ECharts options ───────────────────────────────────────────────────────────
 
@@ -416,7 +407,7 @@ const SystemDashboard: React.FC = () => {
         <Grid container spacing={{ xs: 2, sm: 2.5 }} sx={{ mb: { xs: 2, sm: 2.5 } }}>
 
           {/* Workspace growth — takes 8 cols on lg, full width below */}
-          {hasPerm('system.workspaces') && (
+          {hasBackendPermission(PERMISSIONS.SYSTEM_WORKSPACES_VIEW) && (
             <Grid item xs={12} lg={8}>
               <ChartCard title="Workspace Growth" subtitle="New workspaces registered over time" badge="Last 30 days" minH={280}>
                 {(dashboardData?.workspace_growth ?? []).length === 0 ? (
@@ -435,7 +426,7 @@ const SystemDashboard: React.FC = () => {
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 2, sm: 2.5 }, height: '100%' }}>
 
               {/* User distribution donut */}
-              {hasPerm('system.users') && (
+              {hasBackendPermission(PERMISSIONS.SYSTEM_USERS_VIEW) && (
                 <ChartCard title="User Distribution" subtitle="Breakdown by role type" minH={0}>
                   {(dashboardData?.user_distribution ?? []).length === 0 ? (
                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 200 }}>
@@ -501,7 +492,7 @@ const SystemDashboard: React.FC = () => {
         {/* ── Row 2: Top onboarders + Subscription breakdown side by side ── */}
         <Grid container spacing={{ xs: 2, sm: 2.5 }}>
 
-          {hasPerm('system.users') && (
+          {hasBackendPermission(PERMISSIONS.SYSTEM_USERS_VIEW) && (
             <Grid item xs={12} md={6}>
               <ChartCard title="Top Onboarders" subtitle="Users onboarded per agent" minH={0}>
                 {(dashboardData?.top_onboarders ?? []).length === 0 ? (
@@ -519,7 +510,7 @@ const SystemDashboard: React.FC = () => {
             </Grid>
           )}
 
-          {hasPerm('system.billing') && (
+          {hasBackendPermission(PERMISSIONS.SYSTEM_BILLING_VIEW) && (
             <Grid item xs={12} md={6}>
               <ChartCard title="Subscription Breakdown" subtitle="Active vs trial vs past due" minH={0}>
                 {!dashboardData?.subscription_stats ? (

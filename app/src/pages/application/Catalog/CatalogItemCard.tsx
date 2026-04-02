@@ -71,7 +71,7 @@ const CatalogItemCard: React.FC<CatalogItemCardProps> = ({
       <Box
         onClick={handleImageClick}
         sx={{
-          height: 180,
+          height: { xs: 160, sm: 180 },
           backgroundColor: '#f8fafc',
           display: 'flex',
           alignItems: 'center',
@@ -126,7 +126,7 @@ const CatalogItemCard: React.FC<CatalogItemCardProps> = ({
       </Box>
 
       {/* Content */}
-      <Box sx={{ p: 2.5, flex: 1, display: 'flex', flexDirection: 'column' }}>
+      <Box sx={{ p: { xs: 2, sm: 2.5 }, flex: 1, display: 'flex', flexDirection: 'column' }}>
         <Typography
           variant="h6"
           sx={{
@@ -176,7 +176,7 @@ const CatalogItemCard: React.FC<CatalogItemCardProps> = ({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            mb: 2,
+            mb: { xs: 1.5, sm: 2 },
           }}
         >
           <Typography
@@ -197,7 +197,7 @@ const CatalogItemCard: React.FC<CatalogItemCardProps> = ({
 
         {/* Tags */}
         {item.tags && item.tags.length > 0 && (
-          <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mb: 2 }}>
+          <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mb: { xs: 1.5, sm: 2 } }}>
             {item.tags.slice(0, 3).map((tag, index) => (
               <Chip
                 key={index}
@@ -221,7 +221,7 @@ const CatalogItemCard: React.FC<CatalogItemCardProps> = ({
             display: 'flex',
             gap: 1,
             justifyContent: 'flex-end',
-            pt: 2,
+            pt: { xs: 1.5, sm: 2 },
             borderTop: '1px solid #f1f5f9',
           }}
         >
@@ -232,12 +232,12 @@ const CatalogItemCard: React.FC<CatalogItemCardProps> = ({
               sx={{
                 color: '#94a3b8',
                 '&:hover': {
-                  backgroundColor: 'rgba(25,118,210,0.08)',
-                  color: '#1976d2',
+                  color: '#0f172a',
+                  bgcolor: 'rgba(15,23,42,0.06)',
                 },
               }}
             >
-              <EditIcon fontSize="small" />
+              <EditIcon sx={{ fontSize: 16 }} />
             </IconButton>
           </Tooltip>
           <Tooltip title="Delete item">
@@ -247,12 +247,12 @@ const CatalogItemCard: React.FC<CatalogItemCardProps> = ({
               sx={{
                 color: '#94a3b8',
                 '&:hover': {
-                  backgroundColor: 'rgba(239,68,68,0.08)',
-                  color: '#dc2626',
+                  color: '#f43f5e',
+                  bgcolor: 'rgba(244,63,94,0.08)',
                 },
               }}
             >
-              <DeleteIcon fontSize="small" />
+              <DeleteIcon sx={{ fontSize: 16 }} />
             </IconButton>
           </Tooltip>
         </Box>

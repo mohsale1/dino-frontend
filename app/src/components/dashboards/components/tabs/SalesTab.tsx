@@ -1,745 +1,441 @@
-import React, { useState, useEffect } from 'react';
-import { Box, Grid, Paper, Typography, Card, CardContent } from '@mui/material';
-import { Line, Doughnut, Bar } from 'react-chartjs-2';
+import React from 'react';
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  ArcElement,
-  Title,
-  Tooltip,
-  Legend,
-  Filler,
-  ChartOptions,
-} from 'chart.js';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import TrendingDownIcon from '@mui/icons-material/TrendingDown';
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
-import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
-import ReceiptIcon from '@mui/icons-material/Receipt';
-
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  ArcElement,
-  Title,
-  Tooltip,
-  Legend,
-  Filler
-);
+  Box,
+  Grid,
+  Card,
+  CardContent,
+  Typography,
+  LinearProgress,
+  Chip,
+  Divider,
+  Avatar,
+} from '@mui/material';
+import { alpha } from '@mui/material/styles';
+import {
+  AttachMoney,
+  TrendingUp,
+  ShoppingCart,
+  Category,
+} from '@mui/icons-material';
+import RevenueChart from '../../charts/RevenueChart';
 
 interface SalesTabProps {
-  stats: any;
   dashboardData: any;
-  analyticsData: any;
 }
 
-interface SalesMetrics {
-  todayRevenue: number;
-  totalOrders: number;
-  averageOrderValue: number;
-  revenueGrowth: number;
+const PAYMENT_COLORS: Record<string, string> = {
+  cash: '#2e7d32',
+  card: '#0288d1',
+  upi: '#7b1fa2',
+  online: '#f57c00',
+  credit: '#0288d1',
+  debit: '#0277bd',
+  wallet: '#c62828',
+};
+
+const CATEGORY_COLORS = [
+  '#0288d1',
+  '#2e7d32',
+  '#f57c00',
+  '#7b1fa2',
+  '#c62828',
+  '#00838f',
+  '#558b2f',
+  '#6d4c41',
+];
+
+const formatCurrency = (value: number): string =>
+  `\u20B9${value.toLocaleString('en-IN')}`;
+
+const getPaymentColor = (method: string): string => {
+  const key = method.toLowerCase();
+  for (const k of Object.keys(PAYMENT_COLORS)) {
+    if (key.includes(k)) return PAYMENT_COLORS[k];
+  }
+  return '#546e7a';
+};
+
+interface StatCardProps {
+  title: string;
+  value: string;
+  icon: React.ReactNode;
+  color: string;
+  subtitle?: string;
 }
 
-interface DailySales {
-  date: string;
-  revenue: number;
-  orders: number;
-}
-
-interface PaymentMethod {
-  method: string;
-  amount: number;
-  percentage: number;
-}
-
-interface HourlySales {
-  hour: string;
-  revenue: number;
-}
-
-interface WeeklySales {
-  day: string;
-  thisWeek: number;
-  lastWeek: number;
-}
-
-const SalesTab: React.FC<SalesTabProps> = ({ stats, dashboardData, analyticsData }) => {
-  const [metrics, setMetrics] = useState<SalesMetrics>({
-    todayRevenue: 0,
-    totalOrders: 0,
-    averageOrderValue: 0,
-    revenueGrowth: 0,
-  });
-
-  const [dailySales, setDailySales] = useState<DailySales[]>([]);
-  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
-  const [hourlySales, setHourlySales] = useState<HourlySales[]>([]);
-  const [weeklySales, setWeeklySales] = useState<WeeklySales[]>([]);
-
-  useEffect(() => {
-    // Use real data from backend, or set empty defaults
-    loadRealData();
-  }, [analyticsData, stats, dashboardData]);
-
-  const loadRealData = () => {
-    // Debug: Log the data we're receiving
-    console.log('SalesTab - Analytics Data:', analyticsData);
-    console.log('SalesTab - Stats:', stats);
-    console.log('SalesTab - Dashboard Data:', dashboardData);
-    
-    // Set metrics from stats (always show these even if 0)
-    const todayRevenue = stats?.todays_revenue || 0;
-    const todayOrders = stats?.todays_orders || 0;
-    const avgOrderValue = stats?.avg_order_value || 0;
-    
-    setMetrics({
-      todayRevenue: todayRevenue,
-      totalOrders: todayOrders,
-      averageOrderValue: avgOrderValue,
-      revenueGrowth: 0,
-    });
-    
-    // Load revenue trend from analytics
-    const revenueTrend = analyticsData?.revenue_trend || [];
-    if (revenueTrend.length > 0) {
-      const daily: DailySales[] = revenueTrend.map((item: any) => ({
-        date: item.period || new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-        revenue: item.revenue || 0,
-        orders: item.orders || 0,
-      }));
-      setDailySales(daily);
-
-      // Calculate growth from trend data
-      let growth = 0;
-      if (daily.length >= 2) {
-        const todayData = daily[daily.length - 1];
-        const yesterdayData = daily[daily.length - 2];
-        if (yesterdayData.revenue > 0) {
-          growth = ((todayData.revenue - yesterdayData.revenue) / yesterdayData.revenue) * 100;
-        }
-      }
-
-      setMetrics(prev => ({
-        ...prev,
-        revenueGrowth: Math.round(growth * 10) / 10,
-      }));
-    } else {
-      // Set empty revenue trend
-      setDailySales([]);
-    }
-
-    // Load payment methods from analytics
-    const paymentMethodsData = analyticsData?.payment_methods || [];
-    if (paymentMethodsData.length > 0) {
-      const methods: PaymentMethod[] = paymentMethodsData.map((pm: any) => ({
-        method: pm.method || 'Unknown',
-        amount: pm.revenue || 0,
-        percentage: pm.percentage || 0,
-      }));
-      setPaymentMethods(methods);
-    } else {
-      // If no payment data, show empty state
-      setPaymentMethods([]);
-    }
-
-    // Load peak hours from analytics
-    const peakHoursData = analyticsData?.peak_hours || [];
-    if (peakHoursData.length > 0) {
-      const hourly: HourlySales[] = peakHoursData.map((ph: any) => ({
-        hour: ph.hour || '',
-        revenue: ph.revenue || 0,
-      }));
-      setHourlySales(hourly);
-    } else {
-      setHourlySales([]);
-    }
-
-    // Calculate weekly comparison from revenue trend
-    if (revenueTrend.length >= 14) {
-      const weekly: WeeklySales[] = [];
-      const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-      
-      // Get last 14 days of data (2 weeks)
-      const last14Days = revenueTrend.slice(-14);
-      
-      for (let i = 0; i < 7; i++) {
-        const thisWeekData = last14Days[i + 7] || { revenue: 0 };
-        const lastWeekData = last14Days[i] || { revenue: 0 };
-        
-        weekly.push({
-          day: days[i],
-          thisWeek: thisWeekData.revenue || 0,
-          lastWeek: lastWeekData.revenue || 0,
-        });
-      }
-      
-      setWeeklySales(weekly);
-    } else {
-      setWeeklySales([]);
-    }
-  };
-
-  // Chart configurations
-  const revenueChartData = {
-    labels: dailySales.map(d => d.date),
-    datasets: [
-      {
-        label: 'Revenue ($)',
-        data: dailySales.map(d => d.revenue),
-        fill: true,
-        backgroundColor: 'rgba(2, 136, 209, 0.1)',
-        borderColor: '#0288d1',
-        borderWidth: 2,
-        tension: 0.4,
-        pointRadius: 3,
-        pointHoverRadius: 6,
-        pointBackgroundColor: '#0288d1',
-        pointBorderColor: '#fff',
-        pointBorderWidth: 2,
+const StatCard: React.FC<StatCardProps> = ({ title, value, icon, color, subtitle }) => (
+  <Card
+    elevation={0}
+    sx={{
+      height: '100%',
+      position: 'relative',
+      overflow: 'hidden',
+      border: '1px solid #e2e8f0',
+      borderRadius: 2,
+      bgcolor: '#ffffff',
+      transition: 'box-shadow 0.2s',
+      '&:hover': {
+        boxShadow: '0 4px 16px rgba(0,0,0,0.07)',
       },
-    ],
-  };
-
-  const revenueChartOptions: ChartOptions<'line'> = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        display: false,
+      '&::after': {
+        content: '""',
+        position: 'absolute',
+        left: 0,
+        top: 0,
+        bottom: 0,
+        width: 4,
+        borderRadius: '2px 0 0 2px',
+        bgcolor: color,
       },
-      tooltip: {
-        mode: 'index',
-        intersect: false,
-        backgroundColor: 'rgba(15, 23, 42, 0.9)',
-        padding: 12,
-        titleColor: '#fff',
-        bodyColor: '#fff',
-        borderColor: '#0288d1',
-        borderWidth: 1,
-        callbacks: {
-          label: (context) => `Revenue: $${context.parsed?.y?.toLocaleString() ?? '0'}`,
-        },
-      },
-    },
-    scales: {
-      x: {
-        grid: {
-          display: false,
-        },
-        ticks: {
-          maxRotation: 45,
-          minRotation: 45,
-          font: {
-            size: 10,
-          },
-        },
-      },
-      y: {
-        beginAtZero: true,
-        grid: {
-          color: 'rgba(0, 0, 0, 0.05)',
-        },
-        ticks: {
-          callback: (value) => `$${value.toLocaleString()}`,
-        },
-      },
-    },
-    interaction: {
-      mode: 'nearest',
-      axis: 'x',
-      intersect: false,
-    },
-  };
-
-  const paymentChartData = {
-    labels: paymentMethods.map(p => p.method),
-    datasets: [
-      {
-        data: paymentMethods.map(p => p.amount),
-        backgroundColor: [
-          '#2e7d32', // Cash - green
-          '#f57c00', // Credit Card - orange
-          '#0288d1', // Debit Card - blue
-          '#9c27b0', // Online - purple
-        ],
-        borderColor: '#fff',
-        borderWidth: 3,
-        hoverOffset: 10,
-      },
-    ],
-  };
-
-  const paymentChartOptions: ChartOptions<'doughnut'> = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        position: 'bottom',
-        labels: {
-          padding: 15,
-          font: {
-            size: 12,
-          },
-          usePointStyle: true,
-          pointStyle: 'circle',
-        },
-      },
-      tooltip: {
-        backgroundColor: 'rgba(15, 23, 42, 0.9)',
-        padding: 12,
-        titleColor: '#fff',
-        bodyColor: '#fff',
-        borderColor: '#0288d1',
-        borderWidth: 1,
-        callbacks: {
-          label: (context) => {
-            const method = paymentMethods[context.dataIndex];
-            return `${method.method}: $${method.amount.toLocaleString()} (${method.percentage}%)`;
-          },
-        },
-      },
-    },
-    cutout: '65%',
-  };
-
-  const hourlyChartData = {
-    labels: hourlySales.map(h => h.hour),
-    datasets: [
-      {
-        label: 'Hourly Revenue',
-        data: hourlySales.map(h => h.revenue),
-        backgroundColor: '#0288d1',
-        borderColor: '#0288d1',
-        borderWidth: 1,
-        borderRadius: 6,
-        hoverBackgroundColor: '#0277bd',
-      },
-    ],
-  };
-
-  const hourlyChartOptions: ChartOptions<'bar'> = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        display: false,
-      },
-      tooltip: {
-        backgroundColor: 'rgba(15, 23, 42, 0.9)',
-        padding: 12,
-        titleColor: '#fff',
-        bodyColor: '#fff',
-        borderColor: '#0288d1',
-        borderWidth: 1,
-        callbacks: {
-          label: (context) => `Revenue: $${context.parsed?.y?.toLocaleString() ?? '0'}`,
-        },
-      },
-    },
-    scales: {
-      x: {
-        grid: {
-          display: false,
-        },
-        ticks: {
-          font: {
-            size: 10,
-          },
-        },
-      },
-      y: {
-        beginAtZero: true,
-        grid: {
-          color: 'rgba(0, 0, 0, 0.05)',
-        },
-        ticks: {
-          callback: (value) => `$${value}`,
-        },
-      },
-    },
-  };
-
-  const weeklyChartData = {
-    labels: weeklySales.map(w => w.day),
-    datasets: [
-      {
-        label: 'This Week',
-        data: weeklySales.map(w => w.thisWeek),
-        borderColor: '#0288d1',
-        backgroundColor: '#0288d1',
-        borderWidth: 2,
-        tension: 0.4,
-        pointRadius: 4,
-        pointHoverRadius: 6,
-        pointBackgroundColor: '#0288d1',
-        pointBorderColor: '#fff',
-        pointBorderWidth: 2,
-      },
-      {
-        label: 'Last Week',
-        data: weeklySales.map(w => w.lastWeek),
-        borderColor: '#9e9e9e',
-        backgroundColor: '#9e9e9e',
-        borderWidth: 2,
-        tension: 0.4,
-        pointRadius: 4,
-        pointHoverRadius: 6,
-        pointBackgroundColor: '#9e9e9e',
-        pointBorderColor: '#fff',
-        pointBorderWidth: 2,
-        borderDash: [5, 5],
-      },
-    ],
-  };
-
-  const weeklyChartOptions: ChartOptions<'line'> = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        position: 'top',
-        align: 'end',
-        labels: {
-          usePointStyle: true,
-          pointStyle: 'circle',
-          padding: 15,
-          font: {
-            size: 12,
-          },
-        },
-      },
-      tooltip: {
-        mode: 'index',
-        intersect: false,
-        backgroundColor: 'rgba(15, 23, 42, 0.9)',
-        padding: 12,
-        titleColor: '#fff',
-        bodyColor: '#fff',
-        borderColor: '#0288d1',
-        borderWidth: 1,
-        callbacks: {
-          label: (context) => `${context.dataset.label}: $${context.parsed?.y?.toLocaleString() ?? '0'}`,
-        },
-      },
-    },
-    scales: {
-      x: {
-        grid: {
-          display: false,
-        },
-      },
-      y: {
-        beginAtZero: true,
-        grid: {
-          color: 'rgba(0, 0, 0, 0.05)',
-        },
-        ticks: {
-          callback: (value) => `$${value.toLocaleString()}`,
-        },
-      },
-    },
-    interaction: {
-      mode: 'nearest',
-      axis: 'x',
-      intersect: false,
-    },
-  };
-
-  const MetricCard: React.FC<{
-    title: string;
-    value: string | number;
-    trend?: number;
-    icon: React.ReactNode;
-    color: string;
-  }> = ({ title, value, trend, icon, color }) => (
-    <Card
-      sx={{
-        height: '100%',
-        background: `linear-gradient(135deg, ${color}08 0%, ${color}03 100%)`,
-        border: `1px solid ${color}20`,
-        borderRadius: 3,
-        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-        position: 'relative',
-        overflow: 'hidden',
-        '&:hover': {
-          transform: 'translateY(-2px)',
-          boxShadow: `0 12px 24px ${color}15`,
-          borderColor: `${color}40`,
-        },
-        '&::before': {
-          content: '""',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          height: '3px',
-          background: `linear-gradient(90deg, ${color} 0%, ${color}80 100%)`,
-        },
-      }}
-    >
-      <CardContent sx={{ p: 2.5, '&:last-child': { pb: 2.5 } }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
-          <Typography 
-            variant="caption" 
-            sx={{ 
-              fontWeight: 600,
-              fontSize: '0.75rem',
-              textTransform: 'uppercase',
-              letterSpacing: '0.5px',
-              color: 'text.secondary',
-            }}
-          >
-            {title}
-          </Typography>
-          <Box
-            sx={{
-              width: 36,
-              height: 36,
-              borderRadius: 2,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              backgroundColor: `${color}15`,
-              color: color,
-            }}
-          >
-            {icon}
-          </Box>
-        </Box>
-        <Typography 
-          variant="h4" 
-          sx={{ 
-            fontWeight: 700, 
-            mb: 0.5, 
-            color: '#1a1a1a',
-            fontSize: '1.75rem',
-            lineHeight: 1.2,
+    }}
+  >
+    <CardContent sx={{ p: 2.5, pl: 3.5, '&:last-child': { pb: 2.5 } }}>
+      <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 1.5 }}>
+        <Typography
+          variant="caption"
+          sx={{
+            fontWeight: 600,
+            fontSize: '0.7rem',
+            textTransform: 'uppercase',
+            letterSpacing: '0.6px',
+            color: 'text.secondary',
           }}
         >
-          {value}
+          {title}
         </Typography>
-        {trend !== undefined && (
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 1 }}>
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 0.5,
-                px: 1,
-                py: 0.25,
-                borderRadius: 1,
-                backgroundColor: trend >= 0 ? '#e8f5e9' : '#ffebee',
-              }}
-            >
-              {trend >= 0 ? (
-                <TrendingUpIcon sx={{ fontSize: 14, color: '#2e7d32' }} />
-              ) : (
-                <TrendingDownIcon sx={{ fontSize: 14, color: '#d32f2f' }} />
-              )}
-              <Typography
-                variant="caption"
-                sx={{
-                  color: trend >= 0 ? '#2e7d32' : '#d32f2f',
-                  fontWeight: 700,
-                  fontSize: '0.7rem',
-                }}
-              >
-                {Math.abs(trend)}%
-              </Typography>
-            </Box>
-            <Typography
-              variant="caption"
-              sx={{
-                color: 'text.secondary',
-                fontSize: '0.7rem',
-              }}
-            >
-              vs yesterday
-            </Typography>
-          </Box>
-        )}
-      </CardContent>
-    </Card>
-  );
+        <Avatar
+          sx={{
+            width: 36,
+            height: 36,
+            borderRadius: 2,
+            bgcolor: alpha(color, 0.12),
+            color,
+          }}
+        >
+          {icon}
+        </Avatar>
+      </Box>
+      <Typography
+        variant="h4"
+        sx={{
+          fontWeight: 700,
+          fontSize: '1.65rem',
+          lineHeight: 1.2,
+          color: 'text.primary',
+          mb: subtitle ? 0.5 : 0,
+        }}
+      >
+        {value}
+      </Typography>
+      {subtitle && (
+        <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.72rem' }}>
+          {subtitle}
+        </Typography>
+      )}
+    </CardContent>
+  </Card>
+);
+
+
+const SalesTab: React.FC<SalesTabProps> = ({ dashboardData }) => {
+  const stats = dashboardData?.stats || {};
+  const analytics = dashboardData?.analytics || {};
+
+  const totalRevenue: number = stats.total_revenue || 0;
+  const todaysRevenue: number = stats.todays_revenue || 0;
+  const avgOrderValue: number = stats.avg_order_value || 0;
+
+  const revenueTrend: any[] = analytics.revenue_trend || [];
+  const paymentMethods: any[] = analytics.payment_methods || [];
+  const categoryPerformance: any[] = analytics.category_performance || [];
+
+  const maxPaymentPct = paymentMethods.length > 0
+    ? Math.max(...paymentMethods.map((p: any) => p.percentage || 0))
+    : 100;
+
+  const maxCategoryPct = categoryPerformance.length > 0
+    ? Math.max(...categoryPerformance.map((c: any) => c.percentage || 0))
+    : 100;
 
   return (
     <Box>
-      {/* Key Metrics */}
-      <Grid container spacing={3} sx={{ mb: 5 }}>
-        <Grid item xs={12} sm={6} md={3}>
-          <MetricCard
-            title="Today's Revenue"
-            value={`$${metrics.todayRevenue.toLocaleString()}`}
-            trend={metrics.revenueGrowth}
-            icon={<AttachMoneyIcon />}
+      {/* Summary Cards */}
+      <Grid container spacing={2.5} sx={{ mb: 3 }}>
+        <Grid item xs={12} sm={4}>
+          <StatCard
+            title="Total Revenue"
+            value={formatCurrency(totalRevenue)}
+            icon={<AttachMoney sx={{ fontSize: 20 }} />}
             color="#0288d1"
+            subtitle="All time"
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <MetricCard
-            title="Total Orders"
-            value={metrics.totalOrders}
-            icon={<ShoppingCartIcon />}
+        <Grid item xs={12} sm={4}>
+          <StatCard
+            title="Today's Revenue"
+            value={formatCurrency(todaysRevenue)}
+            icon={<TrendingUp sx={{ fontSize: 20 }} />}
             color="#2e7d32"
+            subtitle="Current day"
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <MetricCard
-            title="Average Order Value"
-            value={`$${metrics.averageOrderValue}`}
-            icon={<ReceiptIcon />}
+        <Grid item xs={12} sm={4}>
+          <StatCard
+            title="Avg Order Value"
+            value={formatCurrency(avgOrderValue)}
+            icon={<ShoppingCart sx={{ fontSize: 20 }} />}
             color="#f57c00"
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <MetricCard
-            title="Revenue Growth"
-            value={`${metrics.revenueGrowth >= 0 ? '+' : ''}${metrics.revenueGrowth}%`}
-            icon={metrics.revenueGrowth >= 0 ? <TrendingUpIcon /> : <TrendingDownIcon />}
-            color={metrics.revenueGrowth >= 0 ? '#2e7d32' : '#d32f2f'}
+            subtitle="Per order"
           />
         </Grid>
       </Grid>
 
-      {/* Charts */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        {/* Revenue Trend */}
-        <Grid item xs={12} lg={8}>
-          <Paper
-            sx={{
-              p: 3,
-              border: '1px solid #e0e0e0',
-              borderRadius: 2,
-              height: '400px',
-            }}
-          >
-            <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: '#0f172a' }}>
-              Revenue Trend (Last 30 Days)
-            </Typography>
-            <Box sx={{ height: 'calc(100% - 40px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              {dailySales.length > 0 ? (
-                <Box sx={{ width: '100%', height: '100%' }}>
-                  <Line data={revenueChartData} options={revenueChartOptions} />
-                </Box>
-              ) : (
-                <Box sx={{ textAlign: 'center', py: 4 }}>
-                  <TrendingUpIcon sx={{ fontSize: 64, color: 'text.disabled', mb: 2 }} />
-                  <Typography variant="body1" color="text.secondary" gutterBottom>
-                    No Revenue Data
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Revenue trend will appear once orders are placed
-                  </Typography>
-                </Box>
-              )}
-            </Box>
-          </Paper>
-        </Grid>
+      {/* Revenue Trend Chart */}
+      <Box sx={{ mb: 3 }}>
+        <RevenueChart
+          data={revenueTrend}
+          title="Revenue Trend"
+          height={340}
+          showOrders={true}
+        />
+      </Box>
 
+      {/* Payment Methods + Category Performance */}
+      <Grid container spacing={2.5}>
         {/* Payment Methods */}
-        <Grid item xs={12} lg={4}>
-          <Paper
+        <Grid item xs={12} md={6}>
+          <Card
+            elevation={0}
             sx={{
-              p: 3,
-              border: '1px solid #e0e0e0',
+              height: '100%',
+              border: '1px solid #e2e8f0',
               borderRadius: 2,
-              height: '400px',
+              bgcolor: '#ffffff',
             }}
           >
-            <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: '#0f172a' }}>
-              Payment Methods
-            </Typography>
-            <Box sx={{ height: 'calc(100% - 40px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              {paymentMethods.length > 0 ? (
-                <Box sx={{ width: '100%', height: '100%' }}>
-                  <Doughnut data={paymentChartData} options={paymentChartOptions} />
+            <CardContent sx={{ p: 2.5, '&:last-child': { pb: 2.5 } }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                <Typography variant="h6" fontWeight={600} fontSize="1rem">
+                  Payment Methods
+                </Typography>
+                <Chip
+                  label={`${paymentMethods.length} methods`}
+                  size="small"
+                  variant="outlined"
+                  sx={{ fontSize: '0.7rem' }}
+                />
+              </Box>
+
+              {paymentMethods.length === 0 ? (
+                <Box
+                  sx={{
+                    py: 6,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: 1,
+                    color: 'text.disabled',
+                  }}
+                >
+                  <AttachMoney sx={{ fontSize: 40 }} />
+                  <Typography variant="body2" color="text.secondary">
+                    No payment data available
+                  </Typography>
                 </Box>
               ) : (
-                <Box sx={{ textAlign: 'center', py: 4 }}>
-                  <AttachMoneyIcon sx={{ fontSize: 64, color: 'text.disabled', mb: 2 }} />
-                  <Typography variant="body1" color="text.secondary" gutterBottom>
-                    No Payment Data
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Payment method data will appear once orders are placed
-                  </Typography>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+                  {paymentMethods.map((pm: any, idx: number) => {
+                    const color = getPaymentColor(pm.method || '');
+                    const pct = pm.percentage || 0;
+                    const barWidth = maxPaymentPct > 0 ? (pct / maxPaymentPct) * 100 : 0;
+                    return (
+                      <React.Fragment key={pm.method || idx}>
+                        {idx > 0 && <Divider sx={{ my: 1.5 }} />}
+                        <Box>
+                          <Box
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              mb: 0.75,
+                            }}
+                          >
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <Box
+                                sx={{
+                                  width: 10,
+                                  height: 10,
+                                  borderRadius: '50%',
+                                  bgcolor: color,
+                                  flexShrink: 0,
+                                }}
+                              />
+                              <Typography
+                                variant="body2"
+                                fontWeight={600}
+                                sx={{ textTransform: 'capitalize' }}
+                              >
+                                {pm.method || 'Unknown'}
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                ({pm.count || 0} txns)
+                              </Typography>
+                            </Box>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                              <Typography variant="body2" fontWeight={700} color="text.primary">
+                                {formatCurrency(pm.revenue || 0)}
+                              </Typography>
+                              <Chip
+                                label={`${pct.toFixed(1)}%`}
+                                size="small"
+                                sx={{
+                                  height: 20,
+                                  fontSize: '0.68rem',
+                                  fontWeight: 700,
+                                  bgcolor: alpha(color, 0.1),
+                                  color,
+                                  border: 'none',
+                                }}
+                              />
+                            </Box>
+                          </Box>
+                          <LinearProgress
+                            variant="determinate"
+                            value={barWidth}
+                            sx={{
+                              height: 6,
+                              borderRadius: 3,
+                              bgcolor: alpha(color, 0.1),
+                              '& .MuiLinearProgress-bar': {
+                                borderRadius: 3,
+                                bgcolor: color,
+                              },
+                            }}
+                          />
+                        </Box>
+                      </React.Fragment>
+                    );
+                  })}
                 </Box>
               )}
-            </Box>
-          </Paper>
+            </CardContent>
+          </Card>
         </Grid>
 
-        {/* Hourly Sales Pattern */}
-        <Grid item xs={12} lg={6}>
-          <Paper
+        {/* Category Performance */}
+        <Grid item xs={12} md={6}>
+          <Card
+            elevation={0}
             sx={{
-              p: 3,
-              border: '1px solid #e0e0e0',
+              height: '100%',
+              border: '1px solid #e2e8f0',
               borderRadius: 2,
-              height: '400px',
+              bgcolor: '#ffffff',
             }}
           >
-            <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: '#0f172a' }}>
-              Hourly Sales Pattern
-            </Typography>
-            <Box sx={{ height: 'calc(100% - 40px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              {hourlySales.length > 0 ? (
-                <Box sx={{ width: '100%', height: '100%' }}>
-                  <Bar data={hourlyChartData} options={hourlyChartOptions} />
-                </Box>
-              ) : (
-                <Box sx={{ textAlign: 'center', py: 4 }}>
-                  <ShoppingCartIcon sx={{ fontSize: 64, color: 'text.disabled', mb: 2 }} />
-                  <Typography variant="body1" color="text.secondary" gutterBottom>
-                    No Hourly Data
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Hourly sales pattern will appear once orders are placed
-                  </Typography>
-                </Box>
-              )}
-            </Box>
-          </Paper>
-        </Grid>
+            <CardContent sx={{ p: 2.5, '&:last-child': { pb: 2.5 } }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                <Typography variant="h6" fontWeight={600} fontSize="1rem">
+                  Category Performance
+                </Typography>
+                <Chip
+                  label={`${categoryPerformance.length} categories`}
+                  size="small"
+                  variant="outlined"
+                  sx={{ fontSize: '0.7rem' }}
+                />
+              </Box>
 
-        {/* Week Comparison */}
-        <Grid item xs={12} lg={6}>
-          <Paper
-            sx={{
-              p: 3,
-              border: '1px solid #e0e0e0',
-              borderRadius: 2,
-              height: '400px',
-            }}
-          >
-            <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: '#0f172a' }}>
-              Week Comparison
-            </Typography>
-            <Box sx={{ height: 'calc(100% - 40px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              {weeklySales.length > 0 ? (
-                <Box sx={{ width: '100%', height: '100%' }}>
-                  <Line data={weeklyChartData} options={weeklyChartOptions} />
+              {categoryPerformance.length === 0 ? (
+                <Box
+                  sx={{
+                    py: 6,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: 1,
+                    color: 'text.disabled',
+                  }}
+                >
+                  <Category sx={{ fontSize: 40 }} />
+                  <Typography variant="body2" color="text.secondary">
+                    No category data available
+                  </Typography>
                 </Box>
               ) : (
-                <Box sx={{ textAlign: 'center', py: 4 }}>
-                  <TrendingUpIcon sx={{ fontSize: 64, color: 'text.disabled', mb: 2 }} />
-                  <Typography variant="body1" color="text.secondary" gutterBottom>
-                    No Weekly Data
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Weekly comparison will appear once sufficient data is available
-                  </Typography>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+                  {categoryPerformance.map((cat: any, idx: number) => {
+                    const color = CATEGORY_COLORS[idx % CATEGORY_COLORS.length];
+                    const pct = cat.percentage || 0;
+                    const barWidth = maxCategoryPct > 0 ? (pct / maxCategoryPct) * 100 : 0;
+                    return (
+                      <React.Fragment key={cat.category || idx}>
+                        {idx > 0 && <Divider sx={{ my: 1.5 }} />}
+                        <Box>
+                          <Box
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              mb: 0.75,
+                            }}
+                          >
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <Box
+                                sx={{
+                                  width: 10,
+                                  height: 10,
+                                  borderRadius: '50%',
+                                  bgcolor: color,
+                                  flexShrink: 0,
+                                }}
+                              />
+                              <Typography variant="body2" fontWeight={600}>
+                                {cat.category || 'Unknown'}
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                ({cat.orders || 0} orders)
+                              </Typography>
+                            </Box>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                              <Typography variant="body2" fontWeight={700} color="text.primary">
+                                {formatCurrency(cat.revenue || 0)}
+                              </Typography>
+                              <Chip
+                                label={`${pct.toFixed(1)}%`}
+                                size="small"
+                                sx={{
+                                  height: 20,
+                                  fontSize: '0.68rem',
+                                  fontWeight: 700,
+                                  bgcolor: alpha(color, 0.1),
+                                  color,
+                                  border: 'none',
+                                }}
+                              />
+                            </Box>
+                          </Box>
+                          <LinearProgress
+                            variant="determinate"
+                            value={barWidth}
+                            sx={{
+                              height: 6,
+                              borderRadius: 3,
+                              bgcolor: alpha(color, 0.1),
+                              '& .MuiLinearProgress-bar': {
+                                borderRadius: 3,
+                                bgcolor: color,
+                              },
+                            }}
+                          />
+                        </Box>
+                      </React.Fragment>
+                    );
+                  })}
                 </Box>
               )}
-            </Box>
-          </Paper>
+            </CardContent>
+          </Card>
         </Grid>
       </Grid>
     </Box>

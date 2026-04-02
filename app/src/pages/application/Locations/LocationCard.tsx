@@ -86,7 +86,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
     <Paper
       elevation={0}
       sx={{
-        p: 2.5,
+        p: { xs: 2, sm: 2.5 },
         backgroundColor: '#ffffff',
         border: '1px solid #e2e8f0',
         borderRadius: 2,
@@ -101,7 +101,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
       }}
     >
       {/* Header */}
-      <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 2 }}>
+      <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: { xs: 1.5, sm: 2 } }}>
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Typography
             variant="h6"
@@ -140,7 +140,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
       </Box>
 
       {/* Content */}
-      <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+      <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: { xs: 1, sm: 1.5 } }}>
         {/* Capacity */}
         {location.capacity && (
           <Box
@@ -205,8 +205,8 @@ const LocationCard: React.FC<LocationCardProps> = ({
         sx={{
           display: 'flex',
           gap: 1,
-          mt: 2,
-          pt: 2,
+          mt: { xs: 1.5, sm: 2 },
+          pt: { xs: 1.5, sm: 2 },
           borderTop: '1px solid #f1f5f9',
         }}
       >
@@ -217,12 +217,12 @@ const LocationCard: React.FC<LocationCardProps> = ({
             sx={{
               color: '#64748b',
               '&:hover': {
-                bgcolor: 'rgba(25,118,210,0.08)',
-                color: '#1976d2',
+                color: '#0f172a',
+                bgcolor: 'rgba(15,23,42,0.06)',
               },
             }}
           >
-            <QrCode fontSize="small" />
+            <QrCode sx={{ fontSize: 16 }} />
           </IconButton>
         </Tooltip>
         <Tooltip title="Print QR">
@@ -232,12 +232,12 @@ const LocationCard: React.FC<LocationCardProps> = ({
             sx={{
               color: '#64748b',
               '&:hover': {
-                bgcolor: 'rgba(25,118,210,0.08)',
-                color: '#1976d2',
+                color: '#0f172a',
+                bgcolor: 'rgba(15,23,42,0.06)',
               },
             }}
           >
-            <Print fontSize="small" />
+            <Print sx={{ fontSize: 16 }} />
           </IconButton>
         </Tooltip>
         <Box sx={{ flex: 1 }} />
@@ -248,12 +248,12 @@ const LocationCard: React.FC<LocationCardProps> = ({
             sx={{
               color: '#64748b',
               '&:hover': {
-                bgcolor: 'rgba(25,118,210,0.08)',
-                color: '#1976d2',
+                color: '#0f172a',
+                bgcolor: 'rgba(15,23,42,0.06)',
               },
             }}
           >
-            <EditIcon fontSize="small" />
+            <EditIcon sx={{ fontSize: 16 }} />
           </IconButton>
         </Tooltip>
         <Tooltip title="Delete location">
@@ -263,12 +263,12 @@ const LocationCard: React.FC<LocationCardProps> = ({
             sx={{
               color: '#64748b',
               '&:hover': {
-                bgcolor: 'rgba(239,68,68,0.08)',
-                color: '#dc2626',
+                color: '#f43f5e',
+                bgcolor: 'rgba(244,63,94,0.08)',
               },
             }}
           >
-            <DeleteIcon fontSize="small" />
+            <DeleteIcon sx={{ fontSize: 16 }} />
           </IconButton>
         </Tooltip>
       </Box>

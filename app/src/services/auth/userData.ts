@@ -34,6 +34,7 @@ export interface UserData {
     website?: string;
     isActive: boolean;
     isOpen: boolean;
+    orderType?: number; // 0 = online (QR/self-service), 1 = POS (manual/counter)
     theme?: string;
     menuTemplate?: string;
     menuTemplateConfig?: any;
@@ -115,6 +116,13 @@ class UserDataService {
         if (userData.venue) {
           const venueAny = userData.venue as any;
           
+          console.log('[UserDataService] Raw venue from API:', JSON.stringify({
+            id: venueAny.id,
+            name: venueAny.name,
+            order_type: venueAny.order_type,
+            orderType: venueAny.orderType,
+          }));
+
           // Normalize isOpen from backend (is_open, isOpen, status)
           const isOpen = venueAny.is_open !== undefined 
             ? Boolean(venueAny.is_open)
@@ -152,6 +160,11 @@ class UserDataService {
             website: venueAny.website || '',
             isActive,
             isOpen,
+            orderType: venueAny.order_type !== undefined
+              ? Number(venueAny.order_type)
+              : venueAny.orderType !== undefined
+                ? Number(venueAny.orderType)
+                : undefined,
             theme: venueAny.theme || 'pet',
             menuTemplate: venueAny.menu_template || venueAny.menuTemplate || 'classic',
             menuTemplateConfig: venueAny.menu_template_config || venueAny.menuTemplateConfig,

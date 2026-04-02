@@ -140,9 +140,9 @@ const RevenueChart: React.FC<RevenueChartProps> = ({
             }
             if (context.parsed.y !== null) {
               if (context.datasetIndex === 0) {
-                label += new Intl.NumberFormat('en-US', {
+                label += new Intl.NumberFormat('en-IN', {
                   style: 'currency',
-                  currency: 'USD',
+                  currency: 'INR',
                 }).format(context.parsed.y);
               } else {
                 label += context.parsed.y + ' orders';
@@ -175,7 +175,7 @@ const RevenueChart: React.FC<RevenueChartProps> = ({
         },
         ticks: {
           callback: function(value) {
-            return '$' + value.toLocaleString();
+            return '₹' + Number(value).toLocaleString('en-IN');
           },
           font: {
             size: 11,

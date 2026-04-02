@@ -6,7 +6,7 @@ export const APP_CONFIG = {
   NAME: 'Dino',
   VERSION: '1.0.0',
   DESCRIPTION: 'Revolutionizing restaurant ordering',
-  COPYRIGHT: 'Â© 2025 Dino. All rights reserved.',
+  COPYRIGHT: '© 2025 Dino. All rights reserved.',
   COMPANY: 'Dino',
 } as const;
 
@@ -69,7 +69,7 @@ export const BUSINESS_RULES = {
   SERVICE_CHARGE_RATE: 0.10, // 10%
   MAX_DISCOUNT_PERCENTAGE: 50,
   ORDER_CANCELLATION_TIME: 5 * 60 * 1000, // 5 minutes
-  CURRENCY_SYMBOL: 'â‚¹',
+  CURRENCY_SYMBOL: '₹',
   CURRENCY_CODE: 'INR',
   PHONE_COUNTRY_CODE: '+91',
 } as const;
@@ -308,62 +308,41 @@ export const GRADIENTS = {
 } as const;
 
 // ===================================================================
-// ORDER MANAGEMENT CONSTANTS
+// ROLE-BASED HERO COLOR PALETTE
 // ===================================================================
 
-// Order Status
-export const ORDER_STATUS = {
-  PENDING: 'pending',
-  CONFIRMED: 'confirmed',
-  PREPARING: 'preparing',
-  READY: 'ready',
-  SERVED: 'served',
-  COMPLETED: 'completed',
-  CANCELLED: 'cancelled',
-  REFUNDED: 'refunded',
-} as const;
-
-// Payment Status
-export const PAYMENT_STATUS = {
-  PENDING: 'pending',
-  PROCESSING: 'processing',
-  COMPLETED: 'completed',
-  FAILED: 'failed',
-  CANCELLED: 'cancelled',
-  REFUNDED: 'refunded',
-} as const;
-
-// Order Types
-export const ORDER_TYPES = {
-  DINE_IN: 'dine_in',
-  TAKEAWAY: 'takeaway',
-  DELIVERY: 'delivery',
-} as const;
-
-// Payment Methods
-export const PAYMENT_METHODS = {
-  CASH: 'cash',
-  CARD: 'card',
-  UPI: 'upi',
-  WALLET: 'wallet',
-  NET_BANKING: 'net_banking',
-} as const;
-
-// Order Priority
-export const ORDER_PRIORITY = {
-  LOW: 'low',
-  NORMAL: 'normal',
-  HIGH: 'high',
-  URGENT: 'urgent',
-} as const;
-
-// Table Status
-export const TABLE_STATUS = {
-  AVAILABLE: 'available',
-  OCCUPIED: 'occupied',
-  RESERVED: 'reserved',
-  MAINTENANCE: 'maintenance',
-  CLEANING: 'cleaning',
+// Role-based color palette — used across all page hero sections
+export const ROLE_COLORS = {
+  Owner: {
+    primary: '#6366f1',
+    secondary: '#8b5cf6',
+    gradient: 'linear-gradient(135deg,#0f172a 0%,#1e1b4b 45%,#312e81 100%)',
+    glowA: 'rgba(99,102,241,0.22)',
+    glowB: 'rgba(139,92,246,0.15)',
+    chipText: '#c7d2fe',
+    statLabel: 'rgba(199,210,254,0.65)',
+    statValue: '#ffffff',
+  },
+  Manager: {
+    primary: '#0ea5e9',
+    secondary: '#38bdf8',
+    gradient: 'linear-gradient(135deg,#0c1a2e 0%,#0c2a4a 45%,#0369a1 100%)',
+    glowA: 'rgba(14,165,233,0.22)',
+    glowB: 'rgba(56,189,248,0.15)',
+    chipText: '#bae6fd',
+    statLabel: 'rgba(186,230,253,0.65)',
+    statValue: '#ffffff',
+  },
+  User: {
+    primary: '#10b981',
+    secondary: '#34d399',
+    gradient: 'linear-gradient(135deg,#052e16 0%,#064e3b 45%,#065f46 100%)',
+    glowA: 'rgba(16,185,129,0.22)',
+    glowB: 'rgba(52,211,153,0.15)',
+    chipText: '#a7f3d0',
+    statLabel: 'rgba(167,243,208,0.65)',
+    statValue: '#ffffff',
+  },
 } as const;
 
 // ===================================================================

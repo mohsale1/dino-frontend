@@ -7,7 +7,6 @@
 import React from 'react';
 import {
   Box,
-  Paper,
   Tabs,
   Tab,
   Grid,
@@ -46,15 +45,7 @@ const LocationTabs: React.FC<LocationTabsProps> = ({
   onPrintQR,
 }) => {
   return (
-    <Paper
-      elevation={0}
-      sx={{
-        backgroundColor: '#ffffff',
-        border: '1px solid #e2e8f0',
-        borderRadius: 2,
-        overflow: 'hidden',
-      }}
-    >
+    <Box sx={{ bgcolor: '#ffffff' }}>
       <Box sx={{ borderBottom: '1px solid #e2e8f0' }}>
         <Tabs
           value={activeTab}
@@ -67,11 +58,11 @@ const LocationTabs: React.FC<LocationTabsProps> = ({
               fontSize: '0.9375rem',
               color: '#64748b',
               '&.Mui-selected': {
-                color: '#1976d2',
+                color: '#0f172a',
               },
             },
             '& .MuiTabs-indicator': {
-              backgroundColor: '#1976d2',
+              backgroundColor: '#0f172a',
               height: 3,
             },
           }}
@@ -81,7 +72,7 @@ const LocationTabs: React.FC<LocationTabsProps> = ({
         </Tabs>
       </Box>
 
-      <Box sx={{ p: { xs: 2, sm: 3 } }}>
+      <Box sx={{ p: { xs: 2, sm: 3 }, bgcolor: '#f1f5f9' }}>
         {activeTab === 'locations' && (
           <Grid container spacing={{ xs: 1.5, sm: 2 }}>
             {locations.length === 0 ? (
@@ -92,7 +83,7 @@ const LocationTabs: React.FC<LocationTabsProps> = ({
                       width: 56,
                       height: 56,
                       borderRadius: 2,
-                      bgcolor: 'rgba(25,118,210,0.08)',
+                      bgcolor: 'rgba(15,23,42,0.06)',
                       margin: 'auto',
                       mb: 2,
                       display: 'flex',
@@ -100,7 +91,7 @@ const LocationTabs: React.FC<LocationTabsProps> = ({
                       justifyContent: 'center',
                     }}
                   >
-                    <LocationOn sx={{ color: '#1976d2', fontSize: 28 }} />
+                    <LocationOn sx={{ color: '#0f172a', fontSize: 28 }} />
                   </Box>
                   <Typography variant="h6" sx={{ color: '#0f172a', fontWeight: 600, mb: 0.5 }}>
                     No locations found
@@ -138,7 +129,7 @@ const LocationTabs: React.FC<LocationTabsProps> = ({
                       width: 56,
                       height: 56,
                       borderRadius: 2,
-                      bgcolor: 'rgba(25,118,210,0.08)',
+                      bgcolor: 'rgba(15,23,42,0.06)',
                       margin: 'auto',
                       mb: 2,
                       display: 'flex',
@@ -146,7 +137,7 @@ const LocationTabs: React.FC<LocationTabsProps> = ({
                       justifyContent: 'center',
                     }}
                   >
-                    <Business sx={{ color: '#1976d2', fontSize: 28 }} />
+                    <Business sx={{ color: '#0f172a', fontSize: 28 }} />
                   </Box>
                   <Typography variant="h6" sx={{ color: '#0f172a', fontWeight: 600, mb: 0.5 }}>
                     No areas found
@@ -170,7 +161,7 @@ const LocationTabs: React.FC<LocationTabsProps> = ({
           </Grid>
         )}
       </Box>
-    </Paper>
+    </Box>
   );
 };
 

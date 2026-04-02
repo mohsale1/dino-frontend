@@ -47,6 +47,11 @@ import './AppSidebar.css';
 export const DRAWER_WIDTH = 260;
 export const COLLAPSED_WIDTH = 68;
 
+// Order type constants
+// 0 = online (QR / self-service), 1 = POS (manual / counter)
+export const ORDER_TYPE_ONLINE = 0;
+export const ORDER_TYPE_POS = 1;
+
 interface NavigationItem {
   label: string;
   path: string;
@@ -54,6 +59,8 @@ interface NavigationItem {
   requiredPermissions: string[];
   category?: string;
   description?: string;
+  /** When set, item is only shown for the specified order type. Omit to show for all types. */
+  orderTypeRestriction?: number;
 }
 
 interface MenuCategory {
@@ -73,57 +80,59 @@ const allMenuItems: NavigationItem[] = [
     label: 'Menu',
     path: '/admin/pos',
     icon: <MenuBook />,
-    requiredPermissions: ['application.orders.create'],
+    requiredPermissions: ['application.pos.view'],
     category: 'main',
     description: 'Manual order entry',
+    orderTypeRestriction: ORDER_TYPE_POS,
   },
   {
     label: 'Dashboard',
     path: '/admin',
     icon: <Dashboard />,
-    requiredPermissions: ['application.dashboard.read'],
+    requiredPermissions: ['application.dashboard.view'],
     category: 'main',
   },
   {
     label: 'Order',
     path: '/admin/orders',
     icon: <ShoppingCart />,
-    requiredPermissions: ['application.orders.read'],
+    requiredPermissions: ['application.orders.view'],
     category: 'main',
   },
   {
     label: 'Catalog',
     path: '/admin/catalog',
     icon: <Category />,
-    requiredPermissions: ['application.items.read', 'application.categories.read'],
+    requiredPermissions: ['application.catalog.view'],
     category: 'management',
   },
   {
     label: 'Location',
     path: '/admin/locations',
     icon: <LocationOn />,
-    requiredPermissions: ['application.areas.read', 'application.tables.read'],
+    requiredPermissions: ['application.locations.view'],
     category: 'management',
+    orderTypeRestriction: ORDER_TYPE_ONLINE,
   },
   {
     label: 'Coupon',
     path: '/admin/coupons',
     icon: <LocalOffer />,
-    requiredPermissions: ['application.coupons.read'],
+    requiredPermissions: ['application.coupons.view'],
     category: 'management',
   },
   {
     label: 'Users',
     path: '/admin/users',
     icon: <People />,
-    requiredPermissions: ['application.users.read'],
+    requiredPermissions: ['application.users.view'],
     category: 'management',
   },
   {
     label: 'Settings',
     path: '/admin/settings',
     icon: <Settings />,
-    requiredPermissions: ['application.workspace.read'],
+    requiredPermissions: ['application.settings.view'],
     category: 'settings',
   },
 ];
@@ -162,12 +171,25 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ isTablet = false }) => {
     return roleDefinition?.displayName || detectedRole;
   })();
 
-  // Filter nav items by backend permissions
-  const adminNavItems = allMenuItems.filter(
-    (item) =>
+  // Resolve venue order type: 0 = online, 1 = POS. Undefined means not yet loaded.
+  const venueOrderType: number | undefined = userData?.venue?.orderType;
+
+  // Filter nav items by backend permissions and order type
+  const adminNavItems = allMenuItems.filter((item) => {
+    // Permission check: item must have at least one granted permission
+    const hasAccess =
       item.requiredPermissions.length === 0 ||
-      item.requiredPermissions.some((p) => hasBackendPermission(p))
-  );
+      item.requiredPermissions.some((p) => hasBackendPermission(p));
+
+    if (!hasAccess) return false;
+
+    // Order type check: only apply when the venue order type is known
+    if (item.orderTypeRestriction !== undefined && venueOrderType !== undefined) {
+      return venueOrderType === item.orderTypeRestriction;
+    }
+
+    return true;
+  });
 
   // Group items by category
   const groupedNavItems = menuCategories
@@ -220,99 +242,122 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ isTablet = false }) => {
     const collapsed = !isMobileDrawer && isCollapsed;
 
     return (
-      <Box
-        sx={{
-          px: collapsed ? 1 : 2,
-          py: 1.5,
-          borderBottom: '1px solid rgba(255,255,255,0.1)',
-          minHeight: 64,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: collapsed ? 'center' : 'space-between',
-          backgroundColor: 'rgba(0,0,0,0.1)',
-          flexShrink: 0,
-        }}
-      >
-        {!collapsed && (
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-            <DinoLogo size={32} />
-            <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-              <Typography
-                variant="h6"
-                sx={{
-                  fontWeight: 700,
-                  fontSize: '1.125rem',
-                  color: '#ffffff',
-                  lineHeight: 1.3,
-                  letterSpacing: '-0.02em',
-                  mb: 0.25,
-                }}
-              >
-                Dino
-              </Typography>
-              <Typography
-                variant="caption"
-                sx={{
-                  color: 'rgba(255,255,255,0.6)',
-                  fontSize: '0.6875rem',
-                  fontWeight: 500,
-                  lineHeight: 1,
-                  letterSpacing: '0.5px',
-                  textTransform: 'uppercase',
-                }}
-              >
-                Admin Panel
-              </Typography>
+      <>
+        {/* ── Logo / title bar ── */}
+        <Box
+          sx={{
+            px: collapsed ? 1 : 2,
+            py: 1.5,
+            borderBottom: collapsed ? 'none' : '1px solid rgba(255,255,255,0.1)',
+            minHeight: 64,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: collapsed ? 'center' : 'space-between',
+            backgroundColor: 'rgba(0,0,0,0.1)',
+            flexShrink: 0,
+          }}
+        >
+          {/* Expanded: logo + text */}
+          {!collapsed && (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              <DinoLogo size={32} />
+              <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                <Typography
+                  variant="subtitle2"
+                  sx={{
+                    fontWeight: 700,
+                    fontSize: '0.9rem',
+                    color: '#ffffff',
+                    lineHeight: 1.2,
+                  }}
+                >
+                  Admin Panel
+                </Typography>
+                <Chip
+                  label={roleDisplayName || 'User'}
+                  size="small"
+                  sx={{
+                    mt: 0.5,
+                    bgcolor: alpha('#ffffff', 0.15),
+                    color: '#ffffff',
+                    fontWeight: 600,
+                    fontSize: '0.68rem',
+                    height: 18,
+                    textTransform: 'capitalize',
+                  }}
+                />
+              </Box>
             </Box>
-          </Box>
-        )}
+          )}
 
-        {collapsed && <DinoLogo size={28} />}
+          {/* Collapsed: logo only, centered */}
+          {collapsed && <DinoLogo size={28} />}
 
-        {/* Desktop collapse/expand toggle */}
-        {!isMobileDrawer && (
-          <Tooltip
-            title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-            placement="right"
-          >
+          {/* Expanded desktop: collapse button */}
+          {!isMobileDrawer && !collapsed && (
+            <Tooltip title="Collapse sidebar" placement="right">
+              <IconButton
+                onClick={toggleCollapsed}
+                size="small"
+                sx={{
+                  color: alpha('#ffffff', 0.6),
+                  flexShrink: 0,
+                  '&:hover': { bgcolor: alpha('#ffffff', 0.1), color: '#ffffff' },
+                }}
+              >
+                <ChevronLeft fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          )}
+
+          {/* Mobile: close button */}
+          {isMobileDrawer && (
             <IconButton
               onClick={toggleCollapsed}
               size="small"
               sx={{
-                color: 'rgba(255,255,255,0.7)',
-                '&:hover': {
-                  color: '#ffffff',
-                  backgroundColor: 'rgba(255,255,255,0.1)',
-                },
+                color: alpha('#ffffff', 0.6),
+                '&:hover': { bgcolor: alpha('#ffffff', 0.1), color: '#ffffff' },
               }}
             >
-              {isCollapsed ? <ChevronRight /> : <ChevronLeft />}
+              <ChevronLeft fontSize="small" />
             </IconButton>
-          </Tooltip>
-        )}
+          )}
+        </Box>
 
-        {/* Mobile close button */}
-        {isMobileDrawer && (
-          <IconButton
-            onClick={toggleCollapsed}
-            size="small"
+        {/* ── Collapsed desktop: expand button row (below logo, above nav) ── */}
+        {collapsed && !isMobileDrawer && (
+          <Box
             sx={{
-              color: 'rgba(255,255,255,0.7)',
-              '&:hover': {
-                color: '#ffffff',
-                backgroundColor: 'rgba(255,255,255,0.1)',
-              },
+              px: 0.75,
+              pt: 1,
+              pb: 0.5,
+              borderBottom: '1px solid rgba(255,255,255,0.1)',
             }}
           >
-            <ChevronLeft />
-          </IconButton>
+            <Tooltip title="Expand sidebar" placement="right" arrow>
+              <IconButton
+                onClick={toggleCollapsed}
+                sx={{
+                  width: '100%',
+                  borderRadius: 1.5,
+                  color: alpha('#ffffff', 0.6),
+                  '&:hover': { bgcolor: alpha('#ffffff', 0.08), color: '#ffffff' },
+                }}
+              >
+                <ChevronRight fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          </Box>
         )}
-      </Box>
+      </>
     );
   };
 
+
   const renderVenueStatus = (isMobileDrawer: boolean) => {
     if (!venueStatus) return null;
+    if (!hasBackendPermission('application.status.update')) return null;
     const collapsed = !isMobileDrawer && isCollapsed;
 
     if (collapsed) {
@@ -527,9 +572,10 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ isTablet = false }) => {
                   >
                     <ListItemIcon
                       sx={{
-                        minWidth: collapsed ? 0 : 36,
+                        minWidth: collapsed ? 0 : 32,
                         color: isActive ? '#ffffff' : 'rgba(255,255,255,0.7)',
                         justifyContent: 'center',
+                        '& .MuiSvgIcon-root': { fontSize: '1.1rem' },
                       }}
                     >
                       {item.icon}

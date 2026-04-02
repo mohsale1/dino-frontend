@@ -1,22 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import {
   Dialog,
-  DialogTitle,
   DialogContent,
   DialogActions,
   Button,
   TextField,
   Grid,
-  FormControlLabel,
   Switch,
   MenuItem,
   Box,
   Typography,
-  Divider,
   IconButton,
   InputAdornment,
+  useTheme,
+  useMediaQuery,
 } from '@mui/material';
-import { Close as CloseIcon } from '@mui/icons-material';
+import { Close as CloseIcon, LocalOffer, AddCircleOutline } from '@mui/icons-material';
 
 interface CouponFormData {
   code: string;
@@ -41,16 +40,11 @@ interface CouponFormDialogProps {
 
 const textFieldSx = {
   '& .MuiOutlinedInput-root': {
-    '&:hover fieldset': {
-      borderColor: '#94a3b8',
-    },
-    '&.Mui-focused fieldset': {
-      borderColor: '#1976d2',
-    },
+    borderRadius: 2,
+    '&:hover fieldset': { borderColor: '#94a3b8' },
+    '&.Mui-focused fieldset': { borderColor: '#1976d2' },
   },
-  '& .MuiInputLabel-root.Mui-focused': {
-    color: '#1976d2',
-  },
+  '& .MuiInputLabel-root.Mui-focused': { color: '#1976d2' },
 };
 
 const defaultFormData: CouponFormData = {
@@ -73,6 +67,9 @@ const CouponFormDialog: React.FC<CouponFormDialogProps> = ({
   onSave,
   editingCoupon,
 }) => {
+  const theme = useTheme();
+  const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
+
   const [formData, setFormData] = useState<CouponFormData>(defaultFormData);
   const [loading, setLoading] = useState(false);
 
@@ -118,37 +115,81 @@ const CouponFormDialog: React.FC<CouponFormDialogProps> = ({
     <Dialog
       open={open}
       onClose={onClose}
-      maxWidth="md"
+      maxWidth="sm"
       fullWidth
+      fullScreen={fullScreen}
       PaperProps={{
         sx: {
-          borderRadius: 2,
+          borderRadius: { xs: 0, sm: 3 },
+          overflow: 'hidden',
           boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
         },
       }}
     >
-      <DialogTitle sx={{ p: 3, pb: 2, borderBottom: '1px solid #e2e8f0' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Box>
-            <Typography variant="h6" sx={{ fontWeight: 700, color: '#0f172a', fontSize: '1.125rem' }}>
-              {editingCoupon ? 'Edit Coupon' : 'Create New Coupon'}
-            </Typography>
-            <Typography variant="body2" sx={{ color: '#64748b', fontSize: '0.875rem', mt: 0.5 }}>
-              {editingCoupon ? 'Update coupon information' : 'Create a new discount code or promotion'}
-            </Typography>
+      {/* Dark gradient header */}
+      <Box
+        sx={{
+          background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 60%, #312e81 100%)',
+          px: 3,
+          pt: 3,
+          pb: 3,
+          position: 'relative',
+          overflow: 'hidden',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: -60,
+            right: -40,
+            width: 180,
+            height: 180,
+            borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(99,102,241,0.25) 0%, transparent 70%)',
+            pointerEvents: 'none',
+          },
+        }}
+      >
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative', zIndex: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <Box
+              sx={{
+                width: 40,
+                height: 40,
+                borderRadius: 2,
+                bgcolor: 'rgba(255,255,255,0.12)',
+                border: '1px solid rgba(255,255,255,0.20)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+              }}
+            >
+              {editingCoupon ? (
+                <LocalOffer sx={{ fontSize: 20, color: '#ffffff' }} />
+              ) : (
+                <AddCircleOutline sx={{ fontSize: 20, color: '#ffffff' }} />
+              )}
+            </Box>
+            <Box>
+              <Typography variant="h6" sx={{ fontWeight: 700, color: '#ffffff', lineHeight: 1.2 }}>
+                {editingCoupon ? 'Edit Coupon' : 'Create New Coupon'}
+              </Typography>
+              <Typography variant="caption" sx={{ color: 'rgba(199,210,254,0.7)', fontSize: '0.75rem' }}>
+                {editingCoupon ? 'Update coupon information' : 'Create a new discount code or promotion'}
+              </Typography>
+            </Box>
           </Box>
           <IconButton
             onClick={onClose}
             size="small"
             sx={{
-              color: '#64748b',
-              '&:hover': { backgroundColor: '#f1f5f9' },
+              color: 'rgba(255,255,255,0.7)',
+              '&:hover': { backgroundColor: 'rgba(255,255,255,0.10)' },
             }}
           >
             <CloseIcon fontSize="small" />
           </IconButton>
         </Box>
-      </DialogTitle>
+      </Box>
 
       <DialogContent sx={{ p: 3 }}>
         <Grid container spacing={2.5}>
@@ -157,6 +198,7 @@ const CouponFormDialog: React.FC<CouponFormDialogProps> = ({
           <Grid item xs={12} sm={8}>
             <TextField
               fullWidth
+              size="small"
               label="Coupon Code"
               value={formData.code}
               onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
@@ -171,10 +213,10 @@ const CouponFormDialog: React.FC<CouponFormDialogProps> = ({
               variant="outlined"
               onClick={generateCode}
               sx={{
-                height: 56,
+                height: 40,
                 textTransform: 'none',
                 fontWeight: 600,
-                borderRadius: 1.5,
+                borderRadius: 2,
                 borderColor: '#e2e8f0',
                 color: '#475569',
                 '&:hover': {
@@ -191,6 +233,7 @@ const CouponFormDialog: React.FC<CouponFormDialogProps> = ({
           <Grid item xs={12}>
             <TextField
               fullWidth
+              size="small"
               label="Coupon Name"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -204,6 +247,7 @@ const CouponFormDialog: React.FC<CouponFormDialogProps> = ({
           <Grid item xs={12}>
             <TextField
               fullWidth
+              size="small"
               label="Description"
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
@@ -218,6 +262,7 @@ const CouponFormDialog: React.FC<CouponFormDialogProps> = ({
           <Grid item xs={12} sm={6}>
             <TextField
               fullWidth
+              size="small"
               select
               label="Discount Type"
               value={formData.discountType}
@@ -236,6 +281,7 @@ const CouponFormDialog: React.FC<CouponFormDialogProps> = ({
           <Grid item xs={12} sm={6}>
             <TextField
               fullWidth
+              size="small"
               label={formData.discountType === 'percentage' ? 'Discount Percentage' : 'Discount Amount'}
               type="number"
               value={formData.discountValue}
@@ -257,6 +303,7 @@ const CouponFormDialog: React.FC<CouponFormDialogProps> = ({
           <Grid item xs={12} sm={6}>
             <TextField
               fullWidth
+              size="small"
               label="Max Discount Amount"
               type="number"
               value={formData.maxDiscountAmount}
@@ -278,6 +325,7 @@ const CouponFormDialog: React.FC<CouponFormDialogProps> = ({
           <Grid item xs={12} sm={6}>
             <TextField
               fullWidth
+              size="small"
               label="Min Order Amount"
               type="number"
               value={formData.minOrderAmount}
@@ -299,6 +347,7 @@ const CouponFormDialog: React.FC<CouponFormDialogProps> = ({
           <Grid item xs={12} sm={6}>
             <TextField
               fullWidth
+              size="small"
               label="Usage Limit"
               type="number"
               value={formData.usageLimit}
@@ -317,6 +366,7 @@ const CouponFormDialog: React.FC<CouponFormDialogProps> = ({
           <Grid item xs={12} sm={6}>
             <TextField
               fullWidth
+              size="small"
               label="Valid From"
               type="date"
               value={formData.validFrom}
@@ -330,6 +380,7 @@ const CouponFormDialog: React.FC<CouponFormDialogProps> = ({
           <Grid item xs={12} sm={6}>
             <TextField
               fullWidth
+              size="small"
               label="Valid Until"
               type="date"
               value={formData.validUntil}
@@ -341,41 +392,66 @@ const CouponFormDialog: React.FC<CouponFormDialogProps> = ({
 
           {/* Active Toggle */}
           <Grid item xs={12}>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={formData.isAvailable}
-                  onChange={(e) => setFormData({ ...formData, isAvailable: e.target.checked })}
-                  color="primary"
-                />
-              }
-              label={
-                <Box sx={{ ml: 0.5 }}>
-                  <Typography variant="body2" sx={{ fontWeight: 600, color: '#0f172a', lineHeight: 1.4 }}>
-                    Available
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                px: 2,
+                py: 1.5,
+                borderRadius: 2,
+                bgcolor: '#f8fafc',
+                border: '1px solid #e2e8f0',
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                <Box
+                  sx={{
+                    width: 34,
+                    height: 34,
+                    borderRadius: 1.5,
+                    bgcolor: formData.isAvailable ? 'rgba(16,185,129,0.1)' : 'rgba(148,163,184,0.1)',
+                    border: `1px solid ${formData.isAvailable ? 'rgba(16,185,129,0.25)' : 'rgba(148,163,184,0.2)'}`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                    transition: 'all 0.2s',
+                  }}
+                >
+                  <LocalOffer sx={{ fontSize: 17, color: formData.isAvailable ? '#10b981' : '#94a3b8' }} />
+                </Box>
+                <Box>
+                  <Typography variant="body2" sx={{ fontWeight: 600, color: '#0f172a', lineHeight: 1.3 }}>
+                    {formData.isAvailable ? 'Available' : 'Unavailable'}
                   </Typography>
-                  <Typography variant="caption" sx={{ color: '#64748b', fontSize: '0.8125rem' }}>
-                    Coupon can be used by customers
+                  <Typography variant="caption" sx={{ color: '#64748b', fontSize: '0.75rem' }}>
+                    {formData.isAvailable ? 'Coupon can be used by customers' : 'Coupon is disabled'}
                   </Typography>
                 </Box>
-              }
-            />
+              </Box>
+              <Switch
+                checked={formData.isAvailable}
+                onChange={(e) => setFormData({ ...formData, isAvailable: e.target.checked })}
+                color="success"
+                size="small"
+              />
+            </Box>
           </Grid>
 
         </Grid>
       </DialogContent>
 
-      <Divider sx={{ borderColor: '#e2e8f0' }} />
-
-      <DialogActions sx={{ p: 3, pt: 2, gap: 1 }}>
+      <DialogActions sx={{ px: 3, py: 2.5, borderTop: '1px solid #e2e8f0', gap: 1 }}>
         <Button
           onClick={onClose}
           disabled={loading}
           sx={{
             textTransform: 'none',
-            color: '#475569',
-            borderRadius: 1.5,
-            px: 3,
+            fontWeight: 600,
+            color: '#64748b',
+            borderRadius: 2,
+            px: 2.5,
             '&:hover': { backgroundColor: '#f8fafc' },
           }}
         >
@@ -387,12 +463,11 @@ const CouponFormDialog: React.FC<CouponFormDialogProps> = ({
           disabled={loading}
           sx={{
             textTransform: 'none',
-            fontWeight: 600,
-            borderRadius: 1.5,
+            fontWeight: 700,
+            borderRadius: 2,
             px: 3,
-            bgcolor: '#1976d2',
-            boxShadow: '0 4px 14px rgba(25,118,210,0.3)',
-            '&:hover': { bgcolor: '#1565c0' },
+            bgcolor: '#0f172a',
+            '&:hover': { bgcolor: '#1e293b' },
           }}
         >
           {editingCoupon ? 'Update Coupon' : 'Create Coupon'}

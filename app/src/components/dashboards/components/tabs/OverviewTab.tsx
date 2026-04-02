@@ -1,300 +1,469 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
+  Box,
   Grid,
   Card,
   CardContent,
   Typography,
-  Box,
-  Divider,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemIcon,
   useTheme,
-  Chip,
+  Divider,
   Stack,
-  Avatar,
 } from '@mui/material';
+import { alpha } from '@mui/material/styles';
 import {
+  AttachMoney,
   ShoppingCart,
-  TrendingUp,
-  AccessTime,
-  Restaurant,
+  ReceiptLong,
   TableRestaurant,
-  MonetizationOn,
+  AccessTime,
+  FiberManualRecord,
 } from '@mui/icons-material';
-import { 
-  RevenueChart,
-  OrderStatusChart,
-  MenuPerformanceChart,
-  PeakHoursChart,
-} from '../../charts';
-
-interface VenueDashboardStats {
-  total_orders: number;
-  total_revenue: number;
-  active_orders: number;
-  total_tables: number;
-  total_menu_items: number;
-  todays_revenue: number;
-  todays_orders: number;
-  avg_order_value: number;
-  table_occupancy_rate: number;
-  popular_items_count: number;
-  pending_orders: number;
-  preparing_orders: number;
-  ready_orders: number;
-  occupied_tables: number;
-  active_menu_items: number;
-}
+import RevenueChart from '../../charts/RevenueChart';
+import OrderStatusChart from '../../charts/OrderStatusChart';
+import PeakHoursChart from '../../charts/PeakHoursChart';
 
 interface OverviewTabProps {
   dashboardData: any;
-  stats: VenueDashboardStats | null;
-  analyticsData?: any;
 }
 
-const OverviewTab: React.FC<OverviewTabProps> = ({ dashboardData, stats, analyticsData }) => {
+// ─── Helpers ────────────────────────────────────────────────────────────────
+
+function formatCurrency(value: number): string {
+  if (value >= 100000) {
+    return `₹${(value / 100000).toFixed(1)}L`;
+  }
+  if (value >= 1000) {
+    return `₹${(value / 1000).toFixed(1)}K`;
+  }
+  return `₹${value.toLocaleString('en-IN')}`;
+}
+
+function timeAgo(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  return `${Math.floor(hrs / 24)}d ago`;
+}
+
+const STATUS_COLORS: Record<string, string> = {
+  pending: '#F59E0B',
+  preparing: '#3B82F6',
+  ready: '#10B981',
+  completed: '#6B7280',
+  cancelled: '#EF4444',
+  served: '#8B5CF6',
+  confirmed: '#06B6D4',
+};
+
+// ─── Stat Card ───────────────────────────────────────────────────────────────
+
+interface StatCardProps {
+  label: string;
+  value: string;
+  icon: React.ReactNode;
+  iconBg: string;
+  iconColor: string;
+  accentColor: string;
+  sub?: string;
+}
+
+const StatCard: React.FC<StatCardProps> = ({
+  label,
+  value,
+  icon,
+  iconBg,
+  iconColor,
+  accentColor,
+  sub,
+}) => (
+  <Card
+    elevation={0}
+    sx={{
+      height: '100%',
+      border: '1px solid #e2e8f0',
+      borderRadius: 2,
+      bgcolor: '#ffffff',
+      position: 'relative',
+      overflow: 'hidden',
+      transition: 'box-shadow 0.2s',
+      '&:hover': {
+        boxShadow: '0 4px 16px rgba(0,0,0,0.07)',
+      },
+      '&::after': {
+        content: '""',
+        position: 'absolute',
+        left: 0,
+        top: 0,
+        bottom: 0,
+        width: 4,
+        borderRadius: '2px 0 0 2px',
+        bgcolor: accentColor,
+      },
+    }}
+  >
+    <CardContent sx={{ p: 2.5, pl: 3, '&:last-child': { pb: 2.5 } }}>
+      <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+        <Box>
+          <Typography
+            variant="caption"
+            sx={{
+              fontWeight: 600,
+              textTransform: 'uppercase',
+              letterSpacing: '0.6px',
+              color: 'text.secondary',
+              display: 'block',
+              mb: 0.75,
+            }}
+          >
+            {label}
+          </Typography>
+          <Typography
+            variant="h5"
+            sx={{
+              fontWeight: 700,
+              fontSize: '1.6rem',
+              lineHeight: 1.15,
+              color: 'text.primary',
+              letterSpacing: '-0.5px',
+            }}
+          >
+            {value}
+          </Typography>
+          {sub && (
+            <Typography variant="caption" sx={{ color: 'text.secondary', mt: 0.5, display: 'block' }}>
+              {sub}
+            </Typography>
+          )}
+        </Box>
+
+        <Box
+          sx={{
+            width: 44,
+            height: 44,
+            borderRadius: 2,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            bgcolor: iconBg,
+            color: iconColor,
+            flexShrink: 0,
+            ml: 1,
+          }}
+        >
+          {icon}
+        </Box>
+      </Box>
+    </CardContent>
+  </Card>
+);
+
+// ─── Recent Activity Card ────────────────────────────────────────────────────
+
+interface RecentActivityCardProps {
+  recentActivity: any[];
+  theme: any;
+}
+
+const RecentActivityCard: React.FC<RecentActivityCardProps> = ({ recentActivity, theme }) => {
+  const items = recentActivity.slice(0, 8);
+
+  return (
+    <Card
+      elevation={0}
+      sx={{
+        height: '100%',
+        border: '1px solid #e2e8f0',
+        borderRadius: 2,
+        bgcolor: '#ffffff',
+      }}
+    >
+      <CardContent sx={{ p: 0, '&:last-child': { pb: 0 } }}>
+        {/* Header */}
+        <Box
+          sx={{
+            px: 2.5,
+            py: 2,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            borderBottom: '1px solid #e2e8f0',
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <ShoppingCart sx={{ fontSize: 18, color: 'primary.main' }} />
+            <Typography variant="subtitle1" fontWeight={700} color="#0f172a">
+              Recent Activity
+            </Typography>
+          </Box>
+          <Stack direction="row" alignItems="center" spacing={0.5}>
+            <FiberManualRecord sx={{ fontSize: 8, color: 'success.main' }} />
+            <Typography variant="caption" sx={{ color: 'success.main', fontWeight: 600 }}>
+              Live
+            </Typography>
+          </Stack>
+        </Box>
+
+        {/* List */}
+        {items.length === 0 ? (
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              py: 6,
+              px: 3,
+              gap: 1,
+            }}
+          >
+            <ShoppingCart sx={{ fontSize: 40, color: 'text.disabled' }} />
+            <Typography variant="body2" color="text.secondary" textAlign="center">
+              No recent activity yet. Orders will appear here once placed.
+            </Typography>
+          </Box>
+        ) : (
+          <Box sx={{ maxHeight: 380, overflowY: 'auto' }}>
+            {items.map((activity: any, index: number) => {
+              const total =
+                activity.total_amount ??
+                (activity.subtotal ?? 0) +
+                  (activity.tax_amount ?? 0) -
+                  (activity.discount_amount ?? 0);
+
+              const statusColor = STATUS_COLORS[activity.status] ?? '#9E9E9E';
+
+              return (
+                <React.Fragment key={activity.id ?? index}>
+                  <Box
+                    sx={{
+                      px: 2.5,
+                      py: 1.5,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 1.5,
+                      transition: 'background 0.15s',
+                      '&:hover': { backgroundColor: alpha(theme.palette.primary.main, 0.03) },
+                    }}
+                  >
+                    {/* Status dot */}
+                    <Box
+                      sx={{
+                        width: 8,
+                        height: 8,
+                        borderRadius: '50%',
+                        bgcolor: statusColor,
+                        flexShrink: 0,
+                      }}
+                    />
+
+                    {/* Order info */}
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.25 }}>
+                        <Typography
+                          variant="body2"
+                          fontWeight={600}
+                          sx={{ whiteSpace: 'nowrap' }}
+                        >
+                          #{activity.order_number}
+                        </Typography>
+                        {activity.table_number && (
+                          <Typography
+                            variant="caption"
+                            sx={{
+                              color: 'text.secondary',
+                              backgroundColor: alpha(theme.palette.text.secondary, 0.08),
+                              px: 0.75,
+                              py: 0.1,
+                              borderRadius: 0.75,
+                              whiteSpace: 'nowrap',
+                            }}
+                          >
+                            Table {activity.table_number}
+                          </Typography>
+                        )}
+                      </Box>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <AccessTime sx={{ fontSize: 11, color: 'text.disabled' }} />
+                        <Typography variant="caption" color="text.secondary">
+                          {timeAgo(activity.createdAt)}
+                        </Typography>
+                      </Box>
+                    </Box>
+
+                    {/* Right side: amount + dot+text status badge */}
+                    <Box sx={{ textAlign: 'right', flexShrink: 0 }}>
+                      <Typography
+                        variant="body2"
+                        fontWeight={700}
+                        sx={{ color: 'text.primary', mb: 0.25 }}
+                      >
+                        ₹{Number(total).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+                      </Typography>
+                      <Box
+                        sx={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 0.5,
+                          bgcolor: alpha(statusColor, 0.1),
+                          px: 0.75,
+                          py: 0.25,
+                          borderRadius: 1,
+                        }}
+                      >
+                        <Box
+                          sx={{
+                            width: 6,
+                            height: 6,
+                            borderRadius: '50%',
+                            bgcolor: statusColor,
+                            flexShrink: 0,
+                          }}
+                        />
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            color: statusColor,
+                            fontWeight: 600,
+                            fontSize: '0.65rem',
+                            textTransform: 'capitalize',
+                            lineHeight: 1,
+                          }}
+                        >
+                          {activity.status}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </Box>
+                  {index < items.length - 1 && (
+                    <Divider sx={{ mx: 2.5, borderColor: alpha(theme.palette.divider, 0.6) }} />
+                  )}
+                </React.Fragment>
+              );
+            })}
+          </Box>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
+// ─── Main Component ──────────────────────────────────────────────────────────
+
+const OverviewTab: React.FC<OverviewTabProps> = ({ dashboardData }) => {
   const theme = useTheme();
-  
-  // Get popular items from analytics or dashboard data
-  const popularItems = analyticsData?.popular_items || dashboardData?.analytics?.popular_items || [];
 
-  // Check if we have revenue data
-  const hasRevenueData = dashboardData?.analytics?.revenue_trend && 
-                         dashboardData.analytics.revenue_trend.length > 0;
-  
-  // Check if we have order status data
-  const hasOrderStatusData = dashboardData?.analytics?.order_status_breakdown &&
-                              Object.values(dashboardData.analytics.order_status_breakdown).some((val: any) => {
-                                const count = typeof val === 'object' ? val.count : val;
-                                return count > 0;
-                              });
+  const stats = dashboardData?.stats ?? {};
+  const analytics = dashboardData?.analytics ?? {};
+  const recentActivity: any[] = dashboardData?.recent_activity ?? [];
 
-  // Prepare trend data for line chart
-  const trendData = dashboardData?.analytics?.revenue_trend?.map((item: any) => ({
-    label: item.period || item.date || 'N/A',
-    revenue: item.revenue || 0,
-    orders: item.orders || 0
-  })) || [];
+  const revenueTrend = useMemo(
+    () => (analytics.revenue_trend ?? []) as Array<{ date: string; period: string; revenue: number; orders: number }>,
+    [analytics.revenue_trend]
+  );
+
+  const orderStatusBreakdown = useMemo(
+    () => analytics.order_status_breakdown ?? {},
+    [analytics.order_status_breakdown]
+  );
+
+  const peakHoursData = useMemo(() => {
+    const raw: Array<{ hour: string; orders: number; revenue: number }> =
+      analytics.peak_hours ?? [];
+    return raw.map((item) => ({
+      hour: parseInt(item.hour.split(':')[0], 10),
+      orders: item.orders,
+      revenue: item.revenue,
+    }));
+  }, [analytics.peak_hours]);
+
+  const todayRevenue = stats.todays_revenue ?? 0;
+  const todayOrders = stats.todays_orders ?? 0;
+  const avgOrderValue = stats.avg_order_value ?? 0;
+  const occupancyRate = stats.table_occupancy_rate ?? 0;
+
+  const statCards: StatCardProps[] = [
+    {
+      label: "Today's Revenue",
+      value: formatCurrency(todayRevenue),
+      icon: <AttachMoney sx={{ fontSize: 22 }} />,
+      iconBg: alpha('#10B981', 0.12),
+      iconColor: '#10B981',
+      accentColor: '#10B981',
+      sub: 'Total revenue today',
+    },
+    {
+      label: "Today's Orders",
+      value: String(todayOrders),
+      icon: <ShoppingCart sx={{ fontSize: 22 }} />,
+      iconBg: alpha('#3B82F6', 0.12),
+      iconColor: '#3B82F6',
+      accentColor: '#3B82F6',
+      sub: 'Orders placed today',
+    },
+    {
+      label: 'Avg Order Value',
+      value: `₹${Number(avgOrderValue).toLocaleString('en-IN', { maximumFractionDigits: 0 })}`,
+      icon: <ReceiptLong sx={{ fontSize: 22 }} />,
+      iconBg: alpha('#F59E0B', 0.12),
+      iconColor: '#F59E0B',
+      accentColor: '#F59E0B',
+      sub: 'Per order average',
+    },
+    {
+      label: 'Table Occupancy',
+      value: `${Number(occupancyRate).toFixed(0)}%`,
+      icon: <TableRestaurant sx={{ fontSize: 22 }} />,
+      iconBg: alpha('#8B5CF6', 0.12),
+      iconColor: '#8B5CF6',
+      accentColor: '#8B5CF6',
+      sub: 'Current occupancy rate',
+    },
+  ];
 
   return (
     <Box>
-      <Grid container spacing={3}>
-      {/* Revenue Trend Chart - Full Width */}
-      {trendData.length > 0 && (
-        <Grid item xs={12}>
-          <RevenueChart 
-            data={trendData}
-            title="Revenue & Orders Trend"
-            height={400}
-            showOrders={true}
-          />
-        </Grid>
-      )}
-
-      {/* Order Status Distribution */}
-      {hasOrderStatusData && (
-        <Grid item xs={12} lg={6}>
-          <OrderStatusChart 
-            data={dashboardData?.analytics?.order_status_breakdown || {}}
-            title="Order Status Distribution"
-            height={350}
-          />
-        </Grid>
-      )}
-
-      {/* Peak Hours Analysis */}
-      <Grid item xs={12} lg={6}>
-        <PeakHoursChart 
-          title="Peak Hours Analysis"
-          height={350}
-        />
+      {/* ── Row 1: Stat Cards ─────────────────────────────────────────────── */}
+      <Grid container spacing={2.5} sx={{ mb: 3 }}>
+        {statCards.map((card) => (
+          <Grid item xs={12} sm={6} lg={3} key={card.label}>
+            <StatCard {...card} />
+          </Grid>
+        ))}
       </Grid>
 
-      {/* Menu Performance Chart */}
-      {popularItems && popularItems.length > 0 && (
-        <Grid item xs={12}>
-          <MenuPerformanceChart 
-            data={popularItems}
-            title="Top Menu Items Performance"
-            height={400}
-            maxItems={10}
-            sortBy="revenue"
+      {/* ── Row 2: Revenue Chart + Order Status ───────────────────────────── */}
+      <Grid container spacing={2.5} sx={{ mb: 3 }}>
+        <Grid item xs={12} md={8}>
+          <RevenueChart
+            data={revenueTrend}
+            title="Revenue & Orders Trend"
+            height={320}
+            showOrders
           />
         </Grid>
-      )}
-
-      {/* Popular Items */}
-        <Grid item xs={12} md={6}>
-          <Card sx={{ 
-            borderRadius: 0,
-            boxShadow: theme.shadows[2],
-            border: '1px solid',
-            borderColor: 'divider',
-            height: '100%'
-          }}>
-            <CardContent sx={{ p: 2.5 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3, pb: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
-                <Restaurant sx={{ color: 'primary.main', fontSize: 24 }} />
-                <Typography variant="h6" sx={{ fontWeight: 700, color: 'text.primary' }}>
-                  Top Menu Items
-                </Typography>
-              </Box>
-              
-              {popularItems && popularItems.length > 0 ? (
-                <List>
-                  {popularItems.slice(0, 5).map((item: any, index: number) => (
-                    <ListItem key={item.id || index} divider={index < 4}>
-                      <ListItemIcon>
-                        <Avatar sx={{ backgroundColor: 'primary.main' }}>
-                          <Restaurant />
-                        </Avatar>
-                      </ListItemIcon>
-                      <ListItemText
-                        primary={item.name}
-                        secondary={`${item.category} â€¢ ${item.orders} orders`}
-                      />
-                      <Typography variant="body2" sx={{ fontWeight: 600, color: 'success.main' }}>
-                        â‚¹{typeof item.revenue === 'number' ? item.revenue.toLocaleString() : item.revenue}
-                      </Typography>
-                    </ListItem>
-                  ))}
-                </List>
-              ) : (
-                <Box sx={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'center', 
-                  flexDirection: 'column', 
-                  py: 6,
-                  backgroundColor: 'grey.50',
-                  borderRadius: 0,
-                  border: '2px dashed',
-                  borderColor: 'grey.300'
-                }}>
-                  <Restaurant sx={{ fontSize: 48, color: 'grey.400', mb: 2 }} />
-                  <Typography variant="h6" color="text.secondary">No Menu Data</Typography>
-                </Box>
-              )}
-            </CardContent>
-          </Card>
+        <Grid item xs={12} md={4}>
+          <OrderStatusChart
+            data={orderStatusBreakdown}
+            title="Order Status"
+            height={260}
+          />
         </Grid>
+      </Grid>
 
-      {/* Recent Activity */}
+      {/* ── Row 3: Peak Hours + Recent Activity ───────────────────────────── */}
+      <Grid container spacing={2.5}>
         <Grid item xs={12} md={6}>
-          <Card sx={{ 
-            borderRadius: 0,
-            boxShadow: theme.shadows[2],
-            border: '1px solid',
-            borderColor: 'divider',
-            height: '100%'
-          }}>
-            <CardContent sx={{ p: 2.5 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, pb: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <ShoppingCart sx={{ color: 'primary.main', fontSize: 24 }} />
-                  <Typography variant="h6" sx={{ fontWeight: 700, color: 'text.primary' }}>
-                    Recent Activity
-                  </Typography>
-                </Box>
-                <Chip 
-                  label="Live" 
-                  color="success" 
-                  size="small"
-                  sx={{ animation: 'pulse 2s infinite' }}
-                />
-              </Box>
-              
-              {(() => {
-                // Check for both snake_case and camelCase versions
-                const recentActivity = dashboardData?.recent_activity || dashboardData?.recentActivity || [];                return recentActivity && recentActivity.length > 0 ? (
-                <List sx={{ maxHeight: 400, overflow: 'auto' }}>
-                  {recentActivity.slice(0, 6).map((activity: any, index: number) => (
-                    <ListItem 
-                      key={activity.id || index} 
-                      divider={index < recentActivity.length - 1}
-                      sx={{ 
-                        px: 0,
-                        '&:hover': {
-                          backgroundColor: 'action.hover',
-                          borderRadius: 1
-                        }
-                      }}
-                    >
-                      <ListItemIcon>
-                        <Avatar sx={{ 
-                          backgroundColor: 'primary.main', 
-                          width: 36, 
-                          height: 36 
-                        }}>
-                          <ShoppingCart sx={{ fontSize: 20 }} />
-                        </Avatar>
-                      </ListItemIcon>
-                      <ListItemText
-                        primary={
-                          <Box component="div" sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <Typography component="span" variant="subtitle2" sx={{ fontWeight: 600 }}>
-                              Order #{activity.order_number}
-                            </Typography>
-                            <Chip 
-                              label={activity.status} 
-                              size="small"
-                              color={
-                                activity.status === 'completed' ? 'success' :
-                                activity.status === 'pending' ? 'warning' :
-                                activity.status === 'preparing' ? 'info' : 'default'
-                              }
-                              variant="outlined"
-                            />
-                          </Box>
-                        }
-                        secondary={
-                          <Box component="span" sx={{ mt: 0.5, display: 'block' }}>
-                            <Typography component="span" variant="caption" display="block" color="text.secondary">
-                              {activity.venue_name} {activity.table_number ? `â€¢ Table ${activity.table_number}` : ''}
-                            </Typography>
-                            <Box component="span" sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 0.5 }}>
-                              <Typography component="span" variant="body2" sx={{ fontWeight: 600, color: 'success.main' }}>
-                                â‚¹{((activity.subtotal || 0) + (activity.tax_amount || 0) - (activity.discount_amount || 0)).toFixed(2)}
-                              </Typography>
-                              <Box component="span" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                <AccessTime sx={{ fontSize: 14, color: 'text.secondary' }} />
-                                <Typography component="span" variant="caption" color="text.secondary">
-                                  {new Date(activity.createdAt).toLocaleTimeString()}
-                                </Typography>
-                              </Box>
-                            </Box>
-                          </Box>
-                        }
-                      />
-                    </ListItem>
-                  ))}
-                </List>
-              ) : (
-                <Box sx={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'center', 
-                  flexDirection: 'column', 
-                  py: 6,
-                  backgroundColor: 'grey.50',
-                  borderRadius: 0,
-                  border: '2px dashed',
-                  borderColor: 'grey.300'
-                }}>
-                  <ShoppingCart sx={{ fontSize: 48, color: 'grey.400', mb: 2 }} />
-                  <Typography variant="h6" color="text.secondary" gutterBottom>
-                    No Recent Activity
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" textAlign="center">
-                    Recent system activity will appear here once orders start coming in
-                  </Typography>
-                </Box>
-              );
-              })()}
-            </CardContent>
-          </Card>
+          <PeakHoursChart
+            data={peakHoursData.length > 0 ? peakHoursData : undefined}
+            title="Peak Hours"
+            height={280}
+          />
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <RecentActivityCard recentActivity={recentActivity} theme={theme} />
         </Grid>
       </Grid>
     </Box>

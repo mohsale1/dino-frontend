@@ -28,7 +28,7 @@ class RoleService {
       
       if (filters?.page) params.append('page', filters.page.toString());
       if (filters?.page_size) params.append('page_size', filters.page_size.toString());
-      if (filters?.search) params.append('search', filters.search);      const response = await apiService.get<any>(`/roles?${params.toString()}`);      
+      if (filters?.search) params.append('search', filters.search);      const response = await apiService.get<any>(`/application/roles?${params.toString()}`);      
       // Based on your actual response, the structure is:
       // response.data = { success: true, data: [...roles], total: 2, page: 1, ... }
       
@@ -88,7 +88,7 @@ class RoleService {
    */
   async getRole(roleId: string): Promise<Role | null> {
     try {
-      const response = await apiService.get<Role>(`/roles/${roleId}`);
+      const response = await apiService.get<Role>(`/application/roles/${roleId}`);
       return response.data || null;
     } catch (error) {      return null;
     }
@@ -125,7 +125,7 @@ class RoleService {
    */
   async getRolesWithPermissions(): Promise<RoleWithPermissions[]> {
     try {
-      const response = await apiService.get<RoleWithPermissions[]>('/roles/with-permissions');
+      const response = await apiService.get<RoleWithPermissions[]>('/application/roles/with-permissions');
       
       if (response.success && response.data) {
         return response.data;

@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { TableOccupancyChart } from '../../charts';
+import React, { useMemo } from 'react';
 import {
   Grid,
   Card,
@@ -8,705 +7,547 @@ import {
   Box,
   Chip,
   useTheme,
-  Avatar,
   Stack,
-  LinearProgress,
-  IconButton,
-  Tooltip,
-  Alert,
-  CircularProgress,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
   Divider,
-  Snackbar,
 } from '@mui/material';
+import { alpha } from '@mui/material/styles';
 import {
   TableRestaurant,
   People,
   CheckCircle,
   Schedule,
-  Warning,
+  Build,
   AccessTime,
-  Refresh,
-  CleaningServices,
-  Edit,
+  ReceiptLong,
 } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
-import { usePermissions } from '../../../auth';
-import { dashboardService, tableService } from '../../../../services/application';
-import { useUserData } from '../../../../contexts/application/UserData';
-import { useAuth } from '../../../../contexts/common/Auth';
+import { TableOccupancyChart } from '../../charts';
 
 interface TableStatus {
   id: string;
   table_number: string;
   status: 'available' | 'occupied' | 'reserved' | 'maintenance';
-  current_order_id?: string;
-  occupancy_time?: number;
   capacity?: number;
   area_id?: string;
+  current_order_id?: string;
+  occupancy_time?: number;
+}
+
+interface RecentActivity {
+  id: string;
+  order_number: string;
+  status: string;
+  total_amount: number;
+  table_number: string;
+  createdAt: string;
 }
 
 interface TablesOrdersTabProps {
-  tableStatuses?: TableStatus[];
-  analyticsData?: any;
+  dashboardData: any;
 }
 
-type TableStatusType = 'available' | 'occupied' | 'reserved' | 'maintenance';
+const STATUS_COLORS: Record<string, string> = {
+  available: '#10b981',
+  occupied: '#f59e0b',
+  reserved: '#3b82f6',
+  maintenance: '#6b7280',
+};
 
-const TablesOrdersTab: React.FC<TablesOrdersTabProps> = ({ tableStatuses: propTableStatuses, analyticsData }) => {
+const STATUS_LABELS: Record<string, string> = {
+  available: 'Available',
+  occupied: 'Occupied',
+  reserved: 'Reserved',
+  maintenance: 'Maintenance',
+};
+
+const ORDER_STATUS_COLORS: Record<string, string> = {
+  pending: '#f59e0b',
+  preparing: '#3b82f6',
+  ready: '#10b981',
+  completed: '#6b7280',
+  cancelled: '#ef4444',
+};
+
+const StatCard: React.FC<{
+  label: string;
+  count: number;
+  total: number;
+  color: string;
+  icon: React.ReactNode;
+}> = ({ label, count, total, color, icon }) => {
+  const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+  return (
+    <Card
+      elevation={0}
+      sx={{
+        border: '1px solid #e2e8f0',
+        borderRadius: 2,
+        bgcolor: '#ffffff',
+        height: '100%',
+        position: 'relative',
+        overflow: 'hidden',
+        transition: 'box-shadow 0.2s',
+        '&:hover': {
+          boxShadow: '0 4px 16px rgba(0,0,0,0.07)',
+        },
+        '&::after': {
+          content: '""',
+          position: 'absolute',
+          left: 0,
+          top: 0,
+          bottom: 0,
+          width: 4,
+          borderRadius: '2px 0 0 2px',
+          bgcolor: color,
+        },
+      }}
+    >
+      <CardContent sx={{ p: 2.5 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1.5 }}>
+          <Box
+            sx={{
+              width: 40,
+              height: 40,
+              borderRadius: 1.5,
+              bgcolor: alpha(color, 0.1),
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            {icon}
+          </Box>
+          <Typography variant="h4" fontWeight={800} color="text.primary" lineHeight={1}>
+            {count}
+          </Typography>
+        </Box>
+        <Typography variant="body2" fontWeight={600} color="text.primary" sx={{ mb: 0.25 }}>
+          {label}
+        </Typography>
+        <Typography variant="caption" color="text.secondary">
+          {pct}% of total
+        </Typography>
+        <Box
+          sx={{
+            mt: 1.5,
+            height: 4,
+            borderRadius: 2,
+            bgcolor: alpha(color, 0.12),
+            overflow: 'hidden',
+          }}
+        >
+          <Box
+            sx={{
+              height: '100%',
+              width: `${pct}%`,
+              bgcolor: color,
+              borderRadius: 2,
+              transition: 'width 0.6s ease',
+            }}
+          />
+        </Box>
+      </CardContent>
+    </Card>
+  );
+};
+
+const TablesOrdersTab: React.FC<TablesOrdersTabProps> = ({ dashboardData }) => {
   const theme = useTheme();
-  const navigate = useNavigate();
-  const { canManageTables } = usePermissions();
-  const { userData } = useUserData();
-  const { user } = useAuth();
-  const currentVenue = userData?.venue;
-  
-  const [tableStatuses, setTableStatuses] = useState<TableStatus[]>(propTableStatuses || []);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
-  const [selectedTable, setSelectedTable] = useState<TableStatus | null>(null);
-  const [openStatusDialog, setOpenStatusDialog] = useState(false);
-  const [newStatus, setNewStatus] = useState<TableStatusType>('available');
-  const [updating, setUpdating] = useState(false);
-  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
 
-  // Fetch real table data from backend using tables API
-  const fetchTableData = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      // Try to get tables directly from the tables API
-      const tablesResponse = await tableService.getTables({
-        venueId: currentVenue?.id,
-        isActive: true
-      });
-      
-      if (tablesResponse && tablesResponse.data && tablesResponse.data.length > 0) {
-        // Map the table data to our TableStatus interface
-        const mappedTables: TableStatus[] = tablesResponse.data.map((table: any) => ({
-          id: table.id,
-          table_number: table.table_number || table.tableNumber || 'Unknown',
-          status: table.table_status || table.status || 'available',
-          current_order_id: table.current_order_id || table.currentOrderId,
-          occupancy_time: table.occupancy_time || table.occupancyTime,
-          capacity: table.capacity,
-          area_id: table.area_id || table.areaId,
-        }));
-        
-        setTableStatuses(mappedTables);
-        setLastRefresh(new Date());
-        return;
-      }
-      
-      // Fallback: Try to get from dashboard data
-      const dashboardData = await dashboardService.getAdminDashboard();
-      
-      if (dashboardData && (dashboardData as any).tables) {
-        const tables = (dashboardData as any).tables as TableStatus[];
-        setTableStatuses(tables);
-        setLastRefresh(new Date());
-      } else {
-        // No tables found
-        setTableStatuses([]);
-      }
-    } catch (err: any) {
-      console.error('Error fetching table data:', err);
-      setError(err?.message || 'Failed to load table data');
-      setTableStatuses([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const tableStatuses: TableStatus[] = dashboardData?.table_statuses ?? [];
+  const recentActivity: RecentActivity[] = dashboardData?.recent_activity ?? [];
 
-  // Initial load and auto-refresh
-  useEffect(() => {
-    // Always try to fetch table data, even without venue
-    fetchTableData();
+  const { available, occupied, reserved, maintenance, occupancyRate } = useMemo(() => {
+    const av = tableStatuses.filter((t) => t.status === 'available').length;
+    const oc = tableStatuses.filter((t) => t.status === 'occupied').length;
+    const re = tableStatuses.filter((t) => t.status === 'reserved').length;
+    const ma = tableStatuses.filter((t) => t.status === 'maintenance').length;
+    const total = tableStatuses.length;
+    return {
+      available: av,
+      occupied: oc,
+      reserved: re,
+      maintenance: ma,
+      occupancyRate: total > 0 ? Math.round((oc / total) * 100) : 0,
+    };
+  }, [tableStatuses]);
 
-    // Auto-refresh every 30 seconds
-    const interval = setInterval(() => {
-      fetchTableData();
-    }, 30000);
+  const activeOrders = useMemo(
+    () => recentActivity.filter((o) => ['pending', 'preparing', 'ready'].includes(o.status)),
+    [recentActivity]
+  );
 
-    return () => clearInterval(interval);
-  }, [currentVenue?.id, user]);
+  const tablesByArea = useMemo(() => {
+    const groups: Record<string, TableStatus[]> = {};
+    tableStatuses.forEach((t) => {
+      const area = t.area_id || 'General';
+      if (!groups[area]) groups[area] = [];
+      groups[area].push(t);
+    });
+    return groups;
+  }, [tableStatuses]);
 
-  // Update when prop changes
-  useEffect(() => {
-    if (propTableStatuses && propTableStatuses.length > 0) {
-      setTableStatuses(propTableStatuses);
-    }
-  }, [propTableStatuses]);
-
-  const getTableStatusColor = (status: string) => {
-    switch (status) {
-      case 'occupied': return '#F44336';
-      case 'available': return '#4CAF50';
-      case 'reserved': return '#FF9800';
-      case 'maintenance': return '#9E9E9E';
-      default: return '#9E9E9E';
-    }
-  };
-
-  const getTableStatusIcon = (status: string) => {
-    switch (status) {
-      case 'occupied': return <People sx={{ fontSize: 16 }} />;
-      case 'available': return <CheckCircle sx={{ fontSize: 16 }} />;
-      case 'reserved': return <Schedule sx={{ fontSize: 16 }} />;
-      case 'maintenance': return <CleaningServices sx={{ fontSize: 16 }} />;
-      default: return <Warning sx={{ fontSize: 16 }} />;
-    }
-  };
-
-  const handleOpenStatusDialog = (table: TableStatus) => {
-    setSelectedTable(table);
-    setNewStatus(table.status);
-    setOpenStatusDialog(true);
-  };
-
-  const handleCloseStatusDialog = () => {
-    setOpenStatusDialog(false);
-    setSelectedTable(null);
-  };
-
-  const handleUpdateStatus = async () => {
-    if (!selectedTable || newStatus === selectedTable.status) {
-      handleCloseStatusDialog();
-      return;
-    }
-
-    setUpdating(true);
-    try {
-      console.log('Updating table status:', {
-        tableId: selectedTable.id,
-        currentStatus: selectedTable.status,
-        newStatus: newStatus
-      });
-      
-      await tableService.updateTableStatus(selectedTable.id, newStatus);
-      
-      // Update local state
-      setTableStatuses(prev => prev.map(table => 
-        table.id === selectedTable.id ? { ...table, status: newStatus } : table
-      ));
-      
-      setSnackbar({
-        open: true,
-        message: `Table ${selectedTable.table_number} status updated to ${newStatus}`,
-        severity: 'success'
-      });
-      
-      handleCloseStatusDialog();
-      
-      // Refresh data after a short delay
-      setTimeout(() => {
-        fetchTableData();
-      }, 1000);
-    } catch (err: any) {
-      console.error('Error updating table status:', err);
-      setSnackbar({
-        open: true,
-        message: err?.message || 'Failed to update table status',
-        severity: 'error'
-      });
-    } finally {
-      setUpdating(false);
-    }
-  };
-
-  // Calculate table analytics
-  const totalTables = tableStatuses.length;
-  const occupiedTables = tableStatuses.filter(table => table.status === 'occupied').length;
-  const availableTables = tableStatuses.filter(table => table.status === 'available').length;
-  const reservedTables = tableStatuses.filter(table => table.status === 'reserved').length;
-  const maintenanceTables = tableStatuses.filter(table => table.status === 'maintenance').length;
-  const occupancyRate = totalTables > 0 ? Math.round((occupiedTables / totalTables) * 100) : 0;
-  const avgOccupancyTime = tableStatuses
-    .filter(table => table.occupancy_time)
-    .reduce((sum, table) => sum + (table.occupancy_time || 0), 0) / 
-    Math.max(tableStatuses.filter(table => table.occupancy_time).length, 1);
-
-  const statusStats = [
-    { label: 'Available', count: availableTables, color: '#4CAF50', icon: <CheckCircle /> },
-    { label: 'Occupied', count: occupiedTables, color: '#F44336', icon: <People /> },
-    { label: 'Reserved', count: reservedTables, color: '#FF9800', icon: <Schedule /> },
-    { label: 'Maintenance', count: maintenanceTables, color: '#9E9E9E', icon: <CleaningServices /> },
-  ];
-
-  const statusOptions: { value: TableStatusType; label: string; description: string }[] = [
-    { value: 'available', label: 'Available', description: 'Table is ready for guests' },
-    { value: 'occupied', label: 'Occupied', description: 'Table is currently in use' },
-    { value: 'reserved', label: 'Reserved', description: 'Table is reserved for upcoming guests' },
-    { value: 'maintenance', label: 'Maintenance', description: 'Table is under maintenance/cleaning' },
-  ];
+  const total = tableStatuses.length;
 
   return (
-    <Grid container spacing={2}>
-      {/* Error Alert */}
-      {error && (
-        <Grid item xs={12}>
-          <Alert severity="error" onClose={() => setError(null)}>
-            {error}
-          </Alert>
-        </Grid>
-      )}
-
-      {/* Table Occupancy Chart - Full Width */}
-      {tableStatuses.length > 0 && (
-        <Grid item xs={12}>
-          <TableOccupancyChart 
-            tables={tableStatuses}
-            title="Table Status Overview"
-            height={350}
-          />
-        </Grid>
-      )}
-
-      {/* Status Distribution */}
-      <Grid item xs={12} md={4}>
-        <Card sx={{ 
-          borderRadius: 0,
-          boxShadow: theme.shadows[2],
-          border: '1px solid',
-          borderColor: 'divider',
-          height: '100%'
-        }}>
-          <CardContent sx={{ p: 2.5 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, pb: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <TableRestaurant sx={{ color: 'primary.main', fontSize: 24 }} />
-                <Typography variant="h6" sx={{ fontWeight: 700, color: 'text.primary' }}>
-                  Tables Distribution
-                </Typography>
-              </Box>
-              <Tooltip title="Refresh">
-                <IconButton 
-                  size="small" 
-                  onClick={fetchTableData}
-                  disabled={loading}
-                  sx={{ 
-                    backgroundColor: 'primary.50',
-                    '&:hover': { backgroundColor: 'primary.100' }
-                  }}
-                >
-                  {loading ? <CircularProgress size={20} /> : <Refresh fontSize="small" />}
-                </IconButton>
-              </Tooltip>
-            </Box>
-            
-            <Stack spacing={2.5}>
-              {statusStats.map((stat) => (
-                <Box key={stat.label} sx={{ 
-                  p: 2.5, 
-                  backgroundColor: `${stat.color}15`,
-                  borderRadius: 0,
-                  border: '1px solid',
-                  borderColor: `${stat.color}40`
-                }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Avatar sx={{ 
-                        backgroundColor: stat.color,
-                        width: 32,
-                        height: 32
-                      }}>
-                        {React.cloneElement(stat.icon, { fontSize: 'small' })}
-                      </Avatar>
-                      <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                        {stat.label}
-                      </Typography>
-                    </Box>
-                    <Typography variant="h6" sx={{ fontWeight: 700, color: stat.color }}>
-                      {stat.count}
-                    </Typography>
-                  </Box>
-                  
-                  <LinearProgress 
-                    variant="determinate" 
-                    value={totalTables > 0 ? (stat.count / totalTables) * 100 : 0} 
-                    sx={{ 
-                      height: 6,
-                      borderRadius: 0,
-                      backgroundColor: 'rgba(255,255,255,0.5)',
-                      '& .MuiLinearProgress-bar': {
-                        borderRadius: 0,
-                        backgroundColor: stat.color
-                      }
-                    }}
-                  />
-                  
-                  <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-                    {totalTables > 0 ? Math.round((stat.count / totalTables) * 100) : 0}% of total tables
-                  </Typography>
-                </Box>
-              ))}
-            </Stack>
-
-            {/* Quick Stats */}
-            <Box sx={{ mt: 3, pt: 3, borderTop: '1px solid', borderColor: 'divider' }}>
-              <Grid container spacing={2}>
-                <Grid item xs={6}>
-                  <Box sx={{ textAlign: 'center' }}>
-                    <Typography variant="h5" sx={{ fontWeight: 700, color: 'warning.main' }}>
-                      {occupancyRate}%
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      Occupancy Rate
-                    </Typography>
-                  </Box>
-                </Grid>
-                <Grid item xs={6}>
-                  <Box sx={{ textAlign: 'center' }}>
-                    <Typography variant="h5" sx={{ fontWeight: 700, color: 'info.main' }}>
-                      {Math.round(avgOccupancyTime || 0)}m
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      Avg Duration
-                    </Typography>
-                  </Box>
-                </Grid>
-              </Grid>
-            </Box>
-
-            {/* Last Refresh */}
-            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', textAlign: 'center', mt: 2 }}>
-              Last updated: {lastRefresh.toLocaleTimeString()}
-            </Typography>
-          </CardContent>
-        </Card>
+    <Grid container spacing={2.5}>
+      {/* Stat Cards */}
+      <Grid item xs={6} sm={3}>
+        <StatCard
+          label="Available"
+          count={available}
+          total={total}
+          color={STATUS_COLORS.available}
+          icon={<CheckCircle sx={{ fontSize: 20, color: STATUS_COLORS.available }} />}
+        />
+      </Grid>
+      <Grid item xs={6} sm={3}>
+        <StatCard
+          label="Occupied"
+          count={occupied}
+          total={total}
+          color={STATUS_COLORS.occupied}
+          icon={<People sx={{ fontSize: 20, color: STATUS_COLORS.occupied }} />}
+        />
+      </Grid>
+      <Grid item xs={6} sm={3}>
+        <StatCard
+          label="Reserved"
+          count={reserved}
+          total={total}
+          color={STATUS_COLORS.reserved}
+          icon={<Schedule sx={{ fontSize: 20, color: STATUS_COLORS.reserved }} />}
+        />
+      </Grid>
+      <Grid item xs={6} sm={3}>
+        <StatCard
+          label="Maintenance"
+          count={maintenance}
+          total={total}
+          color={STATUS_COLORS.maintenance}
+          icon={<Build sx={{ fontSize: 20, color: STATUS_COLORS.maintenance }} />}
+        />
       </Grid>
 
-      {/* Table Status Grid */}
-      <Grid item xs={12} md={8}>
-        <Card sx={{ 
-          borderRadius: 0,
-          boxShadow: theme.shadows[2],
-          border: '1px solid',
-          borderColor: 'divider',
-          height: '100%'
-        }}>
-          <CardContent sx={{ p: 2.5 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, pb: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
+      {/* Occupancy Rate Banner */}
+      <Grid item xs={12}>
+        <Box
+          sx={{
+            px: 3,
+            py: 1.5,
+            borderRadius: 2,
+            bgcolor: alpha(STATUS_COLORS.occupied, 0.06),
+            border: `1px solid ${alpha(STATUS_COLORS.occupied, 0.18)}`,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 2,
+          }}
+        >
+          <Typography variant="body2" color="text.secondary" fontWeight={500}>
+            Current Occupancy Rate
+          </Typography>
+          <Typography variant="h6" fontWeight={800} color={STATUS_COLORS.occupied}>
+            {occupancyRate}%
+          </Typography>
+          <Box
+            sx={{
+              flex: 1,
+              height: 6,
+              borderRadius: 3,
+              bgcolor: alpha(STATUS_COLORS.occupied, 0.12),
+              overflow: 'hidden',
+            }}
+          >
+            <Box
+              sx={{
+                height: '100%',
+                width: `${occupancyRate}%`,
+                bgcolor: STATUS_COLORS.occupied,
+                borderRadius: 3,
+                transition: 'width 0.6s ease',
+              }}
+            />
+          </Box>
+          <Typography variant="body2" color="text.secondary">
+            {occupied} / {total} tables
+          </Typography>
+        </Box>
+      </Grid>
+
+      {/* Chart (7/12) + Active Orders (5/12) */}
+      <Grid item xs={12} md={7}>
+        <TableOccupancyChart
+          tables={tableStatuses}
+          title="Table Status Overview"
+          height={300}
+        />
+      </Grid>
+
+      <Grid item xs={12} md={5}>
+        <Card
+          elevation={0}
+          sx={{
+            border: '1px solid #e2e8f0',
+            borderRadius: 2,
+            bgcolor: '#ffffff',
+            height: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+          }}
+        >
+          <CardContent sx={{ p: 2.5, flex: 1, display: 'flex', flexDirection: 'column' }}>
+            {/* Header */}
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <TableRestaurant sx={{ color: 'primary.main', fontSize: 24 }} />
-                <Typography variant="h6" sx={{ fontWeight: 700, color: 'text.primary' }}>
-                  Table Status Grid
+                <ReceiptLong sx={{ fontSize: 20, color: 'primary.main' }} />
+                <Typography variant="h6" fontWeight={700}>
+                  Active Orders
                 </Typography>
               </Box>
               <Chip
-                label="Manage Tables"
-                onClick={() => navigate('/admin/tables')}
+                label={activeOrders.length}
+                size="small"
                 sx={{
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  '&:hover': {
-                    backgroundColor: 'primary.main',
-                    color: 'white'
-                  }
+                  fontWeight: 700,
+                  bgcolor: alpha(theme.palette.primary.main, 0.1),
+                  color: 'primary.main',
+                  border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
                 }}
               />
             </Box>
 
-            {loading && tableStatuses.length === 0 ? (
-              <Box sx={{ 
-                display: 'flex', 
-                justifyContent: 'center', 
-                alignItems: 'center', 
-                py: 8 
-              }}>
-                <CircularProgress />
-              </Box>
-            ) : tableStatuses.length === 0 ? (
-              <Box sx={{ 
-                display: 'flex', 
-                flexDirection: 'column', 
-                alignItems: 'center', 
-                gap: 2, 
-                py: 8,
-                backgroundColor: 'grey.50',
-                borderRadius: 0,
-                border: '2px dashed',
-                borderColor: 'grey.300'
-              }}>
-                <TableRestaurant sx={{ fontSize: 64, color: 'grey.400' }} />
-                <Typography variant="h6" color="text.secondary">No Table Data Available</Typography>
-                <Typography variant="body2" color="text.secondary" textAlign="center">
-                  Table status information will appear here once tables are configured.
+            {activeOrders.length === 0 ? (
+              <Box
+                sx={{
+                  flex: 1,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 1,
+                  py: 4,
+                  bgcolor: alpha(theme.palette.grey[500], 0.04),
+                  borderRadius: 1.5,
+                  border: `2px dashed ${alpha(theme.palette.grey[500], 0.15)}`,
+                }}
+              >
+                <ReceiptLong sx={{ fontSize: 40, color: 'text.disabled' }} />
+                <Typography variant="body2" color="text.secondary">
+                  No active orders right now
                 </Typography>
               </Box>
             ) : (
-              <Grid container spacing={2} sx={{ maxHeight: 500, overflow: 'auto', pr: 1 }}>
-                {tableStatuses.map((table) => (
-                  <Grid item xs={12} sm={6} lg={4} key={table.id}>
-                    <Card sx={{ 
-                      border: '2px solid',
-                      borderColor: getTableStatusColor(table.status),
-                      borderRadius: 0,
-                      transition: 'all 0.3s ease',
-                      backgroundColor: `${getTableStatusColor(table.status)}08`,
-                      '&:hover': {
-                        boxShadow: theme.shadows[4],
-                        transform: 'translateY(-2px)'
-                      }
-                    }}>
-                      <CardContent sx={{ p: 2.5 }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <TableRestaurant sx={{ color: getTableStatusColor(table.status) }} />
-                            <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                              {table.table_number}
+              <Stack
+                spacing={1}
+                sx={{
+                  flex: 1,
+                  overflowY: 'auto',
+                  maxHeight: 340,
+                  pr: 0.5,
+                  '&::-webkit-scrollbar': { width: 4 },
+                  '&::-webkit-scrollbar-track': { bgcolor: 'transparent' },
+                  '&::-webkit-scrollbar-thumb': {
+                    bgcolor: alpha(theme.palette.grey[500], 0.3),
+                    borderRadius: 2,
+                  },
+                }}
+              >
+                {activeOrders.map((order) => {
+                  const statusColor = ORDER_STATUS_COLORS[order.status] ?? '#6b7280';
+                  return (
+                    <Box
+                      key={order.id}
+                      sx={{
+                        p: 1.5,
+                        borderRadius: 1.5,
+                        border: `1px solid ${alpha(statusColor, 0.2)}`,
+                        bgcolor: alpha(statusColor, 0.04),
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1.5,
+                      }}
+                    >
+                      <Box sx={{ flex: 1, minWidth: 0 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.25 }}>
+                          <Typography variant="body2" fontWeight={700} noWrap>
+                            #{order.order_number}
+                          </Typography>
+                          {order.table_number && (
+                            <Typography variant="caption" color="text.secondary">
+                              Table {order.table_number}
                             </Typography>
-                          </Box>
-                          <Chip
-                            icon={getTableStatusIcon(table.status)}
-                            label={table.status.charAt(0).toUpperCase() + table.status.slice(1)}
-                            size="small"
-                            sx={{
-                              backgroundColor: getTableStatusColor(table.status),
-                              color: 'white',
-                              fontWeight: 600,
-                              '& .MuiChip-icon': {
-                                color: 'white'
-                              }
-                            }}
-                          />
+                          )}
                         </Box>
-                        
-                        <Stack spacing={1}>
-                          {table.capacity && (
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              <People sx={{ fontSize: 14, color: 'text.secondary' }} />
-                              <Typography variant="body2" color="text.secondary">
-                                Capacity: {table.capacity} guests
-                              </Typography>
-                            </Box>
-                          )}
-
-                          {table.current_order_id && (
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              <Typography variant="caption" color="text.secondary">Order:</Typography>
-                              <Chip 
-                                label={table.current_order_id} 
-                                size="small" 
-                                variant="outlined"
-                                color="primary"
-                                sx={{ fontWeight: 600 }}
-                              />
-                            </Box>
-                          )}
-                          
-                          {table.occupancy_time && (
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              <AccessTime sx={{ fontSize: 14, color: 'text.secondary' }} />
-                              <Typography variant="body2" color="text.secondary">
-                                Occupied: {table.occupancy_time} minutes
-                              </Typography>
-                            </Box>
-                          )}
-                          
-                          {table.status === 'available' && (
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              <CheckCircle sx={{ fontSize: 14, color: 'success.main' }} />
-                              <Typography variant="body2" color="success.main" sx={{ fontWeight: 600 }}>
-                                Ready for guests
-                              </Typography>
-                            </Box>
-                          )}
-
-                          {table.status === 'maintenance' && (
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              <CleaningServices sx={{ fontSize: 14, color: 'text.secondary' }} />
-                              <Typography variant="body2" color="text.secondary">
-                                Under maintenance
-                              </Typography>
-                            </Box>
-                          )}
-                        </Stack>
-
-                        {/* Update Status Button */}
-                        <Button
-                          fullWidth
-                          variant="outlined"
+                        <Chip
+                          label={order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                           size="small"
-                          startIcon={<Edit />}
-                          onClick={() => handleOpenStatusDialog(table)}
-                          sx={{ 
-                            mt: 2,
-                            borderRadius: 0,
-                            fontWeight: 600,
-                            borderWidth: 2,
-                            '&:hover': {
-                              borderWidth: 2,
-                              transform: 'translateY(-1px)',
-                              boxShadow: 2
-                            }
+                          sx={{
+                            height: 20,
+                            fontSize: '0.65rem',
+                            fontWeight: 700,
+                            bgcolor: alpha(statusColor, 0.12),
+                            color: statusColor,
+                            border: `1px solid ${alpha(statusColor, 0.25)}`,
                           }}
-                        >
-                          Update Status
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  </Grid>
-                ))}
-              </Grid>
+                        />
+                      </Box>
+                      <Typography variant="body2" fontWeight={800} color="text.primary" sx={{ whiteSpace: 'nowrap' }}>
+                        {Number(order.total_amount).toFixed(0)}
+                      </Typography>
+                    </Box>
+                  );
+                })}
+              </Stack>
             )}
           </CardContent>
         </Card>
       </Grid>
 
-      {/* Status Update Dialog */}
-      <Dialog
-        open={openStatusDialog}
-        onClose={handleCloseStatusDialog}
-        maxWidth="sm"
-        fullWidth
-        PaperProps={{
-          sx: { borderRadius: 0 }
-        }}
-      >
-        <DialogTitle>
-          <Typography variant="h6" fontWeight="600">
-            Update Table Status
-          </Typography>
-          {selectedTable && (
-            <Typography variant="body2" color="text.secondary">
-              Table {selectedTable.table_number}
-            </Typography>
-          )}
-        </DialogTitle>
-        
-        <DialogContent>
-          {selectedTable && (
-            <>
-              {/* Current Status */}
-              <Box sx={{ mb: 3 }}>
-                <Typography variant="subtitle2" gutterBottom>
-                  Current Status
-                </Typography>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                  <Chip
-                    icon={getTableStatusIcon(selectedTable.status)}
-                    label={selectedTable.status.charAt(0).toUpperCase() + selectedTable.status.slice(1)}
-                    sx={{
-                      backgroundColor: getTableStatusColor(selectedTable.status),
-                      color: 'white',
-                      fontWeight: 600,
-                      '& .MuiChip-icon': {
-                        color: 'white'
-                      }
-                    }}
-                  />
-                </Box>
-              </Box>
-
-              <Divider sx={{ mb: 3 }} />
-
-              {/* Status Selection */}
-              <FormControl fullWidth sx={{ mb: 3 }}>
-                <InputLabel>New Status</InputLabel>
-                <Select
-                  value={newStatus}
-                  onChange={(e) => setNewStatus(e.target.value as TableStatusType)}
-                  label="New Status"
-                  disabled={updating}
-                >
-                  {statusOptions.map((option) => (
-                    <MenuItem key={option.value} value={option.value}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%' }}>
-                        <Box sx={{ color: getTableStatusColor(option.value) }}>
-                          {getTableStatusIcon(option.value)}
-                        </Box>
-                        <Box>
-                          <Typography variant="body1">{option.label}</Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            {option.description}
-                          </Typography>
-                        </Box>
-                      </Box>
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-
-              {/* Status Preview */}
-              {newStatus !== selectedTable.status && (
-                <Box sx={{ 
-                  p: 2, 
-                  backgroundColor: 'grey.50', 
-                  borderRadius: 0,
-                  border: '1px solid',
-                  borderColor: 'divider'
-                }}>
-                  <Typography variant="subtitle2" gutterBottom>
-                    Preview
-                  </Typography>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <Chip
-                      icon={getTableStatusIcon(newStatus)}
-                      label={newStatus.charAt(0).toUpperCase() + newStatus.slice(1)}
-                      sx={{
-                        backgroundColor: getTableStatusColor(newStatus),
-                        color: 'white',
-                        fontWeight: 600,
-                        '& .MuiChip-icon': {
-                          color: 'white'
-                        }
-                      }}
-                    />
-                    <Typography variant="body2" color="text.secondary">
-                      {statusOptions.find(opt => opt.value === newStatus)?.description}
-                    </Typography>
-                  </Box>
-                </Box>
-              )}
-            </>
-          )}
-        </DialogContent>
-
-        <DialogActions sx={{ p: 2, pt: 1 }}>
-          <Button 
-            onClick={handleCloseStatusDialog}
-            disabled={updating}
-            sx={{ borderRadius: 0 }}
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={handleUpdateStatus}
-            disabled={updating || !selectedTable || newStatus === selectedTable.status}
-            variant="contained"
-            startIcon={updating ? <CircularProgress size={16} /> : <CheckCircle />}
-            sx={{ borderRadius: 0 }}
-          >
-            {updating ? 'Updating...' : 'Update Status'}
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Snackbar for notifications */}
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={6000}
-        onClose={() => setSnackbar({ ...snackbar, open: false })}
-      >
-        <Alert 
-          onClose={() => setSnackbar({ ...snackbar, open: false })} 
-          severity={snackbar.severity}
-          sx={{ width: '100%' }}
+      {/* Table Grid grouped by area */}
+      <Grid item xs={12}>
+        <Card
+          elevation={0}
+          sx={{
+            border: '1px solid #e2e8f0',
+            borderRadius: 2,
+            bgcolor: '#ffffff',
+          }}
         >
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
+          <CardContent sx={{ p: 2.5 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2.5 }}>
+              <TableRestaurant sx={{ fontSize: 20, color: 'primary.main' }} />
+              <Typography variant="h6" fontWeight={700}>
+                Table Grid
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ ml: 0.5 }}>
+                ({total} tables)
+              </Typography>
+            </Box>
+
+            {tableStatuses.length === 0 ? (
+              <Box
+                sx={{
+                  py: 8,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: 1.5,
+                  bgcolor: alpha(theme.palette.grey[500], 0.04),
+                  borderRadius: 2,
+                  border: `2px dashed ${alpha(theme.palette.grey[500], 0.15)}`,
+                }}
+              >
+                <TableRestaurant sx={{ fontSize: 52, color: 'text.disabled' }} />
+                <Typography variant="body1" color="text.secondary" fontWeight={500}>
+                  No table data available
+                </Typography>
+              </Box>
+            ) : (
+              <Stack spacing={3}>
+                {Object.entries(tablesByArea).map(([area, tables], areaIdx) => (
+                  <Box key={area}>
+                    {areaIdx > 0 && <Divider sx={{ mb: 2.5 }} />}
+                    <Typography
+                      variant="caption"
+                      fontWeight={700}
+                      color="text.secondary"
+                      sx={{ textTransform: 'uppercase', letterSpacing: 0.8, display: 'block', mb: 1.5 }}
+                    >
+                      Area: {area}
+                    </Typography>
+                    <Grid container spacing={1.5}>
+                      {tables.map((table) => {
+                        const color = STATUS_COLORS[table.status] ?? '#6b7280';
+                        return (
+                          <Grid item xs={6} sm={4} md={3} lg={2} key={table.id}>
+                            <Box
+                              sx={{
+                                p: 1.75,
+                                borderRadius: 2,
+                                border: `1px solid #e2e8f0`,
+                                bgcolor: '#ffffff',
+                                position: 'relative',
+                                overflow: 'hidden',
+                                transition: 'box-shadow 0.2s',
+                                '&:hover': {
+                                  boxShadow: '0 4px 16px rgba(0,0,0,0.07)',
+                                },
+                                '&::after': {
+                                  content: '""',
+                                  position: 'absolute',
+                                  left: 0,
+                                  top: 0,
+                                  bottom: 0,
+                                  width: 4,
+                                  borderRadius: '2px 0 0 2px',
+                                  bgcolor: color,
+                                },
+                              }}
+                            >
+                              {/* Table number + status dot */}
+                              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                  <TableRestaurant sx={{ fontSize: 14, color }} />
+                                  <Typography variant="body2" fontWeight={800} color="text.primary">
+                                    {table.table_number}
+                                  </Typography>
+                                </Box>
+                                <Box
+                                  sx={{
+                                    width: 8,
+                                    height: 8,
+                                    borderRadius: '50%',
+                                    bgcolor: color,
+                                    boxShadow: `0 0 0 2px ${alpha(color, 0.25)}`,
+                                  }}
+                                />
+                              </Box>
+
+                              {/* Status chip */}
+                              <Chip
+                                label={STATUS_LABELS[table.status] ?? table.status}
+                                size="small"
+                                sx={{
+                                  height: 18,
+                                  fontSize: '0.6rem',
+                                  fontWeight: 700,
+                                  bgcolor: alpha(color, 0.12),
+                                  color,
+                                  border: `1px solid ${alpha(color, 0.25)}`,
+                                  mb: 1,
+                                }}
+                              />
+
+                              {/* Capacity */}
+                              {table.capacity != null && (
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                  <People sx={{ fontSize: 11, color: 'text.disabled' }} />
+                                  <Typography variant="caption" color="text.secondary">
+                                    {table.capacity} seats
+                                  </Typography>
+                                </Box>
+                              )}
+
+                              {/* Occupancy time */}
+                              {table.status === 'occupied' && table.occupancy_time != null && (
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.25 }}>
+                                  <AccessTime sx={{ fontSize: 11, color: STATUS_COLORS.occupied }} />
+                                  <Typography variant="caption" sx={{ color: STATUS_COLORS.occupied, fontWeight: 600 }}>
+                                    {table.occupancy_time} min
+                                  </Typography>
+                                </Box>
+                              )}
+                            </Box>
+                          </Grid>
+                        );
+                      })}
+                    </Grid>
+                  </Box>
+                ))}
+              </Stack>
+            )}
+          </CardContent>
+        </Card>
+      </Grid>
     </Grid>
   );
 };

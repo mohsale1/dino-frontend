@@ -40,6 +40,7 @@ export interface Venue {
   total_reviews?: number;
   isActive: boolean;
   is_open: boolean;
+  order_type?: number; // 0 = online (QR/self-service), 1 = POS (manual/counter)
   status?: string;
   workspaceId: string;
   owner_id?: string;

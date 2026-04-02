@@ -7,7 +7,7 @@ import { ProtectedRoute, PermissionSync } from './components/auth';
 import SystemLayout from './components/layout/SystemLayout';
 import { AppInitializer } from './components/common';
 
-import { AuthProvider } from './contexts/common/Auth';
+import { AuthProvider, useAuth } from './contexts/common/Auth';
 import { ToastProvider } from './contexts/common/Toast';
 import { SidebarProvider } from './contexts/common/Sidebar';
 
@@ -29,6 +29,7 @@ import { StorageCleanup } from './utils/storage';
 import { tokenRefreshScheduler } from './utils/auth';
 import { apiService } from './utils/api';
 import { initializePerformanceMonitoring } from './utils/performance';
+import { PageTransitionLoader, usePageTransition } from './components/ui/PageTransitionLoader';
 
 const theme = createTheme({
   palette: {
@@ -36,12 +37,47 @@ const theme = createTheme({
   },
 });
 
-const LoadingFallback = memo(() => (
-  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-    <div className="loading-spinner" />
-  </div>
-));
-LoadingFallback.displayName = 'LoadingFallback';
+// Inner component — has access to both auth context and router context
+const AppContent = memo(() => {
+  const { loading } = useAuth();
+  const { transitioning } = usePageTransition();
+
+  return (
+    <>
+      <PageTransitionLoader
+        visible={loading || transitioning}
+        message={loading ? 'Initialising...' : 'Loading...'}
+      />
+      <Suspense fallback={null}>
+        <Routes>
+          {/* Root redirects to login */}
+          <Route path="/" element={<Navigate to="/login" replace />} />
+
+          {/* Public: login only */}
+          <Route path="/login" element={<Login />} />
+
+          {/* Protected system routes */}
+          <Route element={<ProtectedRoute redirectTo="/login"><SystemLayout /></ProtectedRoute>}>
+            <Route path="/system" element={<Navigate to="/system/dashboard" replace />} />
+            <Route path="/system/dashboard" element={<SystemDashboard />} />
+            <Route path="/system/users" element={<UserManagement />} />
+            <Route path="/system/roles-permissions" element={<RolesPermissions />} />
+            <Route path="/system/workspaces" element={<Workspaces />} />
+            <Route path="/system/billing" element={<Billing />} />
+            <Route path="/system/registration-codes" element={<RegistrationCodes />} />
+            <Route path="/system/settings" element={<SystemSettings />} />
+            <Route path="/system/appearance" element={<Appearance />} />
+            <Route path="/system/profile" element={<Profile />} />
+          </Route>
+
+          {/* 404 */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Suspense>
+    </>
+  );
+});
+AppContent.displayName = 'AppContent';
 
 const AppProviders = memo(({ children }: { children: React.ReactNode }) => (
   <GlobalErrorBoundary>
@@ -74,32 +110,7 @@ function App() {
 
   return (
     <AppProviders>
-      <Suspense fallback={<LoadingFallback />}>
-        <Routes>
-          {/* Root redirects to login */}
-          <Route path="/" element={<Navigate to="/login" replace />} />
-
-          {/* Public: login only */}
-          <Route path="/login" element={<Login />} />
-
-          {/* Protected system routes */}
-          <Route element={<ProtectedRoute redirectTo="/login"><SystemLayout /></ProtectedRoute>}>
-            <Route path="/system" element={<Navigate to="/system/dashboard" replace />} />
-            <Route path="/system/dashboard" element={<SystemDashboard />} />
-            <Route path="/system/users" element={<UserManagement />} />
-            <Route path="/system/roles-permissions" element={<RolesPermissions />} />
-            <Route path="/system/workspaces" element={<Workspaces />} />
-            <Route path="/system/billing" element={<Billing />} />
-            <Route path="/system/registration-codes" element={<RegistrationCodes />} />
-            <Route path="/system/settings" element={<SystemSettings />} />
-            <Route path="/system/appearance" element={<Appearance />} />
-            <Route path="/system/profile" element={<Profile />} />
-          </Route>
-
-          {/* 404 */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </Suspense>
+      <AppContent />
     </AppProviders>
   );
 }

@@ -1,486 +1,431 @@
-/**
- * SecuritySection Component
- *
- * Clean, professional security settings
- */
-
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   Box,
-  Button,
+  Card,
+  CardContent,
   Typography,
   TextField,
-  Switch,
+  Button,
+  IconButton,
+  InputAdornment,
+  Alert,
   Divider,
   CircularProgress,
-  Alert,
-  Paper,
-  InputAdornment,
-  IconButton,
+  Grid,
+  Switch,
 } from '@mui/material';
 import {
-  Save,
-  Lock,
-  VpnKey,
-  Security as SecurityIcon,
+  LockOutlined,
+  ShieldOutlined,
   Visibility,
   VisibilityOff,
+  CheckCircle,
+  Cancel,
+  NotificationsOutlined,
 } from '@mui/icons-material';
+import { authService } from '../../../../services/auth';
+
+// ---------------------------------------------------------------------------
+// Brand
+// ---------------------------------------------------------------------------
+
+const BRAND = {
+  primary: '#1976D2',
+  primaryHover: '#1565C0',
+  primaryBg: 'rgba(25,118,210,0.08)',
+  primaryBorder: 'rgba(25,118,210,0.2)',
+};
+
+// ---------------------------------------------------------------------------
+// Password strength
+// ---------------------------------------------------------------------------
+
+function getPasswordStrength(pw: string): { score: number; label: string; color: string } {
+  if (!pw) return { score: 0, label: '', color: '#e2e8f0' };
+  let score = 0;
+  if (pw.length >= 8)  score++;
+  if (pw.length >= 12) score++;
+  if (/[A-Z]/.test(pw) && /[a-z]/.test(pw)) score++;
+  if (/\d/.test(pw))   score++;
+  if (/[^A-Za-z0-9]/.test(pw)) score++;
+  score = Math.min(score, 4);
+  const map: Record<number, { label: string; color: string }> = {
+    0: { label: '',       color: '#e2e8f0' },
+    1: { label: 'Weak',   color: '#ef4444' },
+    2: { label: 'Fair',   color: '#f59e0b' },
+    3: { label: 'Good',   color: '#3b82f6' },
+    4: { label: 'Strong', color: '#10b981' },
+  };
+  return { score, ...map[score] };
+}
+
+// ---------------------------------------------------------------------------
+// Sub-components
+// ---------------------------------------------------------------------------
+
+const SectionHeader: React.FC<{ icon: React.ReactNode; title: string; subtitle?: string }> = ({ icon, title, subtitle }) => (
+  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: { xs: 2, sm: 3 } }}>
+    <Box sx={{
+      width: { xs: 34, sm: 38 }, height: { xs: 34, sm: 38 },
+      borderRadius: 2, bgcolor: BRAND.primaryBg, border: `1px solid ${BRAND.primaryBorder}`,
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      color: BRAND.primary, flexShrink: 0,
+    }}>
+      {icon}
+    </Box>
+    <Box sx={{ minWidth: 0 }}>
+      <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#0f172a', lineHeight: 1.2, fontSize: { xs: '0.9rem', sm: '1rem' } }}>
+        {title}
+      </Typography>
+      {subtitle && (
+        <Typography variant="caption" color="text.secondary" sx={{ display: { xs: 'none', sm: 'block' } }}>
+          {subtitle}
+        </Typography>
+      )}
+    </Box>
+  </Box>
+);
+
+const Requirement: React.FC<{ met: boolean; label: string }> = ({ met, label }) => (
+  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+    {met
+      ? <CheckCircle sx={{ fontSize: 15, color: '#10b981' }} />
+      : <Cancel      sx={{ fontSize: 15, color: '#cbd5e1' }} />
+    }
+    <Typography variant="caption" sx={{ color: met ? '#10b981' : '#94a3b8', fontWeight: met ? 600 : 400 }}>
+      {label}
+    </Typography>
+  </Box>
+);
+
+const fieldSx = {
+  '& .MuiOutlinedInput-root': {
+    borderRadius: 2,
+    bgcolor: '#ffffff',
+    '& fieldset': { borderColor: '#e2e8f0' },
+    '&:hover fieldset': { borderColor: BRAND.primaryBorder },
+    '&.Mui-focused fieldset': { borderColor: BRAND.primary },
+  },
+  '& .MuiInputLabel-root.Mui-focused': { color: BRAND.primary },
+};
+
+// ---------------------------------------------------------------------------
+// Main component
+// ---------------------------------------------------------------------------
 
 export interface SecuritySectionProps {
-  securitySettings?: {
-    twoFactorEnabled: boolean;
-    sessionTimeout: number;
-    loginNotifications: boolean;
-  };
-  onSave?: (data: any) => Promise<void>;
+  onSave?: (data: unknown) => Promise<void>;
   onChangePassword?: (data: { currentPassword: string; newPassword: string }) => Promise<void>;
 }
 
-const SecuritySection: React.FC<SecuritySectionProps> = ({
-  securitySettings,
-  onSave,
-  onChangePassword,
-}) => {
-  const [formData, setFormData] = useState({
-    twoFactorEnabled: securitySettings?.twoFactorEnabled ?? false,
-    sessionTimeout: securitySettings?.sessionTimeout ?? 30,
-    loginNotifications: securitySettings?.loginNotifications ?? true,
-  });
-  const [passwordData, setPasswordData] = useState({
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: '',
-  });
-  const [showPasswords, setShowPasswords] = useState({
-    current: false,
-    new: false,
-    confirm: false,
-  });
-  const [saving, setSaving] = useState(false);
-  const [changingPassword, setChangingPassword] = useState(false);
-  const [hasChanges, setHasChanges] = useState(false);
-  const [passwordError, setPasswordError] = useState('');
+const SecuritySection: React.FC<SecuritySectionProps> = () => {
+  // ── Password change state ──
+  const [currentPw, setCurrentPw]   = useState('');
+  const [newPw,     setNewPw]       = useState('');
+  const [confirmPw, setConfirmPw]   = useState('');
+  const [showCurrent, setShowCurrent] = useState(false);
+  const [showNew,     setShowNew]     = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [pwLoading,   setPwLoading]   = useState(false);
+  const [pwSuccess,   setPwSuccess]   = useState('');
+  const [pwError,     setPwError]     = useState('');
 
-  const handleChange = (field: string, value: any) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-    setHasChanges(true);
-  };
+  // ── Preferences state ──
+  const [twoFactor,          setTwoFactor]          = useState(false);
+  const [loginNotifications, setLoginNotifications] = useState(true);
+  const [prefsDirty,         setPrefsDirty]         = useState(false);
+  const [prefsSaving,        setPrefsSaving]        = useState(false);
 
-  const handlePasswordChange = (field: string, value: string) => {
-    setPasswordData((prev) => ({ ...prev, [field]: value }));
-    setPasswordError('');
-  };
+  // ── Derived ──
+  const strength = useMemo(() => getPasswordStrength(newPw), [newPw]);
 
-  const handleSave = async () => {
-    if (!onSave) return;
+  const requirements = useMemo(() => [
+    { met: newPw.length >= 8,                                    label: 'At least 8 characters'       },
+    { met: /[A-Z]/.test(newPw) && /[a-z]/.test(newPw),          label: 'Upper & lowercase letters'   },
+    { met: /\d/.test(newPw),                                     label: 'At least one number'         },
+    { met: /[^A-Za-z0-9]/.test(newPw),                          label: 'At least one special character' },
+  ], [newPw]);
 
+  const passwordsMatch   = confirmPw.length > 0 && newPw === confirmPw;
+  const passwordMismatch = confirmPw.length > 0 && newPw !== confirmPw;
+
+  // ── Handlers ──
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPwError('');
+    setPwSuccess('');
+
+    if (!currentPw) { setPwError('Current password is required.'); return; }
+    if (strength.score < 2) { setPwError('New password is too weak.'); return; }
+    if (!passwordsMatch) { setPwError('New passwords do not match.'); return; }
+    if (currentPw === newPw) { setPwError('New password must differ from current password.'); return; }
+
+    setPwLoading(true);
     try {
-      setSaving(true);
-      await onSave(formData);
-      setHasChanges(false);
-    } catch (error) {
-      console.error('Failed to save security settings:', error);
+      await authService.changePassword(currentPw, newPw);
+      setPwSuccess('Password updated successfully.');
+      setCurrentPw(''); setNewPw(''); setConfirmPw('');
+    } catch (err: unknown) {
+      setPwError(err instanceof Error ? err.message : 'Failed to update password. Please try again.');
     } finally {
-      setSaving(false);
+      setPwLoading(false);
     }
   };
 
-  const handlePasswordSubmit = async () => {
-    if (!onChangePassword) return;
-
-    if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
-      setPasswordError('All password fields are required');
-      return;
-    }
-
-    if (passwordData.newPassword !== passwordData.confirmPassword) {
-      setPasswordError('New passwords do not match');
-      return;
-    }
-
-    if (passwordData.newPassword.length < 8) {
-      setPasswordError('Password must be at least 8 characters long');
-      return;
-    }
-
-    try {
-      setChangingPassword(true);
-      await onChangePassword({
-        currentPassword: passwordData.currentPassword,
-        newPassword: passwordData.newPassword,
-      });
-      setPasswordData({
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: '',
-      });
-      setPasswordError('');
-    } catch (error) {
-      setPasswordError(error instanceof Error ? error.message : 'Failed to change password');
-    } finally {
-      setChangingPassword(false);
-    }
+  const handleSavePrefs = async () => {
+    setPrefsSaving(true);
+    await new Promise((r) => setTimeout(r, 600)); // placeholder
+    setPrefsDirty(false);
+    setPrefsSaving(false);
   };
 
-  const textFieldSx = {
-    '& .MuiOutlinedInput-root': {
-      '&:hover fieldset': {
-        borderColor: '#94a3b8',
-      },
-      '&.Mui-focused fieldset': {
-        borderColor: '#1976d2',
-      },
-    },
-    '& .MuiInputLabel-root.Mui-focused': {
-      color: '#1976d2',
-    },
-  };
+  // ── Toggle row helper ──
+  const ToggleRow = ({
+    icon, title, subtitle, checked, onChange,
+  }: { icon: React.ReactNode; title: string; subtitle: string; checked: boolean; onChange: (v: boolean) => void }) => (
+    // Fix 1: py responsive, icon size responsive
+    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', py: { xs: 1.5, sm: 2 } }}>
+      <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, flex: 1, minWidth: 0 }}>
+        <Box sx={{
+          width: { xs: 32, sm: 36 }, height: { xs: 32, sm: 36 }, borderRadius: 2,
+          bgcolor: BRAND.primaryBg, border: `1px solid ${BRAND.primaryBorder}`,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          color: BRAND.primary, flexShrink: 0,
+        }}>
+          {icon}
+        </Box>
+        <Box sx={{ minWidth: 0 }}>
+          <Typography variant="body2" sx={{ fontWeight: 600, color: '#0f172a', mb: 0.25 }}>{title}</Typography>
+          <Typography variant="caption" sx={{ color: '#64748b' }}>{subtitle}</Typography>
+        </Box>
+      </Box>
+      <Switch
+        checked={checked}
+        onChange={(e) => { onChange(e.target.checked); setPrefsDirty(true); }}
+        color="primary"
+        sx={{ flexShrink: 0, ml: 2 }}
+      />
+    </Box>
+  );
+
+  // ---------------------------------------------------------------------------
+  // Render
+  // ---------------------------------------------------------------------------
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-      {/* Change Password */}
-      <Paper
-        elevation={0}
-        sx={{
-          backgroundColor: '#ffffff',
-          border: '1px solid #e2e8f0',
-          borderRadius: 2,
-          overflow: 'hidden',
-        }}
-      >
-        <Box sx={{ p: 3, borderBottom: '1px solid #f1f5f9' }}>
-          <Typography
-            variant="h6"
-            sx={{
-              fontWeight: 700,
-              fontSize: '1.125rem',
-              color: '#0f172a',
-              mb: 0.5,
-            }}
-          >
-            Change Password
-          </Typography>
-          <Typography
-            variant="body2"
-            sx={{
-              color: '#64748b',
-              fontSize: '0.875rem',
-            }}
-          >
-            Update your password to keep your account secure
-          </Typography>
-        </Box>
+    // Fix 6: outer Box gap responsive
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 2, sm: 3 } }}>
 
-        <Box sx={{ p: 3 }}>
-          {passwordError && (
-            <Alert
-              severity="error"
-              sx={{
-                mb: 3,
-                borderRadius: 1.5,
-                border: '1px solid #fecaca',
-              }}
-            >
-              {passwordError}
+      {/* ── Card 1: Change Password ── */}
+      <Card elevation={0} sx={{ borderRadius: 3, border: '1px solid #e2e8f0' }}>
+        <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+          <SectionHeader
+            icon={<LockOutlined sx={{ fontSize: 20 }} />}
+            title="Change Password"
+            subtitle="Update your account password to keep it secure"
+          />
+
+          {pwSuccess && (
+            <Alert severity="success" onClose={() => setPwSuccess('')} sx={{ mb: 2.5, borderRadius: 2 }}>
+              {pwSuccess}
+            </Alert>
+          )}
+          {pwError && (
+            <Alert severity="error" onClose={() => setPwError('')} sx={{ mb: 2.5, borderRadius: 2 }}>
+              {pwError}
             </Alert>
           )}
 
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+          {/* Fix 4: form gap responsive */}
+          <Box component="form" onSubmit={handlePasswordSubmit} noValidate sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 2, sm: 2.5 } }}>
+
+            {/* Current password */}
             <TextField
-              fullWidth
               label="Current Password"
-              type={showPasswords.current ? 'text' : 'password'}
-              value={passwordData.currentPassword}
-              onChange={(e) => handlePasswordChange('currentPassword', e.target.value)}
+              type={showCurrent ? 'text' : 'password'}
+              value={currentPw}
+              onChange={(e) => setCurrentPw(e.target.value)}
+              fullWidth size="small" required
+              autoComplete="current-password"
+              sx={fieldSx}
               InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <LockOutlined sx={{ fontSize: 17, color: '#94a3b8' }} />
+                  </InputAdornment>
+                ),
                 endAdornment: (
                   <InputAdornment position="end">
-                    <IconButton
-                      onClick={() => setShowPasswords((prev) => ({ ...prev, current: !prev.current }))}
-                      edge="end"
-                    >
-                      {showPasswords.current ? <VisibilityOff /> : <Visibility />}
+                    <IconButton size="small" onClick={() => setShowCurrent((v) => !v)} edge="end" tabIndex={-1}>
+                      {showCurrent ? <VisibilityOff sx={{ fontSize: 18 }} /> : <Visibility sx={{ fontSize: 18 }} />}
                     </IconButton>
                   </InputAdornment>
                 ),
               }}
-              sx={textFieldSx}
             />
 
-            <TextField
-              fullWidth
-              label="New Password"
-              type={showPasswords.new ? 'text' : 'password'}
-              value={passwordData.newPassword}
-              onChange={(e) => handlePasswordChange('newPassword', e.target.value)}
-              helperText="Must be at least 8 characters long"
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      onClick={() => setShowPasswords((prev) => ({ ...prev, new: !prev.new }))}
-                      edge="end"
-                    >
-                      {showPasswords.new ? <VisibilityOff /> : <Visibility />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-              sx={textFieldSx}
-            />
+            <Divider sx={{ borderStyle: 'dashed' }} />
 
+            {/* New password */}
+            <Box>
+              <TextField
+                label="New Password"
+                type={showNew ? 'text' : 'password'}
+                value={newPw}
+                onChange={(e) => setNewPw(e.target.value)}
+                fullWidth size="small" required
+                autoComplete="new-password"
+                sx={fieldSx}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <LockOutlined sx={{ fontSize: 17, color: '#94a3b8' }} />
+                    </InputAdornment>
+                  ),
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton size="small" onClick={() => setShowNew((v) => !v)} edge="end" tabIndex={-1}>
+                        {showNew ? <VisibilityOff sx={{ fontSize: 18 }} /> : <Visibility sx={{ fontSize: 18 }} />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+              />
+
+              {/* Strength bar + requirements */}
+              {newPw.length > 0 && (
+                <Box sx={{ mt: 1.5 }}>
+                  <Box sx={{ display: 'flex', gap: 0.75, mb: 0.75 }}>
+                    {[1, 2, 3, 4].map((seg) => (
+                      <Box key={seg} sx={{
+                        flex: 1, height: 5, borderRadius: 99,
+                        bgcolor: strength.score >= seg ? strength.color : '#e2e8f0',
+                        transition: 'background-color 0.25s',
+                      }} />
+                    ))}
+                  </Box>
+                  {strength.label && (
+                    <Typography variant="caption" sx={{ color: strength.color, fontWeight: 600 }}>
+                      {strength.label}
+                    </Typography>
+                  )}
+                  {/* Fix 3: spacing={0.5} and xs={12} sm={6} kept as-is */}
+                  <Grid container spacing={0.5} sx={{ mt: 1 }}>
+                    {requirements.map((r) => (
+                      <Grid item xs={12} sm={6} key={r.label}>
+                        <Requirement met={r.met} label={r.label} />
+                      </Grid>
+                    ))}
+                  </Grid>
+                </Box>
+              )}
+            </Box>
+
+            {/* Confirm password */}
             <TextField
-              fullWidth
               label="Confirm New Password"
-              type={showPasswords.confirm ? 'text' : 'password'}
-              value={passwordData.confirmPassword}
-              onChange={(e) => handlePasswordChange('confirmPassword', e.target.value)}
+              type={showConfirm ? 'text' : 'password'}
+              value={confirmPw}
+              onChange={(e) => setConfirmPw(e.target.value)}
+              fullWidth size="small" required
+              autoComplete="new-password"
+              helperText={
+                passwordMismatch ? 'Passwords do not match' :
+                passwordsMatch   ? 'Passwords match'        : ''
+              }
+              FormHelperTextProps={{
+                sx: { color: passwordMismatch ? '#ef4444' : passwordsMatch ? '#10b981' : 'inherit', fontWeight: 600 },
+              }}
+              sx={{
+                ...fieldSx,
+                ...(passwordsMatch   && { '& .MuiOutlinedInput-root fieldset': { borderColor: '#10b981' } }),
+                ...(passwordMismatch && { '& .MuiOutlinedInput-root fieldset': { borderColor: '#ef4444' } }),
+              }}
               InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <LockOutlined sx={{ fontSize: 17, color: '#94a3b8' }} />
+                  </InputAdornment>
+                ),
                 endAdornment: (
                   <InputAdornment position="end">
-                    <IconButton
-                      onClick={() => setShowPasswords((prev) => ({ ...prev, confirm: !prev.confirm }))}
-                      edge="end"
-                    >
-                      {showPasswords.confirm ? <VisibilityOff /> : <Visibility />}
+                    <IconButton size="small" onClick={() => setShowConfirm((v) => !v)} edge="end" tabIndex={-1}>
+                      {showConfirm ? <VisibilityOff sx={{ fontSize: 18 }} /> : <Visibility sx={{ fontSize: 18 }} />}
                     </IconButton>
                   </InputAdornment>
                 ),
               }}
-              sx={textFieldSx}
             />
 
-            <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-              <Button
-                variant="contained"
-                startIcon={changingPassword ? <CircularProgress size={16} color="inherit" /> : <VpnKey />}
-                onClick={handlePasswordSubmit}
-                disabled={changingPassword}
-                sx={{
-                  fontWeight: 600,
-                  textTransform: 'none',
-                  borderRadius: 1.5,
-                  px: 3,
-                  backgroundColor: '#1976d2',
-                  boxShadow: '0 4px 14px rgba(25,118,210,0.3)',
-                  '&:hover': {
-                    backgroundColor: '#1565c0',
-                    boxShadow: '0 4px 14px rgba(25,118,210,0.3)',
-                  },
-                }}
-              >
-                {changingPassword ? 'Updating...' : 'Update Password'}
-              </Button>
-            </Box>
-          </Box>
-        </Box>
-      </Paper>
-
-      {/* Security Settings */}
-      <Paper
-        elevation={0}
-        sx={{
-          backgroundColor: '#ffffff',
-          border: '1px solid #e2e8f0',
-          borderRadius: 2,
-          overflow: 'hidden',
-        }}
-      >
-        <Box sx={{ p: 3, borderBottom: '1px solid #f1f5f9' }}>
-          <Typography
-            variant="h6"
-            sx={{
-              fontWeight: 700,
-              fontSize: '1.125rem',
-              color: '#0f172a',
-              mb: 0.5,
-            }}
-          >
-            Security Settings
-          </Typography>
-          <Typography
-            variant="body2"
-            sx={{
-              color: '#64748b',
-              fontSize: '0.875rem',
-            }}
-          >
-            Manage your account security preferences
-          </Typography>
-        </Box>
-
-        <Box sx={{ p: 3 }}>
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              py: 2,
-            }}
-          >
-            <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, flex: 1 }}>
-              <Box
-                sx={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 1.5,
-                  backgroundColor: 'rgba(25,118,210,0.08)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: '#1976d2',
-                  flexShrink: 0,
-                }}
-              >
-                <Lock sx={{ fontSize: 20 }} />
-              </Box>
-              <Box>
-                <Typography
-                  variant="body1"
-                  sx={{
-                    fontWeight: 600,
-                    fontSize: '0.9375rem',
-                    color: '#0f172a',
-                    mb: 0.25,
-                  }}
-                >
-                  Two-Factor Authentication
-                </Typography>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: '#64748b',
-                    fontSize: '0.8125rem',
-                  }}
-                >
-                  Add an extra layer of security to your account
-                </Typography>
-              </Box>
-            </Box>
-            <Switch
-              color="primary"
-              checked={formData.twoFactorEnabled}
-              onChange={(e) => handleChange('twoFactorEnabled', e.target.checked)}
-            />
-          </Box>
-
-          <Divider sx={{ my: 2, borderColor: '#f1f5f9' }} />
-
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              py: 2,
-            }}
-          >
-            <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, flex: 1 }}>
-              <Box
-                sx={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 1.5,
-                  backgroundColor: 'rgba(25,118,210,0.08)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: '#1976d2',
-                  flexShrink: 0,
-                }}
-              >
-                <SecurityIcon sx={{ fontSize: 20 }} />
-              </Box>
-              <Box>
-                <Typography
-                  variant="body1"
-                  sx={{
-                    fontWeight: 600,
-                    fontSize: '0.9375rem',
-                    color: '#0f172a',
-                    mb: 0.25,
-                  }}
-                >
-                  Login Notifications
-                </Typography>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: '#64748b',
-                    fontSize: '0.8125rem',
-                  }}
-                >
-                  Get notified when someone logs into your account
-                </Typography>
-              </Box>
-            </Box>
-            <Switch
-              color="primary"
-              checked={formData.loginNotifications}
-              onChange={(e) => handleChange('loginNotifications', e.target.checked)}
-            />
-          </Box>
-
-          {hasChanges && (
-            <Box
+            {/* Submit */}
+            <Button
+              type="submit"
+              variant="contained"
+              fullWidth
+              disabled={pwLoading}
               sx={{
-                mt: 3,
-                pt: 3,
-                borderTop: '1px solid #f1f5f9',
-                display: 'flex',
-                justifyContent: 'flex-end',
-                gap: 2,
+                mt: 0.5, py: 1.25, borderRadius: 2,
+                textTransform: 'none', fontWeight: 700, fontSize: '0.9rem',
+                bgcolor: BRAND.primary,
+                boxShadow: '0 4px 14px rgba(25,118,210,0.3)',
+                '&:hover': { bgcolor: BRAND.primaryHover },
+                '&:disabled': { bgcolor: 'rgba(25,118,210,0.4)' },
               }}
+              startIcon={pwLoading ? <CircularProgress size={16} color="inherit" /> : <LockOutlined sx={{ fontSize: 18 }} />}
             >
-              <Button
-                variant="outlined"
-                onClick={() => {
-                  setFormData({
-                    twoFactorEnabled: securitySettings?.twoFactorEnabled ?? false,
-                    sessionTimeout: securitySettings?.sessionTimeout ?? 30,
-                    loginNotifications: securitySettings?.loginNotifications ?? true,
-                  });
-                  setHasChanges(false);
-                }}
-                sx={{
-                  fontWeight: 600,
-                  textTransform: 'none',
-                  borderRadius: 1.5,
-                  px: 3,
-                  borderColor: '#e2e8f0',
-                  color: '#475569',
-                  '&:hover': {
-                    borderColor: '#cbd5e1',
-                    backgroundColor: 'transparent',
-                  },
-                }}
-              >
-                Cancel
-              </Button>
+              {pwLoading ? 'Updating...' : 'Update Password'}
+            </Button>
+          </Box>
+        </CardContent>
+      </Card>
+
+      {/* ── Card 2: Security Preferences ── */}
+      <Card elevation={0} sx={{ borderRadius: 3, border: '1px solid #e2e8f0' }}>
+        <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+          <SectionHeader
+            icon={<ShieldOutlined sx={{ fontSize: 20 }} />}
+            title="Security Preferences"
+            subtitle="Manage your account security settings"
+          />
+
+          <ToggleRow
+            icon={<LockOutlined sx={{ fontSize: 18 }} />}
+            title="Two-Factor Authentication"
+            subtitle="Add an extra layer of security to your account"
+            checked={twoFactor}
+            onChange={setTwoFactor}
+          />
+
+          <Divider sx={{ borderColor: '#f1f5f9' }} />
+
+          <ToggleRow
+            icon={<NotificationsOutlined sx={{ fontSize: 18 }} />}
+            title="Login Notifications"
+            subtitle="Get notified when someone logs into your account"
+            checked={loginNotifications}
+            onChange={setLoginNotifications}
+          />
+
+          {/* Fix 2: Save Preferences button — full width on xs */}
+          {prefsDirty && (
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', flexDirection: { xs: 'column', sm: 'row' }, mt: 2 }}>
               <Button
                 variant="contained"
-                startIcon={saving ? <CircularProgress size={16} color="inherit" /> : <Save />}
-                onClick={handleSave}
-                disabled={saving}
+                onClick={handleSavePrefs}
+                disabled={prefsSaving}
+                startIcon={prefsSaving ? <CircularProgress size={16} color="inherit" /> : undefined}
                 sx={{
-                  fontWeight: 600,
-                  textTransform: 'none',
-                  borderRadius: 1.5,
-                  px: 3,
-                  backgroundColor: '#1976d2',
-                  boxShadow: '0 4px 14px rgba(25,118,210,0.3)',
-                  '&:hover': {
-                    backgroundColor: '#1565c0',
-                    boxShadow: '0 4px 14px rgba(25,118,210,0.3)',
-                  },
+                  textTransform: 'none', fontWeight: 600, borderRadius: 2, px: 3,
+                  width: { xs: '100%', sm: 'auto' },
+                  bgcolor: BRAND.primary, '&:hover': { bgcolor: BRAND.primaryHover },
                 }}
               >
-                {saving ? 'Saving...' : 'Save Changes'}
+                {prefsSaving ? 'Saving...' : 'Save Preferences'}
               </Button>
             </Box>
           )}
-        </Box>
-      </Paper>
+        </CardContent>
+      </Card>
     </Box>
   );
 };

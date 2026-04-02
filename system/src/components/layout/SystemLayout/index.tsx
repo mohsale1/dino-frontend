@@ -32,6 +32,7 @@ import {
 import { useNavigate, useLocation, Outlet } from 'react-router-dom';
 import DinoLogo from '../../ui/DinoLogo';
 import { useAuth } from '../../../contexts/common/Auth';
+import { PERMISSIONS } from '../../../types/auth/permissions';
 import { ConfirmationDialog } from '../../dialogs/ConfirmationDialog';
 
 const DRAWER_WIDTH   = 260;
@@ -40,7 +41,7 @@ const COLLAPSED_WIDTH = 68;
 interface MenuItem {
   title: string;
   icon: React.ReactElement;
-  permission: string;
+  permission?: string;
   path: string;
 }
 
@@ -67,19 +68,19 @@ const SystemLayout: React.FC = () => {
   }, [userPermissions, user]);
 
   const menuItems: MenuItem[] = [
-    { title: 'Dashboard',          icon: <DashboardIcon fontSize="small" />,      permission: 'system.workspaces.read',   path: '/system/dashboard' },
-    { title: 'Users',              icon: <People fontSize="small" />,             permission: 'system.users.read',        path: '/system/users' },
-    { title: 'Billing',            icon: <Payment fontSize="small" />,            permission: 'system.billing.read',      path: '/system/billing' },
-    { title: 'Workspaces',         icon: <Business fontSize="small" />,           permission: 'system.workspaces.read',   path: '/system/workspaces' },
-    { title: 'Roles & Permissions',icon: <AdminPanelSettings fontSize="small" />, permission: 'system.roles.read',        path: '/system/roles-permissions' },
-    // { title: 'Registration Codes', icon: <Settings fontSize="small" />,           permission: 'system.registration.read', path: '/system/registration-codes' },
-    { title: 'Appearance',         icon: <Palette fontSize="small" />,            permission: 'system.workspaces.read',   path: '/system/appearance' },
-    { title: 'Profile',            icon: <AccountCircle fontSize="small" />,      permission: 'system.users.read',        path: '/system/profile' },
-   // { title: 'Settings',           icon: <Settings fontSize="small" />,           permission: 'system.workspaces.read',   path: '/system/settings' },
+    { title: 'Dashboard',          icon: <DashboardIcon fontSize="small" />,      permission: PERMISSIONS.SYSTEM_DASHBOARD_VIEW,    path: '/system/dashboard' },
+    { title: 'Users',              icon: <People fontSize="small" />,             permission: PERMISSIONS.SYSTEM_USERS_VIEW,        path: '/system/users' },
+    { title: 'Billing',            icon: <Payment fontSize="small" />,            permission: PERMISSIONS.SYSTEM_BILLING_VIEW,      path: '/system/billing' },
+    { title: 'Workspaces',         icon: <Business fontSize="small" />,           permission: PERMISSIONS.SYSTEM_WORKSPACES_VIEW,   path: '/system/workspaces' },
+    { title: 'Roles & Permissions',icon: <AdminPanelSettings fontSize="small" />, permission: PERMISSIONS.SYSTEM_ROLES_VIEW,        path: '/system/roles-permissions' },
+    { title: 'Registration Codes', icon: <Settings fontSize="small" />,           permission: PERMISSIONS.SYSTEM_REGISTRATION_VIEW, path: '/system/registration-codes' },
+    { title: 'Appearance',         icon: <Palette fontSize="small" />,            permission: PERMISSIONS.SYSTEM_SETTINGS_VIEW,     path: '/system/appearance' },
+    { title: 'Profile',            icon: <AccountCircle fontSize="small" />,                                              path: '/system/profile' },
+    { title: 'Settings',           icon: <Settings fontSize="small" />,           permission: PERMISSIONS.SYSTEM_SETTINGS_VIEW,     path: '/system/settings' },
   ];
 
   const availableMenuItems = useMemo(
-    () => menuItems.filter(item => hasBackendPermission(item.permission)),
+    () => menuItems.filter(item => !item.permission || hasBackendPermission(item.permission)),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [userPermissions],
   );

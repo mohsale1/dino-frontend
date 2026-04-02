@@ -78,6 +78,9 @@ export { default as AnimatedCounter } from './AnimatedCounter';
 // Stats Components
 export { default as StatsCards } from './StatsCards';
 
+// Page Transition Loader
+export { PageTransitionLoader, usePageTransition } from './PageTransitionLoader';
+
 // ===================================================================
 // LEGACY EXPORTS (for backward compatibility)
 // ===================================================================

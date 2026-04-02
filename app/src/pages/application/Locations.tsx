@@ -9,23 +9,136 @@ import {
   Box,
   Typography,
   Button,
+  Paper,
+  InputBase,
+  Select,
+  MenuItem,
+  FormControl,
   Snackbar,
   Alert,
   CircularProgress,
 } from '@mui/material';
-import { Add as AddIcon } from '@mui/icons-material';
-import LocationStats from './Locations/LocationStats';
-import LocationFilters from './Locations/LocationFilters';
+import IconButton from '@mui/material/IconButton';
+import { alpha } from '@mui/material/styles';
+import {
+  Add as AddIcon,
+  CalendarToday,
+  LocationOn as LocationIcon,
+  CheckCircle as CheckCircleIcon,
+  People as OccupiedIcon,
+  Search as SearchIcon,
+  Close as CloseIcon,
+} from '@mui/icons-material';
 import LocationTabs from './Locations/LocationTabs';
 import { ServiceLocationFormDialog, ServiceAreaFormDialog } from '../../features/locations/components';
 import { DeleteConfirmationDialog } from '../../components/dialogs';
 import { locationService } from '../../services/application';
 import { useUserData } from '../../contexts/application/UserData';
+import { useAuth } from '../../contexts/common/Auth';
+import { usePermissions } from '../../hooks/usePermissions';
+import { ROLE_COLORS } from '../../constants/app';
 import type { ServiceLocation, ServiceArea } from '../../features/locations/types';
+
+// ---------------------------------------------------------------------------
+// useCountUp hook
+// ---------------------------------------------------------------------------
+
+const useCountUp = (target: number, duration = 900) => {
+  const [count, setCount] = React.useState(0);
+  React.useEffect(() => {
+    if (target === 0) { setCount(0); return; }
+    let start: number | null = null;
+    const step = (ts: number) => {
+      if (!start) start = ts;
+      const p = Math.min((ts - start) / duration, 1);
+      setCount(Math.round((1 - Math.pow(1 - p, 3)) * target));
+      if (p < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }, [target, duration]);
+  return count;
+};
+
+// ---------------------------------------------------------------------------
+// HeroStat component
+// ---------------------------------------------------------------------------
+
+const HeroStat: React.FC<{
+  label: string;
+  value: number;
+  icon: React.ReactElement;
+  rc: typeof ROLE_COLORS[keyof typeof ROLE_COLORS];
+}> = ({ label, value, icon, rc }) => {
+  const animated = useCountUp(value);
+  return (
+    <Box
+      sx={{
+        width: '100%',
+        px: { xs: 1.5, sm: 2 },
+        py: 1.75,
+        borderRadius: 2.5,
+        bgcolor: 'rgba(255,255,255,0.07)',
+        border: '1px solid rgba(255,255,255,0.12)',
+        backdropFilter: 'blur(8px)',
+        '&:hover': { bgcolor: 'rgba(255,255,255,0.11)' },
+      }}
+    >
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+        <Box
+          sx={{
+            width: 34,
+            height: 34,
+            borderRadius: 1.5,
+            bgcolor: 'rgba(255,255,255,0.1)',
+            border: '1px solid rgba(255,255,255,0.15)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: alpha(rc.chipText, 0.9),
+            flexShrink: 0,
+          }}
+        >
+          {React.cloneElement(icon, { sx: { fontSize: 17 } })}
+        </Box>
+        <Box>
+          <Typography
+            sx={{
+              fontWeight: 700,
+              color: rc.statValue,
+              fontSize: { xs: '1.2rem', sm: '1.5rem' },
+              letterSpacing: '-0.03em',
+              lineHeight: 1,
+            }}
+          >
+            {animated}
+          </Typography>
+          <Typography sx={{ color: rc.statLabel, fontSize: '0.72rem', fontWeight: 500, mt: 0.25 }}>
+            {label}
+          </Typography>
+        </Box>
+      </Box>
+    </Box>
+  );
+};
+
+// ---------------------------------------------------------------------------
+// Main Component
+// ---------------------------------------------------------------------------
 
 const LocationsManagementPage: React.FC = () => {
   const { userData } = useUserData();
   const workspaceId = userData?.venue?.workspaceId || '';
+  const { canCreateAreas, canCreateTables } = usePermissions();
+
+  // Role detection
+  const { userPermissions } = useAuth();
+  const rawRole = (userPermissions?.role?.name || '').toLowerCase();
+  const roleKey: 'Owner' | 'Manager' | 'User' = rawRole.includes('owner') || rawRole.includes('super')
+    ? 'Owner'
+    : rawRole.includes('manager') || rawRole.includes('admin')
+    ? 'Manager'
+    : 'User';
+  const rc = ROLE_COLORS[roleKey];
 
   const [activeTab, setActiveTab] = useState('locations');
   const [searchQuery, setSearchQuery] = useState('');
@@ -36,16 +149,13 @@ const LocationsManagementPage: React.FC = () => {
   const [selectedArea, setSelectedArea] = useState<ServiceArea | null>(null);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
 
-  // Data state
   const [locations, setLocations] = useState<ServiceLocation[]>([]);
   const [areas, setAreas] = useState<ServiceArea[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch areas
   const fetchAreas = useCallback(async () => {
     if (!workspaceId) return;
-
     try {
       const data = await locationService.getAreas(workspaceId);
       setAreas(data);
@@ -55,10 +165,8 @@ const LocationsManagementPage: React.FC = () => {
     }
   }, [workspaceId]);
 
-  // Fetch locations
   const fetchLocations = useCallback(async () => {
     if (!workspaceId) return;
-
     try {
       const data = await locationService.getLocations(workspaceId);
       setLocations(data);
@@ -68,17 +176,11 @@ const LocationsManagementPage: React.FC = () => {
     }
   }, [workspaceId]);
 
-  // Initial data load
   useEffect(() => {
     const loadData = async () => {
-      if (!workspaceId) {
-        setLoading(false);
-        return;
-      }
-
+      if (!workspaceId) { setLoading(false); return; }
       setLoading(true);
       setError(null);
-
       try {
         await Promise.all([fetchAreas(), fetchLocations()]);
       } catch (err: any) {
@@ -88,7 +190,6 @@ const LocationsManagementPage: React.FC = () => {
         setLoading(false);
       }
     };
-
     loadData();
   }, [workspaceId, fetchAreas, fetchLocations]);
 
@@ -116,18 +217,12 @@ const LocationsManagementPage: React.FC = () => {
 
   const handleDeleteLocation = (locationId: string) => {
     const location = locations.find(l => l.id === locationId);
-    if (location) {
-      setSelectedLocation(location);
-      setDeleteDialogOpen(true);
-    }
+    if (location) { setSelectedLocation(location); setDeleteDialogOpen(true); }
   };
 
   const handleDeleteArea = (areaId: string) => {
     const area = areas.find(a => a.id === areaId);
-    if (area) {
-      setSelectedArea(area);
-      setDeleteDialogOpen(true);
-    }
+    if (area) { setSelectedArea(area); setDeleteDialogOpen(true); }
   };
 
   const handleSaveLocation = async (data: any) => {
@@ -139,7 +234,6 @@ const LocationsManagementPage: React.FC = () => {
         await locationService.createLocation({ ...data, workspaceId });
         setSnackbar({ open: true, message: 'Location created successfully', severity: 'success' });
       }
-
       setAddDialogOpen(false);
       setSelectedLocation(null);
       await fetchLocations();
@@ -157,7 +251,6 @@ const LocationsManagementPage: React.FC = () => {
         await locationService.createArea({ ...data, workspaceId });
         setSnackbar({ open: true, message: 'Area created successfully', severity: 'success' });
       }
-
       setAddDialogOpen(false);
       setSelectedArea(null);
       await fetchAreas();
@@ -177,7 +270,6 @@ const LocationsManagementPage: React.FC = () => {
         setSnackbar({ open: true, message: 'Area deleted successfully', severity: 'success' });
         await fetchAreas();
       }
-
       setDeleteDialogOpen(false);
       setSelectedLocation(null);
       setSelectedArea(null);
@@ -190,7 +282,6 @@ const LocationsManagementPage: React.FC = () => {
     try {
       const location = locations.find(l => l.id === id);
       if (!location) return;
-
       const newStatus = location.status === 'available' ? 'maintenance' : 'available';
       await locationService.updateLocationStatus(id, newStatus);
       setSnackbar({ open: true, message: 'Status updated successfully', severity: 'success' });
@@ -234,114 +325,294 @@ const LocationsManagementPage: React.FC = () => {
     );
   }
 
+  // Compute filtered count for toolbar result count
+  const total = activeTab === 'locations' ? locations.length : areas.length;
+  const filteredCount = activeTab === 'locations'
+    ? locations.filter((l) => {
+        const matchSearch =
+          !searchQuery ||
+          l.name?.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchStatus =
+          filterStatus === 'all' || l.status === filterStatus;
+        return matchSearch && matchStatus;
+      }).length
+    : areas.filter((a) => {
+        const matchSearch =
+          !searchQuery ||
+          a.name?.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchStatus =
+          filterStatus === 'all' || (a as any).status === filterStatus;
+        return matchSearch && matchStatus;
+      }).length;
+
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', bgcolor: '#f8fafc' }}>
-      {/* Header */}
+    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100%', bgcolor: '#f1f5f9' }}>
+      {/* Hero Section */}
       <Box
         sx={{
-          px: 3,
-          py: 2,
-          borderBottom: '1px solid #e2e8f0',
-          bgcolor: '#ffffff',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexShrink: 0,
+          background: rc.gradient,
+          px: { xs: 2, sm: 4, md: 6 },
+          pt: { xs: 2.5, md: 4 },
+          pb: { xs: 2.5, md: 4 },
+          position: 'relative',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: -80,
+            right: -80,
+            width: 360,
+            height: 360,
+            borderRadius: '50%',
+            background: `radial-gradient(circle, ${rc.glowA} 0%, transparent 70%)`,
+            pointerEvents: 'none',
+          },
+          '&::after': {
+            content: '""',
+            position: 'absolute',
+            bottom: -60,
+            left: '25%',
+            width: 280,
+            height: 280,
+            borderRadius: '50%',
+            background: `radial-gradient(circle, ${rc.glowB} 0%, transparent 70%)`,
+            pointerEvents: 'none',
+          },
         }}
       >
-        <Box>
-          <Typography
-            variant="h6"
-            sx={{ fontWeight: 700, color: '#0f172a', fontSize: '1.0625rem' }}
-          >
-            Locations
-          </Typography>
-          <Typography variant="body2" sx={{ color: '#64748b' }}>
-            Manage service locations and areas
-          </Typography>
-        </Box>
-
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={handleAddNew}
+        {/* Grid overlay */}
+        <Box
           sx={{
-            textTransform: 'none',
-            borderRadius: 1.5,
-            px: 2.5,
-            fontWeight: 600,
-            bgcolor: '#1976d2',
-            '&:hover': { bgcolor: '#1565c0' },
+            position: 'absolute',
+            inset: 0,
+            backgroundImage:
+              'linear-gradient(rgba(255,255,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.03) 1px,transparent 1px)',
+            backgroundSize: '40px 40px',
+            pointerEvents: 'none',
           }}
-        >
-          Add {activeTab === 'locations' ? 'Location' : 'Area'}
-        </Button>
+        />
+
+        <Box sx={{ position: 'relative', zIndex: 1 }}>
+          {/* Overline above title row */}
+          <Typography
+            sx={{
+              color: alpha(rc.chipText, 0.75),
+              fontWeight: 700,
+              letterSpacing: 3,
+              fontSize: '0.65rem',
+              textTransform: 'uppercase',
+              mb: 1,
+            }}
+          >
+            APPLICATION CONTROL CENTER
+          </Typography>
+
+          {/* Title row */}
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: { xs: 'column', sm: 'row' },
+              alignItems: { xs: 'flex-start', sm: 'flex-start' },
+              justifyContent: 'space-between',
+              gap: 2,
+              mb: 4,
+            }}
+          >
+            <Box>
+              <Typography
+                variant="h4"
+                sx={{
+                  fontWeight: 800,
+                  color: '#fff',
+                  letterSpacing: '-0.025em',
+                  lineHeight: 1.2,
+                  fontSize: { xs: '1.4rem', md: '2rem' },
+                }}
+              >
+                Locations
+              </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mt: 0.75 }}>
+                <CalendarToday sx={{ fontSize: 13, color: alpha(rc.chipText, 0.6) }} />
+                <Typography
+                  variant="caption"
+                  sx={{ color: alpha(rc.chipText, 0.6), fontWeight: 500, fontSize: '0.75rem' }}
+                >
+                  {new Date().toLocaleDateString('en-US', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  })}
+                </Typography>
+              </Box>
+            </Box>
+
+            {(canCreateAreas || canCreateTables) && (
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={handleAddNew}
+                sx={{
+                  alignSelf: { xs: 'stretch', sm: 'flex-start' },
+                  width: { xs: '100%', sm: 'auto' },
+                  bgcolor: alpha('#fff', 0.15),
+                  color: '#fff',
+                  fontWeight: 600,
+                  textTransform: 'none',
+                  backdropFilter: 'blur(8px)',
+                  border: '1px solid rgba(255,255,255,0.25)',
+                  px: 2.5,
+                  py: 1,
+                  borderRadius: 2,
+                  boxShadow: 'none',
+                  '&:hover': {
+                    bgcolor: alpha('#fff', 0.25),
+                    border: '1px solid rgba(255,255,255,0.4)',
+                    boxShadow: 'none',
+                  },
+                }}
+              >
+                Add {activeTab === 'locations' ? 'Location' : 'Area'}
+              </Button>
+            )}
+          </Box>
+
+          {/* Hero stat tiles — CSS Grid */}
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: { xs: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' },
+              gap: { xs: 1.5, sm: 2 },
+            }}
+          >
+            <HeroStat label="Total Locations" value={stats.totalLocations} icon={<LocationIcon />} rc={rc} />
+            <HeroStat label="Available" value={stats.available} icon={<CheckCircleIcon />} rc={rc} />
+            <HeroStat label="Occupied" value={stats.occupied} icon={<OccupiedIcon />} rc={rc} />
+          </Box>
+        </Box>
       </Box>
 
       {/* Body */}
-      <Box
-        sx={{
-          flex: 1,
-          overflowY: 'auto',
-          p: 3,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 3,
-        }}
-      >
-        <LocationStats stats={stats} />
+      <Box sx={{ pb: 6 }}>
+        {/* Full-width toolbar */}
+        <Box sx={{ pt: 0, pb: 0 }}>
+          <Paper
+            elevation={0}
+            sx={{
+              borderRadius: 0,
+              border: 'none',
+              borderTop: '1px solid #e2e8f0',
+              borderBottom: '1px solid #e2e8f0',
+              bgcolor: '#ffffff',
+            }}
+          >
+            <Box
+              sx={{
+                px: 2.5,
+                pt: 2,
+                pb: 1.5,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1.5,
+                flexWrap: 'wrap',
+                borderBottom: '1px solid #e2e8f0',
+              }}
+            >
+              {/* Search */}
+              <Box
+                sx={{
+                  flex: '1 1 220px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                  bgcolor: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: 2,
+                  px: 1.5,
+                  py: 0.75,
+                }}
+              >
+                <SearchIcon sx={{ fontSize: 17, color: '#94a3b8', flexShrink: 0 }} />
+                <InputBase
+                  placeholder="Search locations..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  sx={{ flex: 1, fontSize: '0.875rem', color: '#0f172a' }}
+                />
+                {searchQuery && (
+                  <IconButton
+                    size="small"
+                    onClick={() => setSearchQuery('')}
+                    sx={{ p: 0.25, color: '#94a3b8' }}
+                  >
+                    <CloseIcon sx={{ fontSize: 14 }} />
+                  </IconButton>
+                )}
+              </Box>
 
-        <LocationFilters
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          filterStatus={filterStatus}
-          onStatusChange={setFilterStatus}
-          activeTab={activeTab}
-        />
+              {/* Status filter */}
+              <FormControl size="small" sx={{ minWidth: 130, flexShrink: 0 }}>
+                <Select
+                  value={filterStatus}
+                  onChange={(e) => setFilterStatus(e.target.value)}
+                  displayEmpty
+                  sx={{ borderRadius: 2, fontSize: '0.875rem', bgcolor: '#f8fafc' }}
+                >
+                  <MenuItem value="all">
+                    <Typography variant="body2" sx={{ color: '#94a3b8' }}>All Status</Typography>
+                  </MenuItem>
+                  <MenuItem value="available">Available</MenuItem>
+                  <MenuItem value="occupied">Occupied</MenuItem>
+                  <MenuItem value="maintenance">Maintenance</MenuItem>
+                </Select>
+              </FormControl>
 
-        <LocationTabs
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-          locations={locations}
-          areas={areas}
-          onEditLocation={handleEditLocation}
-          onDeleteLocation={handleDeleteLocation}
-          onEditArea={handleEditArea}
-          onDeleteArea={handleDeleteArea}
-          onToggleStatus={handleToggleStatus}
-          onGenerateQR={handleGenerateQR}
-          onPrintQR={handlePrintQR}
-        />
+              {/* Result count */}
+              <Box sx={{ ml: 'auto', flexShrink: 0, display: { xs: 'none', sm: 'block' } }}>
+                <Typography variant="caption" sx={{ color: '#94a3b8', fontWeight: 500 }}>
+                  {filteredCount} of {total}
+                </Typography>
+              </Box>
+            </Box>
+          </Paper>
+        </Box>
+
+        {/* Content */}
+        <Box sx={{ px: { xs: 2, sm: 3, md: 4 }, pt: 2, pb: 2 }}>
+          <LocationTabs
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+            locations={locations}
+            areas={areas}
+            onEditLocation={handleEditLocation}
+            onDeleteLocation={handleDeleteLocation}
+            onEditArea={handleEditArea}
+            onDeleteArea={handleDeleteArea}
+            onToggleStatus={handleToggleStatus}
+            onGenerateQR={handleGenerateQR}
+            onPrintQR={handlePrintQR}
+          />
+        </Box>
       </Box>
 
-      {/* Add/Edit Location Dialog */}
       {activeTab === 'locations' && (
         <ServiceLocationFormDialog
           open={addDialogOpen}
-          onClose={() => {
-            setAddDialogOpen(false);
-            setSelectedLocation(null);
-          }}
+          onClose={() => { setAddDialogOpen(false); setSelectedLocation(null); }}
           onSave={handleSaveLocation}
           location={selectedLocation}
           areas={areas}
         />
       )}
 
-      {/* Add/Edit Area Dialog */}
       {activeTab === 'areas' && (
         <ServiceAreaFormDialog
           open={addDialogOpen}
-          onClose={() => {
-            setAddDialogOpen(false);
-            setSelectedArea(null);
-          }}
+          onClose={() => { setAddDialogOpen(false); setSelectedArea(null); }}
           onSave={handleSaveArea}
           area={selectedArea}
         />
       )}
 
-      {/* Delete Confirmation */}
       <DeleteConfirmationDialog
         open={deleteDialogOpen}
         onClose={() => {
@@ -357,7 +628,6 @@ const LocationsManagementPage: React.FC = () => {
         requireTyping={false}
       />
 
-      {/* Snackbar */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={6000}

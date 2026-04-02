@@ -1,6 +1,7 @@
 import { useAuth } from '../contexts/common/Auth';
 import { useUserData } from '../contexts/application/UserData';
 import { validateVenueAccess, requiresVenueAssignment, debugVenueAssignment } from '../utils/data/venueUtils';
+import { PERMISSIONS } from '../types/auth/permissions';
 
 interface VenueCheckResult {
   hasVenueAssigned: boolean;
@@ -22,7 +23,7 @@ export const useVenueCheck = (): VenueCheckResult => {
   const hasVenueAssigned = validation.hasVenue;
   const venueId = validation.venueId;
   // Owners/admins can bypass venue check
-  const canBypassVenueCheck = hasBackendPermission('application.workspace.manage') || hasBackendPermission('system.workspaces.read');
+  const canBypassVenueCheck = hasBackendPermission(PERMISSIONS.WORKSPACE_MANAGE) || hasBackendPermission(PERMISSIONS.SYSTEM_WORKSPACES_READ);
   const requiresAssignment = requiresVenueAssignment(userData, user);
   
   return {

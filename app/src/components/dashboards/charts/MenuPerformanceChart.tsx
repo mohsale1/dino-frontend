@@ -116,9 +116,9 @@ const MenuPerformanceChart: React.FC<MenuPerformanceChartProps> = ({
             }
             if (context.parsed.y !== null) {
               if (context.datasetIndex === 1) {
-                label += new Intl.NumberFormat('en-US', {
+                label += new Intl.NumberFormat('en-IN', {
                   style: 'currency',
-                  currency: 'USD',
+                  currency: 'INR',
                 }).format(context.parsed.y);
               } else {
                 label += context.parsed.y + ' orders';
@@ -175,7 +175,7 @@ const MenuPerformanceChart: React.FC<MenuPerformanceChartProps> = ({
         },
         ticks: {
           callback: function(value) {
-            return '$' + value.toLocaleString();
+            return '₹' + Number(value).toLocaleString('en-IN');
           },
           font: {
             size: 11,
@@ -301,7 +301,7 @@ const MenuPerformanceChart: React.FC<MenuPerformanceChartProps> = ({
                       {item.orders} orders
                       {item.rating && (
                         <>
-                          {' â€¢ '}
+                          {' • '}
                           <Star sx={{ fontSize: 12, verticalAlign: 'middle', color: 'warning.main' }} />
                           {item.rating}
                         </>

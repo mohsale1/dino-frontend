@@ -1,36 +1,75 @@
 /**
- * UserFormDialog Component - Clean Professional Design
- *
- * Create and edit users with a modern, minimal dialog
+ * UserFormDialog Component - System-style dark gradient dialog
  */
 
 import React, { useState, useEffect } from 'react';
 import {
   Dialog,
-  DialogTitle,
   DialogContent,
   DialogActions,
   Button,
   TextField,
   Grid,
-  FormControlLabel,
-  Switch,
   MenuItem,
   CircularProgress,
   Box,
   Typography,
-  Divider,
   IconButton,
   InputAdornment,
+  FormControl,
+  Select,
+  Stack,
+  Alert,
+  useTheme,
+  useMediaQuery,
+  alpha,
 } from '@mui/material';
 import {
   Close as CloseIcon,
   Visibility,
   VisibilityOff,
+  Edit,
+  PersonAddAltOutlined,
+  Email,
+  PhoneOutlined,
+  LockResetOutlined,
+  BusinessOutlined,
+  Store,
 } from '@mui/icons-material';
 import { applicationUserService } from '../../../services/application/user';
 import { roleService } from '../../../services/auth/role';
 
+// ─── Design tokens ──────────────────────────────────────────────────────────
+const C = {
+  dark0:   '#0f172a',
+  dark1:   '#1e293b',
+  slate:   '#64748b',
+  muted:   '#94a3b8',
+  border:  '#e2e8f0',
+  surface: '#ffffff',
+  bg:      '#f1f5f9',
+  emerald: '#10b981',
+  rose:    '#f43f5e',
+  amber:   '#f59e0b',
+};
+
+const HEADER_GRADIENT = 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 60%, #312e81 100%)';
+
+const labelSx = {
+  fontWeight: 600,
+  color: C.slate,
+  mb: 0.75,
+  display: 'block',
+  fontSize: '0.75rem',
+  textTransform: 'uppercase' as const,
+  letterSpacing: '0.05em',
+};
+
+const inputSx = {
+  '& .MuiOutlinedInput-root': { borderRadius: 2 },
+};
+
+// ─── Interfaces ──────────────────────────────────────────────────────────────
 interface UserFormData {
   email: string;
   firstName: string;
@@ -55,14 +94,7 @@ interface UserFormDialogProps {
   venues: any[];
 }
 
-const textFieldSx = {
-  '& .MuiOutlinedInput-root': {
-    '&:hover fieldset': { borderColor: '#94a3b8' },
-    '&.Mui-focused fieldset': { borderColor: '#1976d2' },
-  },
-  '& .MuiInputLabel-root.Mui-focused': { color: '#1976d2' },
-};
-
+// ─── Component ───────────────────────────────────────────────────────────────
 const UserFormDialog: React.FC<UserFormDialogProps> = ({
   open,
   onClose,
@@ -72,6 +104,9 @@ const UserFormDialog: React.FC<UserFormDialogProps> = ({
   venueId,
   venues,
 }) => {
+  const theme = useTheme();
+  const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
+
   const [formData, setFormData] = useState<UserFormData>({
     email: '',
     firstName: '',
@@ -91,10 +126,12 @@ const UserFormDialog: React.FC<UserFormDialogProps> = ({
   const [loadingRoles, setLoadingRoles] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [formError, setFormError] = useState('');
 
   useEffect(() => {
     if (open) {
       loadRoles();
+      setFormError('');
       if (editingUser) {
         setFormData({
           email: editingUser.email || '',
@@ -154,18 +191,18 @@ const UserFormDialog: React.FC<UserFormDialogProps> = ({
   const handleSubmit = async () => {
     try {
       setLoading(true);
+      setFormError('');
 
       if (editingUser) {
         const updateData = {
           firstName: formData.firstName,
           lastName: formData.lastName,
           phone: formData.phone,
-          isActive: formData.isActive,
         };
         await applicationUserService.updateUser(editingUser.id, updateData);
       } else {
         if (formData.password !== formData.confirm_password) {
-          alert('Passwords do not match');
+          setFormError('Passwords do not match');
           setLoading(false);
           return;
         }
@@ -185,220 +222,335 @@ const UserFormDialog: React.FC<UserFormDialogProps> = ({
       onSuccess();
       onClose();
     } catch (error: any) {
-      alert(error?.message || 'Failed to save user');
+      setFormError(error?.message || 'Failed to save user');
     } finally {
       setLoading(false);
     }
   };
 
+  // Save button disabled logic
+  const isSaveDisabled = loading
+    || !formData.firstName
+    || !formData.lastName
+    || (!editingUser && (!formData.email || !formData.password || !formData.role_id));
+
   return (
     <Dialog
       open={open}
       onClose={onClose}
-      maxWidth="md"
+      maxWidth="sm"
       fullWidth
+      fullScreen={fullScreen}
       PaperProps={{
         sx: {
-          borderRadius: 2,
-          boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+          borderRadius: { xs: 0, sm: 3 },
+          overflow: 'hidden',
         },
       }}
     >
-      <DialogTitle sx={{ p: 3, pb: 2, borderBottom: '1px solid #e2e8f0' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Box>
-            <Typography variant="h6" sx={{ fontWeight: 700, color: '#0f172a', fontSize: '1.25rem' }}>
-              {editingUser ? 'Edit User' : 'Create New User'}
-            </Typography>
-            <Typography variant="body2" sx={{ color: '#64748b', fontSize: '0.875rem', mt: 0.5 }}>
-              {editingUser ? 'Update user information' : 'Add a new user to your venue'}
-            </Typography>
+      {/* ── Dark gradient header ─────────────────────────────────────────────── */}
+      <Box
+        sx={{
+          background: HEADER_GRADIENT,
+          px: 3,
+          pt: 3,
+          pb: 3,
+          position: 'relative',
+          overflow: 'hidden',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: -60,
+            right: -40,
+            width: 180,
+            height: 180,
+            borderRadius: '50%',
+            background: `radial-gradient(circle, ${alpha('#6366f1', 0.25)} 0%, transparent 70%)`,
+            pointerEvents: 'none',
+          },
+        }}
+      >
+        <Box sx={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <Box
+              sx={{
+                width: 40,
+                height: 40,
+                borderRadius: 2,
+                bgcolor: alpha('#fff', 0.12),
+                border: `1px solid ${alpha('#fff', 0.2)}`,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              {editingUser
+                ? <Edit sx={{ fontSize: 20, color: '#fff' }} />
+                : <PersonAddAltOutlined sx={{ fontSize: 20, color: '#fff' }} />
+              }
+            </Box>
+            <Box>
+              <Typography variant="h6" sx={{ color: '#fff', fontWeight: 700, lineHeight: 1.2 }}>
+                {editingUser ? 'Edit User' : 'Create New User'}
+              </Typography>
+              <Typography variant="caption" sx={{ color: 'rgba(199,210,254,0.7)', fontSize: '0.75rem' }}>
+                {editingUser ? 'Update user information' : 'Add a new user to your venue'}
+              </Typography>
+            </Box>
           </Box>
           <IconButton
             onClick={onClose}
-            sx={{
-              color: '#64748b',
-              '&:hover': { backgroundColor: '#f1f5f9' },
-            }}
+            size="small"
+            sx={{ color: alpha('#fff', 0.7), '&:hover': { bgcolor: alpha('#fff', 0.1) } }}
           >
             <CloseIcon />
           </IconButton>
         </Box>
-      </DialogTitle>
+      </Box>
 
+      {/* ── Form content ────────────────────────────────────────────────────── */}
       <DialogContent sx={{ p: 3 }}>
-        <Grid container spacing={3}>
-          <Grid item xs={12} sm={6}>
-            <TextField
-              fullWidth
-              label="First Name"
-              value={formData.firstName}
-              onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-              required
-              sx={textFieldSx}
-            />
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <TextField
-              fullWidth
-              label="Last Name"
-              value={formData.lastName}
-              onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-              required
-              sx={textFieldSx}
-            />
-          </Grid>
+        <Stack spacing={2.5}>
 
-          {!editingUser && (
-            <Grid item xs={12}>
+          {/* Inline error alert */}
+          {formError && (
+            <Alert severity="error" onClose={() => setFormError('')} sx={{ borderRadius: 2 }}>
+              {formError}
+            </Alert>
+          )}
+
+          {/* First / Last name */}
+          <Grid container spacing={2}>
+            <Grid item xs={6}>
+              <Typography variant="caption" sx={labelSx}>First Name</Typography>
               <TextField
                 fullWidth
-                label="Email"
+                size="small"
+                placeholder="John"
+                value={formData.firstName}
+                onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                required
+                sx={inputSx}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <Typography variant="caption" sx={labelSx}>Last Name</Typography>
+              <TextField
+                fullWidth
+                size="small"
+                placeholder="Doe"
+                value={formData.lastName}
+                onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                required
+                sx={inputSx}
+              />
+            </Grid>
+          </Grid>
+
+          {/* Email — create only */}
+          {!editingUser && (
+            <Box>
+              <Typography variant="caption" sx={labelSx}>Email Address</Typography>
+              <TextField
+                fullWidth
+                size="small"
                 type="email"
+                placeholder="user@example.com"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 required
-                sx={textFieldSx}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Email sx={{ fontSize: 18, color: C.muted }} />
+                    </InputAdornment>
+                  ),
+                }}
+                sx={inputSx}
               />
-            </Grid>
+            </Box>
           )}
 
+          {/* Password fields — create only */}
           {!editingUser && (
             <>
-              <Grid item xs={12} sm={6}>
+              <Box>
+                <Typography variant="caption" sx={labelSx}>Password</Typography>
                 <TextField
                   fullWidth
-                  label="Password"
+                  size="small"
                   type={showPassword ? 'text' : 'password'}
+                  placeholder="Min. 8 characters"
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   required
                   InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <LockResetOutlined sx={{ fontSize: 18, color: C.muted }} />
+                      </InputAdornment>
+                    ),
                     endAdornment: (
                       <InputAdornment position="end">
-                        <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
-                          {showPassword ? <VisibilityOff /> : <Visibility />}
+                        <IconButton onClick={() => setShowPassword(!showPassword)} edge="end" size="small">
+                          {showPassword ? <VisibilityOff sx={{ fontSize: 18 }} /> : <Visibility sx={{ fontSize: 18 }} />}
                         </IconButton>
                       </InputAdornment>
                     ),
                   }}
-                  sx={textFieldSx}
+                  sx={inputSx}
                 />
-              </Grid>
-              <Grid item xs={12} sm={6}>
+              </Box>
+
+              <Box>
+                <Typography variant="caption" sx={labelSx}>Confirm Password</Typography>
                 <TextField
                   fullWidth
-                  label="Confirm Password"
+                  size="small"
                   type={showConfirmPassword ? 'text' : 'password'}
+                  placeholder="Re-enter password"
                   value={formData.confirm_password}
                   onChange={(e) => setFormData({ ...formData, confirm_password: e.target.value })}
                   required
                   InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <LockResetOutlined sx={{ fontSize: 18, color: C.muted }} />
+                      </InputAdornment>
+                    ),
                     endAdornment: (
                       <InputAdornment position="end">
-                        <IconButton onClick={() => setShowConfirmPassword(!showConfirmPassword)} edge="end">
-                          {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                        <IconButton onClick={() => setShowConfirmPassword(!showConfirmPassword)} edge="end" size="small">
+                          {showConfirmPassword ? <VisibilityOff sx={{ fontSize: 18 }} /> : <Visibility sx={{ fontSize: 18 }} />}
                         </IconButton>
                       </InputAdornment>
                     ),
                   }}
-                  sx={textFieldSx}
+                  sx={inputSx}
                 />
-              </Grid>
+              </Box>
             </>
           )}
 
-          <Grid item xs={12} sm={6}>
+          {/* Phone */}
+          <Box>
+            <Typography variant="caption" sx={labelSx}>Phone</Typography>
             <TextField
               fullWidth
-              label="Phone"
+              size="small"
+              placeholder="+1 (555) 000-0000"
               value={formData.phone}
               onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-              sx={textFieldSx}
-            />
-          </Grid>
-
-          <Grid item xs={12} sm={6}>
-            <TextField
-              fullWidth
-              select
-              label="Role"
-              value={formData.role_id}
-              onChange={(e) => {
-                const selectedRole = roles.find(r => r.id === e.target.value);
-                setFormData({
-                  ...formData,
-                  role_id: e.target.value,
-                  role_name: selectedRole?.name || '',
-                });
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <PhoneOutlined sx={{ fontSize: 18, color: C.muted }} />
+                  </InputAdornment>
+                ),
               }}
-              disabled={editingUser || loadingRoles}
-              required={!editingUser}
-              sx={textFieldSx}
-            >
-              {roles.map((role) => (
-                <MenuItem key={role.id} value={role.id}>
-                  {role.displayName || role.name}
-                </MenuItem>
-              ))}
-            </TextField>
-          </Grid>
-
-          <Grid item xs={12}>
-            <TextField
-              fullWidth
-              select
-              label="Venue"
-              value={formData.venueId}
-              onChange={(e) => setFormData({ ...formData, venueId: e.target.value })}
-              disabled={editingUser}
-              sx={textFieldSx}
-            >
-              {venues.map((venue) => (
-                <MenuItem key={venue.id} value={venue.id}>
-                  {venue.name}
-                </MenuItem>
-              ))}
-            </TextField>
-          </Grid>
-
-          <Grid item xs={12}>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={formData.isActive}
-                  onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-                  color="primary"
-                />
-              }
-              label={
-                <Box>
-                  <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.9375rem', color: '#0f172a' }}>
-                    Active
-                  </Typography>
-                  <Typography variant="caption" sx={{ color: '#64748b', fontSize: '0.8125rem' }}>
-                    User can access the system
-                  </Typography>
-                </Box>
-              }
+              sx={inputSx}
             />
-          </Grid>
-        </Grid>
+          </Box>
+
+          {/* Role */}
+          <Box>
+            <Typography variant="caption" sx={labelSx}>Role</Typography>
+            <FormControl fullWidth size="small" required>
+              <Select
+                value={formData.role_id}
+                onChange={(e) => {
+                  const selectedRole = roles.find((r) => r.id === e.target.value);
+                  setFormData({
+                    ...formData,
+                    role_id: e.target.value as string,
+                    role_name: selectedRole?.name || '',
+                  });
+                }}
+                displayEmpty
+                disabled={!!editingUser || loadingRoles}
+                sx={{ borderRadius: 2 }}
+                renderValue={(value) => {
+                  if (!value) {
+                    return <Typography variant="body2" sx={{ color: C.muted }}>Select a role...</Typography>;
+                  }
+                  const role = roles.find((r) => r.id === value);
+                  return (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Store sx={{ fontSize: 16, color: C.slate }} />
+                      <Typography variant="body2">{role?.displayName || role?.name || value}</Typography>
+                    </Box>
+                  );
+                }}
+              >
+                <MenuItem value="" disabled>
+                  <Typography variant="body2" sx={{ color: C.muted }}>Select a role...</Typography>
+                </MenuItem>
+                {roles.map((role) => (
+                  <MenuItem key={role.id} value={role.id}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Store sx={{ fontSize: 16, color: C.slate }} />
+                      <Typography variant="body2">{role.displayName || role.name}</Typography>
+                    </Box>
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Box>
+
+          {/* Venue */}
+          <Box>
+            <Typography variant="caption" sx={labelSx}>Venue</Typography>
+            <FormControl fullWidth size="small">
+              <Select
+                value={formData.venueId}
+                onChange={(e) => setFormData({ ...formData, venueId: e.target.value as string })}
+                displayEmpty
+                disabled={!!editingUser}
+                sx={{ borderRadius: 2 }}
+                renderValue={(value) => {
+                  if (!value) {
+                    return <Typography variant="body2" sx={{ color: C.muted }}>Select a venue...</Typography>;
+                  }
+                  const venue = venues.find((v) => v.id === value);
+                  return (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <BusinessOutlined sx={{ fontSize: 16, color: C.slate }} />
+                      <Typography variant="body2">{venue?.name || value}</Typography>
+                    </Box>
+                  );
+                }}
+              >
+                <MenuItem value="" disabled>
+                  <Typography variant="body2" sx={{ color: C.muted }}>Select a venue...</Typography>
+                </MenuItem>
+                {venues.map((venue) => (
+                  <MenuItem key={venue.id} value={venue.id}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <BusinessOutlined sx={{ fontSize: 16, color: C.slate }} />
+                      <Typography variant="body2">{venue.name}</Typography>
+                    </Box>
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Box>
+
+
+        </Stack>
       </DialogContent>
 
-      <Divider sx={{ borderColor: '#e2e8f0' }} />
-
-      <DialogActions sx={{ p: 3, pt: 2 }}>
+      {/* ── Actions ─────────────────────────────────────────────────────────── */}
+      <DialogActions sx={{ px: 3, py: 2.5, borderTop: `1px solid ${C.border}`, gap: 1 }}>
         <Button
           onClick={onClose}
           disabled={loading}
           sx={{
             textTransform: 'none',
             fontWeight: 600,
-            borderRadius: 1.5,
-            px: 3,
-            color: '#475569',
-            '&:hover': { backgroundColor: '#f8fafc' },
+            color: C.slate,
+            borderRadius: 2,
+            px: 2.5,
+            '&:hover': { bgcolor: alpha(C.slate, 0.06) },
           }}
         >
           Cancel
@@ -406,18 +558,25 @@ const UserFormDialog: React.FC<UserFormDialogProps> = ({
         <Button
           onClick={handleSubmit}
           variant="contained"
-          disabled={loading}
+          disabled={isSaveDisabled}
+          startIcon={
+            loading
+              ? <CircularProgress size={16} color="inherit" />
+              : editingUser
+                ? <Edit sx={{ fontSize: 17 }} />
+                : <PersonAddAltOutlined sx={{ fontSize: 17 }} />
+          }
           sx={{
             textTransform: 'none',
-            fontWeight: 600,
-            borderRadius: 1.5,
+            fontWeight: 700,
+            borderRadius: 2,
             px: 3,
-            backgroundColor: '#1976d2',
-            boxShadow: '0 4px 14px rgba(25,118,210,0.3)',
-            '&:hover': { backgroundColor: '#1565c0' },
+            bgcolor: C.dark0,
+            '&:hover': { bgcolor: C.dark1 },
+            '&.Mui-disabled': { bgcolor: C.border },
           }}
         >
-          {loading ? <CircularProgress size={24} color="inherit" /> : editingUser ? 'Update User' : 'Create User'}
+          {editingUser ? 'Update User' : 'Create User'}
         </Button>
       </DialogActions>
     </Dialog>

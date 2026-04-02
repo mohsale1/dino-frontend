@@ -84,3 +84,6 @@ export { default as StatsCards } from './StatsCards';
 
 export { Button as StandardButton } from './Button';
 export { Card as StandardCard } from './Card';
+
+// Page Transition Loader
+export { PageTransitionLoader, usePageTransition } from './PageTransitionLoader';
