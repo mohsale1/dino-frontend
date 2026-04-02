@@ -1,23 +1,22 @@
 import React, { useState } from 'react';
 import {
   Box,
+  Drawer,
+  List,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Divider,
   IconButton,
-  Typography,
-  Button,
-  Tooltip,
-  Collapse,
-  useTheme,
-  alpha,
-  Chip,
   Avatar,
+  Button,
+  Chip,
+  Typography,
+  Tooltip,
+  alpha,
   Switch,
   FormControlLabel,
   CircularProgress,
-  Divider,
-  Menu,
-  MenuItem,
-  ListItemIcon,
-  ListItemText,
 } from '@mui/material';
 import {
   ChevronLeft,
@@ -33,7 +32,6 @@ import {
   CheckCircle,
   Cancel,
   Logout,
-  MoreVert,
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../../contexts/common/Auth';
@@ -42,18 +40,18 @@ import { useSidebar } from '../../../contexts/common/Sidebar';
 import { venueService } from '../../../services/application/venue.service';
 import PermissionService from '../../../services/auth/permission';
 import { ConfirmationDialog } from '../../dialogs/ConfirmationDialog';
-
 import { getUserFirstName } from '../../../utils/data/userUtils';
+import DinoLogo from '../../ui/DinoLogo';
 import './AppSidebar.css';
+
+export const DRAWER_WIDTH = 260;
+export const COLLAPSED_WIDTH = 68;
 
 interface NavigationItem {
   label: string;
   path: string;
   icon: React.ReactNode;
   requiredPermissions: string[];
-  requiredRoles?: string[];
-  badge?: string | number;
-  flagKey?: string;
   category?: string;
   description?: string;
 }
@@ -68,22 +66,89 @@ interface AppSidebarProps {
   isTablet?: boolean;
 }
 
+const SIDEBAR_BG = '#0f172a';
+
+const allMenuItems: NavigationItem[] = [
+  {
+    label: 'Menu',
+    path: '/admin/pos',
+    icon: <MenuBook />,
+    requiredPermissions: ['application.orders.create'],
+    category: 'main',
+    description: 'Manual order entry',
+  },
+  {
+    label: 'Dashboard',
+    path: '/admin',
+    icon: <Dashboard />,
+    requiredPermissions: ['application.dashboard.read'],
+    category: 'main',
+  },
+  {
+    label: 'Order',
+    path: '/admin/orders',
+    icon: <ShoppingCart />,
+    requiredPermissions: ['application.orders.read'],
+    category: 'main',
+  },
+  {
+    label: 'Catalog',
+    path: '/admin/catalog',
+    icon: <Category />,
+    requiredPermissions: ['application.items.read', 'application.categories.read'],
+    category: 'management',
+  },
+  {
+    label: 'Location',
+    path: '/admin/locations',
+    icon: <LocationOn />,
+    requiredPermissions: ['application.areas.read', 'application.tables.read'],
+    category: 'management',
+  },
+  {
+    label: 'Coupon',
+    path: '/admin/coupons',
+    icon: <LocalOffer />,
+    requiredPermissions: ['application.coupons.read'],
+    category: 'management',
+  },
+  {
+    label: 'Users',
+    path: '/admin/users',
+    icon: <People />,
+    requiredPermissions: ['application.users.read'],
+    category: 'management',
+  },
+  {
+    label: 'Settings',
+    path: '/admin/settings',
+    icon: <Settings />,
+    requiredPermissions: ['application.workspace.read'],
+    category: 'settings',
+  },
+];
+
+const menuCategories: MenuCategory[] = [
+  { name: 'main', label: 'Main', order: 1 },
+  { name: 'management', label: 'Management', order: 2 },
+  { name: 'settings', label: 'Settings', order: 3 },
+];
+
 const AppSidebar: React.FC<AppSidebarProps> = ({ isTablet = false }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const theme = useTheme();
   const { user, logout, hasBackendPermission, userPermissions } = useAuth();
   const { userData, refreshUserData } = useUserData();
-  const { isCollapsed, toggleCollapsed, getSidebarWidth } = useSidebar();
+  const { isCollapsed, toggleCollapsed } = useSidebar();
 
   const [statusLoading, setStatusLoading] = useState(false);
-  const [profileMenuAnchor, setProfileMenuAnchor] = useState<null | HTMLElement>(null);
   const [showLogoutConfirmation, setShowLogoutConfirmation] = useState(false);
 
-  // Determine if sidebar should show expanded content
-  const showExpanded = !isCollapsed;
+  // On desktop: isCollapsed drives collapse state.
+  // On mobile: isCollapsed drives the temporary drawer open/close.
+  const isMobileOpen = !isCollapsed; // mobile drawer open when NOT collapsed
 
-  // Resolve role name from Auth context userPermissions (reactive) with fallbacks
+  // Resolve role display name
   const detectedRole = (
     userPermissions?.role?.name ||
     PermissionService.getBackendRole()?.name ||
@@ -91,138 +156,51 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ isTablet = false }) => {
     ''
   ).toLowerCase();
 
-  // Simple static menu configuration
-  const menuCategories: MenuCategory[] = [
-    { name: 'main', label: 'Main', order: 1 },
-    { name: 'management', label: 'Management', order: 2 },
-    { name: 'settings', label: 'Settings', order: 3 },
-  ];
+  const roleDisplayName = (() => {
+    if (!detectedRole) return 'User';
+    const roleDefinition = PermissionService.getRoleDefinition(detectedRole);
+    return roleDefinition?.displayName || detectedRole;
+  })();
 
-  // Define all menu items mapped to their exact permission keys from the reference.
-  // Each item lists ALL permissions that grant access to it â€” any match shows the item.
-  const allMenuItems: NavigationItem[] = [
-    // Main
-    {
-      label: 'Menu',
-      path: '/admin/pos',
-      icon: <MenuBook />,
-      requiredPermissions: ['application.orders.create'],
-      requiredRoles: [],
-      category: 'main',
-      description: 'Manual order entry',
-    },
-    {
-      label: 'Dashboard',
-      path: '/admin',
-      icon: <Dashboard />,
-      requiredPermissions: ['application.dashboard.read'],
-      requiredRoles: [],
-      category: 'main',
-    },
-    {
-      label: 'Order',
-      path: '/admin/orders',
-      icon: <ShoppingCart />,
-      requiredPermissions: ['application.orders.read'],
-      requiredRoles: [],
-      category: 'main',
-    },
-
-    // Management
-    {
-      label: 'Catalog',
-      path: '/admin/catalog',
-      icon: <Category />,
-      requiredPermissions: ['application.items.read', 'application.categories.read'],
-      requiredRoles: [],
-      category: 'management',
-    },
-    {
-      label: 'Location',
-      path: '/admin/locations',
-      icon: <LocationOn />,
-      requiredPermissions: ['application.areas.read', 'application.tables.read'],
-      requiredRoles: [],
-      category: 'management',
-    },
-    {
-      label: 'Coupon',
-      path: '/admin/coupons',
-      icon: <LocalOffer />,
-      requiredPermissions: ['application.coupons.read'],
-      requiredRoles: [],
-      category: 'management',
-    },
-    {
-      label: 'Users',
-      path: '/admin/users',
-      icon: <People />,
-      requiredPermissions: ['application.users.read'],
-      requiredRoles: [],
-      category: 'management',
-    },
-
-    // Settings
-    {
-      label: 'Settings',
-      path: '/admin/settings',
-      icon: <Settings />,
-      requiredPermissions: ['application.workspace.read'],
-      requiredRoles: [],
-      category: 'settings',
-    },
-  ];
-
-  // Filter nav items strictly by backend permissions.
-  const adminNavItems = allMenuItems.filter(item =>
-    item.requiredPermissions.length === 0 ||
-    item.requiredPermissions.some(p => hasBackendPermission(p))
+  // Filter nav items by backend permissions
+  const adminNavItems = allMenuItems.filter(
+    (item) =>
+      item.requiredPermissions.length === 0 ||
+      item.requiredPermissions.some((p) => hasBackendPermission(p))
   );
 
   // Group items by category
-  const groupedNavItems = menuCategories.map(category => ({
-    ...category,
-    items: adminNavItems.filter(item => item.category === category.name),
-  })).filter(group => group.items.length > 0);
+  const groupedNavItems = menuCategories
+    .map((category) => ({
+      ...category,
+      items: adminNavItems.filter((item) => item.category === category.name),
+    }))
+    .filter((group) => group.items.length > 0);
 
-  // Get venue status for display (using standardized camelCase)
-  const venueStatus = userData?.venue ? {
-    isActive: userData.venue.isActive || false,
-    isOpen: userData.venue.isOpen || false,
-    venueName: userData.venue.name || 'Current Venue',
-  } : null;
+  // Venue status
+  const venueStatus = userData?.venue
+    ? {
+        isActive: userData.venue.isActive || false,
+        isOpen: userData.venue.isOpen || false,
+        venueName: userData.venue.name || 'Current Venue',
+      }
+    : null;
 
-  const sidebarWidth = getSidebarWidth(isTablet);
-
-  // Handle venue status toggle
   const handleToggleVenueOpen = async () => {
     if (!userData?.venue?.id || statusLoading || !venueStatus) return;
-
     try {
       setStatusLoading(true);
       const newStatus = !venueStatus.isOpen;
-      await venueService.updateVenue(userData.venue.id, {
-        is_open: newStatus,
-      });
+      await venueService.updateVenue(userData.venue.id, { is_open: newStatus });
       await refreshUserData();
-    } catch (error) {
+    } catch {
       alert('Failed to update venue status. Please try again.');
     } finally {
       setStatusLoading(false);
     }
   };
 
-  // Handle profile menu
-  const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setProfileMenuAnchor(event.currentTarget);
-  };
-
-  const handleProfileMenuClose = () => {
-    setProfileMenuAnchor(null);
-  };
-
   const handleLogoutClick = () => {
-    handleProfileMenuClose();
     setShowLogoutConfirmation(true);
   };
 
@@ -236,381 +214,305 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ isTablet = false }) => {
     setShowLogoutConfirmation(false);
   };
 
-  const handleSettings = () => {
-    handleProfileMenuClose();
-    navigate('/admin/settings');
-  };
+  // ─── Shared drawer content ────────────────────────────────────────────────
 
-  // Resolve display name for the role label
-  const roleDisplayName = (() => {
-    if (!detectedRole) return 'User';
-    const roleDefinition = PermissionService.getRoleDefinition(detectedRole);
-    return roleDefinition?.displayName || detectedRole;
-  })();
+  const renderHeader = (isMobileDrawer: boolean) => {
+    const collapsed = !isMobileDrawer && isCollapsed;
 
-  return (
-    <>
-      {/* Backdrop Overlay - Shows when sidebar is expanded */}
-      {!isCollapsed && (
-        <Box
-          className="sidebar-backdrop"
-          onClick={toggleCollapsed}
-          sx={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: alpha(theme.palette.common.black, 0.5),
-            backdropFilter: 'blur(4px)',
-            zIndex: 1199,
-            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-            cursor: 'pointer',
-          }}
-        />
-      )}
-
+    return (
       <Box
-        className={`sidebar sidebar-glass ${isCollapsed ? 'sidebar-collapsed' : isTablet ? 'sidebar-tablet' : 'sidebar-expanded'}`}
         sx={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          bottom: 0,
-          width: sidebarWidth,
-          backgroundColor: '#0f172a',
-          zIndex: 1200,
+          px: collapsed ? 1 : 2,
+          py: 1.5,
+          borderBottom: '1px solid rgba(255,255,255,0.1)',
+          minHeight: 64,
           display: 'flex',
-          flexDirection: 'column',
-          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+          alignItems: 'center',
+          justifyContent: collapsed ? 'center' : 'space-between',
+          backgroundColor: 'rgba(0,0,0,0.1)',
+          flexShrink: 0,
         }}
       >
-        {/* Header Section */}
-        <Box
-          sx={{
-            p: 2,
-            borderBottom: `1px solid rgba(255, 255, 255, 0.1)`,
-            minHeight: 64,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: showExpanded ? 'space-between' : 'center',
-            backgroundColor: 'rgba(0, 0, 0, 0.1)',
-          }}
-        >
-          {showExpanded && (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-              <Box
+        {!collapsed && (
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <DinoLogo size={32} />
+            <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+              <Typography
+                variant="h6"
                 sx={{
-                  width: 36,
-                  height: 36,
-                  borderRadius: 2,
-                  backgroundColor: '#3b82f6',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)',
-                  flexShrink: 0,
+                  fontWeight: 700,
+                  fontSize: '1.125rem',
+                  color: '#ffffff',
+                  lineHeight: 1.3,
+                  letterSpacing: '-0.02em',
+                  mb: 0.25,
                 }}
               >
-                <Typography
-                  sx={{
-                    color: '#ffffff',
-                    fontSize: '1.25rem',
-                    fontWeight: 800,
-                  }}
-                >
-                  D
-                </Typography>
-              </Box>
-              <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                <Typography
-                  variant="h6"
-                  sx={{
-                    fontWeight: 700,
-                    fontSize: '1.125rem',
-                    color: '#ffffff',
-                    lineHeight: 1.3,
-                    letterSpacing: '-0.02em',
-                    mb: 0.25,
-                  }}
-                >
-                  Dino
-                </Typography>
-                <Typography
-                  variant="caption"
-                  sx={{
-                    color: 'rgba(255, 255, 255, 0.6)',
-                    fontSize: '0.6875rem',
-                    fontWeight: 500,
-                    lineHeight: 1,
-                    letterSpacing: '0.5px',
-                    textTransform: 'uppercase',
-                  }}
-                >
-                  Admin Panel
-                </Typography>
-              </Box>
-            </Box>
-          )}
-
-          {/* Expand/Collapse Button */}
-          <Tooltip title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'} placement="right">
-            <Button
-              onClick={toggleCollapsed}
-              sx={{
-                justifyContent: 'center',
-                minWidth: showExpanded ? 40 : '100%',
-                width: showExpanded ? 40 : '100%',
-                height: 40,
-                borderRadius: 2,
-                fontSize: '0.8125rem',
-                fontWeight: 500,
-                color: '#ffffff',
-                backgroundColor: 'transparent',
-                border: '1px solid transparent',
-                transition: 'all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-                '&:hover': {
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                  borderColor: 'rgba(255, 255, 255, 0.2)',
-                  color: '#ffffff',
-                  transform: 'translateX(2px)',
-                },
-                '&:active': {
-                  transform: 'translateX(1px)',
-                },
-                '& .MuiButton-startIcon': {
-                  mr: 0,
-                  color: 'inherit',
-                  fontSize: '1.125rem',
-                },
-              }}
-              startIcon={isCollapsed ? <ChevronRight /> : <ChevronLeft />}
-            />
-          </Tooltip>
-        </Box>
-
-        {/* Venue Status */}
-        {venueStatus && showExpanded && (
-          <Box
-            sx={{
-              p: 1.5,
-              borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
-            }}
-            data-tour="venue-status"
-          >
-            <Box
-              sx={{
-                p: 1.5,
-                borderRadius: 2,
-                backgroundColor: alpha(theme.palette.background.default, 0.8),
-                border: `1px solid ${alpha(theme.palette.divider, 0.2)}`,
-              }}
-            >
-              {/* Order Status */}
-              <Box sx={{ mb: 1.5 }}>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: 'text.secondary',
-                    fontSize: '0.75rem',
-                    fontWeight: 500,
-                    mb: 0.75,
-                  }}
-                >
-                  Order Status
-                </Typography>
-                <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 0.75, mb: 1 }}>
-                  {venueStatus.isOpen ? (
-                    <CheckCircle sx={{ fontSize: 14, color: 'success.main', mt: 0.1 }} />
-                  ) : (
-                    <Cancel sx={{ fontSize: 14, color: 'error.main', mt: 0.1 }} />
-                  )}
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      color: 'text.primary',
-                      fontSize: '0.75rem',
-                      lineHeight: 1.4,
-                    }}
-                  >
-                    {venueStatus.isOpen
-                      ? 'Accepting new orders'
-                      : 'Not accepting orders'
-                    }
-                  </Typography>
-                </Box>
-
-                {/* Toggle Switch */}
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={venueStatus.isOpen}
-                      onChange={handleToggleVenueOpen}
-                      disabled={statusLoading || !venueStatus.isActive}
-                      color="success"
-                      size="small"
-                    />
-                  }
-                  label={
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      {statusLoading && <CircularProgress size={12} />}
-                      <Typography variant="caption" fontWeight={500}>
-                        {venueStatus.isOpen ? 'Open for Orders' : 'Closed for Orders'}
-                      </Typography>
-                    </Box>
-                  }
-                  sx={{ m: 0, alignItems: 'center' }}
-                />
-              </Box>
+                Dino
+              </Typography>
+              <Typography
+                variant="caption"
+                sx={{
+                  color: 'rgba(255,255,255,0.6)',
+                  fontSize: '0.6875rem',
+                  fontWeight: 500,
+                  lineHeight: 1,
+                  letterSpacing: '0.5px',
+                  textTransform: 'uppercase',
+                }}
+              >
+                Admin Panel
+              </Typography>
             </Box>
           </Box>
         )}
 
-        {/* Collapsed Venue Status Indicator */}
-        {venueStatus && !showExpanded && (
-          <Box
+        {collapsed && <DinoLogo size={28} />}
+
+        {/* Desktop collapse/expand toggle */}
+        {!isMobileDrawer && (
+          <Tooltip
+            title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            placement="right"
+          >
+            <IconButton
+              onClick={toggleCollapsed}
+              size="small"
+              sx={{
+                color: 'rgba(255,255,255,0.7)',
+                '&:hover': {
+                  color: '#ffffff',
+                  backgroundColor: 'rgba(255,255,255,0.1)',
+                },
+              }}
+            >
+              {isCollapsed ? <ChevronRight /> : <ChevronLeft />}
+            </IconButton>
+          </Tooltip>
+        )}
+
+        {/* Mobile close button */}
+        {isMobileDrawer && (
+          <IconButton
+            onClick={toggleCollapsed}
+            size="small"
             sx={{
-              p: 1,
-              borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
-              display: 'flex',
-              justifyContent: 'center',
+              color: 'rgba(255,255,255,0.7)',
+              '&:hover': {
+                color: '#ffffff',
+                backgroundColor: 'rgba(255,255,255,0.1)',
+              },
             }}
           >
-            <Tooltip
-              title={`${venueStatus.isOpen ? 'Accepting Orders' : 'Closed for Orders'} - Click to toggle`}
-              placement="right"
-            >
+            <ChevronLeft />
+          </IconButton>
+        )}
+      </Box>
+    );
+  };
+
+  const renderVenueStatus = (isMobileDrawer: boolean) => {
+    if (!venueStatus) return null;
+    const collapsed = !isMobileDrawer && isCollapsed;
+
+    if (collapsed) {
+      return (
+        <Box
+          sx={{
+            p: 1,
+            borderBottom: '1px solid rgba(255,255,255,0.1)',
+            display: 'flex',
+            justifyContent: 'center',
+          }}
+        >
+          <Tooltip
+            title={`${venueStatus.isOpen ? 'Accepting Orders' : 'Closed for Orders'} — Click to toggle`}
+            placement="right"
+          >
+            <span>
               <IconButton
                 onClick={handleToggleVenueOpen}
                 disabled={statusLoading || !venueStatus.isActive}
                 sx={{
                   width: 40,
                   height: 40,
-                  backgroundColor: alpha(venueStatus.isOpen ? theme.palette.success.main : theme.palette.error.main, 0.1),
-                  border: `2px solid ${alpha(venueStatus.isOpen ? theme.palette.success.main : theme.palette.error.main, 0.3)}`,
+                  backgroundColor: venueStatus.isOpen
+                    ? alpha('#1976d2', 0.15)
+                    : alpha('#ef4444', 0.15),
+                  border: venueStatus.isOpen
+                    ? '2px solid rgba(25,118,210,0.4)'
+                    : '2px solid rgba(239,68,68,0.4)',
                   '&:hover': {
-                    backgroundColor: alpha(venueStatus.isOpen ? theme.palette.success.main : theme.palette.error.main, 0.2),
+                    backgroundColor: venueStatus.isOpen
+                      ? alpha('#1976d2', 0.25)
+                      : alpha('#ef4444', 0.25),
                   },
-                  '&:disabled': {
-                    opacity: 0.5,
-                  },
+                  '&:disabled': { opacity: 0.5 },
                 }}
               >
                 {statusLoading ? (
-                  <CircularProgress size={16} />
+                  <CircularProgress size={16} sx={{ color: '#ffffff' }} />
                 ) : venueStatus.isOpen ? (
-                  <CheckCircle sx={{ fontSize: 20, color: 'success.main' }} />
+                  <CheckCircle sx={{ fontSize: 20, color: '#42a5f5' }} />
                 ) : (
-                  <Cancel sx={{ fontSize: 20, color: 'error.main' }} />
+                  <Cancel sx={{ fontSize: 20, color: '#f87171' }} />
                 )}
               </IconButton>
-            </Tooltip>
-          </Box>
-        )}
+            </span>
+          </Tooltip>
+        </Box>
+      );
+    }
 
-        {/* Navigation Items */}
+    return (
+      <Box
+        sx={{ p: 1.5, borderBottom: '1px solid rgba(255,255,255,0.1)' }}
+        data-tour="venue-status"
+      >
         <Box
           sx={{
-            flex: 1,
-            overflowY: 'auto',
-            overflowX: 'hidden',
-            py: 2,
-            px: showExpanded ? 2 : 1,
-            '&::-webkit-scrollbar': {
-              width: '4px',
-            },
-            '&::-webkit-scrollbar-track': {
-              backgroundColor: 'transparent',
-            },
-            '&::-webkit-scrollbar-thumb': {
-              backgroundColor: 'rgba(255, 255, 255, 0.2)',
-              borderRadius: '2px',
-              '&:hover': {
-                backgroundColor: 'rgba(255, 255, 255, 0.3)',
-              },
-            },
+            p: 1.5,
+            borderRadius: 2,
+            bgcolor: 'rgba(255,255,255,0.06)',
+            border: '1px solid rgba(255,255,255,0.1)',
           }}
-          data-tour="sidebar-navigation"
         >
-          {/* Render grouped navigation */}
-          {groupedNavItems.map((group, groupIndex) => (
-            <Box key={group.name} sx={{ mb: groupIndex < groupedNavItems.length - 1 ? 3 : 0 }}>
-              {/* Category Header */}
-              {showExpanded && (
+          <Typography
+            variant="caption"
+            sx={{
+              color: 'rgba(255,255,255,0.6)',
+              fontSize: '0.6875rem',
+              fontWeight: 600,
+              letterSpacing: '0.5px',
+              textTransform: 'uppercase',
+              display: 'block',
+              mb: 1,
+            }}
+          >
+            Order Status
+          </Typography>
+
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+            <Typography
+              variant="body2"
+              sx={{ color: '#ffffff', fontSize: '0.8125rem', fontWeight: 600 }}
+            >
+              {venueStatus.isOpen ? 'Accepting Orders' : 'Closed for Orders'}
+            </Typography>
+            <Chip
+              label={venueStatus.isOpen ? 'Open' : 'Closed'}
+              size="small"
+              sx={{
+                height: 20,
+                fontSize: '0.6875rem',
+                fontWeight: 700,
+                bgcolor: venueStatus.isOpen
+                  ? alpha('#1976d2', 0.2)
+                  : alpha('#ef4444', 0.15),
+                color: venueStatus.isOpen ? '#42a5f5' : '#f87171',
+                border: 'none',
+                '& .MuiChip-label': { px: 1 },
+              }}
+            />
+          </Box>
+
+          <FormControlLabel
+            control={
+              <Switch
+                checked={venueStatus.isOpen}
+                onChange={handleToggleVenueOpen}
+                disabled={statusLoading || !venueStatus.isActive}
+                color="primary"
+                size="small"
+              />
+            }
+            label={
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                {statusLoading && <CircularProgress size={12} sx={{ color: 'rgba(255,255,255,0.6)' }} />}
                 <Typography
-                  variant="overline"
-                  sx={{
-                    color: 'rgba(255, 255, 255, 0.4)',
-                    fontWeight: 700,
-                    fontSize: '0.6875rem',
-                    mb: 1.5,
-                    display: 'block',
-                    px: 1,
-                    letterSpacing: '1px',
-                  }}
+                  variant="caption"
+                  sx={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.75rem' }}
                 >
-                  {group.label}
+                  {venueStatus.isOpen ? 'Open for Orders' : 'Closed for Orders'}
                 </Typography>
-              )}
+              </Box>
+            }
+            sx={{ m: 0, alignItems: 'center' }}
+          />
+        </Box>
+      </Box>
+    );
+  };
 
-              {/* Category Divider for Collapsed State */}
-              {!showExpanded && groupIndex > 0 && (
-                <Divider
-                  sx={{
-                    my: 1.5,
-                    borderColor: 'rgba(255, 255, 255, 0.1)',
-                  }}
-                />
-              )}
+  const renderNavList = (isMobileDrawer: boolean) => {
+    const collapsed = !isMobileDrawer && isCollapsed;
 
-              {/* Menu Items */}
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-                {group.items.map((item) => {
-                  const isActive = location.pathname === item.path;
+    return (
+      <Box
+        sx={{
+          flex: 1,
+          overflowY: 'auto',
+          overflowX: 'hidden',
+          py: 1.5,
+          '&::-webkit-scrollbar': { width: '4px' },
+          '&::-webkit-scrollbar-track': { backgroundColor: 'transparent' },
+          '&::-webkit-scrollbar-thumb': {
+            backgroundColor: 'rgba(255,255,255,0.2)',
+            borderRadius: '2px',
+            '&:hover': { backgroundColor: 'rgba(255,255,255,0.3)' },
+          },
+        }}
+        data-tour="sidebar-navigation"
+      >
+        {groupedNavItems.map((group, groupIndex) => (
+          <Box key={group.name}>
+            {/* Category label (expanded) */}
+            {!collapsed && (
+              <Typography
+                variant="overline"
+                sx={{
+                  color: 'rgba(255,255,255,0.4)',
+                  fontWeight: 700,
+                  fontSize: '0.6875rem',
+                  letterSpacing: '1px',
+                  display: 'block',
+                  px: 2,
+                  pt: groupIndex === 0 ? 0.5 : 1.5,
+                  pb: 0.5,
+                }}
+              >
+                {group.label}
+              </Typography>
+            )}
 
-                  return (
-                    <Tooltip
-                      key={item.label}
-                      title={isCollapsed ? item.label : ''}
-                      placement="right"
-                      disableHoverListener={showExpanded}
-                      arrow
-                    >
-                      <Button
-                        onClick={() => navigate(item.path)}
-                        fullWidth
-                        sx={{
-                          justifyContent: showExpanded ? 'flex-start' : 'center',
-                          textAlign: 'left',
-                          py: 1.25,
-                          px: showExpanded ? 1.5 : 1,
-                          borderRadius: 2,
-                          minHeight: 44,
-                          fontSize: '0.875rem',
-                          fontWeight: isActive ? 600 : 500,
-                          color: isActive ? '#ffffff' : 'rgba(255, 255, 255, 0.8)',
-                          backgroundColor: isActive
-                            ? 'rgba(255, 255, 255, 0.1)'
-                            : 'transparent',
-                          border: '1px solid transparent',
-                          transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                          position: 'relative',
-                          overflow: 'hidden',
-                          '&:hover': {
-                            backgroundColor: isActive
-                              ? 'rgba(255, 255, 255, 0.15)'
-                              : 'rgba(255, 255, 255, 0.08)',
-                            color: '#ffffff',
-                            transform: 'none',
-                            '& .MuiButton-startIcon': {
-                              color: '#ffffff',
-                            },
-                          },
-                          '&:active': {
-                            transform: 'scale(0.98)',
-                          },
-                          '&::before': isActive ? {
+            {/* Divider between groups in collapsed state */}
+            {collapsed && groupIndex > 0 && (
+              <Divider sx={{ my: 1, borderColor: 'rgba(255,255,255,0.1)' }} />
+            )}
+
+            <List disablePadding sx={{ px: collapsed ? 0.75 : 1 }}>
+              {group.items.map((item) => {
+                const isActive = location.pathname === item.path;
+
+                const listItemButton = (
+                  <ListItemButton
+                    onClick={() => navigate(item.path)}
+                    sx={{
+                      borderRadius: 1.5,
+                      mb: 0.25,
+                      minHeight: 44,
+                      px: collapsed ? 1 : 1.5,
+                      justifyContent: collapsed ? 'center' : 'flex-start',
+                      bgcolor: isActive ? alpha('#ffffff', 0.15) : 'transparent',
+                      position: 'relative',
+                      overflow: 'hidden',
+                      '&:hover': {
+                        bgcolor: isActive
+                          ? alpha('#ffffff', 0.18)
+                          : alpha('#ffffff', 0.08),
+                      },
+                      '&::before': isActive
+                        ? {
                             content: '""',
                             position: 'absolute',
                             left: 0,
@@ -619,246 +521,248 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ isTablet = false }) => {
                             width: 3,
                             backgroundColor: '#ffffff',
                             borderRadius: '0 2px 2px 0',
-                          } : {},
-                          '& .MuiButton-startIcon': {
-                            mr: showExpanded ? 1.5 : 0,
-                            color: isActive ? '#ffffff' : 'rgba(255, 255, 255, 0.7)',
-                            fontSize: '1.25rem',
-                            transition: 'all 0.2s ease',
-                          },
+                          }
+                        : {},
+                    }}
+                  >
+                    <ListItemIcon
+                      sx={{
+                        minWidth: collapsed ? 0 : 36,
+                        color: isActive ? '#ffffff' : 'rgba(255,255,255,0.7)',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      {item.icon}
+                    </ListItemIcon>
+                    {!collapsed && (
+                      <ListItemText
+                        primary={item.label}
+                        primaryTypographyProps={{
+                          fontSize: '0.875rem',
+                          fontWeight: isActive ? 600 : 500,
+                          color: isActive ? '#ffffff' : 'rgba(255,255,255,0.85)',
+                          noWrap: true,
                         }}
-                        startIcon={item.icon}
-                      >
-                        <Collapse in={showExpanded} orientation="horizontal">
-                          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', minWidth: 0 }}>
-                            <Typography
-                              variant="inherit"
-                              sx={{
-                                fontWeight: 'inherit',
-                                fontSize: 'inherit',
-                                whiteSpace: 'nowrap',
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                                flex: 1,
-                              }}
-                            >
-                              {item.label}
-                            </Typography>
-                            {item.badge && (
-                              <Chip
-                                label={item.badge}
-                                size="small"
-                                sx={{
-                                  ml: 1,
-                                  height: 20,
-                                  fontSize: '0.6875rem',
-                                  fontWeight: 700,
-                                  backgroundColor: isActive ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.15)',
-                                  color: 'rgba(255, 255, 255, 0.9)',
-                                  border: `1px solid rgba(255, 255, 255, 0.2)`,
-                                  '& .MuiChip-label': {
-                                    px: 1,
-                                  },
-                                }}
-                              />
-                            )}
-                          </Box>
-                        </Collapse>
-                      </Button>
-                    </Tooltip>
-                  );
-                })}
-              </Box>
-            </Box>
-          ))}
-        </Box>
+                      />
+                    )}
+                  </ListItemButton>
+                );
 
-        {/* User Profile Section at Bottom */}
-        {user && (
-          <Box
-            sx={{
-              flexShrink: 0,
-              mt: 'auto',
-              borderTop: `1px solid rgba(255, 255, 255, 0.1)`,
-              backgroundColor: 'rgba(0, 0, 0, 0.2)',
-            }}
-          >
-            {/* Profile Info */}
-            <Box
-              onClick={showExpanded ? handleProfileMenuOpen : undefined}
+                return collapsed ? (
+                  <Tooltip key={item.label} title={item.label} placement="right" arrow>
+                    {listItemButton}
+                  </Tooltip>
+                ) : (
+                  <React.Fragment key={item.label}>{listItemButton}</React.Fragment>
+                );
+              })}
+            </List>
+          </Box>
+        ))}
+      </Box>
+    );
+  };
+
+  const renderUserFooter = (isMobileDrawer: boolean) => {
+    if (!user) return null;
+    const collapsed = !isMobileDrawer && isCollapsed;
+
+    if (collapsed) {
+      return (
+        <Box
+          sx={{
+            flexShrink: 0,
+            borderTop: '1px solid rgba(255,255,255,0.1)',
+            backgroundColor: 'rgba(0,0,0,0.2)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 0.5,
+            py: 1.5,
+            px: 1,
+          }}
+        >
+          <Tooltip title="Settings" placement="right">
+            <Avatar
+              onClick={() => navigate('/admin/settings')}
               sx={{
-                p: showExpanded ? 2 : 1.5,
-                display: 'flex',
-                alignItems: 'center',
-                gap: showExpanded ? 1.5 : 0,
-                justifyContent: showExpanded ? 'space-between' : 'center',
-                cursor: showExpanded ? 'pointer' : 'default',
-                transition: 'all 0.2s ease',
-                '&:hover': showExpanded ? {
-                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                } : {},
+                width: 36,
+                height: 36,
+                bgcolor: '#1976d2',
+                fontSize: '0.875rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                border: '2px solid rgba(255,255,255,0.2)',
+                '&:hover': { border: '2px solid rgba(255,255,255,0.4)' },
               }}
             >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, minWidth: 0, flex: 1 }}>
-                <Avatar
-                  sx={{
-                    width: showExpanded ? 40 : 36,
-                    height: showExpanded ? 40 : 36,
-                    backgroundColor: '#3b82f6',
-                    fontSize: '1rem',
-                    fontWeight: 700,
-                    flexShrink: 0,
-                    border: '2px solid rgba(255, 255, 255, 0.2)',
-                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-                  }}
-                >
-                  {getUserFirstName(user)?.charAt(0) || user.email?.charAt(0) || 'U'}
-                </Avatar>
-
-                <Collapse in={showExpanded} orientation="horizontal">
-                  <Box sx={{ minWidth: 0, flex: 1 }}>
-                    <Typography
-                      variant="subtitle2"
-                      sx={{
-                        fontWeight: 700,
-                        color: '#ffffff',
-                        fontSize: '0.875rem',
-                        lineHeight: 1.2,
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                        mb: 0.25,
-                      }}
-                    >
-                      {getUserFirstName(user) || user.email}
-                    </Typography>
-                    <Typography
-                      variant="caption"
-                      sx={{
-                        color: 'rgba(255, 255, 255, 0.6)',
-                        fontSize: '0.75rem',
-                        fontWeight: 500,
-                        display: 'block',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
-                      {roleDisplayName}
-                    </Typography>
-                  </Box>
-                </Collapse>
-              </Box>
-
-              {showExpanded && (
-                <IconButton
-                  size="small"
-                  sx={{
-                    color: 'rgba(255, 255, 255, 0.6)',
-                    '&:hover': {
-                      color: '#ffffff',
-                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                    },
-                  }}
-                >
-                  <MoreVert fontSize="small" />
-                </IconButton>
-              )}
-            </Box>
-
-            {/* Quick Actions - Collapsed State */}
-            {!showExpanded && (
-              <Box
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: 0.5,
-                  p: 1,
-                  borderTop: `1px solid rgba(255, 255, 255, 0.05)`,
-                }}
-              >
-                <Tooltip title="Settings" placement="right">
-                  <IconButton
-                    size="small"
-                    onClick={handleSettings}
-                    sx={{
-                      color: 'rgba(255, 255, 255, 0.7)',
-                      '&:hover': {
-                        color: '#ffffff',
-                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                      },
-                    }}
-                  >
-                    <Settings fontSize="small" />
-                  </IconButton>
-                </Tooltip>
-                <Tooltip title="Logout" placement="right">
-                  <IconButton
-                    size="small"
-                    onClick={handleLogoutClick}
-                    sx={{
-                      color: 'rgba(255, 255, 255, 0.7)',
-                      '&:hover': {
-                        color: '#ef4444',
-                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                      },
-                    }}
-                  >
-                    <Logout fontSize="small" />
-                  </IconButton>
-                </Tooltip>
-              </Box>
-            )}
-
-            {/* Profile Menu - Expanded State */}
-            <Menu
-              anchorEl={profileMenuAnchor}
-              open={Boolean(profileMenuAnchor)}
-              onClose={handleProfileMenuClose}
-              anchorOrigin={{
-                vertical: 'top',
-                horizontal: 'right',
-              }}
-              transformOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left',
-              }}
-              PaperProps={{
-                sx: {
-                  mt: -1,
-                  ml: 1,
-                  minWidth: 200,
-                  borderRadius: 2,
-                  boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15)',
-                  border: '1px solid rgba(0, 0, 0, 0.05)',
+              {getUserFirstName(user)?.charAt(0) || user.email?.charAt(0) || 'U'}
+            </Avatar>
+          </Tooltip>
+          <Tooltip title="Logout" placement="right">
+            <IconButton
+              size="small"
+              onClick={handleLogoutClick}
+              sx={{
+                color: 'rgba(255,255,255,0.7)',
+                '&:hover': {
+                  color: '#f87171',
+                  backgroundColor: alpha('#ef4444', 0.1),
                 },
               }}
             >
-              <MenuItem onClick={handleSettings}>
-                <ListItemIcon>
-                  <Settings fontSize="small" />
-                </ListItemIcon>
-                <ListItemText>Settings</ListItemText>
-              </MenuItem>
-              <Divider sx={{ my: 0.5 }} />
-              <MenuItem
-                onClick={handleLogoutClick}
-                sx={{
-                  color: 'error.main',
-                  '&:hover': {
-                    backgroundColor: 'rgba(239, 68, 68, 0.08)',
-                  },
-                }}
-              >
-                <ListItemIcon>
-                  <Logout fontSize="small" color="error" />
-                </ListItemIcon>
-                <ListItemText>Logout</ListItemText>
-              </MenuItem>
-            </Menu>
+              <Logout fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        </Box>
+      );
+    }
+
+    return (
+      <Box
+        sx={{
+          flexShrink: 0,
+          borderTop: '1px solid rgba(255,255,255,0.1)',
+          backgroundColor: 'rgba(0,0,0,0.2)',
+          p: 2,
+        }}
+      >
+        {/* User info row */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5 }}>
+          <Avatar
+            sx={{
+              width: 40,
+              height: 40,
+              bgcolor: '#1976d2',
+              fontSize: '1rem',
+              fontWeight: 700,
+              flexShrink: 0,
+              border: '2px solid rgba(255,255,255,0.2)',
+            }}
+          >
+            {getUserFirstName(user)?.charAt(0) || user.email?.charAt(0) || 'U'}
+          </Avatar>
+          <Box sx={{ minWidth: 0, flex: 1 }}>
+            <Typography
+              variant="subtitle2"
+              sx={{
+                fontWeight: 700,
+                color: '#ffffff',
+                fontSize: '0.875rem',
+                lineHeight: 1.2,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                mb: 0.25,
+              }}
+            >
+              {getUserFirstName(user) || user.email}
+            </Typography>
+            <Typography
+              variant="caption"
+              sx={{
+                color: 'rgba(255,255,255,0.6)',
+                fontSize: '0.75rem',
+                fontWeight: 500,
+                display: 'block',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {roleDisplayName}
+            </Typography>
           </Box>
-        )}
+        </Box>
+
+        {/* Logout button */}
+        <Button
+          fullWidth
+          variant="outlined"
+          startIcon={<Logout />}
+          onClick={handleLogoutClick}
+          sx={{
+            borderColor: alpha('#ffffff', 0.3),
+            color: '#ffffff',
+            fontSize: '0.8125rem',
+            fontWeight: 500,
+            borderRadius: 1.5,
+            py: 0.75,
+            '&:hover': {
+              borderColor: '#ffffff',
+              bgcolor: alpha('#ffffff', 0.1),
+            },
+          }}
+        >
+          Logout
+        </Button>
       </Box>
+    );
+  };
+
+  // ─── Drawer inner content ─────────────────────────────────────────────────
+
+  const drawerContent = (isMobileDrawer: boolean) => (
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%',
+        bgcolor: SIDEBAR_BG,
+        width: isMobileDrawer ? DRAWER_WIDTH : isCollapsed ? COLLAPSED_WIDTH : DRAWER_WIDTH,
+        overflow: 'hidden',
+      }}
+    >
+      {renderHeader(isMobileDrawer)}
+      {renderVenueStatus(isMobileDrawer)}
+      {renderNavList(isMobileDrawer)}
+      {renderUserFooter(isMobileDrawer)}
+    </Box>
+  );
+
+  return (
+    <>
+      {/* Desktop — permanent Drawer, collapsible */}
+      <Drawer
+        variant="permanent"
+        sx={{
+          display: { xs: 'none', md: 'block' },
+          width: isCollapsed ? COLLAPSED_WIDTH : DRAWER_WIDTH,
+          flexShrink: 0,
+          '& .MuiDrawer-paper': {
+            width: isCollapsed ? COLLAPSED_WIDTH : DRAWER_WIDTH,
+            boxSizing: 'border-box',
+            border: 'none',
+            bgcolor: SIDEBAR_BG,
+            transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            overflowX: 'hidden',
+            boxShadow: '4px 0 12px rgba(0,0,0,0.3)',
+          },
+        }}
+        open
+      >
+        {drawerContent(false)}
+      </Drawer>
+
+      {/* Mobile — temporary Drawer, full width */}
+      <Drawer
+        variant="temporary"
+        open={isMobileOpen}
+        onClose={toggleCollapsed}
+        ModalProps={{ keepMounted: true }}
+        sx={{
+          display: { xs: 'block', md: 'none' },
+          '& .MuiDrawer-paper': {
+            width: DRAWER_WIDTH,
+            boxSizing: 'border-box',
+            border: 'none',
+            bgcolor: SIDEBAR_BG,
+            boxShadow: '4px 0 24px rgba(0,0,0,0.4)',
+          },
+        }}
+      >
+        {drawerContent(true)}
+      </Drawer>
 
       {/* Logout Confirmation Dialog */}
       <ConfirmationDialog

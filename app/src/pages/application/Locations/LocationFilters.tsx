@@ -1,6 +1,6 @@
 /**
  * LocationFilters Component - Clean Professional Design
- * 
+ *
  * Filter and search locations
  */
 
@@ -12,9 +12,7 @@ import {
   MenuItem,
   InputAdornment,
 } from '@mui/material';
-import {
-  Search as SearchIcon,
-} from '@mui/icons-material';
+import { Search as SearchIcon } from '@mui/icons-material';
 
 interface LocationFiltersProps {
   searchQuery: string;
@@ -23,6 +21,20 @@ interface LocationFiltersProps {
   onStatusChange: (value: string) => void;
   activeTab: string;
 }
+
+const textFieldSx = {
+  '& .MuiOutlinedInput-root': {
+    '&:hover fieldset': {
+      borderColor: '#94a3b8',
+    },
+    '&.Mui-focused fieldset': {
+      borderColor: '#1976d2',
+    },
+  },
+  '& .MuiInputLabel-root.Mui-focused': {
+    color: '#1976d2',
+  },
+} as const;
 
 const LocationFilters: React.FC<LocationFiltersProps> = ({
   searchQuery,
@@ -35,10 +47,9 @@ const LocationFilters: React.FC<LocationFiltersProps> = ({
     <Paper
       elevation={0}
       sx={{
-        p: 3,
-        mb: 3,
+        p: 2,
         backgroundColor: '#ffffff',
-        border: '1px solid #e5e7eb',
+        border: '1px solid #e2e8f0',
         borderRadius: 2,
       }}
     >
@@ -56,18 +67,8 @@ const LocationFilters: React.FC<LocationFiltersProps> = ({
           }}
           sx={{
             flexGrow: 1,
-            minWidth: 250,
-            '& .MuiOutlinedInput-root': {
-              '&:hover fieldset': {
-                borderColor: '#9ca3af',
-              },
-              '&.Mui-focused fieldset': {
-                borderColor: '#1a1a1a',
-              },
-            },
-            '& .MuiInputLabel-root.Mui-focused': {
-              color: '#1a1a1a',
-            },
+            minWidth: { xs: '100%', sm: 250 },
+            ...textFieldSx,
           }}
         />
         {activeTab === 'locations' && (
@@ -77,18 +78,8 @@ const LocationFilters: React.FC<LocationFiltersProps> = ({
             value={filterStatus}
             onChange={(e) => onStatusChange(e.target.value)}
             sx={{
-              minWidth: 150,
-              '& .MuiOutlinedInput-root': {
-                '&:hover fieldset': {
-                  borderColor: '#9ca3af',
-                },
-                '&.Mui-focused fieldset': {
-                  borderColor: '#1a1a1a',
-                },
-              },
-              '& .MuiInputLabel-root.Mui-focused': {
-                color: '#1a1a1a',
-              },
+              minWidth: { xs: '100%', sm: 150 },
+              ...textFieldSx,
             }}
           >
             <MenuItem value="all">All Status</MenuItem>

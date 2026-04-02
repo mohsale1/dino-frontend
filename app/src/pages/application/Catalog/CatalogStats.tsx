@@ -33,46 +33,44 @@ const CatalogStats: React.FC<CatalogStatsProps> = ({ stats }) => {
       title: 'Total Items',
       value: stats.totalItems,
       icon: <Inventory sx={{ fontSize: 24 }} />,
-      color: '#6b7280',
+      iconBg: 'rgba(25,118,210,0.08)',
+      iconColor: '#1976d2',
     },
     {
       title: 'Available',
       value: stats.available,
       icon: <CheckCircle sx={{ fontSize: 24 }} />,
-      color: '#166534',
-      bgColor: '#dcfce7',
-      borderColor: '#bbf7d0',
+      iconBg: 'rgba(16,185,129,0.08)',
+      iconColor: '#059669',
     },
     {
       title: 'Unavailable',
       value: stats.unavailable,
       icon: <Cancel sx={{ fontSize: 24 }} />,
-      color: '#991b1b',
-      bgColor: '#fee2e2',
-      borderColor: '#fecaca',
+      iconBg: 'rgba(239,68,68,0.08)',
+      iconColor: '#dc2626',
     },
     {
       title: 'Categories',
       value: stats.categories,
       icon: <Category sx={{ fontSize: 24 }} />,
-      color: '#1e40af',
-      bgColor: '#dbeafe',
-      borderColor: '#bfdbfe',
+      iconBg: 'rgba(99,102,241,0.08)',
+      iconColor: '#6366f1',
     },
   ];
 
   return (
     <Grid container spacing={2}>
       {statCards.map((stat, index) => (
-        <Grid item xs={12} sm={6} md={3} key={index}>
+        <Grid item xs={6} sm={6} md={3} key={index}>
           <Paper
             elevation={0}
             sx={{
-              p: 3,
+              px: 2.5,
+              py: 2,
               backgroundColor: '#ffffff',
-              border: '1px solid #e5e7eb',
+              border: '1px solid #e2e8f0',
               borderRadius: 2,
-              height: '100%',
             }}
           >
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -81,21 +79,21 @@ const CatalogStats: React.FC<CatalogStatsProps> = ({ stats }) => {
                   width: 48,
                   height: 48,
                   borderRadius: 1.5,
-                  backgroundColor: stat.bgColor || '#f3f4f6',
-                  border: stat.borderColor ? `1px solid ${stat.borderColor}` : 'none',
+                  bgcolor: stat.iconBg,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  color: stat.color,
+                  color: stat.iconColor,
+                  flexShrink: 0,
                 }}
               >
                 {stat.icon}
               </Box>
               <Box>
-                <Typography variant="h5" sx={{ fontWeight: 700, color: '#1a1a1a', mb: 0.5 }}>
+                <Typography variant="h5" sx={{ fontWeight: 700, color: '#0f172a', mb: 0.5 }}>
                   {stat.value}
                 </Typography>
-                <Typography variant="body2" sx={{ color: '#6b7280', fontSize: '0.875rem' }}>
+                <Typography variant="body2" sx={{ color: '#64748b', fontSize: '0.875rem' }}>
                   {stat.title}
                 </Typography>
               </Box>

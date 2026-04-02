@@ -1,6 +1,6 @@
 /**
  * SettingsNav Component
- * 
+ *
  * Clean, professional navigation for settings sections
  */
 
@@ -11,17 +11,14 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  Paper,
   Typography,
-  useTheme,
   useMediaQuery,
+  useTheme,
 } from '@mui/material';
 import {
   Person,
   Business,
-  Notifications,
   Security,
-  Palette,
 } from '@mui/icons-material';
 
 export interface SettingsSection {
@@ -40,9 +37,7 @@ export interface SettingsNavProps {
 const iconMap: Record<string, React.ReactNode> = {
   person: <Person />,
   business: <Business />,
-  notifications: <Notifications />,
   security: <Security />,
-  palette: <Palette />,
 };
 
 const SettingsNav: React.FC<SettingsNavProps> = ({
@@ -53,27 +48,21 @@ const SettingsNav: React.FC<SettingsNavProps> = ({
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
+  // ── Mobile: horizontal scrollable tab strip ──────────────────────────────
   if (isMobile) {
     return (
-      <Box
-        sx={{
-          backgroundColor: '#ffffff',
-          borderRadius: 2,
-          border: '1px solid #e5e7eb',
-          p: 1,
-          overflowX: 'auto',
-          '&::-webkit-scrollbar': { display: 'none' },
-          scrollbarWidth: 'none',
-        }}
-      >
-        <Box
-          sx={{
-            display: 'flex',
-            gap: 1,
-            minWidth: 'max-content',
-          }}
-        >
-          {sections.map((section) => (
+      <Box sx={{
+        display: 'flex',
+        gap: 0.5,
+        px: 2,
+        py: 1.5,
+        overflowX: 'auto',
+        '&::-webkit-scrollbar': { display: 'none' },
+        scrollbarWidth: 'none',
+      }}>
+        {sections.map((section) => {
+          const isActive = activeSection === section.id;
+          return (
             <Box
               key={section.id}
               onClick={() => onSectionChange(section.id)}
@@ -82,125 +71,79 @@ const SettingsNav: React.FC<SettingsNavProps> = ({
                 alignItems: 'center',
                 gap: 1,
                 px: 2,
-                py: 1.5,
+                py: 1,
                 borderRadius: 1.5,
                 cursor: 'pointer',
-                backgroundColor: activeSection === section.id ? '#f3f4f6' : 'transparent',
-                color: activeSection === section.id ? '#1a1a1a' : '#6b7280',
-                fontWeight: activeSection === section.id ? 600 : 500,
-                fontSize: '0.875rem',
-                transition: 'all 0.2s',
                 whiteSpace: 'nowrap',
-                border: activeSection === section.id ? '1px solid #e5e7eb' : '1px solid transparent',
-                '&:hover': {
-                  backgroundColor: '#f9fafb',
-                  color: '#1a1a1a',
-                },
+                flexShrink: 0,
+                bgcolor: isActive ? 'rgba(25,118,210,0.08)' : 'transparent',
+                color: isActive ? '#1976d2' : '#64748b',
+                border: isActive ? '1px solid rgba(25,118,210,0.2)' : '1px solid transparent',
+                transition: 'all 0.15s',
+                '&:hover': { bgcolor: isActive ? 'rgba(25,118,210,0.1)' : '#f1f5f9' },
               }}
             >
-              <Box sx={{ display: 'flex', fontSize: 20 }}>{iconMap[section.icon]}</Box>
-              <Typography variant="body2" sx={{ fontWeight: 'inherit', fontSize: 'inherit' }}>
+              <Box sx={{ display: 'flex', fontSize: 18, color: 'inherit' }}>
+                {iconMap[section.icon]}
+              </Box>
+              <Typography variant="body2" sx={{ fontWeight: isActive ? 600 : 500, fontSize: '0.875rem', color: 'inherit' }}>
                 {section.label}
               </Typography>
             </Box>
-          ))}
-        </Box>
+          );
+        })}
       </Box>
     );
   }
 
+  // ── Desktop: vertical list filling the nav column ────────────────────────
   return (
-    <Paper
-      elevation={0}
-      sx={{
-        backgroundColor: '#ffffff',
-        border: '1px solid #e5e7eb',
-        borderRadius: 2,
-        overflow: 'hidden',
-        position: 'sticky',
-        top: 24,
-      }}
-    >
-      <Box 
-        sx={{ 
-          p: 3, 
-          borderBottom: '1px solid #e5e7eb',
-        }}
-      >
-        <Typography
-          variant="h6"
-          sx={{
-            fontWeight: 700,
-            fontSize: '1.125rem',
-            color: '#1a1a1a',
-            mb: 0.5,
-          }}
-        >
-          Settings
-        </Typography>
-        <Typography
-          variant="body2"
-          sx={{
-            color: '#6b7280',
-            fontSize: '0.875rem',
-          }}
-        >
-          Manage your preferences
-        </Typography>
-      </Box>
-
-      <List sx={{ p: 2 }}>
-        {sections.map((section) => (
+    <List sx={{ p: 1.5 }}>
+      {sections.map((section) => {
+        const isActive = activeSection === section.id;
+        return (
           <ListItemButton
             key={section.id}
-            selected={activeSection === section.id}
+            selected={isActive}
             onClick={() => onSectionChange(section.id)}
             sx={{
               borderRadius: 1.5,
               mb: 0.5,
-              py: 1.5,
-              px: 2,
+              py: 1.25,
+              px: 1.5,
               '&.Mui-selected': {
-                backgroundColor: '#f3f4f6',
-                border: '1px solid #e5e7eb',
-                '&:hover': {
-                  backgroundColor: '#e5e7eb',
-                },
+                bgcolor: 'rgba(25,118,210,0.08)',
+                border: '1px solid rgba(25,118,210,0.15)',
+                '&:hover': { bgcolor: 'rgba(25,118,210,0.12)' },
               },
-              '&:hover': {
-                backgroundColor: '#f9fafb',
-              },
-              transition: 'all 0.2s',
+              '&:not(.Mui-selected)': { border: '1px solid transparent' },
+              '&:hover:not(.Mui-selected)': { bgcolor: '#f8fafc' },
+              transition: 'all 0.15s',
             }}
           >
-            <ListItemIcon
-              sx={{
-                minWidth: 40,
-                color: activeSection === section.id ? '#1a1a1a' : '#6b7280',
-                transition: 'color 0.2s',
-              }}
-            >
+            <ListItemIcon sx={{ minWidth: 38, color: isActive ? '#1976d2' : '#64748b' }}>
               {iconMap[section.icon]}
             </ListItemIcon>
             <ListItemText
               primary={section.label}
               secondary={section.description}
               primaryTypographyProps={{
-                fontWeight: activeSection === section.id ? 600 : 500,
-                fontSize: '0.9375rem',
-                color: activeSection === section.id ? '#1a1a1a' : '#374151',
+                fontWeight: isActive ? 600 : 500,
+                fontSize: '0.9rem',
+                color: isActive ? '#1976d2' : '#374151',
               }}
               secondaryTypographyProps={{
-                fontSize: '0.8125rem',
-                color: '#9ca3af',
+                fontSize: '0.78rem',
+                color: '#94a3b8',
                 sx: { mt: 0.25 },
               }}
             />
           </ListItemButton>
-        ))}
-      </List>
-    </Paper>
+        );
+      })}
+    </List>
   );
 };
+
 
 export default SettingsNav;

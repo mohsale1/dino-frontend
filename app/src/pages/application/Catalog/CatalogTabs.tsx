@@ -1,6 +1,6 @@
 /**
- * CatalogTabs Component - Clean Professional Design
- * 
+ * CatalogTabs Component - Blue System Palette
+ *
  * Tabs for items and categories
  */
 
@@ -14,9 +14,12 @@ import {
   TextField,
   InputAdornment,
   MenuItem,
+  Typography,
 } from '@mui/material';
 import {
   Search as SearchIcon,
+  Inventory as InventoryIcon,
+  Category as CategoryIcon,
 } from '@mui/icons-material';
 import CatalogItemCard from './CatalogItemCard';
 import CategoryCard from './CategoryCard';
@@ -34,6 +37,20 @@ interface CatalogTabsProps {
   onToggleAvailability: (itemId: string) => void;
   onImageUpload: (itemId: string, file: File) => void;
 }
+
+const textFieldSx = {
+  '& .MuiOutlinedInput-root': {
+    '&:hover fieldset': {
+      borderColor: '#94a3b8',
+    },
+    '&.Mui-focused fieldset': {
+      borderColor: '#1976d2',
+    },
+  },
+  '& .MuiInputLabel-root.Mui-focused': {
+    color: '#1976d2',
+  },
+};
 
 const CatalogTabs: React.FC<CatalogTabsProps> = ({
   activeTab,
@@ -55,7 +72,7 @@ const CatalogTabs: React.FC<CatalogTabsProps> = ({
     const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          item.description?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = filterCategory === 'all' || item.categoryId === filterCategory;
-    const matchesAvailability = filterAvailability === 'all' || 
+    const matchesAvailability = filterAvailability === 'all' ||
                                (filterAvailability === 'available' && item.isAvailable) ||
                                (filterAvailability === 'unavailable' && !item.isAvailable);
     return matchesSearch && matchesCategory && matchesAvailability;
@@ -71,28 +88,30 @@ const CatalogTabs: React.FC<CatalogTabsProps> = ({
       elevation={0}
       sx={{
         backgroundColor: '#ffffff',
-        border: '1px solid #e5e7eb',
+        border: '1px solid #e2e8f0',
         borderRadius: 2,
-        overflow: 'hidden',
+        overflow: 'visible',
       }}
     >
-      <Box sx={{ borderBottom: '1px solid #e5e7eb' }}>
+      {/* Tab bar */}
+      <Box sx={{ borderBottom: '1px solid #e2e8f0' }}>
         <Tabs
           value={activeTab}
           onChange={(_, newValue) => onTabChange(newValue)}
           sx={{
-            px: 2,
+            px: { xs: 2, sm: 3 },
             '& .MuiTab-root': {
               textTransform: 'none',
               fontWeight: 600,
               fontSize: '0.9375rem',
-              color: '#6b7280',
+              color: '#64748b',
+              px: { xs: 2, sm: 3 },
               '&.Mui-selected': {
-                color: '#1a1a1a',
+                color: '#1976d2',
               },
             },
             '& .MuiTabs-indicator': {
-              backgroundColor: '#1a1a1a',
+              backgroundColor: '#1976d2',
               height: 3,
             },
           }}
@@ -102,9 +121,9 @@ const CatalogTabs: React.FC<CatalogTabsProps> = ({
         </Tabs>
       </Box>
 
-      {/* Filters */}
-      <Box sx={{ p: 3, borderBottom: '1px solid #e5e7eb' }}>
-        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+      {/* Filter bar */}
+      <Box sx={{ p: { xs: 2, sm: 3 }, borderBottom: '1px solid #e2e8f0' }}>
+        <Box sx={{ display: 'flex', gap: { xs: 1.5, sm: 2 }, flexWrap: 'wrap' }}>
           <TextField
             placeholder={`Search ${activeTab}...`}
             value={searchQuery}
@@ -112,24 +131,14 @@ const CatalogTabs: React.FC<CatalogTabsProps> = ({
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  <SearchIcon sx={{ color: '#6b7280', fontSize: 20 }} />
+                  <SearchIcon sx={{ color: '#94a3b8', fontSize: 20 }} />
                 </InputAdornment>
               ),
             }}
             sx={{
               flexGrow: 1,
-              minWidth: 250,
-              '& .MuiOutlinedInput-root': {
-                '&:hover fieldset': {
-                  borderColor: '#9ca3af',
-                },
-                '&.Mui-focused fieldset': {
-                  borderColor: '#1a1a1a',
-                },
-              },
-              '& .MuiInputLabel-root.Mui-focused': {
-                color: '#1a1a1a',
-              },
+              minWidth: { xs: '100%', sm: 250 },
+              ...textFieldSx,
             }}
           />
           {activeTab === 'items' && (
@@ -140,18 +149,8 @@ const CatalogTabs: React.FC<CatalogTabsProps> = ({
                 value={filterCategory}
                 onChange={(e) => setFilterCategory(e.target.value)}
                 sx={{
-                  minWidth: 150,
-                  '& .MuiOutlinedInput-root': {
-                    '&:hover fieldset': {
-                      borderColor: '#9ca3af',
-                    },
-                    '&.Mui-focused fieldset': {
-                      borderColor: '#1a1a1a',
-                    },
-                  },
-                  '& .MuiInputLabel-root.Mui-focused': {
-                    color: '#1a1a1a',
-                  },
+                  minWidth: { xs: '100%', sm: 150 },
+                  ...textFieldSx,
                 }}
               >
                 <MenuItem value="all">All Categories</MenuItem>
@@ -165,18 +164,8 @@ const CatalogTabs: React.FC<CatalogTabsProps> = ({
                 value={filterAvailability}
                 onChange={(e) => setFilterAvailability(e.target.value)}
                 sx={{
-                  minWidth: 150,
-                  '& .MuiOutlinedInput-root': {
-                    '&:hover fieldset': {
-                      borderColor: '#9ca3af',
-                    },
-                    '&.Mui-focused fieldset': {
-                      borderColor: '#1a1a1a',
-                    },
-                  },
-                  '& .MuiInputLabel-root.Mui-focused': {
-                    color: '#1a1a1a',
-                  },
+                  minWidth: { xs: '100%', sm: 150 },
+                  ...textFieldSx,
                 }}
               >
                 <MenuItem value="all">All Items</MenuItem>
@@ -188,20 +177,39 @@ const CatalogTabs: React.FC<CatalogTabsProps> = ({
         </Box>
       </Box>
 
-      <Box sx={{ p: 3 }}>
+      {/* Content area */}
+      <Box sx={{ p: { xs: 2, sm: 3 } }}>
         {activeTab === 'items' && (
-          <Grid container spacing={2}>
+          <Grid container spacing={{ xs: 1.5, sm: 2 }} alignItems="stretch">
             {filteredItems.length === 0 ? (
               <Grid item xs={12}>
-                <Box sx={{ textAlign: 'center', py: 8 }}>
-                  <Box sx={{ color: '#6b7280', fontSize: '0.9375rem' }}>
-                    No items found
+                <Box sx={{ textAlign: 'center', py: 6 }}>
+                  <Box
+                    sx={{
+                      width: 56,
+                      height: 56,
+                      borderRadius: 2,
+                      bgcolor: 'rgba(25,118,210,0.08)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      margin: 'auto',
+                      mb: 2,
+                    }}
+                  >
+                    <InventoryIcon sx={{ color: '#1976d2', fontSize: 28 }} />
                   </Box>
+                  <Typography variant="h6" sx={{ color: '#0f172a', fontWeight: 600, mb: 0.5 }}>
+                    No items found
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: '#64748b' }}>
+                    Try adjusting your search or filters
+                  </Typography>
                 </Box>
               </Grid>
             ) : (
               filteredItems.map((item) => (
-                <Grid item xs={12} sm={6} md={4} lg={3} key={item.id}>
+                <Grid item xs={12} sm={6} md={4} lg={3} key={item.id} sx={{ display: 'flex' }}>
                   <CatalogItemCard
                     item={item}
                     categoryName={categories.find(c => c.id === item.categoryId)?.name}
@@ -217,18 +225,36 @@ const CatalogTabs: React.FC<CatalogTabsProps> = ({
         )}
 
         {activeTab === 'categories' && (
-          <Grid container spacing={2}>
+          <Grid container spacing={{ xs: 1.5, sm: 2 }} alignItems="stretch">
             {filteredCategories.length === 0 ? (
               <Grid item xs={12}>
-                <Box sx={{ textAlign: 'center', py: 8 }}>
-                  <Box sx={{ color: '#6b7280', fontSize: '0.9375rem' }}>
-                    No categories found
+                <Box sx={{ textAlign: 'center', py: 6 }}>
+                  <Box
+                    sx={{
+                      width: 56,
+                      height: 56,
+                      borderRadius: 2,
+                      bgcolor: 'rgba(25,118,210,0.08)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      margin: 'auto',
+                      mb: 2,
+                    }}
+                  >
+                    <CategoryIcon sx={{ color: '#1976d2', fontSize: 28 }} />
                   </Box>
+                  <Typography variant="h6" sx={{ color: '#0f172a', fontWeight: 600, mb: 0.5 }}>
+                    No categories found
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: '#64748b' }}>
+                    Try adjusting your search or filters
+                  </Typography>
                 </Box>
               </Grid>
             ) : (
               filteredCategories.map((category) => (
-                <Grid item xs={12} sm={6} md={4} key={category.id}>
+                <Grid item xs={12} sm={6} md={4} lg={3} key={category.id} sx={{ display: 'flex' }}>
                   <CategoryCard
                     category={category}
                     itemCount={items.filter(i => i.categoryId === category.id).length}

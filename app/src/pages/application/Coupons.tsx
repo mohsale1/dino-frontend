@@ -1,13 +1,6 @@
-/**
- * Coupons & Promotions Page - Clean Professional Design
- * 
- * Manage discount codes and promotional offers
- */
-
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
-  Container,
   Typography,
   Paper,
   Button,
@@ -49,7 +42,7 @@ const Coupons: React.FC = () => {
   // Fetch coupons
   const fetchCoupons = useCallback(async () => {
     if (!workspaceId) return;
-    
+
     try {
       const data = await couponService.getCoupons(workspaceId);
       setCoupons(data);
@@ -69,7 +62,7 @@ const Coupons: React.FC = () => {
 
       setLoading(true);
       setError(null);
-      
+
       try {
         await fetchCoupons();
       } catch (err: any) {
@@ -87,7 +80,7 @@ const Coupons: React.FC = () => {
     totalCoupons: coupons.length,
     activeCoupons: coupons.filter(c => c.isAvailable).length,
     totalRedemptions: coupons.reduce((sum, c) => sum + c.usageCount, 0),
-    totalSavings: 0, // Calculate based on your business logic
+    totalSavings: 0,
   };
 
   const handleCreateCoupon = () => {
@@ -122,7 +115,7 @@ const Coupons: React.FC = () => {
           severity: 'success',
         });
       }
-      
+
       handleCloseDialog();
       await fetchCoupons();
     } catch (err: any) {
@@ -184,70 +177,76 @@ const Coupons: React.FC = () => {
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
-        <CircularProgress />
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+        <CircularProgress color="primary" />
       </Box>
     );
   }
 
   if (error) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', p: 3 }}>
         <Alert severity="error">{error}</Alert>
       </Box>
     );
   }
 
   return (
-    <Box sx={{ minHeight: '100vh', backgroundColor: '#f8f9fa', py: 4 }}>
-      <Container maxWidth="xl">
-        {/* Header */}
-        <Box sx={{ mb: 4 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
-            <Box>
-              <Typography
-                variant="h4"
-                sx={{
-                  fontWeight: 700,
-                  color: '#1a1a1a',
-                  mb: 1,
-                  fontSize: { xs: '1.75rem', md: '2.125rem' },
-                }}
-              >
-                Coupons & Promotions
-              </Typography>
-              <Typography
-                variant="body1"
-                sx={{
-                  color: '#6b7280',
-                  fontSize: '0.9375rem',
-                }}
-              >
-                Create and manage discount codes and promotional offers
-              </Typography>
-            </Box>
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={handleCreateCoupon}
-              sx={{
-                textTransform: 'none',
-                borderRadius: 1.5,
-                px: 3,
-                fontWeight: 600,
-                backgroundColor: '#1a1a1a',
-                '&:hover': {
-                  backgroundColor: '#374151',
-                },
-              }}
-            >
-              Create Coupon
-            </Button>
-          </Box>
-
-          {/* Statistics */}
-          <CouponStats stats={stats} />
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', bgcolor: '#f8fafc' }}>
+      {/* Header */}
+      <Box
+        sx={{
+          px: 3,
+          py: 2,
+          borderBottom: '1px solid #e2e8f0',
+          bgcolor: '#ffffff',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexShrink: 0,
+        }}
+      >
+        <Box>
+          <Typography
+            variant="h6"
+            sx={{ fontWeight: 700, color: '#0f172a', fontSize: '1.0625rem' }}
+          >
+            Coupons & Promotions
+          </Typography>
+          <Typography variant="body2" sx={{ color: '#64748b' }}>
+            Create and manage discount codes
+          </Typography>
         </Box>
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={handleCreateCoupon}
+          sx={{
+            bgcolor: '#1976d2',
+            '&:hover': { bgcolor: '#1565c0' },
+            textTransform: 'none',
+            fontWeight: 600,
+            borderRadius: 1.5,
+            px: 2.5,
+          }}
+        >
+          Create Coupon
+        </Button>
+      </Box>
+
+      {/* Body */}
+      <Box
+        sx={{
+          flex: 1,
+          overflowY: 'auto',
+          p: 3,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 3,
+        }}
+      >
+        {/* Stats */}
+        <CouponStats stats={stats} />
 
         {/* Filters */}
         <CouponFilters
@@ -264,32 +263,31 @@ const Coupons: React.FC = () => {
           <Paper
             elevation={0}
             sx={{
-              p: 8,
-              textAlign: 'center',
-              backgroundColor: '#ffffff',
-              border: '1px solid #e5e7eb',
+              border: '1px solid #e2e8f0',
               borderRadius: 2,
+              p: 6,
+              textAlign: 'center',
             }}
           >
             <Box
               sx={{
-                width: 80,
-                height: 80,
+                width: 64,
+                height: 64,
                 borderRadius: 2,
-                backgroundColor: '#f3f4f6',
+                bgcolor: 'rgba(25,118,210,0.08)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                margin: '0 auto',
-                mb: 3,
+                margin: 'auto',
+                mb: 2.5,
               }}
             >
-              <CouponIcon sx={{ fontSize: 40, color: '#6b7280' }} />
+              <CouponIcon sx={{ fontSize: 32, color: '#1976d2' }} />
             </Box>
-            <Typography variant="h6" sx={{ fontWeight: 700, color: '#1a1a1a', mb: 1 }}>
+            <Typography variant="h6" sx={{ fontWeight: 700, color: '#0f172a', mb: 1 }}>
               No coupons yet
             </Typography>
-            <Typography variant="body2" sx={{ color: '#6b7280', mb: 4, maxWidth: 500, mx: 'auto' }}>
+            <Typography variant="body2" sx={{ color: '#64748b', mb: 3 }}>
               Create your first coupon to start offering discounts and promotions to your customers
             </Typography>
             <Button
@@ -297,14 +295,12 @@ const Coupons: React.FC = () => {
               startIcon={<AddIcon />}
               onClick={handleCreateCoupon}
               sx={{
+                bgcolor: '#1976d2',
+                '&:hover': { bgcolor: '#1565c0' },
                 textTransform: 'none',
-                borderRadius: 1.5,
-                px: 4,
                 fontWeight: 600,
-                backgroundColor: '#1a1a1a',
-                '&:hover': {
-                  backgroundColor: '#374151',
-                },
+                borderRadius: 1.5,
+                px: 2.5,
               }}
             >
               Create Your First Coupon
@@ -323,7 +319,7 @@ const Coupons: React.FC = () => {
             ))}
           </Box>
         )}
-      </Container>
+      </Box>
 
       {/* Create/Edit Dialog */}
       <CouponFormDialog
@@ -358,10 +354,7 @@ const Coupons: React.FC = () => {
         <Alert
           severity={snackbar.severity}
           onClose={() => setSnackbar({ ...snackbar, open: false })}
-          sx={{
-            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-            borderRadius: 1.5,
-          }}
+          sx={{ boxShadow: '0 4px 12px rgba(0,0,0,0.15)', borderRadius: 1.5 }}
         >
           {snackbar.message}
         </Alert>

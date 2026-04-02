@@ -1,22 +1,13 @@
-/**
- * Catalog Management Page - Clean Professional Design
- * 
- * Manage menu items and categories
- */
-
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
-  Container,
   Typography,
   Button,
   Snackbar,
   Alert,
   CircularProgress,
 } from '@mui/material';
-import {
-  Add as AddIcon,
-} from '@mui/icons-material';
+import { Add as AddIcon } from '@mui/icons-material';
 import CatalogStats from './Catalog/CatalogStats';
 import CatalogTabs from './Catalog/CatalogTabs';
 import { CatalogItemFormDialog, CategoryFormDialog } from '../../features/catalog/components';
@@ -34,10 +25,10 @@ const CatalogManagementPage: React.FC = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<CatalogItem | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
-  const [snackbar, setSnackbar] = useState({ 
-    open: false, 
-    message: '', 
-    severity: 'success' as 'success' | 'error' 
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: '',
+    severity: 'success' as 'success' | 'error',
   });
 
   // Data state
@@ -49,7 +40,7 @@ const CatalogManagementPage: React.FC = () => {
   // Fetch categories
   const fetchCategories = useCallback(async () => {
     if (!workspaceId) return;
-    
+
     try {
       const data = await catalogService.getCategories(workspaceId);
       setCategories(data);
@@ -62,7 +53,7 @@ const CatalogManagementPage: React.FC = () => {
   // Fetch catalog items
   const fetchCatalogItems = useCallback(async () => {
     if (!workspaceId) return;
-    
+
     try {
       const data = await catalogService.getCatalogItems(workspaceId);
       setCatalogItems(data);
@@ -82,7 +73,7 @@ const CatalogManagementPage: React.FC = () => {
 
       setLoading(true);
       setError(null);
-      
+
       try {
         await Promise.all([fetchCategories(), fetchCatalogItems()]);
       } catch (err: any) {
@@ -133,29 +124,17 @@ const CatalogManagementPage: React.FC = () => {
     try {
       if (selectedItem) {
         await catalogService.updateCatalogItem(selectedItem.id, data);
-        setSnackbar({
-          open: true,
-          message: 'Item updated successfully',
-          severity: 'success',
-        });
+        setSnackbar({ open: true, message: 'Item updated successfully', severity: 'success' });
       } else {
         await catalogService.createCatalogItem({ ...data, workspaceId });
-        setSnackbar({
-          open: true,
-          message: 'Item created successfully',
-          severity: 'success',
-        });
+        setSnackbar({ open: true, message: 'Item created successfully', severity: 'success' });
       }
-      
+
       setAddDialogOpen(false);
       setSelectedItem(null);
       await fetchCatalogItems();
     } catch (err: any) {
-      setSnackbar({
-        open: true,
-        message: err.message || 'Failed to save item',
-        severity: 'error',
-      });
+      setSnackbar({ open: true, message: err.message || 'Failed to save item', severity: 'error' });
     }
   };
 
@@ -163,29 +142,17 @@ const CatalogManagementPage: React.FC = () => {
     try {
       if (selectedCategory) {
         await catalogService.updateCategory(selectedCategory.id, data);
-        setSnackbar({
-          open: true,
-          message: 'Category updated successfully',
-          severity: 'success',
-        });
+        setSnackbar({ open: true, message: 'Category updated successfully', severity: 'success' });
       } else {
         await catalogService.createCategory({ ...data, workspaceId });
-        setSnackbar({
-          open: true,
-          message: 'Category created successfully',
-          severity: 'success',
-        });
+        setSnackbar({ open: true, message: 'Category created successfully', severity: 'success' });
       }
-      
+
       setAddDialogOpen(false);
       setSelectedCategory(null);
       await fetchCategories();
     } catch (err: any) {
-      setSnackbar({
-        open: true,
-        message: err.message || 'Failed to save category',
-        severity: 'error',
-      });
+      setSnackbar({ open: true, message: err.message || 'Failed to save category', severity: 'error' });
     }
   };
 
@@ -193,31 +160,19 @@ const CatalogManagementPage: React.FC = () => {
     try {
       if (activeTab === 'items' && selectedItem) {
         await catalogService.deleteCatalogItem(selectedItem.id);
-        setSnackbar({
-          open: true,
-          message: 'Item deleted successfully',
-          severity: 'success',
-        });
+        setSnackbar({ open: true, message: 'Item deleted successfully', severity: 'success' });
         await fetchCatalogItems();
       } else if (activeTab === 'categories' && selectedCategory) {
         await catalogService.deleteCategory(selectedCategory.id);
-        setSnackbar({
-          open: true,
-          message: 'Category deleted successfully',
-          severity: 'success',
-        });
+        setSnackbar({ open: true, message: 'Category deleted successfully', severity: 'success' });
         await fetchCategories();
       }
-      
+
       setDeleteDialogOpen(false);
       setSelectedItem(null);
       setSelectedCategory(null);
     } catch (err: any) {
-      setSnackbar({
-        open: true,
-        message: err.message || 'Failed to delete',
-        severity: 'error',
-      });
+      setSnackbar({ open: true, message: err.message || 'Failed to delete', severity: 'error' });
     }
   };
 
@@ -227,107 +182,94 @@ const CatalogManagementPage: React.FC = () => {
       if (!item) return;
 
       await catalogService.toggleItemAvailability(itemId, !item.isAvailable);
-      setSnackbar({
-        open: true,
-        message: 'Availability updated successfully',
-        severity: 'success',
-      });
+      setSnackbar({ open: true, message: 'Availability updated successfully', severity: 'success' });
       await fetchCatalogItems();
     } catch (err: any) {
-      setSnackbar({
-        open: true,
-        message: err.message || 'Failed to update availability',
-        severity: 'error',
-      });
+      setSnackbar({ open: true, message: err.message || 'Failed to update availability', severity: 'error' });
     }
   };
 
   const handleImageUpload = async (itemId: string, file: File) => {
     try {
       await catalogService.uploadItemImage(itemId, file);
-      setSnackbar({
-        open: true,
-        message: 'Image uploaded successfully',
-        severity: 'success',
-      });
+      setSnackbar({ open: true, message: 'Image uploaded successfully', severity: 'success' });
       await fetchCatalogItems();
     } catch (err: any) {
-      setSnackbar({
-        open: true,
-        message: err.message || 'Failed to upload image',
-        severity: 'error',
-      });
+      setSnackbar({ open: true, message: err.message || 'Failed to upload image', severity: 'error' });
     }
   };
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
-        <CircularProgress />
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+        <CircularProgress color="primary" />
       </Box>
     );
   }
 
   if (error) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', p: 3 }}>
         <Alert severity="error">{error}</Alert>
       </Box>
     );
   }
 
   return (
-    <Box sx={{ minHeight: '100vh', backgroundColor: '#f8f9fa', py: 4 }}>
-      <Container maxWidth="xl">
-        {/* Header */}
-        <Box sx={{ mb: 4 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
-            <Box>
-              <Typography
-                variant="h4"
-                sx={{
-                  fontWeight: 700,
-                  color: '#1a1a1a',
-                  mb: 1,
-                  fontSize: { xs: '1.75rem', md: '2.125rem' },
-                }}
-              >
-                Catalog Management
-              </Typography>
-              <Typography
-                variant="body1"
-                sx={{
-                  color: '#6b7280',
-                  fontSize: '0.9375rem',
-                }}
-              >
-                Manage your menu items and categories
-              </Typography>
-            </Box>
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={handleAddNew}
-              sx={{
-                textTransform: 'none',
-                borderRadius: 1.5,
-                px: 3,
-                fontWeight: 600,
-                backgroundColor: '#1a1a1a',
-                '&:hover': {
-                  backgroundColor: '#374151',
-                },
-              }}
-            >
-              Add {activeTab === 'items' ? 'Item' : 'Category'}
-            </Button>
-          </Box>
-
-          {/* Statistics */}
-          <CatalogStats stats={stats} />
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', bgcolor: '#f8fafc' }}>
+      {/* Header */}
+      <Box
+        sx={{
+          px: 3,
+          py: 2,
+          borderBottom: '1px solid #e2e8f0',
+          bgcolor: '#ffffff',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexShrink: 0,
+        }}
+      >
+        <Box>
+          <Typography
+            variant="h6"
+            sx={{ fontWeight: 700, color: '#0f172a', fontSize: '1.0625rem' }}
+          >
+            Catalog
+          </Typography>
+          <Typography variant="body2" sx={{ color: '#64748b' }}>
+            Manage your menu items and categories
+          </Typography>
         </Box>
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={handleAddNew}
+          sx={{
+            textTransform: 'none',
+            fontWeight: 600,
+            borderRadius: 1.5,
+            px: 2.5,
+            bgcolor: '#1976d2',
+            '&:hover': { bgcolor: '#1565c0' },
+          }}
+        >
+          Add {activeTab === 'items' ? 'Item' : 'Category'}
+        </Button>
+      </Box>
 
-        {/* Tabs */}
+      {/* Body */}
+      <Box
+        sx={{
+          flex: 1,
+          overflowY: 'auto',
+          p: 3,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 3,
+        }}
+      >
+        <CatalogStats stats={stats} />
         <CatalogTabs
           activeTab={activeTab}
           onTabChange={setActiveTab}
@@ -340,7 +282,7 @@ const CatalogManagementPage: React.FC = () => {
           onToggleAvailability={handleToggleAvailability}
           onImageUpload={handleImageUpload}
         />
-      </Container>
+      </Box>
 
       {/* Add/Edit Item Dialog */}
       {activeTab === 'items' && (
@@ -395,10 +337,7 @@ const CatalogManagementPage: React.FC = () => {
         <Alert
           severity={snackbar.severity}
           onClose={() => setSnackbar({ ...snackbar, open: false })}
-          sx={{
-            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-            borderRadius: 1.5,
-          }}
+          sx={{ boxShadow: '0 4px 12px rgba(0,0,0,0.15)', borderRadius: 1.5 }}
         >
           {snackbar.message}
         </Alert>

@@ -12,6 +12,7 @@ import {
   Button,
   Chip,
   Typography,
+  Tooltip,
   alpha,
 } from '@mui/material';
 import {
@@ -25,6 +26,7 @@ import {
   Logout,
   Menu as MenuIcon,
   ChevronLeft,
+  ChevronRight,
   AccountCircle,
 } from '@mui/icons-material';
 import { useNavigate, useLocation, Outlet } from 'react-router-dom';
@@ -32,7 +34,8 @@ import DinoLogo from '../../ui/DinoLogo';
 import { useAuth } from '../../../contexts/common/Auth';
 import { ConfirmationDialog } from '../../dialogs/ConfirmationDialog';
 
-const DRAWER_WIDTH = 280;
+const DRAWER_WIDTH   = 260;
+const COLLAPSED_WIDTH = 68;
 
 interface MenuItem {
   title: string;
@@ -42,24 +45,18 @@ interface MenuItem {
 }
 
 const SystemLayout: React.FC = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
+  const navigate  = useNavigate();
+  const location  = useLocation();
   const { user, logout, hasBackendPermission, userPermissions } = useAuth();
+
+  // Mobile drawer open/close
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [showLogoutConfirmation, setShowLogoutConfirmation] = useState(false);
+  // Desktop sidebar collapsed (icon-only mode) — does NOT affect mobile
+  const [collapsed, setCollapsed] = useState(false);
+  const [showLogout, setShowLogout] = useState(false);
 
-  const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen);
-  };
+  const drawerWidth = collapsed ? COLLAPSED_WIDTH : DRAWER_WIDTH;
 
-  const toggleSidebar = () => {
-    setSidebarCollapsed(!sidebarCollapsed);
-  };
-
-  const drawerWidth = sidebarCollapsed ? 70 : DRAWER_WIDTH;
-
-  // Resolve role name from Auth context userPermissions (reactive) with fallbacks
   const roleName = useMemo(() => {
     const name =
       userPermissions?.role?.name ||
@@ -69,252 +66,189 @@ const SystemLayout: React.FC = () => {
     return typeof name === 'string' ? name : '';
   }, [userPermissions, user]);
 
-  // Define menu items with their exact permission requirements per the reference
   const menuItems: MenuItem[] = [
-    {
-      title: 'Dashboard',
-      icon: <DashboardIcon fontSize="small" />,
-      permission: 'system.workspaces.read',
-      path: '/system/dashboard',
-    },
-    {
-      title: 'Users',
-      icon: <People fontSize="small" />,
-      permission: 'system.users.read',
-      path: '/system/users',
-    },
-    {
-      title: 'Billing',
-      icon: <Payment fontSize="small" />,
-      permission: 'system.billing.read',
-      path: '/system/billing',
-    },
-    {
-      title: 'Workspaces',
-      icon: <Business fontSize="small" />,
-      permission: 'system.workspaces.read',
-      path: '/system/workspaces',
-    },
-    {
-      title: 'Roles & Permissions',
-      icon: <AdminPanelSettings fontSize="small" />,
-      permission: 'system.roles.read',
-      path: '/system/roles',
-    },
-    {
-      title: 'Registration Codes',
-      icon: <Settings fontSize="small" />,
-      permission: 'system.registration.read',
-      path: '/system/registration',
-    },
-    {
-      title: 'Appearance',
-      icon: <Palette fontSize="small" />,
-      permission: 'system.workspaces.read',
-      path: '/system/appearance',
-    },
-    {
-      title: 'Profile',
-      icon: <AccountCircle fontSize="small" />,
-      permission: 'system.users.read',
-      path: '/system/profile',
-    },
-    {
-      title: 'Settings',
-      icon: <Settings fontSize="small" />,
-      permission: 'system.workspaces.read',
-      path: '/system/settings',
-    },
+    { title: 'Dashboard',          icon: <DashboardIcon fontSize="small" />,      permission: 'system.workspaces.read',   path: '/system/dashboard' },
+    { title: 'Users',              icon: <People fontSize="small" />,             permission: 'system.users.read',        path: '/system/users' },
+    { title: 'Billing',            icon: <Payment fontSize="small" />,            permission: 'system.billing.read',      path: '/system/billing' },
+    { title: 'Workspaces',         icon: <Business fontSize="small" />,           permission: 'system.workspaces.read',   path: '/system/workspaces' },
+    { title: 'Roles & Permissions',icon: <AdminPanelSettings fontSize="small" />, permission: 'system.roles.read',        path: '/system/roles-permissions' },
+    // { title: 'Registration Codes', icon: <Settings fontSize="small" />,           permission: 'system.registration.read', path: '/system/registration-codes' },
+    { title: 'Appearance',         icon: <Palette fontSize="small" />,            permission: 'system.workspaces.read',   path: '/system/appearance' },
+    { title: 'Profile',            icon: <AccountCircle fontSize="small" />,      permission: 'system.users.read',        path: '/system/profile' },
+   // { title: 'Settings',           icon: <Settings fontSize="small" />,           permission: 'system.workspaces.read',   path: '/system/settings' },
   ];
 
-  // Filter menu items reactively based on userPermissions from Auth context.
-  const availableMenuItems = useMemo(() => {
-    return menuItems.filter(item => hasBackendPermission(item.permission));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userPermissions]);
+  const availableMenuItems = useMemo(
+    () => menuItems.filter(item => hasBackendPermission(item.permission)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [userPermissions],
+  );
 
-  const handleLogoutClick = () => {
-    setShowLogoutConfirmation(true);
+  const handleNav = (path: string) => {
+    navigate(path);
+    if (mobileOpen) setMobileOpen(false);
   };
 
-  const handleLogoutConfirm = () => {
-    setShowLogoutConfirmation(false);
-    logout();
-    navigate('/login');
-  };
-
-  const handleLogoutCancel = () => {
-    setShowLogoutConfirmation(false);
-  };
-
-  // Sidebar content
-  const drawer = (
-    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', bgcolor: '#0f172a' }}>
-      {/* Logo & Header */}
-      <Box
-        sx={{
-          p: sidebarCollapsed ? 1.5 : 2.5,
-          textAlign: 'center',
-          borderBottom: `1px solid ${alpha('#ffffff', 0.1)}`,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          position: 'relative',
-        }}
-      >
-        {!sidebarCollapsed && (
-          <IconButton
-            onClick={toggleSidebar}
+  // ── Shared nav list (used in both mobile full drawer and desktop collapsed/expanded) ──
+  const navList = (isCollapsedMode: boolean) => (
+    <List sx={{
+      flexGrow: 1,
+      overflowY: 'auto',
+      overflowX: 'hidden',
+      py: 1.5,
+      px: isCollapsedMode ? 0.75 : 1,
+      '&::-webkit-scrollbar': { width: 4 },
+      '&::-webkit-scrollbar-thumb': { bgcolor: 'rgba(255,255,255,0.2)', borderRadius: 2 },
+    }}>
+      {availableMenuItems.map((item, index) => {
+        const isActive = location.pathname === item.path;
+        const btn = (
+          <ListItemButton
+            key={index}
+            selected={isActive}
+            onClick={() => handleNav(item.path)}
             sx={{
-              position: 'absolute',
-              right: 8,
-              top: 8,
-              color: '#ffffff',
-              '&:hover': {
-                backgroundColor: alpha('#ffffff', 0.1),
+              borderRadius: 1.5,
+              mb: 0.5,
+              justifyContent: isCollapsedMode ? 'center' : 'flex-start',
+              px: isCollapsedMode ? 1 : 1.5,
+              minHeight: 40,
+              '&.Mui-selected': {
+                bgcolor: alpha('#ffffff', 0.15),
+                '&:hover': { bgcolor: alpha('#ffffff', 0.2) },
               },
+              '&:hover': { bgcolor: alpha('#ffffff', 0.08) },
             }}
           >
-            <ChevronLeft />
+            <ListItemIcon sx={{ color: '#ffffff', minWidth: isCollapsedMode ? 'auto' : 36, '& svg': { fontSize: 20 } }}>
+              {item.icon}
+            </ListItemIcon>
+            {!isCollapsedMode && (
+              <ListItemText
+                primary={item.title}
+                primaryTypographyProps={{
+                  sx: { color: '#ffffff', fontWeight: isActive ? 600 : 400, fontSize: '0.875rem' },
+                }}
+              />
+            )}
+          </ListItemButton>
+        );
+
+        // Wrap in Tooltip when collapsed for accessibility
+        return isCollapsedMode ? (
+          <Tooltip key={index} title={item.title} placement="right" arrow>
+            <span>{btn}</span>
+          </Tooltip>
+        ) : btn;
+      })}
+    </List>
+  );
+
+  // ── Full sidebar content (mobile always full, desktop depends on collapsed) ──
+  // isMobile: true when rendered inside the temporary mobile drawer
+  const sidebarContent = (isCollapsedMode: boolean, isMobile = false) => (
+    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', bgcolor: '#0f172a' }}>
+
+      {/* ── Logo header ── */}
+      <Box sx={{
+        px: isCollapsedMode ? 1 : 2.5,
+        py: 2,
+        borderBottom: `1px solid ${alpha('#ffffff', 0.1)}`,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: isCollapsedMode ? 'center' : 'space-between',
+        minHeight: 64,
+      }}>
+        {!isCollapsedMode && (
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, minWidth: 0 }}>
+            <DinoLogo size={32} animated={false} />
+            <Box sx={{ minWidth: 0 }}>
+              <Typography variant="subtitle2" sx={{ color: '#ffffff', fontWeight: 700, fontSize: '0.9rem', lineHeight: 1.2 }}>
+                System Admin
+              </Typography>
+              <Chip
+                label={roleName || 'System User'}
+                size="small"
+                sx={{ mt: 0.5, bgcolor: alpha('#ffffff', 0.15), color: '#ffffff', fontWeight: 600, fontSize: '0.68rem', height: 18, textTransform: 'capitalize' }}
+              />
+            </Box>
+          </Box>
+        )}
+
+        {isCollapsedMode && (
+          <DinoLogo size={28} animated={false} />
+        )}
+
+        {/* Mobile: close (X) button — closes the drawer */}
+        {isMobile && (
+          <IconButton
+            onClick={() => setMobileOpen(false)}
+            size="small"
+            sx={{ color: alpha('#ffffff', 0.6), flexShrink: 0, '&:hover': { bgcolor: alpha('#ffffff', 0.1), color: '#ffffff' } }}
+          >
+            <ChevronLeft fontSize="small" />
           </IconButton>
         )}
 
-        <DinoLogo size={sidebarCollapsed ? 32 : 40} animated={false} />
-
-        {!sidebarCollapsed && (
-          <>
-            <Typography
-              variant="subtitle1"
-              sx={{ color: '#ffffff', fontWeight: 700, mt: 1.5, fontSize: '0.95rem' }}
-            >
-              System Admin
-            </Typography>
-            <Chip
-              label={roleName || 'System User'}
-              size="small"
-              sx={{
-                mt: 1,
-                backgroundColor: alpha('#ffffff', 0.15),
-                color: '#ffffff',
-                fontWeight: 600,
-                fontSize: '0.75rem',
-                height: 24,
-                textTransform: 'capitalize',
-              }}
-            />
-          </>
+        {/* Desktop expanded: collapse toggle */}
+        {!isMobile && !isCollapsedMode && (
+          <IconButton
+            onClick={() => setCollapsed(true)}
+            size="small"
+            sx={{ color: alpha('#ffffff', 0.6), flexShrink: 0, '&:hover': { bgcolor: alpha('#ffffff', 0.1), color: '#ffffff' } }}
+          >
+            <ChevronLeft fontSize="small" />
+          </IconButton>
         )}
       </Box>
 
-      {/* Navigation */}
-      <List sx={{ flexGrow: 1, overflowY: 'auto', overflowX: 'hidden', py: 1.5, px: sidebarCollapsed ? 0.5 : 1, '&::-webkit-scrollbar': { width: '4px' }, '&::-webkit-scrollbar-thumb': { backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: '2px' } }}>
-        {sidebarCollapsed && (
-          <ListItemButton
-            onClick={toggleSidebar}
-            sx={{
-              justifyContent: 'center',
-              mb: 1,
-              borderRadius: 1,
-              '&:hover': {
-                backgroundColor: alpha('#ffffff', 0.08),
-              },
-            }}
-          >
-            <ListItemIcon sx={{ color: '#ffffff', minWidth: 'auto' }}>
-              <MenuIcon fontSize="small" />
-            </ListItemIcon>
-          </ListItemButton>
-        )}
-
-        {availableMenuItems.map((item, index) => {
-          const isActive = location.pathname === item.path;
-          return (
-            <ListItemButton
-              key={index}
-              selected={isActive}
-              onClick={() => {
-                navigate(item.path);
-                if (mobileOpen) setMobileOpen(false);
-              }}
-              sx={{
-                borderRadius: 1,
-                mb: 0.5,
-                justifyContent: sidebarCollapsed ? 'center' : 'flex-start',
-                px: sidebarCollapsed ? 1 : 2,
-                '&.Mui-selected': {
-                  backgroundColor: alpha('#ffffff', 0.15),
-                  '&:hover': {
-                    backgroundColor: alpha('#ffffff', 0.2),
-                  },
-                },
-                '&:hover': {
-                  backgroundColor: alpha('#ffffff', 0.08),
-                },
-              }}
+      {/* Expand button when collapsed */}
+      {isCollapsedMode && (
+        <Box sx={{ px: 0.75, pt: 1 }}>
+          <Tooltip title="Expand sidebar" placement="right" arrow>
+            <IconButton
+              onClick={() => setCollapsed(false)}
+              sx={{ width: '100%', borderRadius: 1.5, color: alpha('#ffffff', 0.6), '&:hover': { bgcolor: alpha('#ffffff', 0.08), color: '#ffffff' } }}
             >
-              <ListItemIcon sx={{ color: '#ffffff', minWidth: sidebarCollapsed ? 'auto' : 40 }}>
-                {item.icon}
-              </ListItemIcon>
-              {!sidebarCollapsed && (
-                <ListItemText
-                  primary={item.title}
-                  primaryTypographyProps={{
-                    sx: {
-                      color: '#ffffff',
-                      fontWeight: isActive ? 600 : 400,
-                      fontSize: '0.875rem',
-                    },
-                  }}
-                />
-              )}
-            </ListItemButton>
-          );
-        })}
-      </List>
+              <ChevronRight fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        </Box>
+      )}
+
+      {/* ── Nav list ── */}
+      {navList(isCollapsedMode)}
 
       <Divider sx={{ borderColor: alpha('#ffffff', 0.1) }} />
 
-      {/* User Info */}
-      <Box sx={{ p: sidebarCollapsed ? 1 : 2 }}>
-        {!sidebarCollapsed ? (
+      {/* ── User footer ── */}
+      <Box sx={{ p: isCollapsedMode ? 0.75 : 2 }}>
+        {!isCollapsedMode ? (
           <>
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5, px: 0.5 }}>
-              <Avatar
-                sx={{
-                  width: 32,
-                  height: 32,
-                  bgcolor: alpha('#ffffff', 0.2),
-                  mr: 1.5,
-                  fontSize: '0.875rem',
-                }}
-              >
+            {/* Clickable profile row */}
+            <Box
+              onClick={() => handleNav('/system/profile')}
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1.5,
+                mb: 1.5,
+                px: 1,
+                py: 0.75,
+                borderRadius: 1.5,
+                cursor: 'pointer',
+                transition: 'background-color 0.15s',
+                '&:hover': { bgcolor: alpha('#ffffff', 0.08) },
+              }}
+            >
+              <Avatar sx={{ width: 32, height: 32, bgcolor: alpha('#ffffff', 0.2), fontSize: '0.875rem', flexShrink: 0 }}>
                 {user?.email?.charAt(0).toUpperCase()}
               </Avatar>
               <Box sx={{ flexGrow: 1, minWidth: 0 }}>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: '#ffffff',
-                    fontWeight: 600,
-                    fontSize: '0.8125rem',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
+                <Typography variant="body2" sx={{ color: '#ffffff', fontWeight: 600, fontSize: '0.8125rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {user?.email?.split('@')[0]}
                 </Typography>
-                <Typography
-                  variant="caption"
-                  sx={{
-                    color: alpha('#ffffff', 0.7),
-                    fontSize: '0.6875rem',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                    display: 'block',
-                  }}
-                >
+                <Typography variant="caption" sx={{ color: alpha('#ffffff', 0.6), fontSize: '0.6875rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>
                   {user?.email}
                 </Typography>
               </Box>
@@ -324,7 +258,7 @@ const SystemLayout: React.FC = () => {
               fullWidth
               variant="outlined"
               startIcon={<Logout fontSize="small" />}
-              onClick={handleLogoutClick}
+              onClick={() => setShowLogout(true)}
               sx={{
                 borderColor: alpha('#ffffff', 0.3),
                 color: '#ffffff',
@@ -332,28 +266,40 @@ const SystemLayout: React.FC = () => {
                 textTransform: 'none',
                 fontSize: '0.8125rem',
                 py: 0.75,
-                '&:hover': {
-                  borderColor: '#ffffff',
-                  backgroundColor: alpha('#ffffff', 0.1),
-                },
+                borderRadius: 1.5,
+                '&:hover': { borderColor: '#ffffff', bgcolor: alpha('#ffffff', 0.1) },
               }}
             >
               Logout
             </Button>
           </>
         ) : (
-          <IconButton
-            onClick={handleLogoutClick}
-            sx={{
-              color: '#ffffff',
-              width: '100%',
-              '&:hover': {
-                backgroundColor: alpha('#ffffff', 0.1),
-              },
-            }}
-          >
-            <Logout fontSize="small" />
-          </IconButton>
+          /* Collapsed: avatar navigates to profile, logout icon below */
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+            <Tooltip title="My Profile" placement="right" arrow>
+              <Avatar
+                onClick={() => handleNav('/system/profile')}
+                sx={{
+                  width: 34, height: 34,
+                  bgcolor: alpha('#ffffff', 0.2),
+                  fontSize: '0.875rem',
+                  cursor: 'pointer',
+                  transition: 'background-color 0.15s',
+                  '&:hover': { bgcolor: alpha('#ffffff', 0.35) },
+                }}
+              >
+                {user?.email?.charAt(0).toUpperCase()}
+              </Avatar>
+            </Tooltip>
+            <Tooltip title="Logout" placement="right" arrow>
+              <IconButton
+                onClick={() => setShowLogout(true)}
+                sx={{ color: alpha('#ffffff', 0.6), borderRadius: 1.5, '&:hover': { bgcolor: alpha('#ffffff', 0.1), color: '#ffffff' } }}
+              >
+                <Logout fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          </Box>
         )}
       </Box>
     </Box>
@@ -361,118 +307,115 @@ const SystemLayout: React.FC = () => {
 
   return (
     <>
-      <Box sx={{ display: 'flex', minHeight: '100vh', width: '100%', margin: 0, padding: 0 }}>
-        {/* Mobile drawer */}
+      <Box sx={{ display: 'flex', minHeight: '100vh', width: '100%' }}>
+
+        {/* ── Mobile drawer — always full width, no collapse ── */}
         <Drawer
           variant="temporary"
           open={mobileOpen}
-          onClose={handleDrawerToggle}
+          onClose={() => setMobileOpen(false)}
           ModalProps={{ keepMounted: true }}
           sx={{
             display: { xs: 'block', md: 'none' },
             '& .MuiDrawer-paper': {
-              boxSizing: 'border-box',
               width: DRAWER_WIDTH,
               border: 'none',
+              boxSizing: 'border-box',
             },
           }}
         >
-          {drawer}
+          {sidebarContent(false, true)}
         </Drawer>
 
-        {/* Desktop drawer */}
+        {/* ── Desktop drawer — collapsible ── */}
         <Drawer
           variant="permanent"
           sx={{
             display: { xs: 'none', md: 'block' },
-            width: 0,
             flexShrink: 0,
             '& .MuiDrawer-paper': {
-              boxSizing: 'border-box',
               width: drawerWidth,
               border: 'none',
-              borderRight: 'none',
-              transition: 'width 0.3s ease',
+              boxSizing: 'border-box',
+              transition: 'width 0.25s ease',
               overflowX: 'hidden',
               overflowY: 'hidden',
               position: 'fixed',
               height: '100vh',
               top: 0,
               left: 0,
-              margin: 0,
-              padding: 0,
             },
           }}
           open
         >
-          {drawer}
+          {sidebarContent(collapsed)}
         </Drawer>
 
-        {/* Main Content */}
+        {/* ── Main content ── */}
         <Box
           component="main"
           sx={{
             flexGrow: 1,
-            height: '100vh',
+            minHeight: '100vh',
             bgcolor: '#f8fafc',
             overflowY: 'auto',
             overflowX: 'hidden',
+            // On desktop shift right by sidebar width; on mobile full width with top bar offset
             width: { xs: '100%', md: `calc(100% - ${drawerWidth}px)` },
             marginLeft: { xs: 0, md: `${drawerWidth}px` },
-            transition: 'margin-left 0.3s ease',
+            transition: 'margin-left 0.25s ease, width 0.25s ease',
             pt: { xs: '56px', md: 0 },
           }}
         >
-          {/* Mobile Top Navbar */}
-          <Box
-            sx={{
-              display: { xs: 'flex', md: 'none' },
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              right: 0,
-              height: 56,
-              bgcolor: '#0f172a',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              px: 2,
-              zIndex: 1100,
-              boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
-            }}
-          >
-            <IconButton onClick={handleDrawerToggle} sx={{ color: '#ffffff', p: 1 }}>
+          {/* ── Mobile top navbar ── */}
+          <Box sx={{
+            display: { xs: 'flex', md: 'none' },
+            position: 'fixed',
+            top: 0, left: 0, right: 0,
+            height: 56,
+            bgcolor: '#0f172a',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            px: 2,
+            zIndex: 1200,
+            boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+          }}>
+            {/* Hamburger */}
+            <IconButton onClick={() => setMobileOpen(true)} sx={{ color: '#ffffff', p: 1 }}>
               <MenuIcon />
             </IconButton>
+
+            {/* Title */}
             <Typography variant="subtitle1" sx={{ color: '#ffffff', fontWeight: 700, fontSize: '0.9375rem' }}>
               System Admin
             </Typography>
-            <Box
+
+            {/* Avatar — clickable → profile */}
+            <Avatar
+              onClick={() => navigate('/system/profile')}
               sx={{
-                width: 32,
-                height: 32,
-                borderRadius: '50%',
+                width: 32, height: 32,
                 bgcolor: 'rgba(255,255,255,0.15)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
+                fontSize: '0.875rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                border: '1.5px solid rgba(255,255,255,0.25)',
+                transition: 'background-color 0.15s',
+                '&:hover': { bgcolor: 'rgba(255,255,255,0.28)' },
               }}
             >
-              <Typography sx={{ color: '#ffffff', fontWeight: 700, fontSize: '0.875rem' }}>
-                {user?.email?.charAt(0).toUpperCase() || 'S'}
-              </Typography>
-            </Box>
+              {user?.email?.charAt(0).toUpperCase() || 'S'}
+            </Avatar>
           </Box>
 
-          {/* Child Routes via React Router Outlet */}
           <Outlet />
         </Box>
       </Box>
 
-      {/* Logout Confirmation Dialog */}
       <ConfirmationDialog
-        open={showLogoutConfirmation}
-        onClose={handleLogoutCancel}
-        onConfirm={handleLogoutConfirm}
+        open={showLogout}
+        onClose={() => setShowLogout(false)}
+        onConfirm={() => { setShowLogout(false); logout(); navigate('/login'); }}
         title="Logout"
         message="Are you sure you want to logout? You will need to sign in again to access your account."
         confirmLabel="Logout"

@@ -1,6 +1,6 @@
 /**
  * CouponFilters Component - Clean Professional Design
- * 
+ *
  * Filter and search coupons
  */
 
@@ -12,9 +12,7 @@ import {
   MenuItem,
   InputAdornment,
 } from '@mui/material';
-import {
-  Search as SearchIcon,
-} from '@mui/icons-material';
+import { Search as SearchIcon } from '@mui/icons-material';
 
 interface CouponFiltersProps {
   searchQuery: string;
@@ -24,6 +22,20 @@ interface CouponFiltersProps {
   filterType: string;
   onTypeChange: (value: string) => void;
 }
+
+const textFieldSx = {
+  '& .MuiOutlinedInput-root': {
+    '&:hover fieldset': {
+      borderColor: '#94a3b8',
+    },
+    '&.Mui-focused fieldset': {
+      borderColor: '#1976d2',
+    },
+  },
+  '& .MuiInputLabel-root.Mui-focused': {
+    color: '#1976d2',
+  },
+} as const;
 
 const CouponFilters: React.FC<CouponFiltersProps> = ({
   searchQuery,
@@ -37,10 +49,10 @@ const CouponFilters: React.FC<CouponFiltersProps> = ({
     <Paper
       elevation={0}
       sx={{
-        p: 3,
+        p: 2,
         mb: 3,
         backgroundColor: '#ffffff',
-        border: '1px solid #e5e7eb',
+        border: '1px solid #e2e8f0',
         borderRadius: 2,
       }}
     >
@@ -56,41 +68,14 @@ const CouponFilters: React.FC<CouponFiltersProps> = ({
               </InputAdornment>
             ),
           }}
-          sx={{
-            flexGrow: 1,
-            minWidth: 250,
-            '& .MuiOutlinedInput-root': {
-              '&:hover fieldset': {
-                borderColor: '#9ca3af',
-              },
-              '&.Mui-focused fieldset': {
-                borderColor: '#1a1a1a',
-              },
-            },
-            '& .MuiInputLabel-root.Mui-focused': {
-              color: '#1a1a1a',
-            },
-          }}
+          sx={{ flexGrow: 1, minWidth: 250, ...textFieldSx }}
         />
         <TextField
           select
           label="Status"
           value={filterStatus}
           onChange={(e) => onStatusChange(e.target.value)}
-          sx={{
-            minWidth: 150,
-            '& .MuiOutlinedInput-root': {
-              '&:hover fieldset': {
-                borderColor: '#9ca3af',
-              },
-              '&.Mui-focused fieldset': {
-                borderColor: '#1a1a1a',
-              },
-            },
-            '& .MuiInputLabel-root.Mui-focused': {
-              color: '#1a1a1a',
-            },
-          }}
+          sx={{ minWidth: 150, ...textFieldSx }}
         >
           <MenuItem value="all">All Status</MenuItem>
           <MenuItem value="active">Active</MenuItem>
@@ -102,20 +87,7 @@ const CouponFilters: React.FC<CouponFiltersProps> = ({
           label="Type"
           value={filterType}
           onChange={(e) => onTypeChange(e.target.value)}
-          sx={{
-            minWidth: 180,
-            '& .MuiOutlinedInput-root': {
-              '&:hover fieldset': {
-                borderColor: '#9ca3af',
-              },
-              '&.Mui-focused fieldset': {
-                borderColor: '#1a1a1a',
-              },
-            },
-            '& .MuiInputLabel-root.Mui-focused': {
-              color: '#1a1a1a',
-            },
-          }}
+          sx={{ minWidth: 180, ...textFieldSx }}
         >
           <MenuItem value="all">All Types</MenuItem>
           <MenuItem value="percentage">Percentage</MenuItem>

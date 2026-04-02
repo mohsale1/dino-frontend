@@ -44,17 +44,17 @@ import { DeleteConfirmationDialog } from '../../components/dialogs';
 // Design tokens
 // ---------------------------------------------------------------------------
 const COLORS = {
-  indigo:  '#6366f1',
-  dark0:   '#0f172a',
-  dark1:   '#1e293b',
-  violet:  '#8b5cf6',
-  border:  '#e2e8f0',
-  surface: '#ffffff',
-  bg:      '#f1f5f9',
-  slate:   '#64748b',
-  muted:   '#94a3b8',
-  emerald: '#10b981',
-  rose:    '#f43f5e',
+  primary:      '#1976D2',
+  primaryLight: '#42A5F5',
+  dark0:        '#0f172a',
+  dark1:        '#1e293b',
+  border:       '#e2e8f0',
+  surface:      '#ffffff',
+  bg:           '#f1f5f9',
+  slate:        '#64748b',
+  muted:        '#94a3b8',
+  emerald:      '#10b981',
+  rose:         '#f43f5e',
 };
 
 // ---------------------------------------------------------------------------
@@ -113,7 +113,7 @@ const HeroStat: React.FC<HeroStatProps> = ({ icon, value, label }) => {
           borderRadius: 1.5,
           bgcolor: 'rgba(255,255,255,0.1)',
           border: '1px solid rgba(255,255,255,0.15)',
-          color: 'rgba(199,210,254,0.9)',
+          color: 'rgba(144,202,249,0.9)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -133,7 +133,7 @@ const HeroStat: React.FC<HeroStatProps> = ({ icon, value, label }) => {
       >
         {animated}
       </Typography>
-      <Typography sx={{ color: 'rgba(199,210,254,0.65)', fontSize: '0.75rem', mt: 0.5 }}>
+      <Typography sx={{ color: 'rgba(144,202,249,0.65)', fontSize: '0.75rem', mt: 0.5 }}>
         {label}
       </Typography>
     </Box>
@@ -253,7 +253,7 @@ const RegistrationCodes: React.FC = () => {
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
-        <CircularProgress />
+        <CircularProgress sx={{ color: '#1976D2' }} />
       </Box>
     );
   }
@@ -274,7 +274,7 @@ const RegistrationCodes: React.FC = () => {
       {/* ------------------------------------------------------------------ */}
       <Box
         sx={{
-          background: `linear-gradient(135deg, ${COLORS.dark0} 0%, #1e1b4b 45%, #312e81 100%)`,
+          background: 'linear-gradient(135deg, #0d1b2e 0%, #0f2744 45%, #1565C0 100%)',
           px: { xs: 2.5, sm: 4, md: 6 },
           pt: { xs: 3, md: 4 },
           pb: { xs: 4, md: 5 },
@@ -288,7 +288,7 @@ const RegistrationCodes: React.FC = () => {
             width: 360,
             height: 360,
             borderRadius: '50%',
-            background: `radial-gradient(circle, ${alpha(COLORS.indigo, 0.22)} 0%, transparent 70%)`,
+            background: 'radial-gradient(circle, rgba(25,118,210,0.22) 0%, transparent 70%)',
             pointerEvents: 'none',
           },
           '&::after': {
@@ -299,7 +299,7 @@ const RegistrationCodes: React.FC = () => {
             width: 280,
             height: 280,
             borderRadius: '50%',
-            background: `radial-gradient(circle, ${alpha(COLORS.violet, 0.15)} 0%, transparent 70%)`,
+            background: 'radial-gradient(circle, rgba(66,165,245,0.15) 0%, transparent 70%)',
             pointerEvents: 'none',
           },
         }}
@@ -330,7 +330,7 @@ const RegistrationCodes: React.FC = () => {
           <Box>
             <Typography
               variant="overline"
-              sx={{ color: 'rgba(199,210,254,0.75)', fontWeight: 700, letterSpacing: 3, fontSize: '0.65rem' }}
+              sx={{ color: 'rgba(144,202,249,0.75)', fontWeight: 700, letterSpacing: 3, fontSize: '0.65rem' }}
             >
               SYSTEM CONTROL CENTER
             </Typography>
@@ -348,8 +348,8 @@ const RegistrationCodes: React.FC = () => {
               Registration Codes
             </Typography>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mt: 1.5 }}>
-              <CalendarToday sx={{ fontSize: 13, color: 'rgba(199,210,254,0.6)' }} />
-              <Typography variant="caption" sx={{ color: 'rgba(199,210,254,0.6)', fontWeight: 500, fontSize: '0.75rem' }}>
+              <CalendarToday sx={{ fontSize: 13, color: 'rgba(144,202,249,0.6)' }} />
+              <Typography variant="caption" sx={{ color: 'rgba(144,202,249,0.6)', fontWeight: 500, fontSize: '0.75rem' }}>
                 {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
               </Typography>
             </Box>
@@ -393,195 +393,196 @@ const RegistrationCodes: React.FC = () => {
       {/* ------------------------------------------------------------------ */}
       {/* Content Area                                                         */}
       {/* ------------------------------------------------------------------ */}
-      <Box sx={{ pt: 4, pb: 6 }}>
+      <Box sx={{ pt: 4, pb: 6, px: { xs: 2, sm: 3, md: 5 } }}>
 
         {codes.length === 0 ? (
-          <Box sx={{ px: { xs: 2, sm: 3, md: 5 } }}>
-            <Paper
-              elevation={0}
+          <Paper
+            elevation={0}
+            sx={{
+              p: 6,
+              textAlign: 'center',
+              border: `1px solid ${COLORS.border}`,
+              borderRadius: 3,
+              bgcolor: COLORS.surface,
+            }}
+          >
+            <Box
               sx={{
-                p: 6,
-                textAlign: 'center',
-                border: `1px solid ${COLORS.border}`,
+                width: 64,
+                height: 64,
                 borderRadius: 3,
-                bgcolor: COLORS.surface,
+                bgcolor: '#f1f5f9',
+                border: `1px solid ${COLORS.border}`,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                mx: 'auto',
+                mb: 2,
               }}
             >
-              <Box
-                sx={{
-                  width: 64,
-                  height: 64,
-                  borderRadius: 3,
-                  bgcolor: '#f1f5f9',
-                  border: `1px solid ${COLORS.border}`,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  mx: 'auto',
-                  mb: 2,
-                }}
-              >
-                <QrCodeOutlined sx={{ fontSize: 32, color: COLORS.muted }} />
-              </Box>
-              <Typography variant="h6" sx={{ fontWeight: 600, color: COLORS.dark0, mb: 1 }}>
-                No Registration Codes Found
-              </Typography>
-              <Typography variant="body2" sx={{ color: COLORS.slate }}>
-                Create your first registration code to get started.
-              </Typography>
-            </Paper>
-          </Box>
+              <QrCodeOutlined sx={{ fontSize: 32, color: COLORS.muted }} />
+            </Box>
+            <Typography variant="h6" sx={{ fontWeight: 600, color: COLORS.dark0, mb: 1 }}>
+              No Registration Codes Found
+            </Typography>
+            <Typography variant="body2" sx={{ color: COLORS.slate }}>
+              Create your first registration code to get started.
+            </Typography>
+          </Paper>
         ) : (
-          <Box sx={{ borderTop: `1px solid ${COLORS.border}`, borderBottom: `1px solid ${COLORS.border}` }}>
-            <TableContainer
-              component={Paper}
-              elevation={0}
-              sx={{ borderRadius: 0, border: 'none', bgcolor: '#ffffff', overflowX: 'auto' }}
-            >
-              <Table sx={{ minWidth: 700 }}>
-                <TableHead>
-                  <TableRow sx={{ bgcolor: '#f8fafc', borderBottom: '2px solid #e2e8f0' }}>
-                    <TableCell sx={{ fontWeight: 600, color: COLORS.slate, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                      Code
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 600, color: COLORS.slate, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                      Workspace
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 600, color: COLORS.slate, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                      Usage
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 600, color: COLORS.slate, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                      Status
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 600, color: COLORS.slate, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                      Expires
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 600, color: COLORS.slate, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em' }} align="right">
-                      Actions
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {codes.map((code) => {
-                    const status = getCodeStatus(code);
-                    const isActive = status === 'Active';
-                    return (
-                      <TableRow
-                        key={code.id}
-                        sx={{
-                          bgcolor: '#ffffff',
-                          borderBottom: '1px solid #e2e8f0',
-                          '&:last-child': { borderBottom: 'none' },
-                          '&:hover': { bgcolor: '#fafafa' },
-                        }}
-                      >
-                        {/* Code cell */}
-                        <TableCell>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <Typography
-                              variant="body2"
-                              sx={{
-                                fontFamily: 'monospace',
-                                fontWeight: 600,
-                                bgcolor: alpha(COLORS.dark0, 0.04),
-                                px: 1,
-                                py: 0.5,
-                                borderRadius: 1,
-                                fontSize: '0.8125rem',
-                              }}
-                            >
-                              {code.code}
-                            </Typography>
-                            <IconButton
-                              size="small"
-                              onClick={() => handleCopyCode(code.code)}
-                              sx={{
-                                color: COLORS.muted,
-                                '&:hover': { color: COLORS.dark0, bgcolor: alpha(COLORS.dark0, 0.06) },
-                              }}
-                            >
-                              <ContentCopy sx={{ fontSize: 15 }} />
-                            </IconButton>
-                          </Box>
-                        </TableCell>
-
-                        {/* Workspace */}
-                        <TableCell>
-                          <Typography variant="body2" sx={{ color: COLORS.dark1, fontSize: '0.8125rem' }}>
-                            {getWorkspaceName(code.workspace_id)}
+          <TableContainer
+            component={Paper}
+            elevation={0}
+            sx={{
+              borderRadius: 3,
+              border: `1px solid ${COLORS.border}`,
+              bgcolor: '#ffffff',
+              overflowX: 'auto',
+            }}
+          >
+            <Table sx={{ minWidth: 500 }}>
+              <TableHead>
+                <TableRow sx={{ bgcolor: '#f8fafc', borderBottom: '2px solid #e2e8f0' }}>
+                  <TableCell sx={{ fontWeight: 600, color: COLORS.slate, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                    Code
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: COLORS.slate, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em', display: { xs: 'none', sm: 'table-cell' } }}>
+                    Workspace
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: COLORS.slate, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                    Usage
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: COLORS.slate, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                    Status
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: COLORS.slate, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em', display: { xs: 'none', md: 'table-cell' } }}>
+                    Expires
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: COLORS.slate, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em' }} align="right">
+                    Actions
+                  </TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {codes.map((code) => {
+                  const status = getCodeStatus(code);
+                  const isActive = status === 'Active';
+                  return (
+                    <TableRow
+                      key={code.id}
+                      sx={{
+                        bgcolor: '#ffffff',
+                        borderBottom: '1px solid #e2e8f0',
+                        '&:last-child': { borderBottom: 'none' },
+                        '&:hover': { bgcolor: '#fafafa' },
+                      }}
+                    >
+                      {/* Code cell */}
+                      <TableCell>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              fontFamily: 'monospace',
+                              fontWeight: 600,
+                              bgcolor: alpha(COLORS.dark0, 0.04),
+                              px: 1,
+                              py: 0.5,
+                              borderRadius: 1,
+                              fontSize: '0.8125rem',
+                            }}
+                          >
+                            {code.code}
                           </Typography>
-                        </TableCell>
+                          <IconButton
+                            size="small"
+                            onClick={() => handleCopyCode(code.code)}
+                            sx={{
+                              color: COLORS.muted,
+                              '&:hover': { color: '#1976D2', bgcolor: alpha('#1976D2', 0.06) },
+                            }}
+                          >
+                            <ContentCopy sx={{ fontSize: 15 }} />
+                          </IconButton>
+                        </Box>
+                      </TableCell>
 
-                        {/* Usage */}
-                        <TableCell>
-                          <Typography variant="body2" sx={{ color: COLORS.slate, fontSize: '0.8125rem' }}>
-                            {code.current_uses} / {code.max_uses}
+                      {/* Workspace */}
+                      <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>
+                        <Typography variant="body2" sx={{ color: COLORS.dark1, fontSize: '0.8125rem' }}>
+                          {getWorkspaceName(code.workspace_id)}
+                        </Typography>
+                      </TableCell>
+
+                      {/* Usage */}
+                      <TableCell>
+                        <Typography variant="body2" sx={{ color: COLORS.slate, fontSize: '0.8125rem' }}>
+                          {code.current_uses} / {code.max_uses}
+                        </Typography>
+                      </TableCell>
+
+                      {/* Status — dot + text */}
+                      <TableCell>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                          <Box
+                            sx={{
+                              width: 6,
+                              height: 6,
+                              borderRadius: '50%',
+                              bgcolor: isActive ? COLORS.emerald : COLORS.muted,
+                            }}
+                          />
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              color: isActive ? COLORS.dark0 : COLORS.muted,
+                              fontSize: '0.8125rem',
+                            }}
+                          >
+                            {status}
                           </Typography>
-                        </TableCell>
+                        </Box>
+                      </TableCell>
 
-                        {/* Status â€” dot + text */}
-                        <TableCell>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-                            <Box
-                              sx={{
-                                width: 6,
-                                height: 6,
-                                borderRadius: '50%',
-                                bgcolor: isActive ? COLORS.emerald : COLORS.muted,
-                              }}
-                            />
-                            <Typography
-                              variant="body2"
-                              sx={{
-                                color: isActive ? COLORS.dark0 : COLORS.muted,
-                                fontSize: '0.8125rem',
-                              }}
-                            >
-                              {status}
-                            </Typography>
-                          </Box>
-                        </TableCell>
+                      {/* Expires */}
+                      <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
+                        <Typography variant="body2" sx={{ color: COLORS.slate, fontSize: '0.8125rem' }}>
+                          {code.expires_at ? new Date(code.expires_at).toLocaleDateString() : 'Never'}
+                        </Typography>
+                      </TableCell>
 
-                        {/* Expires */}
-                        <TableCell>
-                          <Typography variant="body2" sx={{ color: COLORS.slate, fontSize: '0.8125rem' }}>
-                            {code.expires_at ? new Date(code.expires_at).toLocaleDateString() : 'Never'}
-                          </Typography>
-                        </TableCell>
-
-                        {/* Actions */}
-                        <TableCell align="right">
-                          {code.is_deleted ? (
-                            <IconButton
-                              size="small"
-                              onClick={() => handleRestoreCode(code)}
-                              sx={{
-                                color: COLORS.muted,
-                                '&:hover': { color: COLORS.emerald, bgcolor: alpha(COLORS.emerald, 0.08) },
-                              }}
-                            >
-                              <Restore sx={{ fontSize: 18 }} />
-                            </IconButton>
-                          ) : (
-                            <IconButton
-                              size="small"
-                              onClick={() => handleDeleteClick(code)}
-                              sx={{
-                                color: COLORS.muted,
-                                '&:hover': { color: COLORS.rose, bgcolor: alpha(COLORS.rose, 0.08) },
-                              }}
-                            >
-                              <Delete sx={{ fontSize: 18 }} />
-                            </IconButton>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Box>
+                      {/* Actions */}
+                      <TableCell align="right">
+                        {code.is_deleted ? (
+                          <IconButton
+                            size="small"
+                            onClick={() => handleRestoreCode(code)}
+                            sx={{
+                              color: COLORS.muted,
+                              '&:hover': { color: COLORS.emerald, bgcolor: alpha(COLORS.emerald, 0.08) },
+                            }}
+                          >
+                            <Restore sx={{ fontSize: 18 }} />
+                          </IconButton>
+                        ) : (
+                          <IconButton
+                            size="small"
+                            onClick={() => handleDeleteClick(code)}
+                            sx={{
+                              color: COLORS.muted,
+                              '&:hover': { color: COLORS.rose, bgcolor: alpha(COLORS.rose, 0.08) },
+                            }}
+                          >
+                            <Delete sx={{ fontSize: 18 }} />
+                          </IconButton>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </TableContainer>
         )}
       </Box>
 
@@ -598,7 +599,7 @@ const RegistrationCodes: React.FC = () => {
         {/* Gradient header */}
         <Box
           sx={{
-            background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 60%, #312e81 100%)',
+            background: 'linear-gradient(135deg, #0d1b2e 0%, #0f2744 60%, #1565C0 100%)',
             px: 3,
             pt: 3,
             pb: 3,
@@ -612,7 +613,7 @@ const RegistrationCodes: React.FC = () => {
               width: 180,
               height: 180,
               borderRadius: '50%',
-              background: `radial-gradient(circle, ${alpha(COLORS.indigo, 0.25)} 0%, transparent 70%)`,
+              background: 'radial-gradient(circle, rgba(25,118,210,0.25) 0%, transparent 70%)',
               pointerEvents: 'none',
             },
           }}
@@ -622,7 +623,7 @@ const RegistrationCodes: React.FC = () => {
               <Typography variant="h6" sx={{ color: '#ffffff', fontWeight: 700 }}>
                 Generate Registration Code
               </Typography>
-              <Typography variant="body2" sx={{ color: 'rgba(199,210,254,0.7)', mt: 0.5 }}>
+              <Typography variant="body2" sx={{ color: 'rgba(144,202,249,0.7)', mt: 0.5 }}>
                 Configure and create a new registration code
               </Typography>
             </Box>
@@ -685,9 +686,9 @@ const RegistrationCodes: React.FC = () => {
             disabled={!createForm.workspaceId}
             sx={{
               textTransform: 'none',
-              bgcolor: COLORS.dark0,
+              bgcolor: '#1976D2',
               borderRadius: 1.5,
-              '&:hover': { bgcolor: COLORS.dark1 },
+              '&:hover': { bgcolor: '#1565C0' },
             }}
           >
             Generate Code

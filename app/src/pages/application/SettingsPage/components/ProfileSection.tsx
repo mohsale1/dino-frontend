@@ -1,6 +1,6 @@
 /**
  * ProfileSection Component
- * 
+ *
  * Clean, professional profile settings
  */
 
@@ -15,7 +15,6 @@ import {
   IconButton,
   CircularProgress,
   Paper,
-  Divider,
 } from '@mui/material';
 import {
   PhotoCamera,
@@ -53,7 +52,7 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({
 
   const handleSave = async () => {
     if (!onSave) return;
-    
+
     try {
       setSaving(true);
       await onSave(formData);
@@ -74,24 +73,38 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({
     setHasChanges(false);
   };
 
+  const textFieldSx = {
+    '& .MuiOutlinedInput-root': {
+      '&:hover fieldset': {
+        borderColor: '#94a3b8',
+      },
+      '&.Mui-focused fieldset': {
+        borderColor: '#1976d2',
+      },
+    },
+    '& .MuiInputLabel-root.Mui-focused': {
+      color: '#1976d2',
+    },
+  };
+
   return (
     <Paper
       elevation={0}
       sx={{
         backgroundColor: '#ffffff',
-        border: '1px solid #e5e7eb',
+        border: '1px solid #e2e8f0',
         borderRadius: 2,
         overflow: 'hidden',
       }}
     >
       {/* Header */}
-      <Box sx={{ p: 3, borderBottom: '1px solid #e5e7eb' }}>
+      <Box sx={{ p: 3, borderBottom: '1px solid #e2e8f0' }}>
         <Typography
           variant="h6"
           sx={{
             fontWeight: 700,
             fontSize: '1.125rem',
-            color: '#1a1a1a',
+            color: '#0f172a',
             mb: 0.5,
           }}
         >
@@ -100,7 +113,7 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({
         <Typography
           variant="body2"
           sx={{
-            color: '#6b7280',
+            color: '#64748b',
             fontSize: '0.875rem',
           }}
         >
@@ -117,7 +130,7 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({
             gap: 3,
             mb: 4,
             pb: 3,
-            borderBottom: '1px solid #f3f4f6',
+            borderBottom: '1px solid #f1f5f9',
           }}
         >
           <Box sx={{ position: 'relative' }}>
@@ -126,11 +139,11 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({
               sx={{
                 width: 80,
                 height: 80,
-                backgroundColor: '#1a1a1a',
+                backgroundColor: '#1976d2',
                 color: '#ffffff',
                 fontSize: '2rem',
                 fontWeight: 600,
-                border: '3px solid #f3f4f6',
+                border: '3px solid #e2e8f0',
               }}
             >
               {userData?.name?.charAt(0).toUpperCase() || <Person sx={{ fontSize: 40 }} />}
@@ -141,12 +154,12 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({
                 position: 'absolute',
                 bottom: 0,
                 right: 0,
-                backgroundColor: '#1a1a1a',
+                backgroundColor: '#1976d2',
                 color: '#ffffff',
                 width: 32,
                 height: 32,
-                '&:hover': { 
-                  backgroundColor: '#374151',
+                '&:hover': {
+                  backgroundColor: '#1565c0',
                 },
                 boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
               }}
@@ -161,7 +174,7 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({
               sx={{
                 fontWeight: 600,
                 fontSize: '1.125rem',
-                color: '#1a1a1a',
+                color: '#0f172a',
                 mb: 0.5,
               }}
             >
@@ -170,7 +183,7 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({
             <Typography
               variant="body2"
               sx={{
-                color: '#6b7280',
+                color: '#64748b',
                 fontSize: '0.875rem',
                 mb: 1,
               }}
@@ -184,14 +197,14 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({
                   px: 2,
                   py: 0.5,
                   borderRadius: 1,
-                  backgroundColor: '#f3f4f6',
-                  border: '1px solid #e5e7eb',
+                  backgroundColor: 'rgba(25,118,210,0.08)',
+                  border: '1px solid rgba(25,118,210,0.2)',
                 }}
               >
                 <Typography
                   variant="caption"
                   sx={{
-                    color: '#374151',
+                    color: '#1976d2',
                     fontSize: '0.75rem',
                     fontWeight: 600,
                     textTransform: 'uppercase',
@@ -213,19 +226,7 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({
               label="Full Name"
               value={formData.name}
               onChange={(e) => handleChange('name', e.target.value)}
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  '&:hover fieldset': {
-                    borderColor: '#9ca3af',
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: '#1a1a1a',
-                  },
-                },
-                '& .MuiInputLabel-root.Mui-focused': {
-                  color: '#1a1a1a',
-                },
-              }}
+              sx={textFieldSx}
             />
           </Grid>
 
@@ -236,19 +237,7 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({
               type="email"
               value={formData.email}
               onChange={(e) => handleChange('email', e.target.value)}
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  '&:hover fieldset': {
-                    borderColor: '#9ca3af',
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: '#1a1a1a',
-                  },
-                },
-                '& .MuiInputLabel-root.Mui-focused': {
-                  color: '#1a1a1a',
-                },
-              }}
+              sx={textFieldSx}
             />
           </Grid>
 
@@ -259,19 +248,7 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({
               value={formData.phone}
               onChange={(e) => handleChange('phone', e.target.value)}
               placeholder="Optional"
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  '&:hover fieldset': {
-                    borderColor: '#9ca3af',
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: '#1a1a1a',
-                  },
-                },
-                '& .MuiInputLabel-root.Mui-focused': {
-                  color: '#1a1a1a',
-                },
-              }}
+              sx={textFieldSx}
             />
           </Grid>
         </Grid>
@@ -282,7 +259,7 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({
             sx={{
               mt: 4,
               pt: 3,
-              borderTop: '1px solid #f3f4f6',
+              borderTop: '1px solid #f1f5f9',
               display: 'flex',
               justifyContent: 'flex-end',
               gap: 2,
@@ -296,11 +273,11 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({
                 textTransform: 'none',
                 borderRadius: 1.5,
                 px: 3,
-                borderColor: '#e5e7eb',
-                color: '#374151',
+                borderColor: '#e2e8f0',
+                color: '#475569',
                 '&:hover': {
-                  borderColor: '#9ca3af',
-                  backgroundColor: '#f9fafb',
+                  borderColor: '#cbd5e1',
+                  backgroundColor: '#f8fafc',
                 },
               }}
             >
@@ -316,9 +293,10 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({
                 textTransform: 'none',
                 borderRadius: 1.5,
                 px: 3,
-                backgroundColor: '#1a1a1a',
+                backgroundColor: '#1976d2',
+                boxShadow: '0 4px 14px rgba(25,118,210,0.3)',
                 '&:hover': {
-                  backgroundColor: '#374151',
+                  backgroundColor: '#1565c0',
                 },
               }}
             >

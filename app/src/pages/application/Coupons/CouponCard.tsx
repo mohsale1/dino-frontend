@@ -1,6 +1,6 @@
 /**
  * CouponCard Component - Clean Professional Design
- * 
+ *
  * Display individual coupon information
  */
 
@@ -61,11 +61,23 @@ const CouponCard: React.FC<CouponCardProps> = ({
   const getTypeColor = () => {
     switch (coupon.discountType) {
       case 'percentage':
-        return { bg: '#dbeafe', color: '#1e40af', border: '#bfdbfe' };
+        return {
+          bg: 'rgba(25,118,210,0.08)',
+          color: '#1976d2',
+          border: 'rgba(25,118,210,0.2)',
+        };
       case 'fixed':
-        return { bg: '#dcfce7', color: '#166534', border: '#bbf7d0' };
+        return {
+          bg: 'rgba(16,185,129,0.08)',
+          color: '#059669',
+          border: 'rgba(16,185,129,0.2)',
+        };
       default:
-        return { bg: '#f3f4f6', color: '#374151', border: '#e5e7eb' };
+        return {
+          bg: 'rgba(25,118,210,0.08)',
+          color: '#1976d2',
+          border: 'rgba(25,118,210,0.2)',
+        };
     }
   };
 
@@ -81,11 +93,11 @@ const CouponCard: React.FC<CouponCardProps> = ({
       sx={{
         p: 3,
         backgroundColor: '#ffffff',
-        border: '1px solid #e5e7eb',
+        border: '1px solid #e2e8f0',
         borderRadius: 2,
         transition: 'all 0.2s',
         '&:hover': {
-          boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
         },
       }}
     >
@@ -113,7 +125,7 @@ const CouponCard: React.FC<CouponCardProps> = ({
           {/* Info */}
           <Box sx={{ flex: 1 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
-              <Typography variant="h6" sx={{ fontWeight: 700, color: '#1a1a1a', fontSize: '1.125rem' }}>
+              <Typography variant="h6" sx={{ fontWeight: 700, color: '#0f172a', fontSize: '1.125rem' }}>
                 {coupon.name}
               </Typography>
               <Chip
@@ -133,15 +145,21 @@ const CouponCard: React.FC<CouponCardProps> = ({
                 size="small"
                 onClick={() => onToggleStatus(coupon.id, coupon.isAvailable)}
                 sx={{
-                  backgroundColor: coupon.isAvailable ? '#dcfce7' : '#fee2e2',
-                  color: coupon.isAvailable ? '#166534' : '#991b1b',
-                  border: coupon.isAvailable ? '1px solid #bbf7d0' : '1px solid #fecaca',
+                  backgroundColor: coupon.isAvailable
+                    ? 'rgba(16,185,129,0.08)'
+                    : 'rgba(239,68,68,0.08)',
+                  color: coupon.isAvailable ? '#059669' : '#dc2626',
+                  border: coupon.isAvailable
+                    ? '1px solid rgba(16,185,129,0.2)'
+                    : '1px solid rgba(239,68,68,0.2)',
                   fontWeight: 600,
                   fontSize: '0.75rem',
                   height: 24,
                   cursor: 'pointer',
                   '&:hover': {
-                    backgroundColor: coupon.isAvailable ? '#bbf7d0' : '#fecaca',
+                    backgroundColor: coupon.isAvailable
+                      ? 'rgba(16,185,129,0.15)'
+                      : 'rgba(239,68,68,0.15)',
                   },
                 }}
               />
@@ -153,13 +171,13 @@ const CouponCard: React.FC<CouponCardProps> = ({
                 sx={{
                   px: 2,
                   py: 0.75,
-                  backgroundColor: '#f3f4f6',
-                  border: '1px solid #e5e7eb',
+                  bgcolor: '#f8fafc',
+                  border: '1px solid #e2e8f0',
                   borderRadius: 1,
                   fontFamily: 'monospace',
                   fontSize: '0.875rem',
                   fontWeight: 600,
-                  color: '#1a1a1a',
+                  color: '#0f172a',
                 }}
               >
                 {coupon.code}
@@ -169,10 +187,10 @@ const CouponCard: React.FC<CouponCardProps> = ({
                   size="small"
                   onClick={handleCopyCode}
                   sx={{
-                    color: '#6b7280',
+                    color: '#94a3b8',
                     '&:hover': {
-                      backgroundColor: '#f3f4f6',
-                      color: '#1a1a1a',
+                      bgcolor: 'rgba(25,118,210,0.08)',
+                      color: '#1976d2',
                     },
                   }}
                 >
@@ -183,7 +201,7 @@ const CouponCard: React.FC<CouponCardProps> = ({
 
             {/* Description */}
             {coupon.description && (
-              <Typography variant="body2" sx={{ color: '#6b7280', fontSize: '0.875rem', mb: 1 }}>
+              <Typography variant="body2" sx={{ color: '#64748b', fontSize: '0.875rem', mb: 1 }}>
                 {coupon.description}
               </Typography>
             )}
@@ -191,19 +209,19 @@ const CouponCard: React.FC<CouponCardProps> = ({
             {/* Usage Stats */}
             <Box sx={{ display: 'flex', gap: 3, mt: 2 }}>
               <Box>
-                <Typography variant="caption" sx={{ color: '#9ca3af', fontSize: '0.75rem', display: 'block' }}>
+                <Typography variant="caption" sx={{ color: '#94a3b8', fontSize: '0.75rem', display: 'block' }}>
                   Used
                 </Typography>
-                <Typography variant="body2" sx={{ color: '#1a1a1a', fontWeight: 600, fontSize: '0.875rem' }}>
-                  {coupon.usageCount} {coupon.usageLimit ? `/ ${coupon.usageLimit}` : ''}
+                <Typography variant="body2" sx={{ color: '#0f172a', fontWeight: 600, fontSize: '0.875rem' }}>
+                  {coupon.usageCount}{coupon.usageLimit ? ` / ${coupon.usageLimit}` : ''}
                 </Typography>
               </Box>
               {coupon.validUntil && (
                 <Box>
-                  <Typography variant="caption" sx={{ color: '#9ca3af', fontSize: '0.75rem', display: 'block' }}>
+                  <Typography variant="caption" sx={{ color: '#94a3b8', fontSize: '0.75rem', display: 'block' }}>
                     Expires
                   </Typography>
-                  <Typography variant="body2" sx={{ color: '#1a1a1a', fontWeight: 600, fontSize: '0.875rem' }}>
+                  <Typography variant="body2" sx={{ color: '#0f172a', fontWeight: 600, fontSize: '0.875rem' }}>
                     {new Date(coupon.validUntil).toLocaleDateString()}
                   </Typography>
                 </Box>
@@ -219,10 +237,10 @@ const CouponCard: React.FC<CouponCardProps> = ({
               size="small"
               onClick={() => onEdit(coupon)}
               sx={{
-                color: '#6b7280',
+                color: '#94a3b8',
                 '&:hover': {
-                  backgroundColor: '#f3f4f6',
-                  color: '#1a1a1a',
+                  bgcolor: 'rgba(25,118,210,0.08)',
+                  color: '#1976d2',
                 },
               }}
             >
@@ -234,10 +252,10 @@ const CouponCard: React.FC<CouponCardProps> = ({
               size="small"
               onClick={() => onDelete(coupon.id)}
               sx={{
-                color: '#6b7280',
+                color: '#94a3b8',
                 '&:hover': {
-                  backgroundColor: '#fee2e2',
-                  color: '#991b1b',
+                  bgcolor: 'rgba(239,68,68,0.08)',
+                  color: '#dc2626',
                 },
               }}
             >

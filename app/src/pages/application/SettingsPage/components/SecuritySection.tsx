@@ -1,6 +1,6 @@
 /**
  * SecuritySection Component
- * 
+ *
  * Clean, professional security settings
  */
 
@@ -74,7 +74,7 @@ const SecuritySection: React.FC<SecuritySectionProps> = ({
 
   const handleSave = async () => {
     if (!onSave) return;
-    
+
     try {
       setSaving(true);
       await onSave(formData);
@@ -123,6 +123,20 @@ const SecuritySection: React.FC<SecuritySectionProps> = ({
     }
   };
 
+  const textFieldSx = {
+    '& .MuiOutlinedInput-root': {
+      '&:hover fieldset': {
+        borderColor: '#94a3b8',
+      },
+      '&.Mui-focused fieldset': {
+        borderColor: '#1976d2',
+      },
+    },
+    '& .MuiInputLabel-root.Mui-focused': {
+      color: '#1976d2',
+    },
+  };
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
       {/* Change Password */}
@@ -130,18 +144,18 @@ const SecuritySection: React.FC<SecuritySectionProps> = ({
         elevation={0}
         sx={{
           backgroundColor: '#ffffff',
-          border: '1px solid #e5e7eb',
+          border: '1px solid #e2e8f0',
           borderRadius: 2,
           overflow: 'hidden',
         }}
       >
-        <Box sx={{ p: 3, borderBottom: '1px solid #e5e7eb' }}>
+        <Box sx={{ p: 3, borderBottom: '1px solid #f1f5f9' }}>
           <Typography
             variant="h6"
             sx={{
               fontWeight: 700,
               fontSize: '1.125rem',
-              color: '#1a1a1a',
+              color: '#0f172a',
               mb: 0.5,
             }}
           >
@@ -150,7 +164,7 @@ const SecuritySection: React.FC<SecuritySectionProps> = ({
           <Typography
             variant="body2"
             sx={{
-              color: '#6b7280',
+              color: '#64748b',
               fontSize: '0.875rem',
             }}
           >
@@ -160,9 +174,9 @@ const SecuritySection: React.FC<SecuritySectionProps> = ({
 
         <Box sx={{ p: 3 }}>
           {passwordError && (
-            <Alert 
-              severity="error" 
-              sx={{ 
+            <Alert
+              severity="error"
+              sx={{
                 mb: 3,
                 borderRadius: 1.5,
                 border: '1px solid #fecaca',
@@ -191,19 +205,7 @@ const SecuritySection: React.FC<SecuritySectionProps> = ({
                   </InputAdornment>
                 ),
               }}
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  '&:hover fieldset': {
-                    borderColor: '#9ca3af',
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: '#1a1a1a',
-                  },
-                },
-                '& .MuiInputLabel-root.Mui-focused': {
-                  color: '#1a1a1a',
-                },
-              }}
+              sx={textFieldSx}
             />
 
             <TextField
@@ -225,19 +227,7 @@ const SecuritySection: React.FC<SecuritySectionProps> = ({
                   </InputAdornment>
                 ),
               }}
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  '&:hover fieldset': {
-                    borderColor: '#9ca3af',
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: '#1a1a1a',
-                  },
-                },
-                '& .MuiInputLabel-root.Mui-focused': {
-                  color: '#1a1a1a',
-                },
-              }}
+              sx={textFieldSx}
             />
 
             <TextField
@@ -258,19 +248,7 @@ const SecuritySection: React.FC<SecuritySectionProps> = ({
                   </InputAdornment>
                 ),
               }}
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  '&:hover fieldset': {
-                    borderColor: '#9ca3af',
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: '#1a1a1a',
-                  },
-                },
-                '& .MuiInputLabel-root.Mui-focused': {
-                  color: '#1a1a1a',
-                },
-              }}
+              sx={textFieldSx}
             />
 
             <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
@@ -284,9 +262,11 @@ const SecuritySection: React.FC<SecuritySectionProps> = ({
                   textTransform: 'none',
                   borderRadius: 1.5,
                   px: 3,
-                  backgroundColor: '#1a1a1a',
+                  backgroundColor: '#1976d2',
+                  boxShadow: '0 4px 14px rgba(25,118,210,0.3)',
                   '&:hover': {
-                    backgroundColor: '#374151',
+                    backgroundColor: '#1565c0',
+                    boxShadow: '0 4px 14px rgba(25,118,210,0.3)',
                   },
                 }}
               >
@@ -302,18 +282,18 @@ const SecuritySection: React.FC<SecuritySectionProps> = ({
         elevation={0}
         sx={{
           backgroundColor: '#ffffff',
-          border: '1px solid #e5e7eb',
+          border: '1px solid #e2e8f0',
           borderRadius: 2,
           overflow: 'hidden',
         }}
       >
-        <Box sx={{ p: 3, borderBottom: '1px solid #e5e7eb' }}>
+        <Box sx={{ p: 3, borderBottom: '1px solid #f1f5f9' }}>
           <Typography
             variant="h6"
             sx={{
               fontWeight: 700,
               fontSize: '1.125rem',
-              color: '#1a1a1a',
+              color: '#0f172a',
               mb: 0.5,
             }}
           >
@@ -322,7 +302,7 @@ const SecuritySection: React.FC<SecuritySectionProps> = ({
           <Typography
             variant="body2"
             sx={{
-              color: '#6b7280',
+              color: '#64748b',
               fontSize: '0.875rem',
             }}
           >
@@ -345,11 +325,11 @@ const SecuritySection: React.FC<SecuritySectionProps> = ({
                   width: 40,
                   height: 40,
                   borderRadius: 1.5,
-                  backgroundColor: '#f3f4f6',
+                  backgroundColor: 'rgba(25,118,210,0.08)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  color: '#374151',
+                  color: '#1976d2',
                   flexShrink: 0,
                 }}
               >
@@ -361,7 +341,7 @@ const SecuritySection: React.FC<SecuritySectionProps> = ({
                   sx={{
                     fontWeight: 600,
                     fontSize: '0.9375rem',
-                    color: '#1a1a1a',
+                    color: '#0f172a',
                     mb: 0.25,
                   }}
                 >
@@ -370,7 +350,7 @@ const SecuritySection: React.FC<SecuritySectionProps> = ({
                 <Typography
                   variant="body2"
                   sx={{
-                    color: '#6b7280',
+                    color: '#64748b',
                     fontSize: '0.8125rem',
                   }}
                 >
@@ -379,20 +359,13 @@ const SecuritySection: React.FC<SecuritySectionProps> = ({
               </Box>
             </Box>
             <Switch
+              color="primary"
               checked={formData.twoFactorEnabled}
               onChange={(e) => handleChange('twoFactorEnabled', e.target.checked)}
-              sx={{
-                '& .MuiSwitch-switchBase.Mui-checked': {
-                  color: '#1a1a1a',
-                },
-                '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
-                  backgroundColor: '#1a1a1a',
-                },
-              }}
             />
           </Box>
 
-          <Divider sx={{ my: 2 }} />
+          <Divider sx={{ my: 2, borderColor: '#f1f5f9' }} />
 
           <Box
             sx={{
@@ -408,11 +381,11 @@ const SecuritySection: React.FC<SecuritySectionProps> = ({
                   width: 40,
                   height: 40,
                   borderRadius: 1.5,
-                  backgroundColor: '#f3f4f6',
+                  backgroundColor: 'rgba(25,118,210,0.08)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  color: '#374151',
+                  color: '#1976d2',
                   flexShrink: 0,
                 }}
               >
@@ -424,7 +397,7 @@ const SecuritySection: React.FC<SecuritySectionProps> = ({
                   sx={{
                     fontWeight: 600,
                     fontSize: '0.9375rem',
-                    color: '#1a1a1a',
+                    color: '#0f172a',
                     mb: 0.25,
                   }}
                 >
@@ -433,7 +406,7 @@ const SecuritySection: React.FC<SecuritySectionProps> = ({
                 <Typography
                   variant="body2"
                   sx={{
-                    color: '#6b7280',
+                    color: '#64748b',
                     fontSize: '0.8125rem',
                   }}
                 >
@@ -442,16 +415,9 @@ const SecuritySection: React.FC<SecuritySectionProps> = ({
               </Box>
             </Box>
             <Switch
+              color="primary"
               checked={formData.loginNotifications}
               onChange={(e) => handleChange('loginNotifications', e.target.checked)}
-              sx={{
-                '& .MuiSwitch-switchBase.Mui-checked': {
-                  color: '#1a1a1a',
-                },
-                '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
-                  backgroundColor: '#1a1a1a',
-                },
-              }}
             />
           </Box>
 
@@ -460,7 +426,7 @@ const SecuritySection: React.FC<SecuritySectionProps> = ({
               sx={{
                 mt: 3,
                 pt: 3,
-                borderTop: '1px solid #f3f4f6',
+                borderTop: '1px solid #f1f5f9',
                 display: 'flex',
                 justifyContent: 'flex-end',
                 gap: 2,
@@ -481,11 +447,11 @@ const SecuritySection: React.FC<SecuritySectionProps> = ({
                   textTransform: 'none',
                   borderRadius: 1.5,
                   px: 3,
-                  borderColor: '#e5e7eb',
-                  color: '#374151',
+                  borderColor: '#e2e8f0',
+                  color: '#475569',
                   '&:hover': {
-                    borderColor: '#9ca3af',
-                    backgroundColor: '#f9fafb',
+                    borderColor: '#cbd5e1',
+                    backgroundColor: 'transparent',
                   },
                 }}
               >
@@ -501,9 +467,11 @@ const SecuritySection: React.FC<SecuritySectionProps> = ({
                   textTransform: 'none',
                   borderRadius: 1.5,
                   px: 3,
-                  backgroundColor: '#1a1a1a',
+                  backgroundColor: '#1976d2',
+                  boxShadow: '0 4px 14px rgba(25,118,210,0.3)',
                   '&:hover': {
-                    backgroundColor: '#374151',
+                    backgroundColor: '#1565c0',
+                    boxShadow: '0 4px 14px rgba(25,118,210,0.3)',
                   },
                 }}
               >

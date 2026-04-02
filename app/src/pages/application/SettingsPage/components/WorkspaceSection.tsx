@@ -1,6 +1,6 @@
 /**
  * WorkspaceSection Component
- * 
+ *
  * Clean, professional workspace settings
  */
 
@@ -39,6 +39,20 @@ export interface WorkspaceSectionProps {
   onSave?: (data: any) => Promise<void>;
 }
 
+const textFieldSx = {
+  '& .MuiOutlinedInput-root': {
+    '&:hover fieldset': {
+      borderColor: '#94a3b8',
+    },
+    '&.Mui-focused fieldset': {
+      borderColor: '#1976d2',
+    },
+  },
+  '& .MuiInputLabel-root.Mui-focused': {
+    color: '#1976d2',
+  },
+};
+
 const WorkspaceSection: React.FC<WorkspaceSectionProps> = ({
   workspaceData,
   onSave,
@@ -64,7 +78,7 @@ const WorkspaceSection: React.FC<WorkspaceSectionProps> = ({
 
   const handleSave = async () => {
     if (!onSave) return;
-    
+
     try {
       setSaving(true);
       await onSave(formData);
@@ -96,18 +110,18 @@ const WorkspaceSection: React.FC<WorkspaceSectionProps> = ({
       elevation={0}
       sx={{
         backgroundColor: '#ffffff',
-        border: '1px solid #e5e7eb',
+        border: '1px solid #e2e8f0',
         borderRadius: 2,
         overflow: 'hidden',
       }}
     >
-      <Box sx={{ p: 3, borderBottom: '1px solid #e5e7eb' }}>
+      <Box sx={{ p: 3, borderBottom: '1px solid #e2e8f0' }}>
         <Typography
           variant="h6"
           sx={{
             fontWeight: 700,
             fontSize: '1.125rem',
-            color: '#1a1a1a',
+            color: '#0f172a',
             mb: 0.5,
           }}
         >
@@ -116,7 +130,7 @@ const WorkspaceSection: React.FC<WorkspaceSectionProps> = ({
         <Typography
           variant="body2"
           sx={{
-            color: '#6b7280',
+            color: '#64748b',
             fontSize: '0.875rem',
           }}
         >
@@ -133,7 +147,7 @@ const WorkspaceSection: React.FC<WorkspaceSectionProps> = ({
             gap: 2,
             mb: 3,
             pb: 3,
-            borderBottom: '1px solid #f3f4f6',
+            borderBottom: '1px solid #f1f5f9',
           }}
         >
           <Box
@@ -141,7 +155,7 @@ const WorkspaceSection: React.FC<WorkspaceSectionProps> = ({
               width: 48,
               height: 48,
               borderRadius: 1.5,
-              backgroundColor: '#1a1a1a',
+              backgroundColor: '#1976d2',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -155,7 +169,7 @@ const WorkspaceSection: React.FC<WorkspaceSectionProps> = ({
               sx={{
                 fontWeight: 600,
                 fontSize: '1.125rem',
-                color: '#1a1a1a',
+                color: '#0f172a',
                 mb: 0.5,
               }}
             >
@@ -169,11 +183,15 @@ const WorkspaceSection: React.FC<WorkspaceSectionProps> = ({
                 height: 24,
                 fontWeight: 600,
                 fontSize: '0.75rem',
-                backgroundColor: formData.isActive ? '#dcfce7' : '#fee2e2',
-                color: formData.isActive ? '#166534' : '#991b1b',
-                border: formData.isActive ? '1px solid #bbf7d0' : '1px solid #fecaca',
+                backgroundColor: formData.isActive
+                  ? 'rgba(25,118,210,0.08)'
+                  : '#fee2e2',
+                color: formData.isActive ? '#1976d2' : '#991b1b',
+                border: formData.isActive
+                  ? '1px solid rgba(25,118,210,0.2)'
+                  : '1px solid #fecaca',
                 '& .MuiChip-icon': {
-                  color: formData.isActive ? '#166534' : '#991b1b',
+                  color: formData.isActive ? '#1976d2' : '#991b1b',
                 },
               }}
             />
@@ -189,19 +207,7 @@ const WorkspaceSection: React.FC<WorkspaceSectionProps> = ({
               value={formData.name}
               onChange={(e) => handleChange('name', e.target.value)}
               required
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  '&:hover fieldset': {
-                    borderColor: '#9ca3af',
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: '#1a1a1a',
-                  },
-                },
-                '& .MuiInputLabel-root.Mui-focused': {
-                  color: '#1a1a1a',
-                },
-              }}
+              sx={textFieldSx}
             />
           </Grid>
 
@@ -213,19 +219,7 @@ const WorkspaceSection: React.FC<WorkspaceSectionProps> = ({
               onChange={(e) => handleChange('description', e.target.value)}
               multiline
               rows={3}
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  '&:hover fieldset': {
-                    borderColor: '#9ca3af',
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: '#1a1a1a',
-                  },
-                },
-                '& .MuiInputLabel-root.Mui-focused': {
-                  color: '#1a1a1a',
-                },
-              }}
+              sx={textFieldSx}
             />
           </Grid>
 
@@ -236,19 +230,7 @@ const WorkspaceSection: React.FC<WorkspaceSectionProps> = ({
               value={formData.address}
               onChange={(e) => handleChange('address', e.target.value)}
               required
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  '&:hover fieldset': {
-                    borderColor: '#9ca3af',
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: '#1a1a1a',
-                  },
-                },
-                '& .MuiInputLabel-root.Mui-focused': {
-                  color: '#1a1a1a',
-                },
-              }}
+              sx={textFieldSx}
             />
           </Grid>
 
@@ -259,19 +241,7 @@ const WorkspaceSection: React.FC<WorkspaceSectionProps> = ({
               value={formData.city}
               onChange={(e) => handleChange('city', e.target.value)}
               required
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  '&:hover fieldset': {
-                    borderColor: '#9ca3af',
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: '#1a1a1a',
-                  },
-                },
-                '& .MuiInputLabel-root.Mui-focused': {
-                  color: '#1a1a1a',
-                },
-              }}
+              sx={textFieldSx}
             />
           </Grid>
 
@@ -282,19 +252,7 @@ const WorkspaceSection: React.FC<WorkspaceSectionProps> = ({
               value={formData.state}
               onChange={(e) => handleChange('state', e.target.value)}
               required
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  '&:hover fieldset': {
-                    borderColor: '#9ca3af',
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: '#1a1a1a',
-                  },
-                },
-                '& .MuiInputLabel-root.Mui-focused': {
-                  color: '#1a1a1a',
-                },
-              }}
+              sx={textFieldSx}
             />
           </Grid>
 
@@ -305,19 +263,7 @@ const WorkspaceSection: React.FC<WorkspaceSectionProps> = ({
               value={formData.postalCode}
               onChange={(e) => handleChange('postalCode', e.target.value)}
               required
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  '&:hover fieldset': {
-                    borderColor: '#9ca3af',
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: '#1a1a1a',
-                  },
-                },
-                '& .MuiInputLabel-root.Mui-focused': {
-                  color: '#1a1a1a',
-                },
-              }}
+              sx={textFieldSx}
             />
           </Grid>
 
@@ -328,19 +274,7 @@ const WorkspaceSection: React.FC<WorkspaceSectionProps> = ({
               value={formData.phone}
               onChange={(e) => handleChange('phone', e.target.value)}
               required
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  '&:hover fieldset': {
-                    borderColor: '#9ca3af',
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: '#1a1a1a',
-                  },
-                },
-                '& .MuiInputLabel-root.Mui-focused': {
-                  color: '#1a1a1a',
-                },
-              }}
+              sx={textFieldSx}
             />
           </Grid>
 
@@ -352,19 +286,7 @@ const WorkspaceSection: React.FC<WorkspaceSectionProps> = ({
               value={formData.email}
               onChange={(e) => handleChange('email', e.target.value)}
               placeholder="Optional"
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  '&:hover fieldset': {
-                    borderColor: '#9ca3af',
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: '#1a1a1a',
-                  },
-                },
-                '& .MuiInputLabel-root.Mui-focused': {
-                  color: '#1a1a1a',
-                },
-              }}
+              sx={textFieldSx}
             />
           </Grid>
 
@@ -374,22 +296,21 @@ const WorkspaceSection: React.FC<WorkspaceSectionProps> = ({
                 <Switch
                   checked={formData.isActive}
                   onChange={(e) => handleChange('isActive', e.target.checked)}
-                  sx={{
-                    '& .MuiSwitch-switchBase.Mui-checked': {
-                      color: '#1a1a1a',
-                    },
-                    '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
-                      backgroundColor: '#1a1a1a',
-                    },
-                  }}
+                  color="primary"
                 />
               }
               label={
                 <Box>
-                  <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.9375rem', color: '#1a1a1a' }}>
+                  <Typography
+                    variant="body2"
+                    sx={{ fontWeight: 600, fontSize: '0.9375rem', color: '#0f172a' }}
+                  >
                     Workspace Active
                   </Typography>
-                  <Typography variant="caption" sx={{ color: '#6b7280', fontSize: '0.8125rem' }}>
+                  <Typography
+                    variant="caption"
+                    sx={{ color: '#64748b', fontSize: '0.8125rem' }}
+                  >
                     Enable or disable workspace operations
                   </Typography>
                 </Box>
@@ -404,7 +325,7 @@ const WorkspaceSection: React.FC<WorkspaceSectionProps> = ({
             sx={{
               mt: 3,
               pt: 3,
-              borderTop: '1px solid #f3f4f6',
+              borderTop: '1px solid #f1f5f9',
               display: 'flex',
               justifyContent: 'flex-end',
               gap: 2,
@@ -418,11 +339,11 @@ const WorkspaceSection: React.FC<WorkspaceSectionProps> = ({
                 textTransform: 'none',
                 borderRadius: 1.5,
                 px: 3,
-                borderColor: '#e5e7eb',
-                color: '#374151',
+                borderColor: '#e2e8f0',
+                color: '#475569',
                 '&:hover': {
-                  borderColor: '#9ca3af',
-                  backgroundColor: '#f9fafb',
+                  borderColor: '#cbd5e1',
+                  backgroundColor: '#f8fafc',
                 },
               }}
             >
@@ -438,9 +359,10 @@ const WorkspaceSection: React.FC<WorkspaceSectionProps> = ({
                 textTransform: 'none',
                 borderRadius: 1.5,
                 px: 3,
-                backgroundColor: '#1a1a1a',
+                backgroundColor: '#1976d2',
+                boxShadow: '0 4px 14px rgba(25,118,210,0.3)',
                 '&:hover': {
-                  backgroundColor: '#374151',
+                  backgroundColor: '#1565c0',
                 },
               }}
             >

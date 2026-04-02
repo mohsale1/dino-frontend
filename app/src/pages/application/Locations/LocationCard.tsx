@@ -1,6 +1,6 @@
 /**
  * LocationCard Component - Clean Professional Design
- * 
+ *
  * Display individual location information
  */
 
@@ -9,7 +9,6 @@ import {
   Box,
   Paper,
   Typography,
-  Chip,
   IconButton,
   Tooltip,
 } from '@mui/material';
@@ -40,33 +39,33 @@ interface LocationCardProps {
 
 const getStatusConfig = (status: LocationStatus) => {
   const configs = {
-    available: { 
-      label: 'Available', 
+    available: {
+      label: 'Available',
       icon: <CheckCircle sx={{ fontSize: 16 }} />,
-      bg: '#dcfce7',
-      color: '#166534',
-      border: '#bbf7d0',
+      bg: 'rgba(16,185,129,0.08)',
+      color: '#059669',
+      border: 'rgba(16,185,129,0.2)',
     },
-    occupied: { 
-      label: 'Occupied', 
+    occupied: {
+      label: 'Occupied',
       icon: <Cancel sx={{ fontSize: 16 }} />,
-      bg: '#fee2e2',
-      color: '#991b1b',
-      border: '#fecaca',
+      bg: 'rgba(239,68,68,0.08)',
+      color: '#dc2626',
+      border: 'rgba(239,68,68,0.2)',
     },
-    reserved: { 
-      label: 'Reserved', 
+    reserved: {
+      label: 'Reserved',
       icon: <Schedule sx={{ fontSize: 16 }} />,
-      bg: '#fef3c7',
-      color: '#92400e',
-      border: '#fde68a',
+      bg: 'rgba(245,158,11,0.08)',
+      color: '#d97706',
+      border: 'rgba(245,158,11,0.2)',
     },
-    maintenance: { 
-      label: 'Maintenance', 
+    maintenance: {
+      label: 'Maintenance',
       icon: <Build sx={{ fontSize: 16 }} />,
-      bg: '#f3f4f6',
-      color: '#374151',
-      border: '#e5e7eb',
+      bg: 'rgba(100,116,139,0.08)',
+      color: '#475569',
+      border: 'rgba(100,116,139,0.2)',
     },
   };
   return configs[status] || configs.available;
@@ -89,7 +88,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
       sx={{
         p: 2.5,
         backgroundColor: '#ffffff',
-        border: '1px solid #e5e7eb',
+        border: '1px solid #e2e8f0',
         borderRadius: 2,
         height: '100%',
         display: 'flex',
@@ -97,7 +96,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
         opacity: location.isActive ? 1 : 0.6,
         transition: 'all 0.2s',
         '&:hover': {
-          boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
         },
       }}
     >
@@ -108,7 +107,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
             variant="h6"
             sx={{
               fontWeight: 700,
-              color: '#1a1a1a',
+              color: '#0f172a',
               fontSize: '1rem',
               mb: 0.5,
               overflow: 'hidden',
@@ -119,7 +118,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
             {location.name || location.identifier}
           </Typography>
           {areaName && (
-            <Typography variant="body2" sx={{ color: '#6b7280', fontSize: '0.8125rem' }}>
+            <Typography variant="body2" sx={{ color: '#64748b', fontSize: '0.8125rem' }}>
               {areaName}
             </Typography>
           )}
@@ -129,9 +128,9 @@ const LocationCard: React.FC<LocationCardProps> = ({
             size="small"
             onClick={() => onToggleStatus(location.id)}
             sx={{
-              color: location.isActive ? '#166534' : '#6b7280',
+              color: location.isActive ? '#059669' : '#94a3b8',
               '&:hover': {
-                backgroundColor: '#f3f4f6',
+                backgroundColor: location.isActive ? 'rgba(16,185,129,0.08)' : '#f8fafc',
               },
             }}
           >
@@ -151,13 +150,13 @@ const LocationCard: React.FC<LocationCardProps> = ({
               gap: 1,
               px: 1.5,
               py: 1,
-              backgroundColor: '#f9fafb',
-              border: '1px solid #e5e7eb',
+              bgcolor: '#f8fafc',
+              border: '1px solid #e2e8f0',
               borderRadius: 1.5,
             }}
           >
-            <People sx={{ fontSize: 16, color: '#6b7280' }} />
-            <Typography variant="body2" sx={{ color: '#1a1a1a', fontWeight: 600, fontSize: '0.8125rem' }}>
+            <People sx={{ fontSize: 16, color: '#64748b' }} />
+            <Typography variant="body2" sx={{ color: '#0f172a', fontWeight: 600, fontSize: '0.8125rem' }}>
               Capacity: {location.capacity}
             </Typography>
           </Box>
@@ -187,7 +186,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
           <Typography
             variant="body2"
             sx={{
-              color: '#6b7280',
+              color: '#64748b',
               fontSize: '0.8125rem',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
@@ -208,7 +207,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
           gap: 1,
           mt: 2,
           pt: 2,
-          borderTop: '1px solid #f3f4f6',
+          borderTop: '1px solid #f1f5f9',
         }}
       >
         <Tooltip title="Generate QR">
@@ -216,10 +215,10 @@ const LocationCard: React.FC<LocationCardProps> = ({
             size="small"
             onClick={() => onGenerateQR(location.id)}
             sx={{
-              color: '#6b7280',
+              color: '#64748b',
               '&:hover': {
-                backgroundColor: '#f3f4f6',
-                color: '#1a1a1a',
+                bgcolor: 'rgba(25,118,210,0.08)',
+                color: '#1976d2',
               },
             }}
           >
@@ -231,10 +230,10 @@ const LocationCard: React.FC<LocationCardProps> = ({
             size="small"
             onClick={() => onPrintQR(location.id)}
             sx={{
-              color: '#6b7280',
+              color: '#64748b',
               '&:hover': {
-                backgroundColor: '#f3f4f6',
-                color: '#1a1a1a',
+                bgcolor: 'rgba(25,118,210,0.08)',
+                color: '#1976d2',
               },
             }}
           >
@@ -247,10 +246,10 @@ const LocationCard: React.FC<LocationCardProps> = ({
             size="small"
             onClick={() => onEdit(location)}
             sx={{
-              color: '#6b7280',
+              color: '#64748b',
               '&:hover': {
-                backgroundColor: '#f3f4f6',
-                color: '#1a1a1a',
+                bgcolor: 'rgba(25,118,210,0.08)',
+                color: '#1976d2',
               },
             }}
           >
@@ -262,10 +261,10 @@ const LocationCard: React.FC<LocationCardProps> = ({
             size="small"
             onClick={() => onDelete(location.id)}
             sx={{
-              color: '#6b7280',
+              color: '#64748b',
               '&:hover': {
-                backgroundColor: '#fee2e2',
-                color: '#991b1b',
+                bgcolor: 'rgba(239,68,68,0.08)',
+                color: '#dc2626',
               },
             }}
           >

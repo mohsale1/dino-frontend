@@ -1,9 +1,3 @@
-/**
- * CouponFormDialog Component - Clean Professional Design
- * 
- * Create and edit coupons
- */
-
 import React, { useState, useEffect } from 'react';
 import {
   Dialog,
@@ -20,21 +14,22 @@ import {
   Typography,
   Divider,
   IconButton,
+  InputAdornment,
 } from '@mui/material';
-import {
-  Close as CloseIcon,
-} from '@mui/icons-material';
+import { Close as CloseIcon } from '@mui/icons-material';
 
 interface CouponFormData {
   code: string;
   name: string;
   description: string;
-  type: 'percentage' | 'fixed' | 'bogo' | 'free_shipping';
-  value: number;
-  usageLimit: number | null;
-  expiresAt: string;
-  isActive: boolean;
-  minPurchaseAmount: number | null;
+  discountType: 'percentage' | 'fixed';
+  discountValue: number;
+  maxDiscountAmount: number | '';
+  minOrderAmount: number | '';
+  usageLimit: number | '';
+  validFrom: string;
+  validUntil: string;
+  isAvailable: boolean;
 }
 
 interface CouponFormDialogProps {
@@ -44,23 +39,41 @@ interface CouponFormDialogProps {
   editingCoupon?: any | null;
 }
 
+const textFieldSx = {
+  '& .MuiOutlinedInput-root': {
+    '&:hover fieldset': {
+      borderColor: '#94a3b8',
+    },
+    '&.Mui-focused fieldset': {
+      borderColor: '#1976d2',
+    },
+  },
+  '& .MuiInputLabel-root.Mui-focused': {
+    color: '#1976d2',
+  },
+};
+
+const defaultFormData: CouponFormData = {
+  code: '',
+  name: '',
+  description: '',
+  discountType: 'percentage',
+  discountValue: 0,
+  maxDiscountAmount: '',
+  minOrderAmount: '',
+  usageLimit: '',
+  validFrom: '',
+  validUntil: '',
+  isAvailable: true,
+};
+
 const CouponFormDialog: React.FC<CouponFormDialogProps> = ({
   open,
   onClose,
   onSave,
   editingCoupon,
 }) => {
-  const [formData, setFormData] = useState<CouponFormData>({
-    code: '',
-    name: '',
-    description: '',
-    type: 'percentage',
-    value: 0,
-    usageLimit: null,
-    expiresAt: '',
-    isActive: true,
-    minPurchaseAmount: null,
-  });
+  const [formData, setFormData] = useState<CouponFormData>(defaultFormData);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -70,25 +83,17 @@ const CouponFormDialog: React.FC<CouponFormDialogProps> = ({
           code: editingCoupon.code || '',
           name: editingCoupon.name || '',
           description: editingCoupon.description || '',
-          type: editingCoupon.type || 'percentage',
-          value: editingCoupon.value || 0,
-          usageLimit: editingCoupon.usageLimit || null,
-          expiresAt: editingCoupon.expiresAt || '',
-          isActive: editingCoupon.isActive !== undefined ? editingCoupon.isActive : true,
-          minPurchaseAmount: editingCoupon.minPurchaseAmount || null,
+          discountType: editingCoupon.discountType || 'percentage',
+          discountValue: editingCoupon.discountValue || 0,
+          maxDiscountAmount: editingCoupon.maxDiscountAmount || '',
+          minOrderAmount: editingCoupon.minOrderAmount || '',
+          usageLimit: editingCoupon.usageLimit || '',
+          validFrom: editingCoupon.validFrom || '',
+          validUntil: editingCoupon.validUntil || '',
+          isAvailable: editingCoupon.isAvailable ?? true,
         });
       } else {
-        setFormData({
-          code: '',
-          name: '',
-          description: '',
-          type: 'percentage',
-          value: 0,
-          usageLimit: null,
-          expiresAt: '',
-          isActive: true,
-          minPurchaseAmount: null,
-        });
+        setFormData(defaultFormData);
       }
     }
   }, [open, editingCoupon]);
@@ -122,35 +127,33 @@ const CouponFormDialog: React.FC<CouponFormDialogProps> = ({
         },
       }}
     >
-      <DialogTitle sx={{ p: 3, pb: 2 }}>
+      <DialogTitle sx={{ p: 3, pb: 2, borderBottom: '1px solid #e2e8f0' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <Box>
-            <Typography variant="h6" sx={{ fontWeight: 700, color: '#1a1a1a', fontSize: '1.25rem' }}>
+            <Typography variant="h6" sx={{ fontWeight: 700, color: '#0f172a', fontSize: '1.125rem' }}>
               {editingCoupon ? 'Edit Coupon' : 'Create New Coupon'}
             </Typography>
-            <Typography variant="body2" sx={{ color: '#6b7280', fontSize: '0.875rem', mt: 0.5 }}>
+            <Typography variant="body2" sx={{ color: '#64748b', fontSize: '0.875rem', mt: 0.5 }}>
               {editingCoupon ? 'Update coupon information' : 'Create a new discount code or promotion'}
             </Typography>
           </Box>
           <IconButton
             onClick={onClose}
+            size="small"
             sx={{
-              color: '#6b7280',
-              '&:hover': {
-                backgroundColor: '#f3f4f6',
-              },
+              color: '#64748b',
+              '&:hover': { backgroundColor: '#f1f5f9' },
             }}
           >
-            <CloseIcon />
+            <CloseIcon fontSize="small" />
           </IconButton>
         </Box>
       </DialogTitle>
 
-      <Divider />
-
       <DialogContent sx={{ p: 3 }}>
-        <Grid container spacing={3}>
-          {/* Coupon Code */}
+        <Grid container spacing={2.5}>
+
+          {/* Coupon Code + Generate */}
           <Grid item xs={12} sm={8}>
             <TextField
               fullWidth
@@ -159,19 +162,7 @@ const CouponFormDialog: React.FC<CouponFormDialogProps> = ({
               onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
               required
               placeholder="e.g., SAVE20"
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  '&:hover fieldset': {
-                    borderColor: '#9ca3af',
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: '#1a1a1a',
-                  },
-                },
-                '& .MuiInputLabel-root.Mui-focused': {
-                  color: '#1a1a1a',
-                },
-              }}
+              sx={textFieldSx}
             />
           </Grid>
           <Grid item xs={12} sm={4}>
@@ -180,15 +171,15 @@ const CouponFormDialog: React.FC<CouponFormDialogProps> = ({
               variant="outlined"
               onClick={generateCode}
               sx={{
-                height: '56px',
+                height: 56,
                 textTransform: 'none',
                 fontWeight: 600,
                 borderRadius: 1.5,
-                borderColor: '#e5e7eb',
-                color: '#374151',
+                borderColor: '#e2e8f0',
+                color: '#475569',
                 '&:hover': {
-                  borderColor: '#9ca3af',
-                  backgroundColor: '#f9fafb',
+                  borderColor: '#94a3b8',
+                  backgroundColor: 'transparent',
                 },
               }}
             >
@@ -204,20 +195,8 @@ const CouponFormDialog: React.FC<CouponFormDialogProps> = ({
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               required
-              placeholder="e.g., Summer Sale 2024"
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  '&:hover fieldset': {
-                    borderColor: '#9ca3af',
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: '#1a1a1a',
-                  },
-                },
-                '& .MuiInputLabel-root.Mui-focused': {
-                  color: '#1a1a1a',
-                },
-              }}
+              placeholder="e.g., Summer Sale 2025"
+              sx={textFieldSx}
             />
           </Grid>
 
@@ -231,108 +210,88 @@ const CouponFormDialog: React.FC<CouponFormDialogProps> = ({
               multiline
               rows={2}
               placeholder="Optional description for internal use"
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  '&:hover fieldset': {
-                    borderColor: '#9ca3af',
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: '#1a1a1a',
-                  },
-                },
-                '& .MuiInputLabel-root.Mui-focused': {
-                  color: '#1a1a1a',
-                },
-              }}
+              sx={textFieldSx}
             />
           </Grid>
 
-          {/* Type */}
+          {/* Discount Type */}
           <Grid item xs={12} sm={6}>
             <TextField
               fullWidth
               select
               label="Discount Type"
-              value={formData.type}
-              onChange={(e) => setFormData({ ...formData, type: e.target.value as any })}
+              value={formData.discountType}
+              onChange={(e) =>
+                setFormData({ ...formData, discountType: e.target.value as 'percentage' | 'fixed' })
+              }
               required
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  '&:hover fieldset': {
-                    borderColor: '#9ca3af',
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: '#1a1a1a',
-                  },
-                },
-                '& .MuiInputLabel-root.Mui-focused': {
-                  color: '#1a1a1a',
-                },
-              }}
+              sx={textFieldSx}
             >
               <MenuItem value="percentage">Percentage Discount</MenuItem>
               <MenuItem value="fixed">Fixed Amount Discount</MenuItem>
-              <MenuItem value="bogo">Buy One Get One</MenuItem>
-              <MenuItem value="free_shipping">Free Shipping</MenuItem>
             </TextField>
           </Grid>
 
-          {/* Value */}
-          {formData.type !== 'bogo' && formData.type !== 'free_shipping' && (
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label={formData.type === 'percentage' ? 'Discount Percentage' : 'Discount Amount'}
-                type="number"
-                value={formData.value}
-                onChange={(e) => setFormData({ ...formData, value: parseFloat(e.target.value) || 0 })}
-                required
-                InputProps={{
-                  startAdornment: formData.type === 'fixed' ? '$' : undefined,
-                  endAdornment: formData.type === 'percentage' ? '%' : undefined,
-                }}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    '&:hover fieldset': {
-                      borderColor: '#9ca3af',
-                    },
-                    '&.Mui-focused fieldset': {
-                      borderColor: '#1a1a1a',
-                    },
-                  },
-                  '& .MuiInputLabel-root.Mui-focused': {
-                    color: '#1a1a1a',
-                  },
-                }}
-              />
-            </Grid>
-          )}
-
-          {/* Min Purchase Amount */}
+          {/* Discount Value */}
           <Grid item xs={12} sm={6}>
             <TextField
               fullWidth
-              label="Minimum Purchase Amount"
+              label={formData.discountType === 'percentage' ? 'Discount Percentage' : 'Discount Amount'}
               type="number"
-              value={formData.minPurchaseAmount || ''}
-              onChange={(e) => setFormData({ ...formData, minPurchaseAmount: parseFloat(e.target.value) || null })}
+              value={formData.discountValue}
+              onChange={(e) => setFormData({ ...formData, discountValue: parseFloat(e.target.value) || 0 })}
+              required
+              InputProps={{
+                startAdornment: formData.discountType === 'fixed'
+                  ? <InputAdornment position="start">$</InputAdornment>
+                  : undefined,
+                endAdornment: formData.discountType === 'percentage'
+                  ? <InputAdornment position="end">%</InputAdornment>
+                  : undefined,
+              }}
+              sx={textFieldSx}
+            />
+          </Grid>
+
+          {/* Max Discount Amount */}
+          <Grid item xs={12} sm={6}>
+            <TextField
+              fullWidth
+              label="Max Discount Amount"
+              type="number"
+              value={formData.maxDiscountAmount}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  maxDiscountAmount: e.target.value === '' ? '' : parseFloat(e.target.value),
+                })
+              }
               placeholder="Optional"
               InputProps={{
-                startAdornment: '$',
+                startAdornment: <InputAdornment position="start">$</InputAdornment>,
               }}
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  '&:hover fieldset': {
-                    borderColor: '#9ca3af',
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: '#1a1a1a',
-                  },
-                },
-                '& .MuiInputLabel-root.Mui-focused': {
-                  color: '#1a1a1a',
-                },
+              sx={textFieldSx}
+            />
+          </Grid>
+
+          {/* Min Order Amount */}
+          <Grid item xs={12} sm={6}>
+            <TextField
+              fullWidth
+              label="Min Order Amount"
+              type="number"
+              value={formData.minOrderAmount}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  minOrderAmount: e.target.value === '' ? '' : parseFloat(e.target.value),
+                })
+              }
+              placeholder="Optional"
+              InputProps={{
+                startAdornment: <InputAdornment position="start">$</InputAdornment>,
               }}
+              sx={textFieldSx}
             />
           </Grid>
 
@@ -342,99 +301,82 @@ const CouponFormDialog: React.FC<CouponFormDialogProps> = ({
               fullWidth
               label="Usage Limit"
               type="number"
-              value={formData.usageLimit || ''}
-              onChange={(e) => setFormData({ ...formData, usageLimit: parseInt(e.target.value) || null })}
+              value={formData.usageLimit}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  usageLimit: e.target.value === '' ? '' : parseInt(e.target.value),
+                })
+              }
               placeholder="Unlimited"
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  '&:hover fieldset': {
-                    borderColor: '#9ca3af',
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: '#1a1a1a',
-                  },
-                },
-                '& .MuiInputLabel-root.Mui-focused': {
-                  color: '#1a1a1a',
-                },
-              }}
+              sx={textFieldSx}
             />
           </Grid>
 
-          {/* Expiration Date */}
+          {/* Valid From */}
           <Grid item xs={12} sm={6}>
             <TextField
               fullWidth
-              label="Expiration Date"
+              label="Valid From"
               type="date"
-              value={formData.expiresAt}
-              onChange={(e) => setFormData({ ...formData, expiresAt: e.target.value })}
-              InputLabelProps={{
-                shrink: true,
-              }}
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  '&:hover fieldset': {
-                    borderColor: '#9ca3af',
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: '#1a1a1a',
-                  },
-                },
-                '& .MuiInputLabel-root.Mui-focused': {
-                  color: '#1a1a1a',
-                },
-              }}
+              value={formData.validFrom}
+              onChange={(e) => setFormData({ ...formData, validFrom: e.target.value })}
+              InputLabelProps={{ shrink: true }}
+              sx={textFieldSx}
             />
           </Grid>
 
-          {/* Active Status */}
+          {/* Valid Until */}
+          <Grid item xs={12} sm={6}>
+            <TextField
+              fullWidth
+              label="Valid Until"
+              type="date"
+              value={formData.validUntil}
+              onChange={(e) => setFormData({ ...formData, validUntil: e.target.value })}
+              InputLabelProps={{ shrink: true }}
+              sx={textFieldSx}
+            />
+          </Grid>
+
+          {/* Active Toggle */}
           <Grid item xs={12}>
             <FormControlLabel
               control={
                 <Switch
-                  checked={formData.isActive}
-                  onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-                  sx={{
-                    '& .MuiSwitch-switchBase.Mui-checked': {
-                      color: '#1a1a1a',
-                    },
-                    '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
-                      backgroundColor: '#1a1a1a',
-                    },
-                  }}
+                  checked={formData.isAvailable}
+                  onChange={(e) => setFormData({ ...formData, isAvailable: e.target.checked })}
+                  color="primary"
                 />
               }
               label={
-                <Box>
-                  <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.9375rem', color: '#1a1a1a' }}>
-                    Active
+                <Box sx={{ ml: 0.5 }}>
+                  <Typography variant="body2" sx={{ fontWeight: 600, color: '#0f172a', lineHeight: 1.4 }}>
+                    Available
                   </Typography>
-                  <Typography variant="caption" sx={{ color: '#6b7280', fontSize: '0.8125rem' }}>
+                  <Typography variant="caption" sx={{ color: '#64748b', fontSize: '0.8125rem' }}>
                     Coupon can be used by customers
                   </Typography>
                 </Box>
               }
             />
           </Grid>
+
         </Grid>
       </DialogContent>
 
-      <Divider />
+      <Divider sx={{ borderColor: '#e2e8f0' }} />
 
-      <DialogActions sx={{ p: 3, pt: 2 }}>
+      <DialogActions sx={{ p: 3, pt: 2, gap: 1 }}>
         <Button
           onClick={onClose}
           disabled={loading}
           sx={{
             textTransform: 'none',
-            fontWeight: 600,
+            color: '#475569',
             borderRadius: 1.5,
             px: 3,
-            color: '#374151',
-            '&:hover': {
-              backgroundColor: '#f3f4f6',
-            },
+            '&:hover': { backgroundColor: '#f8fafc' },
           }}
         >
           Cancel
@@ -448,10 +390,9 @@ const CouponFormDialog: React.FC<CouponFormDialogProps> = ({
             fontWeight: 600,
             borderRadius: 1.5,
             px: 3,
-            backgroundColor: '#1a1a1a',
-            '&:hover': {
-              backgroundColor: '#374151',
-            },
+            bgcolor: '#1976d2',
+            boxShadow: '0 4px 14px rgba(25,118,210,0.3)',
+            '&:hover': { bgcolor: '#1565c0' },
           }}
         >
           {editingCoupon ? 'Update Coupon' : 'Create Coupon'}

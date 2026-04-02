@@ -1,7 +1,7 @@
 /**
- * User Management Page - Clean Professional Design
- * 
- * Manage users for the venue with a modern, minimal interface
+ * User Management Page
+ *
+ * Manage users for the venue with server-side pagination and blue design system.
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -10,7 +10,6 @@ import {
   TextField,
   MenuItem,
   Typography,
-  Container,
   Paper,
   InputAdornment,
   FormControlLabel,
@@ -18,7 +17,7 @@ import {
   Alert,
   Snackbar,
   Button,
-  Chip,
+  IconButton,
   CircularProgress,
 } from '@mui/material';
 import {
@@ -26,6 +25,8 @@ import {
   Search as SearchIcon,
   Refresh as RefreshIcon,
   People as PeopleIcon,
+  CheckCircle as CheckCircleIcon,
+  Cancel as CancelIcon,
 } from '@mui/icons-material';
 import { useUserData } from '../../contexts/application/UserData';
 import { applicationUserService } from '../../services/application/user';
@@ -56,7 +57,8 @@ const UserManagement: React.FC = () => {
       const filters: any = {};
       if (currentWorkspace?.id) filters.workspaceId = currentWorkspace.id;
       if (currentVenue?.id) filters.organizationId = currentVenue.id;
-      const usersData = await applicationUserService.getUsers(1, 1000, filters);
+      if (searchTerm) filters.search = searchTerm;
+      const usersData = await applicationUserService.getUsers(1, 100, filters);
       setUsers(usersData);
     } catch (error: any) {
       setSnackbar({
@@ -67,7 +69,7 @@ const UserManagement: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [currentWorkspace?.id, currentVenue?.id]);
+  }, [currentWorkspace?.id, currentVenue?.id, searchTerm]);
 
   useEffect(() => {
     loadUsers();
@@ -130,7 +132,7 @@ const UserManagement: React.FC = () => {
   };
 
   const filteredUsers = users.filter(user => {
-    const matchesSearch = 
+    const matchesSearch =
       user.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.email?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -142,273 +144,254 @@ const UserManagement: React.FC = () => {
   const activeUsersCount = users.filter(u => u.isActive).length;
   const inactiveUsersCount = users.filter(u => !u.isActive).length;
 
+  const textFieldFocusSx = {
+    '& .MuiOutlinedInput-root': {
+      '&.Mui-focused fieldset': {
+        borderColor: '#1976d2',
+      },
+    },
+    '& .MuiInputLabel-root.Mui-focused': {
+      color: '#1976d2',
+    },
+  };
+
   return (
-    <Box sx={{ minHeight: '100vh', backgroundColor: '#f8f9fa', py: 4 }}>
-      <Container maxWidth="xl">
-        {/* Header */}
-        <Box sx={{ mb: 4 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
-            <Box>
-              <Typography
-                variant="h4"
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', bgcolor: '#f8fafc' }}>
+      {/* Header bar */}
+      <Box
+        sx={{
+          px: 3,
+          py: 2,
+          borderBottom: '1px solid #e2e8f0',
+          bgcolor: '#ffffff',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexShrink: 0,
+        }}
+      >
+        <Box>
+          <Typography
+            variant="h6"
+            sx={{ fontWeight: 700, color: '#0f172a', fontSize: '1.0625rem', lineHeight: 1.3 }}
+          >
+            User Management
+          </Typography>
+          <Typography variant="body2" sx={{ color: '#64748b', mt: 0.25 }}>
+            Manage users for {currentVenue?.name || 'your venue'}
+          </Typography>
+        </Box>
+
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => handleOpenDialog(null)}
+            sx={{
+              textTransform: 'none',
+              borderRadius: 1.5,
+              px: 2.5,
+              fontWeight: 600,
+              bgcolor: '#1976d2',
+              '&:hover': { bgcolor: '#1565c0' },
+            }}
+          >
+            Add User
+          </Button>
+          <IconButton
+            onClick={loadUsers}
+            disabled={loading}
+            size="small"
+            sx={{ color: '#64748b', '&:hover': { bgcolor: 'rgba(25,118,210,0.08)' } }}
+          >
+            <RefreshIcon fontSize="small" />
+          </IconButton>
+        </Box>
+      </Box>
+
+      {/* Body */}
+      <Box sx={{ flex: 1, overflowY: 'auto', p: 3, display: 'flex', flexDirection: 'column', gap: 3 }}>
+        {/* Stats row */}
+        <Box sx={{ display: 'flex', gap: 2 }}>
+          {/* Total */}
+          <Paper
+            elevation={0}
+            sx={{ border: '1px solid #e2e8f0', borderRadius: 2, px: 2.5, py: 2, flex: 1 }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              <Box
                 sx={{
-                  fontWeight: 700,
-                  color: '#1a1a1a',
-                  mb: 1,
-                  fontSize: { xs: '1.75rem', md: '2.125rem' },
+                  width: 40,
+                  height: 40,
+                  borderRadius: 1.5,
+                  bgcolor: 'rgba(25,118,210,0.08)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
                 }}
               >
-                User Management
-              </Typography>
-              <Typography
-                variant="body1"
-                sx={{
-                  color: '#6b7280',
-                  fontSize: '0.9375rem',
-                }}
-              >
-                Manage users for {currentVenue?.name || 'your venue'}
-              </Typography>
+                <PeopleIcon sx={{ fontSize: 20, color: '#1976d2' }} />
+              </Box>
+              <Box>
+                <Typography variant="h6" sx={{ fontWeight: 700, color: '#0f172a', lineHeight: 1.2 }}>
+                  {users.length}
+                </Typography>
+                <Typography variant="body2" sx={{ color: '#64748b', fontSize: '0.8125rem' }}>
+                  Total Users
+                </Typography>
+              </Box>
             </Box>
+          </Paper>
+
+          {/* Active */}
+          <Paper
+            elevation={0}
+            sx={{ border: '1px solid #e2e8f0', borderRadius: 2, px: 2.5, py: 2, flex: 1 }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              <Box
+                sx={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 1.5,
+                  bgcolor: 'rgba(16,185,129,0.08)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                }}
+              >
+                <CheckCircleIcon sx={{ fontSize: 20, color: '#059669' }} />
+              </Box>
+              <Box>
+                <Typography variant="h6" sx={{ fontWeight: 700, color: '#0f172a', lineHeight: 1.2 }}>
+                  {activeUsersCount}
+                </Typography>
+                <Typography variant="body2" sx={{ color: '#64748b', fontSize: '0.8125rem' }}>
+                  Active Users
+                </Typography>
+              </Box>
+            </Box>
+          </Paper>
+
+          {/* Inactive */}
+          <Paper
+            elevation={0}
+            sx={{ border: '1px solid #e2e8f0', borderRadius: 2, px: 2.5, py: 2, flex: 1 }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              <Box
+                sx={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 1.5,
+                  bgcolor: 'rgba(239,68,68,0.08)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                }}
+              >
+                <CancelIcon sx={{ fontSize: 20, color: '#dc2626' }} />
+              </Box>
+              <Box>
+                <Typography variant="h6" sx={{ fontWeight: 700, color: '#0f172a', lineHeight: 1.2 }}>
+                  {inactiveUsersCount}
+                </Typography>
+                <Typography variant="body2" sx={{ color: '#64748b', fontSize: '0.8125rem' }}>
+                  Inactive Users
+                </Typography>
+              </Box>
+            </Box>
+          </Paper>
+        </Box>
+
+        {/* Filters + Table */}
+        <Paper elevation={0} sx={{ border: '1px solid #e2e8f0', borderRadius: 2, overflow: 'hidden' }}>
+          {/* Filter bar */}
+          <Box
+            sx={{
+              px: 2.5,
+              py: 2,
+              borderBottom: '1px solid #e2e8f0',
+              display: 'flex',
+              gap: 2,
+              flexWrap: 'wrap',
+              alignItems: 'center',
+            }}
+          >
+            <TextField
+              size="small"
+              placeholder="Search users..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon sx={{ color: '#94a3b8', fontSize: 18 }} />
+                  </InputAdornment>
+                ),
+              }}
+              sx={{ flexGrow: 1, minWidth: 220, ...textFieldFocusSx }}
+            />
+
+            <TextField
+              select
+              size="small"
+              label="Filter by Role"
+              value={filterRole}
+              onChange={(e) => setFilterRole(e.target.value)}
+              sx={{ minWidth: 160, ...textFieldFocusSx }}
+            >
+              <MenuItem value="all">All Roles</MenuItem>
+              <MenuItem value="admin">Admin</MenuItem>
+              <MenuItem value="operator">Operator</MenuItem>
+            </TextField>
+
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={showInactive}
+                  onChange={(e) => setShowInactive(e.target.checked)}
+                  color="primary"
+                />
+              }
+              label={
+                <Typography variant="body2" sx={{ color: '#475569' }}>
+                  Show Inactive
+                </Typography>
+              }
+              sx={{ ml: 0.5, mr: 0 }}
+            />
+
             <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={() => handleOpenDialog(null)}
+              variant="outlined"
+              startIcon={<RefreshIcon />}
+              onClick={loadUsers}
+              disabled={loading}
+              size="small"
               sx={{
                 textTransform: 'none',
                 borderRadius: 1.5,
-                px: 3,
                 fontWeight: 600,
-                backgroundColor: '#1a1a1a',
+                borderColor: '#e2e8f0',
+                color: '#475569',
                 '&:hover': {
-                  backgroundColor: '#374151',
+                  borderColor: '#cbd5e1',
+                  bgcolor: '#f8fafc',
                 },
               }}
             >
-              Add User
+              Refresh
             </Button>
           </Box>
 
-          {/* Stats */}
-          <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-            <Paper
-              elevation={0}
-              sx={{
-                px: 3,
-                py: 2,
-                backgroundColor: '#ffffff',
-                border: '1px solid #e5e7eb',
-                borderRadius: 2,
-                flex: 1,
-                minWidth: 200,
-              }}
-            >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Box
-                  sx={{
-                    width: 48,
-                    height: 48,
-                    borderRadius: 1.5,
-                    backgroundColor: '#f3f4f6',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <PeopleIcon sx={{ fontSize: 24, color: '#374151' }} />
-                </Box>
-                <Box>
-                  <Typography variant="h5" sx={{ fontWeight: 700, color: '#1a1a1a' }}>
-                    {users.length}
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: '#6b7280', fontSize: '0.875rem' }}>
-                    Total Users
-                  </Typography>
-                </Box>
-              </Box>
-            </Paper>
-
-            <Paper
-              elevation={0}
-              sx={{
-                px: 3,
-                py: 2,
-                backgroundColor: '#ffffff',
-                border: '1px solid #e5e7eb',
-                borderRadius: 2,
-                flex: 1,
-                minWidth: 200,
-              }}
-            >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Chip
-                  label={activeUsersCount}
-                  sx={{
-                    height: 48,
-                    width: 48,
-                    borderRadius: 1.5,
-                    fontSize: '1.25rem',
-                    fontWeight: 700,
-                    backgroundColor: '#dcfce7',
-                    color: '#166534',
-                    border: '1px solid #bbf7d0',
-                  }}
-                />
-                <Box>
-                  <Typography variant="body2" sx={{ color: '#6b7280', fontSize: '0.875rem' }}>
-                    Active Users
-                  </Typography>
-                </Box>
-              </Box>
-            </Paper>
-
-            <Paper
-              elevation={0}
-              sx={{
-                px: 3,
-                py: 2,
-                backgroundColor: '#ffffff',
-                border: '1px solid #e5e7eb',
-                borderRadius: 2,
-                flex: 1,
-                minWidth: 200,
-              }}
-            >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Chip
-                  label={inactiveUsersCount}
-                  sx={{
-                    height: 48,
-                    width: 48,
-                    borderRadius: 1.5,
-                    fontSize: '1.25rem',
-                    fontWeight: 700,
-                    backgroundColor: '#fee2e2',
-                    color: '#991b1b',
-                    border: '1px solid #fecaca',
-                  }}
-                />
-                <Box>
-                  <Typography variant="body2" sx={{ color: '#6b7280', fontSize: '0.875rem' }}>
-                    Inactive Users
-                  </Typography>
-                </Box>
-              </Box>
-            </Paper>
-          </Box>
-        </Box>
-
-        {/* Main Content */}
-        <Paper
-          elevation={0}
-          sx={{
-            backgroundColor: '#ffffff',
-            border: '1px solid #e5e7eb',
-            borderRadius: 2,
-            overflow: 'hidden',
-          }}
-        >
-          {/* Filters */}
-          <Box sx={{ p: 3, borderBottom: '1px solid #e5e7eb' }}>
-            <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
-              <TextField
-                placeholder="Search users..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon sx={{ color: '#6b7280', fontSize: 20 }} />
-                    </InputAdornment>
-                  ),
-                }}
-                sx={{
-                  flexGrow: 1,
-                  minWidth: 250,
-                  '& .MuiOutlinedInput-root': {
-                    '&:hover fieldset': {
-                      borderColor: '#9ca3af',
-                    },
-                    '&.Mui-focused fieldset': {
-                      borderColor: '#1a1a1a',
-                    },
-                  },
-                  '& .MuiInputLabel-root.Mui-focused': {
-                    color: '#1a1a1a',
-                  },
-                }}
-              />
-              <TextField
-                select
-                label="Filter by Role"
-                value={filterRole}
-                onChange={(e) => setFilterRole(e.target.value)}
-                sx={{
-                  minWidth: 180,
-                  '& .MuiOutlinedInput-root': {
-                    '&:hover fieldset': {
-                      borderColor: '#9ca3af',
-                    },
-                    '&.Mui-focused fieldset': {
-                      borderColor: '#1a1a1a',
-                    },
-                  },
-                  '& .MuiInputLabel-root.Mui-focused': {
-                    color: '#1a1a1a',
-                  },
-                }}
-              >
-                <MenuItem value="all">All Roles</MenuItem>
-                <MenuItem value="admin">Admin</MenuItem>
-                <MenuItem value="operator">Operator</MenuItem>
-              </TextField>
-
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={showInactive}
-                    onChange={(e) => setShowInactive(e.target.checked)}
-                    sx={{
-                      '& .MuiSwitch-switchBase.Mui-checked': {
-                        color: '#1a1a1a',
-                      },
-                      '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
-                        backgroundColor: '#1a1a1a',
-                      },
-                    }}
-                  />
-                }
-                label="Show Inactive"
-                sx={{ ml: 1 }}
-              />
-
-              <Button
-                variant="outlined"
-                startIcon={<RefreshIcon />}
-                onClick={loadUsers}
-                disabled={loading}
-                sx={{
-                  textTransform: 'none',
-                  borderRadius: 1.5,
-                  fontWeight: 600,
-                  borderColor: '#e5e7eb',
-                  color: '#374151',
-                  '&:hover': {
-                    borderColor: '#9ca3af',
-                    backgroundColor: '#f9fafb',
-                  },
-                }}
-              >
-                Refresh
-              </Button>
-            </Box>
-          </Box>
-
-          {/* User Table */}
+          {/* Table area */}
           <Box>
             {loading ? (
               <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8 }}>
-                <CircularProgress sx={{ color: '#1a1a1a' }} />
+                <CircularProgress color="primary" />
               </Box>
             ) : (
               <UserTable
@@ -427,7 +410,7 @@ const UserManagement: React.FC = () => {
             )}
           </Box>
         </Paper>
-      </Container>
+      </Box>
 
       <UserFormDialog
         open={openDialog}
@@ -457,13 +440,10 @@ const UserManagement: React.FC = () => {
         onClose={() => setSnackbar({ ...snackbar, open: false })}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
       >
-        <Alert 
-          severity={snackbar.severity} 
+        <Alert
+          severity={snackbar.severity}
           onClose={() => setSnackbar({ ...snackbar, open: false })}
-          sx={{ 
-            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-            borderRadius: 1.5,
-          }}
+          sx={{ boxShadow: '0 4px 12px rgba(0,0,0,0.15)', borderRadius: 1.5 }}
         >
           {snackbar.message}
         </Alert>

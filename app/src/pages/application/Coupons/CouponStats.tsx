@@ -33,31 +33,29 @@ const CouponStats: React.FC<CouponStatsProps> = ({ stats }) => {
       title: 'Total Coupons',
       value: stats.totalCoupons,
       icon: <CouponIcon sx={{ fontSize: 24 }} />,
-      color: '#6b7280',
+      iconBgColor: 'rgba(25,118,210,0.08)',
+      iconColor: '#1976d2',
     },
     {
       title: 'Active Coupons',
       value: stats.activeCoupons,
       icon: <Percent sx={{ fontSize: 24 }} />,
-      color: '#166534',
-      bgColor: '#dcfce7',
-      borderColor: '#bbf7d0',
+      iconBgColor: 'rgba(16,185,129,0.08)',
+      iconColor: '#059669',
     },
     {
       title: 'Total Redemptions',
       value: stats.totalRedemptions,
       icon: <CardGiftcard sx={{ fontSize: 24 }} />,
-      color: '#1e40af',
-      bgColor: '#dbeafe',
-      borderColor: '#bfdbfe',
+      iconBgColor: 'rgba(99,102,241,0.08)',
+      iconColor: '#6366f1',
     },
     {
       title: 'Total Savings',
       value: `$${stats.totalSavings.toLocaleString()}`,
       icon: <AttachMoney sx={{ fontSize: 24 }} />,
-      color: '#92400e',
-      bgColor: '#fef3c7',
-      borderColor: '#fde68a',
+      iconBgColor: 'rgba(245,158,11,0.08)',
+      iconColor: '#d97706',
     },
   ];
 
@@ -68,9 +66,10 @@ const CouponStats: React.FC<CouponStatsProps> = ({ stats }) => {
           <Paper
             elevation={0}
             sx={{
-              p: 3,
+              px: 2.5,
+              py: 2,
               backgroundColor: '#ffffff',
-              border: '1px solid #e5e7eb',
+              border: '1px solid #e2e8f0',
               borderRadius: 2,
               height: '100%',
             }}
@@ -81,21 +80,20 @@ const CouponStats: React.FC<CouponStatsProps> = ({ stats }) => {
                   width: 48,
                   height: 48,
                   borderRadius: 1.5,
-                  backgroundColor: stat.bgColor || '#f3f4f6',
-                  border: stat.borderColor ? `1px solid ${stat.borderColor}` : 'none',
+                  backgroundColor: stat.iconBgColor,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  color: stat.color,
+                  color: stat.iconColor,
                 }}
               >
                 {stat.icon}
               </Box>
               <Box>
-                <Typography variant="h5" sx={{ fontWeight: 700, color: '#1a1a1a', mb: 0.5 }}>
+                <Typography variant="h5" sx={{ fontWeight: 700, color: '#0f172a', mb: 0.5 }}>
                   {stat.value}
                 </Typography>
-                <Typography variant="body2" sx={{ color: '#6b7280', fontSize: '0.875rem' }}>
+                <Typography variant="body2" sx={{ color: '#64748b', fontSize: '0.875rem' }}>
                   {stat.title}
                 </Typography>
               </Box>

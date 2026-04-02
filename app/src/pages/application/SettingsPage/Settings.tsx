@@ -1,13 +1,6 @@
-/**
- * Settings Page - Professional Clean Design
- * 
- * Modern, minimal settings interface without flashy effects
- */
-
 import React, { useState } from 'react';
 import {
   Box,
-  Container,
   Typography,
   useTheme,
   useMediaQuery,
@@ -18,8 +11,6 @@ import { useUserData } from '../../../contexts/application/UserData';
 import SettingsNav from './components/SettingsNav';
 import ProfileSection from './components/ProfileSection';
 import SecuritySection from './components/SecuritySection';
-import NotificationsSection from './components/NotificationsSection';
-import AppearanceSection from './components/AppearanceSection';
 import WorkspaceSection from './components/WorkspaceSection';
 
 const Settings: React.FC = () => {
@@ -36,111 +27,52 @@ const Settings: React.FC = () => {
   });
 
   const sections = [
-    { 
-      id: 'profile', 
-      label: 'Profile', 
-      icon: 'person',
-      description: 'Personal information'
-    },
-    { 
-      id: 'workspace', 
-      label: 'Workspace', 
-      icon: 'business',
-      description: 'Venue settings'
-    },
-    { 
-      id: 'notifications', 
-      label: 'Notifications', 
-      icon: 'notifications',
-      description: 'Alert preferences'
-    },
-    { 
-      id: 'security', 
-      label: 'Security', 
-      icon: 'security',
-      description: 'Password & privacy'
-    },
-    { 
-      id: 'appearance', 
-      label: 'Appearance', 
-      icon: 'palette',
-      description: 'Theme & display'
-    },
+    { id: 'profile',   label: 'Profile',   icon: 'person',   description: 'Personal information' },
+    { id: 'workspace', label: 'Workspace', icon: 'business', description: 'Venue & operations'   },
+    { id: 'security',  label: 'Security',  icon: 'security', description: 'Password & access'    },
   ];
 
   const handleSave = async (data: any, section: string) => {
     try {
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      setSnackbar({
-        open: true,
-        message: `${section} settings saved successfully`,
-        severity: 'success',
-      });
-    } catch (error) {
-      setSnackbar({
-        open: true,
-        message: `Failed to save ${section} settings`,
-        severity: 'error',
-      });
+      setSnackbar({ open: true, message: `${section} settings saved successfully`, severity: 'success' });
+    } catch {
+      setSnackbar({ open: true, message: `Failed to save ${section} settings`, severity: 'error' });
     }
   };
 
   const renderContent = () => {
     const profileData = {
-      name: userData?.user?.firstName && userData?.user?.lastName 
-        ? `${userData.user.firstName} ${userData.user.lastName}` 
+      name: userData?.user?.firstName && userData?.user?.lastName
+        ? `${userData.user.firstName} ${userData.user.lastName}`
         : userData?.user?.email || '',
       email: userData?.user?.email || '',
       phone: userData?.user?.phone || '',
-      role: userData?.user?.role || 'User',
+      role:  userData?.user?.role  || 'User',
     };
 
     const workspaceData = {
-      name: venue?.name || '',
-      description: venue?.description || '',
-      address: venue?.location?.address || '',
-      city: venue?.location?.city || '',
-      state: venue?.location?.state || '',
-      postalCode: venue?.location?.postalCode || '',
-      phone: venue?.phone || '',
-      email: venue?.email || '',
-      isActive: venue?.isActive ?? true,
+      name:        venue?.name                || '',
+      description: venue?.description         || '',
+      address:     venue?.location?.address   || '',
+      city:        venue?.location?.city      || '',
+      state:       venue?.location?.state     || '',
+      postalCode:  venue?.location?.postalCode || '',
+      phone:       venue?.phone               || '',
+      email:       venue?.email               || '',
+      isActive:    venue?.isActive            ?? true,
     };
 
     switch (activeSection) {
       case 'profile':
-        return (
-          <ProfileSection 
-            userData={profileData}
-            onSave={(data) => handleSave(data, 'Profile')}
-          />
-        );
+        return <ProfileSection userData={profileData} onSave={(d) => handleSave(d, 'Profile')} />;
       case 'workspace':
-        return (
-          <WorkspaceSection 
-            workspaceData={workspaceData}
-            onSave={(data) => handleSave(data, 'Workspace')}
-          />
-        );
-      case 'notifications':
-        return (
-          <NotificationsSection 
-            onSave={(data) => handleSave(data, 'Notifications')}
-          />
-        );
+        return <WorkspaceSection workspaceData={workspaceData} onSave={(d) => handleSave(d, 'Workspace')} />;
       case 'security':
         return (
-          <SecuritySection 
-            onSave={(data) => handleSave(data, 'Security')}
-            onChangePassword={async (data) => {
-              await handleSave(data, 'Password');
-            }}
-          />
-        );
-      case 'appearance':
-        return (
-          <AppearanceSection 
-            onSave={(data) => handleSave(data, 'Appearance')}
+          <SecuritySection
+            onSave={(d) => handleSave(d, 'Security')}
+            onChangePassword={async (d) => { await handleSave(d, 'Password'); }}
           />
         );
       default:
@@ -148,69 +80,66 @@ const Settings: React.FC = () => {
     }
   };
 
+  const activeLabel = sections.find((s) => s.id === activeSection)?.label ?? '';
+
   return (
-    <Box
-      sx={{
-        minHeight: '100vh',
-        backgroundColor: '#f8f9fa',
-        py: 4,
-      }}
-    >
-      <Container maxWidth="xl">
-        {/* Header */}
-        <Box sx={{ mb: 4 }}>
-          <Typography
-            variant="h4"
-            sx={{
-              fontWeight: 700,
-              color: '#1a1a1a',
-              mb: 1,
-              fontSize: { xs: '1.75rem', md: '2.125rem' },
-            }}
-          >
-            Settings
-          </Typography>
-          <Typography
-            variant="body1"
-            sx={{
-              color: '#6b7280',
-              fontSize: '0.9375rem',
-            }}
-          >
-            Manage your account preferences and configuration
-          </Typography>
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', bgcolor: '#f8fafc' }}>
+
+      {/* ── Header ── */}
+      <Box sx={{
+        px: 3,
+        py: 2,
+        borderBottom: '1px solid #e2e8f0',
+        bgcolor: '#ffffff',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexShrink: 0,
+      }}>
+        <Typography variant="h6" sx={{ fontWeight: 700, color: '#0f172a', fontSize: '1.0625rem' }}>
+          Settings
+        </Typography>
+        <Typography variant="body2" sx={{ color: '#64748b' }}>
+          {activeLabel}
+        </Typography>
+      </Box>
+
+      {/* ── Body: nav + content ── */}
+      <Box sx={{
+        flex: 1,
+        display: 'flex',
+        flexDirection: { xs: 'column', md: 'row' },
+        overflow: 'hidden',
+      }}>
+
+        {/* Nav panel */}
+        <Box sx={{
+          width: { xs: '100%', md: 220 },
+          flexShrink: 0,
+          borderRight: { xs: 'none', md: '1px solid #e2e8f0' },
+          borderBottom: { xs: '1px solid #e2e8f0', md: 'none' },
+          bgcolor: '#ffffff',
+          overflowY: 'auto',
+        }}>
+          <SettingsNav
+            sections={sections}
+            activeSection={activeSection}
+            onSectionChange={setActiveSection}
+          />
         </Box>
 
-        {/* Main Content */}
-        <Box
-          sx={{
-            display: 'flex',
-            gap: 3,
-            flexDirection: { xs: 'column', md: 'row' },
-          }}
-        >
-          {/* Navigation */}
-          <Box
-            sx={{
-              width: { xs: '100%', md: 280 },
-              flexShrink: 0,
-            }}
-          >
-            <SettingsNav
-              sections={sections}
-              activeSection={activeSection}
-              onSectionChange={setActiveSection}
-            />
-          </Box>
-
-          {/* Content Area */}
-          <Box sx={{ flex: 1, minWidth: 0 }}>
-            {renderContent()}
-          </Box>
+        {/* Content panel */}
+        <Box sx={{
+          flex: 1,
+          minWidth: 0,
+          overflowY: 'auto',
+          p: { xs: 2, md: 3 },
+        }}>
+          {renderContent()}
         </Box>
-      </Container>
+      </Box>
 
-      {/* Snackbar */}
+      {/* ── Snackbar ── */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={6000}
@@ -220,10 +149,7 @@ const Settings: React.FC = () => {
         <Alert
           severity={snackbar.severity}
           onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
-          sx={{ 
-            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-            borderRadius: 1,
-          }}
+          sx={{ boxShadow: '0 4px 12px rgba(0,0,0,0.15)', borderRadius: 1 }}
         >
           {snackbar.message}
         </Alert>
@@ -231,5 +157,6 @@ const Settings: React.FC = () => {
     </Box>
   );
 };
+
 
 export default Settings;

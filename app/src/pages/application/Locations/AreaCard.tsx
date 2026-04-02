@@ -36,7 +36,7 @@ const AreaCard: React.FC<AreaCardProps> = ({
       sx={{
         p: 3,
         backgroundColor: '#ffffff',
-        border: '1px solid #e5e7eb',
+        border: '1px solid #e2e8f0',
         borderRadius: 2,
         height: '100%',
         display: 'flex',
@@ -44,7 +44,7 @@ const AreaCard: React.FC<AreaCardProps> = ({
         transition: 'all 0.2s',
         cursor: 'pointer',
         '&:hover': {
-          boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
         },
       }}
       onClick={() => onEdit(area)}
@@ -55,21 +55,21 @@ const AreaCard: React.FC<AreaCardProps> = ({
             width: 48,
             height: 48,
             borderRadius: 1.5,
-            backgroundColor: '#f3f4f6',
+            bgcolor: 'rgba(25,118,210,0.08)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             flexShrink: 0,
           }}
         >
-          <Business sx={{ fontSize: 24, color: '#6b7280' }} />
+          <Business sx={{ fontSize: 24, color: '#1976d2' }} />
         </Box>
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Typography
             variant="h6"
             sx={{
               fontWeight: 700,
-              color: '#1a1a1a',
+              color: '#0f172a',
               fontSize: '1.125rem',
               mb: 0.5,
               overflow: 'hidden',
@@ -83,7 +83,7 @@ const AreaCard: React.FC<AreaCardProps> = ({
             <Typography
               variant="body2"
               sx={{
-                color: '#6b7280',
+                color: '#64748b',
                 fontSize: '0.875rem',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
@@ -106,7 +106,7 @@ const AreaCard: React.FC<AreaCardProps> = ({
           justifyContent: 'flex-end',
           mt: 'auto',
           pt: 2,
-          borderTop: '1px solid #f3f4f6',
+          borderTop: '1px solid #f1f5f9',
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -118,10 +118,10 @@ const AreaCard: React.FC<AreaCardProps> = ({
               onEdit(area);
             }}
             sx={{
-              color: '#6b7280',
+              color: '#64748b',
               '&:hover': {
-                backgroundColor: '#f3f4f6',
-                color: '#1a1a1a',
+                bgcolor: 'rgba(25,118,210,0.08)',
+                color: '#1976d2',
               },
             }}
           >
@@ -136,10 +136,10 @@ const AreaCard: React.FC<AreaCardProps> = ({
               onDelete(area.id);
             }}
             sx={{
-              color: '#6b7280',
+              color: '#64748b',
               '&:hover': {
-                backgroundColor: '#fee2e2',
-                color: '#991b1b',
+                bgcolor: 'rgba(239,68,68,0.08)',
+                color: '#dc2626',
               },
             }}
           >

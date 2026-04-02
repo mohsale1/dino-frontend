@@ -63,12 +63,12 @@ export interface HomePageData {
 
 class HomePageService {
   // --------------------------------------------------------------------------
-  // READ â€” public application endpoints (no auth required)
+  // READ â€” public system endpoints (no auth required)
   // --------------------------------------------------------------------------
 
   async getStats(): Promise<HomePageStat[]> {
     try {
-      const response = await apiService.get<HomePageStat[]>('/application/home/stats');
+      const response = await apiService.get<HomePageStat[]>('/system/home/stats');
       if (response.success && response.data) {
         return response.data;
       }
@@ -82,8 +82,8 @@ class HomePageService {
   async getTestimonials(limit?: number): Promise<Testimonial[]> {
     try {
       const url = limit
-        ? `/application/home/testimonials?limit=${limit}`
-        : '/application/home/testimonials';
+        ? `/system/home/testimonials?limit=${limit}`
+        : '/system/home/testimonials';
       const response = await apiService.get<Testimonial[]>(url);
       if (response.success && response.data) {
         return response.data;
@@ -97,7 +97,7 @@ class HomePageService {
 
   async getContactInfo(): Promise<ContactInfo> {
     try {
-      const response = await apiService.get<ContactInfo>('/application/home/contact');
+      const response = await apiService.get<ContactInfo>('/system/home/contact');
       if (response.success && response.data) {
         return response.data;
       }
@@ -110,7 +110,7 @@ class HomePageService {
 
   async getAllHomeData(): Promise<HomePageData> {
     try {
-      const response = await apiService.get<HomePageData>('/application/home/all');
+      const response = await apiService.get<HomePageData>('/system/home/all');
       if (response.success && response.data) {
         return response.data;
       }
@@ -122,16 +122,16 @@ class HomePageService {
   }
 
   // --------------------------------------------------------------------------
-  // WRITE â€” application endpoints (require application Admin role)
+  // WRITE â€” system endpoints (require system Admin role)
   // These are called from the system Appearance page using the system token.
-  // PUT /application/home/stats      â†’ { stats: [...] }
-  // PUT /application/home/testimonials â†’ { testimonials: [...] }
-  // PUT /application/home/contact    â†’ { contact: {...} }
+  // PUT /system/home/stats      â†’ { stats: [...] }
+  // PUT /system/home/testimonials â†’ { testimonials: [...] }
+  // PUT /system/home/contact    â†’ { contact: {...} }
   // --------------------------------------------------------------------------
 
   async updateStats(stats: HomePageStat[]): Promise<HomePageStat[]> {
     try {
-      const response = await apiService.put<HomePageStat[]>('/application/home/stats', { stats });
+      const response = await apiService.put<HomePageStat[]>('/system/home/stats', { stats });
       if (response.success) {
         return (response.data as HomePageStat[]) ?? stats;
       }
@@ -144,7 +144,7 @@ class HomePageService {
 
   async updateTestimonials(testimonials: Testimonial[]): Promise<Testimonial[]> {
     try {
-      const response = await apiService.put<Testimonial[]>('/application/home/testimonials', { testimonials });
+      const response = await apiService.put<Testimonial[]>('/system/home/testimonials', { testimonials });
       if (response.success) {
         return (response.data as Testimonial[]) ?? testimonials;
       }
@@ -157,7 +157,7 @@ class HomePageService {
 
   async updateContact(contact: ContactInfo): Promise<ContactInfo> {
     try {
-      const response = await apiService.put<ContactInfo>('/application/home/contact', { contact });
+      const response = await apiService.put<ContactInfo>('/system/home/contact', { contact });
       if (response.success) {
         return (response.data as ContactInfo) ?? contact;
       }
@@ -170,7 +170,7 @@ class HomePageService {
 
   async updateAllHomeData(data: Partial<HomePageData>): Promise<HomePageData> {
     try {
-      const response = await apiService.put<HomePageData>('/application/home/all', data);
+      const response = await apiService.put<HomePageData>('/system/home/all', data);
       if (response.success) {
         return (response.data as HomePageData) ?? { stats: [], testimonials: [], contact: {} };
       }

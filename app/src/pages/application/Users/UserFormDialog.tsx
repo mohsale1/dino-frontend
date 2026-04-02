@@ -1,6 +1,6 @@
 /**
  * UserFormDialog Component - Clean Professional Design
- * 
+ *
  * Create and edit users with a modern, minimal dialog
  */
 
@@ -54,6 +54,14 @@ interface UserFormDialogProps {
   venueId: string;
   venues: any[];
 }
+
+const textFieldSx = {
+  '& .MuiOutlinedInput-root': {
+    '&:hover fieldset': { borderColor: '#94a3b8' },
+    '&.Mui-focused fieldset': { borderColor: '#1976d2' },
+  },
+  '& .MuiInputLabel-root.Mui-focused': { color: '#1976d2' },
+};
 
 const UserFormDialog: React.FC<UserFormDialogProps> = ({
   open,
@@ -131,7 +139,7 @@ const UserFormDialog: React.FC<UserFormDialogProps> = ({
           rolesArray = (response.data as any).items;
         }
       }
-      const applicationRoles = rolesArray.filter((role: any) => 
+      const applicationRoles = rolesArray.filter((role: any) =>
         role.role_type === 1 || role.roleType === 1 || role.role_type === '1'
       );
       setRoles(applicationRoles);
@@ -148,7 +156,6 @@ const UserFormDialog: React.FC<UserFormDialogProps> = ({
       setLoading(true);
 
       if (editingUser) {
-        // Update existing user
         const updateData = {
           firstName: formData.firstName,
           lastName: formData.lastName,
@@ -157,14 +164,12 @@ const UserFormDialog: React.FC<UserFormDialogProps> = ({
         };
         await applicationUserService.updateUser(editingUser.id, updateData);
       } else {
-        // Validate password confirmation
         if (formData.password !== formData.confirm_password) {
           alert('Passwords do not match');
           setLoading(false);
           return;
         }
 
-        // Create new user
         const createData = {
           email: formData.email,
           password: formData.password,
@@ -187,10 +192,10 @@ const UserFormDialog: React.FC<UserFormDialogProps> = ({
   };
 
   return (
-    <Dialog 
-      open={open} 
-      onClose={onClose} 
-      maxWidth="md" 
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="md"
       fullWidth
       PaperProps={{
         sx: {
@@ -199,31 +204,27 @@ const UserFormDialog: React.FC<UserFormDialogProps> = ({
         },
       }}
     >
-      <DialogTitle sx={{ p: 3, pb: 2 }}>
+      <DialogTitle sx={{ p: 3, pb: 2, borderBottom: '1px solid #e2e8f0' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <Box>
-            <Typography variant="h6" sx={{ fontWeight: 700, color: '#1a1a1a', fontSize: '1.25rem' }}>
+            <Typography variant="h6" sx={{ fontWeight: 700, color: '#0f172a', fontSize: '1.25rem' }}>
               {editingUser ? 'Edit User' : 'Create New User'}
             </Typography>
-            <Typography variant="body2" sx={{ color: '#6b7280', fontSize: '0.875rem', mt: 0.5 }}>
+            <Typography variant="body2" sx={{ color: '#64748b', fontSize: '0.875rem', mt: 0.5 }}>
               {editingUser ? 'Update user information' : 'Add a new user to your venue'}
             </Typography>
           </Box>
-          <IconButton 
+          <IconButton
             onClick={onClose}
             sx={{
-              color: '#6b7280',
-              '&:hover': {
-                backgroundColor: '#f3f4f6',
-              },
+              color: '#64748b',
+              '&:hover': { backgroundColor: '#f1f5f9' },
             }}
           >
             <CloseIcon />
           </IconButton>
         </Box>
       </DialogTitle>
-
-      <Divider />
 
       <DialogContent sx={{ p: 3 }}>
         <Grid container spacing={3}>
@@ -234,19 +235,7 @@ const UserFormDialog: React.FC<UserFormDialogProps> = ({
               value={formData.firstName}
               onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
               required
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  '&:hover fieldset': {
-                    borderColor: '#9ca3af',
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: '#1a1a1a',
-                  },
-                },
-                '& .MuiInputLabel-root.Mui-focused': {
-                  color: '#1a1a1a',
-                },
-              }}
+              sx={textFieldSx}
             />
           </Grid>
           <Grid item xs={12} sm={6}>
@@ -256,19 +245,7 @@ const UserFormDialog: React.FC<UserFormDialogProps> = ({
               value={formData.lastName}
               onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
               required
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  '&:hover fieldset': {
-                    borderColor: '#9ca3af',
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: '#1a1a1a',
-                  },
-                },
-                '& .MuiInputLabel-root.Mui-focused': {
-                  color: '#1a1a1a',
-                },
-              }}
+              sx={textFieldSx}
             />
           </Grid>
 
@@ -281,19 +258,7 @@ const UserFormDialog: React.FC<UserFormDialogProps> = ({
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 required
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    '&:hover fieldset': {
-                      borderColor: '#9ca3af',
-                    },
-                    '&.Mui-focused fieldset': {
-                      borderColor: '#1a1a1a',
-                    },
-                  },
-                  '& .MuiInputLabel-root.Mui-focused': {
-                    color: '#1a1a1a',
-                  },
-                }}
+                sx={textFieldSx}
               />
             </Grid>
           )}
@@ -311,28 +276,13 @@ const UserFormDialog: React.FC<UserFormDialogProps> = ({
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">
-                        <IconButton
-                          onClick={() => setShowPassword(!showPassword)}
-                          edge="end"
-                        >
+                        <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
                           {showPassword ? <VisibilityOff /> : <Visibility />}
                         </IconButton>
                       </InputAdornment>
                     ),
                   }}
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      '&:hover fieldset': {
-                        borderColor: '#9ca3af',
-                      },
-                      '&.Mui-focused fieldset': {
-                        borderColor: '#1a1a1a',
-                      },
-                    },
-                    '& .MuiInputLabel-root.Mui-focused': {
-                      color: '#1a1a1a',
-                    },
-                  }}
+                  sx={textFieldSx}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -346,28 +296,13 @@ const UserFormDialog: React.FC<UserFormDialogProps> = ({
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">
-                        <IconButton
-                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                          edge="end"
-                        >
+                        <IconButton onClick={() => setShowConfirmPassword(!showConfirmPassword)} edge="end">
                           {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
                         </IconButton>
                       </InputAdornment>
                     ),
                   }}
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      '&:hover fieldset': {
-                        borderColor: '#9ca3af',
-                      },
-                      '&.Mui-focused fieldset': {
-                        borderColor: '#1a1a1a',
-                      },
-                    },
-                    '& .MuiInputLabel-root.Mui-focused': {
-                      color: '#1a1a1a',
-                    },
-                  }}
+                  sx={textFieldSx}
                 />
               </Grid>
             </>
@@ -379,19 +314,7 @@ const UserFormDialog: React.FC<UserFormDialogProps> = ({
               label="Phone"
               value={formData.phone}
               onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  '&:hover fieldset': {
-                    borderColor: '#9ca3af',
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: '#1a1a1a',
-                  },
-                },
-                '& .MuiInputLabel-root.Mui-focused': {
-                  color: '#1a1a1a',
-                },
-              }}
+              sx={textFieldSx}
             />
           </Grid>
 
@@ -411,19 +334,7 @@ const UserFormDialog: React.FC<UserFormDialogProps> = ({
               }}
               disabled={editingUser || loadingRoles}
               required={!editingUser}
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  '&:hover fieldset': {
-                    borderColor: '#9ca3af',
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: '#1a1a1a',
-                  },
-                },
-                '& .MuiInputLabel-root.Mui-focused': {
-                  color: '#1a1a1a',
-                },
-              }}
+              sx={textFieldSx}
             >
               {roles.map((role) => (
                 <MenuItem key={role.id} value={role.id}>
@@ -441,19 +352,7 @@ const UserFormDialog: React.FC<UserFormDialogProps> = ({
               value={formData.venueId}
               onChange={(e) => setFormData({ ...formData, venueId: e.target.value })}
               disabled={editingUser}
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  '&:hover fieldset': {
-                    borderColor: '#9ca3af',
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: '#1a1a1a',
-                  },
-                },
-                '& .MuiInputLabel-root.Mui-focused': {
-                  color: '#1a1a1a',
-                },
-              }}
+              sx={textFieldSx}
             >
               {venues.map((venue) => (
                 <MenuItem key={venue.id} value={venue.id}>
@@ -469,22 +368,15 @@ const UserFormDialog: React.FC<UserFormDialogProps> = ({
                 <Switch
                   checked={formData.isActive}
                   onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-                  sx={{
-                    '& .MuiSwitch-switchBase.Mui-checked': {
-                      color: '#1a1a1a',
-                    },
-                    '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
-                      backgroundColor: '#1a1a1a',
-                    },
-                  }}
+                  color="primary"
                 />
               }
               label={
                 <Box>
-                  <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.9375rem', color: '#1a1a1a' }}>
+                  <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.9375rem', color: '#0f172a' }}>
                     Active
                   </Typography>
-                  <Typography variant="caption" sx={{ color: '#6b7280', fontSize: '0.8125rem' }}>
+                  <Typography variant="caption" sx={{ color: '#64748b', fontSize: '0.8125rem' }}>
                     User can access the system
                   </Typography>
                 </Box>
@@ -494,38 +386,35 @@ const UserFormDialog: React.FC<UserFormDialogProps> = ({
         </Grid>
       </DialogContent>
 
-      <Divider />
+      <Divider sx={{ borderColor: '#e2e8f0' }} />
 
       <DialogActions sx={{ p: 3, pt: 2 }}>
-        <Button 
-          onClick={onClose} 
+        <Button
+          onClick={onClose}
           disabled={loading}
           sx={{
             textTransform: 'none',
             fontWeight: 600,
             borderRadius: 1.5,
             px: 3,
-            color: '#374151',
-            '&:hover': {
-              backgroundColor: '#f3f4f6',
-            },
+            color: '#475569',
+            '&:hover': { backgroundColor: '#f8fafc' },
           }}
         >
           Cancel
         </Button>
-        <Button 
-          onClick={handleSubmit} 
-          variant="contained" 
+        <Button
+          onClick={handleSubmit}
+          variant="contained"
           disabled={loading}
           sx={{
             textTransform: 'none',
             fontWeight: 600,
             borderRadius: 1.5,
             px: 3,
-            backgroundColor: '#1a1a1a',
-            '&:hover': {
-              backgroundColor: '#374151',
-            },
+            backgroundColor: '#1976d2',
+            boxShadow: '0 4px 14px rgba(25,118,210,0.3)',
+            '&:hover': { backgroundColor: '#1565c0' },
           }}
         >
           {loading ? <CircularProgress size={24} color="inherit" /> : editingUser ? 'Update User' : 'Create User'}

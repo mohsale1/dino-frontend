@@ -1,6 +1,6 @@
 /**
  * CatalogItemCard Component - Clean Professional Design
- * 
+ *
  * Display individual catalog item
  */
 
@@ -17,8 +17,6 @@ import {
   Edit as EditIcon,
   Delete as DeleteIcon,
   Image as ImageIcon,
-  CheckCircle,
-  Cancel,
 } from '@mui/icons-material';
 import type { CatalogItem } from '../../../features/catalog/types';
 
@@ -57,15 +55,15 @@ const CatalogItemCard: React.FC<CatalogItemCardProps> = ({
       elevation={0}
       sx={{
         backgroundColor: '#ffffff',
-        border: '1px solid #e5e7eb',
+        border: '1px solid #e2e8f0',
         borderRadius: 2,
         overflow: 'hidden',
-        height: '100%',
         display: 'flex',
         flexDirection: 'column',
+        width: '100%',
         transition: 'all 0.2s',
         '&:hover': {
-          boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
         },
       }}
     >
@@ -74,14 +72,14 @@ const CatalogItemCard: React.FC<CatalogItemCardProps> = ({
         onClick={handleImageClick}
         sx={{
           height: 180,
-          backgroundColor: '#f3f4f6',
+          backgroundColor: '#f8fafc',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           cursor: 'pointer',
           position: 'relative',
           '&:hover': {
-            backgroundColor: '#e5e7eb',
+            backgroundColor: '#f1f5f9',
           },
         }}
       >
@@ -96,7 +94,7 @@ const CatalogItemCard: React.FC<CatalogItemCardProps> = ({
             }}
           />
         ) : (
-          <ImageIcon sx={{ fontSize: 48, color: '#9ca3af' }} />
+          <ImageIcon sx={{ fontSize: 48, color: '#94a3b8' }} />
         )}
         <Chip
           label={item.isAvailable ? 'Available' : 'Unavailable'}
@@ -109,15 +107,19 @@ const CatalogItemCard: React.FC<CatalogItemCardProps> = ({
             position: 'absolute',
             top: 8,
             right: 8,
-            backgroundColor: item.isAvailable ? '#dcfce7' : '#fee2e2',
-            color: item.isAvailable ? '#166534' : '#991b1b',
-            border: item.isAvailable ? '1px solid #bbf7d0' : '1px solid #fecaca',
+            backgroundColor: item.isAvailable
+              ? 'rgba(16,185,129,0.9)'
+              : 'rgba(239,68,68,0.9)',
+            color: '#ffffff',
+            border: 'none',
             fontWeight: 600,
             fontSize: '0.75rem',
             height: 24,
             cursor: 'pointer',
             '&:hover': {
-              backgroundColor: item.isAvailable ? '#bbf7d0' : '#fecaca',
+              backgroundColor: item.isAvailable
+                ? 'rgba(16,185,129,1)'
+                : 'rgba(239,68,68,1)',
             },
           }}
         />
@@ -129,7 +131,7 @@ const CatalogItemCard: React.FC<CatalogItemCardProps> = ({
           variant="h6"
           sx={{
             fontWeight: 700,
-            color: '#1a1a1a',
+            color: '#0f172a',
             fontSize: '1rem',
             mb: 0.5,
             overflow: 'hidden',
@@ -141,7 +143,10 @@ const CatalogItemCard: React.FC<CatalogItemCardProps> = ({
         </Typography>
 
         {categoryName && (
-          <Typography variant="body2" sx={{ color: '#6b7280', fontSize: '0.8125rem', mb: 1 }}>
+          <Typography
+            variant="body2"
+            sx={{ color: '#64748b', fontSize: '0.8125rem', mb: 1 }}
+          >
             {categoryName}
           </Typography>
         )}
@@ -150,7 +155,7 @@ const CatalogItemCard: React.FC<CatalogItemCardProps> = ({
           <Typography
             variant="body2"
             sx={{
-              color: '#6b7280',
+              color: '#64748b',
               fontSize: '0.8125rem',
               mb: 2,
               overflow: 'hidden',
@@ -166,12 +171,25 @@ const CatalogItemCard: React.FC<CatalogItemCardProps> = ({
         )}
 
         {/* Price */}
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-          <Typography variant="h6" sx={{ fontWeight: 700, color: '#1a1a1a', fontSize: '1.125rem' }}>
-            ${item.basePrice.toFixed(2)}
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            mb: 2,
+          }}
+        >
+          <Typography
+            variant="h6"
+            sx={{ fontWeight: 700, color: '#0f172a', fontSize: '1.125rem' }}
+          >
+            ${(item.basePrice ?? 0).toFixed(2)}
           </Typography>
           {item.preparationTime && (
-            <Typography variant="caption" sx={{ color: '#6b7280', fontSize: '0.75rem' }}>
+            <Typography
+              variant="caption"
+              sx={{ color: '#94a3b8', fontSize: '0.75rem' }}
+            >
               {item.preparationTime} min
             </Typography>
           )}
@@ -188,9 +206,9 @@ const CatalogItemCard: React.FC<CatalogItemCardProps> = ({
                 sx={{
                   height: 20,
                   fontSize: '0.6875rem',
-                  backgroundColor: '#f3f4f6',
-                  color: '#374151',
-                  border: '1px solid #e5e7eb',
+                  backgroundColor: 'rgba(25,118,210,0.06)',
+                  color: '#1976d2',
+                  border: '1px solid rgba(25,118,210,0.15)',
                 }}
               />
             ))}
@@ -204,7 +222,7 @@ const CatalogItemCard: React.FC<CatalogItemCardProps> = ({
             gap: 1,
             justifyContent: 'flex-end',
             pt: 2,
-            borderTop: '1px solid #f3f4f6',
+            borderTop: '1px solid #f1f5f9',
           }}
         >
           <Tooltip title="Edit item">
@@ -212,10 +230,10 @@ const CatalogItemCard: React.FC<CatalogItemCardProps> = ({
               size="small"
               onClick={() => onEdit(item)}
               sx={{
-                color: '#6b7280',
+                color: '#94a3b8',
                 '&:hover': {
-                  backgroundColor: '#f3f4f6',
-                  color: '#1a1a1a',
+                  backgroundColor: 'rgba(25,118,210,0.08)',
+                  color: '#1976d2',
                 },
               }}
             >
@@ -227,10 +245,10 @@ const CatalogItemCard: React.FC<CatalogItemCardProps> = ({
               size="small"
               onClick={() => onDelete(item)}
               sx={{
-                color: '#6b7280',
+                color: '#94a3b8',
                 '&:hover': {
-                  backgroundColor: '#fee2e2',
-                  color: '#991b1b',
+                  backgroundColor: 'rgba(239,68,68,0.08)',
+                  color: '#dc2626',
                 },
               }}
             >
