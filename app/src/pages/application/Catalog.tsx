@@ -149,8 +149,12 @@ const CatalogManagementPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // FIX: show a proper UI error when workspaceId is missing instead of silently returning
   const fetchCategories = useCallback(async () => {
-    if (!workspaceId) return;
+    if (!workspaceId) {
+      setError('Workspace not found. Please ensure you are assigned to a workspace.');
+      return;
+    }
     try {
       const data = await catalogService.getCategories(workspaceId);
       setCategories(data);
@@ -161,7 +165,10 @@ const CatalogManagementPage: React.FC = () => {
   }, [workspaceId]);
 
   const fetchCatalogItems = useCallback(async () => {
-    if (!workspaceId) return;
+    if (!workspaceId) {
+      setError('Workspace not found. Please ensure you are assigned to a workspace.');
+      return;
+    }
     try {
       const data = await catalogService.getCatalogItems(workspaceId);
       setCatalogItems(data);
@@ -173,7 +180,12 @@ const CatalogManagementPage: React.FC = () => {
 
   useEffect(() => {
     const loadData = async () => {
-      if (!workspaceId) { setLoading(false); return; }
+      // FIX: show a proper error in the UI when workspaceId is empty
+      if (!workspaceId) {
+        setError('Workspace not found. Please ensure you are assigned to a workspace.');
+        setLoading(false);
+        return;
+      }
       setLoading(true);
       setError(null);
       try {
@@ -238,6 +250,8 @@ const CatalogManagementPage: React.FC = () => {
       }
       setAddDialogOpen(false);
       setSelectedItem(null);
+      // FIX: reset error before re-fetching after mutation
+      setError(null);
       await fetchCatalogItems();
     } catch (err: any) {
       setSnackbar({ open: true, message: err.message || 'Failed to save item', severity: 'error' });
@@ -255,6 +269,8 @@ const CatalogManagementPage: React.FC = () => {
       }
       setAddDialogOpen(false);
       setSelectedCategory(null);
+      // FIX: reset error before re-fetching after mutation
+      setError(null);
       await fetchCategories();
     } catch (err: any) {
       setSnackbar({ open: true, message: err.message || 'Failed to save category', severity: 'error' });
@@ -263,13 +279,19 @@ const CatalogManagementPage: React.FC = () => {
 
   const handleConfirmDelete = async () => {
     try {
-      if (activeTab === 'items' && selectedItem) {
+      // FIX: check selectedItem and selectedCategory independently of activeTab
+      // so the correct entity is always deleted regardless of which tab is active
+      if (selectedItem) {
         await catalogService.deleteCatalogItem(selectedItem.id);
         setSnackbar({ open: true, message: 'Item deleted successfully', severity: 'success' });
+        // FIX: reset error before re-fetching after mutation
+        setError(null);
         await fetchCatalogItems();
-      } else if (activeTab === 'categories' && selectedCategory) {
+      } else if (selectedCategory) {
         await catalogService.deleteCategory(selectedCategory.id);
         setSnackbar({ open: true, message: 'Category deleted successfully', severity: 'success' });
+        // FIX: reset error before re-fetching after mutation
+        setError(null);
         await fetchCategories();
       }
       setDeleteDialogOpen(false);
@@ -576,10 +598,10 @@ const CatalogManagementPage: React.FC = () => {
           setSelectedCategory(null);
         }}
         onConfirm={handleConfirmDelete}
-        title={`Delete ${activeTab === 'items' ? 'Item' : 'Category'}`}
+        title={`Delete ${selectedItem ? 'Item' : 'Category'}`}
         itemName={selectedItem?.name || selectedCategory?.name || ''}
-        itemType={activeTab === 'items' ? 'item' : 'category'}
-        description={`This will remove this ${activeTab === 'items' ? 'item' : 'category'} from the system. This action can be undone later.`}
+        itemType={selectedItem ? 'item' : 'category'}
+        description={`This will remove this ${selectedItem ? 'item' : 'category'} from the system. This action can be undone later.`}
         requireTyping={false}
       />
 

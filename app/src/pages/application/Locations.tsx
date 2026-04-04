@@ -30,6 +30,7 @@ import {
   Close as CloseIcon,
 } from '@mui/icons-material';
 import LocationTabs from './Locations/LocationTabs';
+import QRCodeDialog from './Locations/QRCodeDialog';
 import { ServiceLocationFormDialog, ServiceAreaFormDialog } from '../../features/locations/components';
 import { DeleteConfirmationDialog } from '../../components/dialogs';
 import { locationService } from '../../services/application';
@@ -154,8 +155,11 @@ const LocationsManagementPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const [qrDialogLocation, setQrDialogLocation] = useState<ServiceLocation | null>(null);
+
   const fetchAreas = useCallback(async () => {
     if (!workspaceId) return;
+    setError(null);
     try {
       const data = await locationService.getAreas(workspaceId);
       setAreas(data);
@@ -167,6 +171,7 @@ const LocationsManagementPage: React.FC = () => {
 
   const fetchLocations = useCallback(async () => {
     if (!workspaceId) return;
+    setError(null);
     try {
       const data = await locationService.getLocations(workspaceId);
       setLocations(data);
@@ -236,6 +241,7 @@ const LocationsManagementPage: React.FC = () => {
       }
       setAddDialogOpen(false);
       setSelectedLocation(null);
+      setError(null);
       await fetchLocations();
     } catch (err: any) {
       setSnackbar({ open: true, message: err.message || 'Failed to save location', severity: 'error' });
@@ -253,6 +259,7 @@ const LocationsManagementPage: React.FC = () => {
       }
       setAddDialogOpen(false);
       setSelectedArea(null);
+      setError(null);
       await fetchAreas();
     } catch (err: any) {
       setSnackbar({ open: true, message: err.message || 'Failed to save area', severity: 'error' });
@@ -264,10 +271,12 @@ const LocationsManagementPage: React.FC = () => {
       if (activeTab === 'locations' && selectedLocation) {
         await locationService.deleteLocation(selectedLocation.id);
         setSnackbar({ open: true, message: 'Location deleted successfully', severity: 'success' });
+        setError(null);
         await fetchLocations();
       } else if (activeTab === 'areas' && selectedArea) {
         await locationService.deleteArea(selectedArea.id);
         setSnackbar({ open: true, message: 'Area deleted successfully', severity: 'success' });
+        setError(null);
         await fetchAreas();
       }
       setDeleteDialogOpen(false);
@@ -279,12 +288,24 @@ const LocationsManagementPage: React.FC = () => {
   };
 
   const handleToggleStatus = async (id: string) => {
+    const location = locations.find(l => l.id === id);
+    if (!location) return;
+
+    // Cannot toggle status while a table is occupied — it must be cleared first.
+    if (location.status === 'occupied') {
+      setSnackbar({
+        open: true,
+        message: 'Cannot change status: table is currently occupied',
+        severity: 'error',
+      });
+      return;
+    }
+
     try {
-      const location = locations.find(l => l.id === id);
-      if (!location) return;
       const newStatus = location.status === 'available' ? 'maintenance' : 'available';
       await locationService.updateLocationStatus(id, newStatus);
       setSnackbar({ open: true, message: 'Status updated successfully', severity: 'success' });
+      setError(null);
       await fetchLocations();
     } catch (err: any) {
       setSnackbar({ open: true, message: err.message || 'Failed to update status', severity: 'error' });
@@ -293,9 +314,17 @@ const LocationsManagementPage: React.FC = () => {
 
   const handleGenerateQR = async (locationId: string) => {
     try {
-      await locationService.generateQRCode(locationId);
+      // Store the returned QR URL and open the QR dialog for the relevant location
+      const qrUrl = await locationService.generateQRCode(locationId);
       setSnackbar({ open: true, message: 'QR code generated successfully', severity: 'success' });
+      setError(null);
+      // Refresh so the location record reflects the new qrCode field
       await fetchLocations();
+      // Open the QR dialog with the freshly generated URL injected
+      const updated = locations.find(l => l.id === locationId);
+      if (updated) {
+        setQrDialogLocation({ ...updated, qrCode: qrUrl || updated.qrCode });
+      }
     } catch (err: any) {
       setSnackbar({ open: true, message: err.message || 'Failed to generate QR code', severity: 'error' });
     }
@@ -307,6 +336,10 @@ const LocationsManagementPage: React.FC = () => {
     } catch (err: any) {
       setSnackbar({ open: true, message: err.message || 'Failed to print QR code', severity: 'error' });
     }
+  };
+
+  const handleViewQR = (location: ServiceLocation) => {
+    setQrDialogLocation(location);
   };
 
   if (loading) {
@@ -325,13 +358,15 @@ const LocationsManagementPage: React.FC = () => {
     );
   }
 
-  // Compute filtered count for toolbar result count
+  // Compute filtered count for toolbar result count.
+  // ServiceArea has no 'status' field — it uses 'isActive' (boolean).
   const total = activeTab === 'locations' ? locations.length : areas.length;
   const filteredCount = activeTab === 'locations'
     ? locations.filter((l) => {
         const matchSearch =
           !searchQuery ||
-          l.name?.toLowerCase().includes(searchQuery.toLowerCase());
+          l.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          l.identifier?.toLowerCase().includes(searchQuery.toLowerCase());
         const matchStatus =
           filterStatus === 'all' || l.status === filterStatus;
         return matchSearch && matchStatus;
@@ -340,8 +375,10 @@ const LocationsManagementPage: React.FC = () => {
         const matchSearch =
           !searchQuery ||
           a.name?.toLowerCase().includes(searchQuery.toLowerCase());
+        // ServiceArea uses isActive, not status. Map the filter values accordingly.
         const matchStatus =
-          filterStatus === 'all' || (a as any).status === filterStatus;
+          filterStatus === 'all' ||
+          (filterStatus === 'available' ? a.isActive : !a.isActive);
         return matchSearch && matchStatus;
       }).length;
 
@@ -590,6 +627,7 @@ const LocationsManagementPage: React.FC = () => {
             onToggleStatus={handleToggleStatus}
             onGenerateQR={handleGenerateQR}
             onPrintQR={handlePrintQR}
+            onViewQR={handleViewQR}
           />
         </Box>
       </Box>
@@ -626,6 +664,14 @@ const LocationsManagementPage: React.FC = () => {
         itemType={activeTab === 'locations' ? 'location' : 'area'}
         description={`This will remove this ${activeTab === 'locations' ? 'location' : 'area'} from the system. This action can be undone later.`}
         requireTyping={false}
+      />
+
+      <QRCodeDialog
+        open={!!qrDialogLocation}
+        location={qrDialogLocation}
+        areaName={areas.find(a => a.id === qrDialogLocation?.areaId)?.name}
+        organizationId={userData?.venue?.id || ''}
+        onClose={() => setQrDialogLocation(null)}
       />
 
       <Snackbar

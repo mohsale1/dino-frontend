@@ -4,18 +4,21 @@ import {
   Box,
   Container,
   Typography,
-  CircularProgress,
   Alert,
   AppBar,
   Toolbar,
-  Paper,
+  Chip,
+  Badge,
+  IconButton,
   BottomNavigation,
   BottomNavigationAction,
+  Button,
 } from '@mui/material';
 import {
   Home as HomeIcon,
   Restaurant as MenuIcon,
   Receipt as OrdersIcon,
+  ShoppingCart as CartIcon,
 } from '@mui/icons-material';
 import HomeFragment from './fragments/HomeFragment';
 import MenuFragment from './fragments/MenuFragment';
@@ -24,33 +27,123 @@ import CustomerDetailsBottomSheet from './components/CustomerDetailsBottomSheet'
 import CheckoutPage from './components/CheckoutPage';
 import SwipeToCheckout from './components/SwipeToCheckout';
 import { useCart } from './hooks/useCart';
-import { mockMenuData } from './mockData';
+import { publicMenuService } from '../../../services/application/publicMenuService';
 
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: number;
-  value: number;
-}
+// ─── Design tokens ────────────────────────────────────────────────────────────
+const COLORS = {
+  primary: '#1a1a1a',
+  accent: '#f97316',
+  bg: '#fafafa',
+  cardBg: '#ffffff',
+  border: '#e8e8e8',
+  textPrimary: '#1a1a1a',
+  textSecondary: '#6b7280',
+  inactive: '#9ca3af',
+};
 
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
+// ─── Shimmer keyframe injected via dangerouslySetInnerHTML ────────────────────
+const SHIMMER_CSS = '@keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }';
+const ShimmerStyle: React.FC = () => (
+  // eslint-disable-next-line react/no-danger
+  <style dangerouslySetInnerHTML={{ __html: SHIMMER_CSS }} />
+);
 
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`menu-tabpanel-${index}`}
-      aria-labelledby={`menu-tab-${index}`}
-      {...other}
+const shimmerSx = {
+  background: `linear-gradient(90deg, #ececec 25%, #f5f5f5 50%, #ececec 75%)`,
+  backgroundSize: '200% 100%',
+  animation: 'shimmer 1.4s ease-in-out infinite',
+  borderRadius: 1,
+};
+
+// ─── Skeleton loading UI ───────────────────────────────────────────────────────
+const SkeletonUI: React.FC = () => (
+  <Box sx={{ height: '100dvh', display: 'flex', flexDirection: 'column', bgcolor: COLORS.bg, overflow: 'hidden' }}>
+    {/* inject keyframes */}
+    <ShimmerStyle />
+
+    {/* Fake header */}
+    <Box
+      sx={{
+        height: 56,
+        bgcolor: COLORS.cardBg,
+        borderBottom: `1px solid ${COLORS.border}`,
+        display: 'flex',
+        alignItems: 'center',
+        px: 2,
+        gap: 1.5,
+        flexShrink: 0,
+      }}
     >
-      {value === index && <Box sx={{ py: 3 }}>{children}</Box>}
-    </div>
-  );
-}
+      <Box sx={{ flex: 1 }}>
+        <Box sx={{ ...shimmerSx, height: 16, width: '55%', mb: 0.75 }} />
+        <Box sx={{ ...shimmerSx, height: 11, width: '35%' }} />
+      </Box>
+      <Box sx={{ ...shimmerSx, height: 32, width: 32, borderRadius: '50%' }} />
+    </Box>
 
+    {/* Fake content */}
+    <Box sx={{ flex: 1, overflowY: 'auto', p: 2, pb: '60px' }}>
+      {/* Hero card */}
+      <Box sx={{ ...shimmerSx, height: 160, width: '100%', borderRadius: 2, mb: 2 }} />
+
+      {/* Category chips row */}
+      <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
+        {[80, 100, 70, 90].map((w, i) => (
+          <Box key={i} sx={{ ...shimmerSx, height: 30, width: w, borderRadius: 4 }} />
+        ))}
+      </Box>
+
+      {/* Item cards */}
+      {[1, 2, 3, 4].map((i) => (
+        <Box
+          key={i}
+          sx={{
+            bgcolor: COLORS.cardBg,
+            borderRadius: 2,
+            border: `1px solid ${COLORS.border}`,
+            p: 1.5,
+            mb: 1.5,
+            display: 'flex',
+            gap: 1.5,
+          }}
+        >
+          <Box sx={{ ...shimmerSx, height: 72, width: 72, borderRadius: 1.5, flexShrink: 0 }} />
+          <Box sx={{ flex: 1 }}>
+            <Box sx={{ ...shimmerSx, height: 14, width: '70%', mb: 0.75 }} />
+            <Box sx={{ ...shimmerSx, height: 11, width: '90%', mb: 0.5 }} />
+            <Box sx={{ ...shimmerSx, height: 11, width: '60%', mb: 1 }} />
+            <Box sx={{ ...shimmerSx, height: 14, width: '30%' }} />
+          </Box>
+        </Box>
+      ))}
+    </Box>
+
+    {/* Fake bottom nav */}
+    <Box
+      sx={{
+        height: 60,
+        bgcolor: COLORS.cardBg,
+        borderTop: `1px solid ${COLORS.border}`,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-around',
+        flexShrink: 0,
+      }}
+    >
+      {[1, 2, 3].map((i) => (
+        <Box key={i} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5 }}>
+          <Box sx={{ ...shimmerSx, height: 22, width: 22, borderRadius: 1 }} />
+          <Box sx={{ ...shimmerSx, height: 9, width: 32 }} />
+        </Box>
+      ))}
+    </Box>
+  </Box>
+);
+
+// ─── Main component ────────────────────────────────────────────────────────────
 const PublicMenu: React.FC = () => {
   const { organizationId, tableId } = useParams<{ organizationId: string; tableId: string }>();
-  
+
   const [activeTab, setActiveTab] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -67,7 +160,7 @@ const PublicMenu: React.FC = () => {
 
   const loadMenuData = async () => {
     if (!organizationId || !tableId) {
-      setError('Invalid URL. Please scan the QR code again.');
+      setError('Invalid QR code URL. Please scan the QR code again.');
       setLoading(false);
       return;
     }
@@ -75,11 +168,19 @@ const PublicMenu: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      await new Promise(resolve => setTimeout(resolve, 800));
-      setMenuData(mockMenuData);
+      const data = await publicMenuService.getMenuData(organizationId, tableId);
+      setMenuData(data);
     } catch (err: any) {
-      console.error('Error loading menu:', err);
-      setError(err.message || 'Failed to load menu. Please try again.');
+      const status = err?.response?.status;
+      const detail = err?.response?.data?.detail || err?.response?.data?.message;
+      const msg =
+        status === 404
+          ? 'Menu not found. Please check the QR code and try again.'
+          : status === 401 || status === 403
+          ? 'Please log in to your Dino account and scan the QR code again to view the menu.'
+          : detail || err?.message || 'Failed to load menu. Please try again.';
+      console.error('[PublicMenu] load error:', status, detail, err);
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -91,7 +192,6 @@ const PublicMenu: React.FC = () => {
 
   const handleCheckoutClick = () => {
     if (getCartItemCount() === 0) return;
-    
     if (customerInfo) {
       setShowCheckout(true);
     } else {
@@ -111,40 +211,58 @@ const PublicMenu: React.FC = () => {
     setActiveTab(2);
   };
 
-  if (loading) {
+  // ── Loading state: shimmer skeleton ─────────────────────────────────────────
+  if (loading) return <SkeletonUI />;
+
+  // ── Error state ──────────────────────────────────────────────────────────────
+  if (error) {
     return (
       <Box
         display="flex"
         flexDirection="column"
         justifyContent="center"
         alignItems="center"
-        minHeight="100vh"
-        bgcolor="#f8fafc"
+        sx={{ minHeight: '100dvh', bgcolor: COLORS.bg, px: 3 }}
       >
-        <CircularProgress size={48} thickness={4} sx={{ color: '#0f172a' }} />
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-          Loading menu...
-        </Typography>
+        <Container maxWidth="sm">
+          <Alert
+            severity="error"
+            sx={{ borderRadius: 2, mb: 2 }}
+            action={
+              <Button color="inherit" size="small" onClick={loadMenuData} sx={{ fontWeight: 600 }}>
+                Retry
+              </Button>
+            }
+          >
+            {error}
+          </Alert>
+          <Typography variant="caption" color="text.secondary" display="block" textAlign="center">
+            If the problem persists, please ask restaurant staff for assistance.
+          </Typography>
+        </Container>
       </Box>
     );
   }
 
-  if (error) {
-    return (
-      <Container maxWidth="sm" sx={{ py: 4 }}>
-        <Alert severity="error">{error}</Alert>
-      </Container>
-    );
-  }
-
+  // ── No data state ────────────────────────────────────────────────────────────
   if (!menuData) {
     return (
-      <Container maxWidth="sm" sx={{ py: 4 }}>
-        <Alert severity="warning">No menu data available</Alert>
-      </Container>
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        sx={{ minHeight: '100dvh', bgcolor: COLORS.bg, px: 3 }}
+      >
+        <Container maxWidth="sm">
+          <Alert severity="warning" sx={{ borderRadius: 2 }}>
+            No menu data available. Please scan the QR code again.
+          </Alert>
+        </Container>
+      </Box>
     );
   }
 
+  // ── Checkout page (full-screen takeover) ─────────────────────────────────────
   if (showCheckout && customerInfo) {
     return (
       <CheckoutPage
@@ -159,89 +277,168 @@ const PublicMenu: React.FC = () => {
     );
   }
 
+  const cartItemCount = getCartItemCount();
   const cartTotal = cart.reduce((sum, item) => sum + item.total_price, 0);
 
+  // ── Main render ──────────────────────────────────────────────────────────────
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: '#f8fafc', pb: 8 }}>
-      {/* Header */}
+    <Box
+      sx={{
+        height: '100dvh',
+        display: 'flex',
+        flexDirection: 'column',
+        bgcolor: COLORS.bg,
+        overflow: 'hidden',
+      }}
+    >
+      {/* inject shimmer keyframes (used by child fragments if needed) */}
+      <ShimmerStyle />
+
+      {/* ── Sticky Header ──────────────────────────────────────────────────── */}
       <AppBar
-        position="sticky"
+        position="static"
         elevation={0}
         sx={{
-          bgcolor: 'rgba(255, 255, 255, 0.98)',
-          backdropFilter: 'blur(20px)',
-          borderBottom: '1px solid rgba(15, 23, 42, 0.08)',
-          boxShadow: '0 2px 8px rgba(15, 23, 42, 0.04)',
+          bgcolor: COLORS.cardBg,
+          borderBottom: `1px solid ${COLORS.border}`,
+          flexShrink: 0,
+          zIndex: 10,
         }}
       >
-        <Container maxWidth="md">
-          <Toolbar disableGutters sx={{ py: 1.5, minHeight: 64 }}>
-            <Box sx={{ flex: 1 }}>
-              <Typography variant="h6" fontWeight={700} color="#0f172a">
-                {menuData.organization.name}
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                Table {menuData.table.table_number} â€¢ {menuData.table.capacity} seats
-              </Typography>
-            </Box>
-          </Toolbar>
-        </Container>
+        <Toolbar
+          disableGutters
+          sx={{
+            px: 2,
+            minHeight: '56px !important',
+            height: 56,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+          }}
+        >
+          {/* Restaurant name + table badge */}
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Typography
+              variant="subtitle1"
+              fontWeight={700}
+              color={COLORS.textPrimary}
+              noWrap
+              sx={{ lineHeight: 1.2, fontSize: '1rem' }}
+            >
+              {menuData.organization.name}
+            </Typography>
+            <Chip
+              label={`Table ${menuData.table.table_number}`}
+              size="small"
+              sx={{
+                height: 18,
+                fontSize: '0.65rem',
+                fontWeight: 600,
+                bgcolor: '#fff7ed',
+                color: COLORS.accent,
+                border: `1px solid #fed7aa`,
+                borderRadius: '6px',
+                mt: 0.25,
+                '& .MuiChip-label': { px: 0.75 },
+              }}
+            />
+          </Box>
+
+          {/* Cart icon with badge */}
+          {cartItemCount > 0 && (
+            <IconButton
+              size="small"
+              onClick={handleCheckoutClick}
+              sx={{
+                bgcolor: COLORS.accent,
+                color: '#fff',
+                width: 36,
+                height: 36,
+                '&:hover': { bgcolor: '#ea6c0a' },
+              }}
+            >
+              <Badge
+                badgeContent={cartItemCount}
+                sx={{
+                  '& .MuiBadge-badge': {
+                    bgcolor: COLORS.primary,
+                    color: '#fff',
+                    fontSize: '0.6rem',
+                    minWidth: 16,
+                    height: 16,
+                    top: -4,
+                    right: -4,
+                  },
+                }}
+              >
+                <CartIcon sx={{ fontSize: 18 }} />
+              </Badge>
+            </IconButton>
+          )}
+        </Toolbar>
       </AppBar>
 
-      {/* Content */}
-      <Container maxWidth="md">
-        <TabPanel value={activeTab} index={0}>
+      {/* ── Scrollable Content Area (THE KEY FIX) ──────────────────────────── */}
+      <Box
+        sx={{
+          flex: 1,
+          overflowY: 'auto',
+          WebkitOverflowScrolling: 'touch',
+          // bottom padding: bottom-nav (60px) + swipe bar when visible (~72px)
+          pb: cartItemCount > 0 ? '132px' : '60px',
+        }}
+      >
+        {activeTab === 0 && (
           <HomeFragment menuData={menuData} onViewMenu={() => setActiveTab(1)} />
-        </TabPanel>
-
-        <TabPanel value={activeTab} index={1}>
+        )}
+        {activeTab === 1 && (
           <MenuFragment
             menuData={menuData}
             cart={cart}
             onAddToCart={addToCart}
             onUpdateQuantity={updateQuantity}
           />
-        </TabPanel>
-
-        <TabPanel value={activeTab} index={2}>
+        )}
+        {activeTab === 2 && (
           <OrdersFragment
             organizationId={organizationId!}
             tableId={tableId!}
             customerPhone={customerInfo?.phone}
           />
-        </TabPanel>
-      </Container>
+        )}
+      </Box>
 
-      {/* Swipe to Checkout */}
-      {getCartItemCount() > 0 && !showCheckout && (
+      {/* ── Swipe to Checkout (sits above bottom nav) ──────────────────────── */}
+      {cartItemCount > 0 && !showCheckout && (
         <Box
           sx={{
-            position: 'fixed',
-            bottom: 64,
+            position: 'absolute',
+            bottom: 60,
             left: 0,
             right: 0,
             zIndex: 1200,
-            width: '100%',
+            // allow touch-scroll to pass through the wrapper; only the slider
+            // handle inside SwipeToCheckout should have touchAction: 'none'
+            pointerEvents: 'none',
+            '& > *': { pointerEvents: 'auto' },
           }}
         >
           <SwipeToCheckout
             onSwipeComplete={handleCheckoutClick}
-            itemCount={getCartItemCount()}
+            itemCount={cartItemCount}
             total={cartTotal}
           />
         </Box>
       )}
 
-      {/* Bottom Navigation */}
-      <Paper
-        elevation={8}
+      {/* ── Bottom Navigation ───────────────────────────────────────────────── */}
+      <Box
         sx={{
-          position: 'fixed',
-          bottom: 0,
-          left: 0,
-          right: 0,
+          height: 60,
+          flexShrink: 0,
+          bgcolor: COLORS.cardBg,
+          borderTop: `1px solid ${COLORS.border}`,
           zIndex: 1100,
-          borderTop: '1px solid rgba(15, 23, 42, 0.08)',
         }}
       >
         <BottomNavigation
@@ -249,31 +446,91 @@ const PublicMenu: React.FC = () => {
           onChange={handleTabChange}
           showLabels
           sx={{
-            height: 64,
+            height: 60,
+            bgcolor: 'transparent',
             '& .MuiBottomNavigationAction-root': {
-              color: '#64748b',
+              color: COLORS.inactive,
               minWidth: 'auto',
+              py: 0.75,
+              gap: 0.25,
               '&.Mui-selected': {
-                color: '#0f172a',
+                color: COLORS.primary,
               },
             },
             '& .MuiBottomNavigationAction-label': {
-              fontSize: '0.75rem',
+              fontSize: '0.7rem',
               fontWeight: 500,
               '&.Mui-selected': {
-                fontSize: '0.75rem',
-                fontWeight: 600,
+                fontSize: '0.7rem',
+                fontWeight: 700,
               },
             },
           }}
         >
-          <BottomNavigationAction label="Home" icon={<HomeIcon />} />
-          <BottomNavigationAction label="Menu" icon={<MenuIcon />} />
-          <BottomNavigationAction label="Orders" icon={<OrdersIcon />} />
+          <BottomNavigationAction
+            label="Home"
+            icon={
+              <Box sx={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <HomeIcon sx={{ fontSize: 22 }} />
+                {activeTab === 0 && (
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      bottom: -6,
+                      width: 4,
+                      height: 4,
+                      borderRadius: '50%',
+                      bgcolor: COLORS.primary,
+                    }}
+                  />
+                )}
+              </Box>
+            }
+          />
+          <BottomNavigationAction
+            label="Menu"
+            icon={
+              <Box sx={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <MenuIcon sx={{ fontSize: 22 }} />
+                {activeTab === 1 && (
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      bottom: -6,
+                      width: 4,
+                      height: 4,
+                      borderRadius: '50%',
+                      bgcolor: COLORS.primary,
+                    }}
+                  />
+                )}
+              </Box>
+            }
+          />
+          <BottomNavigationAction
+            label="Orders"
+            icon={
+              <Box sx={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <OrdersIcon sx={{ fontSize: 22 }} />
+                {activeTab === 2 && (
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      bottom: -6,
+                      width: 4,
+                      height: 4,
+                      borderRadius: '50%',
+                      bgcolor: COLORS.primary,
+                    }}
+                  />
+                )}
+              </Box>
+            }
+          />
         </BottomNavigation>
-      </Paper>
+      </Box>
 
-      {/* Customer Details Bottom Sheet */}
+      {/* ── Customer Details Bottom Sheet ───────────────────────────────────── */}
       <CustomerDetailsBottomSheet
         open={showCustomerDetails}
         onClose={() => setShowCustomerDetails(false)}

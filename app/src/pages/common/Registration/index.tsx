@@ -20,6 +20,7 @@ import {
   useMediaQuery,
   Stack,
   Divider,
+  Chip,
 } from '@mui/material';
 import {
   ArrowBack,
@@ -34,6 +35,9 @@ import {
   Security,
   VpnKey,
   Payment,
+  CheckCircleOutline,
+  QrCode2,
+  Dashboard,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../contexts/common/Auth';
@@ -51,13 +55,36 @@ import {
 } from './Steps';
 import { RegistrationFormData, initialFormData } from './types';
 
+// ─── Design tokens (mirrors Login page BRAND) ────────────────────────────────
+const BRAND = {
+  primary:      '#1976D2',
+  primaryHover: '#1565C0',
+  primaryLight: '#42A5F5',
+  panelBg:      '#0d1b2e',
+  panelBg2:     '#112240',
+  accent:       'rgba(66,165,245,0.15)',
+  accentBorder: 'rgba(66,165,245,0.25)',
+  green:        '#10b981',
+  greenHover:   '#059669',
+};
+
 const steps = [
-  { label: 'Code',         icon: <VpnKey />,       description: 'Enter registration code' },
-  { label: 'Workspace',    icon: <BusinessIcon />,  description: 'Create your workspace' },
-  { label: 'Billing',      icon: <Payment />,       description: 'Billing information' },
-  { label: 'Organization', icon: <Store />,         description: 'Add organization details' },
-  { label: 'Admin Account',icon: <Person />,        description: 'Set up admin account' },
-  { label: 'Review',       icon: <Preview />,       description: 'Review and submit' },
+  { label: 'Code',          icon: <VpnKey />,       description: 'Enter registration code' },
+  { label: 'Workspace',     icon: <BusinessIcon />,  description: 'Create your workspace' },
+  { label: 'Billing',       icon: <Payment />,       description: 'Billing information' },
+  { label: 'Organization',  icon: <Store />,         description: 'Add organization details' },
+  { label: 'Admin Account', icon: <Person />,        description: 'Set up admin account' },
+  { label: 'Review',        icon: <Preview />,       description: 'Review and submit' },
+];
+
+// Features shown in the left branding panel — mirrors Login APP_FEATURES style
+const APP_FEATURES = [
+  { icon: CheckCircleOutline, text: 'Quick 6-step setup process' },
+  { icon: Speed,              text: 'Start selling in minutes' },
+  { icon: QrCode2,            text: 'QR-based ordering system' },
+  { icon: Dashboard,          text: 'Real-time analytics dashboard' },
+  { icon: Store,              text: 'Full catalog & venue management' },
+  { icon: Security,           text: 'Secure & reliable platform' },
 ];
 
 // Thin scrollbar mixin reused in multiple panels
@@ -393,13 +420,128 @@ const RegisterPage: React.FC = () => {
 
   const progress = (activeStep / steps.length) * 100;
 
-  const features = [
-    { icon: <CheckCircle sx={{ fontSize: 20 }} />, text: 'Quick 5-Step Setup' },
-    { icon: <Speed     sx={{ fontSize: 20 }} />, text: 'Start Selling in Minutes' },
-    { icon: <Security  sx={{ fontSize: 20 }} />, text: 'Secure & Reliable' },
-  ];
+  // ─── Progress bar ─────────────────────────────────────────────────────────
+  // light=true → used on white right panel; light=false → used on dark left panel
+  const progressBar = (light: boolean) => (
+    <Box sx={{ mt: light ? 0 : 1 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 0.5 }}>
+        <Box
+          sx={{
+            flex: 1,
+            height: 6,
+            borderRadius: 3,
+            backgroundColor: light ? '#e2e8f0' : alpha('#ffffff', 0.15),
+            overflow: 'hidden',
+          }}
+        >
+          <Box
+            sx={{
+              height: '100%',
+              width: `${progress}%`,
+              backgroundColor: BRAND.primary,
+              transition: 'width 0.3s ease',
+              borderRadius: 3,
+            }}
+          />
+        </Box>
+        <Typography
+          variant="caption"
+          sx={{ color: light ? BRAND.primary : '#ffffff', fontWeight: 700, minWidth: 36 }}
+        >
+          {Math.round(progress)}%
+        </Typography>
+      </Box>
+      <Typography variant="caption" sx={{ color: light ? '#64748b' : alpha('#ffffff', 0.6) }}>
+        Step {activeStep + 1} of {steps.length}: {steps[activeStep].description}
+      </Typography>
+    </Box>
+  );
 
-  // ─── Shared: navigation buttons + login link (rendered inside scrollable area) ───
+  // ─── Compact stepper (right panel, desktop) ───────────────────────────────
+  const compactStepper = (
+    <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 0 }}>
+      {steps.map((step, index) => (
+        <Step key={step.label}>
+          <StepLabel
+            StepIconComponent={() => (
+              <Box
+                sx={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor:
+                    index < activeStep
+                      ? BRAND.green
+                      : index === activeStep
+                      ? BRAND.primary
+                      : '#e2e8f0',
+                  color: index <= activeStep ? '#ffffff' : '#94a3b8',
+                  transition: 'all 0.3s ease',
+                  flexShrink: 0,
+                  boxShadow:
+                    index === activeStep
+                      ? `0 0 0 3px ${alpha(BRAND.primary, 0.18)}`
+                      : index < activeStep
+                      ? `0 0 0 3px ${alpha(BRAND.green, 0.15)}`
+                      : 'none',
+                }}
+              >
+                {index < activeStep
+                  ? <CheckCircle sx={{ fontSize: 18 }} />
+                  : React.cloneElement(step.icon, { sx: { fontSize: 16 } })}
+              </Box>
+            )}
+            sx={{
+              '& .MuiStepLabel-label': {
+                display: { xs: 'none', sm: 'block' },
+                color: index <= activeStep ? '#0f172a' : '#94a3b8',
+                fontWeight: index === activeStep ? 700 : 500,
+                fontSize: '0.75rem',
+                mt: 0.5,
+              },
+            }}
+          >
+            {step.label}
+          </StepLabel>
+        </Step>
+      ))}
+    </Stepper>
+  );
+
+  // ─── Home button ──────────────────────────────────────────────────────────
+  const homeButton = (
+    <Button
+      variant="outlined"
+      startIcon={<Home />}
+      onClick={() => navigate('/')}
+      size="small"
+      sx={{
+        borderRadius: 2,
+        textTransform: 'none',
+        fontWeight: 600,
+        px: 2,
+        py: 0.75,
+        fontSize: '0.875rem',
+        borderWidth: 1.5,
+        borderColor: '#e2e8f0',
+        color: '#64748b',
+        flexShrink: 0,
+        '&:hover': {
+          borderWidth: 1.5,
+          borderColor: BRAND.primary,
+          backgroundColor: alpha(BRAND.primary, 0.04),
+          color: BRAND.primary,
+        },
+      }}
+    >
+      Home
+    </Button>
+  );
+
+  // ─── Navigation buttons + sign-in link ───────────────────────────────────
   const navigationButtons = (
     <>
       <Stack direction="row" spacing={2} justifyContent="space-between" sx={{ mt: 3 }}>
@@ -420,9 +562,9 @@ const RegisterPage: React.FC = () => {
             color: '#64748b',
             '&:hover': {
               borderWidth: 1.5,
-              borderColor: '#0f172a',
-              backgroundColor: '#f8fafc',
-              color: '#0f172a',
+              borderColor: BRAND.primary,
+              backgroundColor: alpha(BRAND.primary, 0.04),
+              color: BRAND.primary,
             },
             '&:disabled': {
               borderColor: '#e2e8f0',
@@ -447,18 +589,22 @@ const RegisterPage: React.FC = () => {
               px: 4,
               py: 1.5,
               fontSize: '1rem',
-              backgroundColor: '#0f172a',
+              backgroundColor: BRAND.primary,
               color: '#ffffff',
-              boxShadow: '0 4px 14px rgba(15,23,42,0.25)',
+              boxShadow: '0 4px 14px rgba(25,118,210,0.3)',
               '&:hover': {
-                backgroundColor: '#1e293b',
-                boxShadow: '0 6px 20px rgba(15,23,42,0.35)',
+                backgroundColor: BRAND.primaryHover,
+                boxShadow: '0 6px 20px rgba(25,118,210,0.4)',
                 transform: 'translateY(-1px)',
+              },
+              '&:disabled': {
+                backgroundColor: alpha(BRAND.primary, 0.4),
+                color: 'rgba(255,255,255,0.7)',
               },
               transition: 'all 0.2s ease',
             }}
           >
-            Continue
+            {loading ? <CircularProgress size={22} sx={{ color: '#ffffff' }} /> : 'Continue'}
           </Button>
         ) : (
           <Button
@@ -474,11 +620,11 @@ const RegisterPage: React.FC = () => {
               px: 4,
               py: 1.5,
               fontSize: '1rem',
-              backgroundColor: '#10b981',
+              backgroundColor: BRAND.green,
               color: '#ffffff',
               boxShadow: '0 4px 14px rgba(16,185,129,0.25)',
               '&:hover': {
-                backgroundColor: '#059669',
+                backgroundColor: BRAND.greenHover,
                 boxShadow: '0 6px 20px rgba(16,185,129,0.35)',
                 transform: 'translateY(-1px)',
               },
@@ -506,7 +652,7 @@ const RegisterPage: React.FC = () => {
               fontWeight: 700,
               p: 0,
               minWidth: 'auto',
-              color: '#0f172a',
+              color: BRAND.primary,
               '&:hover': { backgroundColor: 'transparent', textDecoration: 'underline' },
             }}
           >
@@ -517,151 +663,61 @@ const RegisterPage: React.FC = () => {
     </>
   );
 
-  // ─── Shared: progress bar ────────────────────────────────────────────────────
-  const progressBar = (light: boolean) => (
-    <Box sx={{ mt: light ? 0 : 1 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 0.5 }}>
-        <Box
-          sx={{
-            flex: 1,
-            height: 6,
-            borderRadius: 3,
-            backgroundColor: light ? '#e2e8f0' : alpha('#ffffff', 0.15),
-            overflow: 'hidden',
-          }}
-        >
-          <Box
-            sx={{
-              height: '100%',
-              width: `${progress}%`,
-              backgroundColor: light ? '#0f172a' : '#10b981',
-              transition: 'width 0.3s ease',
-              borderRadius: 3,
-            }}
-          />
-        </Box>
-        <Typography
-          variant="caption"
-          sx={{ color: light ? '#0f172a' : '#ffffff', fontWeight: 700, minWidth: 36 }}
-        >
-          {Math.round(progress)}%
-        </Typography>
-      </Box>
-      <Typography variant="caption" sx={{ color: light ? '#64748b' : alpha('#ffffff', 0.6) }}>
-        Step {activeStep + 1} of {steps.length}: {steps[activeStep].description}
-      </Typography>
-    </Box>
-  );
-
-  // ─── Shared: compact stepper ─────────────────────────────────────────────────
-  const compactStepper = (
-    <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 0 }}>
-      {steps.map((step, index) => (
-        <Step key={step.label}>
-          <StepLabel
-            StepIconComponent={() => (
-              <Box
-                sx={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: '50%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  backgroundColor:
-                    index < activeStep
-                      ? '#10b981'
-                      : index === activeStep
-                      ? '#0f172a'
-                      : '#e2e8f0',
-                  color: index <= activeStep ? '#ffffff' : '#94a3b8',
-                  transition: 'all 0.3s ease',
-                  flexShrink: 0,
-                }}
-              >
-                {index < activeStep
-                  ? <CheckCircle sx={{ fontSize: 18 }} />
-                  : React.cloneElement(step.icon, { sx: { fontSize: 16 } })}
-              </Box>
-            )}
-            sx={{
-              '& .MuiStepLabel-label': {
-                color: index <= activeStep ? '#0f172a' : '#94a3b8',
-                fontWeight: index === activeStep ? 700 : 500,
-                fontSize: '0.75rem',
-                mt: 0.5,
-              },
-            }}
-          >
-            {step.label}
-          </StepLabel>
-        </Step>
-      ))}
-    </Stepper>
-  );
-
-  // ─── Home button ─────────────────────────────────────────────────────────────
-  const homeButton = (
-    <Button
-      variant="outlined"
-      startIcon={<Home />}
-      onClick={() => navigate('/')}
-      size="small"
+  // ─── Shared error alert ───────────────────────────────────────────────────
+  const errorAlert = error ? (
+    <Alert
+      severity="error"
+      onClose={() => setError('')}
       sx={{
+        mb: 2.5,
         borderRadius: 2,
-        textTransform: 'none',
-        fontWeight: 600,
-        px: 2,
-        py: 0.75,
-        fontSize: '0.875rem',
-        borderWidth: 1.5,
-        borderColor: '#e2e8f0',
-        color: '#64748b',
-        '&:hover': {
-          borderWidth: 1.5,
-          borderColor: '#0f172a',
-          backgroundColor: '#f8fafc',
-          color: '#0f172a',
-        },
+        backgroundColor: alpha('#ef4444', 0.1),
+        color: '#dc2626',
+        border: `1px solid ${alpha('#ef4444', 0.3)}`,
+        '& .MuiAlert-icon': { color: '#ef4444' },
       }}
     >
-      Home
-    </Button>
-  );
+      {error}
+    </Alert>
+  ) : null;
 
   // ═══════════════════════════════════════════════════════════════════════════
   // DESKTOP LAYOUT (md+)
   // ═══════════════════════════════════════════════════════════════════════════
   const desktopLayout = (
-    <Box sx={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
+    <Box sx={{ display: 'flex', height: '100vh', overflow: 'hidden', bgcolor: BRAND.panelBg }}>
 
       {/* LEFT BRANDING PANEL */}
       <Box
         sx={{
           flex: 1,
-          background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'center',
           alignItems: 'center',
-          p: 6,
+          px: { md: 6, lg: 10 },
+          py: 8,
+          background: `linear-gradient(160deg, ${BRAND.panelBg} 0%, ${BRAND.panelBg2} 60%, ${BRAND.panelBg} 100%)`,
+          borderRight: `1px solid ${BRAND.accentBorder}`,
           position: 'relative',
           overflow: 'hidden',
         }}
       >
-        {/* Background radial glow */}
+        {/* Blue radial glow — matches Login */}
         <Box
           sx={{
             position: 'absolute',
-            inset: 0,
-            backgroundImage: `
-              radial-gradient(circle at 20% 30%, ${alpha('#ffffff', 0.05)} 0%, transparent 50%),
-              radial-gradient(circle at 80% 70%, ${alpha('#ffffff', 0.03)} 0%, transparent 50%)
-            `,
+            top: '20%',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: 320,
+            height: 320,
+            borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(25,118,210,0.08) 0%, transparent 70%)',
             pointerEvents: 'none',
           }}
         />
-        {/* Grid pattern */}
+        {/* Subtle grid pattern */}
         <Box
           sx={{
             position: 'absolute',
@@ -675,78 +731,56 @@ const RegisterPage: React.FC = () => {
           }}
         />
 
-        <Box sx={{ position: 'relative', zIndex: 2, textAlign: 'center', maxWidth: 420, width: '100%' }}>
+        <Box sx={{ position: 'relative', zIndex: 2, textAlign: 'center', maxWidth: 340, width: '100%' }}>
+          {/* Logo */}
           <Box sx={{ mb: 3, display: 'flex', justifyContent: 'center' }}>
-            <DinoLogo size={64} animated />
+            <DinoLogo size={72} animated />
           </Box>
 
           <Typography
             variant="h4"
-            sx={{ color: '#ffffff', fontWeight: 800, mb: 1.5, letterSpacing: '-0.5px' }}
+            sx={{ color: '#ffffff', fontWeight: 700, mb: 1.5, letterSpacing: '-0.5px' }}
           >
             Join Dino Today
           </Typography>
 
           <Typography
             variant="body1"
-            sx={{ color: alpha('#ffffff', 0.7), mb: 4, lineHeight: 1.6 }}
+            sx={{ color: 'rgba(255,255,255,0.55)', mb: 4, lineHeight: 1.6 }}
           >
             Start your digital transformation journey
           </Typography>
 
-          {/* Features */}
-          <Stack spacing={2} sx={{ mb: 4 }}>
-            {features.map((feature, index) => (
+          <Divider sx={{ width: 48, borderColor: BRAND.accentBorder, mb: 4, mx: 'auto' }} />
+
+          {/* Feature list — Login APP_FEATURES style */}
+          <Box display="flex" flexDirection="column" gap={2} width="100%">
+            {APP_FEATURES.map(({ icon: Icon, text }, index) => (
               <Box
                 key={index}
+                display="flex"
+                alignItems="center"
+                gap={2}
                 sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 2,
                   px: 2,
                   py: 1.25,
                   borderRadius: 2,
-                  backgroundColor: alpha('#ffffff', 0.05),
-                  border: `1px solid ${alpha('#ffffff', 0.1)}`,
+                  bgcolor: BRAND.accent,
+                  border: `1px solid ${BRAND.accentBorder}`,
+                  textAlign: 'left',
                 }}
               >
-                <Box
-                  sx={{
-                    width: 36,
-                    height: 36,
-                    borderRadius: '50%',
-                    backgroundColor: alpha('#ffffff', 0.1),
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: '#ffffff',
-                    flexShrink: 0,
-                  }}
-                >
-                  {feature.icon}
-                </Box>
-                <Typography variant="body2" sx={{ color: '#ffffff', fontWeight: 500 }}>
-                  {feature.text}
+                <Icon sx={{ fontSize: 20, color: BRAND.primaryLight, flexShrink: 0 }} />
+                <Typography variant="body2" color="rgba(255,255,255,0.8)" fontWeight={500}>
+                  {text}
                 </Typography>
               </Box>
             ))}
-          </Stack>
-
-          {/* Progress indicator */}
-          <Box
-            sx={{
-              p: 2.5,
-              borderRadius: 2,
-              backgroundColor: alpha('#ffffff', 0.05),
-              border: `1px solid ${alpha('#ffffff', 0.1)}`,
-              textAlign: 'left',
-            }}
-          >
-            <Typography variant="body2" sx={{ color: alpha('#ffffff', 0.7), mb: 1 }}>
-              Registration Progress
-            </Typography>
-            {progressBar(false)}
           </Box>
+
+          <Typography variant="caption" color="rgba(255,255,255,0.25)" mt={5} display="block" textAlign="center">
+            Dino &copy; {new Date().getFullYear()}
+          </Typography>
         </Box>
       </Box>
 
@@ -760,7 +794,7 @@ const RegisterPage: React.FC = () => {
           overflow: 'hidden',
         }}
       >
-        {/* Top bar — home button + title */}
+        {/* Top bar — title + home button */}
         <Box
           sx={{
             flexShrink: 0,
@@ -801,22 +835,7 @@ const RegisterPage: React.FC = () => {
             ...thinScrollbar,
           }}
         >
-          {error && (
-            <Alert
-              severity="error"
-              onClose={() => setError('')}
-              sx={{
-                mb: 2.5,
-                borderRadius: 2,
-                backgroundColor: alpha('#ef4444', 0.1),
-                color: '#dc2626',
-                border: `1px solid ${alpha('#ef4444', 0.3)}`,
-                '& .MuiAlert-icon': { color: '#ef4444' },
-              }}
-            >
-              {error}
-            </Alert>
-          )}
+          {errorAlert}
 
           <Box sx={{ mb: 1 }}>
             {renderStepContent(activeStep)}
@@ -838,22 +857,22 @@ const RegisterPage: React.FC = () => {
         overflow: 'hidden',
         display: 'flex',
         flexDirection: 'column',
-        bgcolor: '#0f172a',
+        bgcolor: BRAND.panelBg,
       }}
     >
-      {/* Dark branded header */}
+      {/* Dark branded header — matches Login mobile header exactly */}
       <Box
         sx={{
           flexShrink: 0,
           position: 'relative',
           overflow: 'hidden',
           px: 3,
-          pt: 3.5,
-          pb: 2.5,
+          pt: 4,
+          pb: 3,
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+          background: `linear-gradient(160deg, ${BRAND.panelBg} 0%, ${BRAND.panelBg2} 100%)`,
           '&::before': {
             content: '""',
             position: 'absolute',
@@ -862,7 +881,7 @@ const RegisterPage: React.FC = () => {
             width: 220,
             height: 220,
             borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(16,185,129,0.1) 0%, transparent 70%)',
+            background: 'radial-gradient(circle, rgba(25,118,210,0.12) 0%, transparent 70%)',
             pointerEvents: 'none',
           },
         }}
@@ -872,40 +891,63 @@ const RegisterPage: React.FC = () => {
           sx={{
             position: 'absolute',
             inset: 0,
-            backgroundImage: `
-              linear-gradient(${alpha('#ffffff', 0.025)} 1px, transparent 1px),
-              linear-gradient(90deg, ${alpha('#ffffff', 0.025)} 1px, transparent 1px)
-            `,
+            backgroundImage: 'linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px)',
             backgroundSize: '32px 32px',
             pointerEvents: 'none',
           }}
         />
 
-        <Box sx={{ position: 'relative', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <DinoLogo size={44} animated />
+        <Box sx={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
+          <DinoLogo size={48} animated />
           <Typography
             variant="h6"
             fontWeight={700}
             color="white"
-            mt={1.25}
+            mt={1.5}
             textAlign="center"
             sx={{ letterSpacing: '-0.3px' }}
           >
-            Create Account
+            Join Dino Today
           </Typography>
-          <Box sx={{ mt: 1.5, width: '100%', maxWidth: 320 }}>
+          <Typography variant="caption" color="rgba(255,255,255,0.5)" mt={0.5} textAlign="center" maxWidth={260} lineHeight={1.5}>
+            Start your digital transformation journey
+          </Typography>
+
+          {/* Feature chips — matches Login mobile chip row */}
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75, mt: 2, justifyContent: 'center' }}>
+            {APP_FEATURES.map(({ icon: Icon, text }, i) => (
+              <Chip
+                key={i}
+                icon={<Icon sx={{ fontSize: '13px !important', color: `${BRAND.primaryLight} !important` }} />}
+                label={text}
+                size="small"
+                sx={{
+                  bgcolor: BRAND.accent,
+                  border: `1px solid ${BRAND.accentBorder}`,
+                  color: 'rgba(255,255,255,0.8)',
+                  fontSize: '0.7rem',
+                  fontWeight: 500,
+                  height: 26,
+                  '& .MuiChip-icon': { ml: 0.5 },
+                }}
+              />
+            ))}
+          </Box>
+
+          {/* Progress bar below chips */}
+          <Box sx={{ mt: 2, width: '100%', maxWidth: 340 }}>
             {progressBar(false)}
           </Box>
         </Box>
       </Box>
 
-      {/* White card — scrollable */}
+      {/* White card — scrollable, fills remaining height */}
       <Box
         sx={{
           flex: 1,
           bgcolor: '#ffffff',
           borderRadius: '20px 20px 0 0',
-          mt: -1.5,
+          mt: -2,
           position: 'relative',
           zIndex: 1,
           boxShadow: '0 -4px 24px rgba(0,0,0,0.15)',
@@ -918,7 +960,7 @@ const RegisterPage: React.FC = () => {
           ...thinScrollbar,
         }}
       >
-        {/* Home button + step label */}
+        {/* Step label + home button */}
         <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 2 }}>
           <Box>
             <Typography variant="subtitle1" fontWeight={700} color="#0f172a" lineHeight={1.2}>
@@ -931,22 +973,57 @@ const RegisterPage: React.FC = () => {
           {homeButton}
         </Box>
 
-        {error && (
-          <Alert
-            severity="error"
-            onClose={() => setError('')}
-            sx={{
-              mb: 2,
-              borderRadius: 2,
-              backgroundColor: alpha('#ef4444', 0.1),
-              color: '#dc2626',
-              border: `1px solid ${alpha('#ef4444', 0.3)}`,
-              '& .MuiAlert-icon': { color: '#ef4444' },
-            }}
-          >
-            {error}
-          </Alert>
-        )}
+        {/* Icon-only stepper on mobile */}
+        <Box sx={{ mb: 2 }}>
+          <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 0 }}>
+            {steps.map((step, index) => (
+              <Step key={step.label}>
+                <StepLabel
+                  StepIconComponent={() => (
+                    <Box
+                      sx={{
+                        width: 28,
+                        height: 28,
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        backgroundColor:
+                          index < activeStep
+                            ? BRAND.green
+                            : index === activeStep
+                            ? BRAND.primary
+                            : '#e2e8f0',
+                        color: index <= activeStep ? '#ffffff' : '#94a3b8',
+                        transition: 'all 0.3s ease',
+                        flexShrink: 0,
+                        boxShadow:
+                          index === activeStep
+                            ? `0 0 0 3px ${alpha(BRAND.primary, 0.18)}`
+                            : index < activeStep
+                            ? `0 0 0 3px ${alpha(BRAND.green, 0.15)}`
+                            : 'none',
+                      }}
+                    >
+                      {index < activeStep
+                        ? <CheckCircle sx={{ fontSize: 15 }} />
+                        : React.cloneElement(step.icon, { sx: { fontSize: 14 } })}
+                    </Box>
+                  )}
+                  sx={{
+                    '& .MuiStepLabel-label': {
+                      display: 'none',
+                    },
+                  }}
+                >
+                  {step.label}
+                </StepLabel>
+              </Step>
+            ))}
+          </Stepper>
+        </Box>
+
+        {errorAlert}
 
         <Box sx={{ mb: 1 }}>
           {renderStepContent(activeStep)}

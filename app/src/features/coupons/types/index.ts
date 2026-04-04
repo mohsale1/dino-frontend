@@ -40,6 +40,7 @@ export interface CouponCreate {
 }
 
 export interface CouponUpdate {
+  code?: string;
   name?: string;
   description?: string;
   discountType?: 'percentage' | 'fixed';

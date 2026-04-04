@@ -33,10 +33,16 @@ import { apiService } from './utils/api';
 import { initializePerformanceMonitoring } from './utils/performance';
 import { PageTransitionLoader, usePageTransition } from './components/ui/PageTransitionLoader';
 import { ROLE_COLORS } from './constants/app';
+import { useLocation } from 'react-router-dom';
 
 const theme = createTheme({
   palette: {
     mode: (RUNTIME_CONFIG.DEFAULT_THEME as 'light' | 'dark') || 'light',
+    primary: {
+      main: '#1976D2',
+      light: '#42A5F5',
+      dark: '#1565C0',
+    },
   },
 });
 
@@ -46,6 +52,9 @@ const PublicMenu = React.lazy(() => import('./pages/public/Menu'));
 const AppContent = memo(() => {
   const { loading, userPermissions } = useAuth();
   const { transitioning } = usePageTransition();
+  const location = useLocation();
+
+  const isPublicMenu = /^\/[^/]+\/[^/]+\/menu/.test(location.pathname);
 
   const rawRole = (userPermissions?.role?.name || '').toLowerCase();
   const roleKey: keyof typeof ROLE_COLORS = rawRole.includes('owner') || rawRole.includes('super')
@@ -58,7 +67,7 @@ const AppContent = memo(() => {
   return (
     <>
       <PageTransitionLoader
-        visible={loading || transitioning}
+        visible={!isPublicMenu && (loading || transitioning)}
         message={loading ? 'Initialising...' : 'Loading...'}
         color={loaderColor}
       />

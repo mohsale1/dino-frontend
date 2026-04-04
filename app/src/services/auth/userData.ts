@@ -148,12 +148,12 @@ class UserDataService {
             name: venueAny.name || 'Unknown Venue',
             description: venueAny.description || '',
             location: {
-              landmark: location.landmark || '',
-              address: location.address || '',
-              state: location.state || '',
-              city: location.city || '',
-              postalCode: location.postal_code || location.postalCode || '',
-              country: location.country || ''
+              landmark: venueAny.landmark || location.landmark || '',
+              address: venueAny.address || location.address || '',
+              state: venueAny.state || location.state || '',
+              city: venueAny.city || location.city || '',
+              postalCode: venueAny.postal_code || venueAny.postalCode || location.postal_code || location.postalCode || '',
+              country: venueAny.country || location.country || ''
             },
             phone: venueAny.phone || '',
             email: venueAny.email || '',

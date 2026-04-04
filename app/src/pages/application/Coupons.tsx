@@ -149,11 +149,13 @@ const Coupons: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // getCoupons() already returns Coupon[] — the service handles paginated unwrapping internally.
   const fetchCoupons = useCallback(async () => {
     if (!workspaceId) return;
+    setError(null);
     try {
       const data = await couponService.getCoupons(workspaceId);
-      setCoupons(data);
+      setCoupons(Array.isArray(data) ? data : []);
     } catch (err: any) {
       console.error('Failed to fetch coupons:', err);
       setError(err.message || 'Failed to load coupons');
@@ -201,11 +203,20 @@ const Coupons: React.FC = () => {
 
   const handleSaveCoupon = async (data: any) => {
     try {
+      // Convert empty strings to undefined for optional numeric fields so the
+      // backend does not receive an empty string where a number (or null) is expected.
+      const sanitized = {
+        ...data,
+        maxDiscountAmount: data.maxDiscountAmount === '' ? undefined : data.maxDiscountAmount,
+        minOrderAmount: data.minOrderAmount === '' ? undefined : data.minOrderAmount,
+        usageLimit: data.usageLimit === '' ? undefined : data.usageLimit,
+      };
+
       if (editingCoupon) {
-        await couponService.updateCoupon(editingCoupon.id, data);
+        await couponService.updateCoupon(editingCoupon.id, sanitized);
         setSnackbar({ open: true, message: 'Coupon updated successfully', severity: 'success' });
       } else {
-        await couponService.createCoupon({ ...data, workspaceId });
+        await couponService.createCoupon({ ...sanitized, workspaceId });
         setSnackbar({ open: true, message: 'Coupon created successfully', severity: 'success' });
       }
       handleCloseDialog();

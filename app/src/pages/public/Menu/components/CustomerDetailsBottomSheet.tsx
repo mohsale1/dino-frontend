@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import {
   Dialog,
-  DialogTitle,
   DialogContent,
   DialogActions,
   TextField,
@@ -9,12 +8,10 @@ import {
   Box,
   Typography,
   Slide,
-  IconButton,
-  alpha,
-  useTheme,
+  InputAdornment,
 } from '@mui/material';
 import { TransitionProps } from '@mui/material/transitions';
-import { Close as CloseIcon, Person as PersonIcon, Phone as PhoneIcon } from '@mui/icons-material';
+import { Person as PersonIcon, Phone as PhoneIcon } from '@mui/icons-material';
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -31,12 +28,35 @@ interface CustomerDetailsBottomSheetProps {
   onSubmit: (name: string, phone: string) => void;
 }
 
+const COLORS = {
+  primary: '#1a1a1a',
+  accent: '#f97316',
+  border: '#e8e8e8',
+  bg: '#fafafa',
+  textPrimary: '#1a1a1a',
+  textSecondary: '#6b7280',
+};
+
+const inputSx = {
+  '& .MuiOutlinedInput-root': {
+    borderRadius: '12px',
+    bgcolor: COLORS.bg,
+    fontSize: '0.95rem',
+    '& fieldset': { borderColor: COLORS.border },
+    '&:hover fieldset': { borderColor: '#d1d5db' },
+    '&.Mui-focused fieldset': { borderColor: COLORS.accent, borderWidth: 2 },
+  },
+  '& .MuiFormHelperText-root': {
+    mx: 0,
+    mt: 0.75,
+  },
+};
+
 const CustomerDetailsBottomSheet: React.FC<CustomerDetailsBottomSheetProps> = ({
   open,
   onClose,
   onSubmit,
 }) => {
-  const theme = useTheme();
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [errors, setErrors] = useState<{ name?: string; phone?: string }>({});
@@ -92,114 +112,138 @@ const CustomerDetailsBottomSheet: React.FC<CustomerDetailsBottomSheetProps> = ({
           m: 0,
           width: '100%',
           maxWidth: '100%',
-          borderRadius: 0,
-          maxHeight: '85vh',
-          boxShadow: theme.shadows[24],
+          borderRadius: '20px 20px 0 0',
+          maxHeight: '90vh',
+          boxShadow: '0 -8px 40px rgba(0,0,0,0.15)',
+        },
+        '& .MuiBackdrop-root': {
+          bgcolor: 'rgba(0,0,0,0.4)',
         },
       }}
     >
-      <DialogTitle sx={{ p: 3, pb: 2 }}>
-        <Box display="flex" justifyContent="space-between" alignItems="center">
-          <Box>
-            <Typography variant="h6" fontWeight={700}>
-              Enter Your Details
-            </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-              We need this to process your order
-            </Typography>
-          </Box>
-          <IconButton
-            onClick={handleClose}
-            size="small"
-            sx={{
-              bgcolor: alpha(theme.palette.grey[500], 0.1),
-              '&:hover': {
-                bgcolor: alpha(theme.palette.grey[500], 0.2),
-              },
-            }}
-          >
-            <CloseIcon />
-          </IconButton>
-        </Box>
-      </DialogTitle>
+      {/* Handle bar */}
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          pt: 1.5,
+          pb: 0.5,
+        }}
+      >
+        <Box
+          sx={{
+            width: 40,
+            height: 4,
+            borderRadius: '2px',
+            bgcolor: '#d1d5db',
+          }}
+        />
+      </Box>
 
-      <DialogContent sx={{ px: 3, pb: 2 }}>
-        <Box display="flex" flexDirection="column" gap={2.5} mt={1}>
+      {/* Header */}
+      <Box sx={{ px: 3, pt: 1.5, pb: 0 }}>
+        <Typography
+          variant="h5"
+          fontWeight={800}
+          sx={{ color: COLORS.textPrimary, letterSpacing: '-0.02em', mb: 0.5 }}
+        >
+          Almost there!
+        </Typography>
+        <Typography variant="body2" sx={{ color: COLORS.textSecondary }}>
+          We need a few details to process your order.
+        </Typography>
+      </Box>
+
+      <DialogContent sx={{ px: 3, pt: 2.5, pb: 1 }}>
+        <Box display="flex" flexDirection="column" gap={2.5}>
+          {/* Name Field */}
           <Box>
-            <Box display="flex" alignItems="center" gap={1} mb={1}>
-              <PersonIcon fontSize="small" color="action" />
-              <Typography variant="caption" fontWeight={600} color="text.secondary">
-                FULL NAME
-              </Typography>
-            </Box>
+            <Typography
+              variant="caption"
+              fontWeight={700}
+              sx={{
+                color: COLORS.textSecondary,
+                letterSpacing: '0.06em',
+                textTransform: 'uppercase',
+                display: 'block',
+                mb: 1,
+              }}
+            >
+              Full Name
+            </Typography>
             <TextField
               fullWidth
               value={name}
               onChange={(e) => setName(e.target.value)}
               error={!!errors.name}
               helperText={errors.name}
-              placeholder="Enter your full name"
+              placeholder="Your full name"
               autoFocus
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 0,
-                  bgcolor: alpha(theme.palette.primary.main, 0.02),
-                  '&:hover': {
-                    bgcolor: alpha(theme.palette.primary.main, 0.04),
-                  },
-                  '&.Mui-focused': {
-                    bgcolor: 'background.paper',
-                  },
-                },
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <PersonIcon sx={{ fontSize: 18, color: COLORS.textSecondary }} />
+                  </InputAdornment>
+                ),
               }}
+              sx={inputSx}
             />
           </Box>
 
+          {/* Phone Field */}
           <Box>
-            <Box display="flex" alignItems="center" gap={1} mb={1}>
-              <PhoneIcon fontSize="small" color="action" />
-              <Typography variant="caption" fontWeight={600} color="text.secondary">
-                PHONE NUMBER
-              </Typography>
-            </Box>
+            <Typography
+              variant="caption"
+              fontWeight={700}
+              sx={{
+                color: COLORS.textSecondary,
+                letterSpacing: '0.06em',
+                textTransform: 'uppercase',
+                display: 'block',
+                mb: 1,
+              }}
+            >
+              Phone Number
+            </Typography>
             <TextField
               fullWidth
               value={phone}
               onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
               error={!!errors.phone}
               helperText={errors.phone}
-              placeholder="Enter your phone number"
+              placeholder="Your phone number"
               type="tel"
               inputProps={{ maxLength: 15 }}
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 0,
-                  bgcolor: alpha(theme.palette.primary.main, 0.02),
-                  '&:hover': {
-                    bgcolor: alpha(theme.palette.primary.main, 0.04),
-                  },
-                  '&.Mui-focused': {
-                    bgcolor: 'background.paper',
-                  },
-                },
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <PhoneIcon sx={{ fontSize: 18, color: COLORS.textSecondary }} />
+                  </InputAdornment>
+                ),
               }}
+              sx={inputSx}
             />
           </Box>
         </Box>
       </DialogContent>
 
-      <DialogActions sx={{ p: 3, pt: 2, gap: 1.5 }}>
+      <DialogActions sx={{ px: 3, pt: 2, pb: 3, gap: 1.5 }}>
         <Button
           onClick={handleClose}
-          color="inherit"
+          variant="outlined"
           size="large"
           sx={{
             flex: 1,
             fontWeight: 600,
-            borderRadius: 0,
+            borderRadius: '12px',
             textTransform: 'none',
-            color: 'text.secondary',
-            border: '1px solid #e5e7eb',
+            fontSize: '0.95rem',
+            color: COLORS.textSecondary,
+            borderColor: COLORS.border,
+            '&:hover': {
+              borderColor: '#d1d5db',
+              bgcolor: COLORS.bg,
+            },
           }}
         >
           Cancel
@@ -211,16 +255,17 @@ const CustomerDetailsBottomSheet: React.FC<CustomerDetailsBottomSheetProps> = ({
           sx={{
             flex: 2,
             fontWeight: 700,
-            borderRadius: 0,
+            borderRadius: '12px',
             textTransform: 'none',
-            bgcolor: '#1a1a1a',
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+            fontSize: '0.95rem',
+            bgcolor: COLORS.primary,
+            boxShadow: '0 4px 16px rgba(0,0,0,0.18)',
             '&:hover': {
               bgcolor: '#2d2d2d',
-              boxShadow: '0 6px 16px rgba(0, 0, 0, 0.25)',
+              boxShadow: '0 6px 20px rgba(0,0,0,0.28)',
               transform: 'translateY(-1px)',
             },
-            transition: 'all 0.2s',
+            transition: 'all 0.2s ease',
           }}
         >
           Continue to Checkout

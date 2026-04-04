@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Box, Typography, alpha } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { ArrowForward as ArrowForwardIcon } from '@mui/icons-material';
 
 interface SwipeToCheckoutProps {
@@ -21,9 +21,12 @@ const SwipeToCheckout: React.FC<SwipeToCheckoutProps> = ({
   const startXRef = useRef(0);
   const maxPositionRef = useRef(0);
 
+  const SLIDER_WIDTH = 120;
+  const PADDING = 8;
+
   useEffect(() => {
-    if (containerRef.current && sliderRef.current) {
-      maxPositionRef.current = containerRef.current.offsetWidth - sliderRef.current.offsetWidth - 8;
+    if (containerRef.current) {
+      maxPositionRef.current = containerRef.current.offsetWidth - SLIDER_WIDTH - PADDING * 2;
     }
   }, []);
 
@@ -39,7 +42,6 @@ const SwipeToCheckout: React.FC<SwipeToCheckoutProps> = ({
     const clampedPosition = Math.max(0, Math.min(newPosition, maxPositionRef.current));
     setPosition(clampedPosition);
 
-    // Check if swiped to the end
     if (clampedPosition >= maxPositionRef.current * 0.9) {
       setIsCompleted(true);
       setIsDragging(false);
@@ -51,9 +53,7 @@ const SwipeToCheckout: React.FC<SwipeToCheckoutProps> = ({
 
   const handleEnd = () => {
     if (!isCompleted) {
-      // Animate back to start
       setIsDragging(false);
-      // Small delay to ensure transition applies
       setTimeout(() => {
         setPosition(0);
       }, 10);
@@ -80,6 +80,7 @@ const SwipeToCheckout: React.FC<SwipeToCheckoutProps> = ({
   };
 
   const handleTouchMove = (e: TouchEvent) => {
+    e.preventDefault();
     handleMove(e.touches[0].clientX);
   };
 
@@ -91,7 +92,7 @@ const SwipeToCheckout: React.FC<SwipeToCheckoutProps> = ({
     if (isDragging) {
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
-      document.addEventListener('touchmove', handleTouchMove);
+      document.addEventListener('touchmove', handleTouchMove, { passive: false });
       document.addEventListener('touchend', handleTouchEnd);
     }
 
@@ -103,25 +104,27 @@ const SwipeToCheckout: React.FC<SwipeToCheckoutProps> = ({
     };
   }, [isDragging]);
 
-  const progress = (position / maxPositionRef.current) * 100;
+  const progress = maxPositionRef.current > 0
+    ? (position / maxPositionRef.current) * 100
+    : 0;
+
+  const textFaded = progress > 45;
 
   return (
+    /* Outer container: NO touchAction here so page scrolling is never blocked */
     <Box
       ref={containerRef}
       sx={{
         position: 'relative',
-        height: 70,
-        bgcolor: 'white',
-        borderRadius: 0,
+        height: 68,
+        bgcolor: '#ffffff',
         overflow: 'hidden',
-        borderTop: '1px solid #e5e7eb',
-        borderBottom: '1px solid #e5e7eb',
-        boxShadow: '0 -4px 12px rgba(0, 0, 0, 0.08)',
+        borderTop: '1px solid #e8e8e8',
+        boxShadow: '0 -4px 20px rgba(0,0,0,0.08)',
         userSelect: 'none',
-        touchAction: 'none',
       }}
     >
-      {/* Progress Background */}
+      {/* Orange progress fill */}
       <Box
         sx={{
           position: 'absolute',
@@ -129,104 +132,83 @@ const SwipeToCheckout: React.FC<SwipeToCheckoutProps> = ({
           left: 0,
           height: '100%',
           width: `${progress}%`,
-          bgcolor: '#1a1a1a',
+          bgcolor: '#f97316',
           transition: isDragging ? 'none' : 'width 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
         }}
       />
 
-      {/* Text Content */}
+      {/* Center text: item count + total */}
       <Box
         sx={{
           position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          height: '100%',
+          inset: 0,
           display: 'flex',
+          flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
           pointerEvents: 'none',
+          gap: 0.25,
         }}
       >
-        <Box textAlign="center">
-          <Typography
-            variant="caption"
-            fontWeight={600}
-            sx={{
-              color: progress > 50 ? 'rgba(255,255,255,0.8)' : '#6b7280',
-              display: 'block',
-              mb: 0.5,
-              transition: 'color 0.2s ease',
-            }}
-          >
-            {itemCount} {itemCount === 1 ? 'Item' : 'Items'}
-          </Typography>
-          <Typography 
-            variant="h6" 
-            fontWeight={700} 
-            sx={{
-              color: progress > 50 ? 'white' : '#1a1a1a',
-              transition: 'color 0.2s ease',
-            }}
-          >
-            â‚¹{total.toFixed(2)}
-          </Typography>
-        </Box>
+        <Typography
+          variant="caption"
+          fontWeight={600}
+          sx={{
+            color: textFaded ? 'rgba(255,255,255,0.85)' : '#6b7280',
+            transition: 'color 0.2s ease',
+            lineHeight: 1.2,
+          }}
+        >
+          {itemCount} {itemCount === 1 ? 'item' : 'items'}
+        </Typography>
+        <Typography
+          variant="subtitle1"
+          fontWeight={800}
+          sx={{
+            color: textFaded ? '#ffffff' : '#1a1a1a',
+            transition: 'color 0.2s ease',
+            lineHeight: 1.2,
+            letterSpacing: '-0.02em',
+          }}
+        >
+          ₹{total.toFixed(2)}
+        </Typography>
       </Box>
 
-      {/* Slider Button */}
+      {/* Slider handle — touchAction: 'none' is ONLY here */}
       <Box
         ref={sliderRef}
         onMouseDown={handleMouseDown}
         onTouchStart={handleTouchStart}
         sx={{
           position: 'absolute',
-          top: 8,
-          left: position + 8,
-          width: 140,
-          height: 54,
+          top: PADDING,
+          left: position + PADDING,
+          width: SLIDER_WIDTH,
+          height: 68 - PADDING * 2,
           bgcolor: '#1a1a1a',
-          borderRadius: 0,
+          borderRadius: '8px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
+          gap: 1,
           cursor: isDragging ? 'grabbing' : 'grab',
           transition: isDragging ? 'none' : 'left 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.25)',
-          border: '2px solid #1a1a1a',
+          boxShadow: '0 2px 12px rgba(0,0,0,0.22)',
+          touchAction: 'none',
           '&:active': {
             cursor: 'grabbing',
           },
         }}
       >
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 1.5,
-            color: 'white',
-          }}
+        <Typography
+          variant="body2"
+          fontWeight={700}
+          sx={{ color: '#ffffff', fontSize: '0.875rem', lineHeight: 1 }}
         >
-          <Typography variant="body2" fontWeight={700} sx={{ fontSize: '0.9rem' }}>
-            Swipe
-          </Typography>
-          <ArrowForwardIcon sx={{ fontSize: 22 }} />
-        </Box>
-      </Box>
-
-      {/* Hint Text */}
-      <Box
-        sx={{
-          position: 'absolute',
-          bottom: -24,
-          left: 0,
-          right: 0,
-          textAlign: 'center',
-        }}
-      >
-        <Typography variant="caption" color="text.secondary" fontWeight={500}>
-          Swipe right to checkout â†’
+          Swipe
         </Typography>
+        <ArrowForwardIcon sx={{ fontSize: 18, color: '#ffffff' }} />
       </Box>
     </Box>
   );

@@ -2,8 +2,6 @@ import React, { useState, useMemo, useRef, useEffect } from 'react';
 import {
   Box,
   Typography,
-  Card,
-  CardContent,
   Chip,
   IconButton,
   Button,
@@ -11,7 +9,6 @@ import {
   InputAdornment,
   alpha,
   Stack,
-  Fade,
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -19,10 +16,6 @@ import {
   Search as SearchIcon,
   Close as CloseIcon,
   Schedule as ScheduleIcon,
-  ExpandMore as ExpandMoreIcon,
-  ExpandLess as ExpandLessIcon,
-  ChevronLeft as ChevronLeftIcon,
-  ChevronRight as ChevronRightIcon,
   Restaurant as RestaurantIcon,
 } from '@mui/icons-material';
 import { CartItem } from '../hooks/useCart';
@@ -41,18 +34,14 @@ const MenuFragment: React.FC<MenuFragmentProps> = ({
   onUpdateQuantity,
 }) => {
   const { categories, items } = menuData;
-  
+
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
   const categoryScrollRef = useRef<HTMLDivElement>(null);
 
-  const handleCategoryChange = (categoryId: string) => {
-    setSelectedCategory(categoryId);
-  };
-
-  const [showLeftScroll, setShowLeftScroll] = useState(false);
-  const [showRightScroll, setShowRightScroll] = useState(true);
+  // Keep scroll state for potential future use; checkScrollButtons kept per spec
+  const [, setShowLeftScroll] = useState(false);
+  const [, setShowRightScroll] = useState(true);
 
   const checkScrollButtons = () => {
     if (categoryScrollRef.current) {
@@ -72,6 +61,7 @@ const MenuFragment: React.FC<MenuFragmentProps> = ({
     return undefined;
   }, [categories]);
 
+  // scrollCategories kept per spec (may be used externally or in future)
   const scrollCategories = (direction: 'left' | 'right') => {
     if (categoryScrollRef.current) {
       const scrollAmount = 250;
@@ -81,18 +71,8 @@ const MenuFragment: React.FC<MenuFragmentProps> = ({
       });
     }
   };
-
-  const toggleItemExpanded = (itemId: string) => {
-    setExpandedItems(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(itemId)) {
-        newSet.delete(itemId);
-      } else {
-        newSet.add(itemId);
-      }
-      return newSet;
-    });
-  };
+  // Suppress unused warning — kept per spec
+  void scrollCategories;
 
   const getCartItemQuantity = (itemId: string): number => {
     const cartItem = cart.find((item) => item.item_id === itemId);
@@ -120,20 +100,24 @@ const MenuFragment: React.FC<MenuFragmentProps> = ({
 
   const filteredItems = useMemo(() => {
     return items.filter((item: any) => {
-      const matchesCategory = selectedCategory === 'all' || item.category_id === selectedCategory;
-      const matchesSearch = searchQuery === '' || 
+      const matchesCategory =
+        selectedCategory === 'all' || item.category_id === selectedCategory;
+      const matchesSearch =
+        searchQuery === '' ||
         item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (item.description && item.description.toLowerCase().includes(searchQuery.toLowerCase()));
+        (item.description &&
+          item.description.toLowerCase().includes(searchQuery.toLowerCase()));
       return matchesCategory && matchesSearch && item.is_available;
     });
   }, [items, selectedCategory, searchQuery]);
 
   const itemsByCategory = useMemo(() => {
     const grouped: Record<string, any[]> = {};
-    
     if (selectedCategory === 'all') {
       categories.forEach((cat: any) => {
-        const categoryItems = filteredItems.filter((item: any) => item.category_id === cat.id);
+        const categoryItems = filteredItems.filter(
+          (item: any) => item.category_id === cat.id
+        );
         if (categoryItems.length > 0) {
           grouped[cat.id] = categoryItems;
         }
@@ -141,568 +125,432 @@ const MenuFragment: React.FC<MenuFragmentProps> = ({
     } else {
       grouped[selectedCategory] = filteredItems;
     }
-    
     return grouped;
   }, [filteredItems, selectedCategory, categories]);
 
   const renderItemCard = (item: any) => {
     const quantity = getCartItemQuantity(item.id);
-    const isExpanded = expandedItems.has(item.id);
-    const hasLongDescription = item.description && item.description.length > 100;
 
     return (
-      <Card
+      <Box
         key={item.id}
-        elevation={0}
         sx={{
-          border: '1px solid #e5e7eb',
-          borderRadius: 2,
+          bgcolor: '#ffffff',
+          border: '1px solid #e8e8e8',
+          borderRadius: '12px',
           overflow: 'hidden',
-          transition: 'all 0.2s ease',
+          display: 'flex',
+          gap: 0,
+          transition: 'box-shadow 0.2s ease',
           '&:hover': {
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
-            borderColor: '#d1d5db',
+            boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
           },
         }}
       >
-        <CardContent sx={{ p: 0 }}>
-          <Box display="flex" gap={2} p={2.5}>
-            {/* Item Image Placeholder */}
+        {/* Image Column */}
+        <Box
+          sx={{
+            width: 88,
+            minWidth: 88,
+            height: 88,
+            m: 1.5,
+            borderRadius: '10px',
+            overflow: 'hidden',
+            position: 'relative',
+            flexShrink: 0,
+            alignSelf: 'flex-start',
+          }}
+        >
+          {item.image_urls && item.image_urls.length > 0 ? (
+            <img
+              src={item.image_urls[0]}
+              alt={item.name}
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                borderRadius: 10,
+              }}
+            />
+          ) : (
             <Box
               sx={{
-                width: 100,
-                height: 100,
-                borderRadius: 1.5,
-                bgcolor: '#f9fafb',
-                border: '1px solid #e5e7eb',
+                width: '100%',
+                height: '100%',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                flexShrink: 0,
-                position: 'relative',
-                overflow: 'hidden',
+                bgcolor: '#f3f4f6',
+                borderRadius: '10px',
               }}
             >
-              <Typography variant="h3" fontWeight={800} sx={{ color: '#e5e7eb' }}>
+              <Typography
+                variant="h5"
+                fontWeight={800}
+                sx={{ color: '#d1d5db' }}
+              >
                 {item.name.charAt(0)}
               </Typography>
-
-              {/* Veg/Non-Veg Indicator */}
-              {item.is_vegetarian !== null && (
-                <Box
-                  sx={{
-                    position: 'absolute',
-                    top: 8,
-                    left: 8,
-                    width: 20,
-                    height: 20,
-                    border: `2px solid ${item.is_vegetarian ? '#10b981' : '#ef4444'}`,
-                    borderRadius: 0.5,
-                    bgcolor: 'white',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <Box
-                    sx={{
-                      width: 8,
-                      height: 8,
-                      borderRadius: '50%',
-                      bgcolor: item.is_vegetarian ? '#10b981' : '#ef4444',
-                    }}
-                  />
-                </Box>
-              )}
-
-              {/* Bestseller Badge */}
-              {item.display_order <= 3 && (
-                <Chip
-                  label="Bestseller"
-                  size="small"
-                  sx={{
-                    position: 'absolute',
-                    bottom: 6,
-                    left: 6,
-                    height: 20,
-                    fontSize: '0.65rem',
-                    fontWeight: 700,
-                    bgcolor: '#fbbf24',
-                    color: 'white',
-                    '& .MuiChip-label': {
-                      px: 1,
-                    },
-                  }}
-                />
-              )}
             </Box>
+          )}
 
-            {/* Item Details */}
-            <Box flex={1} minWidth={0} display="flex" flexDirection="column">
+          {/* Bestseller badge */}
+          {item.display_order != null && item.display_order <= 3 && (
+            <Box
+              sx={{
+                position: 'absolute',
+                bottom: 0,
+                left: 0,
+                right: 0,
+                bgcolor: '#f97316',
+                py: '2px',
+                textAlign: 'center',
+              }}
+            >
               <Typography
-                variant="subtitle1"
-                fontWeight={700}
-                color="#1a1a1a"
-                sx={{ mb: 0.5 }}
+                sx={{
+                  fontSize: '0.6rem',
+                  fontWeight: 700,
+                  color: '#ffffff',
+                  letterSpacing: '0.02em',
+                  lineHeight: 1.4,
+                }}
               >
-                {item.name}
+                BESTSELLER
               </Typography>
-
-              {/* Description */}
-              {item.description && (
-                <Box sx={{ mb: 1.5 }}>
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{
-                      display: '-webkit-box',
-                      WebkitLineClamp: isExpanded ? 'unset' : 2,
-                      WebkitBoxOrient: 'vertical',
-                      overflow: 'hidden',
-                      lineHeight: 1.5,
-                    }}
-                  >
-                    {item.description}
-                  </Typography>
-                  {hasLongDescription && (
-                    <Button
-                      size="small"
-                      onClick={() => toggleItemExpanded(item.id)}
-                      endIcon={isExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-                      sx={{
-                        textTransform: 'none',
-                        fontSize: '0.75rem',
-                        fontWeight: 600,
-                        color: '#6b7280',
-                        p: 0,
-                        mt: 0.5,
-                        minWidth: 'auto',
-                        '&:hover': {
-                          bgcolor: 'transparent',
-                          color: '#1a1a1a',
-                        },
-                      }}
-                    >
-                      {isExpanded ? 'Show less' : 'Read more'}
-                    </Button>
-                  )}
-                </Box>
-              )}
-
-              {/* Price and Time Info */}
-              <Box display="flex" alignItems="center" gap={1.5} mb={1.5}>
-                <Typography variant="h6" fontWeight={700} color="#1a1a1a">
-                  â‚¹{item.price.toFixed(2)}
-                </Typography>
-                <Chip
-                  icon={<ScheduleIcon sx={{ fontSize: 12 }} />}
-                  label="15-20 min"
-                  size="small"
-                  sx={{
-                    height: 22,
-                    fontSize: '0.7rem',
-                    fontWeight: 500,
-                    bgcolor: '#f3f4f6',
-                    color: '#6b7280',
-                    border: '1px solid #e5e7eb',
-                  }}
-                />
-              </Box>
-
-              {/* Add to Cart Button - Always at bottom */}
-              <Box sx={{ mt: 'auto' }}>
-                {quantity === 0 ? (
-                  <Button
-                    variant="contained"
-                    size="small"
-                    onClick={() => handleAddToCart(item)}
-                    sx={{
-                      minWidth: 100,
-                      fontWeight: 700,
-                      textTransform: 'none',
-                      bgcolor: '#1a1a1a',
-                      px: 2.5,
-                      py: 1,
-                      fontSize: '0.875rem',
-                      borderRadius: 1.5,
-                      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
-                      '&:hover': {
-                        bgcolor: '#2d2d2d',
-                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.25)',
-                        transform: 'translateY(-1px)',
-                      },
-                      transition: 'all 0.2s ease',
-                    }}
-                  >
-                    Add
-                  </Button>
-                ) : (
-                  <Box
-                    display="flex"
-                    alignItems="center"
-                    gap={0.5}
-                    sx={{
-                      border: '2px solid #1a1a1a',
-                      borderRadius: 1.5,
-                      bgcolor: alpha('#1a1a1a', 0.04),
-                      p: 0.5,
-                      width: 'fit-content',
-                    }}
-                  >
-                    <IconButton
-                      size="small"
-                      onClick={() => handleDecrement(item.id)}
-                      sx={{
-                        bgcolor: 'white',
-                        width: 32,
-                        height: 32,
-                        '&:hover': {
-                          bgcolor: '#f3f4f6',
-                        },
-                      }}
-                    >
-                      <RemoveIcon sx={{ fontSize: 18 }} />
-                    </IconButton>
-                    <Typography
-                      variant="body2"
-                      fontWeight={700}
-                      sx={{ minWidth: 32, textAlign: 'center', color: '#1a1a1a' }}
-                    >
-                      {quantity}
-                    </Typography>
-                    <IconButton
-                      size="small"
-                      onClick={() => handleIncrement(item.id)}
-                      sx={{
-                        bgcolor: 'white',
-                        width: 32,
-                        height: 32,
-                        '&:hover': {
-                          bgcolor: '#f3f4f6',
-                        },
-                      }}
-                    >
-                      <AddIcon sx={{ fontSize: 18 }} />
-                    </IconButton>
-                  </Box>
-                )}
-              </Box>
             </Box>
-          </Box>
-        </CardContent>
-      </Card>
-    );
-  };
+          )}
+        </Box>
 
-  return (
-    <Box>
-      {/* Menu Banner */}
-      <Fade in timeout={300}>
-        <Card
-          elevation={0}
+        {/* Content Column */}
+        <Box
           sx={{
-            mb: 3,
-            borderRadius: 2,
-            overflow: 'hidden',
-            position: 'relative',
-            background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
+            flex: 1,
+            minWidth: 0,
+            py: 1.5,
+            pr: 1.5,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 0.5,
           }}
         >
-          {/* Decorative Pattern */}
-          <Box
-            sx={{
-              position: 'absolute',
-              top: 0,
-              right: 0,
-              bottom: 0,
-              left: 0,
-              opacity: 0.08,
-              backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='1' fill-rule='evenodd'%3E%3Cpath d='M0 40L40 0H20L0 20M40 40V20L20 40'/%3E%3C/g%3E%3C/svg%3E")`,
-            }}
-          />
-
-          <CardContent sx={{ p: 2.5, position: 'relative', '&:last-child': { pb: 2.5 } }}>
-            <Box display="flex" alignItems="center" gap={2}>
+          {/* Veg indicator + name row */}
+          <Box display="flex" alignItems="center" gap={0.75}>
+            {item.is_vegetarian !== null && item.is_vegetarian !== undefined && (
               <Box
                 sx={{
-                  width: 48,
-                  height: 48,
-                  borderRadius: 1.5,
-                  bgcolor: 'rgba(255, 255, 255, 0.15)',
-                  backdropFilter: 'blur(10px)',
-                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  width: 16,
+                  height: 16,
+                  border: `1.5px solid ${item.is_vegetarian ? '#16a34a' : '#dc2626'}`,
+                  borderRadius: '3px',
+                  bgcolor: '#ffffff',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
+                  flexShrink: 0,
                 }}
               >
-                <RestaurantIcon sx={{ color: 'white', fontSize: 24 }} />
+                <Box
+                  sx={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: '50%',
+                    bgcolor: item.is_vegetarian ? '#16a34a' : '#dc2626',
+                  }}
+                />
               </Box>
-              <Box flex={1}>
-                <Typography variant="subtitle1" fontWeight={700} color="white" sx={{ mb: 0.5 }}>
-                  Explore Our Menu
-                </Typography>
-                <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.85)' }}>
-                  Browse through our carefully curated selection
-                </Typography>
-              </Box>
-            </Box>
-          </CardContent>
-        </Card>
-      </Fade>
+            )}
+            <Typography
+              sx={{
+                fontWeight: 700,
+                fontSize: '0.9375rem',
+                color: '#1a1a1a',
+                lineHeight: 1.3,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {item.name}
+            </Typography>
+          </Box>
 
+          {/* Description — always 2-line clamp */}
+          {item.description && (
+            <Typography
+              sx={{
+                fontSize: '0.8125rem',
+                color: '#6b7280',
+                lineHeight: 1.45,
+                display: '-webkit-box',
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: 'vertical',
+                overflow: 'hidden',
+              }}
+            >
+              {item.description}
+            </Typography>
+          )}
+
+          {/* Price + prep time */}
+          <Box display="flex" alignItems="center" gap={1} mt={0.25}>
+            <Typography
+              sx={{
+                fontWeight: 700,
+                fontSize: '1rem',
+                color: '#1a1a1a',
+                lineHeight: 1,
+              }}
+            >
+              ₹{item.price.toFixed(2)}
+            </Typography>
+            {item.preparation_time_minutes && (
+              <Chip
+                icon={<ScheduleIcon sx={{ fontSize: '11px !important' }} />}
+                label={`${item.preparation_time_minutes} min`}
+                size="small"
+                sx={{
+                  height: 20,
+                  fontSize: '0.7rem',
+                  fontWeight: 500,
+                  bgcolor: '#f3f4f6',
+                  color: '#6b7280',
+                  border: 'none',
+                  '& .MuiChip-label': { px: 0.75 },
+                  '& .MuiChip-icon': { ml: 0.5 },
+                }}
+              />
+            )}
+          </Box>
+
+          {/* Add / Stepper */}
+          <Box sx={{ mt: 'auto', pt: 0.5 }}>
+            {quantity === 0 ? (
+              <Button
+                size="small"
+                onClick={() => handleAddToCart(item)}
+                sx={{
+                  bgcolor: '#1a1a1a',
+                  color: '#ffffff',
+                  fontWeight: 700,
+                  fontSize: '0.8125rem',
+                  letterSpacing: '0.04em',
+                  textTransform: 'none',
+                  borderRadius: '100px',
+                  px: 2.5,
+                  py: 0.625,
+                  minWidth: 72,
+                  boxShadow: 'none',
+                  '&:hover': {
+                    bgcolor: '#333333',
+                    boxShadow: 'none',
+                  },
+                }}
+                variant="contained"
+                disableElevation
+              >
+                ADD
+              </Button>
+            ) : (
+              <Box
+                display="flex"
+                alignItems="center"
+                sx={{
+                  border: '1.5px solid #1a1a1a',
+                  borderRadius: '100px',
+                  width: 'fit-content',
+                  overflow: 'hidden',
+                }}
+              >
+                <IconButton
+                  size="small"
+                  onClick={() => handleDecrement(item.id)}
+                  sx={{
+                    width: 28,
+                    height: 28,
+                    borderRadius: 0,
+                    color: '#1a1a1a',
+                    '&:hover': { bgcolor: alpha('#1a1a1a', 0.06) },
+                  }}
+                >
+                  <RemoveIcon sx={{ fontSize: 14 }} />
+                </IconButton>
+                <Typography
+                  sx={{
+                    fontWeight: 700,
+                    fontSize: '0.875rem',
+                    color: '#1a1a1a',
+                    minWidth: 24,
+                    textAlign: 'center',
+                    lineHeight: 1,
+                  }}
+                >
+                  {quantity}
+                </Typography>
+                <IconButton
+                  size="small"
+                  onClick={() => handleIncrement(item.id)}
+                  sx={{
+                    width: 28,
+                    height: 28,
+                    borderRadius: 0,
+                    color: '#1a1a1a',
+                    '&:hover': { bgcolor: alpha('#1a1a1a', 0.06) },
+                  }}
+                >
+                  <AddIcon sx={{ fontSize: 14 }} />
+                </IconButton>
+              </Box>
+            )}
+          </Box>
+        </Box>
+      </Box>
+    );
+  };
+
+  const hasResults = filteredItems.length > 0;
+
+  return (
+    <Box sx={{ bgcolor: '#fafafa', minHeight: '100%' }}>
       {/* Search Bar */}
-      <Fade in timeout={400}>
+      <Box sx={{ px: 2, pt: 2, pb: 0 }}>
         <TextField
           fullWidth
-          placeholder="Search for dishes..."
+          placeholder="Search dishes..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
+          size="small"
           sx={{
-            mb: 3,
             '& .MuiOutlinedInput-root': {
-              bgcolor: 'white',
-              borderRadius: 1.5,
-              border: '1px solid #e5e7eb',
-              '&:hover': {
+              bgcolor: '#ffffff',
+              borderRadius: '12px',
+              fontSize: '0.9375rem',
+              '& fieldset': {
+                borderColor: '#e8e8e8',
+                borderWidth: '1px',
+              },
+              '&:hover fieldset': {
                 borderColor: '#d1d5db',
               },
-              '&.Mui-focused': {
-                borderColor: '#1a1a1a',
-              },
-              '& fieldset': {
-                border: 'none',
+              '&.Mui-focused fieldset': {
+                borderColor: 'transparent',
+                borderWidth: '1px',
+                boxShadow: '0 0 0 2px rgba(26,26,26,0.15)',
               },
             },
           }}
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <SearchIcon sx={{ color: '#6b7280', fontSize: 22 }} />
+                <SearchIcon sx={{ color: '#9ca3af', fontSize: 20 }} />
               </InputAdornment>
             ),
-            endAdornment: searchQuery && (
+            endAdornment: searchQuery ? (
               <InputAdornment position="end">
-                <IconButton size="small" onClick={() => setSearchQuery('')}>
-                  <CloseIcon fontSize="small" />
+                <IconButton
+                  size="small"
+                  onClick={() => setSearchQuery('')}
+                  edge="end"
+                  sx={{ color: '#9ca3af' }}
+                >
+                  <CloseIcon sx={{ fontSize: 18 }} />
                 </IconButton>
               </InputAdornment>
-            ),
+            ) : null,
           }}
         />
-      </Fade>
+      </Box>
 
-      {/* Category Slider */}
-      <Fade in timeout={500}>
-        <Box 
-          sx={{ 
-            mb: 3, 
-            position: 'relative',
-            bgcolor: 'white',
-            borderRadius: 2,
-            border: '1px solid #e5e7eb',
-            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
-            overflow: 'hidden',
+      {/* Sticky Category Bar */}
+      <Box
+        sx={{
+          position: 'sticky',
+          top: 0,
+          zIndex: 10,
+          bgcolor: '#fafafa',
+          py: 1.5,
+          px: 2,
+          boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+        }}
+      >
+        <Box
+          ref={categoryScrollRef}
+          sx={{
+            display: 'flex',
+            gap: 1,
+            overflowX: 'auto',
+            scrollBehavior: 'smooth',
+            '&::-webkit-scrollbar': { display: 'none' },
+            msOverflowStyle: 'none',
+            scrollbarWidth: 'none',
           }}
         >
-          {/* Left Gradient Fade */}
-          {showLeftScroll && (
-            <Box
-              sx={{
-                position: 'absolute',
-                left: 0,
-                top: 0,
-                bottom: 0,
-                width: 80,
-                background: 'linear-gradient(to right, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0.8) 50%, rgba(255, 255, 255, 0) 100%)',
-                zIndex: 1,
-                pointerEvents: 'none',
-              }}
-            />
-          )}
-
-          {/* Right Gradient Fade */}
-          {showRightScroll && (
-            <Box
-              sx={{
-                position: 'absolute',
-                right: 0,
-                top: 0,
-                bottom: 0,
-                width: 80,
-                background: 'linear-gradient(to left, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0.8) 50%, rgba(255, 255, 255, 0) 100%)',
-                zIndex: 1,
-                pointerEvents: 'none',
-              }}
-            />
-          )}
-
-          {/* Scroll Buttons */}
-          {showLeftScroll && (
-            <Fade in>
-              <IconButton
-                onClick={() => scrollCategories('left')}
-                sx={{
-                  position: 'absolute',
-                  left: 8,
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  zIndex: 2,
-                  bgcolor: '#1a1a1a',
-                  border: '2px solid #1a1a1a',
-                  width: 40,
-                  height: 40,
-                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.25)',
-                  animation: 'slideInLeft 0.3s ease-out',
-                  '@keyframes slideInLeft': {
-                    from: {
-                      opacity: 0,
-                      transform: 'translateY(-50%) translateX(-20px)',
-                    },
-                    to: {
-                      opacity: 1,
-                      transform: 'translateY(-50%) translateX(0)',
-                    },
-                  },
-                  '&:hover': {
-                    bgcolor: '#2d2d2d',
-                    borderColor: '#2d2d2d',
-                    boxShadow: '0 6px 16px rgba(0, 0, 0, 0.35)',
-                    transform: 'translateY(-50%) scale(1.08)',
-                  },
-                  transition: 'all 0.2s ease',
-                }}
-              >
-                <ChevronLeftIcon sx={{ fontSize: 24, color: 'white', fontWeight: 'bold' }} />
-              </IconButton>
-            </Fade>
-          )}
-          
-          {showRightScroll && (
-            <Fade in>
-              <IconButton
-                onClick={() => scrollCategories('right')}
-                sx={{
-                  position: 'absolute',
-                  right: 8,
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  zIndex: 2,
-                  bgcolor: '#1a1a1a',
-                  border: '2px solid #1a1a1a',
-                  width: 40,
-                  height: 40,
-                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.25)',
-                  animation: 'slideInRight 0.3s ease-out',
-                  '@keyframes slideInRight': {
-                    from: {
-                      opacity: 0,
-                      transform: 'translateY(-50%) translateX(20px)',
-                    },
-                    to: {
-                      opacity: 1,
-                      transform: 'translateY(-50%) translateX(0)',
-                    },
-                  },
-                  '&:hover': {
-                    bgcolor: '#2d2d2d',
-                    borderColor: '#2d2d2d',
-                    boxShadow: '0 6px 16px rgba(0, 0, 0, 0.35)',
-                    transform: 'translateY(-50%) scale(1.08)',
-                  },
-                  transition: 'all 0.2s ease',
-                }}
-              >
-                <ChevronRightIcon sx={{ fontSize: 24, color: 'white', fontWeight: 'bold' }} />
-              </IconButton>
-            </Fade>
-          )}
-
-          {/* Category Pills */}
-          <Box
-            ref={categoryScrollRef}
+          {/* All chip */}
+          <Chip
+            label={`All (${items.filter((i: any) => i.is_available).length})`}
+            onClick={() => setSelectedCategory('all')}
             sx={{
-              display: 'flex',
-              gap: 1.5,
-              overflowX: 'auto',
-              scrollBehavior: 'smooth',
-              py: 2.5,
-              px: 3,
-              scrollSnapType: 'x mandatory',
-              '&::-webkit-scrollbar': {
-                display: 'none',
+              flexShrink: 0,
+              borderRadius: '100px',
+              fontWeight: 600,
+              fontSize: '0.8125rem',
+              height: 34,
+              cursor: 'pointer',
+              bgcolor: selectedCategory === 'all' ? '#1a1a1a' : '#ffffff',
+              color: selectedCategory === 'all' ? '#ffffff' : '#374151',
+              border: selectedCategory === 'all' ? 'none' : '1px solid #e8e8e8',
+              '& .MuiChip-label': { px: 1.5 },
+              '&:hover': {
+                bgcolor: selectedCategory === 'all' ? '#333333' : '#f9fafb',
               },
-              msOverflowStyle: 'none',
-              scrollbarWidth: 'none',
+              transition: 'background-color 0.15s ease, color 0.15s ease',
             }}
-          >
-            <Chip
-              label={`All (${items.length})`}
-              onClick={() => handleCategoryChange('all')}
-              sx={{
-                fontWeight: 600,
-                fontSize: '0.875rem',
-                px: 2.5,
-                py: 2.5,
-                height: 'auto',
-                borderRadius: 1.5,
-                cursor: 'pointer',
-                scrollSnapAlign: 'start',
-                flexShrink: 0,
-                bgcolor: selectedCategory === 'all' ? '#1a1a1a' : 'white',
-                color: selectedCategory === 'all' ? 'white' : '#374151',
-                border: selectedCategory === 'all' ? 'none' : '1px solid #e5e7eb',
-                boxShadow: selectedCategory === 'all' ? '0 2px 8px rgba(0, 0, 0, 0.15)' : 'none',
-                transform: selectedCategory === 'all' ? 'scale(1.02)' : 'scale(1)',
-                '&:hover': {
-                  bgcolor: selectedCategory === 'all' ? '#2d2d2d' : '#f9fafb',
-                  transform: 'scale(1.05)',
-                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-                },
-                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-              }}
-            />
-            {categories.map((category: any) => {
-              const itemCount = items.filter((i: any) => i.category_id === category.id).length;
+          />
 
-              return (
-                <Chip
-                  key={category.id}
-                  label={`${category.name} (${itemCount})`}
-                  onClick={() => handleCategoryChange(category.id)}
-                  sx={{
-                    fontWeight: 600,
-                    fontSize: '0.875rem',
-                    px: 2.5,
-                    py: 2.5,
-                    height: 'auto',
-                    borderRadius: 1.5,
-                    cursor: 'pointer',
-                    scrollSnapAlign: 'start',
-                    flexShrink: 0,
-                    bgcolor: selectedCategory === category.id ? '#1a1a1a' : 'white',
-                    color: selectedCategory === category.id ? 'white' : '#374151',
-                    border: selectedCategory === category.id ? 'none' : '1px solid #e5e7eb',
-                    boxShadow: selectedCategory === category.id ? '0 2px 8px rgba(0, 0, 0, 0.15)' : 'none',
-                    transform: selectedCategory === category.id ? 'scale(1.02)' : 'scale(1)',
-                    '&:hover': {
-                      bgcolor: selectedCategory === category.id ? '#2d2d2d' : '#f9fafb',
-                      transform: 'scale(1.05)',
-                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-                    },
-                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                  }}
-                />
-              );
-            })}
-          </Box>
+          {categories.map((category: any) => {
+            const itemCount = items.filter(
+              (i: any) => i.category_id === category.id && i.is_available
+            ).length;
+            const isSelected = selectedCategory === category.id;
+            return (
+              <Chip
+                key={category.id}
+                label={`${category.name} (${itemCount})`}
+                onClick={() => setSelectedCategory(category.id)}
+                sx={{
+                  flexShrink: 0,
+                  borderRadius: '100px',
+                  fontWeight: 600,
+                  fontSize: '0.8125rem',
+                  height: 34,
+                  cursor: 'pointer',
+                  bgcolor: isSelected ? '#1a1a1a' : '#ffffff',
+                  color: isSelected ? '#ffffff' : '#374151',
+                  border: isSelected ? 'none' : '1px solid #e8e8e8',
+                  '& .MuiChip-label': { px: 1.5 },
+                  '&:hover': {
+                    bgcolor: isSelected ? '#333333' : '#f9fafb',
+                  },
+                  transition: 'background-color 0.15s ease, color 0.15s ease',
+                }}
+              />
+            );
+          })}
         </Box>
-      </Fade>
+      </Box>
 
-      {/* Results Info */}
-      <Box display="flex" alignItems="center" justifyContent="space-between" mb={2.5}>
-        <Typography variant="body2" fontWeight={600} color="#1a1a1a">
-          {filteredItems.length} {filteredItems.length === 1 ? 'item' : 'items'} found
+      {/* Results count */}
+      <Box
+        sx={{
+          px: 2,
+          py: 1,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1,
+        }}
+      >
+        <Typography sx={{ fontSize: '0.8125rem', color: '#6b7280', fontWeight: 500 }}>
+          {filteredItems.length} {filteredItems.length === 1 ? 'item' : 'items'}
         </Typography>
         {searchQuery && (
           <Chip
@@ -710,61 +558,98 @@ const MenuFragment: React.FC<MenuFragmentProps> = ({
             onDelete={() => setSearchQuery('')}
             size="small"
             sx={{
+              height: 22,
+              fontSize: '0.75rem',
               fontWeight: 500,
               bgcolor: '#f3f4f6',
               color: '#6b7280',
-              border: '1px solid #e5e7eb',
+              border: '1px solid #e8e8e8',
+              '& .MuiChip-label': { px: 1 },
+              '& .MuiChip-deleteIcon': { fontSize: 14 },
             }}
           />
         )}
       </Box>
 
-      {/* Menu Items */}
-      {selectedCategory === 'all' ? (
-        <Stack spacing={4}>
-          {Object.entries(itemsByCategory).map(([categoryId, categoryItems]) => {
-            const category = categories.find((c: any) => c.id === categoryId);
-            return (
-              <Box key={categoryId}>
-                <Box
-                  sx={{
-                    mb: 2.5,
-                    pb: 1,
-                    borderBottom: '2px solid #e5e7eb',
-                  }}
-                >
-                  <Typography variant="h6" fontWeight={700} color="#1a1a1a" sx={{ mb: 0.5 }}>
-                    {category?.name}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" fontWeight={500}>
-                    {categoryItems.length} {categoryItems.length === 1 ? 'item' : 'items'}
-                  </Typography>
+      {/* Item List */}
+      <Box sx={{ px: 2, pb: 3 }}>
+        {!hasResults ? (
+          /* Empty state */
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              py: 8,
+              gap: 1.5,
+            }}
+          >
+            <Box
+              sx={{
+                width: 64,
+                height: 64,
+                borderRadius: '50%',
+                bgcolor: '#f3f4f6',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <RestaurantIcon sx={{ fontSize: 28, color: '#d1d5db' }} />
+            </Box>
+            <Typography sx={{ fontWeight: 600, fontSize: '0.9375rem', color: '#374151' }}>
+              No items found
+            </Typography>
+            <Typography sx={{ fontSize: '0.8125rem', color: '#9ca3af', textAlign: 'center' }}>
+              Try a different search or category
+            </Typography>
+          </Box>
+        ) : selectedCategory === 'all' ? (
+          /* Grouped by category */
+          <Stack spacing={3}>
+            {Object.entries(itemsByCategory).map(([categoryId, categoryItems]) => {
+              const category = categories.find((c: any) => c.id === categoryId);
+              return (
+                <Box key={categoryId}>
+                  {/* Category header */}
+                  <Box
+                    sx={{
+                      borderLeft: '3px solid #f97316',
+                      pl: 1.5,
+                      mb: 1.5,
+                    }}
+                  >
+                    <Typography
+                      sx={{
+                        fontWeight: 700,
+                        fontSize: '0.9375rem',
+                        color: '#1a1a1a',
+                        lineHeight: 1.3,
+                      }}
+                    >
+                      {category?.name}
+                    </Typography>
+                    <Typography sx={{ fontSize: '0.75rem', color: '#6b7280', fontWeight: 500 }}>
+                      {(categoryItems as any[]).length}{' '}
+                      {(categoryItems as any[]).length === 1 ? 'item' : 'items'}
+                    </Typography>
+                  </Box>
+
+                  <Stack spacing={1.5}>
+                    {(categoryItems as any[]).map(renderItemCard)}
+                  </Stack>
                 </Box>
-                <Stack spacing={2}>
-                  {categoryItems.map(renderItemCard)}
-                </Stack>
-              </Box>
-            );
-          })}
-        </Stack>
-      ) : (
-        <Stack spacing={2}>
-          {filteredItems.length === 0 ? (
-            <Card elevation={0} sx={{ border: '1px solid #e5e7eb', borderRadius: 2 }}>
-              <CardContent sx={{ py: 6, textAlign: 'center' }}>
-                <Typography variant="body1" color="text.secondary" fontWeight={500} gutterBottom>
-                  No items found
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  Try adjusting your search or filters
-                </Typography>
-              </CardContent>
-            </Card>
-          ) : (
-            filteredItems.map(renderItemCard)
-          )}
-        </Stack>
-      )}
+              );
+            })}
+          </Stack>
+        ) : (
+          /* Single category */
+          <Stack spacing={1.5}>
+            {filteredItems.map(renderItemCard)}
+          </Stack>
+        )}
+      </Box>
     </Box>
   );
 };

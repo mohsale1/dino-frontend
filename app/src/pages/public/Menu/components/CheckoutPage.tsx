@@ -32,6 +32,7 @@ import {
 } from '@mui/icons-material';
 import { CartItem } from '../hooks/useCart';
 import OrderSuccessAnimation from './OrderSuccessAnimation';
+import { publicMenuService } from '../../../../services/application/publicMenuService';
 
 interface CheckoutPageProps {
   cart: CartItem[];
@@ -70,23 +71,18 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
       setLoading(true);
       setError(null);
 
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
-
-      // Generate order number
-      const orderNum = `ORD-${Date.now().toString().slice(-8)}`;
-      setOrderNumber(orderNum);
-
-      // Mock successful order placement
-      console.log('Order placed:', {
+      const order = await publicMenuService.placeOrder(organizationId, tableId, {
         customer_name: customerInfo.name,
         customer_phone: customerInfo.phone,
-        items: cart,
-        special_instructions: specialInstructions,
-        total: total,
-        order_number: orderNum
+        items: cart.map((item) => ({
+          item_id: item.item_id,
+          quantity: item.quantity,
+          unit_price: item.unit_price,
+        })),
+        special_instructions: specialInstructions || undefined,
       });
 
+      setOrderNumber(order.order_number || order.id);
       setShowSuccess(true);
     } catch (err: any) {
       console.error('Error placing order:', err);
@@ -322,7 +318,7 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
                             }}
                           />
                           <Typography variant="caption" color="text.secondary">
-                            â‚¹{item.unit_price.toFixed(2)} each
+                            ₹{item.unit_price.toFixed(2)} each
                           </Typography>
                         </Box>
                         {item.description && (
@@ -344,7 +340,7 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
                       {/* Item Price */}
                       <Box sx={{ textAlign: 'right' }}>
                         <Typography variant="h6" fontWeight={700} color="#1a1a1a">
-                          â‚¹{item.total_price.toFixed(2)}
+                          ₹{item.total_price.toFixed(2)}
                         </Typography>
                       </Box>
                     </Box>
@@ -453,7 +449,7 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
                     Subtotal
                   </Typography>
                   <Typography variant="body2" fontWeight={600} color="#1a1a1a">
-                    â‚¹{subtotal.toFixed(2)}
+                    ₹{subtotal.toFixed(2)}
                   </Typography>
                 </Box>
                 <Box display="flex" justifyContent="space-between" alignItems="center">
@@ -461,7 +457,7 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
                     Tax (5%)
                   </Typography>
                   <Typography variant="body2" fontWeight={600} color="#1a1a1a">
-                    â‚¹{tax.toFixed(2)}
+                    ₹{tax.toFixed(2)}
                   </Typography>
                 </Box>
                 <Box display="flex" justifyContent="space-between" alignItems="center">
@@ -469,7 +465,7 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
                     Service Charge (10%)
                   </Typography>
                   <Typography variant="body2" fontWeight={600} color="#1a1a1a">
-                    â‚¹{serviceCharge.toFixed(2)}
+                    ₹{serviceCharge.toFixed(2)}
                   </Typography>
                 </Box>
                 <Divider />
@@ -488,7 +484,7 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
                     Total Amount
                   </Typography>
                   <Typography variant="h5" fontWeight={800} color="#1a1a1a">
-                    â‚¹{total.toFixed(2)}
+                    ₹{total.toFixed(2)}
                   </Typography>
                 </Box>
               </Stack>
@@ -561,7 +557,7 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
                     fontSize: '0.875rem',
                   }}
                 >
-                  â‚¹{total.toFixed(2)}
+                  ₹{total.toFixed(2)}
                 </Box>
               </Box>
             )}
@@ -581,7 +577,7 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
             }}
           >
             <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
-              ðŸ”’ Secure Checkout â€¢ Your order will be confirmed instantly
+              🔒 Secure Checkout • Your order will be confirmed instantly
             </Typography>
             <Typography variant="caption" color="text.secondary">
               Questions? Contact our staff for assistance

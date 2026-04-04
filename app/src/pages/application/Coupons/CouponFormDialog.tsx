@@ -23,9 +23,12 @@ interface CouponFormData {
   description: string;
   discountType: 'percentage' | 'fixed';
   discountValue: number;
-  maxDiscountAmount: number | '';
-  minOrderAmount: number | '';
-  usageLimit: number | '';
+  // Optional numeric fields use undefined (not '') so the service's
+  // `if (data.x !== undefined)` guard correctly omits them from the payload
+  // when they are not set.
+  maxDiscountAmount: number | undefined;
+  minOrderAmount: number | undefined;
+  usageLimit: number | undefined;
   validFrom: string;
   validUntil: string;
   isAvailable: boolean;
@@ -53,9 +56,9 @@ const defaultFormData: CouponFormData = {
   description: '',
   discountType: 'percentage',
   discountValue: 0,
-  maxDiscountAmount: '',
-  minOrderAmount: '',
-  usageLimit: '',
+  maxDiscountAmount: undefined,
+  minOrderAmount: undefined,
+  usageLimit: undefined,
   validFrom: '',
   validUntil: '',
   isAvailable: true,
@@ -77,14 +80,23 @@ const CouponFormDialog: React.FC<CouponFormDialogProps> = ({
     if (open) {
       if (editingCoupon) {
         setFormData({
+          // code is editable and must be included in the update payload
           code: editingCoupon.code || '',
           name: editingCoupon.name || '',
           description: editingCoupon.description || '',
           discountType: editingCoupon.discountType || 'percentage',
           discountValue: editingCoupon.discountValue || 0,
-          maxDiscountAmount: editingCoupon.maxDiscountAmount || '',
-          minOrderAmount: editingCoupon.minOrderAmount || '',
-          usageLimit: editingCoupon.usageLimit || '',
+          // Use undefined (not '') for optional numeric fields so the service
+          // omits them from the PATCH payload when they are not set.
+          maxDiscountAmount: editingCoupon.maxDiscountAmount != null
+            ? editingCoupon.maxDiscountAmount
+            : undefined,
+          minOrderAmount: editingCoupon.minOrderAmount != null
+            ? editingCoupon.minOrderAmount
+            : undefined,
+          usageLimit: editingCoupon.usageLimit != null
+            ? editingCoupon.usageLimit
+            : undefined,
           validFrom: editingCoupon.validFrom || '',
           validUntil: editingCoupon.validUntil || '',
           isAvailable: editingCoupon.isAvailable ?? true,
@@ -306,11 +318,12 @@ const CouponFormDialog: React.FC<CouponFormDialogProps> = ({
               size="small"
               label="Max Discount Amount"
               type="number"
-              value={formData.maxDiscountAmount}
+              // Display empty string in the input when undefined so the field appears blank
+              value={formData.maxDiscountAmount ?? ''}
               onChange={(e) =>
                 setFormData({
                   ...formData,
-                  maxDiscountAmount: e.target.value === '' ? '' : parseFloat(e.target.value),
+                  maxDiscountAmount: e.target.value === '' ? undefined : parseFloat(e.target.value),
                 })
               }
               placeholder="Optional"
@@ -328,11 +341,11 @@ const CouponFormDialog: React.FC<CouponFormDialogProps> = ({
               size="small"
               label="Min Order Amount"
               type="number"
-              value={formData.minOrderAmount}
+              value={formData.minOrderAmount ?? ''}
               onChange={(e) =>
                 setFormData({
                   ...formData,
-                  minOrderAmount: e.target.value === '' ? '' : parseFloat(e.target.value),
+                  minOrderAmount: e.target.value === '' ? undefined : parseFloat(e.target.value),
                 })
               }
               placeholder="Optional"
@@ -350,11 +363,11 @@ const CouponFormDialog: React.FC<CouponFormDialogProps> = ({
               size="small"
               label="Usage Limit"
               type="number"
-              value={formData.usageLimit}
+              value={formData.usageLimit ?? ''}
               onChange={(e) =>
                 setFormData({
                   ...formData,
-                  usageLimit: e.target.value === '' ? '' : parseInt(e.target.value),
+                  usageLimit: e.target.value === '' ? undefined : parseInt(e.target.value),
                 })
               }
               placeholder="Unlimited"

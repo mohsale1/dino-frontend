@@ -48,8 +48,7 @@ const TestimonialsSection: React.FC = () => {
       try {
         setLoading(true);
         const data = await homePageService.getTestimonials(3);
-        
-        // Use API data (backend now has default testimonials)
+
         if (data && data.length > 0) {
           setTestimonials(data);
         } else {
@@ -66,39 +65,56 @@ const TestimonialsSection: React.FC = () => {
     fetchTestimonials();
   }, []);
 
+  // Always render the outer wrapper so id="testimonials" is always in the DOM
+  // Loading state
   if (loading) {
     return (
       <Box
+        id="testimonials"
         sx={{
-          py: { xs: 10, sm: 12, md: 16 },
-          background: `linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)`,
+          py: { xs: 6, sm: 8, md: 10 },
+          background: `linear-gradient(160deg, #f8fafc 0%, #eef2ff 40%, #f0fdf4 70%, #f8fafc 100%)`,
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
+          scrollMarginTop: { xs: '64px', md: '70px' },
         }}
       >
-        <CircularProgress />
+        <CircularProgress sx={{ color: '#1976D2' }} />
       </Box>
     );
   }
 
-  // Don't render section if no testimonials
+  // No testimonials — render nothing visible but keep the anchor in the DOM
   if (!testimonials || testimonials.length === 0) {
-    return null;
+    return <Box id="testimonials" sx={{ scrollMarginTop: { xs: '64px', md: '70px' } }} />;
   }
 
   return (
     <Box
       id="testimonials"
       sx={{
-        py: { xs: 10, sm: 12, md: 16 },
-        background: `linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)`,
+        py: { xs: 6, sm: 8, md: 10 },
+        background: `linear-gradient(160deg, #f8fafc 0%, #eef2ff 40%, #f0fdf4 70%, #f8fafc 100%)`,
         position: 'relative',
         width: '100%',
-        scrollMarginTop: { xs: '100px', sm: '110px', md: '120px' },
+        scrollMarginTop: { xs: '64px', md: '70px' },
         overflow: 'hidden',
       }}
     >
+      {/* Subtle top border accent */}
+      <Box
+        sx={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: '3px',
+          background: 'linear-gradient(90deg, transparent, #1976D2 30%, #10b981 70%, transparent)',
+          opacity: 0.35,
+        }}
+      />
+
       {/* Decorative Quote Icons */}
       <FormatQuote
         sx={{
@@ -106,7 +122,7 @@ const TestimonialsSection: React.FC = () => {
           top: '10%',
           left: '5%',
           fontSize: { xs: 80, md: 120 },
-          color: alpha('#0f172a', 0.03),
+          color: alpha('#1976D2', 0.05),
           animation: `${float} 6s ease-in-out infinite`,
         }}
       />
@@ -116,7 +132,7 @@ const TestimonialsSection: React.FC = () => {
           bottom: '15%',
           right: '8%',
           fontSize: { xs: 100, md: 150 },
-          color: alpha('#0f172a', 0.02),
+          color: alpha('#10b981', 0.04),
           animation: `${float} 8s ease-in-out infinite`,
           animationDelay: '2s',
           transform: 'rotate(180deg)',
@@ -132,7 +148,7 @@ const TestimonialsSection: React.FC = () => {
           width: '300px',
           height: '300px',
           borderRadius: '50%',
-          border: `2px dashed ${alpha('#0f172a', 0.08)}`,
+          border: `2px dashed ${alpha('#1976D2', 0.08)}`,
           animation: `${pulse} 4s ease-in-out infinite`,
         }}
       />
@@ -144,13 +160,39 @@ const TestimonialsSection: React.FC = () => {
           width: '250px',
           height: '250px',
           borderRadius: '50%',
-          border: `2px dashed ${alpha('#0f172a', 0.06)}`,
+          border: `2px dashed ${alpha('#10b981', 0.07)}`,
           animation: `${pulse} 5s ease-in-out infinite`,
           animationDelay: '1s',
         }}
       />
 
-      <Container 
+      {/* Soft radial glow blobs */}
+      <Box
+        sx={{
+          position: 'absolute',
+          top: '5%',
+          right: '15%',
+          width: '400px',
+          height: '400px',
+          borderRadius: '50%',
+          background: `radial-gradient(circle, ${alpha('#1976D2', 0.05)} 0%, transparent 70%)`,
+          pointerEvents: 'none',
+        }}
+      />
+      <Box
+        sx={{
+          position: 'absolute',
+          bottom: '10%',
+          left: '10%',
+          width: '350px',
+          height: '350px',
+          borderRadius: '50%',
+          background: `radial-gradient(circle, ${alpha('#10b981', 0.05)} 0%, transparent 70%)`,
+          pointerEvents: 'none',
+        }}
+      />
+
+      <Container
         maxWidth="lg"
         disableGutters
         sx={{
@@ -161,10 +203,10 @@ const TestimonialsSection: React.FC = () => {
         }}
       >
         {/* Section Header */}
-        <Box 
-          sx={{ 
-            textAlign: 'center', 
-            mb: { xs: 8, md: 10 },
+        <Box
+          sx={{
+            textAlign: 'center',
+            mb: { xs: 4, md: 6 },
             animation: `${fadeInUp} 0.8s ease-out`,
           }}
         >
@@ -187,7 +229,7 @@ const TestimonialsSection: React.FC = () => {
                 transform: 'translateX(-50%)',
                 width: '60px',
                 height: '4px',
-                background: `linear-gradient(90deg, transparent, #0f172a, transparent)`,
+                background: `linear-gradient(90deg, transparent, #1976D2, transparent)`,
                 borderRadius: 2,
               },
             }}
@@ -212,16 +254,13 @@ const TestimonialsSection: React.FC = () => {
         </Box>
 
         {/* Testimonial Cards */}
-        <Grid 
-          container 
-          spacing={{ xs: 3, sm: 3, md: 4 }}
-        >
+        <Grid container spacing={{ xs: 3, sm: 3, md: 4 }}>
           {testimonials.slice(0, 3).map((testimonial, index) => (
-            <Grid 
-              item 
-              xs={12} 
-              sm={6} 
-              md={4} 
+            <Grid
+              item
+              xs={12}
+              sm={6}
+              md={4}
               key={index}
               sx={{
                 animation: `${fadeInUp} 0.8s ease-out ${0.2 + index * 0.1}s both`,

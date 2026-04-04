@@ -6,11 +6,25 @@
 import { apiService } from '../../../utils/api';
 import type { Coupon, CouponCreate, CouponUpdate, CouponValidationRequest, CouponValidationResponse } from '../types';
 
+/**
+ * Convert a 'YYYY-MM-DD' date string to a full ISO 8601 datetime string.
+ * If the value is already a full datetime string (contains 'T'), it is returned as-is.
+ */
+function toISODateTime(date: string): string {
+  if (!date) return date;
+  return date.includes('T') ? date : `${date}T00:00:00.000Z`;
+}
+
 class CouponService {
   private baseUrl = '/application/coupons';
 
   // ==================== Coupons ====================
   
+  /**
+   * Get coupons list.
+   * The backend may return a paginated envelope { data: Coupon[], pagination: {...} }
+   * or a plain array. Both shapes are handled.
+   */
   async getCoupons(workspaceId: string, page: number = 1, pageSize: number = 100, isAvailable?: boolean): Promise<Coupon[]> {
     const params: any = {
       workspace_id: workspaceId,
@@ -25,7 +39,14 @@ class CouponService {
     }
     
     const response = await apiService.get(this.baseUrl, { params });
-    return response.data as any || [];
+    const raw = response.data as any;
+
+    // Unwrap paginated envelope if present
+    if (raw && Array.isArray(raw.data)) {
+      return raw.data;
+    }
+
+    return Array.isArray(raw) ? raw : [];
   }
 
   async getCoupon(id: string): Promise<Coupon> {
@@ -52,15 +73,21 @@ class CouponService {
       min_order_amount: data.minOrderAmount,
       usage_limit: data.usageLimit,
       usage_limit_per_user: data.usageLimitPerUser,
-      valid_from: data.validFrom,
-      valid_until: data.validUntil,
+      valid_from: data.validFrom ? toISODateTime(data.validFrom) : undefined,
+      valid_until: data.validUntil ? toISODateTime(data.validUntil) : undefined,
       is_available: data.isAvailable ?? true,
     });
     return response.data as any;
   }
 
+  /**
+   * Update a coupon.
+   * - Includes 'code' in the payload when provided.
+   * - Converts validFrom/validUntil from 'YYYY-MM-DD' to ISO 8601 datetime.
+   */
   async updateCoupon(id: string, data: CouponUpdate): Promise<Coupon> {
     const payload: any = {};
+    if (data.code !== undefined) payload.code = data.code;
     if (data.name !== undefined) payload.name = data.name;
     if (data.description !== undefined) payload.description = data.description;
     if (data.discountType !== undefined) payload.discount_type = data.discountType;
@@ -69,8 +96,8 @@ class CouponService {
     if (data.minOrderAmount !== undefined) payload.min_order_amount = data.minOrderAmount;
     if (data.usageLimit !== undefined) payload.usage_limit = data.usageLimit;
     if (data.usageLimitPerUser !== undefined) payload.usage_limit_per_user = data.usageLimitPerUser;
-    if (data.validFrom !== undefined) payload.valid_from = data.validFrom;
-    if (data.validUntil !== undefined) payload.valid_until = data.validUntil;
+    if (data.validFrom !== undefined) payload.valid_from = toISODateTime(data.validFrom);
+    if (data.validUntil !== undefined) payload.valid_until = toISODateTime(data.validUntil);
     if (data.isAvailable !== undefined) payload.is_available = data.isAvailable;
     
     const response = await apiService.put(`${this.baseUrl}/${id}`, payload);

@@ -29,6 +29,7 @@ interface LocationTabsProps {
   onToggleStatus: (id: string) => void;
   onGenerateQR: (locationId: string) => void;
   onPrintQR: (locationId: string) => void;
+  onViewQR: (location: ServiceLocation) => void;
 }
 
 const LocationTabs: React.FC<LocationTabsProps> = ({
@@ -43,6 +44,7 @@ const LocationTabs: React.FC<LocationTabsProps> = ({
   onToggleStatus,
   onGenerateQR,
   onPrintQR,
+  onViewQR,
 }) => {
   return (
     <Box sx={{ bgcolor: '#ffffff' }}>
@@ -112,6 +114,7 @@ const LocationTabs: React.FC<LocationTabsProps> = ({
                     onToggleStatus={onToggleStatus}
                     onGenerateQR={onGenerateQR}
                     onPrintQR={onPrintQR}
+                    onViewQR={onViewQR}
                   />
                 </Grid>
               ))

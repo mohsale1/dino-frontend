@@ -116,24 +116,32 @@ class CatalogService {
     await apiService.put(`${this.itemsUrl}/${id}/restore`, {});
   }
 
+  /**
+   * Toggle item availability via the dedicated availability endpoint.
+   * Uses PUT /items/{id}/availability with is_available as a query param.
+   */
   async toggleItemAvailability(id: string, isAvailable: boolean): Promise<CatalogItem> {
-    const response = await apiService.put(`${this.itemsUrl}/${id}`, {
-      is_available: isAvailable,
-    });
+    const response = await apiService.put(
+      `${this.itemsUrl}/${id}/availability`,
+      {},
+      { params: { is_available: isAvailable } }
+    );
     return response.data as any;
   }
 
+  /**
+   * Upload an item image.
+   * Do NOT set Content-Type manually — the browser must set it automatically
+   * with the correct multipart boundary when sending FormData.
+   * Backend may return image_url (snake_case) or imageUrl (camelCase).
+   */
   async uploadItemImage(id: string, file: File): Promise<string> {
     const formData = new FormData();
     formData.append('image', file);
     
-    const response = await apiService.post(`${this.itemsUrl}/${id}/image`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+    const response = await apiService.post(`${this.itemsUrl}/${id}/image`, formData);
     
-    return (response.data as any)?.imageUrl || '';
+    return (response.data as any)?.image_url || (response.data as any)?.imageUrl || '';
   }
 }
 

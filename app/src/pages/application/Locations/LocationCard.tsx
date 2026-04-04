@@ -35,10 +35,11 @@ interface LocationCardProps {
   onToggleStatus: (locationId: string) => void;
   onGenerateQR: (locationId: string) => void;
   onPrintQR: (locationId: string) => void;
+  onViewQR: (location: ServiceLocation) => void;
 }
 
 const getStatusConfig = (status: LocationStatus) => {
-  const configs = {
+  const configs: Record<LocationStatus, { label: string; icon: React.ReactElement; bg: string; color: string; border: string }> = {
     available: {
       label: 'Available',
       icon: <CheckCircle sx={{ fontSize: 16 }} />,
@@ -68,7 +69,7 @@ const getStatusConfig = (status: LocationStatus) => {
       border: 'rgba(100,116,139,0.2)',
     },
   };
-  return configs[status] || configs.available;
+  return configs[status];
 };
 
 const LocationCard: React.FC<LocationCardProps> = ({
@@ -79,12 +80,14 @@ const LocationCard: React.FC<LocationCardProps> = ({
   onToggleStatus,
   onGenerateQR,
   onPrintQR,
+  onViewQR,
 }) => {
   const statusConfig = getStatusConfig(location.status);
 
   return (
     <Paper
       elevation={0}
+      onClick={() => onViewQR(location)}
       sx={{
         p: { xs: 2, sm: 2.5 },
         backgroundColor: '#ffffff',
@@ -95,8 +98,11 @@ const LocationCard: React.FC<LocationCardProps> = ({
         flexDirection: 'column',
         opacity: location.isActive ? 1 : 0.6,
         transition: 'all 0.2s',
+        cursor: 'pointer',
         '&:hover': {
-          boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+          boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
+          borderColor: '#cbd5e1',
+          transform: 'translateY(-1px)',
         },
       }}
     >
@@ -202,6 +208,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
 
       {/* Actions */}
       <Box
+        onClick={(e) => e.stopPropagation()}
         sx={{
           display: 'flex',
           gap: 1,
@@ -210,7 +217,7 @@ const LocationCard: React.FC<LocationCardProps> = ({
           borderTop: '1px solid #f1f5f9',
         }}
       >
-        <Tooltip title="Generate QR">
+        <Tooltip title="View QR Code">
           <IconButton
             size="small"
             onClick={() => onGenerateQR(location.id)}

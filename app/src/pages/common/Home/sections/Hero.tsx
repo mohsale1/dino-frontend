@@ -6,383 +6,303 @@ import {
   Button,
   Grid,
   Stack,
-  Chip,
   alpha,
   keyframes,
 } from '@mui/material';
 import {
+  ArrowForward,
   PlayArrow,
-  CheckCircleOutline,
   TrendingUp,
   Speed,
   Security,
-  Store,
   QrCode2,
   Dashboard as DashboardIcon,
+  Store,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../../contexts/common/Auth';
 
-// Animations
-const float = keyframes`
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-20px); }
+// ─── Design tokens ────────────────────────────────────────────────────────────
+const BG      = '#0b1120';   // near-black navy
+const BLUE    = '#1976D2';   // primary blue
+const BLUE_LT = '#42A5F5';   // lighter blue for accents
+const WHITE   = '#ffffff';
+
+// ─── Keyframes ────────────────────────────────────────────────────────────────
+
+// Single slow-drifting glow — the only background animation
+const glow = keyframes`
+  0%,100% { transform: translate(0px, 0px)   scale(1);    opacity: 1; }
+  50%      { transform: translate(40px,-30px) scale(1.06); opacity: 0.85; }
 `;
 
-const floatSlow = keyframes`
-  0%, 100% { transform: translateY(0px) translateX(0px); }
-  50% { transform: translateY(-15px) translateX(10px); }
+// Entrance animations
+const fadeUp = keyframes`
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0);    }
 `;
 
-const pulse = keyframes`
-  0%, 100% { opacity: 0.6; transform: scale(1); }
-  50% { opacity: 0.8; transform: scale(1.05); }
+const fadeRight = keyframes`
+  from { opacity: 0; transform: translateX(30px); }
+  to   { opacity: 1; transform: translateX(0);    }
 `;
 
-const slideInLeft = keyframes`
-  from { transform: translateX(-100px); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
+// Subtle status dot pulse
+const dotPulse = keyframes`
+  0%,100% { box-shadow: 0 0 0 0   ${alpha(BLUE_LT, 0.5)}; }
+  50%      { box-shadow: 0 0 0 5px ${alpha(BLUE_LT, 0)};   }
 `;
 
-const slideInRight = keyframes`
-  from { transform: translateX(100px); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
-`;
+// ─── Data ─────────────────────────────────────────────────────────────────────
+const FEATURE_CARDS = [
+  { Icon: QrCode2,       title: 'QR Ordering',       desc: 'Contactless catalog access',  delay: '0.45s' },
+  { Icon: DashboardIcon, title: 'Live Dashboard',     desc: 'Real-time analytics',         delay: '0.6s'  },
+  { Icon: Store,         title: 'Catalog Management', desc: 'Easy updates & control',      delay: '0.75s' },
+];
 
-const fadeIn = keyframes`
-  from { opacity: 0; }
-  to { opacity: 1; }
-`;
+const PILLS = [
+  { Icon: TrendingUp, label: '3x Faster'  },
+  { Icon: Speed,      label: 'Real-time'  },
+  { Icon: Security,   label: 'Secure'     },
+];
 
-
+// ─── Component ────────────────────────────────────────────────────────────────
 const HeroSection: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-
-  const features = [
-    { icon: <TrendingUp sx={{ fontSize: 16 }} />, text: '3x Faster' },
-    { icon: <Speed sx={{ fontSize: 16 }} />, text: 'Real-time' },
-    { icon: <Security sx={{ fontSize: 16 }} />, text: 'Secure' },
-  ];
 
   return (
     <Box
       id="hero"
       sx={{
         position: 'relative',
-        minHeight: '100vh',
+        height: '100vh',
         width: '100%',
         display: 'flex',
-        alignItems: { xs: 'flex-start', md: 'center' },
+        alignItems: 'center',
         overflow: 'hidden',
         pt: { xs: '64px', md: '70px' },
-        background: '#0f172a',
+        boxSizing: 'border-box',
+        backgroundColor: BG,
       }}
     >
-      {/* Animated Background Elements */}
-      <Box
-        sx={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          overflow: 'hidden',
-          pointerEvents: 'none',
-        }}
-      >
-        {/* Animated Background Pattern */}
+
+      {/* ── BACKGROUND ───────────────────────────────────────────────────── */}
+      <Box sx={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden' }}>
+
+        {/* Dot grid — professional texture */}
         <Box
           sx={{
             position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundImage: `
-              radial-gradient(circle at 20% 30%, ${alpha('#ffffff', 0.05)} 0%, transparent 50%),
-              radial-gradient(circle at 80% 70%, ${alpha('#ffffff', 0.03)} 0%, transparent 50%)
-            `,
+            inset: 0,
+            backgroundImage: `radial-gradient(${alpha(WHITE, 0.06)} 1px, transparent 1px)`,
+            backgroundSize: '32px 32px',
           }}
         />
 
-        {/* Grid Pattern */}
+        {/* Single blue glow — top-right, slow drift */}
         <Box
           sx={{
             position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundImage: `
-              linear-gradient(${alpha('#ffffff', 0.02)} 1px, transparent 1px),
-              linear-gradient(90deg, ${alpha('#ffffff', 0.02)} 1px, transparent 1px)
-            `,
-            backgroundSize: '60px 60px',
+            top: '-20%',
+            right: '-10%',
+            width: { xs: '480px', md: '700px' },
+            height: { xs: '480px', md: '700px' },
+            borderRadius: '50%',
+            background: `radial-gradient(circle at 40% 40%,
+              ${alpha(BLUE, 0.22)} 0%,
+              ${alpha(BLUE, 0.08)} 45%,
+              transparent         70%)`,
+            filter: 'blur(80px)',
+            animation: `${glow} 16s ease-in-out infinite`,
           }}
         />
 
-        {/* Large Gradient Orbs */}
+        {/* Subtle secondary glow — bottom-left, counter-drift */}
         <Box
           sx={{
             position: 'absolute',
-            top: '-10%',
-            right: '-5%',
-            width: { xs: '400px', md: '600px' },
-            height: { xs: '400px', md: '600px' },
+            bottom: '-15%',
+            left: '-8%',
+            width: { xs: '360px', md: '520px' },
+            height: { xs: '360px', md: '520px' },
             borderRadius: '50%',
-            background: `radial-gradient(circle, ${alpha('#ffffff', 0.08)} 0%, ${alpha('#ffffff', 0.02)} 40%, transparent 70%)`,
-            filter: 'blur(40px)',
-            animation: `${float} 8s ease-in-out infinite`,
-          }}
-        />
-        <Box
-          sx={{
-            position: 'absolute',
-            bottom: '-10%',
-            left: '-5%',
-            width: { xs: '500px', md: '700px' },
-            height: { xs: '500px', md: '700px' },
-            borderRadius: '50%',
-            background: `radial-gradient(circle, ${alpha('#ffffff', 0.06)} 0%, ${alpha('#ffffff', 0.02)} 40%, transparent 70%)`,
-            filter: 'blur(40px)',
-            animation: `${floatSlow} 10s ease-in-out infinite`,
-            animationDelay: '2s',
+            background: `radial-gradient(circle,
+              ${alpha(BLUE, 0.1)} 0%,
+              transparent        65%)`,
+            filter: 'blur(70px)',
+            animation: `${glow} 20s ease-in-out infinite reverse`,
+            animationDelay: '4s',
           }}
         />
 
-        {/* Floating Circles */}
-        <Box
-          sx={{
-            position: 'absolute',
-            top: '15%',
-            right: '10%',
-            width: '200px',
-            height: '200px',
-            borderRadius: '50%',
-            border: `2px solid ${alpha('#ffffff', 0.1)}`,
-            animation: `${float} 6s ease-in-out infinite`,
-          }}
-        />
-        <Box
-          sx={{
-            position: 'absolute',
-            bottom: '20%',
-            left: '5%',
-            width: '150px',
-            height: '150px',
-            borderRadius: '50%',
-            border: `2px solid ${alpha('#ffffff', 0.08)}`,
-            animation: `${float} 8s ease-in-out infinite`,
-            animationDelay: '2s',
-          }}
-        />
-
-        {/* Floating Icons */}
-        <Box
-          sx={{
-            position: 'absolute',
-            top: '20%',
-            right: '15%',
-            animation: `${float} 5s ease-in-out infinite`,
-            animationDelay: '0.5s',
-          }}
-        >
-          <QrCode2
-            sx={{
-              fontSize: { xs: 40, md: 60 },
-              color: alpha('#ffffff', 0.1),
-              animation: `${pulse} 3s ease-in-out infinite`,
-            }}
-          />
-        </Box>
-        <Box
-          sx={{
-            position: 'absolute',
-            bottom: '25%',
-            right: '20%',
-            animation: `${floatSlow} 6s ease-in-out infinite`,
-            animationDelay: '1.5s',
-          }}
-        >
-          <DashboardIcon
-            sx={{
-              fontSize: { xs: 35, md: 50 },
-              color: alpha('#ffffff', 0.08),
-              animation: `${pulse} 4s ease-in-out infinite`,
-            }}
-          />
-        </Box>
+        {/* Thin horizontal rule — adds structure */}
         <Box
           sx={{
             position: 'absolute',
             top: '50%',
-            left: '10%',
-            animation: `${float} 7s ease-in-out infinite`,
-            animationDelay: '2s',
+            left: 0,
+            right: 0,
+            height: '1px',
+            background: `linear-gradient(90deg,
+              transparent          0%,
+              ${alpha(BLUE, 0.12)} 30%,
+              ${alpha(BLUE, 0.12)} 70%,
+              transparent          100%)`,
+            display: { xs: 'none', md: 'block' },
           }}
-        >
-          <Store
-            sx={{
-              fontSize: { xs: 38, md: 55 },
-              color: alpha('#ffffff', 0.09),
-              animation: `${pulse} 3.5s ease-in-out infinite`,
-            }}
-          />
-        </Box>
+        />
       </Box>
-      
-      <Container 
-        maxWidth="lg" 
-        sx={{ 
-          position: 'relative', 
-          zIndex: 2, 
-          py: { xs: 4, sm: 5, md: 8 },
-          px: { xs: 2, sm: 3, md: 3 },
+
+      {/* ── CONTENT ──────────────────────────────────────────────────────── */}
+      <Container
+        maxWidth="lg"
+        sx={{
+          position: 'relative',
+          zIndex: 2,
+          py: { xs: 2, sm: 3, md: 4 },
+          px: { xs: 2.5, sm: 3, md: 3 },
           height: '100%',
           display: 'flex',
-          alignItems: { xs: 'flex-start', md: 'center' },
+          alignItems: 'center',
         }}
       >
-        <Grid container spacing={{ xs: 4, md: 8 }} alignItems="center">
-          {/* Left Content */}
+        <Grid container spacing={{ xs: 3, sm: 4, md: 6 }} alignItems="center">
+
+          {/* ── LEFT COLUMN ── */}
           <Grid item xs={12} md={6}>
-            <Stack 
-              spacing={{ xs: 3, md: 3.5 }} 
-              sx={{ 
-                alignItems: { xs: 'center', md: 'flex-start' }, 
+            <Stack
+              spacing={{ xs: 2, sm: 2.5, md: 3 }}
+              sx={{
+                alignItems: { xs: 'center', md: 'flex-start' },
                 textAlign: { xs: 'center', md: 'left' },
-                animation: `${slideInLeft} 0.8s ease-out`,
               }}
             >
-              {/* Badge */}
-              <Box sx={{ display: 'flex', justifyContent: { xs: 'center', md: 'flex-start' }, width: '100%' }}>
-                <Chip
-                  icon={<CheckCircleOutline sx={{ fontSize: 18 }} />}
-                  label="Trusted by 500+ Businesses"
+
+
+              {/* Headline */}
+              <Box sx={{ animation: `${fadeUp} 0.6s ease-out 0.22s both` }}>
+                <Typography
+                  variant="h1"
                   sx={{
-                    backgroundColor: alpha('#ffffff', 0.1),
-                    color: '#ffffff',
-                    fontWeight: 600,
-                    fontSize: { xs: '0.8125rem', sm: '0.875rem' },
-                    height: { xs: 32, sm: 36 },
-                    px: { xs: 1.5, sm: 2 },
-                    border: `1px solid ${alpha('#ffffff', 0.2)}`,
-                    '& .MuiChip-icon': {
-                      color: '#ffffff',
-                      marginLeft: '8px',
-                    },
-                    animation: `${fadeIn} 1s ease-out 0.3s both`,
+                    fontSize: { xs: '1.875rem', sm: '2.75rem', md: '3.5rem', lg: '4rem' },
+                    fontWeight: 800,
+                    lineHeight: 1.1,
+                    letterSpacing: '-0.03em',
+                    color: WHITE,
                   }}
-                />
+                >
+                  Transform Your{' '}
+                  <Box
+                    component="span"
+                    sx={{
+                      color: BLUE_LT,
+                      position: 'relative',
+                      // Underline accent
+                      '&::after': {
+                        content: '""',
+                        position: 'absolute',
+                        bottom: '-4px',
+                        left: 0,
+                        right: 0,
+                        height: '3px',
+                        borderRadius: '2px',
+                        background: `linear-gradient(90deg, ${BLUE} 0%, ${BLUE_LT} 100%)`,
+                      },
+                    }}
+                  >
+                    Business
+                  </Box>
+                  {' '}Operations
+                </Typography>
               </Box>
 
-              {/* Main Heading */}
+              {/* Body copy */}
               <Typography
-                variant="h1"
                 sx={{
-                  fontSize: { xs: '2.25rem', sm: '3.25rem', md: '4rem', lg: '4.5rem' },
-                  fontWeight: 800,
-                  lineHeight: 1.1,
-                  color: '#ffffff',
-                  mb: { xs: 1, md: 1.5 },
-                  letterSpacing: '-0.03em',
-                  px: { xs: 0, sm: 0 },
-                  width: '100%',
-                  animation: `${fadeIn} 1s ease-out 0.5s both`,
-                }}
-              >
-                Transform Your Business Operations
-              </Typography>
-
-              {/* Subheading */}
-              <Typography
-                variant="h5"
-                sx={{
-                  fontSize: { xs: '1.0625rem', sm: '1.25rem', md: '1.375rem' },
+                  fontSize: { xs: '0.9375rem', sm: '1rem', md: '1.125rem' },
                   fontWeight: 400,
-                  color: alpha('#ffffff', 0.8),
-                  lineHeight: 1.6,
-                  maxWidth: 600,
-                  px: { xs: 0, sm: 0 },
-                  width: '100%',
-                  mb: 1,
-                  animation: `${fadeIn} 1s ease-out 0.7s both`,
+                  color: alpha(WHITE, 0.58),
+                  lineHeight: 1.75,
+                  maxWidth: 500,
+                  animation: `${fadeUp} 0.6s ease-out 0.34s both`,
                 }}
               >
                 Streamline operations with digital catalogs, QR ordering, and real-time management for cafes, restaurants, bars, and service businesses.
               </Typography>
 
-              {/* Feature Pills */}
-              <Stack 
-                direction="row" 
-                spacing={1.5} 
-                flexWrap="wrap" 
-                useFlexGap 
-                sx={{ 
-                  pt: 0.5,
+              {/* Stat pills */}
+              <Stack
+                direction="row"
+                spacing={1.25}
+                flexWrap="wrap"
+                useFlexGap
+                sx={{
                   justifyContent: { xs: 'center', md: 'flex-start' },
-                  width: '100%',
-                  animation: `${fadeIn} 1s ease-out 0.9s both`,
+                  animation: `${fadeUp} 0.6s ease-out 0.46s both`,
                 }}
               >
-                {features.map((feature, index) => (
-                  <Chip
-                    key={index}
-                    icon={feature.icon}
-                    label={feature.text}
-                    size="medium"
+                {PILLS.map(({ Icon, label }) => (
+                  <Box
+                    key={label}
                     sx={{
-                      backgroundColor: alpha('#ffffff', 0.1),
-                      border: '1px solid',
-                      borderColor: alpha('#ffffff', 0.2),
-                      fontWeight: 600,
-                      fontSize: { xs: '0.8125rem', sm: '0.875rem' },
-                      height: { xs: 32, sm: 36 },
-                      px: 0.5,
-                      color: alpha('#ffffff', 0.9),
-                      '& .MuiChip-icon': {
-                        color: '#ffffff',
-                      },
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 0.75,
+                      px: 1.5,
+                      py: 0.625,
+                      borderRadius: '6px',
+                      backgroundColor: alpha(WHITE, 0.05),
+                      border: `1px solid ${alpha(WHITE, 0.1)}`,
                     }}
-                  />
+                  >
+                    <Icon sx={{ fontSize: 14, color: alpha(WHITE, 0.45) }} />
+                    <Typography
+                      sx={{
+                        fontSize: '0.8125rem',
+                        fontWeight: 500,
+                        color: alpha(WHITE, 0.65),
+                      }}
+                    >
+                      {label}
+                    </Typography>
+                  </Box>
                 ))}
               </Stack>
 
-              {/* CTA Buttons */}
-              <Stack 
-                direction={{ xs: 'column', sm: 'row' }} 
-                spacing={2} 
-                sx={{ 
-                  pt: { xs: 2, md: 2.5 },
+              {/* CTA buttons */}
+              <Stack
+                direction={{ xs: 'column', sm: 'row' }}
+                spacing={1.5}
+                sx={{
                   width: '100%',
                   alignItems: { xs: 'stretch', sm: 'center' },
                   justifyContent: { xs: 'center', md: 'flex-start' },
-                  animation: `${fadeIn} 1s ease-out 1.1s both`,
+                  animation: `${fadeUp} 0.6s ease-out 0.58s both`,
                 }}
               >
                 {user ? (
                   <Button
                     variant="contained"
                     size="large"
+                    endIcon={<ArrowForward sx={{ fontSize: 18 }} />}
                     onClick={() => navigate('/admin/dashboard')}
                     sx={{
-                      px: { xs: 4, sm: 5 },
-                      py: { xs: 1.5, sm: 1.75 },
-                      fontSize: { xs: '1rem', sm: '1.0625rem' },
+                      px: { xs: 4, sm: 4.5 },
+                      py: { xs: 1.25, sm: 1.5 },
+                      fontSize: '1rem',
                       fontWeight: 600,
-                      borderRadius: 2,
+                      borderRadius: '8px',
                       textTransform: 'none',
-                      minHeight: { xs: 50, sm: 54 },
-                      boxShadow: '0 4px 14px rgba(255, 255, 255, 0.25)',
-                      backgroundColor: '#ffffff',
-                      color: '#0f172a',
+                      backgroundColor: BLUE,
+                      color: WHITE,
+                      boxShadow: `0 4px 16px ${alpha(BLUE, 0.4)}`,
                       '&:hover': {
-                        boxShadow: '0 6px 20px rgba(255, 255, 255, 0.35)',
-                        transform: 'translateY(-2px)',
-                        backgroundColor: '#f8fafc',
+                        backgroundColor: '#1565C0',
+                        boxShadow: `0 6px 24px ${alpha(BLUE, 0.5)}`,
+                        transform: 'translateY(-1px)',
                       },
-                      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                      transition: 'all 0.2s ease',
                     }}
                   >
                     Go to Dashboard
@@ -392,55 +312,51 @@ const HeroSection: React.FC = () => {
                     <Button
                       variant="contained"
                       size="large"
+                      endIcon={<ArrowForward sx={{ fontSize: 18 }} />}
                       onClick={() => navigate('/register')}
                       sx={{
-                        px: { xs: 4, sm: 5 },
-                        py: { xs: 1.5, sm: 1.75 },
-                        fontSize: { xs: '1rem', sm: '1.0625rem' },
+                        px: { xs: 4, sm: 4.5 },
+                        py: { xs: 1.25, sm: 1.5 },
+                        fontSize: '1rem',
                         fontWeight: 600,
-                        borderRadius: 2,
+                        borderRadius: '8px',
                         textTransform: 'none',
-                        minHeight: { xs: 50, sm: 54 },
-                        boxShadow: '0 4px 14px rgba(15, 23, 42, 0.25)',
-                        backgroundColor: '#0f172a',
+                        backgroundColor: BLUE,
+                        color: WHITE,
+                        boxShadow: `0 4px 16px ${alpha(BLUE, 0.4)}`,
                         '&:hover': {
-                          boxShadow: '0 6px 20px rgba(15, 23, 42, 0.35)',
-                          transform: 'translateY(-2px)',
-                          backgroundColor: '#1e293b',
+                          backgroundColor: '#1565C0',
+                          boxShadow: `0 6px 24px ${alpha(BLUE, 0.5)}`,
+                          transform: 'translateY(-1px)',
                         },
-                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                        transition: 'all 0.2s ease',
                       }}
                     >
-                      Start Now
+                      Get Started
                     </Button>
+
                     <Button
-                      variant="outlined"
+                      variant="text"
                       size="large"
-                      startIcon={<PlayArrow />}
-                      onClick={() => {
-                        const element = document.getElementById('features');
-                        element?.scrollIntoView({ behavior: 'smooth' });
-                      }}
+                      startIcon={<PlayArrow sx={{ fontSize: 18 }} />}
+                      onClick={() =>
+                        document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })
+                      }
                       sx={{
-                        px: { xs: 4, sm: 5 },
-                        py: { xs: 1.5, sm: 1.75 },
-                        fontSize: { xs: '1rem', sm: '1.0625rem' },
-                        fontWeight: 600,
-                        borderRadius: 2,
+                        px: { xs: 4, sm: 4.5 },
+                        py: { xs: 1.25, sm: 1.5 },
+                        fontSize: '1rem',
+                        fontWeight: 500,
+                        borderRadius: '8px',
                         textTransform: 'none',
-                        minHeight: { xs: 50, sm: 54 },
-                        borderWidth: 1.5,
-                        borderColor: alpha('#ffffff', 0.3),
-                        color: '#ffffff',
-                        backgroundColor: 'transparent',
+                        color: alpha(WHITE, 0.7),
+                        border: `1px solid ${alpha(WHITE, 0.12)}`,
                         '&:hover': {
-                          borderWidth: 1.5,
-                          borderColor: '#ffffff',
-                          backgroundColor: alpha('#ffffff', 0.1),
-                          color: '#ffffff',
-                          transform: 'translateY(-2px)',
+                          backgroundColor: alpha(WHITE, 0.05),
+                          color: WHITE,
+                          borderColor: alpha(WHITE, 0.25),
                         },
-                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                        transition: 'all 0.2s ease',
                       }}
                     >
                       See How It Works
@@ -448,157 +364,103 @@ const HeroSection: React.FC = () => {
                   </>
                 )}
               </Stack>
+
+
             </Stack>
           </Grid>
 
-          {/* Right Content - Feature Showcase */}
-          <Grid item xs={12} md={6}>
+          {/* ── RIGHT COLUMN — Feature cards (desktop only) ── */}
+          <Grid item xs={12} md={6} sx={{ display: { xs: 'none', md: 'flex' }, justifyContent: 'center' }}>
             <Box
               sx={{
-                position: 'relative',
-                height: { xs: 'auto', sm: 'auto', md: 500 },
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                animation: `${slideInRight} 0.8s ease-out`,
+                width: '100%',
+                maxWidth: 440,
+                animation: `${fadeRight} 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.3s both`,
               }}
             >
-              {/* Stacked Feature Cards */}
-              <Stack spacing={{ xs: 2, md: 2.5 }} sx={{ width: '100%', maxWidth: { xs: '100%', md: 480 } }}>
-                {/* QR Code Feature */}
-                <Box
-                  sx={{
-                    backgroundColor: alpha('#ffffff', 0.08),
-                    backdropFilter: 'blur(10px)',
-                    borderRadius: 2.5,
-                    p: { xs: 2.5, md: 3 },
-                    border: `1px solid ${alpha('#ffffff', 0.1)}`,
-                    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
-                    transition: 'all 0.3s ease',
-                    animation: `${fadeIn} 1s ease-out 0.5s both`,
-                    '&:hover': {
-                      transform: 'translateY(-4px)',
-                      boxShadow: '0 12px 32px rgba(0, 0, 0, 0.4)',
-                      borderColor: alpha('#ffffff', 0.2),
-                      backgroundColor: alpha('#ffffff', 0.12),
-                    },
-                  }}
-                >
-                  <Stack direction="row" spacing={{ xs: 2, md: 2.5 }} alignItems="center">
+              <Stack spacing={1.5}>
+                {FEATURE_CARDS.map(({ Icon, title, desc, delay }) => (
+                  <Box
+                    key={title}
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 2,
+                      px: 2.5,
+                      py: 2,
+                      borderRadius: '12px',
+                      backgroundColor: alpha(WHITE, 0.04),
+                      border: `1px solid ${alpha(WHITE, 0.08)}`,
+                      backdropFilter: 'blur(12px)',
+                      transition: 'all 0.25s ease',
+                      animation: `${fadeUp} 0.6s ease-out ${delay} both`,
+                      '&:hover': {
+                        backgroundColor: alpha(WHITE, 0.07),
+                        borderColor: alpha(BLUE_LT, 0.3),
+                        transform: 'translateX(6px)',
+                      },
+                    }}
+                  >
+                    {/* Icon container */}
                     <Box
                       sx={{
-                        width: { xs: 56, md: 64 },
-                        height: { xs: 56, md: 64 },
-                        borderRadius: 2,
-                        backgroundColor: alpha('#ffffff', 0.15),
+                        width: 48,
+                        height: 48,
+                        borderRadius: '10px',
+                        flexShrink: 0,
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
+                        backgroundColor: alpha(BLUE, 0.15),
+                        border: `1px solid ${alpha(BLUE_LT, 0.2)}`,
                       }}
                     >
-                      <QrCode2 sx={{ color: '#ffffff', fontSize: { xs: 28, md: 32 } }} />
+                      <Icon sx={{ fontSize: 24, color: BLUE_LT }} />
                     </Box>
-                    <Box>
-                      <Typography variant="h6" fontWeight={700} sx={{ mb: 0.5, fontSize: { xs: '1.0625rem', md: '1.125rem' }, color: '#ffffff' }}>
-                        QR Ordering
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '0.875rem', md: '0.9375rem' }, color: alpha('#ffffff', 0.7) }}>
-                        Contactless catalog access
-                      </Typography>
-                    </Box>
-                  </Stack>
-                </Box>
 
-                {/* Dashboard Feature */}
-                <Box
-                  sx={{
-                    backgroundColor: alpha('#ffffff', 0.08),
-                    backdropFilter: 'blur(10px)',
-                    borderRadius: 2.5,
-                    p: { xs: 2.5, md: 3 },
-                    border: `1px solid ${alpha('#ffffff', 0.1)}`,
-                    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
-                    transition: 'all 0.3s ease',
-                    animation: `${fadeIn} 1s ease-out 0.7s both`,
-                    '&:hover': {
-                      transform: 'translateY(-4px)',
-                      boxShadow: '0 12px 32px rgba(0, 0, 0, 0.4)',
-                      borderColor: alpha('#ffffff', 0.2),
-                      backgroundColor: alpha('#ffffff', 0.12),
-                    },
-                  }}
-                >
-                  <Stack direction="row" spacing={{ xs: 2, md: 2.5 }} alignItems="center">
-                    <Box
-                      sx={{
-                        width: { xs: 56, md: 64 },
-                        height: { xs: 56, md: 64 },
-                        borderRadius: 2,
-                        backgroundColor: alpha('#ffffff', 0.15),
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                      }}
-                    >
-                      <DashboardIcon sx={{ color: '#ffffff', fontSize: { xs: 28, md: 32 } }} />
-                    </Box>
-                    <Box>
-                      <Typography variant="h6" fontWeight={700} sx={{ mb: 0.5, fontSize: { xs: '1.0625rem', md: '1.125rem' }, color: '#ffffff' }}>
-                        Live Dashboard
+                    {/* Text */}
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                      <Typography
+                        sx={{
+                          fontSize: '0.9375rem',
+                          fontWeight: 600,
+                          color: WHITE,
+                          lineHeight: 1.3,
+                          mb: 0.25,
+                        }}
+                      >
+                        {title}
                       </Typography>
-                      <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '0.875rem', md: '0.9375rem' }, color: alpha('#ffffff', 0.7) }}>
-                        Real-time analytics
+                      <Typography
+                        sx={{
+                          fontSize: '0.8125rem',
+                          color: alpha(WHITE, 0.45),
+                          lineHeight: 1.4,
+                        }}
+                      >
+                        {desc}
                       </Typography>
                     </Box>
-                  </Stack>
-                </Box>
 
-                {/* Business Feature */}
-                <Box
-                  sx={{
-                    backgroundColor: alpha('#ffffff', 0.08),
-                    backdropFilter: 'blur(10px)',
-                    borderRadius: 2.5,
-                    p: { xs: 2.5, md: 3 },
-                    border: `1px solid ${alpha('#ffffff', 0.1)}`,
-                    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
-                    transition: 'all 0.3s ease',
-                    animation: `${fadeIn} 1s ease-out 0.9s both`,
-                    '&:hover': {
-                      transform: 'translateY(-4px)',
-                      boxShadow: '0 12px 32px rgba(0, 0, 0, 0.4)',
-                      borderColor: alpha('#ffffff', 0.2),
-                      backgroundColor: alpha('#ffffff', 0.12),
-                    },
-                  }}
-                >
-                  <Stack direction="row" spacing={{ xs: 2, md: 2.5 }} alignItems="center">
+                    {/* Live indicator */}
                     <Box
                       sx={{
-                        width: { xs: 56, md: 64 },
-                        height: { xs: 56, md: 64 },
-                        borderRadius: 2,
-                        backgroundColor: alpha('#ffffff', 0.15),
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
+                        width: 8,
+                        height: 8,
+                        borderRadius: '50%',
+                        backgroundColor: BLUE_LT,
+                        flexShrink: 0,
+                        animation: `${dotPulse} 2.5s ease-in-out ${delay} infinite`,
                       }}
-                    >
-                      <Store sx={{ color: '#ffffff', fontSize: { xs: 28, md: 32 } }} />
-                    </Box>
-                    <Box>
-                      <Typography variant="h6" fontWeight={700} sx={{ mb: 0.5, fontSize: { xs: '1.0625rem', md: '1.125rem' }, color: '#ffffff' }}>
-                        Catalog Management
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '0.875rem', md: '0.9375rem' }, color: alpha('#ffffff', 0.7) }}>
-                        Easy updates & control
-                      </Typography>
-                    </Box>
-                  </Stack>
-                </Box>
+                    />
+                  </Box>
+                ))}
+
+
               </Stack>
             </Box>
           </Grid>
+
         </Grid>
       </Container>
     </Box>

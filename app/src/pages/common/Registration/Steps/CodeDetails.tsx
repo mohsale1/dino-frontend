@@ -5,7 +5,7 @@ import {
   Typography,
   alpha,
 } from '@mui/material';
-import { VpnKey } from '@mui/icons-material';
+import { CheckCircle, VpnKey } from '@mui/icons-material';
 import { RegistrationFormData } from '../types';
 
 interface RegistrationCodeStepProps {
@@ -13,6 +13,14 @@ interface RegistrationCodeStepProps {
   onInputChange: (field: string, value: any) => void;
   errors: Record<string, string>;
 }
+
+const fieldSx = {
+  '& .MuiOutlinedInput-root': {
+    borderRadius: 2,
+    '&.Mui-focused fieldset': { borderColor: '#1976D2' },
+  },
+  '& label.Mui-focused': { color: '#1976D2' },
+};
 
 const RegistrationCodeStep: React.FC<RegistrationCodeStepProps> = ({
   formData,
@@ -27,7 +35,8 @@ const RegistrationCodeStep: React.FC<RegistrationCodeStepProps> = ({
             width: 80,
             height: 80,
             borderRadius: '50%',
-            backgroundColor: alpha('#0f172a', 0.1),
+            backgroundColor: alpha('#1976D2', 0.1),
+            border: `2px solid ${alpha('#1976D2', 0.25)}`,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -35,9 +44,9 @@ const RegistrationCodeStep: React.FC<RegistrationCodeStepProps> = ({
             mb: 3,
           }}
         >
-          <VpnKey sx={{ fontSize: 40, color: '#0f172a' }} />
+          <VpnKey sx={{ fontSize: 40, color: '#1976D2' }} />
         </Box>
-        <Typography variant="h6" sx={{ color: '#0f172a', fontWeight: 600, mb: 1 }}>
+        <Typography variant="h6" sx={{ color: '#0f172a', fontWeight: 700, mb: 1 }}>
           Referral Code Required
         </Typography>
         <Typography variant="body2" sx={{ color: '#64748b', maxWidth: 400, margin: '0 auto' }}>
@@ -50,10 +59,8 @@ const RegistrationCodeStep: React.FC<RegistrationCodeStepProps> = ({
         label="Referral Code *"
         value={formData.referralCode}
         onChange={(e) => {
-          // Only allow 4 digits
           const value = e.target.value.replace(/\D/g, '').slice(0, 4);
           onInputChange('referralCode', value);
-          // Reset validation when code changes
           if (formData.referralCodeValid) {
             onInputChange('referralCodeValid', false);
             onInputChange('referredByName', '');
@@ -74,25 +81,26 @@ const RegistrationCodeStep: React.FC<RegistrationCodeStepProps> = ({
         }}
         sx={{
           mb: 3,
-          '& .MuiOutlinedInput-root': {
-            borderRadius: 2,
-          },
+          ...fieldSx,
         }}
       />
 
       {formData.referralCodeValid && formData.referredByName && (
         <Box
           sx={{
-            p: 2,
+            p: 2.5,
             mb: 3,
-            backgroundColor: alpha('#10b981', 0.1),
+            backgroundColor: alpha('#10b981', 0.08),
             borderRadius: 2,
-            border: `1px solid ${alpha('#10b981', 0.3)}`,
-            textAlign: 'center',
+            border: `1.5px solid ${alpha('#10b981', 0.4)}`,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1.5,
           }}
         >
+          <CheckCircle sx={{ color: '#10b981', fontSize: 20 }} />
           <Typography variant="body2" sx={{ color: '#065f46', fontWeight: 600 }}>
-            âœ“ Valid Code - Referred by: {formData.referredByName}
+            Valid Code — Referred by: {formData.referredByName}
           </Typography>
         </Box>
       )}
@@ -100,16 +108,16 @@ const RegistrationCodeStep: React.FC<RegistrationCodeStepProps> = ({
       <Box
         sx={{
           p: 3,
-          backgroundColor: alpha('#3b82f6', 0.05),
+          backgroundColor: alpha('#1976D2', 0.04),
           borderRadius: 2,
-          border: `1px solid ${alpha('#3b82f6', 0.2)}`,
+          border: `1.5px solid ${alpha('#1976D2', 0.2)}`,
         }}
       >
-        <Typography variant="body2" sx={{ color: '#64748b', mb: 1 }}>
-          <strong>Don't have a code?</strong>
+        <Typography variant="body2" sx={{ color: '#0f172a', mb: 0.75, fontWeight: 600 }}>
+          Don't have a code?
         </Typography>
-        <Typography variant="caption" sx={{ color: '#64748b' }}>
-          Contact your onboarding agent or sales representative to obtain a referral code. 
+        <Typography variant="caption" sx={{ color: '#64748b', lineHeight: 1.6 }}>
+          Contact your onboarding agent or sales representative to obtain a referral code.
           This code is required to create a new workspace.
         </Typography>
       </Box>

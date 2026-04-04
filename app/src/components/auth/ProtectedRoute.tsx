@@ -33,7 +33,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, redirectTo })
           gap: 2,
         }}
       >
-        <CircularProgress size={60} />
+        <CircularProgress size={60} sx={{ color: '#1976D2' }} />
         <Typography variant="h6" color="text.secondary">
           Loading...
         </Typography>

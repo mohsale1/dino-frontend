@@ -27,7 +27,6 @@ const HomePage: React.FC = () => {
         width: '100%',
         minHeight: '100vh',
         overflowX: 'hidden',
-        overflowY: 'visible',
       }}
     >
       {/* Hero Section */}
@@ -61,13 +60,13 @@ const HomePage: React.FC = () => {
             bottom: { xs: 24, md: 32 },
             right: { xs: 24, md: 32 },
             zIndex: 1000,
-            backgroundColor: '#0f172a',
+            backgroundColor: '#1976D2',
             color: '#ffffff',
-            boxShadow: '0 4px 14px rgba(15, 23, 42, 0.4)',
+            boxShadow: '0 4px 14px rgba(25, 118, 210, 0.4)',
             '&:hover': {
-              backgroundColor: '#1e293b',
+              backgroundColor: '#1565C0',
               transform: 'translateY(-2px)',
-              boxShadow: '0 6px 20px rgba(15, 23, 42, 0.5)',
+              boxShadow: '0 6px 20px rgba(25, 118, 210, 0.5)',
             },
             transition: 'all 0.2s ease',
           }}

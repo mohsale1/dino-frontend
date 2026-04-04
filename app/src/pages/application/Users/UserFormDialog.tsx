@@ -176,12 +176,15 @@ const UserFormDialog: React.FC<UserFormDialogProps> = ({
           rolesArray = (response.data as any).items;
         }
       }
+      // FIX: robust role_type check — numeric 1 only (no string '1' comparison)
       const applicationRoles = rolesArray.filter((role: any) =>
-        role.role_type === 1 || role.roleType === 1 || role.role_type === '1'
+        role.role_type === 1 || role.roleType === 1
       );
       setRoles(applicationRoles);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error loading roles:', error);
+      // FIX: surface the error to the user so they know why the dropdown is empty
+      setFormError('Failed to load roles. Please close and try again.');
       setRoles([]);
     } finally {
       setLoadingRoles(false);
@@ -194,11 +197,15 @@ const UserFormDialog: React.FC<UserFormDialogProps> = ({
       setFormError('');
 
       if (editingUser) {
-        const updateData = {
+        // FIX: include role_id in the update payload so role changes are persisted
+        const updateData: any = {
           firstName: formData.firstName,
           lastName: formData.lastName,
           phone: formData.phone,
         };
+        if (formData.role_id) {
+          updateData.roleId = formData.role_id;
+        }
         await applicationUserService.updateUser(editingUser.id, updateData);
       } else {
         if (formData.password !== formData.confirm_password) {
@@ -452,7 +459,7 @@ const UserFormDialog: React.FC<UserFormDialogProps> = ({
             />
           </Box>
 
-          {/* Role */}
+          {/* Role — FIX: no longer disabled in edit mode; role_id included in update payload */}
           <Box>
             <Typography variant="caption" sx={labelSx}>Role</Typography>
             <FormControl fullWidth size="small" required>
@@ -467,11 +474,13 @@ const UserFormDialog: React.FC<UserFormDialogProps> = ({
                   });
                 }}
                 displayEmpty
-                disabled={!!editingUser || loadingRoles}
+                disabled={loadingRoles}
                 sx={{ borderRadius: 2 }}
                 renderValue={(value) => {
                   if (!value) {
-                    return <Typography variant="body2" sx={{ color: C.muted }}>Select a role...</Typography>;
+                    return <Typography variant="body2" sx={{ color: C.muted }}>
+                      {loadingRoles ? 'Loading roles...' : 'Select a role...'}
+                    </Typography>;
                   }
                   const role = roles.find((r) => r.id === value);
                   return (
@@ -534,7 +543,6 @@ const UserFormDialog: React.FC<UserFormDialogProps> = ({
               </Select>
             </FormControl>
           </Box>
-
 
         </Stack>
       </DialogContent>

@@ -11,17 +11,17 @@ import {
   IconButton,
   Avatar,
   Chip,
-  Paper,
   Button,
   Switch,
   FormControlLabel,
   CircularProgress,
   useMediaQuery,
   useTheme,
+  Divider,
+  alpha,
 } from '@mui/material';
 import {
   Close,
-  AccountCircle,
   ExitToApp,
   Login,
   PersonAdd,
@@ -56,10 +56,7 @@ import { PERMISSIONS } from '../../../types/auth/permissions';
 interface AppMobileMenuProps {
   open: boolean;
   onClose: () => void;
-  homeNavItems: Array<{
-    label: string;
-    id: string;
-  }>;
+  homeNavItems: Array<{ label: string; id: string }>;
   activeSection: string;
   onSectionClick: (sectionId: string) => void;
   user: any;
@@ -83,75 +80,52 @@ const AppMobileMenu: React.FC<AppMobileMenuProps> = ({
   const { userData } = useUserData();
   const { hasBackendPermission } = useAuth();
   usePermissionCheck();
+
   const [venueStatus, setVenueStatus] = useState<{
     isActive: boolean;
     isOpen: boolean;
     venueName: string;
   } | null>(null);
   const [statusLoading, setStatusLoading] = useState(false);
+
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const canManageVenue = hasBackendPermission(PERMISSIONS.WORKSPACE_UPDATE);
 
-  // Load venue status from UserDataContext
   useEffect(() => {
-    if (!user || !canManageVenue) {
-      setVenueStatus(null);
-      return;
-    }
-
+    if (!user || !canManageVenue) { setVenueStatus(null); return; }
     if (!userData?.venue) {
-      setVenueStatus({
-        isActive: false,
-        isOpen: false,
-        venueName: 'No Venue Selected',
-      });
+      setVenueStatus({ isActive: false, isOpen: false, venueName: 'No Venue Selected' });
       return;
     }
-
     setVenueStatus({
       isActive: userData.venue.isActive || false,
-      isOpen: userData.venue.isOpen || false,
-      venueName: userData.venue.name || 'Current Venue',
+      isOpen:   userData.venue.isOpen   || false,
+      venueName: userData.venue.name    || 'Current Venue',
     });
   }, [user, userData?.venue, canManageVenue]);
 
-  // Handle venue status toggle
   const handleToggleVenueOpen = async () => {
     if (!userData?.venue?.id || statusLoading || !venueStatus) return;
-
     try {
       setStatusLoading(true);
       const newStatus = !venueStatus.isOpen;
-
       await venueService.updateVenue(userData.venue.id, {
         status: newStatus ? 'active' : 'closed',
       });
-
       setVenueStatus(prev => (prev ? { ...prev, isOpen: newStatus } : null));
-    } catch (error) {
-      // Handle error silently or show user notification
+    } catch (_) {
+      // silent
     } finally {
       setStatusLoading(false);
     }
   };
 
-  const handleSectionClick = (sectionId: string) => {
-    onSectionClick(sectionId);
-    onClose();
-  };
+  const handleSectionClick = (sectionId: string) => { onSectionClick(sectionId); onClose(); };
+  const handleNavigate    = (path: string)        => { onNavigate(path);          onClose(); };
+  const handleLogout      = ()                    => { onLogout(); };
 
-  const handleNavigate = (path: string) => {
-    onNavigate(path);
-    onClose();
-  };
-
-  const handleLogout = () => {
-    onLogout();
-  };
-
-  // Admin menu items — each mapped to its required backend permission
   const allAdminMenuItems = [
     { label: 'Dashboard', path: '/admin',           icon: <Dashboard />,    permission: PERMISSIONS.APPLICATION_DASHBOARD_VIEW },
     { label: 'Menu',      path: '/admin/menu',      icon: <MenuBook />,     permission: PERMISSIONS.APPLICATION_POS_VIEW },
@@ -167,233 +141,272 @@ const AppMobileMenu: React.FC<AppMobileMenuProps> = ({
     hasBackendPermission(item.permission)
   );
 
-  // Get icon for navigation item based on label or id
   const getNavigationIcon = (item: { label: string; id: string }) => {
+    const id    = item.id.toLowerCase();
     const label = item.label.toLowerCase();
-    const id = item.id.toLowerCase();
-
-    if (id === 'hero' || id === 'home') return <Home />;
-    if (id === 'features') return <AutoAwesome />;
-    if (id === 'testimonials' || id === 'reviews') return <RateReview />;
-    if (id === 'faq') return <HelpOutline />;
-    if (id === 'contact') return <ContactMail />;
-
-    if (label.includes('home')) return <Home />;
-    if (label.includes('feature')) return <AutoAwesome />;
-    if (label.includes('review') || label.includes('testimonial')) return <RateReview />;
-    if (label.includes('faq') || label.includes('question')) return <HelpOutline />;
-    if (label.includes('contact')) return <ContactMail />;
-    if (label.includes('menu')) return <MenuBook />;
-    if (label.includes('order')) return <ShoppingCart />;
-    if (label.includes('offer') || label.includes('promo')) return <LocalOffer />;
-    if (label.includes('about')) return <Info />;
-    if (label.includes('popular') || label.includes('featured')) return <Star />;
-    if (label.includes('dish') || label.includes('food')) return <Fastfood />;
-
+    if (id === 'hero' || id === 'home')                              return <Home />;
+    if (id === 'features')                                           return <AutoAwesome />;
+    if (id === 'stats')                                              return <Star />;
+    if (id === 'testimonials' || id === 'reviews')                   return <RateReview />;
+    if (id === 'faq')                                                return <HelpOutline />;
+    if (id === 'contact')                                            return <ContactMail />;
+    if (label.includes('home'))                                      return <Home />;
+    if (label.includes('feature'))                                   return <AutoAwesome />;
+    if (label.includes('review') || label.includes('testimonial'))   return <RateReview />;
+    if (label.includes('faq') || label.includes('question'))         return <HelpOutline />;
+    if (label.includes('contact'))                                   return <ContactMail />;
+    if (label.includes('menu'))                                      return <MenuBook />;
+    if (label.includes('order'))                                     return <ShoppingCart />;
+    if (label.includes('offer') || label.includes('promo'))          return <LocalOffer />;
+    if (label.includes('about'))                                     return <Info />;
+    if (label.includes('popular') || label.includes('featured'))     return <Star />;
+    if (label.includes('dish') || label.includes('food'))            return <Fastfood />;
     return <Restaurant />;
   };
+
+  const getUserRoleDisplayName = (role: string | any): string => {
+    if (typeof role === 'object' && role !== null) {
+      if (role.displayName) return String(role.displayName);
+      if (role.name)        return String(role.name);
+    }
+    if (!role || (typeof role !== 'string' && typeof role !== 'object')) return 'Unknown Role';
+    if (typeof role === 'string') {
+      const def = PermissionService.getRoleDefinition(role);
+      if (typeof def === 'object' && def?.displayName) return String(def.displayName);
+      return String(role);
+    }
+    return 'Unknown Role';
+  };
+
+  const resolvedRoleLabel = (() => {
+    const backendRole = PermissionService.getBackendRole();
+    if (backendRole?.name) return getUserRoleDisplayName(backendRole.name);
+    return getUserRoleDisplayName(user?.role || '');
+  })();
+
+  const userInitials = (() => {
+    const firstName = getUserFirstName(user);
+    if (firstName)    return firstName.charAt(0).toUpperCase();
+    if (user?.email)  return user.email.charAt(0).toUpperCase();
+    return 'U';
+  })();
+
+  const hasAdminItems = user && adminMenuItems.length > 0;
+  const hasHomeNav    = isHomePage && homeNavItems.length > 0;
+
+  // ── Shared colours ────────────────────────────────────────────────────────────
+  const BG        = '#0b1120';
+  const BG2       = '#0f172a';
+  const BORDER    = 'rgba(255,255,255,0.07)';
+  const MUTED     = 'rgba(255,255,255,0.45)';
+  const DIM       = 'rgba(255,255,255,0.25)';
+  const BLUE      = '#1976D2';
+  const BLUE_LITE = '#42A5F5';
 
   return (
     <Drawer
       anchor="right"
       open={open}
       onClose={onClose}
-      sx={{
-        zIndex: 1300,
-        '& .MuiDrawer-paper': {
-          width: { xs: '85vw', sm: 360 },
+      PaperProps={{
+        sx: {
+          // ── Full-screen dark panel — zero internal scroll ──
+          width: { xs: '100vw', sm: '360px' },
           height: '100vh',
+          maxHeight: '100vh',
           top: 0,
           position: 'fixed',
-          backgroundColor: 'background.paper',
-          borderLeft: '1px solid',
-          borderColor: 'divider',
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',          // hard lock — no scroll ever
+          backgroundColor: BG,
+          backgroundImage: `radial-gradient(circle, rgba(255,255,255,0.03) 1px, transparent 1px)`,
+          backgroundSize: '20px 20px',
+          borderLeft: `1px solid ${BORDER}`,
+          boxSizing: 'border-box',
           willChange: 'transform',
-          backfaceVisibility: 'hidden',
         },
+      }}
+      sx={{
+        zIndex: 1300,
         '& .MuiBackdrop-root': {
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          backgroundColor: 'rgba(0,0,0,0.7)',
+          backdropFilter: 'blur(4px)',
+          WebkitBackdropFilter: 'blur(4px)',
         },
       }}
     >
-      <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-        {/* Header */}
-        <Box
+      {/* ── Soft blue glow — top right ── */}
+      <Box sx={{
+        position: 'absolute', top: '-60px', right: '-60px',
+        width: 240, height: 240, borderRadius: '50%', pointerEvents: 'none',
+        background: `radial-gradient(circle, ${alpha(BLUE, 0.12)} 0%, transparent 70%)`,
+      }} />
+
+      {/* ── Header ─────────────────────────────────────────────────────────────── */}
+      <Box
+        sx={{
+          px: 2.5,
+          pt: 'max(18px, env(safe-area-inset-top))',
+          pb: 2,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexShrink: 0,
+          borderBottom: `1px solid ${BORDER}`,
+          position: 'relative',
+          zIndex: 1,
+        }}
+      >
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <DinoLogo size={isMobile ? 28 : 30} animated={false} />
+          <Box>
+            <Typography sx={{ color: '#ffffff', fontWeight: 700, fontSize: '1.05rem', lineHeight: 1.2, letterSpacing: '-0.01em' }}>
+              Dino
+            </Typography>
+            <Typography sx={{ color: MUTED, fontSize: '0.65rem', lineHeight: 1, display: 'block' }}>
+              Smart Ordering Solutions
+            </Typography>
+          </Box>
+        </Box>
+        <IconButton
+          onClick={onClose}
+          size="small"
           sx={{
-            p: { xs: 2, sm: 2.5 },
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            borderBottom: '1px solid',
-            borderColor: 'divider',
-            minHeight: { xs: 60, sm: 64 },
-            paddingTop: { xs: 'max(16px, env(safe-area-inset-top))', sm: 2.5 },
+            color: MUTED,
+            border: `1px solid ${BORDER}`,
+            borderRadius: '8px',
+            width: 34, height: 34,
+            '&:hover': { color: '#ffffff', backgroundColor: alpha('#ffffff', 0.08), borderColor: alpha('#ffffff', 0.15) },
+            transition: 'all 0.15s ease',
           }}
         >
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1.5, sm: 2 } }}>
-            <DinoLogo size={isMobile ? 28 : 32} animated={false} />
-            <Box>
-              <Typography
-                variant="h6"
-                fontWeight={600}
-                color="text.primary"
-                sx={{ fontSize: { xs: '1.1rem', sm: '1.25rem' } }}
-              >
-                Dino
-              </Typography>
-              <Typography
-                variant="caption"
-                color="text.secondary"
-                sx={{ fontSize: { xs: '0.7rem', sm: '0.75rem' } }}
-              >
-                Digital Menu Revolution
-              </Typography>
-            </Box>
-          </Box>
-          <IconButton
-            onClick={onClose}
-            size={isMobile ? 'small' : 'medium'}
-            sx={{
-              color: 'text.secondary',
-              '&:hover': { backgroundColor: 'action.hover' },
-            }}
-          >
-            <Close />
-          </IconButton>
-        </Box>
+          <Close sx={{ fontSize: 18 }} />
+        </IconButton>
+      </Box>
 
-        {/* User Section */}
+      {/* ── Content — flex column, fills remaining height, NO overflow ─────────── */}
+      <Box
+        sx={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',          // absolutely no scroll
+          position: 'relative',
+          zIndex: 1,
+          pt: 1.5,
+        }}
+      >
+        {/* ── User card ── */}
         {user && (
-          <Box sx={{ p: { xs: 1.5, sm: 2 }, borderBottom: '1px solid', borderColor: 'divider' }}>
-            <Paper
-              elevation={0}
+          <Box sx={{ px: 2, pb: 1.5, flexShrink: 0 }}>
+            <Box
               sx={{
-                p: { xs: 1.5, sm: 2 },
-                backgroundColor: '#E3F2FD',
-                border: 'none',
-                borderRadius: 2,
+                backgroundColor: alpha(BLUE, 0.08),
+                borderRadius: '12px',
+                p: 1.75,
+                border: `1px solid ${alpha(BLUE, 0.18)}`,
               }}
             >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                 <Avatar
-                  src={undefined}
                   sx={{
-                    backgroundColor: 'primary.main',
-                    width: 40,
-                    height: 40,
-                    border: 'none',
-                    borderColor: 'primary.main',
+                    width: 40, height: 40,
+                    backgroundColor: BLUE,
+                    fontSize: '0.9375rem', fontWeight: 700,
+                    color: '#ffffff', flexShrink: 0,
                   }}
                 >
-                  {<AccountCircle />}
+                  {userInitials}
                 </Avatar>
-                <Box sx={{ flex: 1 }}>
-                  <Typography variant="subtitle1" fontWeight={600} color="text.primary">
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                  <Typography
+                    sx={{
+                      fontWeight: 600, color: '#ffffff', fontSize: '0.875rem',
+                      lineHeight: 1.3, whiteSpace: 'nowrap',
+                      overflow: 'hidden', textOverflow: 'ellipsis',
+                    }}
+                  >
                     {getUserFirstName(user) || user.email}
                   </Typography>
                   <Chip
-                    label={(() => {
-                      const getUserRoleDisplayName = (role: string | any) => {
-                        if (typeof role === 'object' && role !== null) {
-                          if (role.displayName) return String(role.displayName);
-                          if (role.name) return String(role.name);
-                        }
-                        if (!role || (typeof role !== 'string' && typeof role !== 'object')) {
-                          return 'Unknown Role';
-                        }
-                        if (typeof role === 'string') {
-                          const roleDefinition = PermissionService.getRoleDefinition(role);
-                          if (typeof roleDefinition === 'object' && roleDefinition?.displayName) {
-                            return String(roleDefinition.displayName);
-                          }
-                          return String(role);
-                        }
-                        return 'Unknown Role';
-                      };
-
-                      const backendRole = PermissionService.getBackendRole();
-                      if (backendRole && backendRole.name) {
-                        return getUserRoleDisplayName(backendRole.name);
-                      }
-
-                      return getUserRoleDisplayName(user?.role || '');
-                    })()}
+                    label={resolvedRoleLabel}
                     size="small"
-                    color="primary"
-                    variant="outlined"
-                    sx={{ fontSize: '0.7rem', height: 20 }}
+                    sx={{
+                      mt: 0.4, height: 18, fontSize: '0.62rem', fontWeight: 600,
+                      backgroundColor: alpha(BLUE, 0.2), color: BLUE_LITE,
+                      border: 'none', '& .MuiChip-label': { px: 1 },
+                    }}
                   />
                 </Box>
+                <Box sx={{ display: 'flex', gap: 0.5, flexShrink: 0 }}>
+                  <IconButton
+                    size="small"
+                    onClick={() => handleNavigate('/admin/settings')}
+                    title="Settings"
+                    sx={{
+                      color: MUTED, width: 30, height: 30,
+                      '&:hover': { color: BLUE_LITE, backgroundColor: alpha(BLUE, 0.12) },
+                    }}
+                  >
+                    <Settings sx={{ fontSize: 16 }} />
+                  </IconButton>
+                  <IconButton
+                    size="small"
+                    onClick={handleLogout}
+                    title="Logout"
+                    sx={{
+                      color: MUTED, width: 30, height: 30,
+                      '&:hover': { color: '#f87171', backgroundColor: 'rgba(239,68,68,0.1)' },
+                    }}
+                  >
+                    <ExitToApp sx={{ fontSize: 16 }} />
+                  </IconButton>
+                </Box>
               </Box>
-              <Box sx={{ display: 'flex', gap: 1 }}>
-                <Button
-                  size="small"
-                  variant="outlined"
-                  startIcon={<Settings sx={{ fontSize: 16 }} />}
-                  onClick={() => handleNavigate('/admin/settings')}
-                  sx={{ flex: 1, textTransform: 'none', fontSize: '0.8rem' }}
-                >
-                  Settings
-                </Button>
-                <Button
-                  size="small"
-                  variant="outlined"
-                  startIcon={<ExitToApp sx={{ fontSize: 16 }} />}
-                  onClick={handleLogout}
-                  sx={{ flex: 1, textTransform: 'none', fontSize: '0.8rem' }}
-                >
-                  Logout
-                </Button>
-              </Box>
-            </Paper>
+            </Box>
           </Box>
         )}
 
-        {/* Venue Status — only for users with workspace update permission */}
+        {/* ── Venue status card ── */}
         {user && canManageVenue && (
-          <Box sx={{ p: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
-            <Paper
-              elevation={0}
+          <Box sx={{ px: 2, pb: 1.5, flexShrink: 0 }}>
+            <Box
               sx={{
-                p: 2,
-                backgroundColor: venueStatus?.isOpen ? 'success.50' : 'warning.50',
-                border: '1px solid',
-                borderColor: venueStatus?.isOpen ? 'success.200' : 'warning.200',
-                borderRadius: 2,
+                borderRadius: '12px',
+                border: `1px solid`,
+                borderColor: venueStatus?.isOpen ? 'rgba(34,197,94,0.2)' : BORDER,
+                backgroundColor: venueStatus?.isOpen ? 'rgba(34,197,94,0.05)' : alpha('#ffffff', 0.03),
+                p: 1.5,
+                transition: 'border-color 0.2s, background-color 0.2s',
               }}
             >
-              <Typography
-                variant="subtitle2"
-                fontWeight={600}
-                color="text.primary"
-                sx={{ mb: 1.5, display: 'flex', alignItems: 'center', gap: 1 }}
-              >
-                <Store sx={{ fontSize: 16, color: venueStatus?.isOpen ? 'success.main' : 'error.main' }} />
-                Venue Status
-              </Typography>
-
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                  <Store sx={{ fontSize: 13, color: MUTED }} />
+                  <Typography sx={{ fontWeight: 700, color: MUTED, fontSize: '0.62rem', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                    Venue Status
+                  </Typography>
+                </Box>
+                {venueStatus ? (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                    {venueStatus.isOpen
+                      ? <CheckCircle sx={{ fontSize: 13, color: '#22c55e' }} />
+                      : <Cancel      sx={{ fontSize: 13, color: '#475569' }} />
+                    }
+                    <Typography sx={{ fontWeight: 700, fontSize: '0.62rem', color: venueStatus.isOpen ? '#22c55e' : '#475569', letterSpacing: '0.04em' }}>
+                      {venueStatus.isOpen ? 'OPEN' : 'CLOSED'}
+                    </Typography>
+                  </Box>
+                ) : (
+                  <Typography sx={{ color: '#475569', fontSize: '0.62rem' }}>Loading...</Typography>
+                )}
+              </Box>
               {venueStatus ? (
                 <>
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
-                    <Typography variant="body2" fontWeight={500} color="text.primary">
-                      {venueStatus.venueName}
-                    </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                      {venueStatus.isOpen ? (
-                        <CheckCircle sx={{ fontSize: 16, color: 'success.main' }} />
-                      ) : (
-                        <Cancel sx={{ fontSize: 16, color: 'error.main' }} />
-                      )}
-                      <Typography
-                        variant="caption"
-                        fontWeight={600}
-                        color={venueStatus.isOpen ? 'success.main' : 'error.main'}
-                      >
-                        {venueStatus.isOpen ? 'OPEN' : 'CLOSED'}
-                      </Typography>
-                    </Box>
-                  </Box>
-
+                  <Typography sx={{ fontWeight: 600, color: '#cbd5e1', fontSize: '0.78rem', mb: 0.75 }}>
+                    {venueStatus.venueName}
+                  </Typography>
                   <FormControlLabel
                     control={
                       <Switch
@@ -405,195 +418,184 @@ const AppMobileMenu: React.FC<AppMobileMenuProps> = ({
                       />
                     }
                     label={
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        {statusLoading && <CircularProgress size={12} />}
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                        {statusLoading && <CircularProgress size={10} sx={{ color: MUTED }} />}
                         <Box>
-                          <Typography variant="caption" fontWeight={500}>
+                          <Typography sx={{ fontWeight: 500, color: '#cbd5e1', fontSize: '0.72rem', display: 'block' }}>
                             {venueStatus.isOpen ? 'Open for Orders' : 'Closed for Orders'}
                           </Typography>
-                          <Typography
-                            variant="caption"
-                            color="text.secondary"
-                            sx={{ display: 'block', fontSize: '0.65rem' }}
-                          >
+                          <Typography sx={{ color: MUTED, fontSize: '0.62rem', display: 'block' }}>
                             {venueStatus.isActive
-                              ? venueStatus.isOpen
-                                ? 'Customers can place orders'
-                                : 'Orders are disabled'
+                              ? venueStatus.isOpen ? 'Customers can place orders' : 'Orders are disabled'
                               : 'Venue is inactive'}
                           </Typography>
                         </Box>
                       </Box>
                     }
-                    sx={{ m: 0, alignItems: 'flex-start' }}
+                    sx={{ m: 0, alignItems: 'center' }}
                   />
                 </>
               ) : (
-                <>
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
-                    <Typography variant="body2" fontWeight={500} color="text.primary">
-                      {userData?.venue?.name || 'Current Venue'}
-                    </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                      <Cancel sx={{ fontSize: 16, color: 'warning.main' }} />
-                      <Typography variant="caption" fontWeight={600} color="warning.main">
-                        LOADING...
-                      </Typography>
-                    </Box>
-                  </Box>
-                  <Typography variant="caption" color="text.secondary">
-                    Loading venue status...
-                  </Typography>
-                </>
+                <Typography sx={{ fontWeight: 600, color: '#cbd5e1', fontSize: '0.78rem' }}>
+                  {userData?.venue?.name || 'Current Venue'}
+                </Typography>
               )}
-            </Paper>
+            </Box>
           </Box>
         )}
 
-        {/* Navigation Items - Scrollable */}
-        <Box sx={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
-          {/* Home Navigation */}
-          {isHomePage && homeNavItems.length > 0 && (
-            <Box sx={{ p: 2 }}>
-              <Typography
-                variant="overline"
-                sx={{
-                  color: 'text.secondary',
-                  fontWeight: 600,
-                  fontSize: '0.75rem',
-                  mb: 1,
-                  display: 'block',
-                }}
-              >
-                Navigation
-              </Typography>
-              <List sx={{ p: 0 }}>
-                {homeNavItems.map((item) => (
-                  <ListItem key={item.id} disablePadding sx={{ mb: 0.5 }}>
+        {/* ── Home navigation ── */}
+        {hasHomeNav && (
+          <Box sx={{ px: 2, flexShrink: 0 }}>
+            {user && <Divider sx={{ mb: 1.5, borderColor: BORDER }} />}
+            <Typography
+              sx={{
+                color: DIM, fontWeight: 700, fontSize: '0.6rem',
+                letterSpacing: '0.12em', textTransform: 'uppercase',
+                mb: 0.5, display: 'block', px: 0.5,
+              }}
+            >
+              Navigation
+            </Typography>
+            <List disablePadding>
+              {homeNavItems.map((item) => {
+                const isActive = activeSection === item.id;
+                return (
+                  <ListItem key={item.id} disablePadding sx={{ mb: 0.25 }}>
                     <ListItemButton
                       onClick={() => handleSectionClick(item.id)}
                       sx={{
-                        borderRadius: 1,
-                        minHeight: 44,
-                        backgroundColor: activeSection === item.id ? 'primary.100' : 'transparent',
-                        '&:hover': { backgroundColor: 'primary.50' },
+                        borderRadius: '8px',
+                        minHeight: 40,
+                        px: 1.5,
+                        position: 'relative',
+                        backgroundColor: isActive ? alpha(BLUE, 0.12) : 'transparent',
+                        '&:hover': {
+                          backgroundColor: isActive ? alpha(BLUE, 0.16) : alpha('#ffffff', 0.05),
+                        },
+                        '&::before': {
+                          content: '""',
+                          position: 'absolute',
+                          left: 0, top: '50%',
+                          transform: 'translateY(-50%)',
+                          width: '3px',
+                          height: isActive ? '60%' : '0%',
+                          backgroundColor: BLUE_LITE,
+                          borderRadius: '0 3px 3px 0',
+                          transition: 'height 0.2s ease',
+                        },
                       }}
                     >
-                      <ListItemIcon
-                        sx={{
-                          color: activeSection === item.id ? 'primary.main' : 'text.secondary',
-                          minWidth: 36,
-                        }}
-                      >
+                      <ListItemIcon sx={{ color: isActive ? BLUE_LITE : MUTED, minWidth: 34, transition: 'color 0.15s' }}>
                         {getNavigationIcon(item)}
                       </ListItemIcon>
                       <ListItemText
                         primary={item.label}
                         primaryTypographyProps={{
-                          fontWeight: activeSection === item.id ? 600 : 400,
-                          color: activeSection === item.id ? 'primary.main' : 'text.primary',
+                          fontWeight: isActive ? 600 : 400,
+                          color: isActive ? BLUE_LITE : '#cbd5e1',
                           fontSize: '0.875rem',
+                          sx: { transition: 'color 0.15s' },
                         }}
                       />
                     </ListItemButton>
                   </ListItem>
-                ))}
-              </List>
-            </Box>
-          )}
+                );
+              })}
+            </List>
+          </Box>
+        )}
 
-          {/* Quick Actions */}
-          <Box sx={{ p: 2 }}>
+        {/* ── Admin menu ── */}
+        {hasAdminItems && (
+          <Box sx={{ px: 2, flexShrink: 0 }}>
+            <Divider sx={{ my: 1.5, borderColor: BORDER }} />
             <Typography
-              variant="overline"
               sx={{
-                color: 'text.secondary',
-                fontWeight: 600,
-                fontSize: '0.75rem',
-                mb: 1,
-                display: 'block',
+                color: DIM, fontWeight: 700, fontSize: '0.6rem',
+                letterSpacing: '0.12em', textTransform: 'uppercase',
+                mb: 0.5, display: 'block', px: 0.5,
               }}
             >
-              Quick Actions
+              Admin
             </Typography>
-            <List sx={{ p: 0 }}>
-              {user && adminMenuItems.map((item) => (
-                <ListItem key={item.path} disablePadding sx={{ mb: 0.5 }}>
+            <List disablePadding>
+              {adminMenuItems.map((item) => (
+                <ListItem key={item.path} disablePadding sx={{ mb: 0.25 }}>
                   <ListItemButton
                     onClick={() => handleNavigate(item.path)}
                     sx={{
-                      borderRadius: 1,
-                      minHeight: 44,
-                      '&:hover': { backgroundColor: 'action.hover' },
+                      borderRadius: '8px',
+                      minHeight: 40,
+                      px: 1.5,
+                      '&:hover': { backgroundColor: alpha('#ffffff', 0.05) },
                     }}
                   >
-                    <ListItemIcon sx={{ color: 'text.secondary', minWidth: 36 }}>
+                    <ListItemIcon sx={{ color: MUTED, minWidth: 34 }}>
                       {item.icon}
                     </ListItemIcon>
                     <ListItemText
                       primary={item.label}
                       primaryTypographyProps={{
-                        fontWeight: 500,
-                        color: 'text.primary',
+                        fontWeight: 400,
+                        color: '#cbd5e1',
                         fontSize: '0.875rem',
                       }}
                     />
                   </ListItemButton>
                 </ListItem>
               ))}
-
-              {/* Login/Register for non-authenticated users */}
-              {!user && (
-                <>
-                  <ListItem disablePadding sx={{ mb: 0.5 }}>
-                    <ListItemButton
-                      onClick={() => handleNavigate('/login')}
-                      sx={{
-                        borderRadius: 1,
-                        minHeight: 44,
-                        '&:hover': { backgroundColor: 'action.hover' },
-                      }}
-                    >
-                      <ListItemIcon sx={{ color: 'text.secondary', minWidth: 36 }}>
-                        <Login />
-                      </ListItemIcon>
-                      <ListItemText
-                        primary="Sign In"
-                        primaryTypographyProps={{
-                          fontWeight: 500,
-                          color: 'text.primary',
-                          fontSize: '0.875rem',
-                        }}
-                      />
-                    </ListItemButton>
-                  </ListItem>
-                  <ListItem disablePadding sx={{ mb: 0.5 }}>
-                    <ListItemButton
-                      onClick={() => handleNavigate('/register')}
-                      sx={{
-                        borderRadius: 1,
-                        minHeight: 44,
-                        '&:hover': { backgroundColor: 'action.hover' },
-                      }}
-                    >
-                      <ListItemIcon sx={{ color: 'text.secondary', minWidth: 36 }}>
-                        <PersonAdd />
-                      </ListItemIcon>
-                      <ListItemText
-                        primary="Create Account"
-                        primaryTypographyProps={{
-                          fontWeight: 500,
-                          color: 'text.primary',
-                          fontSize: '0.875rem',
-                        }}
-                      />
-                    </ListItemButton>
-                  </ListItem>
-                </>
-              )}
             </List>
           </Box>
-        </Box>
+        )}
+
+        {/* ── Flex spacer ── */}
+        <Box sx={{ flex: 1 }} />
+
+        {/* ── Guest actions — pinned at bottom inside the flex column ── */}
+        {!user && (
+          <Box
+            sx={{
+              px: 2,
+              pt: 1.5,
+              pb: 'max(20px, env(safe-area-inset-bottom))',
+              borderTop: `1px solid ${BORDER}`,
+              flexShrink: 0,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 1,
+            }}
+          >
+            <Button
+              fullWidth
+              variant="outlined"
+              startIcon={<Login />}
+              onClick={() => handleNavigate('/login')}
+              sx={{
+                textTransform: 'none', fontWeight: 600,
+                fontSize: '0.875rem', borderRadius: '8px', height: 42,
+                borderColor: alpha(BLUE, 0.5), color: BLUE_LITE,
+                '&:hover': { borderColor: BLUE_LITE, backgroundColor: alpha(BLUE, 0.1) },
+              }}
+            >
+              Sign In
+            </Button>
+            <Button
+              fullWidth
+              variant="contained"
+              startIcon={<PersonAdd />}
+              onClick={() => handleNavigate('/register')}
+              sx={{
+                textTransform: 'none', fontWeight: 600,
+                fontSize: '0.875rem', borderRadius: '8px', height: 42,
+                backgroundColor: BLUE, color: '#ffffff', boxShadow: 'none',
+                '&:hover': { backgroundColor: '#1565C0', boxShadow: 'none' },
+              }}
+            >
+              Get Started
+            </Button>
+          </Box>
+        )}
       </Box>
     </Drawer>
   );

@@ -198,7 +198,7 @@ export const FullPageLoader: React.FC<{
       }}
     >
       <Box sx={{ textAlign: 'center', maxWidth: 300 }}>
-        <CircularProgress size={48} sx={{ mb: 3 }} />
+        <CircularProgress size={48} sx={{ mb: 3, color: '#1976D2' }} />
         <Typography variant="h6" fontWeight="600" gutterBottom>
           {message}
         </Typography>
@@ -361,9 +361,9 @@ export const MenuItemSkeleton: React.FC = () => {
         height={220}
         animation="wave"
         sx={{ 
-          backgroundColor: 'rgba(30, 58, 95, 0.1)',
+          backgroundColor: 'rgba(25, 118, 210, 0.08)',
           '&::after': {
-            background: 'linear-gradient(90deg, transparent, rgba(30, 58, 95, 0.15), transparent)',
+            background: 'linear-gradient(90deg, transparent, rgba(25, 118, 210, 0.12), transparent)',
           }
         }}
       />
@@ -377,9 +377,9 @@ export const MenuItemSkeleton: React.FC = () => {
             width={14} 
             height={14}
             sx={{ 
-              backgroundColor: 'rgba(30, 58, 95, 0.1)',
+              backgroundColor: 'rgba(25, 118, 210, 0.08)',
               '&::after': {
-                background: 'linear-gradient(90deg, transparent, rgba(30, 58, 95, 0.15), transparent)',
+                background: 'linear-gradient(90deg, transparent, rgba(25, 118, 210, 0.12), transparent)',
               }
             }}
           />
@@ -388,9 +388,9 @@ export const MenuItemSkeleton: React.FC = () => {
             width="70%" 
             height={24}
             sx={{ 
-              backgroundColor: 'rgba(30, 58, 95, 0.1)',
+              backgroundColor: 'rgba(25, 118, 210, 0.08)',
               '&::after': {
-                background: 'linear-gradient(90deg, transparent, rgba(30, 58, 95, 0.15), transparent)',
+                background: 'linear-gradient(90deg, transparent, rgba(25, 118, 210, 0.12), transparent)',
               }
             }}
           />
@@ -403,9 +403,9 @@ export const MenuItemSkeleton: React.FC = () => {
           height={20} 
           sx={{ 
             mb: 1.5,
-            backgroundColor: 'rgba(30, 58, 95, 0.1)',
+            backgroundColor: 'rgba(25, 118, 210, 0.08)',
             '&::after': {
-              background: 'linear-gradient(90deg, transparent, rgba(30, 58, 95, 0.15), transparent)',
+              background: 'linear-gradient(90deg, transparent, rgba(25, 118, 210, 0.12), transparent)',
             }
           }} 
         />
@@ -417,9 +417,9 @@ export const MenuItemSkeleton: React.FC = () => {
           height={32} 
           sx={{ 
             mb: 1.5,
-            backgroundColor: 'rgba(30, 58, 95, 0.1)',
+            backgroundColor: 'rgba(25, 118, 210, 0.08)',
             '&::after': {
-              background: 'linear-gradient(90deg, transparent, rgba(30, 58, 95, 0.15), transparent)',
+              background: 'linear-gradient(90deg, transparent, rgba(25, 118, 210, 0.12), transparent)',
             }
           }} 
         />
@@ -431,9 +431,9 @@ export const MenuItemSkeleton: React.FC = () => {
           height={16} 
           sx={{ 
             mb: 0.5,
-            backgroundColor: 'rgba(30, 58, 95, 0.1)',
+            backgroundColor: 'rgba(25, 118, 210, 0.08)',
             '&::after': {
-              background: 'linear-gradient(90deg, transparent, rgba(30, 58, 95, 0.15), transparent)',
+              background: 'linear-gradient(90deg, transparent, rgba(25, 118, 210, 0.12), transparent)',
             }
           }} 
         />
@@ -443,9 +443,9 @@ export const MenuItemSkeleton: React.FC = () => {
           height={16} 
           sx={{ 
             mb: 2,
-            backgroundColor: 'rgba(30, 58, 95, 0.1)',
+            backgroundColor: 'rgba(25, 118, 210, 0.08)',
             '&::after': {
-              background: 'linear-gradient(90deg, transparent, rgba(30, 58, 95, 0.15), transparent)',
+              background: 'linear-gradient(90deg, transparent, rgba(25, 118, 210, 0.12), transparent)',
             }
           }} 
         />
@@ -458,9 +458,9 @@ export const MenuItemSkeleton: React.FC = () => {
           sx={{ 
             borderRadius: 2, 
             mt: 'auto',
-            backgroundColor: 'rgba(30, 58, 95, 0.1)',
+            backgroundColor: 'rgba(25, 118, 210, 0.08)',
             '&::after': {
-              background: 'linear-gradient(90deg, transparent, rgba(30, 58, 95, 0.15), transparent)',
+              background: 'linear-gradient(90deg, transparent, rgba(25, 118, 210, 0.12), transparent)',
             }
           }}
         />
@@ -500,7 +500,7 @@ export const SmartLoading: React.FC<SmartLoadingProps> = ({
     switch (type) {
       case 'menu':
         return {
-          icon: <Restaurant sx={{ fontSize: 56, color: '#1E3A5F' }} />,
+          icon: <Restaurant sx={{ fontSize: 56, color: '#1976D2' }} />,
           defaultMessage: 'Loading menu...',
           skeleton: 'menu' as const,
         };
@@ -536,7 +536,7 @@ export const SmartLoading: React.FC<SmartLoadingProps> = ({
         };
       default:
         return {
-          icon: <CircularProgress size={48} />,
+          icon: <CircularProgress size={48} sx={{ color: '#1976D2' }} />,
           defaultMessage: 'Loading...',
           skeleton: 'card' as const,
         };
@@ -565,7 +565,7 @@ export const SmartLoading: React.FC<SmartLoadingProps> = ({
                 size={40} 
                 thickness={4}
                 sx={{ 
-                  color: '#1E3A5F',
+                  color: '#1976D2',
                   animation: 'spin 1s linear infinite',
                   '@keyframes spin': {
                     '0%': { transform: 'rotate(0deg)' },
@@ -576,7 +576,7 @@ export const SmartLoading: React.FC<SmartLoadingProps> = ({
               <Typography 
                 variant="body1" 
                 sx={{ 
-                  color: '#1E3A5F', 
+                  color: '#1976D2', 
                   textAlign: 'center', 
                   fontWeight: 600,
                   fontSize: '0.95rem'
@@ -683,7 +683,7 @@ export const EnhancedFullPageLoader: React.FC<{
             />
           ) : (
             <Box>
-              <CircularProgress size={48} sx={{ mb: 3 }} />
+              <CircularProgress size={48} sx={{ mb: 3, color: '#1976D2' }} />
               <Typography variant="h6" fontWeight="600" gutterBottom>
                 {message}
               </Typography>

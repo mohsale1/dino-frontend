@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardContent, Typography, Box, Chip, Stack } from '@mui/material';
 import { People, CheckCircle, Cancel, Schedule, Build } from '@mui/icons-material';
-import { ServiceLocation, LocationStatus } from '../types';
+import type { ServiceLocation, LocationStatus } from '../types';
 
 export interface ServiceLocationCardProps {
   location: ServiceLocation;
@@ -12,13 +12,13 @@ export interface ServiceLocationCardProps {
 }
 
 const getStatusConfig = (status: LocationStatus) => {
-  const configs = {
+  const configs: Record<LocationStatus, { label: string; color: 'success' | 'error' | 'warning' | 'default'; icon: React.ReactElement }> = {
     available: { label: 'Available', color: 'success' as const, icon: <CheckCircle /> },
     occupied: { label: 'Occupied', color: 'error' as const, icon: <Cancel /> },
     reserved: { label: 'Reserved', color: 'warning' as const, icon: <Schedule /> },
     maintenance: { label: 'Maintenance', color: 'default' as const, icon: <Build /> },
   };
-  return configs[status] || configs.available;
+  return configs[status];
 };
 
 export const ServiceLocationCard: React.FC<ServiceLocationCardProps> = ({

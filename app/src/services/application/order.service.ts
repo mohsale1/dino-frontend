@@ -17,13 +17,13 @@ export interface Order {
   total: number;
   status: 'pending' | 'confirmed' | 'preparing' | 'ready' | 'served' | 'completed' | 'cancelled';
   items_count: number;
-  venueId: string;
+  workspaceId: string;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface OrderFilters {
-  venueId?: string;
+  workspaceId?: string;
   status?: string;
   startDate?: string;
   endDate?: string;
@@ -31,29 +31,67 @@ export interface OrderFilters {
   page_size?: number;
 }
 
+export interface OrderPagination {
+  page: number;
+  page_size: number;
+  total: number;
+  total_pages: number;
+}
+
+export interface PaginatedOrders {
+  items: Order[];
+  total: number;
+  totalPages: number;
+  pagination: OrderPagination;
+}
+
 class OrderService {
   /**
-   * Get all orders
+   * Get all orders with pagination support.
+   * The backend returns { success, data: Order[], pagination: {...} }.
+   * Returns the full unwrapped paginated payload so callers can access
+   * both the order list and pagination metadata.
    */
-  async getOrders(filters?: OrderFilters): Promise<ApiResponse<Order[]>> {
+  async getOrders(filters?: OrderFilters): Promise<ApiResponse<PaginatedOrders>> {
     try {
       const params: any = {};
-      if (filters?.venueId) params.venueId = filters.venueId;
+      if (filters?.workspaceId) params.workspace_id = filters.workspaceId;
       if (filters?.status) params.status = filters.status;
       if (filters?.startDate) params.start_date = filters.startDate;
       if (filters?.endDate) params.end_date = filters.endDate;
       if (filters?.page) params.page = filters.page;
       if (filters?.page_size) params.page_size = filters.page_size;
 
-      const response = await apiService.get<Order[]>('/application/orders', { params });
+      const response = await apiService.get<any>('/application/orders', { params });
+
+      // Backend returns { success, data: Order[], pagination: { page, page_size, total, total_pages } }
+      const raw = response.data as any;
+      const items: Order[] = Array.isArray(raw?.data) ? raw.data : Array.isArray(raw) ? raw : [];
+      const pagination: OrderPagination = raw?.pagination ?? {
+        page: filters?.page ?? 1,
+        page_size: filters?.page_size ?? 20,
+        total: items.length,
+        total_pages: 1,
+      };
+
       return {
         success: true,
-        data: response.data || [],
+        data: {
+          items,
+          total: pagination.total,
+          totalPages: pagination.total_pages,
+          pagination,
+        },
       };
     } catch (error: any) {
       return {
         success: false,
-        data: [],
+        data: {
+          items: [],
+          total: 0,
+          totalPages: 0,
+          pagination: { page: 1, page_size: 20, total: 0, total_pages: 0 },
+        },
         error: error.message || 'Failed to fetch orders',
       };
     }
@@ -104,6 +142,11 @@ class OrderService {
     }
   }
 
+  /**
+   * Update order status.
+   * Sends an empty object body (not null) to satisfy FastAPI's PUT body parser,
+   * while passing new_status as a query parameter.
+   */
   async updateOrderStatus(
     orderId: string,
     status: Order['status']
@@ -111,7 +154,7 @@ class OrderService {
     try {
       const response = await apiService.put<Order>(
         `/application/orders/${orderId}/status`,
-        null,
+        {},
         { params: { new_status: status } }
       );
       return {
@@ -122,7 +165,6 @@ class OrderService {
       throw new Error(error.message || 'Failed to update order status');
     }
   }
-
 
   /**
    * Cancel order
@@ -156,9 +198,9 @@ class OrderService {
   /**
    * Get order statistics
    */
-  async getOrderStatistics(venueId: string, dateRange?: { startDate: string; endDate: string }): Promise<any> {
+  async getOrderStatistics(workspaceId: string, dateRange?: { startDate: string; endDate: string }): Promise<any> {
     try {
-      const params: any = { venueId };
+      const params: any = { workspace_id: workspaceId };
       if (dateRange) {
         params.start_date = dateRange.startDate;
         params.end_date = dateRange.endDate;

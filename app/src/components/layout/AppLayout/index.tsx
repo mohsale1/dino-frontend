@@ -2,7 +2,6 @@ import React from 'react';
 import {
   Box,
   IconButton,
-  Badge,
   Fade,
   Typography,
   Avatar,
@@ -10,7 +9,6 @@ import {
   useTheme,
 } from '@mui/material';
 import {
-  ShoppingCart,
   Menu as MenuIcon,
 } from '@mui/icons-material';
 import { useNavigate, useLocation, Outlet } from 'react-router-dom';
@@ -42,7 +40,7 @@ const AppLayout: React.FC = () => {
   const { toggleCollapsed } = useSidebar();
 
   const isAdminRoute = location.pathname.startsWith('/admin');
-  const isPublicMenuRoute = location.pathname.includes('/menu/');
+  const isPublicMenuRoute = location.pathname.endsWith('/menu');
   const isCheckoutRoute = location.pathname.includes('/checkout/');
   const isOrderTrackingRoute = location.pathname.includes('/order-tracking/') || location.pathname.includes('/order/');
   const isLoginRoute = location.pathname === '/login' || location.pathname === '/register';
@@ -135,29 +133,6 @@ const AppLayout: React.FC = () => {
             WebkitOverflowScrolling: 'touch',
           }}
         >
-          {/* Public menu cart button — rendered inline for customer-facing routes */}
-          {isPublicMenuRoute && (() => {
-            const pathParts = location.pathname.split('/');
-            const venueId = pathParts[1];
-            const tableId = pathParts[2];
-            return (
-              <Box sx={{ position: 'fixed', top: 16, right: 16, zIndex: 1200 }}>
-                <IconButton
-                  color="primary"
-                  onClick={() => navigate(`/checkout/${venueId}/${tableId}`)}
-                  sx={{
-                    bgcolor: 'background.paper',
-                    boxShadow: 2,
-                    '&:hover': { bgcolor: 'primary.50' },
-                  }}
-                >
-                  <Badge badgeContent={0} color="secondary">
-                    <ShoppingCart />
-                  </Badge>
-                </IconButton>
-              </Box>
-            );
-          })()}
 
           <Fade in timeout={300}>
             <Box sx={{ width: '100%', maxWidth: '100%' }}>

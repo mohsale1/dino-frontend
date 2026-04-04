@@ -37,13 +37,13 @@ export interface ServiceLocationCardAdminProps {
 }
 
 const getStatusConfig = (status: LocationStatus) => {
-  const configs = {
+  const configs: Record<LocationStatus, { label: string; color: 'success' | 'error' | 'warning' | 'default'; icon: React.ReactElement }> = {
     available: { label: 'Available', color: 'success' as const, icon: <CheckCircle /> },
     occupied: { label: 'Occupied', color: 'error' as const, icon: <Cancel /> },
     reserved: { label: 'Reserved', color: 'warning' as const, icon: <Schedule /> },
     maintenance: { label: 'Maintenance', color: 'default' as const, icon: <Build /> },
   };
-  return configs[status] || configs.available;
+  return configs[status];
 };
 
 export const ServiceLocationCardAdmin: React.FC<ServiceLocationCardAdminProps> = ({

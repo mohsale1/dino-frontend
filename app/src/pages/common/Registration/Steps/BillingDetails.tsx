@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, TextField, Typography, Grid } from '@mui/material';
+import { Box, TextField, Typography, Grid, alpha } from '@mui/material';
 import { Payment } from '@mui/icons-material';
 import { RegistrationFormData } from '../types';
 
@@ -9,6 +9,14 @@ interface BillingDetailsStepProps {
   errors: Record<string, string>;
 }
 
+const fieldSx = {
+  '& .MuiOutlinedInput-root': {
+    borderRadius: 2,
+    '&.Mui-focused fieldset': { borderColor: '#1976D2' },
+  },
+  '& label.Mui-focused': { color: '#1976D2' },
+};
+
 const BillingDetailsStep: React.FC<BillingDetailsStepProps> = ({
   formData,
   onInputChange,
@@ -16,10 +24,24 @@ const BillingDetailsStep: React.FC<BillingDetailsStepProps> = ({
 }) => {
   return (
     <Box>
-      <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 2 }}>
-        <Payment sx={{ fontSize: 32, color: '#0f172a' }} />
+      <Box sx={{ mb: 3.5, display: 'flex', alignItems: 'center', gap: 2 }}>
+        <Box
+          sx={{
+            width: 48,
+            height: 48,
+            borderRadius: 2,
+            backgroundColor: alpha('#1976D2', 0.1),
+            border: `1.5px solid ${alpha('#1976D2', 0.25)}`,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+          }}
+        >
+          <Payment sx={{ fontSize: 26, color: '#1976D2' }} />
+        </Box>
         <Box>
-          <Typography variant="h6" sx={{ color: '#0f172a', fontWeight: 600 }}>
+          <Typography variant="h6" sx={{ color: '#0f172a', fontWeight: 700 }}>
             Billing Details
           </Typography>
           <Typography variant="body2" sx={{ color: '#64748b' }}>
@@ -40,7 +62,7 @@ const BillingDetailsStep: React.FC<BillingDetailsStepProps> = ({
         error={!!errors.billingName}
         helperText={errors.billingName || 'Full name for billing purposes'}
         required
-        sx={{ mb: 3.5 }}
+        sx={{ mb: 3.5, ...fieldSx }}
       />
 
       <Grid container spacing={2} sx={{ mb: 3.5 }}>
@@ -54,6 +76,7 @@ const BillingDetailsStep: React.FC<BillingDetailsStepProps> = ({
             error={!!errors.billingEmail}
             helperText={errors.billingEmail || 'Email for invoices and receipts'}
             required
+            sx={fieldSx}
           />
         </Grid>
         <Grid item xs={12} sm={6}>
@@ -66,6 +89,7 @@ const BillingDetailsStep: React.FC<BillingDetailsStepProps> = ({
             helperText={errors.billingPhone || 'Contact phone number'}
             placeholder="+1234567890"
             required
+            sx={fieldSx}
           />
         </Grid>
       </Grid>
@@ -82,7 +106,7 @@ const BillingDetailsStep: React.FC<BillingDetailsStepProps> = ({
         error={!!errors['billingAddress.address']}
         helperText={errors['billingAddress.address']}
         required
-        sx={{ mb: 3.5 }}
+        sx={{ mb: 3.5, ...fieldSx }}
       />
 
       <Grid container spacing={2} sx={{ mb: 3.5 }}>
@@ -95,6 +119,7 @@ const BillingDetailsStep: React.FC<BillingDetailsStepProps> = ({
             error={!!errors['billingAddress.city']}
             helperText={errors['billingAddress.city']}
             required
+            sx={fieldSx}
           />
         </Grid>
         <Grid item xs={12} sm={3}>
@@ -106,6 +131,7 @@ const BillingDetailsStep: React.FC<BillingDetailsStepProps> = ({
             error={!!errors['billingAddress.state']}
             helperText={errors['billingAddress.state']}
             required
+            sx={fieldSx}
           />
         </Grid>
         <Grid item xs={12} sm={3}>
@@ -117,6 +143,7 @@ const BillingDetailsStep: React.FC<BillingDetailsStepProps> = ({
             error={!!errors['billingAddress.postal_code']}
             helperText={errors['billingAddress.postal_code']}
             required
+            sx={fieldSx}
           />
         </Grid>
       </Grid>
@@ -129,6 +156,7 @@ const BillingDetailsStep: React.FC<BillingDetailsStepProps> = ({
         error={!!errors['billingAddress.country']}
         helperText={errors['billingAddress.country'] || 'Country for billing'}
         placeholder="e.g., India"
+        sx={fieldSx}
       />
     </Box>
   );

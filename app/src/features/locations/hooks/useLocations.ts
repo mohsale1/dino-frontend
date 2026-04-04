@@ -129,12 +129,13 @@ export function useLocations({ workspaceId, autoLoad = true }: UseLocationsOptio
     }
   }, [loadLocations]);
 
-  // Toggle location status
+  // Toggle location status (delegates to updateLocationStatus)
   const toggleLocationStatus = useCallback(async (id: string, isActive: boolean) => {
     setError(null);
     
     try {
-      await locationService.toggleLocationStatus(id, isActive);
+      const newStatus = isActive ? 'available' : 'maintenance';
+      await locationService.updateLocationStatus(id, newStatus);
       await loadLocations();
     } catch (err: any) {
       setError(err.message || 'Failed to toggle status');

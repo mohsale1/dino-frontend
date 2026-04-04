@@ -114,37 +114,37 @@ class LocationService {
     await apiService.put(`${this.tablesUrl}/${id}/restore`, {});
   }
 
-  async toggleLocationStatus(id: string, isActive: boolean): Promise<ServiceLocation> {
-    const response = await apiService.put(
-      `${this.tablesUrl}/${id}/status`,
-      null,
-      { params: { table_status: isActive ? 'available' : 'maintenance' } }
-    );
-    return response.data as any;
-  }
-
-
+  /**
+   * Update table status via the dedicated status endpoint.
+   * Passes table_status as a query param as expected by the backend.
+   */
   async updateLocationStatus(id: string, status: string): Promise<ServiceLocation> {
     const response = await apiService.put(
       `${this.tablesUrl}/${id}/status`,
-      null,
+      {},
       { params: { table_status: status } }
     );
     return response.data as any;
   }
 
-
+  /**
+   * Generate a QR code for a table.
+   * Backend may return qr_code_url (snake_case) or qrCodeUrl (camelCase).
+   */
   async generateQRCode(id: string): Promise<string> {
     const response = await apiService.post(`${this.tablesUrl}/${id}/qr-code`);
-    return (response.data as any)?.qrCodeUrl || '';
+    return (response.data as any)?.qr_code_url || (response.data as any)?.qrCodeUrl || '';
   }
 
+  /**
+   * Download and trigger a browser save of the QR code PDF.
+   * Revokes the object URL after use to prevent memory leaks.
+   */
   async printQRCode(id: string): Promise<void> {
     const response = await apiService.get(`${this.tablesUrl}/${id}/qr-code/print`, {
       responseType: 'blob',
     });
     
-    // Create download link
     const url = window.URL.createObjectURL(new Blob([response.data as any]));
     const link = document.createElement('a');
     link.href = url;
@@ -152,6 +152,7 @@ class LocationService {
     document.body.appendChild(link);
     link.click();
     link.remove();
+    window.URL.revokeObjectURL(url);
   }
 }
 

@@ -124,7 +124,7 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
                   width: 8,
                   height: 8,
                   borderRadius: '50%',
-                  backgroundColor: `${color}.main`,
+                  backgroundColor: 'primary.main',
                   animation: `bounce 1.4s ease-in-out ${index * 0.16}s infinite both`,
                   '@keyframes bounce': {
                     '0%, 80%, 100%': {
@@ -147,7 +147,7 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
               width: spinnerSize,
               height: spinnerSize,
               borderRadius: '50%',
-              backgroundColor: `${color}.main`,
+              backgroundColor: 'primary.main',
               animation: 'pulse 2s ease-in-out infinite',
               '@keyframes pulse': {
                 '0%': {

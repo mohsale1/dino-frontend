@@ -17,14 +17,15 @@ import {
   Email,
   Phone,
   LocationOn,
+  ChevronRight,
 } from '@mui/icons-material';
 import DinoLogo from '../../ui/DinoLogo';
 import { homePageService } from '../../../services/api/homePage';
 
-// Default company info
 const DEFAULT_COMPANY_INFO = {
   name: 'Dino',
-  description: 'Streamline operations with digital catalogs and intelligent order management',
+  description:
+    'Streamline your restaurant operations with digital catalogs, smart menus, and intelligent order management built for modern businesses.',
   socialMedia: [
     { icon: 'Twitter' },
     { icon: 'Facebook' },
@@ -32,6 +33,13 @@ const DEFAULT_COMPANY_INFO = {
     { icon: 'LinkedIn' },
   ],
 };
+
+const NAV_LINKS = [
+  { label: 'Features', href: '#features' },
+  { label: 'Stats', href: '#stats' },
+  { label: 'Reviews', href: '#testimonials' },
+  { label: 'FAQ', href: '#faq' },
+];
 
 interface AppFooterProps {
   variant?: 'default' | 'minimal';
@@ -73,12 +81,14 @@ const AppFooter: React.FC<AppFooterProps> = ({ variant = 'default' }) => {
         }}
       >
         <Container maxWidth="lg">
-          <Box sx={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            gap: 1.5,
-          }}>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              gap: 1.5,
+            }}
+          >
             <DinoLogo size={20} animated={false} />
             <Typography
               variant="body2"
@@ -88,7 +98,7 @@ const AppFooter: React.FC<AppFooterProps> = ({ variant = 'default' }) => {
                 fontSize: '0.875rem',
               }}
             >
-              Â© {currentYear} {DEFAULT_COMPANY_INFO.name}. All rights reserved.
+              © {currentYear} {DEFAULT_COMPANY_INFO.name}. All rights reserved.
             </Typography>
           </Box>
         </Container>
@@ -107,40 +117,128 @@ const AppFooter: React.FC<AppFooterProps> = ({ variant = 'default' }) => {
     <Box
       component="footer"
       sx={{
-        backgroundColor: '#0f172a',
+        backgroundColor: '#0b1120',
         color: 'white',
-        py: { xs: 6, md: 8 },
+        py: { xs: 8, md: 10 },
         mt: 'auto',
-        borderTop: '1px solid #1e293b',
+        borderTop: 'none',
+        position: 'relative',
+        overflow: 'hidden',
       }}
     >
-      <Container maxWidth="lg">
-        <Grid container spacing={{ xs: 4, md: 6 }}>
-          {/* Company Info */}
-          <Grid item xs={12} md={4}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
-              <DinoLogo size={32} animated={false} />
-              <Typography variant="h6" fontWeight={700} sx={{ color: 'white' }}>
+      {/* Blue top accent line */}
+      <Box
+        sx={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: '3px',
+          background:
+            'linear-gradient(90deg, transparent, #1976D2 30%, #42A5F5 70%, transparent)',
+          opacity: 0.5,
+        }}
+      />
+
+      {/* Dot-grid texture overlay */}
+      <Box
+        sx={{
+          position: 'absolute',
+          inset: 0,
+          backgroundImage:
+            'radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px)',
+          backgroundSize: '20px 20px',
+          pointerEvents: 'none',
+        }}
+      />
+
+      {/* Glow blob — top-right */}
+      <Box
+        sx={{
+          position: 'absolute',
+          top: '-10%',
+          right: '-5%',
+          width: 400,
+          height: 400,
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(25,118,210,0.08) 0%, transparent 70%)',
+          pointerEvents: 'none',
+        }}
+      />
+
+      {/* Glow blob — bottom-left */}
+      <Box
+        sx={{
+          position: 'absolute',
+          bottom: '-10%',
+          left: '-5%',
+          width: 350,
+          height: 350,
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(66,165,245,0.05) 0%, transparent 70%)',
+          pointerEvents: 'none',
+        }}
+      />
+
+      <Container maxWidth="lg" disableGutters sx={{ px: { xs: 2, sm: 3, md: 3 }, position: 'relative' }}>
+        <Grid container spacing={{ xs: 5, md: 6 }}>
+
+          {/* Column 1 — Brand */}
+          <Grid item xs={12} sm={6} md={4}>
+            {/* Logo + name */}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 0.75 }}>
+              <DinoLogo size={34} animated={false} />
+              <Typography
+                variant="h6"
+                fontWeight={700}
+                sx={{ color: '#ffffff', lineHeight: 1 }}
+              >
                 {DEFAULT_COMPANY_INFO.name}
               </Typography>
             </Box>
-            <Typography variant="body2" sx={{ mb: 3, opacity: 0.8, lineHeight: 1.7, color: '#cbd5e1' }}>
+
+            {/* Tagline */}
+            <Typography
+              variant="caption"
+              sx={{
+                display: 'block',
+                color: 'rgba(255,255,255,0.45)',
+                mb: 2.5,
+                pl: '50px', // align under name (logo 34 + gap ~16)
+              }}
+            >
+              Smart Ordering Solutions
+            </Typography>
+
+            {/* Description */}
+            <Typography
+              variant="body2"
+              sx={{
+                color: '#94a3b8',
+                fontSize: '0.875rem',
+                lineHeight: 1.75,
+                mb: 3,
+              }}
+            >
               {DEFAULT_COMPANY_INFO.description}
             </Typography>
+
+            {/* Social icons */}
             <Box sx={{ display: 'flex', gap: 1 }}>
               {DEFAULT_COMPANY_INFO.socialMedia.map((social, index) => (
                 <IconButton
                   key={index}
                   size="small"
                   sx={{
-                    color: '#cbd5e1',
-                    backgroundColor: alpha('#ffffff', 0.05),
-                    border: '1px solid #334155',
+                    color: '#64748b',
+                    backgroundColor: 'rgba(255,255,255,0.04)',
+                    border: '1px solid #1e293b',
+                    borderRadius: 1.5,
                     transition: 'all 0.2s ease',
                     '&:hover': {
-                      backgroundColor: alpha('#ffffff', 0.15),
-                      borderColor: '#ffffff',
-                      color: '#ffffff',
+                      color: '#42A5F5',
+                      backgroundColor: alpha('#1976D2', 0.12),
+                      borderColor: 'rgba(25,118,210,0.3)',
                       transform: 'translateY(-2px)',
                     },
                   }}
@@ -151,64 +249,95 @@ const AppFooter: React.FC<AppFooterProps> = ({ variant = 'default' }) => {
             </Box>
           </Grid>
 
-          {/* Quick Links */}
-          <Grid item xs={12} md={4}>
-            <Typography variant="h6" fontWeight={600} sx={{ mb: 2.5, fontSize: '1rem', color: 'white' }}>
+          {/* Column 2 — Platform links */}
+          <Grid item xs={12} sm={6} md={4}>
+            <Typography
+              sx={{
+                color: '#ffffff',
+                fontWeight: 700,
+                fontSize: '0.8125rem',
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
+                mb: 2.5,
+              }}
+            >
               Platform
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-              {[
-                { label: 'Features', href: '#features' },
-                { label: 'Stats', href: '#stats' },
-                { label: 'Testimonials', href: '#testimonials' },
-                { label: 'FAQ', href: '#faq' },
-              ].map((item) => (
-                <Link
+              {NAV_LINKS.map((item) => (
+                <Box
                   key={item.label}
+                  component="a"
                   href={item.href}
-                  color="inherit"
-                  underline="none"
                   sx={{
-                    opacity: 0.8,
-                    color: '#cbd5e1',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 0.5,
+                    color: '#64748b',
                     fontSize: '0.875rem',
+                    textDecoration: 'none',
                     transition: 'all 0.2s ease',
+                    '& .link-arrow': {
+                      opacity: 0.3,
+                      transition: 'opacity 0.2s ease',
+                    },
                     '&:hover': {
-                      opacity: 1,
-                      color: '#ffffff',
+                      color: '#42A5F5',
                       transform: 'translateX(4px)',
+                      '& .link-arrow': {
+                        opacity: 1,
+                      },
                     },
                   }}
                 >
+                  <ChevronRight
+                    className="link-arrow"
+                    sx={{ fontSize: 14, color: 'inherit' }}
+                  />
                   {item.label}
-                </Link>
+                </Box>
               ))}
             </Box>
           </Grid>
 
-          {/* Contact Info */}
-          <Grid item xs={12} md={4}>
-            <Typography variant="h6" fontWeight={600} sx={{ mb: 2.5, fontSize: '1rem', color: 'white' }}>
-              Contact Us
+          {/* Column 3 — Contact */}
+          <Grid item xs={12} sm={6} md={4}>
+            <Typography
+              sx={{
+                color: '#ffffff',
+                fontWeight: 700,
+                fontSize: '0.8125rem',
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
+                mb: 2.5,
+              }}
+            >
+              Contact
             </Typography>
-            {!loading && contactInfo ? (
+
+            {loading ? (
+              <Typography
+                variant="body2"
+                sx={{ color: '#334155', fontSize: '0.875rem' }}
+              >
+                Loading...
+              </Typography>
+            ) : contactInfo ? (
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                 {contactInfo.email && (
                   <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
-                    <Email sx={{ fontSize: 18, color: '#cbd5e1', mt: 0.3 }} />
+                    <Email
+                      sx={{ fontSize: 16, color: '#1976D2', mt: 0.25, flexShrink: 0 }}
+                    />
                     <Link
                       href={`mailto:${contactInfo.email}`}
-                      color="inherit"
                       underline="none"
                       sx={{
-                        opacity: 0.8,
-                        color: '#cbd5e1',
+                        color: '#64748b',
                         fontSize: '0.875rem',
-                        transition: 'all 0.2s ease',
-                        '&:hover': {
-                          opacity: 1,
-                          color: '#ffffff',
-                        },
+                        lineHeight: 1.6,
+                        transition: 'color 0.2s ease',
+                        '&:hover': { color: '#42A5F5' },
                       }}
                     >
                       {contactInfo.email}
@@ -217,20 +346,18 @@ const AppFooter: React.FC<AppFooterProps> = ({ variant = 'default' }) => {
                 )}
                 {contactInfo.phone && (
                   <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
-                    <Phone sx={{ fontSize: 18, color: '#cbd5e1', mt: 0.3 }} />
+                    <Phone
+                      sx={{ fontSize: 16, color: '#1976D2', mt: 0.25, flexShrink: 0 }}
+                    />
                     <Link
                       href={`tel:${contactInfo.phone}`}
-                      color="inherit"
                       underline="none"
                       sx={{
-                        opacity: 0.8,
-                        color: '#cbd5e1',
+                        color: '#64748b',
                         fontSize: '0.875rem',
-                        transition: 'all 0.2s ease',
-                        '&:hover': {
-                          opacity: 1,
-                          color: '#ffffff',
-                        },
+                        lineHeight: 1.6,
+                        transition: 'color 0.2s ease',
+                        '&:hover': { color: '#42A5F5' },
                       }}
                     >
                       {contactInfo.phone}
@@ -239,12 +366,13 @@ const AppFooter: React.FC<AppFooterProps> = ({ variant = 'default' }) => {
                 )}
                 {(contactInfo.address || contactInfo.city) && (
                   <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
-                    <LocationOn sx={{ fontSize: 18, color: '#cbd5e1', mt: 0.3 }} />
+                    <LocationOn
+                      sx={{ fontSize: 16, color: '#1976D2', mt: 0.25, flexShrink: 0 }}
+                    />
                     <Typography
                       variant="body2"
                       sx={{
-                        opacity: 0.8,
-                        color: '#cbd5e1',
+                        color: '#64748b',
                         fontSize: '0.875rem',
                         lineHeight: 1.6,
                       }}
@@ -264,18 +392,20 @@ const AppFooter: React.FC<AppFooterProps> = ({ variant = 'default' }) => {
                 )}
               </Box>
             ) : (
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-                <Typography variant="body2" sx={{ opacity: 0.6, color: '#cbd5e1', fontSize: '0.875rem' }}>
-                  {loading ? 'Loading contact information...' : 'Contact information not available'}
-                </Typography>
-              </Box>
+              <Typography
+                variant="body2"
+                sx={{ color: '#334155', fontSize: '0.875rem' }}
+              >
+                Contact information not available.
+              </Typography>
             )}
           </Grid>
         </Grid>
 
-        <Divider sx={{ my: 4, borderColor: '#334155' }} />
+        {/* Divider */}
+        <Divider sx={{ borderColor: '#1e293b', my: { xs: 4, md: 5 } }} />
 
-        {/* Bottom Section */}
+        {/* Bottom bar */}
         <Box
           sx={{
             display: 'flex',
@@ -285,12 +415,42 @@ const AppFooter: React.FC<AppFooterProps> = ({ variant = 'default' }) => {
             gap: 2,
           }}
         >
-          <Typography variant="body2" sx={{ opacity: 0.7, color: '#94a3b8', fontSize: '0.875rem' }}>
-            Â© {currentYear} {DEFAULT_COMPANY_INFO.name}. All rights reserved.
+          <Typography
+            variant="body2"
+            sx={{ color: '#475569', fontSize: '0.8125rem' }}
+          >
+            © {currentYear} Dino. All rights reserved.
           </Typography>
-          <Typography variant="body2" sx={{ opacity: 0.7, color: '#94a3b8', fontSize: '0.875rem' }}>
-            Made with love for modern businesses
-          </Typography>
+
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            {[
+              { label: 'Privacy Policy', href: '/privacy' },
+              { label: 'Terms of Service', href: '/terms' },
+            ].map((item, index) => (
+              <React.Fragment key={item.label}>
+                {index > 0 && (
+                  <Typography
+                    component="span"
+                    sx={{ color: '#334155', fontSize: '0.8125rem', userSelect: 'none' }}
+                  >
+                    ·
+                  </Typography>
+                )}
+                <Link
+                  href={item.href}
+                  underline="none"
+                  sx={{
+                    color: '#475569',
+                    fontSize: '0.8125rem',
+                    transition: 'color 0.2s ease',
+                    '&:hover': { color: '#42A5F5' },
+                  }}
+                >
+                  {item.label}
+                </Link>
+              </React.Fragment>
+            ))}
+          </Box>
         </Box>
       </Container>
     </Box>

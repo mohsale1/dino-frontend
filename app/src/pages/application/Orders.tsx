@@ -94,8 +94,8 @@ function timeAgo(dateStr: string): string {
   return `${Math.floor(hrs / 24)}d ago`;
 }
 
-function formatINR(value: number): string {
-  return `₹${value.toLocaleString('en-IN')}`;
+function formatINR(value: number | undefined | null): string {
+  return `₹${(value ?? 0).toLocaleString('en-IN')}`;
 }
 
 function toISODate(d: Date): string {
@@ -626,8 +626,8 @@ const OrdersManagementPage: React.FC = () => {
   const { user, userPermissions } = useAuth();
   const { userData } = useUserData();
 
-  const venueId: string =
-    userData?.venue?.id || (user as any)?.venueId || (user as any)?.venue_id || '';
+  const workspaceId: string =
+    userData?.venue?.workspaceId || (user as any)?.workspaceId || (user as any)?.workspace_id || '';
 
   // Role detection — full pattern matching all pages
   const rawRole = (
@@ -684,60 +684,62 @@ const OrdersManagementPage: React.FC = () => {
   }, [searchQuery]);
 
   // ---------------------------------------------------------------------------
+  // Helpers
+  // ---------------------------------------------------------------------------
+
+  const showSnackbar = (message: string, severity: 'success' | 'error') =>
+    setSnackbar({ open: true, message, severity });
+
+  // ---------------------------------------------------------------------------
   // Data fetching
   // ---------------------------------------------------------------------------
 
   const loadOrders = useCallback(async () => {
-    if (!venueId) return;
+    if (!workspaceId) return;
     setLoading(true);
-    try {
-      const { startDate, endDate } = getDateRange(dateFilter);
-      const filters: OrderFilters = {
-        venueId,
-        status: statusFilter || undefined,
-        startDate,
-        endDate,
-        page: page + 1,
-        page_size: ROWS_PER_PAGE,
-      };
-      const res = await orderService.getOrders(filters);
-      if (res.success) {
-        const raw = res.data as any;
-        if (raw && typeof raw === 'object' && !Array.isArray(raw) && raw.items) {
-          setOrders(raw.items as Order[]);
-          setTotalOrders(raw.total ?? raw.items.length);
-        } else {
-          const list = Array.isArray(raw) ? raw : [];
-          setOrders(list);
-          setTotalOrders(list.length);
-        }
-      }
-    } catch {
+    const { startDate, endDate } = getDateRange(dateFilter);
+    const filters: OrderFilters = {
+      workspaceId,
+      status: statusFilter || undefined,
+      startDate,
+      endDate,
+      page: page + 1,
+      page_size: ROWS_PER_PAGE,
+    };
+    const res = await orderService.getOrders(filters);
+    if (!res.success || !res.data) {
       showSnackbar('Failed to load orders', 'error');
-    } finally {
       setLoading(false);
+      return;
     }
-  }, [venueId, statusFilter, dateFilter, page]);
+    // res.data is PaginatedOrders: { items, total, totalPages, pagination }
+    setOrders(res.data.items);
+    setTotalOrders(res.data.total);
+    setLoading(false);
+  }, [workspaceId, statusFilter, dateFilter, page]);
 
   const loadStats = useCallback(async () => {
-    if (!venueId) return;
+    if (!workspaceId) return;
     setStatsLoading(true);
     try {
-      const data = await orderService.getOrderStatistics(venueId);
+      const data = await orderService.getOrderStatistics(workspaceId);
       setStats(data ?? null);
     } catch {
       // stats are non-critical
     } finally {
       setStatsLoading(false);
     }
-  }, [venueId]);
+  }, [workspaceId]);
 
   useEffect(() => {
     loadOrders();
     loadStats();
     const interval = setInterval(() => {
-      loadOrders();
-      loadStats();
+      // Only refresh when the tab is visible to avoid unnecessary background requests
+      if (document.visibilityState === 'visible') {
+        loadOrders();
+        loadStats();
+      }
     }, 30000);
     return () => clearInterval(interval);
   }, [loadOrders, loadStats]);
@@ -745,9 +747,6 @@ const OrdersManagementPage: React.FC = () => {
   // ---------------------------------------------------------------------------
   // Handlers
   // ---------------------------------------------------------------------------
-
-  const showSnackbar = (message: string, severity: 'success' | 'error') =>
-    setSnackbar({ open: true, message, severity });
 
   const handleStatusUpdate = async (orderId: string, newStatus: Order['status']) => {
     setActionLoading(orderId);

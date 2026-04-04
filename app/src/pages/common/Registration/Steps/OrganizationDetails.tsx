@@ -8,6 +8,7 @@ import {
   FormControl,
   InputLabel,
   Select,
+  alpha,
 } from '@mui/material';
 import { Store } from '@mui/icons-material';
 import { RegistrationFormData } from '../types';
@@ -18,6 +19,19 @@ interface OrganizationInformationStepProps {
   errors: Record<string, string>;
 }
 
+const fieldSx = {
+  '& .MuiOutlinedInput-root': {
+    borderRadius: 2,
+    '&.Mui-focused fieldset': { borderColor: '#1976D2' },
+  },
+  '& label.Mui-focused': { color: '#1976D2' },
+};
+
+const selectSx = {
+  borderRadius: 2,
+  '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#1976D2' },
+};
+
 const OrganizationInformationStep: React.FC<OrganizationInformationStepProps> = ({
   formData,
   onInputChange,
@@ -25,10 +39,24 @@ const OrganizationInformationStep: React.FC<OrganizationInformationStepProps> = 
 }) => {
   return (
     <Box>
-      <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 2 }}>
-        <Store sx={{ fontSize: 32, color: '#0f172a' }} />
+      <Box sx={{ mb: 3.5, display: 'flex', alignItems: 'center', gap: 2 }}>
+        <Box
+          sx={{
+            width: 48,
+            height: 48,
+            borderRadius: 2,
+            backgroundColor: alpha('#1976D2', 0.1),
+            border: `1.5px solid ${alpha('#1976D2', 0.25)}`,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+          }}
+        >
+          <Store sx={{ fontSize: 26, color: '#1976D2' }} />
+        </Box>
         <Box>
-          <Typography variant="h6" sx={{ color: '#0f172a', fontWeight: 600 }}>
+          <Typography variant="h6" sx={{ color: '#0f172a', fontWeight: 700 }}>
             Organization Details
           </Typography>
           <Typography variant="body2" sx={{ color: '#64748b' }}>
@@ -45,7 +73,7 @@ const OrganizationInformationStep: React.FC<OrganizationInformationStepProps> = 
         error={!!errors.organizationName}
         helperText={errors.organizationName || 'The name of your venue/branch'}
         required
-        sx={{ mb: 3.5 }}
+        sx={{ mb: 3.5, ...fieldSx }}
       />
 
       <TextField
@@ -57,30 +85,36 @@ const OrganizationInformationStep: React.FC<OrganizationInformationStepProps> = 
         helperText={errors.organizationDescription || 'Brief description of your venue'}
         multiline
         rows={3}
-        sx={{ mb: 3.5 }}
+        sx={{ mb: 3.5, ...fieldSx }}
       />
 
       <Grid container spacing={2} sx={{ mb: 3.5 }}>
         <Grid item xs={12} sm={6}>
           <FormControl fullWidth>
-            <InputLabel>Organization Type</InputLabel>
+            <InputLabel sx={{ '&.Mui-focused': { color: '#1976D2' } }}>
+              Organization Type
+            </InputLabel>
             <Select
               value={formData.organizationType}
               onChange={(e) => onInputChange('organizationType', e.target.value)}
               label="Organization Type"
+              sx={selectSx}
             >
-              <MenuItem value={0}>Food & Beverage</MenuItem>
+              <MenuItem value={0}>Food &amp; Beverage</MenuItem>
               <MenuItem value={1}>Non-Food (Retail, Services, etc.)</MenuItem>
             </Select>
           </FormControl>
         </Grid>
         <Grid item xs={12} sm={6}>
           <FormControl fullWidth>
-            <InputLabel>Order Type</InputLabel>
+            <InputLabel sx={{ '&.Mui-focused': { color: '#1976D2' } }}>
+              Order Type
+            </InputLabel>
             <Select
               value={formData.orderType}
               onChange={(e) => onInputChange('orderType', e.target.value)}
               label="Order Type"
+              sx={selectSx}
             >
               <MenuItem value={0}>Online (Self-Service/QR)</MenuItem>
               <MenuItem value={1}>Manual (Counter-Based)</MenuItem>
@@ -101,7 +135,7 @@ const OrganizationInformationStep: React.FC<OrganizationInformationStepProps> = 
         error={!!errors['organizationLocation.address']}
         helperText={errors['organizationLocation.address']}
         required
-        sx={{ mb: 3.5 }}
+        sx={{ mb: 3.5, ...fieldSx }}
       />
 
       <Grid container spacing={2} sx={{ mb: 3.5 }}>
@@ -114,6 +148,7 @@ const OrganizationInformationStep: React.FC<OrganizationInformationStepProps> = 
             error={!!errors['organizationLocation.city']}
             helperText={errors['organizationLocation.city']}
             required
+            sx={fieldSx}
           />
         </Grid>
         <Grid item xs={12} sm={3}>
@@ -125,6 +160,7 @@ const OrganizationInformationStep: React.FC<OrganizationInformationStepProps> = 
             error={!!errors['organizationLocation.state']}
             helperText={errors['organizationLocation.state']}
             required
+            sx={fieldSx}
           />
         </Grid>
         <Grid item xs={12} sm={3}>
@@ -136,6 +172,7 @@ const OrganizationInformationStep: React.FC<OrganizationInformationStepProps> = 
             error={!!errors['organizationLocation.postal_code']}
             helperText={errors['organizationLocation.postal_code']}
             required
+            sx={fieldSx}
           />
         </Grid>
       </Grid>
@@ -151,6 +188,7 @@ const OrganizationInformationStep: React.FC<OrganizationInformationStepProps> = 
             helperText={errors.organizationPhone || 'Contact phone number'}
             required
             placeholder="+1234567890"
+            sx={fieldSx}
           />
         </Grid>
         <Grid item xs={12} sm={6}>
@@ -163,6 +201,7 @@ const OrganizationInformationStep: React.FC<OrganizationInformationStepProps> = 
             error={!!errors.organizationEmail}
             helperText={errors.organizationEmail || 'Contact email address'}
             required
+            sx={fieldSx}
           />
         </Grid>
       </Grid>

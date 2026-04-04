@@ -25,31 +25,32 @@ class RoleService {
   async getRoles(filters?: RoleFilters): Promise<PaginatedResponse<Role>> {
     try {
       const params = new URLSearchParams();
-      
+
       if (filters?.page) params.append('page', filters.page.toString());
       if (filters?.page_size) params.append('page_size', filters.page_size.toString());
-      if (filters?.search) params.append('search', filters.search);      const response = await apiService.get<any>(`/application/roles?${params.toString()}`);      
-      // Based on your actual response, the structure is:
-      // response.data = { success: true, data: [...roles], total: 2, page: 1, ... }
-      
-      if (response && response.data) {        
-        // The response.data contains the paginated response
+      if (filters?.search) params.append('search', filters.search);
+
+      const response = await apiService.get<any>(`/application/roles?${params.toString()}`);
+
+      // Backend returns: { success: true, data: [...roles], pagination: { page, page_size, total, total_pages } }
+      if (response && response.data) {
         if (Array.isArray(response.data.data)) {
-          const rolesArray = response.data.data;          
+          const rolesArray = response.data.data;
           return {
             success: true,
             data: rolesArray,
-            total: response.data.total || 0,
-            page: response.data.page || 1,
-            page_size: response.data.pageSize || response.data.page_size || 10,
-            total_pages: response.data.totalPages || response.data.total_pages || 0,
+            total: response.data.total || response.data.pagination?.total || 0,
+            page: response.data.page || response.data.pagination?.page || 1,
+            page_size: response.data.pageSize || response.data.page_size || response.data.pagination?.page_size || 10,
+            total_pages: response.data.totalPages || response.data.total_pages || response.data.pagination?.total_pages || 0,
             has_next: response.data.hasNext !== undefined ? response.data.hasNext : (response.data.has_next || false),
-            has_prev: response.data.hasPrev !== undefined ? response.data.hasPrev : (response.data.has_prev || false)
+            has_prev: response.data.hasPrev !== undefined ? response.data.hasPrev : (response.data.has_prev || false),
           };
         }
-        
-        // Fallback: if data is directly an array (shouldn't happen based on your response)
-        if (Array.isArray(response.data)) {          return {
+
+        // Fallback: data is directly an array
+        if (Array.isArray(response.data)) {
+          return {
             success: true,
             data: response.data,
             total: response.data.length,
@@ -57,10 +58,12 @@ class RoleService {
             page_size: response.data.length,
             total_pages: 1,
             has_next: false,
-            has_prev: false
+            has_prev: false,
           };
         }
-      }      return {
+      }
+
+      return {
         success: false,
         data: [],
         total: 0,
@@ -68,9 +71,12 @@ class RoleService {
         page_size: 10,
         total_pages: 0,
         has_next: false,
-        has_prev: false
+        has_prev: false,
       };
-    } catch (error) {      return {
+    } catch (error) {
+      // FIX: log error for debugging so callers can see what went wrong
+      console.error('RoleService.getRoles error:', error);
+      return {
         success: false,
         data: [],
         total: 0,
@@ -78,7 +84,7 @@ class RoleService {
         page_size: 10,
         total_pages: 0,
         has_next: false,
-        has_prev: false
+        has_prev: false,
       };
     }
   }
@@ -90,7 +96,9 @@ class RoleService {
     try {
       const response = await apiService.get<Role>(`/application/roles/${roleId}`);
       return response.data || null;
-    } catch (error) {      return null;
+    } catch (error) {
+      console.error('RoleService.getRole error:', error);
+      return null;
     }
   }
 
@@ -102,7 +110,7 @@ class RoleService {
       'superadmin': 'Super Admin',
       'admin': 'Admin',
       'operator': 'Operator',
-      'customer': 'Customer'
+      'customer': 'Customer',
     };
     return displayNames[roleName.toLowerCase()] || roleName;
   }
@@ -115,25 +123,25 @@ class RoleService {
       'superadmin': '#7c3aed',
       'admin': '#dc2626',
       'operator': '#2563eb',
-      'customer': '#059669'
+      'customer': '#059669',
     };
     return colors[roleName.toLowerCase()] || '#6b7280';
   }
 
   /**
-   * Get all roles with their permissions - optimized single API call
+   * Get all roles with their permissions.
+   * FIX: the /with-permissions endpoint does not exist in the backend.
+   * Delegates to GET /application/roles instead and returns the data array.
    */
   async getRolesWithPermissions(): Promise<RoleWithPermissions[]> {
     try {
-      const response = await apiService.get<RoleWithPermissions[]>('/application/roles/with-permissions');
-      
+      const response = await this.getRoles({ page: 1, page_size: 100 });
       if (response.success && response.data) {
-        return response.data;
+        return response.data as unknown as RoleWithPermissions[];
       }
-      
       return [];
     } catch (error) {
-      console.error('Error fetching roles with permissions:', error);
+      console.error('RoleService.getRolesWithPermissions error:', error);
       return [];
     }
   }

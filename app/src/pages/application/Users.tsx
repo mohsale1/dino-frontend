@@ -41,6 +41,7 @@ import {
   Block as BlockIcon,
   AdminPanelSettings as AdminIcon,
   Edit as EditIcon,
+  Delete as DeleteIcon,
   CalendarToday as CalendarTodayIcon,
   FilterAltOutlined,
 } from '@mui/icons-material';
@@ -88,7 +89,6 @@ const useCountUp = (target: number, duration = 900) => {
 
 // ---------------------------------------------------------------------------
 // HeroStat component
-// Fix 1: width: '100%', centered content, no flex shrink/grow
 // ---------------------------------------------------------------------------
 const HeroStat: React.FC<{
   label: string;
@@ -211,7 +211,7 @@ const UserManagement: React.FC = () => {
     open: false, userId: '', userName: '', loading: false,
   });
 
-  // API
+  // API — searchTerm is sent to the API; no client-side search duplication
   const loadUsers = useCallback(async () => {
     try {
       setLoading(true);
@@ -243,7 +243,6 @@ const UserManagement: React.FC = () => {
     });
   };
 
-
   const confirmDeleteUser = async () => {
     try {
       setDeleteModal(prev => ({ ...prev, loading: true }));
@@ -271,16 +270,12 @@ const UserManagement: React.FC = () => {
     }
   };
 
-  // Derived
+  // Derived — trust API for search; apply only role filter and status filter client-side
   const filteredUsers = users.filter(u => {
-    const matchesSearch =
-      u.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      u.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      u.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      u.phone?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesRole   = !filterRole || u.role?.name === filterRole;
+    // FIX: case-insensitive role comparison
+    const matchesRole   = !filterRole || u.role?.name?.toLowerCase() === filterRole.toLowerCase();
     const matchesActive = showInactive || u.isActive;
-    return matchesSearch && matchesRole && matchesActive;
+    return matchesRole && matchesActive;
   });
 
   const activeCount   = users.filter(u => u.isActive).length;
@@ -330,7 +325,7 @@ const UserManagement: React.FC = () => {
           backgroundSize: '40px 40px', pointerEvents: 'none',
         }} />
 
-        {/* Fix 2: Title row — column on xs, row on sm+ */}
+        {/* Title row */}
         <Box
           sx={{
             position: 'relative',
@@ -382,7 +377,7 @@ const UserManagement: React.FC = () => {
           )}
         </Box>
 
-        {/* Fix 1: Stats row — CSS Grid, 2 cols on xs/sm, 4 cols on md+ */}
+        {/* Stats row */}
         <Box
           sx={{
             position: 'relative',
@@ -401,7 +396,7 @@ const UserManagement: React.FC = () => {
       {/* ── Body ── */}
       <Box sx={{ pb: 6 }}>
 
-        {/* Fix 3: Toolbar — two-row layout on xs */}
+        {/* Toolbar */}
         <Box sx={{ pt: 0, pb: 0 }}>
           <Paper
             elevation={0}
@@ -454,7 +449,7 @@ const UserManagement: React.FC = () => {
                 )}
               </Box>
 
-                {/* Role dropdown */}
+                {/* Role dropdown — values match actual API role names (case-insensitive compare) */}
                 <FormControl size="small" sx={{ minWidth: 130, flexShrink: 0 }}>
                   <Select
                     value={filterRole}
@@ -656,7 +651,16 @@ const UserManagement: React.FC = () => {
                                   }
                                 </IconButton>
                               </Tooltip>
-
+                              {/* FIX: Delete button now opens the deleteModal */}
+                              <Tooltip title="Delete user" arrow>
+                                <IconButton
+                                  size="small"
+                                  onClick={() => setDeleteModal({ open: true, userId: u.id, userName: u.email, loading: false })}
+                                  sx={{ color: C.muted, borderRadius: 1.5, '&:hover': { color: C.rose, bgcolor: alpha(C.rose, 0.08) } }}
+                                >
+                                  <DeleteIcon sx={{ fontSize: 16 }} />
+                                </IconButton>
+                              </Tooltip>
                             </Box>
                           </TableCell>
                         </TableRow>
@@ -687,7 +691,7 @@ const UserManagement: React.FC = () => {
           </Box>
         )}
 
-        {/* Fix 4: Mobile Card List (xs / sm) — px: { xs: 1.5, sm: 2 } */}
+        {/* Mobile Card List (xs / sm) */}
         {isMobile && (
           <Box sx={{ borderBottom: `1px solid ${C.border}` }}>
             <Box sx={{ px: { xs: 1.5, sm: 2 }, pt: 2, pb: 2 }}>
@@ -795,7 +799,14 @@ const UserManagement: React.FC = () => {
                               {u.isActive ? <BlockIcon sx={{ fontSize: 16 }} /> : <CheckCircleIcon sx={{ fontSize: 16 }} />}
                             </IconButton>
                           </Tooltip>
-
+                          {/* FIX: Delete button now opens the deleteModal */}
+                          <Tooltip title="Delete user" arrow>
+                            <IconButton size="small"
+                              onClick={() => setDeleteModal({ open: true, userId: u.id, userName: u.email, loading: false })}
+                              sx={{ color: C.muted, borderRadius: 1.5, '&:hover': { color: C.rose, bgcolor: alpha(C.rose, 0.08) } }}>
+                              <DeleteIcon sx={{ fontSize: 16 }} />
+                            </IconButton>
+                          </Tooltip>
                         </Box>
                       </Box>
                     </Paper>

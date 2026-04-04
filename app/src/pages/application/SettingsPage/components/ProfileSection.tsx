@@ -25,6 +25,7 @@ import {
   LockOutlined,
 } from '@mui/icons-material';
 import { useAuth } from '../../../../contexts/common/Auth';
+import { useUserData } from '../../../../contexts/application/UserData';
 import {
   getUserFirstName,
   getUserLastName,
@@ -95,12 +96,20 @@ const InfoRow: React.FC<InfoRowProps> = ({ icon, label, value }) => (
 // ── ProfileSection ───────────────────────────────────────────────────────────
 const ProfileSection: React.FC<ProfileSectionProps> = ({ onSave }) => {
   const { user, updateUser } = useAuth();
+  const { userData } = useUserData();
 
-  const initFirstName = getUserFirstName(user);
-  const initLastName  = getUserLastName(user);
-  const initials      = getUserInitials(user);
-  const createdAt     = getUserCreatedAt(user);
-  const userRole      = (user as any)?.role?.name || (user as any)?.role || 'User';
+  const effectiveUser = userData?.user ?? null;
+  const initFirstName = effectiveUser?.firstName || getUserFirstName(user);
+  const initLastName  = effectiveUser?.lastName  || getUserLastName(user);
+  const initPhone     = effectiveUser?.phone     || user?.phone || '';
+  const initials      = effectiveUser
+    ? ((effectiveUser.firstName?.charAt(0) || '') + (effectiveUser.lastName?.charAt(0) || '')).toUpperCase() || user?.email?.charAt(0)?.toUpperCase() || 'U'
+    : getUserInitials(user);
+  const createdAt = effectiveUser?.createdAt
+    ? new Date(effectiveUser.createdAt)
+    : getUserCreatedAt(user);
+  const userRole  = effectiveUser?.role || (user as any)?.role?.name || (user as any)?.role || 'User';
+  const userEmail = effectiveUser?.email || user?.email || '';
 
   const [editing, setEditing]   = useState(false);
   const [saving, setSaving]     = useState(false);
@@ -109,7 +118,7 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ onSave }) => {
   const [formData, setFormData] = useState({
     firstName: initFirstName,
     lastName:  initLastName,
-    phone:     user?.phone || '',
+    phone:     initPhone,
   });
 
   const handleChange = (field: string, value: string) => {
@@ -117,13 +126,13 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ onSave }) => {
   };
 
   const handleEdit = () => {
-    setFormData({ firstName: initFirstName, lastName: initLastName, phone: user?.phone || '' });
+    setFormData({ firstName: initFirstName, lastName: initLastName, phone: initPhone });
     setAlert(null);
     setEditing(true);
   };
 
   const handleCancel = () => {
-    setFormData({ firstName: initFirstName, lastName: initLastName, phone: user?.phone || '' });
+    setFormData({ firstName: initFirstName, lastName: initLastName, phone: initPhone });
     setAlert(null);
     setEditing(false);
   };
@@ -170,7 +179,7 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ onSave }) => {
     ? createdAt.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
     : '\u2014';
 
-  const displayName = [initFirstName, initLastName].filter(Boolean).join(' ') || user?.email || 'User';
+  const displayName = [initFirstName, initLastName].filter(Boolean).join(' ') || userEmail || 'User';
 
   return (
     <Box>
@@ -226,7 +235,7 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ onSave }) => {
                   minWidth: 0,
                 }}
               >
-                {user?.email || ''}
+                {userEmail}
               </Typography>
               <Chip
                 label={typeof userRole === 'string' ? userRole : 'User'}
@@ -250,12 +259,12 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ onSave }) => {
               <InfoRow
                 icon={<EmailOutlined sx={{ fontSize: 16 }} />}
                 label="Email"
-                value={user?.email || ''}
+                value={userEmail}
               />
               <InfoRow
                 icon={<PhoneOutlined sx={{ fontSize: 16 }} />}
                 label="Phone"
-                value={user?.phone || ''}
+                value={initPhone}
               />
               <InfoRow
                 icon={<CalendarToday sx={{ fontSize: 16 }} />}
@@ -385,7 +394,7 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ onSave }) => {
                 <TextField
                   fullWidth
                   label="Email Address"
-                  value={user?.email || ''}
+                  value={userEmail}
                   disabled
                   helperText="Email cannot be changed"
                   InputProps={{
