@@ -1,4 +1,4 @@
-/**
+ /**
  * Catalog Service
  * Handles API calls for catalog (menu) operations
  */
@@ -74,13 +74,25 @@ class CatalogService {
     }
     
     const response = await apiService.get(this.itemsUrl, { params });
-    return response.data as any || [];
+    const raw: any[] = (response.data as any) || [];
+
+    // Normalize: backend returns `price` but our type uses `basePrice`
+    return raw.map((item: any) => ({
+      ...item,
+      basePrice: Number(item.basePrice ?? item.base_price ?? item.price ?? 0),
+    }));
   }
+
 
   async getCatalogItem(id: string): Promise<CatalogItem> {
     const response = await apiService.get(`${this.itemsUrl}/${id}`);
-    return response.data as any;
+    const item: any = response.data;
+    return {
+      ...item,
+      basePrice: Number(item?.basePrice ?? item?.base_price ?? item?.price ?? 0),
+    };
   }
+
 
   async createCatalogItem(data: CatalogItemCreate): Promise<CatalogItem> {
     const response = await apiService.post(this.itemsUrl, {

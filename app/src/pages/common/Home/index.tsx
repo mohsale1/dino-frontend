@@ -4,6 +4,8 @@ import { KeyboardArrowUp } from '@mui/icons-material';
 import {
   HeroSection,
   FeaturesSection,
+  HowItWorksSection,
+  UseCasesSection,
   StatsSection,
   TestimonialsSection,
   FAQSection,
@@ -26,7 +28,8 @@ const HomePage: React.FC = () => {
       sx={{
         width: '100%',
         minHeight: '100vh',
-        overflowX: 'hidden',
+        overflowX: 'clip',   // clip instead of hidden — does not create a scroll container, so page scroll is unaffected
+        overflowY: 'visible',
       }}
     >
       {/* Hero Section */}
@@ -34,6 +37,12 @@ const HomePage: React.FC = () => {
 
       {/* Features Section */}
       <FeaturesSection />
+
+      {/* How It Works Section */}
+      <HowItWorksSection />
+
+      {/* Use Cases Section */}
+      <UseCasesSection />
 
       {/* Stats Section */}
       <StatsSection />

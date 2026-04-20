@@ -1,7 +1,29 @@
 import React, { useState, useEffect } from 'react';
-import { Grid, Typography, Box, TextField, MenuItem } from '@mui/material';
-import { FormDialog, FormField } from '../../../components';
+import {
+  Dialog, DialogContent, DialogActions, Button, TextField,
+  CircularProgress, Box, Typography, IconButton,
+  Stack, Alert, useTheme, useMediaQuery, alpha,
+} from '@mui/material';
+import {
+  Close as CloseIcon,
+  Edit,
+  CategoryOutlined as CategoryOutlinedIcon,
+} from '@mui/icons-material';
 import type { Category, CategoryCreate, CategoryUpdate } from '../types';
+
+const HEADER_GRADIENT = 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 60%, #312e81 100%)';
+
+const labelSx = {
+  fontWeight: 600,
+  color: '#64748b',
+  mb: 0.75,
+  display: 'block',
+  fontSize: '0.75rem',
+  textTransform: 'uppercase' as const,
+  letterSpacing: '0.05em',
+};
+
+const inputSx = { '& .MuiOutlinedInput-root': { borderRadius: 2 } };
 
 export interface CategoryFormDialogProps {
   open: boolean;
@@ -12,158 +34,155 @@ export interface CategoryFormDialogProps {
 }
 
 export const CategoryFormDialog: React.FC<CategoryFormDialogProps> = ({
-  open,
-  onClose,
-  onSave,
-  category,
-  loading = false,
+  open, onClose, onSave, category, loading = false,
 }) => {
+  const theme = useTheme();
+  const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
+
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    icon: '',
-    displayOrder: '',
   });
-
-  const [errors, setErrors] = useState({
-    name: '',
-  });
+  const [formError, setFormError] = useState('');
 
   useEffect(() => {
-    if (category) {
-      setFormData({
-        name: category.name || '',
-        description: category.description || '',
-        icon: category.icon || '',
-        displayOrder: category.displayOrder?.toString() || '',
-      });
-    } else {
-      setFormData({
-        name: '',
-        description: '',
-        icon: '',
-        displayOrder: '',
-      });
+    if (open) {
+      setFormError('');
+      if (category) {
+        setFormData({
+          name: category.name || '',
+          description: category.description || '',
+        });
+      } else {
+        setFormData({ name: '', description: '' });
+      }
     }
-    setErrors({ name: '' });
-  }, [category, open]);
+  }, [open, category]);
 
-  const validate = (): boolean => {
-    const newErrors = { name: '' };
-    
+  const handleSubmit = () => {
+    setFormError('');
     if (!formData.name.trim()) {
-      newErrors.name = 'Category name is required';
+      setFormError('Category name is required');
+      return;
     }
-
-    setErrors(newErrors);
-    return !newErrors.name;
+    onSave({
+      name: formData.name.trim(),
+      description: formData.description.trim() || undefined,
+    });
   };
 
-  const handleSave = () => {
-    if (validate()) {
-      const data = {
-        name: formData.name,
-        description: formData.description,
-        ...(formData.icon && { icon: formData.icon }),
-        ...(formData.displayOrder && { displayOrder: parseInt(formData.displayOrder) }),
-      };
-      onSave(data);
-    }
-  };
-
-  const handleChange = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-    // Clear error when user starts typing
-    if (errors.name && field === 'name') {
-      setErrors({ name: '' });
-    }
-  };
+  const isSaveDisabled = loading || !formData.name.trim();
 
   return (
-    <FormDialog
+    <Dialog
       open={open}
       onClose={onClose}
-      onSubmit={handleSave}
-      title={category ? 'Edit Category' : 'Add Category'}
-      subtitle={category ? 'Update category details' : 'Create a new category'}
-      submitText={category ? 'Update' : 'Add'}
-      loading={loading}
+      maxWidth="sm"
+      fullWidth
+      fullScreen={fullScreen}
+      PaperProps={{ sx: { borderRadius: { xs: 0, sm: 3 }, overflow: 'hidden' } }}
     >
-      <Grid container spacing={3}>
-        <Grid item xs={12}>
-          <Typography variant="subtitle2" gutterBottom fontWeight={600}>
-            Basic Information
-          </Typography>
-        </Grid>
-
-        <Grid item xs={12}>
-          <FormField
-            label="Category Name"
-            value={formData.name}
-            onChange={(e) => handleChange('name', e.target.value)}
-            error={errors.name}
-            helperText={errors.name}
-            required
-            autoFocus
-            placeholder="Enter category name"
-          />
-        </Grid>
-
-        <Grid item xs={12}>
-          <FormField
-            label="Description"
-            value={formData.description}
-            onChange={(e) => handleChange('description', e.target.value)}
-            multiline
-            rows={3}
-            placeholder="Describe this category..."
-          />
-        </Grid>
-
-        <Grid item xs={12}>
-          <Typography variant="subtitle2" gutterBottom fontWeight={600}>
-            Display Settings
-          </Typography>
-        </Grid>
-
-        <Grid item xs={12} sm={6}>
-          <FormField
-            label="Icon (Emoji)"
-            value={formData.icon}
-            onChange={(e) => handleChange('icon', e.target.value)}
-            placeholder="ðŸ“¦"
-            helperText="Use an emoji to represent this category"
-          />
-        </Grid>
-
-        <Grid item xs={12} sm={6}>
-          <FormField
-            label="Display Order"
-            type="number"
-            value={formData.displayOrder}
-            onChange={(e) => handleChange('displayOrder', e.target.value)}
-            inputProps={{ min: 1 }}
-            helperText="Order in which category appears"
-          />
-        </Grid>
-
-        <Grid item xs={12}>
-          <Box
-            sx={{
-              p: 2,
-              backgroundColor: 'grey.50',
-              borderRadius: 1,
-              border: '1px solid',
-              borderColor: 'divider',
-            }}
-          >
-            <Typography variant="caption" color="text.secondary">
-              ðŸ’¡ <strong>Tip:</strong> Use clear, descriptive names and organize categories by display order for better navigation.
-            </Typography>
+      {/* Dark gradient header */}
+      <Box
+        sx={{
+          background: HEADER_GRADIENT,
+          px: 3, pt: 3, pb: 3,
+          position: 'relative', overflow: 'hidden',
+          '&::before': {
+            content: '""', position: 'absolute', top: -60, right: -40,
+            width: 180, height: 180, borderRadius: '50%',
+            background: `radial-gradient(circle, ${alpha('#6366f1', 0.25)} 0%, transparent 70%)`,
+            pointerEvents: 'none',
+          },
+        }}
+      >
+        <Box sx={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <Box sx={{
+              width: 40, height: 40, borderRadius: 2,
+              bgcolor: alpha('#fff', 0.12), border: `1px solid ${alpha('#fff', 0.2)}`,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              {category
+                ? <Edit sx={{ fontSize: 20, color: '#fff' }} />
+                : <CategoryOutlinedIcon sx={{ fontSize: 20, color: '#fff' }} />
+              }
+            </Box>
+            <Box>
+              <Typography variant="h6" sx={{ color: '#fff', fontWeight: 700, lineHeight: 1.2 }}>
+                {category ? 'Edit Category' : 'New Category'}
+              </Typography>
+              <Typography variant="caption" sx={{ color: 'rgba(199,210,254,0.7)', fontSize: '0.75rem' }}>
+                {category ? 'Update category details' : 'Add a new category to your catalog'}
+              </Typography>
+            </Box>
           </Box>
-        </Grid>
-      </Grid>
-    </FormDialog>
+          <IconButton onClick={onClose} size="small" sx={{ color: alpha('#fff', 0.7), '&:hover': { bgcolor: alpha('#fff', 0.1) } }}>
+            <CloseIcon />
+          </IconButton>
+        </Box>
+      </Box>
+
+      {/* Form content */}
+      <DialogContent sx={{ p: 3 }}>
+        <Stack spacing={2.5}>
+          {formError && (
+            <Alert severity="error" onClose={() => setFormError('')} sx={{ borderRadius: 2 }}>
+              {formError}
+            </Alert>
+          )}
+
+          {/* Name */}
+          <Box>
+            <Typography variant="caption" sx={labelSx}>Category Name *</Typography>
+            <TextField
+              fullWidth size="small"
+              placeholder="e.g. Starters, Main Course, Beverages"
+              value={formData.name}
+              onChange={e => setFormData(p => ({ ...p, name: e.target.value }))}
+              autoFocus
+              sx={inputSx}
+            />
+          </Box>
+
+          {/* Description */}
+          <Box>
+            <Typography variant="caption" sx={labelSx}>Description</Typography>
+            <TextField
+              fullWidth size="small" multiline rows={3}
+              placeholder="Describe this category..."
+              value={formData.description}
+              onChange={e => setFormData(p => ({ ...p, description: e.target.value }))}
+              sx={inputSx}
+            />
+          </Box>
+
+        </Stack>
+      </DialogContent>
+
+      {/* Actions */}
+      <DialogActions sx={{ px: 3, py: 2.5, borderTop: '1px solid #e2e8f0', gap: 1 }}>
+        <Button
+          onClick={onClose} disabled={loading}
+          sx={{ textTransform: 'none', fontWeight: 600, color: '#64748b', borderRadius: 2, px: 2.5, '&:hover': { bgcolor: alpha('#64748b', 0.06) } }}
+        >
+          Cancel
+        </Button>
+        <Button
+          onClick={handleSubmit}
+          variant="contained"
+          disabled={isSaveDisabled}
+          startIcon={loading ? <CircularProgress size={16} color="inherit" /> : category ? <Edit sx={{ fontSize: 17 }} /> : <CategoryOutlinedIcon sx={{ fontSize: 17 }} />}
+          sx={{
+            textTransform: 'none', fontWeight: 700, borderRadius: 2, px: 3,
+            bgcolor: '#0f172a', '&:hover': { bgcolor: '#1e293b' },
+            '&.Mui-disabled': { bgcolor: '#e2e8f0' },
+          }}
+        >
+          {category ? 'Update Category' : 'Create Category'}
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 };
 

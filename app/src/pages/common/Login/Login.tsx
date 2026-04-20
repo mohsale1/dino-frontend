@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import {
   Box, TextField, Button, Typography, Alert,
-  InputAdornment, IconButton, CircularProgress, Divider, Chip, Link,
+  InputAdornment, IconButton, CircularProgress, Divider, Link,
 } from '@mui/material';
 import {
   Visibility, VisibilityOff,
@@ -9,7 +9,9 @@ import {
 } from '@mui/icons-material';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import { useAuth } from '../../../contexts/common/Auth';
+import { normalizeRole, ROLES } from '../../../types/auth/roles';
 import DinoLogo from '../../../components/ui/DinoLogo';
+import { PageTransitionLoader } from '../../../components/ui/PageTransitionLoader';
 
 const BRAND = {
   primary:      '#1976D2',
@@ -36,19 +38,28 @@ const fieldSx = {
   '& label.Mui-focused': { color: BRAND.primary },
 };
 
+const getDestination = (user: any): string => {
+  const role = normalizeRole(user?.role);
+  return role === ROLES.USER ? '/admin/orders' : '/admin/dashboard';
+};
+
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
-  const { login, isAuthenticated } = useAuth();
+  const { login, isAuthenticated, user: authUser } = useAuth();
 
   const [email,        setEmail]        = useState('');
   const [password,     setPassword]     = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading,      setLoading]      = useState(false);
+  const [navigating,   setNavigating]   = useState(false);
   const [error,        setError]        = useState<string | null>(null);
 
+  // Redirect already-authenticated users (e.g. returning with a valid session)
   React.useEffect(() => {
-    if (isAuthenticated) navigate('/admin/dashboard', { replace: true });
-  }, [isAuthenticated, navigate]);
+    if (isAuthenticated && authUser) {
+      navigate(getDestination(authUser), { replace: true });
+    }
+  }, [isAuthenticated, authUser, navigate]);
 
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,8 +70,9 @@ const LoginPage: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      await login(email.trim(), password, false);
-      navigate('/admin/dashboard', { replace: true });
+      const { user: loggedInUser } = await login(email.trim(), password, false);
+      setNavigating(true);
+      navigate(getDestination(loggedInUser), { replace: true });
     } catch (err: any) {
       setError(err?.message || 'Invalid credentials. Please try again.');
     } finally {
@@ -137,9 +149,11 @@ const LoginPage: React.FC = () => {
   );
 
   return (
+    <>
+    <PageTransitionLoader visible={navigating} message="Signing in..." />
     <Box sx={{ display: 'flex', height: '100vh', overflow: 'hidden', bgcolor: BRAND.panelBg }}>
 
-      {/* ── LEFT BRANDING PANEL (desktop) ── */}
+      {/* LEFT BRANDING PANEL (desktop) */}
       <Box sx={{
         display: { xs: 'none', md: 'flex' },
         flex: 1,
@@ -185,7 +199,7 @@ const LoginPage: React.FC = () => {
         </Typography>
       </Box>
 
-      {/* ── RIGHT FORM PANEL (desktop) ── */}
+      {/* RIGHT FORM PANEL (desktop) */}
       <Box sx={{
         display: { xs: 'none', md: 'flex' },
         flexDirection: 'column',
@@ -219,110 +233,40 @@ const LoginPage: React.FC = () => {
         </Box>
       </Box>
 
-      {/* ── MOBILE LAYOUT ── */}
+      {/* MOBILE LAYOUT */}
       <Box sx={{
         display: { xs: 'flex', md: 'none' },
         flexDirection: 'column',
-        height: '100vh',
-        overflow: 'hidden',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '100vh',
         width: '100%',
-        bgcolor: BRAND.panelBg,
+        bgcolor: '#ffffff',
+        overflowY: 'auto',
+        px: 3,
+        py: 5,
       }}>
-        {/* Dark branded header — compact, never shrinks away */}
-        <Box sx={{
-          flexShrink: 0,
-          position: 'relative',
-          overflow: 'hidden',
-          px: 3,
-          pt: 4,
-          pb: 3,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          background: `linear-gradient(160deg, ${BRAND.panelBg} 0%, ${BRAND.panelBg2} 100%)`,
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: -60,
-            right: -40,
-            width: 220,
-            height: 220,
-            borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(25,118,210,0.12) 0%, transparent 70%)',
-            pointerEvents: 'none',
-          },
-        }}>
-          <Box sx={{
-            position: 'absolute',
-            inset: 0,
-            backgroundImage: 'linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px)',
-            backgroundSize: '32px 32px',
-            pointerEvents: 'none',
-          }} />
-          <Box sx={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <DinoLogo size={48} animated />
-            <Typography variant="h6" fontWeight={700} color="white" mt={1.5} textAlign="center" sx={{ letterSpacing: '-0.3px' }}>
-              Welcome to Dino
-            </Typography>
-            <Typography variant="caption" color="rgba(255,255,255,0.5)" mt={0.5} textAlign="center" maxWidth={260} lineHeight={1.5}>
-              Digital solutions for modern businesses
-            </Typography>
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75, mt: 2, justifyContent: 'center' }}>
-              {APP_FEATURES.map(({ icon: Icon, text }, i) => (
-                <Chip
-                  key={i}
-                  icon={<Icon sx={{ fontSize: '13px !important', color: `${BRAND.primaryLight} !important` }} />}
-                  label={text}
-                  size="small"
-                  sx={{
-                    bgcolor: BRAND.accent,
-                    border: `1px solid ${BRAND.accentBorder}`,
-                    color: 'rgba(255,255,255,0.8)',
-                    fontSize: '0.7rem',
-                    fontWeight: 500,
-                    height: 26,
-                    '& .MuiChip-icon': { ml: 0.5 },
-                  }}
-                />
-              ))}
-            </Box>
+        <Box sx={{ width: '100%', maxWidth: 360, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <DinoLogo size={40} />
+          <Box sx={{ width: 44, height: 44, borderRadius: 2, bgcolor: 'rgba(25,118,210,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', mt: 4, mb: 1.5 }}>
+            <LockOutlined sx={{ color: BRAND.primary, fontSize: 22 }} />
           </Box>
-        </Box>
-
-        {/* White form card — scrollable, fills remaining height */}
-        <Box sx={{
-          flex: 1,
-          bgcolor: '#ffffff',
-          borderRadius: '20px 20px 0 0',
-          px: { xs: 3, sm: 5 },
-          pt: 3.5,
-          pb: 3,
-          mt: -2,
-          position: 'relative',
-          zIndex: 1,
-          boxShadow: '0 -4px 24px rgba(0,0,0,0.15)',
-          overflowY: 'auto',
-          '&::-webkit-scrollbar': { width: 4 },
-          '&::-webkit-scrollbar-track': { background: 'transparent' },
-          '&::-webkit-scrollbar-thumb': { background: 'rgba(0,0,0,0.15)', borderRadius: 2 },
-        }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
-            <Box sx={{ width: 36, height: 36, borderRadius: 2, bgcolor: 'rgba(25,118,210,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              <LockOutlined sx={{ color: BRAND.primary, fontSize: 18 }} />
-            </Box>
-            <Box>
-              <Typography variant="h6" fontWeight={700} color="#0f172a" lineHeight={1.2}>Sign In</Typography>
-              <Typography variant="caption" color="text.secondary">Business account</Typography>
-            </Box>
+          <Typography variant="h5" fontWeight={700} color="#0f172a" letterSpacing="-0.3px" textAlign="center">
+            Sign In
+          </Typography>
+          <Typography variant="body2" color="text.secondary" mt={0.5} mb={3.5} textAlign="center">
+            Sign in to your business account
+          </Typography>
+          <Box sx={{ width: '100%' }}>
+            {form}
           </Box>
-          {form}
-          <Typography variant="body2" textAlign="center" color="text.secondary" mt={2.5}>
+          <Typography variant="body2" textAlign="center" color="text.secondary" mt={3}>
             Don't have an account?{' '}
             <Link component={RouterLink} to="/register" fontWeight={600} sx={{ color: BRAND.primary }}>
               Create Business Account
             </Link>
           </Typography>
-          <Typography variant="body2" textAlign="center" mt={1}>
+          <Typography variant="body2" textAlign="center" mt={1.5}>
             <Link component={RouterLink} to="/" sx={{ color: 'text.disabled', fontSize: '0.8125rem' }}>
               Back to Home
             </Link>
@@ -331,6 +275,7 @@ const LoginPage: React.FC = () => {
       </Box>
 
     </Box>
+    </>
   );
 };
 

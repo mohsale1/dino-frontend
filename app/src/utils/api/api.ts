@@ -102,7 +102,6 @@ class ApiService {
       baseURL: API_CONFIG.BASE_URL,
       timeout: API_CONFIG.TIMEOUT,
       headers: API_CONFIG.DEFAULT_HEADERS,
-      adapter: 'fetch',
     });
 
     this.setupInterceptors();
@@ -137,8 +136,7 @@ class ApiService {
         const fullUrl = `${config.baseURL}${config.url}`;
         return config;
       },
-      (error) => {
-        return Promise.reject(error);
+      (error) => {        return Promise.reject(error);
       }
     );
 
@@ -240,6 +238,18 @@ class ApiService {
   async put<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
     try {
       const response = await this.axiosInstance.put<ApiResponse<T>>(url, data, config);
+      return this.handleResponse(response);
+    } catch (error) {
+      throw this.handleError(error);
+    }
+  }
+
+  /**
+   * Generic PATCH request
+   */
+  async patch<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
+    try {
+      const response = await this.axiosInstance.patch<ApiResponse<T>>(url, data, config);
       return this.handleResponse(response);
     } catch (error) {
       throw this.handleError(error);

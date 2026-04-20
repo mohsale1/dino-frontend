@@ -7,29 +7,45 @@ import {
   alpha,
   keyframes,
 } from '@mui/material';
-import { MenuBook, QrCode, Dashboard, People } from '@mui/icons-material';
+import { MenuBook, QrCode2, Dashboard, Business, People, BarChart } from '@mui/icons-material';
 import { FeatureCard } from '../../../../components/home';
 
 const CORE_FEATURES = [
   {
-    title: 'Digital Catalog',
-    description: 'Beautiful, interactive digital catalogs for your products and services',
+    title: 'Digital Catalog Management',
+    description:
+      'Build beautiful, interactive digital menus and product catalogs. Update items, prices, and availability in real-time without reprinting anything.',
     icon: MenuBook,
   },
   {
-    title: 'Smart Ordering',
-    description: 'Flexible ordering system supporting both manual and online orders',
-    icon: QrCode,
+    title: 'QR Code Ordering',
+    description:
+      'Customers scan a QR code at their table or location and instantly browse your catalog. No app download required — works on any smartphone.',
+    icon: QrCode2,
   },
   {
-    title: 'Real-time Management',
-    description: 'Live order tracking and business management dashboard',
+    title: 'Live Order Dashboard',
+    description:
+      'Monitor every order as it comes in. Track status from placed to fulfilled with real-time notifications and a clean management interface.',
     icon: Dashboard,
   },
   {
-    title: 'User-based Access',
-    description: 'Role-based permissions and access control for team collaboration',
+    title: 'Multi-Location Support',
+    description:
+      'Manage multiple branches, outlets, or service areas from one unified dashboard. Each location gets its own catalog and order stream.',
+    icon: Business,
+  },
+  {
+    title: 'Role-Based Access Control',
+    description:
+      'Assign staff roles with specific permissions. Managers, cashiers, and kitchen staff each see exactly what they need.',
     icon: People,
+  },
+  {
+    title: 'Analytics & Insights',
+    description:
+      'Understand your business with revenue charts, peak hour analysis, best-selling items, and customer behavior reports.',
+    icon: BarChart,
   },
 ];
 
@@ -200,8 +216,7 @@ const FeaturesSection: React.FC = () => {
               item
               xs={12}
               sm={6}
-              md={6}
-              lg={3}
+              md={4}
               key={feature.title}
               sx={{
                 animation: `${fadeInUp} 0.7s ease-out ${0.15 + index * 0.1}s both`,

@@ -1,48 +1,38 @@
 import React, { useState } from 'react';
 import {
   Box,
-  Container,
-  Paper,
   Typography,
-  Card,
-  CardContent,
-  Divider,
-  Button,
   IconButton,
+  Button,
   TextField,
+  Divider,
   CircularProgress,
-  Alert,
-  AppBar,
-  Toolbar,
-  alpha,
-  useTheme,
-  Stack,
-  Chip,
-  Fade,
 } from '@mui/material';
 import {
-  ArrowBack as ArrowBackIcon,
+  ArrowBack as BackIcon,
   Person as PersonIcon,
   Phone as PhoneIcon,
-  TableRestaurant as TableIcon,
-  Edit as EditIcon,
-  Receipt as ReceiptIcon,
-  ShoppingCart as CartIcon,
-  LocalOffer as OfferIcon,
+  Remove as RemoveIcon,
+  Add as AddIcon,
+  DeleteOutline as DeleteIcon,
 } from '@mui/icons-material';
+import { publicMenuService, PublicMenuData, PublicOrder } from '../../../../services/application/publicMenuService';
 import { CartItem } from '../hooks/useCart';
 import OrderSuccessAnimation from './OrderSuccessAnimation';
-import { publicMenuService } from '../../../../services/application/publicMenuService';
 
 interface CheckoutPageProps {
   cart: CartItem[];
   customerInfo: { name: string; phone: string };
   organizationId: string;
   tableId: string;
-  menuData: any;
+  menuData: PublicMenuData;
   onBack: () => void;
-  onOrderPlaced: () => void;
+  onOrderPlaced: (order: PublicOrder) => void;
+  onUpdateQuantity: (itemId: string, quantity: number) => void;
 }
+
+const TAX_RATE = 0.05;
+const SERVICE_RATE = 0.10;
 
 const CheckoutPage: React.FC<CheckoutPageProps> = ({
   cart,
@@ -52,547 +42,282 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
   menuData,
   onBack,
   onOrderPlaced,
+  onUpdateQuantity,
 }) => {
-  const theme = useTheme();
   const [specialInstructions, setSpecialInstructions] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [placing, setPlacing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [orderNumber, setOrderNumber] = useState('');
+  const [placedOrder, setPlacedOrder] = useState<PublicOrder | null>(null);
 
-  // Calculate totals
-  const subtotal = cart.reduce((sum, item) => sum + item.total_price, 0);
-  const tax = subtotal * 0.05; // 5% tax
-  const serviceCharge = subtotal * 0.10; // 10% service charge
+  const subtotal = cart.reduce((s, i) => s + i.total_price, 0);
+  const tax = Math.round(subtotal * TAX_RATE);
+  const serviceCharge = Math.round(subtotal * SERVICE_RATE);
   const total = subtotal + tax + serviceCharge;
 
   const handlePlaceOrder = async () => {
+    if (cart.length === 0) return;
+    setPlacing(true);
+    setError(null);
     try {
-      setLoading(true);
-      setError(null);
-
       const order = await publicMenuService.placeOrder(organizationId, tableId, {
         customer_name: customerInfo.name,
         customer_phone: customerInfo.phone,
-        items: cart.map((item) => ({
-          item_id: item.item_id,
-          quantity: item.quantity,
-          unit_price: item.unit_price,
+        items: cart.map((i) => ({
+          item_id: i.item_id,
+          item_name: i.item_name,
+          quantity: i.quantity,
+          unit_price: i.unit_price,
+          total_price: i.total_price,
         })),
-        special_instructions: specialInstructions || undefined,
+        special_instructions: specialInstructions.trim() || undefined,
       });
-
-      setOrderNumber(order.order_number || order.id);
-      setShowSuccess(true);
+      setPlacedOrder(order);
     } catch (err: any) {
-      console.error('Error placing order:', err);
-      setError(err.message || 'Failed to place order. Please try again.');
+      const msg = err?.response?.data?.detail || err?.response?.data?.message || 'Failed to place order. Please try again.';
+      setError(msg);
     } finally {
-      setLoading(false);
+      setPlacing(false);
     }
   };
 
+  // Show success animation
+  if (placedOrder) {
+    return (
+      <OrderSuccessAnimation
+        orderNumber={placedOrder.order_number}
+        onComplete={() => onOrderPlaced(placedOrder)}
+      />
+    );
+  }
+
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: '#f8fafc' }}>
+    <Box
+      sx={{
+        height: '100dvh',
+        display: 'flex',
+        flexDirection: 'column',
+        bgcolor: '#f8fafc',
+        overflow: 'hidden',
+      }}
+    >
       {/* Header */}
-      <AppBar
-        position="sticky"
-        elevation={0}
+      <Box
         sx={{
-          bgcolor: 'white',
-          borderBottom: '1px solid #e5e7eb',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1.5,
+          px: 2,
+          py: 1.5,
+          bgcolor: '#fff',
+          borderBottom: '1px solid #e2e8f0',
+          flexShrink: 0,
         }}
       >
-        <Container maxWidth="md">
-          <Toolbar disableGutters sx={{ py: 1.5 }}>
-            <IconButton 
-              onClick={onBack} 
-              disabled={loading} 
-              edge="start" 
-              sx={{ 
-                mr: 2,
-                bgcolor: '#f3f4f6',
-                '&:hover': {
-                  bgcolor: '#e5e7eb',
-                },
-              }}
-            >
-              <ArrowBackIcon />
-            </IconButton>
-            <Box>
-              <Typography variant="h6" fontWeight={700} color="#1a1a1a">
-                Checkout
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                Review your order
-              </Typography>
+        <IconButton
+          size="small"
+          onClick={onBack}
+          sx={{ bgcolor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 1.5, p: 0.75 }}
+        >
+          <BackIcon sx={{ fontSize: 18, color: '#374151' }} />
+        </IconButton>
+        <Box sx={{ flex: 1 }}>
+          <Typography sx={{ fontSize: '1rem', fontWeight: 800, color: '#0f172a' }}>Review Order</Typography>
+          <Typography sx={{ fontSize: '0.72rem', color: '#94a3b8' }}>
+            {menuData.organization.name} · Table {menuData.table.table_number}
+          </Typography>
+        </Box>
+        <Typography sx={{ fontSize: '0.78rem', fontWeight: 700, color: '#f97316' }}>
+          {cart.reduce((s, i) => s + i.quantity, 0)} items
+        </Typography>
+      </Box>
+
+      {/* Scrollable body */}
+      <Box sx={{ flex: 1, overflowY: 'auto', WebkitOverflowScrolling: 'touch', pb: '100px' }}>
+
+        {/* Customer info card */}
+        <Box sx={{ mx: 2, mt: 2, bgcolor: '#0f172a', borderRadius: 2.5, p: 2, mb: 2 }}>
+          <Typography sx={{ fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#64748b', mb: 1.5 }}>
+            Customer Details
+          </Typography>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <PersonIcon sx={{ fontSize: 16, color: '#64748b' }} />
+              <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: '#f1f5f9' }}>{customerInfo.name}</Typography>
             </Box>
-          </Toolbar>
-        </Container>
-      </AppBar>
-
-      <Container maxWidth="md" sx={{ py: 3, pb: 12 }}>
-        {/* Customer Details Card */}
-        <Fade in timeout={300}>
-          <Card 
-            elevation={0}
-            sx={{ 
-              mb: 2.5, 
-              borderRadius: 2,
-              border: '1px solid #e5e7eb',
-              overflow: 'hidden',
-            }}
-          >
-            <Box
-              sx={{
-                background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
-                p: 2.5,
-                position: 'relative',
-                overflow: 'hidden',
-              }}
-            >
-              {/* Decorative Pattern */}
-              <Box
-                sx={{
-                  position: 'absolute',
-                  top: 0,
-                  right: 0,
-                  bottom: 0,
-                  left: 0,
-                  opacity: 0.08,
-                  backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='1' fill-rule='evenodd'%3E%3Cpath d='M0 40L40 0H20L0 20M40 40V20L20 40'/%3E%3C/g%3E%3C/svg%3E")`,
-                }}
-              />
-              <Box sx={{ position: 'relative' }}>
-                <Typography variant="subtitle2" sx={{ color: 'rgba(255,255,255,0.7)', mb: 1.5 }}>
-                  Customer Details
-                </Typography>
-                <Stack spacing={1.5}>
-                  <Box display="flex" alignItems="center" gap={1.5}>
-                    <Box
-                      sx={{
-                        width: 36,
-                        height: 36,
-                        borderRadius: 1,
-                        bgcolor: 'rgba(255,255,255,0.15)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                      }}
-                    >
-                      <PersonIcon sx={{ fontSize: 18, color: 'white' }} />
-                    </Box>
-                    <Box flex={1}>
-                      <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.6)' }}>
-                        Name
-                      </Typography>
-                      <Typography variant="body2" fontWeight={600} color="white">
-                        {customerInfo.name}
-                      </Typography>
-                    </Box>
-                  </Box>
-                  <Box display="flex" alignItems="center" gap={1.5}>
-                    <Box
-                      sx={{
-                        width: 36,
-                        height: 36,
-                        borderRadius: 1,
-                        bgcolor: 'rgba(255,255,255,0.15)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                      }}
-                    >
-                      <PhoneIcon sx={{ fontSize: 18, color: 'white' }} />
-                    </Box>
-                    <Box flex={1}>
-                      <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.6)' }}>
-                        Phone
-                      </Typography>
-                      <Typography variant="body2" fontWeight={600} color="white">
-                        {customerInfo.phone}
-                      </Typography>
-                    </Box>
-                  </Box>
-                  <Box display="flex" alignItems="center" gap={1.5}>
-                    <Box
-                      sx={{
-                        width: 36,
-                        height: 36,
-                        borderRadius: 1,
-                        bgcolor: 'rgba(255,255,255,0.15)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                      }}
-                    >
-                      <TableIcon sx={{ fontSize: 18, color: 'white' }} />
-                    </Box>
-                    <Box flex={1}>
-                      <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.6)' }}>
-                        Table Number
-                      </Typography>
-                      <Typography variant="body2" fontWeight={600} color="white">
-                        {menuData.table.table_number}
-                      </Typography>
-                    </Box>
-                  </Box>
-                </Stack>
-              </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <PhoneIcon sx={{ fontSize: 16, color: '#64748b' }} />
+              <Typography sx={{ fontSize: '0.875rem', color: '#94a3b8' }}>{customerInfo.phone}</Typography>
             </Box>
-          </Card>
-        </Fade>
-
-        {/* Order Items Card */}
-        <Fade in timeout={400}>
-          <Card 
-            elevation={0}
-            sx={{ 
-              mb: 2.5, 
-              borderRadius: 2,
-              border: '1px solid #e5e7eb',
-            }}
-          >
-            <CardContent sx={{ p: 3 }}>
-              <Box display="flex" alignItems="center" gap={1.5} mb={2.5}>
-                <Box
-                  sx={{
-                    width: 40,
-                    height: 40,
-                    borderRadius: 1.5,
-                    bgcolor: '#f3f4f6',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <CartIcon sx={{ fontSize: 20, color: '#1a1a1a' }} />
-                </Box>
-                <Box flex={1}>
-                  <Typography variant="subtitle1" fontWeight={700} color="#1a1a1a">
-                    Order Items
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {cart.length} {cart.length === 1 ? 'item' : 'items'}
-                  </Typography>
-                </Box>
-              </Box>
-              <Stack spacing={2.5}>
-                {cart.map((item, index) => (
-                  <Box key={item.item_id}>
-                    <Box display="flex" gap={2}>
-                      {/* Item Image Placeholder */}
-                      <Box
-                        sx={{
-                          width: 60,
-                          height: 60,
-                          borderRadius: 1.5,
-                          bgcolor: '#f9fafb',
-                          border: '1px solid #e5e7eb',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          flexShrink: 0,
-                        }}
-                      >
-                        <Typography variant="h6" fontWeight={800} sx={{ color: '#e5e7eb' }}>
-                          {item.item_name.charAt(0)}
-                        </Typography>
-                      </Box>
-                      
-                      {/* Item Details */}
-                      <Box flex={1} minWidth={0}>
-                        <Typography variant="body1" fontWeight={600} color="#1a1a1a" sx={{ mb: 0.5 }}>
-                          {item.item_name}
-                        </Typography>
-                        <Box display="flex" alignItems="center" gap={1} mb={0.5}>
-                          <Chip
-                            label={`Qty: ${item.quantity}`}
-                            size="small"
-                            sx={{
-                              height: 22,
-                              fontSize: '0.7rem',
-                              fontWeight: 600,
-                              bgcolor: '#f3f4f6',
-                              color: '#6b7280',
-                            }}
-                          />
-                          <Typography variant="caption" color="text.secondary">
-                            ₹{item.unit_price.toFixed(2)} each
-                          </Typography>
-                        </Box>
-                        {item.description && (
-                          <Typography 
-                            variant="caption" 
-                            color="text.secondary"
-                            sx={{
-                              display: '-webkit-box',
-                              WebkitLineClamp: 1,
-                              WebkitBoxOrient: 'vertical',
-                              overflow: 'hidden',
-                            }}
-                          >
-                            {item.description}
-                          </Typography>
-                        )}
-                      </Box>
-
-                      {/* Item Price */}
-                      <Box sx={{ textAlign: 'right' }}>
-                        <Typography variant="h6" fontWeight={700} color="#1a1a1a">
-                          ₹{item.total_price.toFixed(2)}
-                        </Typography>
-                      </Box>
-                    </Box>
-                    {index < cart.length - 1 && <Divider sx={{ mt: 2.5 }} />}
-                  </Box>
-                ))}
-              </Stack>
-            </CardContent>
-          </Card>
-        </Fade>
-
-        {/* Special Instructions Card */}
-        <Fade in timeout={500}>
-          <Card 
-            elevation={0}
-            sx={{ 
-              mb: 2.5, 
-              borderRadius: 2,
-              border: '1px solid #e5e7eb',
-            }}
-          >
-            <CardContent sx={{ p: 3 }}>
-              <Box display="flex" alignItems="center" gap={1.5} mb={2}>
-                <Box
-                  sx={{
-                    width: 40,
-                    height: 40,
-                    borderRadius: 1.5,
-                    bgcolor: '#f3f4f6',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <EditIcon sx={{ fontSize: 20, color: '#1a1a1a' }} />
-                </Box>
-                <Box>
-                  <Typography variant="subtitle1" fontWeight={700} color="#1a1a1a">
-                    Special Instructions
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    Optional
-                  </Typography>
-                </Box>
-              </Box>
-              <TextField
-                fullWidth
-                multiline
-                rows={3}
-                placeholder="Any special requests or dietary requirements?"
-                value={specialInstructions}
-                onChange={(e) => setSpecialInstructions(e.target.value)}
-                disabled={loading}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: 1.5,
-                    bgcolor: '#f9fafb',
-                    '& fieldset': {
-                      borderColor: '#e5e7eb',
-                    },
-                    '&:hover fieldset': {
-                      borderColor: '#d1d5db',
-                    },
-                    '&.Mui-focused fieldset': {
-                      borderColor: '#1a1a1a',
-                    },
-                  },
-                }}
-              />
-            </CardContent>
-          </Card>
-        </Fade>
-
-        {/* Bill Summary Card */}
-        <Fade in timeout={600}>
-          <Card 
-            elevation={0}
-            sx={{ 
-              mb: 2.5, 
-              borderRadius: 2,
-              border: '1px solid #e5e7eb',
-            }}
-          >
-            <CardContent sx={{ p: 3 }}>
-              <Box display="flex" alignItems="center" gap={1.5} mb={2.5}>
-                <Box
-                  sx={{
-                    width: 40,
-                    height: 40,
-                    borderRadius: 1.5,
-                    bgcolor: '#f3f4f6',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <ReceiptIcon sx={{ fontSize: 20, color: '#1a1a1a' }} />
-                </Box>
-                <Typography variant="subtitle1" fontWeight={700} color="#1a1a1a">
-                  Bill Summary
-                </Typography>
-              </Box>
-              <Stack spacing={2}>
-                <Box display="flex" justifyContent="space-between" alignItems="center">
-                  <Typography variant="body2" color="text.secondary">
-                    Subtotal
-                  </Typography>
-                  <Typography variant="body2" fontWeight={600} color="#1a1a1a">
-                    ₹{subtotal.toFixed(2)}
-                  </Typography>
-                </Box>
-                <Box display="flex" justifyContent="space-between" alignItems="center">
-                  <Typography variant="body2" color="text.secondary">
-                    Tax (5%)
-                  </Typography>
-                  <Typography variant="body2" fontWeight={600} color="#1a1a1a">
-                    ₹{tax.toFixed(2)}
-                  </Typography>
-                </Box>
-                <Box display="flex" justifyContent="space-between" alignItems="center">
-                  <Typography variant="body2" color="text.secondary">
-                    Service Charge (10%)
-                  </Typography>
-                  <Typography variant="body2" fontWeight={600} color="#1a1a1a">
-                    ₹{serviceCharge.toFixed(2)}
-                  </Typography>
-                </Box>
-                <Divider />
-                <Box
-                  display="flex"
-                  justifyContent="space-between"
-                  alignItems="center"
-                  sx={{
-                    p: 2,
-                    borderRadius: 1.5,
-                    bgcolor: '#f9fafb',
-                    border: '2px solid #1a1a1a',
-                  }}
-                >
-                  <Typography variant="h6" fontWeight={700} color="#1a1a1a">
-                    Total Amount
-                  </Typography>
-                  <Typography variant="h5" fontWeight={800} color="#1a1a1a">
-                    ₹{total.toFixed(2)}
-                  </Typography>
-                </Box>
-              </Stack>
-            </CardContent>
-          </Card>
-        </Fade>
-
-        {/* Error Message */}
-        {error && (
-          <Fade in>
-            <Alert 
-              severity="error" 
-              sx={{ 
-                mb: 2.5, 
-                borderRadius: 1.5,
-                border: '1px solid #fecaca',
-              }}
-            >
-              {error}
-            </Alert>
-          </Fade>
-        )}
-
-        {/* Place Order Button */}
-        <Fade in timeout={700}>
-          <Button
-            variant="contained"
-            fullWidth
-            size="large"
-            onClick={handlePlaceOrder}
-            disabled={loading || cart.length === 0}
-            sx={{
-              py: 2,
-              fontWeight: 700,
-              fontSize: '1rem',
-              borderRadius: 1.5,
-              bgcolor: '#1a1a1a',
-              textTransform: 'none',
-              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-              '&:hover': {
-                bgcolor: '#2d2d2d',
-                boxShadow: '0 6px 16px rgba(0, 0, 0, 0.25)',
-                transform: 'translateY(-2px)',
-              },
-              '&:active': {
-                transform: 'translateY(0)',
-              },
-              '&:disabled': {
-                bgcolor: '#e5e7eb',
-                color: '#9ca3af',
-              },
-              transition: 'all 0.2s ease',
-            }}
-          >
-            {loading ? (
-              <Box display="flex" alignItems="center" gap={1.5}>
-                <CircularProgress size={24} sx={{ color: 'white' }} />
-                <span>Placing Order...</span>
-              </Box>
-            ) : (
-              <Box display="flex" alignItems="center" gap={1}>
-                <span>Place Order</span>
-                <Box 
-                  component="span" 
-                  sx={{ 
-                    px: 1.5, 
-                    py: 0.5, 
-                    borderRadius: 1,
-                    bgcolor: 'rgba(255,255,255,0.2)',
-                    fontSize: '0.875rem',
-                  }}
-                >
-                  ₹{total.toFixed(2)}
-                </Box>
-              </Box>
-            )}
-          </Button>
-        </Fade>
-
-        {/* Trust Indicators */}
-        <Fade in timeout={800}>
-          <Box 
-            sx={{ 
-              mt: 3, 
-              p: 2.5, 
-              borderRadius: 1.5,
-              bgcolor: 'white',
-              border: '1px solid #e5e7eb',
-              textAlign: 'center',
-            }}
-          >
-            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
-              🔒 Secure Checkout • Your order will be confirmed instantly
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              Questions? Contact our staff for assistance
-            </Typography>
           </Box>
-        </Fade>
-      </Container>
+        </Box>
 
-      {/* Order Success Animation */}
-      {showSuccess && (
-        <OrderSuccessAnimation
-          orderNumber={orderNumber}
-          onComplete={onOrderPlaced}
-        />
-      )}
+        {/* Order items */}
+        <Box sx={{ mx: 2, bgcolor: '#fff', borderRadius: 2.5, border: '1px solid #e2e8f0', overflow: 'hidden', mb: 2 }}>
+          <Box sx={{ px: 2, py: 1.5, borderBottom: '1px solid #f1f5f9' }}>
+            <Typography sx={{ fontSize: '0.78rem', fontWeight: 700, color: '#374151' }}>Order Items</Typography>
+          </Box>
+          {cart.map((item, idx) => (
+            <Box key={item.item_id}>
+              <Box sx={{ px: 2, py: 1.5, display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                {/* Image */}
+                <Box
+                  sx={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: 1.5,
+                    bgcolor: '#f8fafc',
+                    border: '1px solid #e2e8f0',
+                    flexShrink: 0,
+                    overflow: 'hidden',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  {item.image_url ? (
+                    <Box component="img" src={item.image_url} alt={item.item_name} sx={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ) : (
+                    <Typography sx={{ fontSize: '1.2rem' }}>🍽️</Typography>
+                  )}
+                </Box>
+
+                {/* Name + price */}
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                  <Typography sx={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {item.item_name}
+                  </Typography>
+                  <Typography sx={{ fontSize: '0.75rem', color: '#64748b' }}>
+                    ₹{item.unit_price.toLocaleString('en-IN')} each
+                  </Typography>
+                </Box>
+
+                {/* Qty stepper */}
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                  <IconButton
+                    size="small"
+                    onClick={() => onUpdateQuantity(item.item_id, item.quantity - 1)}
+                    sx={{ bgcolor: '#f1f5f9', borderRadius: 1, p: 0.4, '&:hover': { bgcolor: '#fee2e2' } }}
+                  >
+                    {item.quantity === 1 ? <DeleteIcon sx={{ fontSize: 14, color: '#ef4444' }} /> : <RemoveIcon sx={{ fontSize: 14, color: '#374151' }} />}
+                  </IconButton>
+                  <Typography sx={{ fontSize: '0.875rem', fontWeight: 700, color: '#0f172a', minWidth: 20, textAlign: 'center' }}>
+                    {item.quantity}
+                  </Typography>
+                  <IconButton
+                    size="small"
+                    onClick={() => onUpdateQuantity(item.item_id, item.quantity + 1)}
+                    sx={{ bgcolor: '#f97316', borderRadius: 1, p: 0.4, '&:hover': { bgcolor: '#ea6c0a' } }}
+                  >
+                    <AddIcon sx={{ fontSize: 14, color: '#fff' }} />
+                  </IconButton>
+                </Box>
+
+                {/* Total */}
+                <Typography sx={{ fontSize: '0.875rem', fontWeight: 800, color: '#0f172a', minWidth: 56, textAlign: 'right' }}>
+                  ₹{item.total_price.toLocaleString('en-IN')}
+                </Typography>
+              </Box>
+              {idx < cart.length - 1 && <Divider sx={{ borderColor: '#f8fafc' }} />}
+            </Box>
+          ))}
+        </Box>
+
+        {/* Special instructions */}
+        <Box sx={{ mx: 2, mb: 2 }}>
+          <TextField
+            fullWidth
+            multiline
+            rows={2}
+            placeholder="Any special instructions? (allergies, preferences...)"
+            value={specialInstructions}
+            onChange={(e) => setSpecialInstructions(e.target.value)}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 2,
+                fontSize: '0.875rem',
+                bgcolor: '#fff',
+                '& fieldset': { borderColor: '#e2e8f0' },
+                '&:hover fieldset': { borderColor: '#f97316' },
+                '&.Mui-focused fieldset': { borderColor: '#f97316' },
+              },
+            }}
+          />
+        </Box>
+
+        {/* Bill summary */}
+        <Box sx={{ mx: 2, bgcolor: '#fff', borderRadius: 2.5, border: '1px solid #e2e8f0', p: 2, mb: 2 }}>
+          <Typography sx={{ fontSize: '0.78rem', fontWeight: 700, color: '#374151', mb: 1.5 }}>Bill Summary</Typography>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.75 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+              <Typography sx={{ fontSize: '0.8rem', color: '#64748b' }}>Subtotal</Typography>
+              <Typography sx={{ fontSize: '0.8rem', color: '#374151' }}>₹{subtotal.toLocaleString('en-IN')}</Typography>
+            </Box>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+              <Typography sx={{ fontSize: '0.8rem', color: '#64748b' }}>Tax (5%)</Typography>
+              <Typography sx={{ fontSize: '0.8rem', color: '#374151' }}>₹{tax.toLocaleString('en-IN')}</Typography>
+            </Box>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+              <Typography sx={{ fontSize: '0.8rem', color: '#64748b' }}>Service charge (10%)</Typography>
+              <Typography sx={{ fontSize: '0.8rem', color: '#374151' }}>₹{serviceCharge.toLocaleString('en-IN')}</Typography>
+            </Box>
+            <Divider sx={{ my: 0.5, borderColor: '#f1f5f9' }} />
+            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+              <Typography sx={{ fontSize: '1rem', fontWeight: 800, color: '#0f172a' }}>Total</Typography>
+              <Typography sx={{ fontSize: '1rem', fontWeight: 800, color: '#0f172a' }}>₹{total.toLocaleString('en-IN')}</Typography>
+            </Box>
+          </Box>
+        </Box>
+
+        {/* Error */}
+        {error && (
+          <Box sx={{ mx: 2, mb: 2, bgcolor: '#fee2e2', border: '1px solid #fecaca', borderRadius: 2, px: 2, py: 1.5 }}>
+            <Typography sx={{ fontSize: '0.8rem', color: '#7f1d1d' }}>{error}</Typography>
+          </Box>
+        )}
+      </Box>
+
+      {/* Fixed bottom bar */}
+      <Box
+        sx={{
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          bgcolor: '#fff',
+          borderTop: '1px solid #e2e8f0',
+          px: 2,
+          py: 1.5,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 2,
+          zIndex: 100,
+        }}
+      >
+        <Box>
+          <Typography sx={{ fontSize: '0.68rem', color: '#94a3b8', fontWeight: 500 }}>Total amount</Typography>
+          <Typography sx={{ fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>₹{total.toLocaleString('en-IN')}</Typography>
+        </Box>
+        <Button
+          variant="contained"
+          fullWidth
+          disabled={placing || cart.length === 0}
+          onClick={handlePlaceOrder}
+          sx={{
+            bgcolor: '#0f172a',
+            color: '#fff',
+            fontWeight: 700,
+            fontSize: '0.95rem',
+            textTransform: 'none',
+            borderRadius: 2,
+            py: 1.3,
+            boxShadow: 'none',
+            '&:hover': { bgcolor: '#1e293b', boxShadow: 'none' },
+            '&:disabled': { bgcolor: '#94a3b8' },
+          }}
+        >
+          {placing ? <CircularProgress size={20} sx={{ color: '#fff' }} /> : 'Place Order'}
+        </Button>
+      </Box>
     </Box>
   );
 };

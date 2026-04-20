@@ -59,7 +59,7 @@ export const UserDataProvider: React.FC<UserDataProviderProps> = ({ children }) 
       return;
     }
 
-    // System users do not have application venue data â€” skip this fetch entirely
+    // System users do not have application venue data — skip this fetch entirely
     const userType = StorageManager.getItem<string>('user_type');
     if (userType === 'system') {
       setUserData(null);
@@ -108,9 +108,19 @@ export const UserDataProvider: React.FC<UserDataProviderProps> = ({ children }) 
     }
   }, [isAuthenticated, initialized]);
 
-  // Refresh user data
+  // Refresh user data — bypasses the debounce so status changes reflect immediately
   const refreshUserData = async () => {
-    await loadUserData(true);
+    if (!isAuthenticated) return;
+    setLoading(true);
+    try {
+      const data = await userDataService.refreshUserData();
+      setUserData(data);
+    } catch {
+      // silently ignore — stale data stays in place
+    } finally {
+      setLoading(false);
+      loadingRef.current = false;
+    }
   };
 
   // SECURITY FIX: Venue switching functionality removed

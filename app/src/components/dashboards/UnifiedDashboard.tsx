@@ -1,338 +1,346 @@
+/**
+ * UnifiedDashboard
+ * Top-level dashboard container: KPI cards + TabbedDashboard
+ */
+
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Box,
-  Skeleton,
-  Button,
+  Grid,
+  Typography,
+  IconButton,
+  Chip,
   Alert,
+  Button,
 } from '@mui/material';
-import RefreshIcon from '@mui/icons-material/Refresh';
+import { alpha } from '@mui/material/styles';
+import {
+  Refresh,
+  TrendingUp,
+  ShoppingCart,
+  TableRestaurant,
+  AttachMoney,
+} from '@mui/icons-material';
 import { useAuth } from '../../contexts/common/Auth';
 import { useUserData } from '../../contexts/application/UserData';
 import { dashboardService } from '../../services/application/dashboard.service';
-import { ROLE_COLORS } from '../../constants/app';
-import DashboardHeader from './components/DashboardHeader';
-import TabbedDashboard from './components/TabbedDashboard';
 import VenueAssignmentCheck from '../common/VenueAssignmentCheck';
+import TabbedDashboard from './components/TabbedDashboard';
+import type { DashboardData } from '../../types/dashboard/responses';
 
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
+// ── Helpers ───────────────────────────────────────────────────────────────────
 
-interface DateRange {
-  startDate: string;
-  endDate: string;
-}
+const formatINR = (value: number): string =>
+  `₹${value.toLocaleString('en-IN')}`;
 
-interface UnifiedDashboardProps {
-  className?: string;
-}
+const formatOccupancy = (value: number): string =>
+  `${value.toFixed(1)}%`;
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-const formatDate = (date: Date): string => {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const d = String(date.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
+const formatLastUpdated = (date: Date): string => {
+  const diff = Date.now() - date.getTime();
+  const mins = Math.floor(diff / 60_000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  return `${Math.floor(hrs / 24)}d ago`;
 };
 
-const getLast30DaysRange = (): DateRange => {
-  const today = new Date();
-  const start = new Date(today);
-  start.setDate(start.getDate() - 29);
-  return { startDate: formatDate(start), endDate: formatDate(today) };
-};
+// ── KPI card config ───────────────────────────────────────────────────────────
 
-// ---------------------------------------------------------------------------
-// Full-page loading skeleton — uses Owner gradient (role unknown at load time)
-// ---------------------------------------------------------------------------
-
-const SKELETON_GRADIENT = ROLE_COLORS.Owner.gradient;
-
-const DashboardSkeleton: React.FC = () => (
-  <Box sx={{ minHeight: '100vh', backgroundColor: '#f8fafc' }}>
-    {/* Header skeleton */}
-    <Box
-      sx={{
-        background: SKELETON_GRADIENT,
-        px: { xs: 2.5, sm: 4 },
-        pt: 3.5,
-        pb: 3,
-      }}
-    >
-      <Skeleton
-        variant="text"
-        width={220}
-        height={40}
-        sx={{ bgcolor: 'rgba(255,255,255,0.1)', borderRadius: 1, mb: 0.5 }}
-      />
-      <Skeleton
-        variant="text"
-        width={140}
-        height={18}
-        sx={{ bgcolor: 'rgba(255,255,255,0.07)', borderRadius: 1, mb: 2 }}
-      />
-      <Box sx={{ display: 'flex', gap: 1 }}>
-        {[120, 100, 90, 110].map((w, i) => (
-          <Skeleton
-            key={i}
-            variant="rounded"
-            width={w}
-            height={32}
-            sx={{ bgcolor: 'rgba(255,255,255,0.08)', borderRadius: '8px' }}
-          />
-        ))}
-      </Box>
-    </Box>
-
-    {/* Tabs skeleton */}
-    <Box sx={{ px: 4, pt: 2, pb: 1, borderBottom: '1px solid #e2e8f0', backgroundColor: '#fff' }}>
-      <Box sx={{ display: 'flex', gap: 2 }}>
-        {[80, 90, 100].map((w, i) => (
-          <Skeleton key={i} variant="text" width={w} height={36} sx={{ borderRadius: 1 }} />
-        ))}
-      </Box>
-    </Box>
-
-    {/* Stat cards skeleton */}
-    <Box sx={{ px: { xs: 2, sm: 4 }, pt: 3, pb: 2 }}>
-      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 2, mb: 3 }}>
-        {[1, 2, 3, 4].map((i) => (
-          <Skeleton key={i} variant="rounded" height={110} sx={{ borderRadius: 2 }} />
-        ))}
-      </Box>
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '2fr 1fr' }, gap: 2 }}>
-        <Skeleton variant="rounded" height={280} sx={{ borderRadius: 2 }} />
-        <Skeleton variant="rounded" height={280} sx={{ borderRadius: 2 }} />
-      </Box>
-    </Box>
-  </Box>
-);
-
-// ---------------------------------------------------------------------------
-// Error state
-// ---------------------------------------------------------------------------
-
-interface ErrorStateProps {
-  message: string;
-  onRetry: () => void;
+interface KpiConfig {
+  label: string;
+  value: string;
+  icon: React.ReactElement;
+  borderColor: string;
+  iconBg: string;
 }
 
-const ErrorState: React.FC<ErrorStateProps> = ({ message, onRetry }) => (
+const buildKpis = (stats: DashboardData['stats']): KpiConfig[] => [
+  {
+    label: "Today's Revenue",
+    value: formatINR(stats.todaysRevenue ?? 0),
+    icon: <AttachMoney />,
+    borderColor: '#1976d2',
+    iconBg: alpha('#1976d2', 0.1),
+  },
+  {
+    label: "Today's Orders",
+    value: String(stats.todaysOrders ?? 0),
+    icon: <ShoppingCart />,
+    borderColor: '#0288d1',
+    iconBg: alpha('#0288d1', 0.1),
+  },
+  {
+    label: 'Avg Order Value',
+    value: formatINR(stats.avgOrderValue ?? 0),
+    icon: <TrendingUp />,
+    borderColor: '#388e3c',
+    iconBg: alpha('#388e3c', 0.1),
+  },
+  {
+    label: 'Table Occupancy',
+    value: formatOccupancy(stats.tableOccupancyRate ?? 0),
+    icon: <TableRestaurant />,
+    borderColor: '#f57c00',
+    iconBg: alpha('#f57c00', 0.1),
+  },
+];
+
+// ── KPI Card ──────────────────────────────────────────────────────────────────
+
+const KpiCard: React.FC<KpiConfig> = ({ label, value, icon, borderColor, iconBg }) => (
   <Box
     sx={{
-      minHeight: '100vh',
-      backgroundColor: '#f8fafc',
+      bgcolor: '#ffffff',
+      borderRadius: 2,
+      boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
+      borderLeft: `4px solid ${borderColor}`,
+      px: 2.5,
+      py: 2,
       display: 'flex',
-      flexDirection: 'column',
       alignItems: 'center',
-      justifyContent: 'center',
+      justifyContent: 'space-between',
       gap: 2,
-      px: 3,
+      height: '100%',
     }}
   >
-    <Alert
-      severity="error"
-      sx={{ maxWidth: 480, width: '100%', borderRadius: 2 }}
-    >
-      {message}
-    </Alert>
-    <Button
-      variant="contained"
-      startIcon={<RefreshIcon />}
-      onClick={onRetry}
+    <Box>
+      <Typography
+        variant="h5"
+        sx={{ fontWeight: 700, color: '#0f172a', letterSpacing: '-0.02em', lineHeight: 1.2 }}
+      >
+        {value}
+      </Typography>
+      <Typography
+        variant="body2"
+        sx={{ color: '#64748b', fontWeight: 500, mt: 0.5, fontSize: '0.8rem' }}
+      >
+        {label}
+      </Typography>
+    </Box>
+    <Box
       sx={{
-        backgroundColor: '#312e81',
-        '&:hover': { backgroundColor: '#1e1b4b' },
-        borderRadius: '8px',
-        textTransform: 'none',
-        fontWeight: 600,
+        width: 44,
+        height: 44,
+        borderRadius: 2,
+        bgcolor: iconBg,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: borderColor,
+        flexShrink: 0,
       }}
     >
-      Retry
-    </Button>
+      {React.cloneElement(icon, { sx: { fontSize: 22 } })}
+    </Box>
   </Box>
 );
 
-// ---------------------------------------------------------------------------
-// Main component
-// ---------------------------------------------------------------------------
+// ── Skeleton placeholders ─────────────────────────────────────────────────────
 
-const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({ className }) => {
-  const { user, userPermissions } = useAuth();
+const KpiSkeleton: React.FC = () => (
+  <Box
+    sx={{
+      bgcolor: '#e2e8f0',
+      borderRadius: 2,
+      height: 88,
+    }}
+  />
+);
+
+const ContentSkeleton: React.FC = () => (
+  <Box sx={{ px: { xs: 2, sm: 3, md: 4 }, pt: 3, pb: 4 }}>
+    <Box sx={{ display: 'flex', gap: 2, mb: 3, flexWrap: 'wrap' }}>
+      <Box sx={{ bgcolor: '#e2e8f0', borderRadius: 2, flex: '2 1 400px', height: 340 }} />
+      <Box sx={{ bgcolor: '#e2e8f0', borderRadius: 2, flex: '1 1 260px', height: 340 }} />
+    </Box>
+    <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+      <Box sx={{ bgcolor: '#e2e8f0', borderRadius: 2, flex: '1 1 300px', height: 300 }} />
+      <Box sx={{ bgcolor: '#e2e8f0', borderRadius: 2, flex: '1 1 300px', height: 300 }} />
+    </Box>
+  </Box>
+);
+
+// ── Main component ────────────────────────────────────────────────────────────
+
+const UnifiedDashboard: React.FC<{ className?: string }> = ({ className }) => {
+  const { user } = useAuth();
   const { userData, loading: userDataLoading } = useUserData();
 
-  // -------------------------------------------------------------------------
-  // Role resolution
-  // -------------------------------------------------------------------------
-
-  const rawRole = (
-    userPermissions?.role?.name ||
-    (user as any)?.role?.name ||
-    (user as any)?.role ||
-    ''
-  ).toLowerCase();
-
-  const roleKey: 'Owner' | 'Manager' | 'User' =
-    rawRole.includes('owner') || rawRole.includes('super')
-      ? 'Owner'
-      : rawRole.includes('manager') || rawRole.includes('admin')
-      ? 'Manager'
-      : 'User';
-
-  const rc = ROLE_COLORS[roleKey];
-
-  // -------------------------------------------------------------------------
-  // User display fields
-  // -------------------------------------------------------------------------
-
-  const firstName: string =
-    (user as any)?.firstName ||
-    (user as any)?.first_name ||
-    (user as any)?.name?.split(' ')[0] ||
-    '';
-
-  const displayRole: string =
-    userPermissions?.role?.displayName ||
-    userPermissions?.role?.name ||
-    roleKey;
-
-  // -------------------------------------------------------------------------
-  // Workspace / venue
-  // -------------------------------------------------------------------------
-
-  const workspaceId: string | undefined =
+  // Venue / workspace identifiers
+  const workspaceId: string =
     userData?.workspace?.id ||
-    userData?.venue?.workspaceId ||
     (user as any)?.workspaceId ||
     (user as any)?.workspace_id ||
-    (user as any)?.workspace?.id ||
-    undefined;
+    '';
+  const organizationId: string = userData?.venue?.id || '';
+  const venueName: string = userData?.venue?.name || 'Dashboard';
 
-  const venueName: string =
-    userData?.venue?.name ||
-    (user as any)?.venue_name ||
-    'Dashboard';
-
-  // -------------------------------------------------------------------------
   // State
-  // -------------------------------------------------------------------------
-
-  const [dateRange] = useState<DateRange>(getLast30DaysRange());
-  const [dashboardData, setDashboardData] = useState<any>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [rawData, setRawData] = useState<DashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const isMountedRef = useRef(true);
-
-  // -------------------------------------------------------------------------
-  // Fetch
-  // -------------------------------------------------------------------------
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const fetchData = useCallback(
     async (isInitial = false) => {
-      // Wait until userData has loaded and workspaceId is available
       if (!workspaceId) return;
-
       if (isInitial) setLoading(true);
       setError(null);
-
       try {
-        const data = await dashboardService.getAdminDashboard(
-          { startDate: dateRange.startDate, endDate: dateRange.endDate },
+        const res = await dashboardService.getDashboard({
           workspaceId,
-        );
-
+          organizationId: organizationId || undefined,
+        });
         if (!isMountedRef.current) return;
-
-        setDashboardData(data);
+        // res is response.data from apiService — shape: { success, data: DashboardData }
+        const payload = (res as any)?.data ?? res;
+        setRawData(payload as DashboardData);
         setLastUpdated(new Date());
       } catch (err: any) {
         if (!isMountedRef.current) return;
-        console.error('[UnifiedDashboard] fetch error:', err);
-        setError(err?.message || 'Failed to load dashboard data. Please try again.');
+        setError(err?.message || 'Failed to load dashboard data');
       } finally {
         if (isMountedRef.current && isInitial) setLoading(false);
       }
     },
-    [dateRange, workspaceId],
+    [workspaceId, organizationId],
   );
 
-  // -------------------------------------------------------------------------
-  // Initial load + polling — only start once workspaceId is resolved
-  // -------------------------------------------------------------------------
-
   useEffect(() => {
-    // Still waiting for userData to load
     if (userDataLoading || !workspaceId) return;
-
     isMountedRef.current = true;
-
     fetchData(true);
-
-    intervalRef.current = setInterval(() => {
-      fetchData(false);
-    }, 30000);
-
+    intervalRef.current = setInterval(() => fetchData(false), 60_000);
     return () => {
       isMountedRef.current = false;
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
   }, [fetchData, userDataLoading, workspaceId]);
 
-  // -------------------------------------------------------------------------
-  // Manual refresh
-  // -------------------------------------------------------------------------
-
-
-  // -------------------------------------------------------------------------
-  // Derived props for children
-  // -------------------------------------------------------------------------
-
-  const stats = dashboardData?.stats ?? null;
-  const analyticsData = dashboardData?.analytics ?? null;
-  const recentActivity = dashboardData?.recent_activity ?? [];
-  const tableStatuses = dashboardData?.table_statuses ?? [];
-
-  // -------------------------------------------------------------------------
-  // Render
-  // -------------------------------------------------------------------------
-
-  if (loading) {
-    return <DashboardSkeleton />;
+  // ── Error state (no data at all) ────────────────────────────────────────────
+  if (!loading && error && !rawData) {
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: '60vh',
+          gap: 2,
+          px: 3,
+          bgcolor: '#f8fafc',
+        }}
+      >
+        <Alert severity="error" sx={{ maxWidth: 480, width: '100%', borderRadius: 2 }}>
+          {error}
+        </Alert>
+        <Button
+          variant="contained"
+          startIcon={<Refresh />}
+          onClick={() => fetchData(true)}
+          sx={{
+            bgcolor: '#1976d2',
+            '&:hover': { bgcolor: '#1565c0' },
+            borderRadius: 2,
+            textTransform: 'none',
+            fontWeight: 600,
+          }}
+        >
+          Retry
+        </Button>
+      </Box>
+    );
   }
 
-  if (error && !dashboardData) {
-    return <ErrorState message={error} onRetry={() => fetchData(true)} />;
-  }
+  const stats = rawData?.stats;
+  const kpis = stats ? buildKpis(stats) : null;
 
   return (
     <VenueAssignmentCheck showFullPage={false}>
-      <Box
-        className={className}
-        sx={{
-          minHeight: '100vh',
-          backgroundColor: '#f8fafc',
-          width: '100%',
-        }}
-      >
-        {/* Compact hero header */}
-        <DashboardHeader
-          venueName={venueName}
-          firstName={firstName}
-          displayRole={displayRole}
-          lastUpdated={lastUpdated}
-          stats={stats}
-          rc={rc}
-        />
+      <Box className={className} sx={{ bgcolor: '#f8fafc', minHeight: '100vh' }}>
 
-        {/* Non-fatal error banner (data already loaded once) */}
-        {error && dashboardData && (
-          <Box sx={{ px: { xs: 2, sm: 4 }, pt: 2 }}>
+        {/* ── Page header ──────────────────────────────────────────────────── */}
+        <Box
+          sx={{
+            bgcolor: '#ffffff',
+            borderBottom: '1px solid #e2e8f0',
+            px: { xs: 2, sm: 3, md: 4 },
+            py: 2.5,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 2,
+            flexWrap: 'wrap',
+          }}
+        >
+          <Box>
+            <Typography
+              variant="h5"
+              sx={{ fontWeight: 700, color: '#0f172a', letterSpacing: '-0.02em' }}
+            >
+              Dashboard
+            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5, flexWrap: 'wrap' }}>
+              <Chip
+                label={venueName}
+                size="small"
+                sx={{
+                  bgcolor: alpha('#1976d2', 0.08),
+                  color: '#1976d2',
+                  fontWeight: 600,
+                  fontSize: '0.75rem',
+                  height: 22,
+                }}
+              />
+              {lastUpdated && (
+                <Typography variant="caption" sx={{ color: '#94a3b8', fontSize: '0.75rem' }}>
+                  Updated {formatLastUpdated(lastUpdated)}
+                </Typography>
+              )}
+            </Box>
+          </Box>
+
+          <IconButton
+            onClick={() => fetchData(false)}
+            size="small"
+            title="Refresh dashboard"
+            sx={{
+              bgcolor: alpha('#1976d2', 0.08),
+              color: '#1976d2',
+              borderRadius: 1.5,
+              '&:hover': { bgcolor: alpha('#1976d2', 0.16) },
+            }}
+          >
+            <Refresh sx={{ fontSize: 20 }} />
+          </IconButton>
+        </Box>
+
+        {/* ── KPI cards ────────────────────────────────────────────────────── */}
+        <Box sx={{ px: { xs: 2, sm: 3, md: 4 }, pt: 3, pb: 1 }}>
+          <Grid container spacing={2}>
+            {loading || !kpis
+              ? [0, 1, 2, 3].map((i) => (
+                  <Grid item xs={6} md={3} key={i}>
+                    <KpiSkeleton />
+                  </Grid>
+                ))
+              : kpis.map((kpi) => (
+                  <Grid item xs={6} md={3} key={kpi.label}>
+                    <KpiCard {...kpi} />
+                  </Grid>
+                ))}
+          </Grid>
+        </Box>
+
+        {/* ── Non-fatal error banner ────────────────────────────────────────── */}
+        {error && rawData && (
+          <Box sx={{ px: { xs: 2, sm: 3, md: 4 }, pt: 2 }}>
             <Alert
               severity="warning"
               onClose={() => setError(null)}
@@ -343,17 +351,17 @@ const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({ className }) => {
           </Box>
         )}
 
-        {/* Main tabbed content */}
-        <TabbedDashboard
-          dashboardData={{
-            ...dashboardData,
-            analytics: analyticsData,
-            recent_activity: recentActivity,
-            table_statuses: tableStatuses,
-          }}
-          loading={loading}
-          lastUpdated={lastUpdated}
-        />
+        {/* ── Tabbed content ────────────────────────────────────────────────── */}
+        {loading && !rawData ? (
+          <ContentSkeleton />
+        ) : (
+          <TabbedDashboard
+            dashboardData={rawData as any}
+            loading={loading}
+            lastUpdated={lastUpdated}
+          />
+        )}
+
       </Box>
     </VenueAssignmentCheck>
   );

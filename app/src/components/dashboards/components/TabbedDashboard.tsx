@@ -19,6 +19,28 @@ import SalesTab from './tabs/SalesTab';
 import ItemsTab from './tabs/ItemsTab';
 import TablesOrdersTab from './tabs/TablesOrdersTab';
 
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
+
+export interface TabbedDashboardData {
+  stats?: Record<string, any>;
+  analytics?: Record<string, any>;
+  recentActivity?: any[];
+  tableStatuses?: any[];
+  summary?: Record<string, any>;
+}
+
+interface TabbedDashboardProps {
+  dashboardData: TabbedDashboardData | null;
+  loading: boolean;
+  lastUpdated: Date | null;
+}
+
+// ---------------------------------------------------------------------------
+// Tab panel
+// ---------------------------------------------------------------------------
+
 interface TabPanelProps {
   children?: React.ReactNode;
   index: number;
@@ -33,39 +55,39 @@ function TabPanel({ children, value, index }: TabPanelProps) {
       id={`dashboard-tabpanel-${index}`}
       aria-labelledby={`dashboard-tab-${index}`}
     >
-      {value === index && (
-        <Box sx={{ py: 3, px: { xs: 1.5, sm: 2.5, md: 4 } }}>
-          {children}
-        </Box>
-      )}
+      {value === index && children}
     </div>
   );
 }
 
-interface TabbedDashboardProps {
-  dashboardData: any;
-  loading: boolean;
-  lastUpdated: Date | null;
-}
+// ---------------------------------------------------------------------------
+// Tab definitions
+// ---------------------------------------------------------------------------
 
 const TAB_DEFINITIONS = [
-  {
-    label: 'Overview',
-    icon: <Dashboard sx={{ fontSize: 18 }} />,
-  },
-  {
-    label: 'Sales & Revenue',
-    icon: <TrendingUp sx={{ fontSize: 18 }} />,
-  },
-  {
-    label: 'Menu & Items',
-    icon: <Restaurant sx={{ fontSize: 18 }} />,
-  },
-  {
-    label: 'Tables',
-    icon: <TableRestaurant sx={{ fontSize: 18 }} />,
-  },
+  { label: 'Overview',        icon: <Dashboard sx={{ fontSize: 18 }} /> },
+  { label: 'Sales & Revenue', icon: <TrendingUp sx={{ fontSize: 18 }} /> },
+  { label: 'Menu & Items',    icon: <Restaurant sx={{ fontSize: 18 }} /> },
+  { label: 'Tables & Orders', icon: <TableRestaurant sx={{ fontSize: 18 }} /> },
 ];
+
+// ---------------------------------------------------------------------------
+// Loading skeleton
+// ---------------------------------------------------------------------------
+
+function LoadingSkeleton() {
+  return (
+    <Box sx={{ p: { xs: 2, sm: 3 }, display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <Skeleton variant="rounded" height={220} sx={{ borderRadius: 2 }} />
+      <Skeleton variant="rounded" height={320} sx={{ borderRadius: 2 }} />
+      <Skeleton variant="rounded" height={260} sx={{ borderRadius: 2 }} />
+    </Box>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Main component
+// ---------------------------------------------------------------------------
 
 const TabbedDashboard: React.FC<TabbedDashboardProps> = ({
   dashboardData,
@@ -77,20 +99,23 @@ const TabbedDashboard: React.FC<TabbedDashboardProps> = ({
     setCurrentTab(newValue);
   };
 
+  const analytics      = dashboardData?.analytics      ?? {};
+  const recentActivity = dashboardData?.recentActivity ?? [];
+  const tableStatuses  = dashboardData?.tableStatuses  ?? [];
+  const stats          = dashboardData?.stats          ?? {};
+  const summary        = dashboardData?.summary        ?? {};
+
   return (
-    <Box sx={{ bgcolor: '#f8fafc', minHeight: '100vh' }}>
-      {/* Tab Navigation Bar */}
+    <Box sx={{ bgcolor: '#f8fafc' }}>
+
+      {/* Tab navigation bar */}
       <Paper
         elevation={0}
         square
         sx={{
-          borderRadius: 0,
           bgcolor: '#ffffff',
-          borderTop: '1px solid #e2e8f0',
           borderBottom: '1px solid #e2e8f0',
-          position: 'sticky',
-          top: 0,
-          zIndex: 10,
+          px: 2,
         }}
       >
         <Tabs
@@ -100,14 +125,15 @@ const TabbedDashboard: React.FC<TabbedDashboardProps> = ({
           variant="scrollable"
           scrollButtons="auto"
           sx={{
-            minHeight: 44,
+            minHeight: 46,
             '& .MuiTabs-indicator': {
+              backgroundColor: '#1976d2',
               height: 3,
               borderRadius: '3px 3px 0 0',
             },
             '& .MuiTab-root': {
               textTransform: 'none',
-              minHeight: 44,
+              minHeight: 46,
               fontSize: '0.875rem',
               fontWeight: 500,
               color: 'text.secondary',
@@ -115,6 +141,7 @@ const TabbedDashboard: React.FC<TabbedDashboardProps> = ({
               gap: 0.75,
               transition: 'color 0.2s, background-color 0.2s',
               '&.Mui-selected': {
+                color: '#1976d2',
                 fontWeight: 600,
               },
               '&:hover': {
@@ -136,46 +163,39 @@ const TabbedDashboard: React.FC<TabbedDashboardProps> = ({
         </Tabs>
       </Paper>
 
-      {/* Tab Panels */}
-      <Box sx={{ bgcolor: '#f8fafc' }}>
-        <TabPanel value={currentTab} index={0}>
-          {loading ? <OverviewSkeleton /> : <OverviewTab dashboardData={dashboardData} />}
-        </TabPanel>
+      {/* Tab panels */}
+      {loading ? (
+        <LoadingSkeleton />
+      ) : (
+        <>
+          <TabPanel value={currentTab} index={0}>
+            <OverviewTab
+              dashboardData={{ analytics, recentActivity, summary } as any}
+            />
+          </TabPanel>
 
-        <TabPanel value={currentTab} index={1}>
-          <SalesTab dashboardData={dashboardData} />
-        </TabPanel>
+          <TabPanel value={currentTab} index={1}>
+            <SalesTab
+              dashboardData={{ stats, analytics, summary } as any}
+            />
+          </TabPanel>
 
-        <TabPanel value={currentTab} index={2}>
-          <ItemsTab dashboardData={dashboardData} />
-        </TabPanel>
+          <TabPanel value={currentTab} index={2}>
+            <ItemsTab
+              dashboardData={{ stats, analytics, summary } as any}
+            />
+          </TabPanel>
 
-        <TabPanel value={currentTab} index={3}>
-          <TablesOrdersTab dashboardData={dashboardData} />
-        </TabPanel>
-      </Box>
+          <TabPanel value={currentTab} index={3}>
+            <TablesOrdersTab
+              dashboardData={{ tableStatuses, analytics, summary, recentActivity } as any}
+            />
+          </TabPanel>
+        </>
+      )}
+
     </Box>
   );
 };
-
-function OverviewSkeleton() {
-  return (
-    <Box>
-      <Box sx={{ display: 'flex', gap: 2, mb: 3, flexWrap: 'wrap' }}>
-        {[1, 2, 3, 4].map((i) => (
-          <Skeleton key={i} variant="rounded" width={220} height={110} sx={{ borderRadius: 2, flex: '1 1 180px' }} />
-        ))}
-      </Box>
-      <Box sx={{ display: 'flex', gap: 2, mb: 3, flexWrap: 'wrap' }}>
-        <Skeleton variant="rounded" height={340} sx={{ borderRadius: 2, flex: '2 1 400px' }} />
-        <Skeleton variant="rounded" height={340} sx={{ borderRadius: 2, flex: '1 1 260px' }} />
-      </Box>
-      <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-        <Skeleton variant="rounded" height={320} sx={{ borderRadius: 2, flex: '1 1 300px' }} />
-        <Skeleton variant="rounded" height={320} sx={{ borderRadius: 2, flex: '1 1 300px' }} />
-      </Box>
-    </Box>
-  );
-}
 
 export default TabbedDashboard;

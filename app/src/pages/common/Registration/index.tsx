@@ -20,26 +20,25 @@ import {
   useMediaQuery,
   Stack,
   Divider,
-  Chip,
 } from '@mui/material';
 import {
   ArrowBack,
   ArrowForward,
   CheckCircle,
-  Home,
   Business as BusinessIcon,
   Store,
   Person,
   Preview,
   Speed,
   Security,
-  VpnKey,
+  Tag,
   Payment,
   CheckCircleOutline,
   QrCode2,
   Dashboard,
 } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link as RouterLink } from 'react-router-dom';
+import { Link } from '@mui/material';
 import { useAuth } from '../../../contexts/common/Auth';
 import { authService } from '../../../services/auth/auth';
 import { apiService } from '../../../utils/api';
@@ -69,7 +68,7 @@ const BRAND = {
 };
 
 const steps = [
-  { label: 'Code',          icon: <VpnKey />,       description: 'Enter registration code' },
+  { label: 'Code',          icon: <Tag />,           description: 'Enter registration code' },
   { label: 'Workspace',     icon: <BusinessIcon />,  description: 'Create your workspace' },
   { label: 'Billing',       icon: <Payment />,       description: 'Billing information' },
   { label: 'Organization',  icon: <Store />,         description: 'Add organization details' },
@@ -418,45 +417,6 @@ const RegisterPage: React.FC = () => {
     }
   };
 
-  const progress = (activeStep / steps.length) * 100;
-
-  // ─── Progress bar ─────────────────────────────────────────────────────────
-  // light=true → used on white right panel; light=false → used on dark left panel
-  const progressBar = (light: boolean) => (
-    <Box sx={{ mt: light ? 0 : 1 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 0.5 }}>
-        <Box
-          sx={{
-            flex: 1,
-            height: 6,
-            borderRadius: 3,
-            backgroundColor: light ? '#e2e8f0' : alpha('#ffffff', 0.15),
-            overflow: 'hidden',
-          }}
-        >
-          <Box
-            sx={{
-              height: '100%',
-              width: `${progress}%`,
-              backgroundColor: BRAND.primary,
-              transition: 'width 0.3s ease',
-              borderRadius: 3,
-            }}
-          />
-        </Box>
-        <Typography
-          variant="caption"
-          sx={{ color: light ? BRAND.primary : '#ffffff', fontWeight: 700, minWidth: 36 }}
-        >
-          {Math.round(progress)}%
-        </Typography>
-      </Box>
-      <Typography variant="caption" sx={{ color: light ? '#64748b' : alpha('#ffffff', 0.6) }}>
-        Step {activeStep + 1} of {steps.length}: {steps[activeStep].description}
-      </Typography>
-    </Box>
-  );
-
   // ─── Compact stepper (right panel, desktop) ───────────────────────────────
   const compactStepper = (
     <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 0 }}>
@@ -511,34 +471,17 @@ const RegisterPage: React.FC = () => {
     </Stepper>
   );
 
-  // ─── Home button ──────────────────────────────────────────────────────────
-  const homeButton = (
-    <Button
-      variant="outlined"
-      startIcon={<Home />}
-      onClick={() => navigate('/')}
-      size="small"
-      sx={{
-        borderRadius: 2,
-        textTransform: 'none',
-        fontWeight: 600,
-        px: 2,
-        py: 0.75,
-        fontSize: '0.875rem',
-        borderWidth: 1.5,
-        borderColor: '#e2e8f0',
-        color: '#64748b',
-        flexShrink: 0,
-        '&:hover': {
-          borderWidth: 1.5,
-          borderColor: BRAND.primary,
-          backgroundColor: alpha(BRAND.primary, 0.04),
-          color: BRAND.primary,
-        },
-      }}
-    >
-      Home
-    </Button>
+  // ─── Back to Home link (matches Login page style) ─────────────────────────
+  const backToHomeLink = (
+    <Typography variant="body2" textAlign="center" mt={1}>
+      <Link
+        component={RouterLink}
+        to="/"
+        sx={{ color: '#94a3b8', fontSize: '0.8125rem', textDecorationColor: 'transparent', '&:hover': { color: '#64748b' } }}
+      >
+        Back to Home
+      </Link>
+    </Typography>
   );
 
   // ─── Navigation buttons + sign-in link ───────────────────────────────────
@@ -659,6 +602,7 @@ const RegisterPage: React.FC = () => {
             Sign In
           </Button>
         </Typography>
+        {backToHomeLink}
       </Box>
     </>
   );
@@ -685,7 +629,7 @@ const RegisterPage: React.FC = () => {
   // DESKTOP LAYOUT (md+)
   // ═══════════════════════════════════════════════════════════════════════════
   const desktopLayout = (
-    <Box sx={{ display: 'flex', height: '100vh', overflow: 'hidden', bgcolor: BRAND.panelBg }}>
+    <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: BRAND.panelBg }}>
 
       {/* LEFT BRANDING PANEL */}
       <Box
@@ -699,7 +643,9 @@ const RegisterPage: React.FC = () => {
           py: 8,
           background: `linear-gradient(160deg, ${BRAND.panelBg} 0%, ${BRAND.panelBg2} 60%, ${BRAND.panelBg} 100%)`,
           borderRight: `1px solid ${BRAND.accentBorder}`,
-          position: 'relative',
+          position: 'sticky',
+          top: 0,
+          height: '100vh',
           overflow: 'hidden',
         }}
       >
@@ -787,52 +733,26 @@ const RegisterPage: React.FC = () => {
       {/* RIGHT FORM PANEL */}
       <Box
         sx={{
-          width: { md: 480, lg: 520 },
+          width: { md: 560, lg: 640 },
+          flexShrink: 0,
           display: 'flex',
           flexDirection: 'column',
           backgroundColor: '#ffffff',
-          overflow: 'hidden',
         }}
       >
-        {/* Top bar — title + home button */}
-        <Box
-          sx={{
-            flexShrink: 0,
-            display: 'flex',
-            alignItems: 'flex-start',
-            justifyContent: 'space-between',
-            px: { md: 5, lg: 6 },
-            pt: 3.5,
-            pb: 0,
-          }}
-        >
-          <Box>
-            <Typography variant="h5" fontWeight={800} color="#0f172a" letterSpacing="-0.3px">
-              Create Your Account
-            </Typography>
-            <Typography variant="body2" color="#64748b" mt={0.5}>
-              Step {activeStep + 1} of {steps.length}: {steps[activeStep].label}
-            </Typography>
-          </Box>
-          {homeButton}
-        </Box>
-
         {/* Stepper */}
-        <Box sx={{ flexShrink: 0, px: { md: 5, lg: 6 }, pt: 2.5, pb: 1 }}>
+        <Box sx={{ flexShrink: 0, px: { md: 5, lg: 6 }, pt: 3.5, pb: 1 }}>
           {compactStepper}
         </Box>
 
-        {/* Scrollable form area */}
+        {/* Form area */}
         <Box
           sx={{
-            flex: 1,
-            overflowY: 'auto',
             display: 'flex',
             flexDirection: 'column',
             px: { md: 5, lg: 6 },
             pt: 2,
-            pb: 3,
-            ...thinScrollbar,
+            pb: 4,
           }}
         >
           {errorAlert}
@@ -848,189 +768,90 @@ const RegisterPage: React.FC = () => {
   );
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // MOBILE LAYOUT (xs–sm)
+  // MOBILE LAYOUT (xs–sm) — plain white, no dark hero
   // ═══════════════════════════════════════════════════════════════════════════
   const mobileLayout = (
     <Box
       sx={{
-        height: '100vh',
-        overflow: 'hidden',
+        minHeight: '100vh',
+        bgcolor: '#ffffff',
         display: 'flex',
         flexDirection: 'column',
-        bgcolor: BRAND.panelBg,
+        overflowY: 'auto',
+        px: { xs: 3, sm: 5 },
+        pt: 4,
+        pb: 4,
+        ...thinScrollbar,
       }}
     >
-      {/* Dark branded header — matches Login mobile header exactly */}
-      <Box
-        sx={{
-          flexShrink: 0,
-          position: 'relative',
-          overflow: 'hidden',
-          px: 3,
-          pt: 4,
-          pb: 3,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          background: `linear-gradient(160deg, ${BRAND.panelBg} 0%, ${BRAND.panelBg2} 100%)`,
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: -60,
-            right: -40,
-            width: 220,
-            height: 220,
-            borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(25,118,210,0.12) 0%, transparent 70%)',
-            pointerEvents: 'none',
-          },
-        }}
-      >
-        {/* Grid overlay */}
-        <Box
-          sx={{
-            position: 'absolute',
-            inset: 0,
-            backgroundImage: 'linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px)',
-            backgroundSize: '32px 32px',
-            pointerEvents: 'none',
-          }}
-        />
-
-        <Box sx={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
-          <DinoLogo size={48} animated />
-          <Typography
-            variant="h6"
-            fontWeight={700}
-            color="white"
-            mt={1.5}
-            textAlign="center"
-            sx={{ letterSpacing: '-0.3px' }}
-          >
-            Join Dino Today
-          </Typography>
-          <Typography variant="caption" color="rgba(255,255,255,0.5)" mt={0.5} textAlign="center" maxWidth={260} lineHeight={1.5}>
-            Start your digital transformation journey
-          </Typography>
-
-          {/* Feature chips — matches Login mobile chip row */}
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75, mt: 2, justifyContent: 'center' }}>
-            {APP_FEATURES.map(({ icon: Icon, text }, i) => (
-              <Chip
-                key={i}
-                icon={<Icon sx={{ fontSize: '13px !important', color: `${BRAND.primaryLight} !important` }} />}
-                label={text}
-                size="small"
-                sx={{
-                  bgcolor: BRAND.accent,
-                  border: `1px solid ${BRAND.accentBorder}`,
-                  color: 'rgba(255,255,255,0.8)',
-                  fontSize: '0.7rem',
-                  fontWeight: 500,
-                  height: 26,
-                  '& .MuiChip-icon': { ml: 0.5 },
-                }}
-              />
-            ))}
-          </Box>
-
-          {/* Progress bar below chips */}
-          <Box sx={{ mt: 2, width: '100%', maxWidth: 340 }}>
-            {progressBar(false)}
-          </Box>
-        </Box>
+      {/* Logo */}
+      <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2.5 }}>
+        <DinoLogo size={40} animated />
       </Box>
 
-      {/* White card — scrollable, fills remaining height */}
-      <Box
-        sx={{
-          flex: 1,
-          bgcolor: '#ffffff',
-          borderRadius: '20px 20px 0 0',
-          mt: -2,
-          position: 'relative',
-          zIndex: 1,
-          boxShadow: '0 -4px 24px rgba(0,0,0,0.15)',
-          overflowY: 'auto',
-          display: 'flex',
-          flexDirection: 'column',
-          px: { xs: 3, sm: 5 },
-          pt: 3,
-          pb: 3,
-          ...thinScrollbar,
-        }}
-      >
-        {/* Step label + home button */}
-        <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 2 }}>
-          <Box>
-            <Typography variant="subtitle1" fontWeight={700} color="#0f172a" lineHeight={1.2}>
-              {steps[activeStep].label}
-            </Typography>
-            <Typography variant="caption" color="#64748b">
-              Step {activeStep + 1} of {steps.length}
-            </Typography>
-          </Box>
-          {homeButton}
-        </Box>
-
-        {/* Icon-only stepper on mobile */}
-        <Box sx={{ mb: 2 }}>
-          <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 0 }}>
-            {steps.map((step, index) => (
-              <Step key={step.label}>
-                <StepLabel
-                  StepIconComponent={() => (
-                    <Box
-                      sx={{
-                        width: 28,
-                        height: 28,
-                        borderRadius: '50%',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        backgroundColor:
-                          index < activeStep
-                            ? BRAND.green
-                            : index === activeStep
-                            ? BRAND.primary
-                            : '#e2e8f0',
-                        color: index <= activeStep ? '#ffffff' : '#94a3b8',
-                        transition: 'all 0.3s ease',
-                        flexShrink: 0,
-                        boxShadow:
-                          index === activeStep
-                            ? `0 0 0 3px ${alpha(BRAND.primary, 0.18)}`
-                            : index < activeStep
-                            ? `0 0 0 3px ${alpha(BRAND.green, 0.15)}`
-                            : 'none',
-                      }}
-                    >
-                      {index < activeStep
-                        ? <CheckCircle sx={{ fontSize: 15 }} />
-                        : React.cloneElement(step.icon, { sx: { fontSize: 14 } })}
-                    </Box>
-                  )}
-                  sx={{
-                    '& .MuiStepLabel-label': {
-                      display: 'none',
-                    },
-                  }}
-                >
-                  {step.label}
-                </StepLabel>
-              </Step>
-            ))}
-          </Stepper>
-        </Box>
-
-        {errorAlert}
-
-        <Box sx={{ mb: 1 }}>
-          {renderStepContent(activeStep)}
-        </Box>
-
-        {navigationButtons}
+      {/* Title + step subtitle */}
+      <Box sx={{ textAlign: 'center', mb: 2.5 }}>
+        <Typography variant="h6" fontWeight={800} color="#0f172a" letterSpacing="-0.3px">
+          Create Your Account
+        </Typography>
+        <Typography variant="body2" color="#64748b" mt={0.5}>
+          Step {activeStep + 1} of {steps.length}: {steps[activeStep].label}
+        </Typography>
       </Box>
+
+      {/* Icon-only stepper */}
+      <Box sx={{ mb: 2.5 }}>
+        <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 0 }}>
+          {steps.map((step, index) => (
+            <Step key={step.label}>
+              <StepLabel
+                StepIconComponent={() => (
+                  <Box
+                    sx={{
+                      width: 28,
+                      height: 28,
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      backgroundColor:
+                        index < activeStep
+                          ? BRAND.green
+                          : index === activeStep
+                          ? BRAND.primary
+                          : '#e2e8f0',
+                      color: index <= activeStep ? '#ffffff' : '#94a3b8',
+                      transition: 'all 0.3s ease',
+                      flexShrink: 0,
+                      boxShadow:
+                        index === activeStep
+                          ? `0 0 0 3px ${alpha(BRAND.primary, 0.18)}`
+                          : index < activeStep
+                          ? `0 0 0 3px ${alpha(BRAND.green, 0.15)}`
+                          : 'none',
+                    }}
+                  >
+                    {index < activeStep
+                      ? <CheckCircle sx={{ fontSize: 15 }} />
+                      : React.cloneElement(step.icon, { sx: { fontSize: 14 } })}
+                  </Box>
+                )}
+                sx={{ '& .MuiStepLabel-label': { display: 'none' } }}
+              >
+                {step.label}
+              </StepLabel>
+            </Step>
+          ))}
+        </Stepper>
+      </Box>
+
+      {errorAlert}
+
+      <Box sx={{ mb: 1 }}>
+        {renderStepContent(activeStep)}
+      </Box>
+
+      {navigationButtons}
     </Box>
   );
 

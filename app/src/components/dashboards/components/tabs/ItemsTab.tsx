@@ -1,444 +1,267 @@
 import React from 'react';
-import {
-  Box,
-  Grid,
-  Card,
-  CardContent,
-  Typography,
-  LinearProgress,
-  Chip,
-  Divider,
-  Avatar,
-} from '@mui/material';
-import { alpha } from '@mui/material/styles';
-import {
-  Restaurant,
-  Category,
-  Star,
-  TrendingUp,
-} from '@mui/icons-material';
-import { MenuPerformanceChart } from '../../charts';
+import { Box, Grid, Typography } from '@mui/material';
+import TopItemsChart from '../../charts/TopItemsChart';
 
 interface ItemsTabProps {
-  dashboardData: any;
+  dashboardData: {
+    stats: { totalCategories?: number; activeItems?: number };
+    analytics: {
+      popularItems: Array<{
+        id: string;
+        name: string;
+        category: string;
+        orders: number;
+        revenue: number;
+        quantity?: number;
+        rating?: number;
+      }>;
+      categoryPerformance: Array<{
+        category: string;
+        orders: number;
+        revenue: number;
+        percentage: number;
+      }>;
+    };
+    summary: { totalMenuItems?: number; activeMenuItems?: number; totalRevenue?: number };
+  };
 }
 
-const formatCurrency = (value: number): string =>
+const formatINR = (value: number): string =>
   `\u20B9${value.toLocaleString('en-IN')}`;
 
-const RANK_COLORS = ['#f9a825', '#78909c', '#8d6e63', '#0288d1', '#2e7d32'];
+const RANK_BADGE: Record<number, { bg: string; color: string }> = {
+  1: { bg: '#f59e0b', color: '#fff' },
+  2: { bg: '#94a3b8', color: '#fff' },
+  3: { bg: '#cd7f32', color: '#fff' },
+};
 
-const getRankColor = (rank: number): string =>
-  rank <= RANK_COLORS.length ? RANK_COLORS[rank - 1] : '#546e7a';
+const getRankBadge = (rank: number) =>
+  RANK_BADGE[rank] ?? { bg: '#e2e8f0', color: '#0f172a' };
+
+const cardSx = {
+  bgcolor: '#fff',
+  borderRadius: 2,
+  boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
+  p: 2.5,
+};
+
+const cardTitleSx = {
+  fontWeight: 700,
+  fontSize: '0.875rem',
+  color: '#0f172a',
+  mb: 2,
+};
 
 interface StatCardProps {
   title: string;
   value: string | number;
-  icon: React.ReactNode;
-  color: string;
-  subtitle?: string;
+  borderColor: string;
 }
 
-const StatCard: React.FC<StatCardProps> = ({ title, value, icon, color, subtitle }) => (
-  <Card
-    elevation={0}
+const StatCard: React.FC<StatCardProps> = ({ title, value, borderColor }) => (
+  <Box
     sx={{
+      ...cardSx,
+      borderLeft: `4px solid ${borderColor}`,
       height: '100%',
-      position: 'relative',
-      overflow: 'hidden',
-      border: '1px solid #e2e8f0',
-      borderRadius: 2,
-      bgcolor: '#ffffff',
-      transition: 'box-shadow 0.2s',
-      '&:hover': {
-        boxShadow: '0 4px 16px rgba(0,0,0,0.07)',
-      },
-      '&::after': {
-        content: '""',
-        position: 'absolute',
-        left: 0,
-        top: 0,
-        bottom: 0,
-        width: 4,
-        borderRadius: '2px 0 0 2px',
-        bgcolor: color,
-      },
     }}
   >
-    <CardContent sx={{ p: 2.5, pl: 3.5, '&:last-child': { pb: 2.5 } }}>
-      <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 1.5 }}>
-        <Typography
-          variant="caption"
-          sx={{
-            fontWeight: 600,
-            fontSize: '0.7rem',
-            textTransform: 'uppercase',
-            letterSpacing: '0.6px',
-            color: 'text.secondary',
-          }}
-        >
-          {title}
-        </Typography>
-        <Avatar
-          sx={{
-            width: 36,
-            height: 36,
-            borderRadius: 2,
-            bgcolor: alpha(color, 0.12),
-            color,
-          }}
-        >
-          {icon}
-        </Avatar>
-      </Box>
-      <Typography
-        variant="h4"
-        sx={{
-          fontWeight: 700,
-          fontSize: '1.65rem',
-          lineHeight: 1.2,
-          color: 'text.primary',
-          mb: subtitle ? 0.5 : 0,
-        }}
-      >
-        {value}
-      </Typography>
-      {subtitle && (
-        <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.72rem' }}>
-          {subtitle}
-        </Typography>
-      )}
-    </CardContent>
-  </Card>
+    <Typography
+      sx={{
+        fontWeight: 600,
+        fontSize: '0.7rem',
+        textTransform: 'uppercase',
+        letterSpacing: '0.5px',
+        color: '#64748b',
+        mb: 1,
+      }}
+    >
+      {title}
+    </Typography>
+    <Typography sx={{ fontWeight: 700, fontSize: '1.6rem', color: '#0f172a', lineHeight: 1.2 }}>
+      {value}
+    </Typography>
+  </Box>
 );
 
-// Column header labels for the responsive ranking grid
-const HEADER_COLS = [
-  { label: '#',      sx: { display: { xs: 'block', sm: 'block' } } },
-  { label: 'Item',   sx: { display: { xs: 'block', sm: 'block' } } },
-  { label: 'Orders', sx: { display: { xs: 'block', sm: 'block' } } },
-  { label: 'Rating', sx: { display: { xs: 'none',  sm: 'block' } } },
-  { label: 'Revenue',sx: { display: { xs: 'none',  sm: 'block' } } },
-];
-
 const ItemsTab: React.FC<ItemsTabProps> = ({ dashboardData }) => {
-  const stats = dashboardData?.stats || {};
-  const analytics = dashboardData?.analytics || {};
+  const stats = dashboardData?.stats ?? {};
+  const analytics = dashboardData?.analytics ?? { popularItems: [], categoryPerformance: [] };
+  const summary = dashboardData?.summary ?? {};
 
-  const totalCategories: number = stats.total_categories || 0;
-  const activeItems: number = stats.active_items || 0;
+  const totalCategories = stats.totalCategories ?? 0;
+  const activeItems = summary.activeMenuItems ?? stats.activeItems ?? 0;
+  const totalRevenue = summary.totalRevenue ?? 0;
 
-  const popularItems: any[] = analytics.popular_items || [];
-
-  const totalMenuRevenue: number = popularItems.reduce(
-    (sum: number, item: any) => sum + (item.revenue || 0),
-    0
-  );
-
-  const menuChartData = popularItems.map((item: any) => ({
-    id: String(item.id),
-    name: item.name || '',
-    orders: item.orders || 0,
-    revenue: item.revenue || 0,
-    category: item.category || '',
-    rating: item.rating,
-  }));
-
-  const top10Items = [...popularItems]
-    .sort((a: any, b: any) => (b.orders || 0) - (a.orders || 0))
+  const popularItems = analytics.popularItems ?? [];
+  const top10 = [...popularItems]
+    .sort((a, b) => b.orders - a.orders)
     .slice(0, 10);
 
-  const maxOrders =
-    top10Items.length > 0
-      ? Math.max(...top10Items.map((i: any) => i.orders || 0))
-      : 1;
-
-  // Shared responsive grid template
-  const gridCols = {
-    xs: '32px 1fr 70px',
-    sm: '40px 1fr 100px 80px 110px',
-  };
-
   return (
-    <Box>
-      {/* Stat Cards */}
+    <Box sx={{ px: { xs: 2, sm: 3, md: 4 }, py: 3, bgcolor: '#f8fafc' }}>
+      {/* Row 1 — Stat Cards */}
       <Grid container spacing={2.5} sx={{ mb: 3 }}>
         <Grid item xs={12} sm={4}>
-          <StatCard
-            title="Total Categories"
-            value={totalCategories}
-            icon={<Category sx={{ fontSize: 20 }} />}
-            color="#7b1fa2"
-            subtitle="Menu categories"
-          />
+          <StatCard title="Total Categories" value={totalCategories} borderColor="#8b5cf6" />
         </Grid>
         <Grid item xs={12} sm={4}>
-          <StatCard
-            title="Active Items"
-            value={activeItems}
-            icon={<Restaurant sx={{ fontSize: 20 }} />}
-            color="#2e7d32"
-            subtitle="Available on menu"
-          />
+          <StatCard title="Active Items" value={activeItems} borderColor="#10b981" />
         </Grid>
         <Grid item xs={12} sm={4}>
-          <StatCard
-            title="Total Menu Revenue"
-            value={formatCurrency(totalMenuRevenue)}
-            icon={<TrendingUp sx={{ fontSize: 20 }} />}
-            color="#0288d1"
-            subtitle="From popular items"
-          />
+          <StatCard title="Menu Revenue" value={formatINR(totalRevenue)} borderColor="#f59e0b" />
         </Grid>
       </Grid>
 
-      {/* Menu Performance Chart */}
-      <Box sx={{ mb: 3 }}>
-        <MenuPerformanceChart
-          data={menuChartData}
-          title="Top Menu Items Performance"
-          height={400}
-          maxItems={10}
-          sortBy="revenue"
-        />
+      {/* Row 2 — Top Menu Items Chart */}
+      <Box sx={{ ...cardSx, mb: 3 }}>
+        <Typography sx={cardTitleSx}>Top Menu Items</Typography>
+        <TopItemsChart data={popularItems} height={340} />
       </Box>
 
-      {/* Popular Items Ranking — responsive grid list */}
-      <Card
-        elevation={0}
-        sx={{
-          border: '1px solid #e2e8f0',
-          borderRadius: 2,
-          bgcolor: '#ffffff',
-          position: 'relative',
-          overflow: 'hidden',
-          transition: 'box-shadow 0.2s',
-          '&:hover': { boxShadow: '0 4px 16px rgba(0,0,0,0.07)' },
-        }}
-      >
-        {/* Section header */}
-        <Box
-          sx={{
-            px: 2.5,
-            py: 2,
-            borderBottom: '1px solid #e2e8f0',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-          }}
-        >
-          <Typography variant="subtitle1" fontWeight={700} color="#0f172a">
-            Popular Items Ranking
-          </Typography>
-          <Chip
-            label={`Top ${top10Items.length}`}
-            size="small"
-            variant="outlined"
-            sx={{ fontSize: '0.7rem' }}
-          />
-        </Box>
+      {/* Row 3 — Popular Items Ranking */}
+      <Box sx={cardSx}>
+        <Typography sx={cardTitleSx}>Popular Items Ranking</Typography>
 
-        <CardContent sx={{ p: 2.5, '&:last-child': { pb: 2.5 } }}>
-          {top10Items.length === 0 ? (
+        {top10.length === 0 ? (
+          <Typography sx={{ color: '#94a3b8', fontSize: '0.875rem', textAlign: 'center', py: 4 }}>
+            No items data
+          </Typography>
+        ) : (
+          <Box>
+            {/* Header row */}
             <Box
               sx={{
-                py: 6,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
+                display: 'grid',
+                gridTemplateColumns: { xs: '40px 1fr 70px', sm: '40px 1fr 100px 100px 110px' },
                 gap: 1,
-                color: 'text.disabled',
+                px: 1,
+                pb: 1,
+                borderBottom: '1px solid #e2e8f0',
+                mb: 0.5,
               }}
             >
-              <Restaurant sx={{ fontSize: 48 }} />
-              <Typography variant="body1" color="text.secondary">
-                No item data available
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Popular items will appear once orders are placed
-              </Typography>
+              {[
+                { label: 'Rank', align: 'center' as const, hide: false },
+                { label: 'Item', align: 'left' as const, hide: false },
+                { label: 'Orders', align: 'center' as const, hide: false },
+                { label: 'Category', align: 'left' as const, hide: true },
+                { label: 'Revenue', align: 'right' as const, hide: true },
+              ].map(({ label, align, hide }) => (
+                <Typography
+                  key={label}
+                  sx={{
+                    display: hide ? { xs: 'none', sm: 'block' } : 'block',
+                    fontWeight: 600,
+                    fontSize: '0.68rem',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px',
+                    color: '#94a3b8',
+                    textAlign: align,
+                  }}
+                >
+                  {label}
+                </Typography>
+              ))}
             </Box>
-          ) : (
-            <Box>
-              {/* Header row */}
-              <Box
-                sx={{
-                  display: 'grid',
-                  gridTemplateColumns: gridCols,
-                  gap: 1,
-                  px: 1,
-                  pb: 1,
-                  mb: 0.5,
-                }}
-              >
-                {HEADER_COLS.map(({ label, sx }) => (
-                  <Typography
-                    key={label}
-                    variant="caption"
-                    fontWeight={600}
-                    sx={{
-                      ...sx,
-                      textTransform: 'uppercase',
-                      fontSize: '0.65rem',
-                      letterSpacing: '0.5px',
-                      color: 'text.secondary',
-                      textAlign: label === 'Revenue' ? 'right' : label === 'Orders' || label === 'Rating' ? 'center' : 'left',
-                    }}
-                  >
-                    {label}
-                  </Typography>
-                ))}
-              </Box>
 
-              <Divider sx={{ mb: 1 }} />
+            {/* Item rows */}
+            {top10.map((item, idx) => {
+              const rank = idx + 1;
+              const badge = getRankBadge(rank);
+              const isEven = idx % 2 === 1;
 
-              {top10Items.map((item: any, idx: number) => {
-                const rank = idx + 1;
-                const rankColor = getRankColor(rank);
-                const orderBarWidth =
-                  maxOrders > 0 ? ((item.orders || 0) / maxOrders) * 100 : 0;
-
-                return (
-                  <React.Fragment key={item.id || idx}>
-                    {idx > 0 && <Divider sx={{ my: 0.5, opacity: 0.5 }} />}
+              return (
+                <Box
+                  key={item.id ?? idx}
+                  sx={{
+                    display: 'grid',
+                    gridTemplateColumns: { xs: '40px 1fr 70px', sm: '40px 1fr 100px 100px 110px' },
+                    gap: 1,
+                    alignItems: 'center',
+                    px: 1,
+                    py: 1,
+                    borderRadius: 1,
+                    bgcolor: isEven ? '#f8fafc' : 'transparent',
+                  }}
+                >
+                  {/* Rank badge */}
+                  <Box sx={{ display: 'flex', justifyContent: 'center' }}>
                     <Box
                       sx={{
-                        display: 'grid',
-                        gridTemplateColumns: gridCols,
-                        gap: 1,
+                        width: 26,
+                        height: 26,
+                        borderRadius: 1,
+                        bgcolor: badge.bg,
+                        color: badge.color,
+                        display: 'flex',
                         alignItems: 'center',
-                        px: 1,
-                        py: 1,
-                        borderRadius: 2,
-                        transition: 'background 0.15s',
-                        '&:hover': {
-                          bgcolor: (theme) =>
-                            alpha(theme.palette.primary.main, 0.04),
-                        },
+                        justifyContent: 'center',
+                        fontWeight: 700,
+                        fontSize: '0.75rem',
                       }}
                     >
-                      {/* Rank */}
-                      <Avatar
-                        sx={{
-                          width: { xs: 24, sm: 28 },
-                          height: { xs: 24, sm: 28 },
-                          fontSize: '0.75rem',
-                          fontWeight: 700,
-                          bgcolor: alpha(rankColor, 0.15),
-                          color: rankColor,
-                          borderRadius: 1.5,
-                        }}
-                      >
-                        {rank}
-                      </Avatar>
-
-                      {/* Name + Category + Bar */}
-                      <Box sx={{ minWidth: 0 }}>
-                        <Typography
-                          variant="body2"
-                          fontWeight={600}
-                          noWrap
-                          sx={{ lineHeight: 1.3 }}
-                        >
-                          {item.name || 'Unknown'}
-                        </Typography>
-                        <Typography
-                          variant="caption"
-                          color="text.secondary"
-                          noWrap
-                          sx={{ fontSize: '0.68rem' }}
-                        >
-                          {item.category || '-'}
-                        </Typography>
-                        <LinearProgress
-                          variant="determinate"
-                          value={orderBarWidth}
-                          sx={{
-                            mt: 0.5,
-                            height: 3,
-                            borderRadius: 2,
-                            bgcolor: alpha(rankColor, 0.1),
-                            '& .MuiLinearProgress-bar': {
-                              borderRadius: 2,
-                              bgcolor: rankColor,
-                            },
-                          }}
-                        />
-                      </Box>
-
-                      {/* Orders — always visible */}
-                      <Box sx={{ textAlign: 'center' }}>
-                        <Typography variant="body2" fontWeight={700}>
-                          {(item.orders || 0).toLocaleString('en-IN')}
-                        </Typography>
-                        <Typography
-                          variant="caption"
-                          color="text.secondary"
-                          sx={{ fontSize: '0.65rem' }}
-                        >
-                          orders
-                        </Typography>
-                      </Box>
-
-                      {/* Rating — hidden on xs */}
-                      <Box
-                        sx={{
-                          display: { xs: 'none', sm: 'flex' },
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          gap: 0.25,
-                        }}
-                      >
-                        {item.rating ? (
-                          <>
-                            <Star sx={{ fontSize: 13, color: '#f9a825' }} />
-                            <Typography
-                              variant="body2"
-                              fontWeight={600}
-                              sx={{ fontSize: '0.8rem' }}
-                            >
-                              {Number(item.rating).toFixed(1)}
-                            </Typography>
-                          </>
-                        ) : (
-                          <Typography variant="caption" color="text.disabled">
-                            -
-                          </Typography>
-                        )}
-                      </Box>
-
-                      {/* Revenue — hidden on xs */}
-                      <Box
-                        sx={{
-                          display: { xs: 'none', sm: 'block' },
-                          textAlign: 'right',
-                        }}
-                      >
-                        <Typography
-                          variant="body2"
-                          fontWeight={700}
-                          sx={{ color: '#2e7d32', fontSize: '0.85rem' }}
-                        >
-                          {formatCurrency(item.revenue || 0)}
-                        </Typography>
-                        {item.quantity != null && (
-                          <Typography
-                            variant="caption"
-                            color="text.secondary"
-                            sx={{ fontSize: '0.65rem' }}
-                          >
-                            qty: {item.quantity}
-                          </Typography>
-                        )}
-                      </Box>
+                      {rank}
                     </Box>
-                  </React.Fragment>
-                );
-              })}
-            </Box>
-          )}
-        </CardContent>
-      </Card>
+                  </Box>
+
+                  {/* Item name + category (xs only) */}
+                  <Box sx={{ minWidth: 0 }}>
+                    <Typography
+                      noWrap
+                      sx={{ fontWeight: 700, fontSize: '0.85rem', color: '#0f172a', lineHeight: 1.3 }}
+                    >
+                      {item.name}
+                    </Typography>
+                    <Typography
+                      noWrap
+                      sx={{
+                        display: { xs: 'block', sm: 'none' },
+                        fontSize: '0.72rem',
+                        color: '#64748b',
+                      }}
+                    >
+                      {item.category}
+                    </Typography>
+                  </Box>
+
+                  {/* Orders */}
+                  <Typography
+                    sx={{ textAlign: 'center', fontWeight: 600, fontSize: '0.85rem', color: '#0f172a' }}
+                  >
+                    {item.orders.toLocaleString('en-IN')}
+                  </Typography>
+
+                  {/* Category — hidden on xs */}
+                  <Typography
+                    noWrap
+                    sx={{
+                      display: { xs: 'none', sm: 'block' },
+                      fontSize: '0.8rem',
+                      color: '#64748b',
+                    }}
+                  >
+                    {item.category}
+                  </Typography>
+
+                  {/* Revenue — hidden on xs */}
+                  <Typography
+                    sx={{
+                      display: { xs: 'none', sm: 'block' },
+                      textAlign: 'right',
+                      fontWeight: 700,
+                      fontSize: '0.85rem',
+                      color: '#0f172a',
+                    }}
+                  >
+                    {formatINR(item.revenue)}
+                  </Typography>
+                </Box>
+              );
+            })}
+          </Box>
+        )}
+      </Box>
     </Box>
   );
 };

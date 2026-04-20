@@ -29,11 +29,6 @@ const FAQS = [
       'Dino is perfect for restaurants, cafes, cloud kitchens, retail stores, salons, and any business that wants to digitize their catalog and streamline order management. Our platform is flexible and adapts to various business models.',
   },
   {
-    question: 'Can we customize the design and branding?',
-    answer:
-      'Absolutely. You can fully customize your digital catalog with your logo, brand colors, fonts, and layout. Make it truly yours and maintain consistent branding across all customer touchpoints.',
-  },
-  {
     question: 'How does the pricing work?',
     answer:
       'We offer flexible pricing plans based on your business size and needs. Contact our sales team for a customized quote. We also provide a free trial so you can experience Dino before committing.',
@@ -47,11 +42,6 @@ const FAQS = [
     question: 'What kind of support do you provide?',
     answer:
       'We provide 24/7 customer support via phone, email, and chat. Our dedicated support team is always ready to help you with any questions or issues. We also offer comprehensive documentation and video tutorials.',
-  },
-  {
-    question: 'Can we integrate Dino with our existing systems?',
-    answer:
-      'Yes. Dino offers API integrations and can connect with popular POS systems, payment gateways, and accounting software. Our technical team will assist you with the integration process.',
   },
 ];
 

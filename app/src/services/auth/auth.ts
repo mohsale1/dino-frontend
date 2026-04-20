@@ -1,6 +1,7 @@
 import { AuthToken, UserProfile, WorkspaceRegistration, ApiResponse } from '../../types';
 import { apiService } from '../../utils/api';
 import StorageManager from '../../utils/storage';
+import { normalizeUserData } from '../../utils/helpers/userDataNormalizer';
 
 class AuthService {
   // Use StorageManager keys for consistency
@@ -140,9 +141,10 @@ class AuthService {
       const response = await apiService.get<UserProfile>(endpoint);
       
       if (response.success && response.data) {
-        // Update stored user data
-        StorageManager.setUserData(response.data);
-        return response.data;
+        // Normalize before storing so camelCase fields are always consistent
+        const normalized = normalizeUserData(response.data) as unknown as UserProfile;
+        StorageManager.setUserData(normalized);
+        return normalized;
       }
       
       throw new Error('Failed to get user profile');

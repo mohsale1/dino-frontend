@@ -379,53 +379,6 @@ const SecuritySection: React.FC<SecuritySectionProps> = () => {
         </CardContent>
       </Card>
 
-      {/* ── Card 2: Security Preferences ── */}
-      <Card elevation={0} sx={{ borderRadius: 3, border: '1px solid #e2e8f0' }}>
-        <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-          <SectionHeader
-            icon={<ShieldOutlined sx={{ fontSize: 20 }} />}
-            title="Security Preferences"
-            subtitle="Manage your account security settings"
-          />
-
-          <ToggleRow
-            icon={<LockOutlined sx={{ fontSize: 18 }} />}
-            title="Two-Factor Authentication"
-            subtitle="Add an extra layer of security to your account"
-            checked={twoFactor}
-            onChange={setTwoFactor}
-          />
-
-          <Divider sx={{ borderColor: '#f1f5f9' }} />
-
-          <ToggleRow
-            icon={<NotificationsOutlined sx={{ fontSize: 18 }} />}
-            title="Login Notifications"
-            subtitle="Get notified when someone logs into your account"
-            checked={loginNotifications}
-            onChange={setLoginNotifications}
-          />
-
-          {/* Fix 2: Save Preferences button — full width on xs */}
-          {prefsDirty && (
-            <Box sx={{ display: 'flex', justifyContent: 'flex-end', flexDirection: { xs: 'column', sm: 'row' }, mt: 2 }}>
-              <Button
-                variant="contained"
-                onClick={handleSavePrefs}
-                disabled={prefsSaving}
-                startIcon={prefsSaving ? <CircularProgress size={16} color="inherit" /> : undefined}
-                sx={{
-                  textTransform: 'none', fontWeight: 600, borderRadius: 2, px: 3,
-                  width: { xs: '100%', sm: 'auto' },
-                  bgcolor: BRAND.primary, '&:hover': { bgcolor: BRAND.primaryHover },
-                }}
-              >
-                {prefsSaving ? 'Saving...' : 'Save Preferences'}
-              </Button>
-            </Box>
-          )}
-        </CardContent>
-      </Card>
     </Box>
   );
 };

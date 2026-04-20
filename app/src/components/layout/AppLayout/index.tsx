@@ -119,21 +119,18 @@ const AppLayout: React.FC = () => {
           </Box>
         </Box>
       ) : (
-        /* Non-admin routes — public menu cart icon in header handled by AppHeader */
+        /* Non-admin routes — public pages scroll naturally via the document */
         <Box
           component="main"
           sx={{
             flexGrow: 1,
             backgroundColor: 'background.default',
             minHeight: '100vh',
-            transition: 'padding-top 0.3s ease-in-out',
-            scrollBehavior: 'smooth',
             width: '100%',
             maxWidth: '100%',
-            WebkitOverflowScrolling: 'touch',
+            /* No overflow set here — let the document handle scrolling */
           }}
         >
-
           <Fade in timeout={300}>
             <Box sx={{ width: '100%', maxWidth: '100%' }}>
               <Outlet />

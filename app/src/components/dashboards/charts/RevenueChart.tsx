@@ -1,253 +1,153 @@
 import React, { useMemo } from 'react';
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
+  ResponsiveContainer,
+  Area,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
   Tooltip,
   Legend,
-  Filler,
-  ChartOptions,
-} from 'chart.js';
-import { Line } from 'react-chartjs-2';
-import { Box, Card, CardContent, Typography, useTheme, alpha } from '@mui/material';
-import { TrendingUp, TrendingDown } from '@mui/icons-material';
+  ComposedChart,
+} from 'recharts';
+import { Box, Typography } from '@mui/material';
 
-// Register Chart.js components
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  Filler
-);
-
-interface RevenueTrendData {
+interface DataPoint {
   date: string;
-  period: string;
+  period?: string;
   revenue: number;
   orders: number;
 }
 
-interface RevenueChartProps {
-  data: RevenueTrendData[];
-  title?: string;
+interface Props {
+  data: DataPoint[];
   height?: number;
-  showOrders?: boolean;
 }
 
-const RevenueChart: React.FC<RevenueChartProps> = ({
-  data = [],
-  title = 'Revenue Trend',
-  height = 350,
-  showOrders = true,
-}) => {
-  const theme = useTheme();
+const formatINR = (value: number) =>
+  new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(value);
 
-  // Calculate trend
-  const trend = useMemo(() => {
-    if (data.length < 2) return { direction: 'neutral', percentage: 0 };
-    
-    const firstHalf = data.slice(0, Math.floor(data.length / 2));
-    const secondHalf = data.slice(Math.floor(data.length / 2));
-    
-    const firstAvg = firstHalf.reduce((sum, d) => sum + d.revenue, 0) / firstHalf.length;
-    const secondAvg = secondHalf.reduce((sum, d) => sum + d.revenue, 0) / secondHalf.length;
-    
-    const percentage = ((secondAvg - firstAvg) / firstAvg) * 100;
-    
-    return {
-      direction: percentage > 0 ? 'up' : percentage < 0 ? 'down' : 'neutral',
-      percentage: Math.abs(percentage),
-    };
-  }, [data]);
+const formatYAxisRevenue = (value: number) => {
+  if (value >= 100000) return `₹${(value / 100000).toFixed(1)}L`;
+  if (value >= 1000) return `₹${(value / 1000).toFixed(0)}k`;
+  return `₹${value}`;
+};
 
-  const chartData = useMemo(() => {
-    const labels = data.map(d => d.period);
-    
-    return {
-      labels,
-      datasets: [
-        {
-          label: 'Revenue',
-          data: data.map(d => d.revenue),
-          borderColor: theme.palette.primary.main,
-          backgroundColor: alpha(theme.palette.primary.main, 0.1),
-          fill: true,
-          tension: 0.4,
-          pointRadius: 4,
-          pointHoverRadius: 6,
-          pointBackgroundColor: theme.palette.primary.main,
-          pointBorderColor: '#fff',
-          pointBorderWidth: 2,
-        },
-        ...(showOrders ? [{
-          label: 'Orders',
-          data: data.map(d => d.orders),
-          borderColor: theme.palette.secondary.main,
-          backgroundColor: alpha(theme.palette.secondary.main, 0.1),
-          fill: true,
-          tension: 0.4,
-          pointRadius: 4,
-          pointHoverRadius: 6,
-          pointBackgroundColor: theme.palette.secondary.main,
-          pointBorderColor: '#fff',
-          pointBorderWidth: 2,
-          yAxisID: 'y1',
-        }] : []),
-      ],
-    };
-  }, [data, theme, showOrders]);
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (!active || !payload || !payload.length) return null;
+  const revenue = payload.find((p: any) => p.dataKey === 'revenue');
+  const orders = payload.find((p: any) => p.dataKey === 'orders');
+  return (
+    <Box
+      sx={{
+        background: '#fff',
+        border: '1px solid #e2e8f0',
+        borderRadius: 1.5,
+        p: 1.5,
+        boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+        minWidth: 160,
+      }}
+    >
+      <Typography sx={{ fontWeight: 600, fontSize: '0.75rem', color: '#0f172a', mb: 0.75 }}>
+        {label}
+      </Typography>
+      {revenue && (
+        <Typography sx={{ fontSize: '0.72rem', color: '#6366f1', mb: 0.25 }}>
+          Revenue: {formatINR(revenue.value ?? 0)}
+        </Typography>
+      )}
+      {orders && (
+        <Typography sx={{ fontSize: '0.72rem', color: '#f59e0b' }}>
+          Orders: {orders.value ?? 0}
+        </Typography>
+      )}
+    </Box>
+  );
+};
 
-  const options: ChartOptions<'line'> = useMemo(() => ({
-    responsive: true,
-    maintainAspectRatio: false,
-    interaction: {
-      mode: 'index' as const,
-      intersect: false,
-    },
-    plugins: {
-      legend: {
-        display: true,
-        position: 'top' as const,
-        labels: {
-          usePointStyle: true,
-          padding: 15,
-          font: {
-            size: 12,
-            family: theme.typography.fontFamily,
-          },
-        },
-      },
-      tooltip: {
-        backgroundColor: alpha(theme.palette.background.paper, 0.95),
-        titleColor: theme.palette.text.primary,
-        bodyColor: theme.palette.text.secondary,
-        borderColor: theme.palette.divider,
-        borderWidth: 1,
-        padding: 12,
-        displayColors: true,
-        callbacks: {
-          label: function(context) {
-            let label = context.dataset.label || '';
-            if (label) {
-              label += ': ';
-            }
-            if (context.parsed.y !== null) {
-              if (context.datasetIndex === 0) {
-                label += new Intl.NumberFormat('en-IN', {
-                  style: 'currency',
-                  currency: 'INR',
-                }).format(context.parsed.y);
-              } else {
-                label += context.parsed.y + ' orders';
-              }
-            }
-            return label;
-          },
-        },
-      },
-    },
-    scales: {
-      x: {
-        grid: {
-          display: false,
-        },
-        ticks: {
-          font: {
-            size: 11,
-          },
-          maxRotation: 45,
-          minRotation: 0,
-        },
-      },
-      y: {
-        type: 'linear' as const,
-        display: true,
-        position: 'left' as const,
-        grid: {
-          color: alpha(theme.palette.divider, 0.1),
-        },
-        ticks: {
-          callback: function(value) {
-            return '₹' + Number(value).toLocaleString('en-IN');
-          },
-          font: {
-            size: 11,
-          },
-        },
-      },
-      ...(showOrders ? {
-        y1: {
-          type: 'linear' as const,
-          display: true,
-          position: 'right' as const,
-          grid: {
-            drawOnChartArea: false,
-          },
-          ticks: {
-            callback: function(value) {
-              return value.toLocaleString();
-            },
-            font: {
-              size: 11,
-            },
-          },
-        },
-      } : {}),
-    },
-  }), [theme, showOrders]);
+const RevenueChart: React.FC<Props> = ({ data, height = 300 }) => {
+  const chartData = useMemo(
+    () =>
+      data.map((d) => ({
+        ...d,
+        label: d.period ?? d.date.slice(-6),
+      })),
+    [data],
+  );
+
+  if (!data || data.length === 0) {
+    return (
+      <Box sx={{ height, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <Typography sx={{ color: '#94a3b8', fontSize: '0.875rem' }}>
+          No revenue data available
+        </Typography>
+      </Box>
+    );
+  }
 
   return (
-    <Card elevation={2}>
-      <CardContent>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-          <Typography variant="h6" fontWeight={600}>
-            {title}
-          </Typography>
-          {trend.direction !== 'neutral' && (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              {trend.direction === 'up' ? (
-                <TrendingUp sx={{ color: 'success.main', fontSize: 20 }} />
-              ) : (
-                <TrendingDown sx={{ color: 'error.main', fontSize: 20 }} />
-              )}
-              <Typography
-                variant="body2"
-                sx={{
-                  color: trend.direction === 'up' ? 'success.main' : 'error.main',
-                  fontWeight: 600,
-                }}
-              >
-                {trend.percentage.toFixed(1)}%
-              </Typography>
-            </Box>
+    <ResponsiveContainer width="100%" height={height}>
+      <ComposedChart data={chartData} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
+        <defs>
+          <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="5%" stopColor="#6366f1" stopOpacity={0.18} />
+            <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+          </linearGradient>
+        </defs>
+        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+        <XAxis
+          dataKey="label"
+          tick={{ fontSize: 11, fill: '#64748b' }}
+          axisLine={{ stroke: '#e2e8f0' }}
+          tickLine={false}
+        />
+        <YAxis
+          yAxisId="revenue"
+          orientation="left"
+          tickFormatter={formatYAxisRevenue}
+          tick={{ fontSize: 10, fill: '#64748b' }}
+          axisLine={false}
+          tickLine={false}
+          width={56}
+        />
+        <YAxis
+          yAxisId="orders"
+          orientation="right"
+          tick={{ fontSize: 10, fill: '#64748b' }}
+          axisLine={false}
+          tickLine={false}
+          width={32}
+        />
+        <Tooltip content={<CustomTooltip />} />
+        <Legend
+          wrapperStyle={{ fontSize: 12, paddingTop: 8 }}
+          formatter={(value) => (
+            <span style={{ color: '#374151', fontSize: 12 }}>{value}</span>
           )}
-        </Box>
-        <Box sx={{ height }}>
-          {data.length > 0 ? (
-            <Line data={chartData} options={options} />
-          ) : (
-            <Box
-              sx={{
-                height: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'text.secondary',
-              }}
-            >
-              <Typography variant="body2">No data available</Typography>
-            </Box>
-          )}
-        </Box>
-      </CardContent>
-    </Card>
+        />
+        <Area
+          yAxisId="revenue"
+          type="monotone"
+          dataKey="revenue"
+          name="Revenue"
+          stroke="#6366f1"
+          strokeWidth={2}
+          fill="url(#revenueGradient)"
+          dot={false}
+          activeDot={{ r: 4, strokeWidth: 0 }}
+        />
+        <Line
+          yAxisId="orders"
+          type="monotone"
+          dataKey="orders"
+          name="Orders"
+          stroke="#f59e0b"
+          strokeWidth={2}
+          dot={false}
+          activeDot={{ r: 4, strokeWidth: 0 }}
+        />
+      </ComposedChart>
+    </ResponsiveContainer>
   );
 };
 

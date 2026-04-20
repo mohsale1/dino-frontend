@@ -15,10 +15,11 @@ import { ConfirmationDialog } from '../../dialogs';
 const COMPANY_INFO = { name: 'Dino', tagline: 'Smart Ordering Solutions' };
 
 const NAV_ITEMS = [
-  { label: 'Features',  id: 'features'     },
-  { label: 'Stats',     id: 'stats'        },
-  { label: 'Reviews',   id: 'testimonials' },
-  { label: 'FAQ',       id: 'faq'          },
+  { label: 'Features',    id: 'features'    },
+  { label: 'How It Works', id: 'how-it-works' },
+  { label: 'Use Cases',   id: 'use-cases'   },
+  { label: 'Reviews',     id: 'testimonials' },
+  { label: 'FAQ',         id: 'faq'         },
 ];
 
 interface AppHeaderProps {
@@ -103,7 +104,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
   const renderDesktopNavigation = () => {
     if (!isHomePage) return null;
     return (
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: { md: 0, lg: 0.5 } }}>
         {NAV_ITEMS.map(({ id, label }) => {
           const active = activeSection === id;
           return (
@@ -113,11 +114,11 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
               sx={{
                 textTransform: 'none',
                 fontWeight: active ? 700 : 500,
-                px: 2,
-                py: 1,
+                px: { md: 1, lg: 2 },
+                py: { md: 0.5, lg: 1 },
                 borderRadius: 2,
-                fontSize: '0.9375rem',
-                minHeight: 40,
+                fontSize: { md: '0.8125rem', lg: '0.9375rem' },
+                minHeight: { md: 34, lg: 40 },
                 position: 'relative',
                 backgroundColor: 'transparent',
                 color: isTransparent
@@ -155,16 +156,20 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
   const renderUserActions = () => {
     if (user) {
       return (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: { md: 0.75, lg: 1.5 } }}>
           <NotificationCenter />
           <Button
             variant="outlined"
             onClick={() => navigate('/admin/settings')}
-            startIcon={<AccountCircle sx={{ fontSize: 18 }} />}
+            startIcon={<AccountCircle sx={{ fontSize: { md: 16, lg: 18 } }} />}
             sx={{
-              textTransform: 'none', fontWeight: 500, px: 2, py: 0.75,
-              borderRadius: 1.5, fontSize: '0.875rem',
-              borderColor: '#e2e8f0', color: '#475569', minHeight: 36,
+              textTransform: 'none', fontWeight: 500,
+              px: { md: 1.25, lg: 2 },
+              py: { md: 0.5, lg: 0.75 },
+              borderRadius: 1.5,
+              fontSize: { md: '0.8125rem', lg: '0.875rem' },
+              borderColor: '#e2e8f0', color: '#475569',
+              minHeight: { md: 32, lg: 36 },
               '&:hover': {
                 borderColor: '#cbd5e1',
                 backgroundColor: alpha('#0f172a', 0.04),
@@ -177,11 +182,15 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
           <Button
             variant="outlined"
             onClick={handleLogout}
-            startIcon={<ExitToApp sx={{ fontSize: 18 }} />}
+            startIcon={<ExitToApp sx={{ fontSize: { md: 16, lg: 18 } }} />}
             sx={{
-              textTransform: 'none', fontWeight: 500, px: 2, py: 0.75,
-              borderRadius: 1.5, fontSize: '0.875rem',
-              borderColor: '#e2e8f0', color: '#475569', minHeight: 36,
+              textTransform: 'none', fontWeight: 500,
+              px: { md: 1.25, lg: 2 },
+              py: { md: 0.5, lg: 0.75 },
+              borderRadius: 1.5,
+              fontSize: { md: '0.8125rem', lg: '0.875rem' },
+              borderColor: '#e2e8f0', color: '#475569',
+              minHeight: { md: 32, lg: 36 },
               '&:hover': {
                 borderColor: '#1976d2',
                 backgroundColor: alpha('#1976d2', 0.04),
@@ -197,13 +206,17 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
     }
 
     return (
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: { md: 0.75, lg: 1.5 } }}>
         <Button
           variant="text"
           onClick={() => navigate('/login')}
           sx={{
-            textTransform: 'none', fontWeight: 500, px: 2.5, py: 1,
-            borderRadius: 1.5, fontSize: '0.9375rem', minHeight: 40,
+            textTransform: 'none', fontWeight: 500,
+            px: { md: 1.5, lg: 2.5 },
+            py: { md: 0.5, lg: 1 },
+            borderRadius: 1.5,
+            fontSize: { md: '0.8125rem', lg: '0.9375rem' },
+            minHeight: { md: 34, lg: 40 },
             color: isTransparent ? alpha('#ffffff', 0.9) : '#475569',
             '&:hover': {
               backgroundColor: isTransparent
@@ -220,8 +233,12 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
           variant="contained"
           onClick={() => navigate('/register')}
           sx={{
-            fontWeight: 600, textTransform: 'none', px: 3, py: 1,
-            borderRadius: 1.5, fontSize: '0.9375rem', minHeight: 40,
+            fontWeight: 600, textTransform: 'none',
+            px: { md: 2, lg: 3 },
+            py: { md: 0.5, lg: 1 },
+            borderRadius: 1.5,
+            fontSize: { md: '0.8125rem', lg: '0.9375rem' },
+            minHeight: { md: 34, lg: 40 },
             backgroundColor: isTransparent ? '#ffffff' : '#1976D2',
             color: isTransparent ? '#0f172a' : '#ffffff',
             boxShadow: 'none',
@@ -301,7 +318,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSectionScroll }) => {
 
             {/* Desktop nav + actions */}
             {!isMobile && (
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: { md: 1, lg: 2 } }}>
                 {renderDesktopNavigation()}
                 {renderUserActions()}
               </Box>

@@ -1,20 +1,14 @@
-/**
- * CatalogTabs Component - System Dark Palette
- *
- * Tabs for items and categories
- */
-
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import {
-  Box,
-  Tabs,
-  Tab,
-  Grid,
-  Typography,
+  Box, Typography, Tabs, Tab, Chip, Skeleton,
+  Paper, InputBase, IconButton, FormControl, Select, MenuItem, Button,
 } from '@mui/material';
 import {
   Inventory as InventoryIcon,
   Category as CategoryIcon,
+  Search as SearchIcon,
+  Close as CloseIcon,
+  FilterAltOutlined,
 } from '@mui/icons-material';
 import CatalogItemCard from './CatalogItemCard';
 import CategoryCard from './CategoryCard';
@@ -25,178 +19,328 @@ interface CatalogTabsProps {
   onTabChange: (tab: string) => void;
   items: CatalogItem[];
   categories: Category[];
+  searchQuery?: string;
+  loading?: boolean;
   onEditItem: (item: CatalogItem) => void;
   onDeleteItem: (item: CatalogItem) => void;
   onEditCategory: (category: Category) => void;
   onDeleteCategory: (category: Category) => void;
   onToggleAvailability: (itemId: string) => void;
   onImageUpload: (itemId: string, file: File) => void;
-  searchQuery?: string;
-  filterCategory?: string;
-  filterAvailability?: string;
 }
 
-const CatalogTabs: React.FC<CatalogTabsProps> = ({
-  activeTab,
-  onTabChange,
-  items,
-  categories,
-  onEditItem,
-  onDeleteItem,
-  onEditCategory,
-  onDeleteCategory,
-  onToggleAvailability,
-  onImageUpload,
-  searchQuery = '',
-  filterCategory = 'all',
-  filterAvailability = 'all',
-}) => {
-  const filteredItems = items.filter(item => {
-    const matchesSearch =
-      item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.description?.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = filterCategory === 'all' || item.categoryId === filterCategory;
-    const matchesAvailability =
-      filterAvailability === 'all' ||
-      (filterAvailability === 'available' && item.isAvailable) ||
-      (filterAvailability === 'unavailable' && !item.isAvailable);
-    return matchesSearch && matchesCategory && matchesAvailability;
-  });
+const GRID_SX = {
+  display: 'grid',
+  gridTemplateColumns: {
+    xs: '1fr',
+    sm: 'repeat(2, 1fr)',
+    md: 'repeat(3, 1fr)',
+    lg: 'repeat(4, 1fr)',
+  },
+  gap: 2,
+  px: { xs: 1.5, sm: 2 },
+};
 
-  const filteredCategories = categories.filter(
-    category =>
-      category.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      category.description?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+const ItemSkeleton: React.FC = () => (
+  <Box sx={{ borderRadius: 2, overflow: 'hidden', bgcolor: '#fff', border: '1px solid #e2e8f0' }}>
+    <Skeleton variant="rectangular" height={160} sx={{ bgcolor: '#f1f5f9' }} />
+    <Box sx={{ p: 2 }}>
+      <Skeleton variant="text" width="60%" height={20} sx={{ mb: 0.5 }} />
+      <Skeleton variant="text" width="40%" height={16} sx={{ mb: 1 }} />
+      <Skeleton variant="text" width="80%" height={14} />
+      <Skeleton variant="text" width="60%" height={14} sx={{ mb: 1.5 }} />
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Skeleton variant="text" width={60} height={24} />
+        <Box sx={{ display: 'flex', gap: 0.5 }}>
+          <Skeleton variant="circular" width={28} height={28} />
+          <Skeleton variant="circular" width={28} height={28} />
+        </Box>
+      </Box>
+    </Box>
+  </Box>
+);
+
+const CatSkeleton: React.FC = () => (
+  <Box sx={{ borderRadius: 2, overflow: 'hidden', bgcolor: '#fff', border: '1px solid #e2e8f0' }}>
+    <Skeleton variant="rectangular" height={80} sx={{ bgcolor: '#f1f5f9' }} />
+    <Box sx={{ p: 2 }}>
+      <Skeleton variant="text" width="50%" height={20} sx={{ mb: 0.5 }} />
+      <Skeleton variant="text" width="70%" height={14} />
+    </Box>
+  </Box>
+);
+
+const CatalogTabs: React.FC<CatalogTabsProps> = ({
+  activeTab, onTabChange, items, categories,
+  searchQuery: externalSearch = '', loading = false,
+  onEditItem, onDeleteItem, onEditCategory, onDeleteCategory,
+  onToggleAvailability, onImageUpload,
+}) => {
+  const [localSearch, setLocalSearch] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('all');
+  const [availFilter, setAvailFilter] = useState('all');
+
+  // Use external search (debounced from parent) merged with local search
+  const q = (externalSearch || localSearch).toLowerCase();
+  const hasFilters = categoryFilter !== 'all' || availFilter !== 'all' || !!localSearch;
+
+  const filteredItems = useMemo(() => items.filter(item => {
+    const matchSearch = !q || item.name?.toLowerCase().includes(q) || item.description?.toLowerCase().includes(q);
+    const matchCat = categoryFilter === 'all' || item.categoryId === categoryFilter;
+    const matchAvail = availFilter === 'all'
+      ? true
+      : availFilter === 'available' ? item.isAvailable : !item.isAvailable;
+    return matchSearch && matchCat && matchAvail;
+  }), [items, q, categoryFilter, availFilter]);
+
+  const filteredCategories = useMemo(() => categories.filter(cat =>
+    !q || cat.name?.toLowerCase().includes(q) || cat.description?.toLowerCase().includes(q)
+  ), [categories, q]);
+
+  const getCategoryItemCount = (catId: string) => items.filter(i => i.categoryId === catId).length;
+
+  const handleTabChange = (_: React.SyntheticEvent, v: string) => {
+    onTabChange(v);
+    setCategoryFilter('all');
+    setAvailFilter('all');
+    setLocalSearch('');
+  };
+
+  const handleClearFilters = () => {
+    setCategoryFilter('all');
+    setAvailFilter('all');
+    setLocalSearch('');
+  };
 
   return (
-    <Box sx={{ bgcolor: '#ffffff' }}>
-      {/* Tab bar */}
-      <Box sx={{ borderBottom: '1px solid #e2e8f0' }}>
+    <Box>
+      {/* ── Row 1: Filter toolbar (items tab only) ── */}
+      {activeTab === 'items' && (
+        <Paper
+          elevation={0}
+          sx={{
+            borderRadius: 0,
+            border: 'none',
+            borderTop: '1px solid #e2e8f0',
+            borderBottom: '1px solid #f1f5f9',
+            bgcolor: '#fff',
+          }}
+        >
+          <Box
+            sx={{
+              px: 2.5,
+              pt: 2,
+              pb: 1.5,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1.5,
+              flexWrap: 'wrap',
+            }}
+          >
+            {/* Search */}
+            <Box
+              sx={{
+                flex: '1 1 200px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+                bgcolor: '#f8fafc',
+                border: '1px solid #e2e8f0',
+                borderRadius: 2,
+                px: 1.5,
+                py: 0.75,
+              }}
+            >
+              <SearchIcon sx={{ fontSize: 17, color: '#94a3b8', flexShrink: 0 }} />
+              <InputBase
+                placeholder="Search items..."
+                value={localSearch}
+                onChange={e => setLocalSearch(e.target.value)}
+                sx={{ flex: 1, fontSize: '0.875rem', color: '#0f172a' }}
+              />
+              {localSearch && (
+                <IconButton size="small" onClick={() => setLocalSearch('')} sx={{ p: 0.25, color: '#94a3b8' }}>
+                  <CloseIcon sx={{ fontSize: 14 }} />
+                </IconButton>
+              )}
+            </Box>
+
+            {/* Category dropdown */}
+            <FormControl size="small" sx={{ minWidth: 140, flexShrink: 0 }}>
+              <Select
+                value={categoryFilter}
+                onChange={e => setCategoryFilter(e.target.value)}
+                displayEmpty
+                sx={{ borderRadius: 2, fontSize: '0.875rem', bgcolor: '#f8fafc' }}
+              >
+                <MenuItem value="all">
+                  <Typography variant="body2" sx={{ color: '#94a3b8' }}>All Categories</Typography>
+                </MenuItem>
+                {categories.map(cat => (
+                  <MenuItem key={cat.id} value={cat.id}>
+                    <Typography variant="body2">{cat.name}</Typography>
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            {/* Availability dropdown */}
+            <FormControl size="small" sx={{ minWidth: 130, flexShrink: 0 }}>
+              <Select
+                value={availFilter}
+                onChange={e => setAvailFilter(e.target.value)}
+                displayEmpty
+                sx={{ borderRadius: 2, fontSize: '0.875rem', bgcolor: '#f8fafc' }}
+              >
+                <MenuItem value="all">
+                  <Typography variant="body2" sx={{ color: '#94a3b8' }}>All Status</Typography>
+                </MenuItem>
+                <MenuItem value="available">
+                  <Typography variant="body2">Available</Typography>
+                </MenuItem>
+                <MenuItem value="unavailable">
+                  <Typography variant="body2">Unavailable</Typography>
+                </MenuItem>
+              </Select>
+            </FormControl>
+
+            {/* Clear filters */}
+            {hasFilters && (
+              <Button
+                size="small"
+                startIcon={<FilterAltOutlined sx={{ fontSize: 14 }} />}
+                onClick={handleClearFilters}
+                sx={{
+                  textTransform: 'none', color: '#64748b', fontWeight: 600,
+                  fontSize: '0.8125rem', borderRadius: 2, px: 1.5,
+                  '&:hover': { bgcolor: 'rgba(100,116,139,0.06)' },
+                }}
+              >
+                Clear
+              </Button>
+            )}
+
+            {/* Result count */}
+            <Box sx={{ ml: 'auto', flexShrink: 0, display: { xs: 'none', sm: 'block' } }}>
+              <Typography variant="caption" sx={{ color: '#94a3b8', fontWeight: 500 }}>
+                {filteredItems.length} of {items.length}
+              </Typography>
+            </Box>
+          </Box>
+        </Paper>
+      )}
+
+      {/* ── Row 2: Items / Categories full-width tabs ── */}
+      <Box sx={{ bgcolor: '#fff', borderTop: activeTab === 'items' ? 'none' : '1px solid #e2e8f0', borderBottom: '1px solid #e2e8f0' }}>
         <Tabs
           value={activeTab}
-          onChange={(_, newValue) => onTabChange(newValue)}
+          onChange={handleTabChange}
+          variant="fullWidth"
           sx={{
-            px: { xs: 2, sm: 3 },
+            minHeight: 44,
             '& .MuiTab-root': {
+              minHeight: 44,
+              fontSize: '0.85rem',
               textTransform: 'none',
               fontWeight: 600,
-              fontSize: '0.9375rem',
-              color: '#64748b',
-              px: { xs: 2, sm: 3 },
-              '&.Mui-selected': {
-                color: '#0f172a',
-              },
+              py: 0,
             },
-            '& .MuiTabs-indicator': {
-              backgroundColor: '#0f172a',
-              height: 3,
-            },
+            '& .MuiTabs-indicator': { height: 2, bgcolor: '#0f172a' },
           }}
         >
           <Tab
-            icon={<InventoryIcon sx={{ fontSize: 16 }} />}
-            iconPosition="start"
-            label="Items"
             value="items"
+            label={
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <InventoryIcon sx={{ fontSize: 16 }} />
+                Items
+                <Chip
+                  label={items.length}
+                  size="small"
+                  sx={{
+                    height: 18, fontSize: '0.68rem', fontWeight: 700,
+                    bgcolor: activeTab === 'items' ? '#0f172a' : '#f1f5f9',
+                    color: activeTab === 'items' ? '#fff' : '#64748b',
+                    '& .MuiChip-label': { px: 0.75 },
+                  }}
+                />
+              </Box>
+            }
           />
           <Tab
-            icon={<CategoryIcon sx={{ fontSize: 16 }} />}
-            iconPosition="start"
-            label="Categories"
             value="categories"
+            label={
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <CategoryIcon sx={{ fontSize: 16 }} />
+                Categories
+                <Chip
+                  label={categories.length}
+                  size="small"
+                  sx={{
+                    height: 18, fontSize: '0.68rem', fontWeight: 700,
+                    bgcolor: activeTab === 'categories' ? '#0f172a' : '#f1f5f9',
+                    color: activeTab === 'categories' ? '#fff' : '#64748b',
+                    '& .MuiChip-label': { px: 0.75 },
+                  }}
+                />
+              </Box>
+            }
           />
         </Tabs>
       </Box>
 
-      {/* Content area */}
-      <Box sx={{ p: { xs: 2, sm: 3 }, bgcolor: '#f1f5f9' }}>
-        {activeTab === 'items' && (
-          <Grid container spacing={{ xs: 1.5, sm: 2 }} alignItems="stretch">
-            {filteredItems.length === 0 ? (
-              <Grid item xs={12}>
-                <Box sx={{ textAlign: 'center', py: 6 }}>
-                  <Box
-                    sx={{
-                      width: 56,
-                      height: 56,
-                      borderRadius: 2,
-                      bgcolor: 'rgba(15,23,42,0.06)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      margin: 'auto',
-                      mb: 2,
-                    }}
-                  >
-                    <InventoryIcon sx={{ color: '#0f172a', fontSize: 28 }} />
-                  </Box>
-                  <Typography variant="h6" sx={{ color: '#0f172a', fontWeight: 600, mb: 0.5 }}>
-                    No items found
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: '#64748b' }}>
-                    Try adjusting your search or filters
-                  </Typography>
-                </Box>
-              </Grid>
-            ) : (
-              filteredItems.map((item) => (
-                <Grid item xs={12} sm={6} md={4} lg={3} key={item.id} sx={{ display: 'flex' }}>
-                  <CatalogItemCard
-                    item={item}
-                    categoryName={categories.find(c => c.id === item.categoryId)?.name}
-                    onEdit={onEditItem}
-                    onDelete={onDeleteItem}
-                    onToggleAvailability={onToggleAvailability}
-                    onImageUpload={onImageUpload}
-                  />
-                </Grid>
-              ))
-            )}
-          </Grid>
-        )}
-
-        {activeTab === 'categories' && (
-          <Grid container spacing={{ xs: 1.5, sm: 2 }} alignItems="stretch">
-            {filteredCategories.length === 0 ? (
-              <Grid item xs={12}>
-                <Box sx={{ textAlign: 'center', py: 6 }}>
-                  <Box
-                    sx={{
-                      width: 56,
-                      height: 56,
-                      borderRadius: 2,
-                      bgcolor: 'rgba(15,23,42,0.06)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      margin: 'auto',
-                      mb: 2,
-                    }}
-                  >
-                    <CategoryIcon sx={{ color: '#0f172a', fontSize: 28 }} />
-                  </Box>
-                  <Typography variant="h6" sx={{ color: '#0f172a', fontWeight: 600, mb: 0.5 }}>
-                    No categories found
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: '#64748b' }}>
-                    Try adjusting your search or filters
-                  </Typography>
-                </Box>
-              </Grid>
-            ) : (
-              filteredCategories.map((category) => (
-                <Grid item xs={12} sm={6} md={4} lg={3} key={category.id} sx={{ display: 'flex' }}>
-                  <CategoryCard
-                    category={category}
-                    itemCount={items.filter(i => i.categoryId === category.id).length}
-                    onEdit={onEditCategory}
-                    onDelete={onDeleteCategory}
-                  />
-                </Grid>
-              ))
-            )}
-          </Grid>
+      {/* ── Content ── */}
+      <Box sx={{ pt: 2 }}>
+        {activeTab === 'items' ? (
+          loading ? (
+            <Box sx={GRID_SX}>
+              {Array.from({ length: 6 }).map((_, i) => <ItemSkeleton key={i} />)}
+            </Box>
+          ) : filteredItems.length === 0 ? (
+            <Box sx={{ textAlign: 'center', py: 10 }}>
+              <InventoryIcon sx={{ fontSize: 48, color: '#cbd5e1', mb: 1.5 }} />
+              <Typography variant="h6" sx={{ fontWeight: 600, color: '#64748b', mb: 0.5 }}>No items found</Typography>
+              <Typography variant="body2" sx={{ color: '#94a3b8' }}>Try adjusting your search or filters</Typography>
+            </Box>
+          ) : (
+            <Box sx={GRID_SX}>
+              {filteredItems.map(item => (
+                <CatalogItemCard
+                  key={item.id}
+                  item={item}
+                  categoryName={categories.find(c => c.id === item.categoryId)?.name}
+                  onEdit={onEditItem}
+                  onDelete={onDeleteItem}
+                  onToggleAvailability={onToggleAvailability}
+                  onImageUpload={onImageUpload}
+                />
+              ))}
+            </Box>
+          )
+        ) : (
+          loading ? (
+            <Box sx={GRID_SX}>
+              {Array.from({ length: 4 }).map((_, i) => <CatSkeleton key={i} />)}
+            </Box>
+          ) : filteredCategories.length === 0 ? (
+            <Box sx={{ textAlign: 'center', py: 10 }}>
+              <CategoryIcon sx={{ fontSize: 48, color: '#cbd5e1', mb: 1.5 }} />
+              <Typography variant="h6" sx={{ fontWeight: 600, color: '#64748b', mb: 0.5 }}>No categories found</Typography>
+              <Typography variant="body2" sx={{ color: '#94a3b8' }}>Try adjusting your search</Typography>
+            </Box>
+          ) : (
+            <Box sx={GRID_SX}>
+              {filteredCategories.map(cat => (
+                <CategoryCard
+                  key={cat.id}
+                  category={cat}
+                  itemCount={getCategoryItemCount(cat.id)}
+                  onEdit={onEditCategory}
+                  onDelete={onDeleteCategory}
+                />
+              ))}
+            </Box>
+          )
         )}
       </Box>
     </Box>

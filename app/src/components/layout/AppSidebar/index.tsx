@@ -15,7 +15,6 @@ import {
   Tooltip,
   alpha,
   Switch,
-  FormControlLabel,
   CircularProgress,
 } from '@mui/material';
 import {
@@ -87,7 +86,7 @@ const allMenuItems: NavigationItem[] = [
   },
   {
     label: 'Dashboard',
-    path: '/admin',
+    path: '/admin/dashboard',
     icon: <Dashboard />,
     requiredPermissions: ['application.dashboard.view'],
     category: 'main',
@@ -209,11 +208,11 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ isTablet = false }) => {
     : null;
 
   const handleToggleVenueOpen = async () => {
-    if (!userData?.venue?.id || statusLoading || !venueStatus) return;
+    if (!userData?.venue?.id || !userData?.workspace?.id || statusLoading || !venueStatus) return;
+    const newStatus = !venueStatus.isOpen;
     try {
       setStatusLoading(true);
-      const newStatus = !venueStatus.isOpen;
-      await venueService.updateVenue(userData.venue.id, { is_open: newStatus });
+      await venueService.setVenueOpenStatus(userData.venue.id, newStatus, userData.workspace.id);
       await refreshUserData();
     } catch {
       alert('Failed to update venue status. Please try again.');
@@ -359,19 +358,20 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ isTablet = false }) => {
     if (!venueStatus) return null;
     if (!hasBackendPermission('application.status.update')) return null;
     const collapsed = !isMobileDrawer && isCollapsed;
+    const isOpen = venueStatus.isOpen;
 
     if (collapsed) {
       return (
         <Box
           sx={{
             p: 1,
-            borderBottom: '1px solid rgba(255,255,255,0.1)',
+            borderBottom: '1px solid rgba(255,255,255,0.08)',
             display: 'flex',
             justifyContent: 'center',
           }}
         >
           <Tooltip
-            title={`${venueStatus.isOpen ? 'Accepting Orders' : 'Closed for Orders'} — Click to toggle`}
+            title={`${isOpen ? 'Accepting Orders' : 'Closed for Orders'} — Click to toggle`}
             placement="right"
           >
             <span>
@@ -379,28 +379,27 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ isTablet = false }) => {
                 onClick={handleToggleVenueOpen}
                 disabled={statusLoading || !venueStatus.isActive}
                 sx={{
-                  width: 40,
-                  height: 40,
-                  backgroundColor: venueStatus.isOpen
-                    ? alpha('#1976d2', 0.15)
-                    : alpha('#ef4444', 0.15),
-                  border: venueStatus.isOpen
-                    ? '2px solid rgba(25,118,210,0.4)'
-                    : '2px solid rgba(239,68,68,0.4)',
+                  width: 36,
+                  height: 36,
+                  backgroundColor: isOpen
+                    ? alpha('#22c55e', 0.15)
+                    : alpha('#ef4444', 0.12),
+                  border: `1.5px solid ${isOpen ? 'rgba(34,197,94,0.35)' : 'rgba(239,68,68,0.3)'}`,
+                  borderRadius: 1.5,
                   '&:hover': {
-                    backgroundColor: venueStatus.isOpen
-                      ? alpha('#1976d2', 0.25)
-                      : alpha('#ef4444', 0.25),
+                    backgroundColor: isOpen
+                      ? alpha('#22c55e', 0.25)
+                      : alpha('#ef4444', 0.22),
                   },
-                  '&:disabled': { opacity: 0.5 },
+                  '&:disabled': { opacity: 0.45 },
                 }}
               >
                 {statusLoading ? (
-                  <CircularProgress size={16} sx={{ color: '#ffffff' }} />
-                ) : venueStatus.isOpen ? (
-                  <CheckCircle sx={{ fontSize: 20, color: '#42a5f5' }} />
+                  <CircularProgress size={14} sx={{ color: '#ffffff' }} />
+                ) : isOpen ? (
+                  <CheckCircle sx={{ fontSize: 18, color: '#4ade80' }} />
                 ) : (
-                  <Cancel sx={{ fontSize: 20, color: '#f87171' }} />
+                  <Cancel sx={{ fontSize: 18, color: '#f87171' }} />
                 )}
               </IconButton>
             </span>
@@ -411,79 +410,99 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ isTablet = false }) => {
 
     return (
       <Box
-        sx={{ p: 1.5, borderBottom: '1px solid rgba(255,255,255,0.1)' }}
+        sx={{ px: 1.5, py: 1.25, borderBottom: '1px solid rgba(255,255,255,0.08)' }}
         data-tour="venue-status"
       >
         <Box
           sx={{
-            p: 1.5,
             borderRadius: 2,
-            bgcolor: 'rgba(255,255,255,0.06)',
-            border: '1px solid rgba(255,255,255,0.1)',
+            overflow: 'hidden',
+            border: `1px solid ${isOpen ? 'rgba(34,197,94,0.2)' : 'rgba(239,68,68,0.18)'}`,
+            bgcolor: isOpen ? 'rgba(34,197,94,0.07)' : 'rgba(239,68,68,0.06)',
           }}
         >
-          <Typography
-            variant="caption"
+          {/* Status header row */}
+          <Box
             sx={{
-              color: 'rgba(255,255,255,0.6)',
-              fontSize: '0.6875rem',
-              fontWeight: 600,
-              letterSpacing: '0.5px',
-              textTransform: 'uppercase',
-              display: 'block',
-              mb: 1,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              px: 1.5,
+              pt: 1.25,
+              pb: 1,
             }}
           >
-            Order Status
-          </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+              {/* Status dot */}
+              <Box
+                sx={{
+                  width: 7,
+                  height: 7,
+                  borderRadius: '50%',
+                  bgcolor: isOpen ? '#4ade80' : '#f87171',
+                  flexShrink: 0,
+                  boxShadow: isOpen
+                    ? '0 0 0 2px rgba(74,222,128,0.25)'
+                    : '0 0 0 2px rgba(248,113,113,0.25)',
+                }}
+              />
+              <Typography
+                sx={{
+                  fontSize: '0.75rem',
+                  fontWeight: 700,
+                  color: isOpen ? '#4ade80' : '#f87171',
+                  letterSpacing: '0.3px',
+                  textTransform: 'uppercase',
+                }}
+              >
+                {isOpen ? 'Open' : 'Closed'}
+              </Typography>
+            </Box>
 
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
-            <Typography
-              variant="body2"
-              sx={{ color: '#ffffff', fontSize: '0.8125rem', fontWeight: 600 }}
-            >
-              {venueStatus.isOpen ? 'Accepting Orders' : 'Closed for Orders'}
-            </Typography>
-            <Chip
-              label={venueStatus.isOpen ? 'Open' : 'Closed'}
-              size="small"
-              sx={{
-                height: 20,
-                fontSize: '0.6875rem',
-                fontWeight: 700,
-                bgcolor: venueStatus.isOpen
-                  ? alpha('#1976d2', 0.2)
-                  : alpha('#ef4444', 0.15),
-                color: venueStatus.isOpen ? '#42a5f5' : '#f87171',
-                border: 'none',
-                '& .MuiChip-label': { px: 1 },
-              }}
-            />
-          </Box>
-
-          <FormControlLabel
-            control={
+            {/* Toggle switch */}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              {statusLoading && (
+                <CircularProgress size={11} sx={{ color: 'rgba(255,255,255,0.5)' }} />
+              )}
               <Switch
-                checked={venueStatus.isOpen}
+                checked={isOpen}
                 onChange={handleToggleVenueOpen}
                 disabled={statusLoading || !venueStatus.isActive}
-                color="primary"
                 size="small"
+                sx={{
+                  '& .MuiSwitch-switchBase.Mui-checked': {
+                    color: '#4ade80',
+                    '& + .MuiSwitch-track': { bgcolor: '#16a34a' },
+                  },
+                  '& .MuiSwitch-switchBase': {
+                    color: '#f87171',
+                    '& + .MuiSwitch-track': { bgcolor: '#b91c1c' },
+                  },
+                }}
               />
-            }
-            label={
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-                {statusLoading && <CircularProgress size={12} sx={{ color: 'rgba(255,255,255,0.6)' }} />}
-                <Typography
-                  variant="caption"
-                  sx={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.75rem' }}
-                >
-                  {venueStatus.isOpen ? 'Open for Orders' : 'Closed for Orders'}
-                </Typography>
-              </Box>
-            }
-            sx={{ m: 0, alignItems: 'center' }}
-          />
+            </Box>
+          </Box>
+
+          {/* Subtitle */}
+          <Box
+            sx={{
+              px: 1.5,
+              pb: 1.25,
+              borderTop: '1px solid rgba(255,255,255,0.06)',
+              pt: 0.75,
+            }}
+          >
+            <Typography
+              sx={{
+                fontSize: '0.6875rem',
+                color: 'rgba(255,255,255,0.45)',
+                fontWeight: 500,
+                lineHeight: 1.3,
+              }}
+            >
+              {isOpen ? 'Customers can place orders' : 'Orders are paused'}
+            </Typography>
+          </Box>
         </Box>
       </Box>
     );
@@ -537,7 +556,7 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ isTablet = false }) => {
 
             <List disablePadding sx={{ px: collapsed ? 0.75 : 1 }}>
               {group.items.map((item) => {
-                const isActive = location.pathname === item.path;
+                const isActive = location.pathname.startsWith(item.path);
 
                 const listItemButton = (
                   <ListItemButton
@@ -545,8 +564,8 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ isTablet = false }) => {
                     sx={{
                       borderRadius: 1.5,
                       mb: 0.25,
-                      minHeight: 44,
-                      px: collapsed ? 1 : 1.5,
+                      minHeight: collapsed ? 36 : 44,
+                      px: collapsed ? 0.75 : 1.5,
                       justifyContent: collapsed ? 'center' : 'flex-start',
                       bgcolor: isActive ? alpha('#ffffff', 0.15) : 'transparent',
                       position: 'relative',
@@ -575,7 +594,7 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ isTablet = false }) => {
                         minWidth: collapsed ? 0 : 32,
                         color: isActive ? '#ffffff' : 'rgba(255,255,255,0.7)',
                         justifyContent: 'center',
-                        '& .MuiSvgIcon-root': { fontSize: '1.1rem' },
+                        '& .MuiSvgIcon-root': { fontSize: collapsed ? '1rem' : '1.1rem' },
                       }}
                     >
                       {item.icon}
@@ -754,9 +773,11 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ isTablet = false }) => {
         display: 'flex',
         flexDirection: 'column',
         height: '100%',
+        maxHeight: '100%',
         bgcolor: SIDEBAR_BG,
         width: isMobileDrawer ? DRAWER_WIDTH : isCollapsed ? COLLAPSED_WIDTH : DRAWER_WIDTH,
         overflow: 'hidden',
+        position: 'relative',
       }}
     >
       {renderHeader(isMobileDrawer)}
@@ -804,6 +825,9 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ isTablet = false }) => {
             border: 'none',
             bgcolor: SIDEBAR_BG,
             boxShadow: '4px 0 24px rgba(0,0,0,0.4)',
+            overflow: 'hidden',
+            height: '100%',
+            position: 'fixed',
           },
         }}
       >

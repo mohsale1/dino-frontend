@@ -1,442 +1,232 @@
 import React from 'react';
-import {
-  Box,
-  Grid,
-  Card,
-  CardContent,
-  Typography,
-  LinearProgress,
-  Chip,
-  Divider,
-  Avatar,
-} from '@mui/material';
-import { alpha } from '@mui/material/styles';
-import {
-  AttachMoney,
-  TrendingUp,
-  ShoppingCart,
-  Category,
-} from '@mui/icons-material';
+import { Box, Grid, Typography, LinearProgress } from '@mui/material';
 import RevenueChart from '../../charts/RevenueChart';
 
 interface SalesTabProps {
-  dashboardData: any;
+  dashboardData: {
+    stats: {
+      totalRevenue?: number;
+      todaysRevenue?: number;
+      avgOrderValue?: number;
+    };
+    analytics: {
+      revenueTrend: Array<{ date: string; period?: string; revenue: number; orders: number }>;
+      paymentMethods: Array<{ method: string; count: number; revenue: number; percentage: number }>;
+      categoryPerformance: Array<{ category: string; orders: number; revenue: number; percentage: number }>;
+    };
+    summary: {
+      totalRevenue?: number;
+      todaysRevenue?: number;
+      avgOrderValue?: number;
+      totalOrders?: number;
+    };
+  };
 }
 
-const PAYMENT_COLORS: Record<string, string> = {
-  cash: '#2e7d32',
-  card: '#0288d1',
-  upi: '#7b1fa2',
-  online: '#f57c00',
-  credit: '#0288d1',
-  debit: '#0277bd',
-  wallet: '#c62828',
-};
+const CATEGORY_COLORS = ['#6366f1', '#f59e0b', '#10b981', '#3b82f6', '#ef4444', '#8b5cf6'];
 
-const CATEGORY_COLORS = [
-  '#0288d1',
-  '#2e7d32',
-  '#f57c00',
-  '#7b1fa2',
-  '#c62828',
-  '#00838f',
-  '#558b2f',
-  '#6d4c41',
-];
+const cardStyle = {
+  bgcolor: '#fff',
+  borderRadius: 2,
+  boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
+  p: 2.5,
+} as const;
 
-const formatCurrency = (value: number): string =>
-  `\u20B9${value.toLocaleString('en-IN')}`;
+const cardTitleStyle = {
+  fontWeight: 700,
+  fontSize: '0.875rem',
+  color: '#0f172a',
+  mb: 2,
+} as const;
 
-const getPaymentColor = (method: string): string => {
-  const key = method.toLowerCase();
-  for (const k of Object.keys(PAYMENT_COLORS)) {
-    if (key.includes(k)) return PAYMENT_COLORS[k];
-  }
-  return '#546e7a';
-};
+const formatINR = (value?: number): string =>
+  `\u20B9${(value ?? 0).toLocaleString('en-IN')}`;
 
-interface StatCardProps {
-  title: string;
-  value: string;
-  icon: React.ReactNode;
-  color: string;
-  subtitle?: string;
-}
-
-const StatCard: React.FC<StatCardProps> = ({ title, value, icon, color, subtitle }) => (
-  <Card
-    elevation={0}
-    sx={{
-      height: '100%',
-      position: 'relative',
-      overflow: 'hidden',
-      border: '1px solid #e2e8f0',
-      borderRadius: 2,
-      bgcolor: '#ffffff',
-      transition: 'box-shadow 0.2s',
-      '&:hover': {
-        boxShadow: '0 4px 16px rgba(0,0,0,0.07)',
-      },
-      '&::after': {
-        content: '""',
-        position: 'absolute',
-        left: 0,
-        top: 0,
-        bottom: 0,
-        width: 4,
-        borderRadius: '2px 0 0 2px',
-        bgcolor: color,
-      },
-    }}
-  >
-    <CardContent sx={{ p: 2.5, pl: 3.5, '&:last-child': { pb: 2.5 } }}>
-      <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 1.5 }}>
-        <Typography
-          variant="caption"
-          sx={{
-            fontWeight: 600,
-            fontSize: '0.7rem',
-            textTransform: 'uppercase',
-            letterSpacing: '0.6px',
-            color: 'text.secondary',
-          }}
-        >
-          {title}
-        </Typography>
-        <Avatar
-          sx={{
-            width: 36,
-            height: 36,
-            borderRadius: 2,
-            bgcolor: alpha(color, 0.12),
-            color,
-          }}
-        >
-          {icon}
-        </Avatar>
-      </Box>
-      <Typography
-        variant="h4"
-        sx={{
-          fontWeight: 700,
-          fontSize: '1.65rem',
-          lineHeight: 1.2,
-          color: 'text.primary',
-          mb: subtitle ? 0.5 : 0,
-        }}
-      >
-        {value}
-      </Typography>
-      {subtitle && (
-        <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.72rem' }}>
-          {subtitle}
-        </Typography>
-      )}
-    </CardContent>
-  </Card>
-);
-
+const capitalize = (str: string): string =>
+  str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 
 const SalesTab: React.FC<SalesTabProps> = ({ dashboardData }) => {
-  const stats = dashboardData?.stats || {};
-  const analytics = dashboardData?.analytics || {};
+  const summary = dashboardData?.summary ?? {};
+  const analytics = dashboardData?.analytics ?? {
+    revenueTrend: [],
+    paymentMethods: [],
+    categoryPerformance: [],
+  };
 
-  const totalRevenue: number = stats.total_revenue || 0;
-  const todaysRevenue: number = stats.todays_revenue || 0;
-  const avgOrderValue: number = stats.avg_order_value || 0;
-
-  const revenueTrend: any[] = analytics.revenue_trend || [];
-  const paymentMethods: any[] = analytics.payment_methods || [];
-  const categoryPerformance: any[] = analytics.category_performance || [];
-
-  const maxPaymentPct = paymentMethods.length > 0
-    ? Math.max(...paymentMethods.map((p: any) => p.percentage || 0))
-    : 100;
-
-  const maxCategoryPct = categoryPerformance.length > 0
-    ? Math.max(...categoryPerformance.map((c: any) => c.percentage || 0))
-    : 100;
+  const paymentMethods = analytics.paymentMethods ?? [];
+  const categoryPerformance = analytics.categoryPerformance ?? [];
 
   return (
-    <Box>
-      {/* Summary Cards */}
-      <Grid container spacing={2.5} sx={{ mb: 3 }}>
+    <Box sx={{ px: { xs: 2, sm: 3, md: 4 }, py: 3, bgcolor: '#f8fafc' }}>
+
+      {/* Row 1 — Stat Cards */}
+      <Grid container spacing={2.5} sx={{ mb: 2.5 }}>
+        {/* Total Revenue */}
         <Grid item xs={12} sm={4}>
-          <StatCard
-            title="Total Revenue"
-            value={formatCurrency(totalRevenue)}
-            icon={<AttachMoney sx={{ fontSize: 20 }} />}
-            color="#0288d1"
-            subtitle="All time"
-          />
+          <Box
+            sx={{
+              ...cardStyle,
+              borderLeft: '4px solid #1976d2',
+            }}
+          >
+            <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 600, fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              Total Revenue
+            </Typography>
+            <Typography sx={{ fontWeight: 700, fontSize: '1.5rem', color: '#0f172a', mt: 0.5 }}>
+              {formatINR(summary.totalRevenue)}
+            </Typography>
+          </Box>
         </Grid>
+
+        {/* Today's Revenue */}
         <Grid item xs={12} sm={4}>
-          <StatCard
-            title="Today's Revenue"
-            value={formatCurrency(todaysRevenue)}
-            icon={<TrendingUp sx={{ fontSize: 20 }} />}
-            color="#2e7d32"
-            subtitle="Current day"
-          />
+          <Box
+            sx={{
+              ...cardStyle,
+              borderLeft: '4px solid #0288d1',
+            }}
+          >
+            <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 600, fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              Today's Revenue
+            </Typography>
+            <Typography sx={{ fontWeight: 700, fontSize: '1.5rem', color: '#0f172a', mt: 0.5 }}>
+              {formatINR(summary.todaysRevenue)}
+            </Typography>
+          </Box>
         </Grid>
+
+        {/* Avg Order Value */}
         <Grid item xs={12} sm={4}>
-          <StatCard
-            title="Avg Order Value"
-            value={formatCurrency(avgOrderValue)}
-            icon={<ShoppingCart sx={{ fontSize: 20 }} />}
-            color="#f57c00"
-            subtitle="Per order"
-          />
+          <Box
+            sx={{
+              ...cardStyle,
+              borderLeft: '4px solid #388e3c',
+            }}
+          >
+            <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 600, fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              Avg Order Value
+            </Typography>
+            <Typography sx={{ fontWeight: 700, fontSize: '1.5rem', color: '#0f172a', mt: 0.5 }}>
+              {formatINR(summary.avgOrderValue)}
+            </Typography>
+          </Box>
         </Grid>
       </Grid>
 
-      {/* Revenue Trend Chart */}
-      <Box sx={{ mb: 3 }}>
-        <RevenueChart
-          data={revenueTrend}
-          title="Revenue Trend"
-          height={340}
-          showOrders={true}
-        />
+      {/* Row 2 — Revenue Trend */}
+      <Box sx={{ ...cardStyle, mb: 2.5 }}>
+        <Typography sx={cardTitleStyle}>Revenue Trend</Typography>
+        <RevenueChart data={analytics.revenueTrend ?? []} height={300} />
       </Box>
 
-      {/* Payment Methods + Category Performance */}
+      {/* Row 3 — Payment Methods + Category Performance */}
       <Grid container spacing={2.5}>
+
         {/* Payment Methods */}
         <Grid item xs={12} md={6}>
-          <Card
-            elevation={0}
-            sx={{
-              height: '100%',
-              border: '1px solid #e2e8f0',
-              borderRadius: 2,
-              bgcolor: '#ffffff',
-            }}
-          >
-            <CardContent sx={{ p: 2.5, '&:last-child': { pb: 2.5 } }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-                <Typography variant="h6" fontWeight={600} fontSize="1rem">
-                  Payment Methods
-                </Typography>
-                <Chip
-                  label={`${paymentMethods.length} methods`}
-                  size="small"
-                  variant="outlined"
-                  sx={{ fontSize: '0.7rem' }}
-                />
-              </Box>
+          <Box sx={cardStyle}>
+            <Typography sx={cardTitleStyle}>Payment Methods</Typography>
 
-              {paymentMethods.length === 0 ? (
-                <Box
-                  sx={{
-                    py: 6,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    gap: 1,
-                    color: 'text.disabled',
-                  }}
-                >
-                  <AttachMoney sx={{ fontSize: 40 }} />
-                  <Typography variant="body2" color="text.secondary">
-                    No payment data available
-                  </Typography>
-                </Box>
-              ) : (
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-                  {paymentMethods.map((pm: any, idx: number) => {
-                    const color = getPaymentColor(pm.method || '');
-                    const pct = pm.percentage || 0;
-                    const barWidth = maxPaymentPct > 0 ? (pct / maxPaymentPct) * 100 : 0;
-                    return (
-                      <React.Fragment key={pm.method || idx}>
-                        {idx > 0 && <Divider sx={{ my: 1.5 }} />}
-                        <Box>
-                          <Box
-                            sx={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'space-between',
-                              mb: 0.75,
-                            }}
-                          >
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              <Box
-                                sx={{
-                                  width: 10,
-                                  height: 10,
-                                  borderRadius: '50%',
-                                  bgcolor: color,
-                                  flexShrink: 0,
-                                }}
-                              />
-                              <Typography
-                                variant="body2"
-                                fontWeight={600}
-                                sx={{ textTransform: 'capitalize' }}
-                              >
-                                {pm.method || 'Unknown'}
-                              </Typography>
-                              <Typography variant="caption" color="text.secondary">
-                                ({pm.count || 0} txns)
-                              </Typography>
-                            </Box>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                              <Typography variant="body2" fontWeight={700} color="text.primary">
-                                {formatCurrency(pm.revenue || 0)}
-                              </Typography>
-                              <Chip
-                                label={`${pct.toFixed(1)}%`}
-                                size="small"
-                                sx={{
-                                  height: 20,
-                                  fontSize: '0.68rem',
-                                  fontWeight: 700,
-                                  bgcolor: alpha(color, 0.1),
-                                  color,
-                                  border: 'none',
-                                }}
-                              />
-                            </Box>
-                          </Box>
-                          <LinearProgress
-                            variant="determinate"
-                            value={barWidth}
-                            sx={{
-                              height: 6,
-                              borderRadius: 3,
-                              bgcolor: alpha(color, 0.1),
-                              '& .MuiLinearProgress-bar': {
-                                borderRadius: 3,
-                                bgcolor: color,
-                              },
-                            }}
-                          />
-                        </Box>
-                      </React.Fragment>
-                    );
-                  })}
-                </Box>
-              )}
-            </CardContent>
-          </Card>
+            {paymentMethods.length === 0 ? (
+              <Typography variant="body2" sx={{ color: '#94a3b8', textAlign: 'center', py: 4 }}>
+                No payment data
+              </Typography>
+            ) : (
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                {paymentMethods.map((pm) => (
+                  <Box key={pm.method}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', mb: 0.5 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
+                        <Typography sx={{ fontWeight: 600, fontSize: '0.8rem', color: '#0f172a', textTransform: 'capitalize' }}>
+                          {capitalize(pm.method)}
+                        </Typography>
+                        <Typography sx={{ fontSize: '0.72rem', color: '#94a3b8' }}>
+                          {pm.count} transactions
+                        </Typography>
+                      </Box>
+                      <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
+                        <Typography sx={{ fontWeight: 700, fontSize: '0.8rem', color: '#0f172a' }}>
+                          {formatINR(pm.revenue)}
+                        </Typography>
+                        <Typography sx={{ fontSize: '0.72rem', color: '#1976d2', fontWeight: 600 }}>
+                          {pm.percentage.toFixed(1)}%
+                        </Typography>
+                      </Box>
+                    </Box>
+                    <LinearProgress
+                      variant="determinate"
+                      value={pm.percentage}
+                      sx={{
+                        height: 6,
+                        borderRadius: 3,
+                        bgcolor: '#e2e8f0',
+                        '& .MuiLinearProgress-bar': {
+                          borderRadius: 3,
+                          bgcolor: '#1976d2',
+                        },
+                      }}
+                    />
+                  </Box>
+                ))}
+              </Box>
+            )}
+          </Box>
         </Grid>
 
         {/* Category Performance */}
         <Grid item xs={12} md={6}>
-          <Card
-            elevation={0}
-            sx={{
-              height: '100%',
-              border: '1px solid #e2e8f0',
-              borderRadius: 2,
-              bgcolor: '#ffffff',
-            }}
-          >
-            <CardContent sx={{ p: 2.5, '&:last-child': { pb: 2.5 } }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-                <Typography variant="h6" fontWeight={600} fontSize="1rem">
-                  Category Performance
-                </Typography>
-                <Chip
-                  label={`${categoryPerformance.length} categories`}
-                  size="small"
-                  variant="outlined"
-                  sx={{ fontSize: '0.7rem' }}
-                />
-              </Box>
+          <Box sx={cardStyle}>
+            <Typography sx={cardTitleStyle}>Category Performance</Typography>
 
-              {categoryPerformance.length === 0 ? (
-                <Box
-                  sx={{
-                    py: 6,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    gap: 1,
-                    color: 'text.disabled',
-                  }}
-                >
-                  <Category sx={{ fontSize: 40 }} />
-                  <Typography variant="body2" color="text.secondary">
-                    No category data available
-                  </Typography>
-                </Box>
-              ) : (
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-                  {categoryPerformance.map((cat: any, idx: number) => {
-                    const color = CATEGORY_COLORS[idx % CATEGORY_COLORS.length];
-                    const pct = cat.percentage || 0;
-                    const barWidth = maxCategoryPct > 0 ? (pct / maxCategoryPct) * 100 : 0;
-                    return (
-                      <React.Fragment key={cat.category || idx}>
-                        {idx > 0 && <Divider sx={{ my: 1.5 }} />}
-                        <Box>
-                          <Box
-                            sx={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'space-between',
-                              mb: 0.75,
-                            }}
-                          >
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              <Box
-                                sx={{
-                                  width: 10,
-                                  height: 10,
-                                  borderRadius: '50%',
-                                  bgcolor: color,
-                                  flexShrink: 0,
-                                }}
-                              />
-                              <Typography variant="body2" fontWeight={600}>
-                                {cat.category || 'Unknown'}
-                              </Typography>
-                              <Typography variant="caption" color="text.secondary">
-                                ({cat.orders || 0} orders)
-                              </Typography>
-                            </Box>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                              <Typography variant="body2" fontWeight={700} color="text.primary">
-                                {formatCurrency(cat.revenue || 0)}
-                              </Typography>
-                              <Chip
-                                label={`${pct.toFixed(1)}%`}
-                                size="small"
-                                sx={{
-                                  height: 20,
-                                  fontSize: '0.68rem',
-                                  fontWeight: 700,
-                                  bgcolor: alpha(color, 0.1),
-                                  color,
-                                  border: 'none',
-                                }}
-                              />
-                            </Box>
-                          </Box>
-                          <LinearProgress
-                            variant="determinate"
-                            value={barWidth}
-                            sx={{
-                              height: 6,
-                              borderRadius: 3,
-                              bgcolor: alpha(color, 0.1),
-                              '& .MuiLinearProgress-bar': {
-                                borderRadius: 3,
-                                bgcolor: color,
-                              },
-                            }}
-                          />
+            {categoryPerformance.length === 0 ? (
+              <Typography variant="body2" sx={{ color: '#94a3b8', textAlign: 'center', py: 4 }}>
+                No category data
+              </Typography>
+            ) : (
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                {categoryPerformance.map((cat, idx) => {
+                  const color = CATEGORY_COLORS[idx % CATEGORY_COLORS.length];
+                  return (
+                    <Box key={cat.category}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', mb: 0.5 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
+                          <Typography sx={{ fontWeight: 600, fontSize: '0.8rem', color: '#0f172a' }}>
+                            {cat.category}
+                          </Typography>
+                          <Typography sx={{ fontSize: '0.72rem', color: '#94a3b8' }}>
+                            {cat.orders} orders
+                          </Typography>
                         </Box>
-                      </React.Fragment>
-                    );
-                  })}
-                </Box>
-              )}
-            </CardContent>
-          </Card>
+                        <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
+                          <Typography sx={{ fontWeight: 700, fontSize: '0.8rem', color: '#0f172a' }}>
+                            {formatINR(cat.revenue)}
+                          </Typography>
+                          <Typography sx={{ fontSize: '0.72rem', fontWeight: 600, color }}>
+                            {cat.percentage.toFixed(1)}%
+                          </Typography>
+                        </Box>
+                      </Box>
+                      <LinearProgress
+                        variant="determinate"
+                        value={cat.percentage}
+                        sx={{
+                          height: 6,
+                          borderRadius: 3,
+                          bgcolor: '#e2e8f0',
+                          '& .MuiLinearProgress-bar': {
+                            borderRadius: 3,
+                            bgcolor: color,
+                          },
+                        }}
+                      />
+                    </Box>
+                  );
+                })}
+              </Box>
+            )}
+          </Box>
         </Grid>
+
       </Grid>
     </Box>
   );

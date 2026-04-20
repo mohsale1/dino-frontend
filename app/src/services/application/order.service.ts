@@ -9,21 +9,47 @@ import type { ApiResponse } from '../../types';
 export interface Order {
   id: string;
   order_number: string;
-  table_number?: string;
+  status: 'pending' | 'confirmed' | 'preparing' | 'ready' | 'served' | 'completed' | 'cancelled';
   customer_name?: string;
+  table_number?: string;
   subtotal: number;
   tax_amount: number;
   discount_amount: number;
   total: number;
-  status: 'pending' | 'confirmed' | 'preparing' | 'ready' | 'served' | 'completed' | 'cancelled';
   items_count: number;
-  workspaceId: string;
+  createdAt: string; // mapped from created_at by axios camelCase interceptor
+}
+
+export interface OrderItem {
+  item_id: string;
+  item_name: string;
+  quantity: number;
+  unit_price: number;
+  total_price: number;
+}
+
+export interface OrderDetail {
+  id: string;
+  order_number: string;
+  status: 'pending' | 'confirmed' | 'preparing' | 'ready' | 'served' | 'completed' | 'cancelled';
+  customer_name?: string;
+  customer_phone?: string;
+  table_number?: string;
+  special_instructions?: string;
+  items: OrderItem[];
+  subtotal: number;
+  tax_amount: number;
+  service_charge: number;
+  discount_amount: number;
+  total: number;
+  items_count: number;
+  payment_status: string;
   createdAt: string;
-  updatedAt: string;
 }
 
 export interface OrderFilters {
   workspaceId?: string;
+  organizationId?: string;
   status?: string;
   startDate?: string;
   endDate?: string;
@@ -56,6 +82,7 @@ class OrderService {
     try {
       const params: any = {};
       if (filters?.workspaceId) params.workspace_id = filters.workspaceId;
+      if (filters?.organizationId) params.organization_id = filters.organizationId;
       if (filters?.status) params.status = filters.status;
       if (filters?.startDate) params.start_date = filters.startDate;
       if (filters?.endDate) params.end_date = filters.endDate;
@@ -98,19 +125,21 @@ class OrderService {
   }
 
   /**
-   * Get order by ID
+   * Get order by ID.
+   * Backend returns { success, data: OrderDetail }; the axios interceptor
+   * converts snake_case keys to camelCase automatically.
    */
-  async getOrder(orderId: string): Promise<ApiResponse<Order>> {
+  async getOrder(orderId: string): Promise<ApiResponse<OrderDetail>> {
     try {
-      const response = await apiService.get<Order>(`/application/orders/${orderId}`);
-      return {
-        success: true,
-        data: response.data,
-      };
+      const response = await apiService.get<any>(`/application/orders/${orderId}`);
+      const raw = response.data as any;
+      const detail: OrderDetail = raw?.data ?? raw;
+      return { success: true, data: detail };
     } catch (error: any) {
       throw new Error(error.message || 'Failed to fetch order');
     }
   }
+
 
   /**
    * Create a new order
@@ -198,13 +227,14 @@ class OrderService {
   /**
    * Get order statistics
    */
-  async getOrderStatistics(workspaceId: string, dateRange?: { startDate: string; endDate: string }): Promise<any> {
+  async getOrderStatistics(workspaceId: string, dateRange?: { startDate: string; endDate: string }, organizationId?: string): Promise<any> {
     try {
       const params: any = { workspace_id: workspaceId };
       if (dateRange) {
         params.start_date = dateRange.startDate;
         params.end_date = dateRange.endDate;
       }
+      if (organizationId) params.organization_id = organizationId;
 
       const response = await apiService.get(`/application/orders/statistics`, { params });
       return response.data;

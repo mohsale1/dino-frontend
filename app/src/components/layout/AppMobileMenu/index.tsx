@@ -43,6 +43,8 @@ import {
   AutoAwesome,
   RateReview,
   HelpOutline,
+  PlayCircleOutline,
+  Storefront,
 } from '@mui/icons-material';
 import DinoLogo from '../../ui/DinoLogo';
 import { getUserFirstName } from '../../../utils/data/userUtils';
@@ -146,11 +148,15 @@ const AppMobileMenu: React.FC<AppMobileMenuProps> = ({
     const label = item.label.toLowerCase();
     if (id === 'hero' || id === 'home')                              return <Home />;
     if (id === 'features')                                           return <AutoAwesome />;
+    if (id === 'how-it-works')                                       return <PlayCircleOutline />;
+    if (id === 'use-cases')                                          return <Storefront />;
     if (id === 'stats')                                              return <Star />;
     if (id === 'testimonials' || id === 'reviews')                   return <RateReview />;
     if (id === 'faq')                                                return <HelpOutline />;
     if (id === 'contact')                                            return <ContactMail />;
     if (label.includes('home'))                                      return <Home />;
+    if (label.includes('how it') || label.includes('works'))         return <PlayCircleOutline />;
+    if (label.includes('use case') || label.includes('business'))    return <Storefront />;
     if (label.includes('feature'))                                   return <AutoAwesome />;
     if (label.includes('review') || label.includes('testimonial'))   return <RateReview />;
     if (label.includes('faq') || label.includes('question'))         return <HelpOutline />;
@@ -196,7 +202,6 @@ const AppMobileMenu: React.FC<AppMobileMenuProps> = ({
 
   // ── Shared colours ────────────────────────────────────────────────────────────
   const BG        = '#0b1120';
-  const BG2       = '#0f172a';
   const BORDER    = 'rgba(255,255,255,0.07)';
   const MUTED     = 'rgba(255,255,255,0.45)';
   const DIM       = 'rgba(255,255,255,0.25)';

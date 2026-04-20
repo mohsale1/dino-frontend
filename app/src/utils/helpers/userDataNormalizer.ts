@@ -16,7 +16,7 @@ export function normalizeUserData(apiUser: any): UserProfile {
   const venueIds = apiUser.venueIds || apiUser.venue_ids || (venueId ? [venueId] : []);
   
   return {
-    id: apiUser.id,
+    id: apiUser.id || apiUser._id || apiUser.user_id || '',
     email: apiUser.email,
     phone: apiUser.phone || '',
     firstName: apiUser.firstName || apiUser.first_name || '',

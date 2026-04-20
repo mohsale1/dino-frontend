@@ -51,7 +51,7 @@ const derivePermissionsFromUser = async (userData: any, isSystemUser?: boolean):
     let permissionsState: any;
 
     if (!userType) {
-      // Application user â€” fetch from dedicated application permissions endpoint
+      // Application user — fetch from dedicated application permissions endpoint
       try {
         const response = await apiService.get<any>('/application/permissions');
         const payload = response.data as any;
@@ -76,7 +76,7 @@ const derivePermissionsFromUser = async (userData: any, isSystemUser?: boolean):
         };
       }
     } else {
-      // System user â€” resolve from /system/permissions (paginated)
+      // System user — resolve from /system/permissions (paginated)
       const rolePermissions: any[] = userRole?.permissions || [];
       const alreadyResolved = rolePermissions
         .filter((p: any) => typeof p === 'object' && p?.name)
@@ -278,17 +278,25 @@ const derivePermissionsFromUser = async (userData: any, isSystemUser?: boolean):
   };
 
   const updateUser = async (userData: Partial<UserProfile>): Promise<void> => {
-    if (!user?.id) {
-      throw new Error('No authenticated user found');
+    // Send camelCase — the apiService interceptor auto-converts to snake_case for the backend
+    const payload = {
+      firstName: userData.firstName,
+      lastName: userData.lastName,
+      phone: userData.phone,
+    };
+
+    let response: any;
+    try {
+      // Self-update via auth/me endpoint (preferred — no ID needed)
+      response = await apiService.put('/application/auth/me', payload);
+    } catch {
+      // Fall back to users/{id} endpoint
+      const userId = user?.id || (StorageManager.getUserData() as any)?.id;
+      if (!userId) throw new Error('No authenticated user found');
+      response = await apiService.put(`/application/users/${userId}`, payload);
     }
 
-    const response = await apiService.put(`/application/users/${user.id}`, {
-      first_name: userData.firstName,
-      last_name: userData.lastName,
-      phone: userData.phone,
-    });
-
-    const updatedUser = normalizeUserData(response.data || userData);
+    const updatedUser = normalizeUserData(response.data || { ...user, ...userData });
     setUser(updatedUser as UserProfile);
     StorageManager.setUserData(updatedUser as UserProfile);
   };

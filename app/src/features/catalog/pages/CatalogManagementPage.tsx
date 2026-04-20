@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import {
   Box,
   Container,
@@ -12,7 +12,6 @@ import {
   useMediaQuery,
   useTheme,
   Fab,
-  Divider,
   Stack,
 } from '@mui/material';
 import {
@@ -38,170 +37,78 @@ import {
   BulkActionsBar,
   CatalogEmptyState,
 } from '../components';
-import type { CatalogItem, Category } from '../types';
+import type { CatalogItem, Category, CatalogItemCreate, CatalogItemUpdate, CategoryCreate, CategoryUpdate } from '../types';
 import type { ViewMode, SortOption } from '../components/CatalogToolbar';
+import { useCatalog } from '../hooks';
+import { useUserData } from '../../../contexts/application/UserData';
+import { CircularProgress } from '@mui/material';
 
 export const CatalogManagementPage: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  
+  const { userData } = useUserData();
+  const workspaceId = userData?.workspace?.id || '';
+
+  // Real data via useCatalog hook
+  const {
+    items: catalogItems,
+    categories,
+    loading,
+    error: catalogError,
+    createItem,
+    updateItem,
+    deleteItem,
+    toggleItemAvailability,
+    uploadItemImage,
+    createCategory,
+    updateCategory,
+    deleteCategory,
+    refresh,
+  } = useCatalog({ workspaceId, autoLoad: true });
+
   // Tab state
   const [activeTab, setActiveTab] = useState('items');
-  
+
   // View and filter states
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<SortOption>('name-asc');
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
-  
+
   // Dialog states
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<CatalogItem | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
-  
+
   // Bulk selection
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
-  
+
   // Filters
   const [filters, setFilters] = useState({
     categoryId: undefined as string | undefined,
-    priceRange: [0, 1000] as [number, number],
+    priceRange: [0, 10000] as [number, number],
     availability: 'all' as 'all' | 'available' | 'unavailable',
-    dietary: {
-      vegetarian: false,
-      vegan: false,
-      glutenFree: false,
-    },
+    dietary: { vegetarian: false, vegan: false, glutenFree: false },
     tags: [] as string[],
   });
 
   // Toast notification
-  const [toast, setToast] = useState({ 
-    open: false, 
-    message: '', 
-    severity: 'success' as 'success' | 'error' | 'info' | 'warning' 
+  const [toast, setToast] = useState({
+    open: false,
+    message: '',
+    severity: 'success' as 'success' | 'error' | 'info' | 'warning',
   });
 
-  // Mock data
-  const catalogItems: CatalogItem[] = [
-    {
-      id: '1',
-      name: 'Premium Widget Pro',
-      description: 'High-quality widget for professional use with advanced features',
-      basePrice: 99.99,
-      categoryId: 'cat1',
-      workspaceId: 'ws1',
-      isAvailable: true,
-      imageUrls: [],
-      createdAt: new Date('2024-01-15').toISOString(),
-      preparationTime: 15,
-      isVegetarian: true,
-      tags: ['premium', 'featured'],
-    },
-    {
-      id: '2',
-      name: 'Standard Widget',
-      description: 'Reliable widget for everyday use',
-      basePrice: 49.99,
-      categoryId: 'cat1',
-      workspaceId: 'ws1',
-      isAvailable: true,
-      imageUrls: [],
-      createdAt: new Date('2024-01-20').toISOString(),
-      preparationTime: 10,
-      isVegetarian: false,
-      tags: ['standard'],
-    },
-    {
-      id: '3',
-      name: 'Deluxe Widget Elite',
-      description: 'Top-tier widget with all the bells and whistles',
-      basePrice: 149.99,
-      categoryId: 'cat2',
-      workspaceId: 'ws1',
-      isAvailable: false,
-      imageUrls: [],
-      createdAt: new Date('2024-02-01').toISOString(),
-      preparationTime: 20,
-      isVegetarian: true,
-      tags: ['premium', 'deluxe'],
-    },
-    {
-      id: '4',
-      name: 'Basic Widget',
-      description: 'Entry-level widget for beginners',
-      basePrice: 29.99,
-      categoryId: 'cat1',
-      workspaceId: 'ws1',
-      isAvailable: true,
-      imageUrls: [],
-      createdAt: new Date('2024-01-10').toISOString(),
-      preparationTime: 5,
-      isVegetarian: true,
-      tags: ['basic'],
-    },
-    {
-      id: '5',
-      name: 'Enterprise Widget',
-      description: 'Enterprise-grade widget with advanced security',
-      basePrice: 299.99,
-      categoryId: 'cat2',
-      workspaceId: 'ws1',
-      isAvailable: true,
-      imageUrls: [],
-      createdAt: new Date('2024-02-10').toISOString(),
-      preparationTime: 30,
-      isVegetarian: false,
-      tags: ['premium', 'enterprise'],
-    },
-    {
-      id: '6',
-      name: 'Compact Widget',
-      description: 'Small form factor widget',
-      basePrice: 39.99,
-      categoryId: 'cat3',
-      workspaceId: 'ws1',
-      isAvailable: true,
-      imageUrls: [],
-      createdAt: new Date('2024-01-25').toISOString(),
-      preparationTime: 8,
-      isVegetarian: true,
-      tags: ['compact'],
-    },
-  ];
+  const showToast = (message: string, severity: typeof toast.severity = 'success') =>
+    setToast({ open: true, message, severity });
 
-  const categories: Category[] = [
-    {
-      id: 'cat1',
-      name: 'Electronics',
-      description: 'Electronic items and gadgets',
-      workspaceId: 'ws1',
-      isActive: true,
-      createdAt: new Date().toISOString(),
-      displayOrder: 1,
-    },
-    {
-      id: 'cat2',
-      name: 'Accessories',
-      description: 'Various accessories and add-ons',
-      workspaceId: 'ws1',
-      isActive: true,
-      createdAt: new Date().toISOString(),
-      displayOrder: 2,
-    },
-    {
-      id: 'cat3',
-      name: 'Home & Office',
-      description: 'Products for home and office',
-      workspaceId: 'ws1',
-      isActive: true,
-      createdAt: new Date().toISOString(),
-      displayOrder: 3,
-    },
-  ];
-
-  const availableTags = ['premium', 'featured', 'standard', 'deluxe', 'new', 'basic', 'enterprise', 'compact'];
+  // Derive available tags from real items
+  const availableTags = useMemo(() => {
+    const tagSet = new Set<string>();
+    catalogItems.forEach(item => item.tags?.forEach(t => tagSet.add(t)));
+    return Array.from(tagSet);
+  }, [catalogItems]);
 
   const breadcrumbItems = [
     { label: 'Dashboard', path: '/admin' },
@@ -279,96 +186,129 @@ export const CatalogManagementPage: React.FC = () => {
     filters.priceRange[0] !== 0 || filters.priceRange[1] !== 1000,
   ].filter(Boolean).length;
 
-  // Handlers
-  const handleAddItem = () => {
-    setSelectedItem(null);
-    setAddDialogOpen(true);
-  };
+  // ── Handlers ──────────────────────────────────────────────────────────────────
 
-  const handleEditItem = (item: CatalogItem) => {
-    setSelectedItem(item);
-    setAddDialogOpen(true);
-  };
+  const handleAddItem = () => { setSelectedItem(null); setAddDialogOpen(true); };
+  const handleEditItem = (item: CatalogItem) => { setSelectedItem(item); setAddDialogOpen(true); };
+  const handleEditCategory = (category: Category) => { setSelectedCategory(category); setAddDialogOpen(true); };
 
-  const handleEditCategory = (category: Category) => {
-    setSelectedCategory(category);
-    setAddDialogOpen(true);
-  };
+  const handleSubmitForm = useCallback(async (data: any) => {
+    try {
+      if (activeTab === 'items') {
+        if (selectedItem) {
+          await updateItem(selectedItem.id, data as CatalogItemUpdate);
+          showToast('Item updated successfully');
+        } else {
+          await createItem({ ...data, workspaceId } as CatalogItemCreate);
+          showToast('Item created successfully');
+        }
+      } else {
+        if (selectedCategory) {
+          await updateCategory(selectedCategory.id, data as CategoryUpdate);
+          showToast('Category updated successfully');
+        } else {
+          await createCategory({ ...data, workspaceId } as CategoryCreate);
+          showToast('Category created successfully');
+        }
+      }
+      setAddDialogOpen(false);
+      setSelectedItem(null);
+      setSelectedCategory(null);
+    } catch (err: any) {
+      showToast(err.message || 'Failed to save. Please try again.', 'error');
+    }
+  }, [activeTab, selectedItem, selectedCategory, workspaceId, createItem, updateItem, createCategory, updateCategory]);
 
-  const handleSubmitForm = (data: any) => {
-    console.log('Form data:', data);
-    setAddDialogOpen(false);
-    setSelectedItem(null);
-    setSelectedCategory(null);
-    setToast({ 
-      open: true, 
-      message: `${activeTab === 'items' ? 'Item' : 'Category'} saved successfully`, 
-      severity: 'success' 
-    });
-  };
+  const handleDeleteItem = (item: CatalogItem) => { setSelectedItem(item); setDeleteDialogOpen(true); };
 
-  const handleDeleteItem = (item: CatalogItem) => {
-    setSelectedItem(item);
-    setDeleteDialogOpen(true);
-  };
+  const handleConfirmDelete = useCallback(async () => {
+    try {
+      if (activeTab === 'items' && selectedItem) {
+        await deleteItem(selectedItem.id);
+        showToast('Item deleted successfully');
+      } else if (activeTab === 'categories' && selectedCategory) {
+        await deleteCategory(selectedCategory.id);
+        showToast('Category deleted successfully');
+      }
+    } catch (err: any) {
+      showToast(err.message || 'Failed to delete.', 'error');
+    } finally {
+      setDeleteDialogOpen(false);
+      setSelectedItem(null);
+      setSelectedCategory(null);
+    }
+  }, [activeTab, selectedItem, selectedCategory, deleteItem, deleteCategory]);
 
-  const handleConfirmDelete = () => {
-    console.log('Delete:', selectedItem);
-    setDeleteDialogOpen(false);
-    setSelectedItem(null);
-    setToast({ open: true, message: 'Item deleted successfully', severity: 'success' });
-  };
+  const handleToggleAvailability = useCallback(async (itemId: string) => {
+    const item = catalogItems.find(i => i.id === itemId);
+    if (!item) return;
+    try {
+      await toggleItemAvailability(itemId, !item.isAvailable);
+      showToast(`Item marked as ${!item.isAvailable ? 'available' : 'unavailable'}`);
+    } catch (err: any) {
+      showToast(err.message || 'Failed to update availability.', 'error');
+    }
+  }, [catalogItems, toggleItemAvailability]);
 
-  const handleToggleAvailability = (itemId: string) => {
-    console.log('Toggle availability:', itemId);
-    setToast({ open: true, message: 'Availability updated', severity: 'info' });
-  };
-
-  const handleImageUpload = (itemId: string, file: File) => {
-    console.log('Upload image for:', itemId, file);
-    setToast({ open: true, message: 'Image uploaded successfully', severity: 'success' });
-  };
+  const handleImageUpload = useCallback(async (itemId: string, file: File) => {
+    try {
+      await uploadItemImage(itemId, file);
+      showToast('Image uploaded successfully');
+    } catch (err: any) {
+      showToast(err.message || 'Failed to upload image.', 'error');
+    }
+  }, [uploadItemImage]);
 
   const handleSelectItem = (itemId: string, checked: boolean) => {
     const newSelection = new Set(selectedItems);
-    if (checked) {
-      newSelection.add(itemId);
-    } else {
-      newSelection.delete(itemId);
-    }
+    checked ? newSelection.add(itemId) : newSelection.delete(itemId);
     setSelectedItems(newSelection);
   };
 
   const handleSelectAll = (checked: boolean) => {
-    if (checked) {
-      setSelectedItems(new Set(filteredAndSortedItems.map(item => item.id)));
-    } else {
+    setSelectedItems(checked ? new Set(filteredAndSortedItems.map(i => i.id)) : new Set());
+  };
+
+  const handleBulkDelete = useCallback(async () => {
+    const ids = Array.from(selectedItems);
+    try {
+      await Promise.all(ids.map(id => deleteItem(id)));
+      showToast(`${ids.length} items deleted`);
+    } catch (err: any) {
+      showToast(err.message || 'Failed to delete some items.', 'error');
+    } finally {
       setSelectedItems(new Set());
     }
-  };
+  }, [selectedItems, deleteItem]);
 
-  const handleBulkDelete = () => {
-    console.log('Bulk delete:', Array.from(selectedItems));
-    setSelectedItems(new Set());
-    setToast({ open: true, message: `${selectedItems.size} items deleted`, severity: 'success' });
-  };
+  const handleBulkToggleAvailability = useCallback(async (available: boolean) => {
+    const ids = Array.from(selectedItems);
+    try {
+      await Promise.all(ids.map(id => toggleItemAvailability(id, available)));
+      showToast(`${ids.length} items updated`);
+    } catch (err: any) {
+      showToast(err.message || 'Failed to update some items.', 'error');
+    } finally {
+      setSelectedItems(new Set());
+    }
+  }, [selectedItems, toggleItemAvailability]);
 
-  const handleBulkToggleAvailability = (available: boolean) => {
-    console.log('Bulk toggle availability:', available, Array.from(selectedItems));
-    setSelectedItems(new Set());
-    setToast({ open: true, message: `${selectedItems.size} items updated`, severity: 'success' });
-  };
-
-  const handleBulkChangeCategory = (categoryId: string) => {
-    console.log('Bulk change category:', categoryId, Array.from(selectedItems));
-    setSelectedItems(new Set());
-    setToast({ open: true, message: `${selectedItems.size} items moved`, severity: 'success' });
-  };
+  const handleBulkChangeCategory = useCallback(async (categoryId: string) => {
+    const ids = Array.from(selectedItems);
+    try {
+      await Promise.all(ids.map(id => updateItem(id, { categoryId })));
+      showToast(`${ids.length} items moved`);
+    } catch (err: any) {
+      showToast(err.message || 'Failed to move some items.', 'error');
+    } finally {
+      setSelectedItems(new Set());
+    }
+  }, [selectedItems, updateItem]);
 
   const handleResetFilters = () => {
     setFilters({
       categoryId: undefined,
-      priceRange: [0, 1000],
+      priceRange: [0, 10000],
       availability: 'all',
       dietary: { vegetarian: false, vegan: false, glutenFree: false },
       tags: [],
@@ -376,17 +316,9 @@ export const CatalogManagementPage: React.FC = () => {
     setSearchQuery('');
   };
 
-  const handleExport = () => {
-    setToast({ open: true, message: 'Export started', severity: 'info' });
-  };
-
-  const handleImport = () => {
-    setToast({ open: true, message: 'Import started', severity: 'info' });
-  };
-
-  const handleRefresh = () => {
-    setToast({ open: true, message: 'Data refreshed', severity: 'info' });
-  };
+  const handleRefresh = () => { refresh(); showToast('Data refreshed', 'info'); };
+  const handleExport = () => showToast('Export started', 'info');
+  const handleImport = () => showToast('Import started', 'info');
 
   const getGridColumns = () => {
     switch (viewMode) {
@@ -426,6 +358,16 @@ export const CatalogManagementPage: React.FC = () => {
     </Drawer>
   );
 
+  // Loading state
+  if (loading && catalogItems.length === 0) {
+    return (
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', flexDirection: 'column', gap: 2 }}>
+        <CircularProgress />
+        <Typography variant="body2" color="text.secondary">Loading catalog...</Typography>
+      </Box>
+    );
+  }
+
   return (
     <Box sx={{ minHeight: '100vh', backgroundColor: '#fafafa' }}>
       {/* Header */}
@@ -439,7 +381,8 @@ export const CatalogManagementPage: React.FC = () => {
                   Catalog Management
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                  {filteredAndSortedItems.length} items â€¢ {categories.length} categories
+                  {catalogItems.length} items • {categories.length} categories
+                  {catalogError && <Box component="span" sx={{ color: 'error.main', ml: 1 }}>— {catalogError}</Box>}
                 </Typography>
               </Box>
               {!isMobile && (

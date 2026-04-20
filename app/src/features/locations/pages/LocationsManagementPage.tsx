@@ -202,7 +202,6 @@ export const LocationsManagementPage: React.FC = () => {
           }}
           onSave={handleSubmitForm}
           location={selectedLocation}
-          areas={areas}
         />
       )}
 

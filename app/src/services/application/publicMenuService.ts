@@ -115,7 +115,7 @@ export interface PublicOrder {
 export interface PlaceOrderPayload {
   customer_name: string;
   customer_phone: string;
-  items: { item_id: string; quantity: number; unit_price: number }[];
+  items: { item_id: string; item_name: string; quantity: number; unit_price: number; total_price: number }[];
   special_instructions?: string;
 }
 

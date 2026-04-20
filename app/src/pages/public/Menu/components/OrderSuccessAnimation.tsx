@@ -1,269 +1,130 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Typography, alpha, Fade, Zoom, Slide } from '@mui/material';
-import {
-  CheckCircle as CheckCircleIcon,
-  Restaurant as RestaurantIcon,
-} from '@mui/icons-material';
+import { Box, Typography } from '@mui/material';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 interface OrderSuccessAnimationProps {
   orderNumber: string;
   onComplete: () => void;
 }
 
-const OrderSuccessAnimation: React.FC<OrderSuccessAnimationProps> = ({
-  orderNumber,
-  onComplete,
-}) => {
+const OrderSuccessAnimation: React.FC<OrderSuccessAnimationProps> = ({ orderNumber, onComplete }) => {
   const [showCheck, setShowCheck] = useState(false);
   const [showText, setShowText] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
 
   useEffect(() => {
-    const timer1 = setTimeout(() => setShowCheck(true), 300);
-    const timer2 = setTimeout(() => setShowText(true), 800);
-    const timer3 = setTimeout(() => setShowDetails(true), 1200);
-    const timer4 = setTimeout(() => onComplete(), 3500);
-
-    return () => {
-      clearTimeout(timer1);
-      clearTimeout(timer2);
-      clearTimeout(timer3);
-      clearTimeout(timer4);
-    };
+    const t1 = setTimeout(() => setShowCheck(true), 200);
+    const t2 = setTimeout(() => setShowText(true), 700);
+    const t3 = setTimeout(() => setShowDetails(true), 1100);
+    const t4 = setTimeout(() => onComplete(), 3400);
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); clearTimeout(t4); };
   }, [onComplete]);
 
   return (
     <Box
       sx={{
         position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        bgcolor: 'rgba(255, 255, 255, 0.98)',
-        backdropFilter: 'blur(10px)',
+        inset: 0,
         zIndex: 9999,
+        bgcolor: '#fff',
         display: 'flex',
+        flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        flexDirection: 'column',
+        px: 3,
+        textAlign: 'center',
       }}
     >
-      {/* Animated Background Circles */}
-      <Box
-        sx={{
-          position: 'absolute',
-          top: '20%',
-          left: '10%',
-          width: 200,
-          height: 200,
-          borderRadius: '50%',
-          bgcolor: alpha('#10b981', 0.05),
-          animation: 'float 3s ease-in-out infinite',
-          '@keyframes float': {
-            '0%, 100%': { transform: 'translateY(0px)' },
-            '50%': { transform: 'translateY(-20px)' },
-          },
-        }}
-      />
-      <Box
-        sx={{
-          position: 'absolute',
-          bottom: '20%',
-          right: '10%',
-          width: 150,
-          height: 150,
-          borderRadius: '50%',
-          bgcolor: alpha('#0f172a', 0.03),
-          animation: 'float 4s ease-in-out infinite',
-        }}
-      />
-
-      {/* Success Icon */}
-      <Zoom in={showCheck} timeout={500}>
+      {/* Ripple + check */}
+      <Box sx={{ position: 'relative', mb: 3, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        {/* Ripple rings */}
+        {showCheck && (
+          <>
+            <Box sx={{ position: 'absolute', width: 120, height: 120, borderRadius: '50%', border: '2px solid rgba(16,185,129,0.3)', animation: 'ripple1 1.5s ease-out infinite', '@keyframes ripple1': { '0%': { transform: 'scale(0.8)', opacity: 1 }, '100%': { transform: 'scale(1.6)', opacity: 0 } } }} />
+            <Box sx={{ position: 'absolute', width: 120, height: 120, borderRadius: '50%', border: '2px solid rgba(16,185,129,0.2)', animation: 'ripple2 1.5s ease-out 0.4s infinite', '@keyframes ripple2': { '0%': { transform: 'scale(0.8)', opacity: 1 }, '100%': { transform: 'scale(1.8)', opacity: 0 } } }} />
+          </>
+        )}
         <Box
           sx={{
-            position: 'relative',
-            mb: 3,
+            width: 80,
+            height: 80,
+            borderRadius: '50%',
+            bgcolor: '#f0fdf4',
+            border: '2px solid #bbf7d0',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            transform: showCheck ? 'scale(1)' : 'scale(0)',
+            transition: 'transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
           }}
         >
-          {/* Ripple Effect */}
-          <Box
-            sx={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              width: 120,
-              height: 120,
-              borderRadius: '50%',
-              bgcolor: alpha('#10b981', 0.2),
-              animation: 'ripple 1.5s ease-out infinite',
-              '@keyframes ripple': {
-                '0%': {
-                  transform: 'translate(-50%, -50%) scale(0.8)',
-                  opacity: 1,
-                },
-                '100%': {
-                  transform: 'translate(-50%, -50%) scale(2)',
-                  opacity: 0,
-                },
-              },
-            }}
-          />
-
-          {/* Check Circle */}
-          <Box
-            sx={{
-              width: 100,
-              height: 100,
-              borderRadius: '50%',
-              bgcolor: '#10b981',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 8px 24px rgba(16, 185, 129, 0.3)',
-              position: 'relative',
-              zIndex: 1,
-            }}
-          >
-            <CheckCircleIcon
-              sx={{
-                fontSize: 60,
-                color: 'white',
-                animation: 'checkmark 0.5s ease-in-out',
-                '@keyframes checkmark': {
-                  '0%': {
-                    transform: 'scale(0) rotate(-45deg)',
-                    opacity: 0,
-                  },
-                  '50%': {
-                    transform: 'scale(1.2) rotate(0deg)',
-                  },
-                  '100%': {
-                    transform: 'scale(1) rotate(0deg)',
-                    opacity: 1,
-                  },
-                },
-              }}
-            />
-          </Box>
+          <CheckCircleIcon sx={{ fontSize: 44, color: '#10b981' }} />
         </Box>
-      </Zoom>
+      </Box>
 
-      {/* Success Text */}
-      <Fade in={showText} timeout={600}>
-        <Box textAlign="center" mb={4}>
-          <Typography
-            variant="h4"
-            fontWeight={800}
-            color="#0f172a"
-            gutterBottom
-            sx={{
-              animation: 'slideUp 0.5s ease-out',
-              '@keyframes slideUp': {
-                '0%': {
-                  transform: 'translateY(20px)',
-                  opacity: 0,
-                },
-                '100%': {
-                  transform: 'translateY(0)',
-                  opacity: 1,
-                },
-              },
-            }}
-          >
-            Order Placed!
-          </Typography>
-          <Typography variant="body1" color="text.secondary" fontWeight={500}>
-            Your order has been confirmed
-          </Typography>
-        </Box>
-      </Fade>
+      {/* Text */}
+      <Box
+        sx={{
+          opacity: showText ? 1 : 0,
+          transform: showText ? 'translateY(0)' : 'translateY(12px)',
+          transition: 'all 0.4s ease',
+          mb: 1,
+        }}
+      >
+        <Typography sx={{ fontSize: { xs: '1.5rem', sm: '1.8rem' }, fontWeight: 800, color: '#0f172a', letterSpacing: '-0.02em', mb: 0.5 }}>
+          Order Placed!
+        </Typography>
+        <Typography sx={{ fontSize: '0.9rem', color: '#64748b', lineHeight: 1.6 }}>
+          Your order has been received and is being processed
+        </Typography>
+      </Box>
 
-      {/* Order Details */}
-      <Slide direction="up" in={showDetails} timeout={500}>
+      {/* Order number card */}
+      <Box
+        sx={{
+          opacity: showDetails ? 1 : 0,
+          transform: showDetails ? 'translateY(0)' : 'translateY(16px)',
+          transition: 'all 0.4s ease',
+          mt: 2,
+          bgcolor: '#f8fafc',
+          border: '1px solid #e2e8f0',
+          borderRadius: 2.5,
+          px: 3,
+          py: 2,
+          minWidth: 200,
+        }}
+      >
+        <Typography sx={{ fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#94a3b8', mb: 0.5 }}>
+          Order Number
+        </Typography>
+        <Typography sx={{ fontFamily: 'monospace', fontSize: '1.4rem', fontWeight: 800, color: '#f97316' }}>
+          #{orderNumber}
+        </Typography>
+        <Typography sx={{ fontSize: '0.75rem', color: '#94a3b8', mt: 0.5 }}>
+          Check the Orders tab to track your order
+        </Typography>
+      </Box>
+
+      {/* Confetti dots */}
+      {showCheck && Array.from({ length: 16 }).map((_, i) => (
         <Box
+          key={i}
           sx={{
-            bgcolor: 'white',
-            borderRadius: 3,
-            p: 3,
-            boxShadow: '0 8px 24px rgba(15, 23, 42, 0.12)',
-            border: '1px solid rgba(15, 23, 42, 0.08)',
-            minWidth: 280,
-            textAlign: 'center',
+            position: 'fixed',
+            width: 8,
+            height: 8,
+            borderRadius: i % 3 === 0 ? '50%' : '2px',
+            bgcolor: ['#f97316', '#10b981', '#3b82f6', '#f59e0b', '#8b5cf6'][i % 5],
+            top: `${10 + Math.random() * 30}%`,
+            left: `${5 + (i / 16) * 90}%`,
+            animation: `confetti-${i} 1.2s ease-out forwards`,
+            [`@keyframes confetti-${i}`]: {
+              '0%': { transform: 'translateY(-20px) rotate(0deg)', opacity: 1 },
+              '100%': { transform: `translateY(${60 + Math.random() * 80}px) rotate(${180 + Math.random() * 180}deg)`, opacity: 0 },
+            },
           }}
-        >
-          <Box
-            sx={{
-              width: 48,
-              height: 48,
-              borderRadius: 2,
-              bgcolor: alpha('#0f172a', 0.06),
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              mx: 'auto',
-              mb: 2,
-            }}
-          >
-            <RestaurantIcon sx={{ color: '#0f172a', fontSize: 24 }} />
-          </Box>
-
-          <Typography variant="caption" color="text.secondary" fontWeight={600}>
-            Order Number
-          </Typography>
-          <Typography variant="h5" fontWeight={800} color="#0f172a" sx={{ mb: 2 }}>
-            {orderNumber}
-          </Typography>
-
-          <Box
-            sx={{
-              pt: 2,
-              borderTop: '1px solid rgba(15, 23, 42, 0.08)',
-            }}
-          >
-            <Typography variant="body2" color="text.secondary">
-              Your order is being prepared
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              Estimated time: 15-20 minutes
-            </Typography>
-          </Box>
-        </Box>
-      </Slide>
-
-      {/* Confetti Effect */}
-      {showCheck && (
-        <>
-          {[...Array(20)].map((_, i) => (
-            <Box
-              key={i}
-              sx={{
-                position: 'absolute',
-                top: '30%',
-                left: `${20 + Math.random() * 60}%`,
-                width: 8,
-                height: 8,
-                borderRadius: '50%',
-                bgcolor: ['#10b981', '#0f172a', '#f59e0b'][Math.floor(Math.random() * 3)],
-                animation: `confetti ${1 + Math.random()}s ease-out forwards`,
-                animationDelay: `${Math.random() * 0.3}s`,
-                '@keyframes confetti': {
-                  '0%': {
-                    transform: 'translateY(0) rotate(0deg)',
-                    opacity: 1,
-                  },
-                  '100%': {
-                    transform: `translateY(${200 + Math.random() * 200}px) rotate(${Math.random() * 360}deg)`,
-                    opacity: 0,
-                  },
-                },
-              }}
-            />
-          ))}
-        </>
-      )}
+        />
+      ))}
     </Box>
   );
 };

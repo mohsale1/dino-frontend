@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Card,
@@ -120,6 +120,17 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ onSave }) => {
     lastName:  initLastName,
     phone:     initPhone,
   });
+
+  // Sync form data when user/userData loads asynchronously
+  useEffect(() => {
+    if (!editing) {
+      setFormData({
+        firstName: initFirstName,
+        lastName:  initLastName,
+        phone:     initPhone,
+      });
+    }
+  }, [initFirstName, initLastName, initPhone, editing]);
 
   const handleChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));

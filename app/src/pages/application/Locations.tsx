@@ -1,7 +1,7 @@
 /**
  * Locations Management Page
  *
- * Manage service locations and areas
+ * Manage service locations (tables) and areas.
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -17,6 +17,10 @@ import {
   Snackbar,
   Alert,
   CircularProgress,
+  Dialog,
+  DialogContent,
+  DialogActions,
+  Radio,
 } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import { alpha } from '@mui/material/styles';
@@ -28,6 +32,8 @@ import {
   People as OccupiedIcon,
   Search as SearchIcon,
   Close as CloseIcon,
+  Schedule as ReservedIcon,
+  Print as PrintIcon,
 } from '@mui/icons-material';
 import LocationTabs from './Locations/LocationTabs';
 import QRCodeDialog from './Locations/QRCodeDialog';
@@ -40,9 +46,7 @@ import { usePermissions } from '../../hooks/usePermissions';
 import { ROLE_COLORS } from '../../constants/app';
 import type { ServiceLocation, ServiceArea } from '../../features/locations/types';
 
-// ---------------------------------------------------------------------------
-// useCountUp hook
-// ---------------------------------------------------------------------------
+// ─── useCountUp ────────────────────────────────────────────────────────────────
 
 const useCountUp = (target: number, duration = 900) => {
   const [count, setCount] = React.useState(0);
@@ -60,9 +64,7 @@ const useCountUp = (target: number, duration = 900) => {
   return count;
 };
 
-// ---------------------------------------------------------------------------
-// HeroStat component
-// ---------------------------------------------------------------------------
+// ─── HeroStat ─────────────────────────────────────────────────────────────────
 
 const HeroStat: React.FC<{
   label: string;
@@ -76,19 +78,20 @@ const HeroStat: React.FC<{
       sx={{
         width: '100%',
         px: { xs: 1.5, sm: 2 },
-        py: 1.75,
+        py: { xs: 1.25, sm: 1.75 },
         borderRadius: 2.5,
         bgcolor: 'rgba(255,255,255,0.07)',
         border: '1px solid rgba(255,255,255,0.12)',
         backdropFilter: 'blur(8px)',
+        transition: 'background 0.2s',
         '&:hover': { bgcolor: 'rgba(255,255,255,0.11)' },
       }}
     >
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
         <Box
           sx={{
-            width: 34,
-            height: 34,
+            width: { xs: 30, sm: 34 },
+            height: { xs: 30, sm: 34 },
             borderRadius: 1.5,
             bgcolor: 'rgba(255,255,255,0.1)',
             border: '1px solid rgba(255,255,255,0.15)',
@@ -106,14 +109,14 @@ const HeroStat: React.FC<{
             sx={{
               fontWeight: 700,
               color: rc.statValue,
-              fontSize: { xs: '1.2rem', sm: '1.5rem' },
+              fontSize: { xs: '1rem', sm: '1.4rem' },
               letterSpacing: '-0.03em',
               lineHeight: 1,
             }}
           >
             {animated}
           </Typography>
-          <Typography sx={{ color: rc.statLabel, fontSize: '0.72rem', fontWeight: 500, mt: 0.25 }}>
+          <Typography sx={{ color: rc.statLabel, fontSize: '0.68rem', fontWeight: 500, mt: 0.25 }}>
             {label}
           </Typography>
         </Box>
@@ -122,14 +125,72 @@ const HeroStat: React.FC<{
   );
 };
 
-// ---------------------------------------------------------------------------
-// Main Component
-// ---------------------------------------------------------------------------
+// ─── Bulk Print ────────────────────────────────────────────────────────────────
+
+type BulkQRStyle = 'classic' | 'rounded' | 'dark' | 'branded' | 'minimal' | 'framed';
+
+interface BulkQRItem {
+  qrUrl: string;
+  name: string;
+  areaName: string;
+  menuUrl: string;
+}
+
+const BULK_STYLE_CSS: Record<BulkQRStyle, { wrap: string; imgCss: string; bg: string }> = {
+  classic:  { wrap: 'background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:12px;box-shadow:0 2px 8px rgba(0,0,0,0.06);display:inline-block;', imgCss: 'border-radius:4px;', bg: '#f8fafc' },
+  rounded:  { wrap: 'background:#fff;border:1px solid #e2e8f0;border-radius:20px;padding:14px;box-shadow:0 4px 16px rgba(0,0,0,0.08);display:inline-block;', imgCss: 'border-radius:14px;', bg: '#f8fafc' },
+  dark:     { wrap: 'background:#0f172a;border-radius:10px;padding:12px;box-shadow:0 4px 16px rgba(0,0,0,0.35);display:inline-block;', imgCss: 'border-radius:6px;filter:invert(1);', bg: '#1e293b' },
+  branded:  { wrap: 'background:#fff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;display:inline-block;box-shadow:0 2px 8px rgba(0,0,0,0.06);', imgCss: 'padding:8px;', bg: '#f8fafc' },
+  minimal:  { wrap: 'display:inline-block;padding:6px;', imgCss: 'border-radius:4px;', bg: '#ffffff' },
+  framed:   { wrap: 'background:#fff;border-radius:10px;padding:12px;border:3px solid #0f172a;box-shadow:3px 3px 0 #0f172a;display:inline-block;', imgCss: 'border-radius:4px;', bg: '#f8fafc' },
+};
+
+const buildBulkPrintHtml = (items: BulkQRItem[], style: BulkQRStyle = 'classic'): string => {
+  const sc = BULK_STYLE_CSS[style];
+  const brandedHeader = style === 'branded'
+    ? `<div style="background:linear-gradient(135deg,#0f172a,#312e81);padding:5px 10px;text-align:center;"><span style="color:#fff;font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;">Dino</span></div>`
+    : '';
+
+  const cards = items.map((item) => `
+    <div class="card">
+      <div style="${sc.wrap}">
+        ${brandedHeader}
+        <img src="${item.qrUrl}" style="width:120px;height:120px;display:block;${sc.imgCss}" alt="QR" />
+      </div>
+      <p class="name">${item.name}</p>
+      ${item.areaName ? `<p class="area">${item.areaName}</p>` : ''}
+      <p class="url">${item.menuUrl}</p>
+    </div>`).join('');
+
+  return `<!DOCTYPE html>
+<html>
+<head>
+  <title>Bulk QR Codes</title>
+  <style>
+    @page { size: A4; margin: 10mm; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: ${sc.bg}; padding: 4px; }
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .card { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 16px 10px 12px; break-inside: avoid; page-break-inside: avoid; gap: 6px; }
+    .name { font-size: 12px; font-weight: 800; color: #0f172a; }
+    .area { font-size: 9px; color: #64748b; }
+    .url { font-size: 7px; color: #94a3b8; word-break: break-all; font-family: monospace; padding-top: 6px; border-top: 1px solid #f1f5f9; width: 100%; }
+  </style>
+</head>
+<body>
+  <div class="grid">${cards}</div>
+  <script>window.onload = function() { window.print(); }<\/script>
+</body>
+</html>`;
+};
+
+// ─── Main Component ────────────────────────────────────────────────────────────
 
 const LocationsManagementPage: React.FC = () => {
   const { userData } = useUserData();
   const workspaceId = userData?.venue?.workspaceId || '';
-  const { canCreateAreas, canCreateTables } = usePermissions();
+  const organizationId = userData?.venue?.id || '';
+  const { canCreateTables, canCreateAreas } = usePermissions();
 
   // Role detection
   const { userPermissions } = useAuth();
@@ -141,210 +202,259 @@ const LocationsManagementPage: React.FC = () => {
     : 'User';
   const rc = ROLE_COLORS[roleKey];
 
-  const [activeTab, setActiveTab] = useState('locations');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filterStatus, setFilterStatus] = useState('all');
-  const [addDialogOpen, setAddDialogOpen] = useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [selectedLocation, setSelectedLocation] = useState<ServiceLocation | null>(null);
-  const [selectedArea, setSelectedArea] = useState<ServiceArea | null>(null);
-  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
+  // ── State ──────────────────────────────────────────────────────────────────
+  const [activeTab, setActiveTab]             = useState(0);
+  const [searchQuery, setSearchQuery]         = useState('');
+  const [filterStatus, setFilterStatus]       = useState('all');
+
+  // Location dialog state
+  const [locationDialogOpen, setLocationDialogOpen]   = useState(false);
+  const [locationDeleteOpen, setLocationDeleteOpen]   = useState(false);
+  const [selectedLocation, setSelectedLocation]       = useState<ServiceLocation | null>(null);
+
+  // Area dialog state
+  const [areaDialogOpen, setAreaDialogOpen]   = useState(false);
+  const [areaDeleteOpen, setAreaDeleteOpen]   = useState(false);
+  const [selectedArea, setSelectedArea]       = useState<ServiceArea | null>(null);
+
+  const [snackbar, setSnackbar] = useState<{
+    open: boolean;
+    message: string;
+    severity: 'success' | 'error' | 'info';
+  }>({ open: false, message: '', severity: 'success' });
 
   const [locations, setLocations] = useState<ServiceLocation[]>([]);
-  const [areas, setAreas] = useState<ServiceArea[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [areas, setAreas]         = useState<ServiceArea[]>([]);
+  const [loading, setLoading]     = useState(true);
+  const [error, setError]         = useState<string | null>(null);
 
   const [qrDialogLocation, setQrDialogLocation] = useState<ServiceLocation | null>(null);
+  const [bulkStyleOpen, setBulkStyleOpen]       = useState(false);
+  const [bulkStyle, setBulkStyle]               = useState<BulkQRStyle>('classic');
 
-  const fetchAreas = useCallback(async () => {
-    if (!workspaceId) return;
-    setError(null);
-    try {
-      const data = await locationService.getAreas(workspaceId);
-      setAreas(data);
-    } catch (err: any) {
-      console.error('Failed to fetch areas:', err);
-      setError(err.message || 'Failed to load areas');
-    }
-  }, [workspaceId]);
+  // ── Data fetching ──────────────────────────────────────────────────────────
 
   const fetchLocations = useCallback(async () => {
     if (!workspaceId) return;
-    setError(null);
-    try {
-      const data = await locationService.getLocations(workspaceId);
-      setLocations(data);
-    } catch (err: any) {
-      console.error('Failed to fetch locations:', err);
-      setError(err.message || 'Failed to load locations');
-    }
+    const data = await locationService.getLocations(workspaceId);
+    setLocations(data);
+  }, [workspaceId]);
+
+  const fetchAreas = useCallback(async () => {
+    if (!workspaceId) return;
+    const data = await locationService.getAreas(workspaceId);
+    setAreas(data);
   }, [workspaceId]);
 
   useEffect(() => {
-    const loadData = async () => {
+    const load = async () => {
       if (!workspaceId) { setLoading(false); return; }
       setLoading(true);
       setError(null);
       try {
-        await Promise.all([fetchAreas(), fetchLocations()]);
+        await Promise.all([fetchLocations(), fetchAreas()]);
       } catch (err: any) {
-        console.error('Failed to load data:', err);
         setError(err.message || 'Failed to load data');
       } finally {
         setLoading(false);
       }
     };
-    loadData();
-  }, [workspaceId, fetchAreas, fetchLocations]);
+    load();
+  }, [workspaceId, fetchLocations, fetchAreas]);
+
+  // ── Stats ──────────────────────────────────────────────────────────────────
 
   const stats = {
-    totalLocations: locations.length,
-    available: locations.filter(l => l.status === 'available').length,
-    occupied: locations.filter(l => l.status === 'occupied').length,
+    total:     locations.length,
+    available: locations.filter((l) => l.status === 'available').length,
+    occupied:  locations.filter((l) => l.status === 'occupied').length,
+    reserved:  locations.filter((l) => l.status === 'reserved').length,
   };
 
+  // ── Filtered locations (for bulk print) ───────────────────────────────────
+
+  const getFilteredLocations = useCallback(
+    (): ServiceLocation[] =>
+      locations.filter((l) => {
+        const q = searchQuery.toLowerCase();
+        const matchSearch =
+          !q ||
+          (l.name ?? '').toLowerCase().includes(q) ||
+          l.identifier.toLowerCase().includes(q) ||
+          (l.description ?? '').toLowerCase().includes(q);
+        const matchStatus = filterStatus === 'all' || l.status === filterStatus;
+        return matchSearch && matchStatus;
+      }),
+    [locations, searchQuery, filterStatus],
+  );
+
+  // ── Shared helpers ─────────────────────────────────────────────────────────
+
+  const showSnack = (message: string, severity: 'success' | 'error' | 'info') =>
+    setSnackbar({ open: true, message, severity });
+
+  // ── Location handlers ──────────────────────────────────────────────────────
+
   const handleAddNew = () => {
-    setSelectedLocation(null);
-    setSelectedArea(null);
-    setAddDialogOpen(true);
+    if (activeTab === 0) {
+      setSelectedLocation(null);
+      setLocationDialogOpen(true);
+    } else {
+      setSelectedArea(null);
+      setAreaDialogOpen(true);
+    }
   };
 
   const handleEditLocation = (location: ServiceLocation) => {
     setSelectedLocation(location);
-    setAddDialogOpen(true);
-  };
-
-  const handleEditArea = (area: ServiceArea) => {
-    setSelectedArea(area);
-    setAddDialogOpen(true);
+    setLocationDialogOpen(true);
   };
 
   const handleDeleteLocation = (locationId: string) => {
-    const location = locations.find(l => l.id === locationId);
-    if (location) { setSelectedLocation(location); setDeleteDialogOpen(true); }
-  };
-
-  const handleDeleteArea = (areaId: string) => {
-    const area = areas.find(a => a.id === areaId);
-    if (area) { setSelectedArea(area); setDeleteDialogOpen(true); }
+    const loc = locations.find((l) => l.id === locationId);
+    if (loc) { setSelectedLocation(loc); setLocationDeleteOpen(true); }
   };
 
   const handleSaveLocation = async (data: any) => {
     try {
       if (selectedLocation) {
         await locationService.updateLocation(selectedLocation.id, data);
-        setSnackbar({ open: true, message: 'Location updated successfully', severity: 'success' });
+        showSnack('Location updated successfully', 'success');
       } else {
         await locationService.createLocation({ ...data, workspaceId });
-        setSnackbar({ open: true, message: 'Location created successfully', severity: 'success' });
+        showSnack('Location created successfully', 'success');
       }
-      setAddDialogOpen(false);
+      setLocationDialogOpen(false);
       setSelectedLocation(null);
-      setError(null);
       await fetchLocations();
     } catch (err: any) {
-      setSnackbar({ open: true, message: err.message || 'Failed to save location', severity: 'error' });
+      showSnack(err.message || 'Failed to save location', 'error');
     }
+  };
+
+  const handleConfirmDeleteLocation = async () => {
+    try {
+      if (selectedLocation) {
+        await locationService.deleteLocation(selectedLocation.id);
+        showSnack('Location deleted successfully', 'success');
+        await fetchLocations();
+      }
+      setLocationDeleteOpen(false);
+      setSelectedLocation(null);
+    } catch (err: any) {
+      showSnack(err.message || 'Failed to delete location', 'error');
+    }
+  };
+
+  const handleToggleStatus = async (id: string) => {
+    const location = locations.find((l) => l.id === id);
+    if (!location) return;
+    if (location.status === 'occupied') {
+      showSnack('Cannot change status: table is currently occupied', 'error');
+      return;
+    }
+    try {
+      const newStatus = location.status === 'available' ? 'maintenance' : 'available';
+      await locationService.updateLocationStatus(id, newStatus);
+      showSnack('Status updated successfully', 'success');
+      await fetchLocations();
+    } catch (err: any) {
+      showSnack(err.message || 'Failed to update status', 'error');
+    }
+  };
+
+  const handleViewQR = async (location: ServiceLocation) => {
+    try {
+      const fresh = await locationService.getLocation(location.id);
+      setQrDialogLocation(fresh);
+    } catch {
+      setQrDialogLocation(location);
+    }
+  };
+
+  // ── Area handlers ──────────────────────────────────────────────────────────
+
+  const handleEditArea = (area: ServiceArea) => {
+    setSelectedArea(area);
+    setAreaDialogOpen(true);
+  };
+
+  const handleDeleteArea = (areaId: string) => {
+    const area = areas.find((a) => a.id === areaId);
+    if (area) { setSelectedArea(area); setAreaDeleteOpen(true); }
   };
 
   const handleSaveArea = async (data: any) => {
     try {
       if (selectedArea) {
         await locationService.updateArea(selectedArea.id, data);
-        setSnackbar({ open: true, message: 'Area updated successfully', severity: 'success' });
+        showSnack('Area updated successfully', 'success');
       } else {
         await locationService.createArea({ ...data, workspaceId });
-        setSnackbar({ open: true, message: 'Area created successfully', severity: 'success' });
+        showSnack('Area created successfully', 'success');
       }
-      setAddDialogOpen(false);
+      setAreaDialogOpen(false);
       setSelectedArea(null);
-      setError(null);
       await fetchAreas();
     } catch (err: any) {
-      setSnackbar({ open: true, message: err.message || 'Failed to save area', severity: 'error' });
+      showSnack(err.message || 'Failed to save area', 'error');
     }
   };
 
-  const handleConfirmDelete = async () => {
+  const handleConfirmDeleteArea = async () => {
     try {
-      if (activeTab === 'locations' && selectedLocation) {
-        await locationService.deleteLocation(selectedLocation.id);
-        setSnackbar({ open: true, message: 'Location deleted successfully', severity: 'success' });
-        setError(null);
-        await fetchLocations();
-      } else if (activeTab === 'areas' && selectedArea) {
+      if (selectedArea) {
         await locationService.deleteArea(selectedArea.id);
-        setSnackbar({ open: true, message: 'Area deleted successfully', severity: 'success' });
-        setError(null);
+        showSnack('Area deleted successfully', 'success');
         await fetchAreas();
       }
-      setDeleteDialogOpen(false);
-      setSelectedLocation(null);
+      setAreaDeleteOpen(false);
       setSelectedArea(null);
     } catch (err: any) {
-      setSnackbar({ open: true, message: err.message || 'Failed to delete', severity: 'error' });
+      showSnack(err.message || 'Failed to delete area', 'error');
     }
   };
 
-  const handleToggleStatus = async (id: string) => {
-    const location = locations.find(l => l.id === id);
-    if (!location) return;
+  // ── Bulk Print QR ──────────────────────────────────────────────────────────
 
-    // Cannot toggle status while a table is occupied — it must be cleared first.
-    if (location.status === 'occupied') {
-      setSnackbar({
-        open: true,
-        message: 'Cannot change status: table is currently occupied',
-        severity: 'error',
-      });
+  const handleBulkPrintQR = () => {
+    const visibleLocations = getFilteredLocations();
+    if (visibleLocations.length === 0) {
+      showSnack('No locations to print', 'error');
       return;
     }
+    setBulkStyleOpen(true);
+  };
 
+  const handleBulkPrintConfirm = async () => {
+    setBulkStyleOpen(false);
+    const visibleLocations = getFilteredLocations();
+    showSnack(`Generating QR codes for ${visibleLocations.length} location(s)...`, 'info');
     try {
-      const newStatus = location.status === 'available' ? 'maintenance' : 'available';
-      await locationService.updateLocationStatus(id, newStatus);
-      setSnackbar({ open: true, message: 'Status updated successfully', severity: 'success' });
-      setError(null);
-      await fetchLocations();
+      const items = await Promise.all(
+        visibleLocations.map(async (loc): Promise<BulkQRItem> => {
+          const qrUrl = await locationService.generateQRCode(loc.id);
+          const area = loc.areaId ? areas.find((a) => a.id === loc.areaId) : undefined;
+          return { qrUrl, name: loc.name ?? loc.identifier, areaName: area?.name ?? '', menuUrl: qrUrl };
+        }),
+      );
+      const html = buildBulkPrintHtml(items, bulkStyle);
+      const win = window.open('', '_blank');
+      if (!win) { showSnack('Pop-up blocked. Please allow pop-ups and try again.', 'error'); return; }
+      win.document.open();
+      win.document.write(html);
+      win.document.close();
+      showSnack(`${items.length} QR code(s) ready to print`, 'success');
     } catch (err: any) {
-      setSnackbar({ open: true, message: err.message || 'Failed to update status', severity: 'error' });
+      showSnack(err.message || 'Failed to generate QR codes', 'error');
     }
   };
 
-  const handleGenerateQR = async (locationId: string) => {
-    try {
-      // Store the returned QR URL and open the QR dialog for the relevant location
-      const qrUrl = await locationService.generateQRCode(locationId);
-      setSnackbar({ open: true, message: 'QR code generated successfully', severity: 'success' });
-      setError(null);
-      // Refresh so the location record reflects the new qrCode field
-      await fetchLocations();
-      // Open the QR dialog with the freshly generated URL injected
-      const updated = locations.find(l => l.id === locationId);
-      if (updated) {
-        setQrDialogLocation({ ...updated, qrCode: qrUrl || updated.qrCode });
-      }
-    } catch (err: any) {
-      setSnackbar({ open: true, message: err.message || 'Failed to generate QR code', severity: 'error' });
-    }
-  };
-
-  const handlePrintQR = async (locationId: string) => {
-    try {
-      await locationService.printQRCode(locationId);
-    } catch (err: any) {
-      setSnackbar({ open: true, message: err.message || 'Failed to print QR code', severity: 'error' });
-    }
-  };
-
-  const handleViewQR = (location: ServiceLocation) => {
-    setQrDialogLocation(location);
-  };
+  // ── Loading / error states ─────────────────────────────────────────────────
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', minHeight: 300 }}>
         <CircularProgress color="primary" />
       </Box>
     );
@@ -353,69 +463,46 @@ const LocationsManagementPage: React.FC = () => {
   if (error) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', p: 3 }}>
-        <Alert severity="error">{error}</Alert>
+        <Alert severity="error" sx={{ maxWidth: 480 }}>{error}</Alert>
       </Box>
     );
   }
 
-  // Compute filtered count for toolbar result count.
-  // ServiceArea has no 'status' field — it uses 'isActive' (boolean).
-  const total = activeTab === 'locations' ? locations.length : areas.length;
-  const filteredCount = activeTab === 'locations'
-    ? locations.filter((l) => {
-        const matchSearch =
-          !searchQuery ||
-          l.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          l.identifier?.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchStatus =
-          filterStatus === 'all' || l.status === filterStatus;
-        return matchSearch && matchStatus;
-      }).length
-    : areas.filter((a) => {
-        const matchSearch =
-          !searchQuery ||
-          a.name?.toLowerCase().includes(searchQuery.toLowerCase());
-        // ServiceArea uses isActive, not status. Map the filter values accordingly.
-        const matchStatus =
-          filterStatus === 'all' ||
-          (filterStatus === 'available' ? a.isActive : !a.isActive);
-        return matchSearch && matchStatus;
-      }).length;
+  // ── Render ─────────────────────────────────────────────────────────────────
+
+  const canAdd = activeTab === 0 ? canCreateTables : canCreateAreas;
+  const addLabel = activeTab === 0 ? 'Add Location' : 'Add Area';
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100%', bgcolor: '#f1f5f9' }}>
-      {/* Hero Section */}
+
+      {/* ── Hero ──────────────────────────────────────────────────────────────── */}
       <Box
         sx={{
           background: rc.gradient,
-          px: { xs: 2, sm: 4, md: 6 },
+          px: { xs: 2, sm: 3, md: 6 },
           pt: { xs: 2.5, md: 4 },
           pb: { xs: 2.5, md: 4 },
           position: 'relative',
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: -80,
-            right: -80,
-            width: 360,
-            height: 360,
-            borderRadius: '50%',
-            background: `radial-gradient(circle, ${rc.glowA} 0%, transparent 70%)`,
-            pointerEvents: 'none',
-          },
-          '&::after': {
-            content: '""',
-            position: 'absolute',
-            bottom: -60,
-            left: '25%',
-            width: 280,
-            height: 280,
-            borderRadius: '50%',
-            background: `radial-gradient(circle, ${rc.glowB} 0%, transparent 70%)`,
-            pointerEvents: 'none',
-          },
+          overflow: 'hidden',
+          zIndex: 0,
+          flexShrink: 0,
         }}
       >
+        {/* Glow orb top-right */}
+        <Box sx={{
+          position: 'absolute', top: -80, right: -80,
+          width: 360, height: 360, borderRadius: '50%',
+          background: `radial-gradient(circle, ${rc.glowA} 0%, transparent 70%)`,
+          pointerEvents: 'none',
+        }} />
+        {/* Glow orb bottom-left */}
+        <Box sx={{
+          position: 'absolute', bottom: -60, left: '25%',
+          width: 280, height: 280, borderRadius: '50%',
+          background: `radial-gradient(circle, ${rc.glowB} 0%, transparent 70%)`,
+          pointerEvents: 'none',
+        }} />
         {/* Grid overlay */}
         <Box
           sx={{
@@ -429,7 +516,7 @@ const LocationsManagementPage: React.FC = () => {
         />
 
         <Box sx={{ position: 'relative', zIndex: 1 }}>
-          {/* Overline above title row */}
+          {/* Overline */}
           <Typography
             sx={{
               color: alpha(rc.chipText, 0.75),
@@ -440,7 +527,7 @@ const LocationsManagementPage: React.FC = () => {
               mb: 1,
             }}
           >
-            APPLICATION CONTROL CENTER
+            Application Control Center
           </Typography>
 
           {/* Title row */}
@@ -451,7 +538,7 @@ const LocationsManagementPage: React.FC = () => {
               alignItems: { xs: 'flex-start', sm: 'flex-start' },
               justifyContent: 'space-between',
               gap: 2,
-              mb: 4,
+              mb: { xs: 2.5, md: 4 },
             }}
           >
             <Box>
@@ -483,7 +570,7 @@ const LocationsManagementPage: React.FC = () => {
               </Box>
             </Box>
 
-            {(canCreateAreas || canCreateTables) && (
+            {canAdd && (
               <Button
                 variant="contained"
                 startIcon={<AddIcon />}
@@ -498,7 +585,8 @@ const LocationsManagementPage: React.FC = () => {
                   backdropFilter: 'blur(8px)',
                   border: '1px solid rgba(255,255,255,0.25)',
                   px: 2.5,
-                  py: 1,
+                  py: { xs: 0.75, sm: 1 },
+                  fontSize: { xs: '0.8125rem', sm: '0.875rem' },
                   borderRadius: 2,
                   boxShadow: 'none',
                   '&:hover': {
@@ -508,181 +596,270 @@ const LocationsManagementPage: React.FC = () => {
                   },
                 }}
               >
-                Add {activeTab === 'locations' ? 'Location' : 'Area'}
+                {addLabel}
               </Button>
             )}
           </Box>
 
-          {/* Hero stat tiles — CSS Grid */}
+          {/* Stats grid */}
           <Box
             sx={{
               display: 'grid',
-              gridTemplateColumns: { xs: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' },
-              gap: { xs: 1.5, sm: 2 },
+              gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(4, 1fr)' },
+              gap: { xs: 1, sm: 1.5 },
             }}
           >
-            <HeroStat label="Total Locations" value={stats.totalLocations} icon={<LocationIcon />} rc={rc} />
-            <HeroStat label="Available" value={stats.available} icon={<CheckCircleIcon />} rc={rc} />
-            <HeroStat label="Occupied" value={stats.occupied} icon={<OccupiedIcon />} rc={rc} />
+            <HeroStat label="Total Locations" value={stats.total}     icon={<LocationIcon />}   rc={rc} />
+            <HeroStat label="Available"        value={stats.available} icon={<CheckCircleIcon />} rc={rc} />
+            <HeroStat label="Occupied"         value={stats.occupied}  icon={<OccupiedIcon />}   rc={rc} />
+            <HeroStat label="Reserved"         value={stats.reserved}  icon={<ReservedIcon />}   rc={rc} />
           </Box>
         </Box>
       </Box>
 
-      {/* Body */}
-      <Box sx={{ pb: 6 }}>
-        {/* Full-width toolbar */}
-        <Box sx={{ pt: 0, pb: 0 }}>
-          <Paper
-            elevation={0}
+      {/* ── Body ──────────────────────────────────────────────────────────────── */}
+      <Box sx={{ position: 'relative', zIndex: 1 }}>
+
+        {/* Search / filter toolbar */}
+        <Paper
+          elevation={0}
+          sx={{
+            borderRadius: 0,
+            border: 'none',
+            borderBottom: '1px solid #e2e8f0',
+            bgcolor: '#ffffff',
+          }}
+        >
+          <Box
             sx={{
-              borderRadius: 0,
-              border: 'none',
-              borderTop: '1px solid #e2e8f0',
-              borderBottom: '1px solid #e2e8f0',
-              bgcolor: '#ffffff',
+              px: { xs: 2, sm: 3, md: 4 },
+              py: 1.5,
+              display: 'flex',
+              flexDirection: { xs: 'column', sm: 'row' },
+              alignItems: { xs: 'stretch', sm: 'center' },
+              gap: 1.5,
             }}
           >
+            {/* Search */}
             <Box
               sx={{
-                px: 2.5,
-                pt: 2,
-                pb: 1.5,
+                flex: '1 1 auto',
                 display: 'flex',
                 alignItems: 'center',
-                gap: 1.5,
-                flexWrap: 'wrap',
-                borderBottom: '1px solid #e2e8f0',
+                gap: 1,
+                bgcolor: '#f8fafc',
+                border: '1px solid #e2e8f0',
+                borderRadius: 2,
+                px: 1.5,
+                py: 0.75,
+                transition: 'border-color 0.15s',
+                '&:focus-within': { borderColor: '#94a3b8' },
               }}
             >
-              {/* Search */}
-              <Box
-                sx={{
-                  flex: '1 1 220px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1,
-                  bgcolor: '#f8fafc',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: 2,
-                  px: 1.5,
-                  py: 0.75,
-                }}
-              >
-                <SearchIcon sx={{ fontSize: 17, color: '#94a3b8', flexShrink: 0 }} />
-                <InputBase
-                  placeholder="Search locations..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  sx={{ flex: 1, fontSize: '0.875rem', color: '#0f172a' }}
-                />
-                {searchQuery && (
-                  <IconButton
-                    size="small"
-                    onClick={() => setSearchQuery('')}
-                    sx={{ p: 0.25, color: '#94a3b8' }}
-                  >
-                    <CloseIcon sx={{ fontSize: 14 }} />
-                  </IconButton>
-                )}
-              </Box>
-
-              {/* Status filter */}
-              <FormControl size="small" sx={{ minWidth: 130, flexShrink: 0 }}>
-                <Select
-                  value={filterStatus}
-                  onChange={(e) => setFilterStatus(e.target.value)}
-                  displayEmpty
-                  sx={{ borderRadius: 2, fontSize: '0.875rem', bgcolor: '#f8fafc' }}
+              <SearchIcon sx={{ fontSize: 17, color: '#94a3b8', flexShrink: 0 }} />
+              <InputBase
+                placeholder={activeTab === 0 ? 'Search locations...' : 'Search areas...'}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                sx={{ flex: 1, fontSize: '0.875rem', color: '#0f172a' }}
+              />
+              {searchQuery && (
+                <IconButton
+                  size="small"
+                  onClick={() => setSearchQuery('')}
+                  sx={{ p: 0.25, color: '#94a3b8' }}
                 >
-                  <MenuItem value="all">
-                    <Typography variant="body2" sx={{ color: '#94a3b8' }}>All Status</Typography>
-                  </MenuItem>
-                  <MenuItem value="available">Available</MenuItem>
-                  <MenuItem value="occupied">Occupied</MenuItem>
-                  <MenuItem value="maintenance">Maintenance</MenuItem>
-                </Select>
-              </FormControl>
-
-              {/* Result count */}
-              <Box sx={{ ml: 'auto', flexShrink: 0, display: { xs: 'none', sm: 'block' } }}>
-                <Typography variant="caption" sx={{ color: '#94a3b8', fontWeight: 500 }}>
-                  {filteredCount} of {total}
-                </Typography>
-              </Box>
+                  <CloseIcon sx={{ fontSize: 14 }} />
+                </IconButton>
+              )}
             </Box>
-          </Paper>
-        </Box>
+
+            {/* Status filter */}
+            <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 140 }, flexShrink: 0 }}>
+              <Select
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+                displayEmpty
+                sx={{ borderRadius: 2, fontSize: '0.875rem', bgcolor: '#f8fafc' }}
+              >
+                <MenuItem value="all">
+                  <Typography variant="body2" sx={{ color: '#94a3b8' }}>All Status</Typography>
+                </MenuItem>
+                <MenuItem value="available">Available</MenuItem>
+                <MenuItem value="occupied">Occupied</MenuItem>
+                <MenuItem value="reserved">Reserved</MenuItem>
+                <MenuItem value="maintenance">Maintenance</MenuItem>
+              </Select>
+            </FormControl>
+          </Box>
+        </Paper>
 
         {/* Content */}
-        <Box sx={{ px: { xs: 2, sm: 3, md: 4 }, pt: 2, pb: 2 }}>
+        <Box>
           <LocationTabs
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
             locations={locations}
-            areas={areas}
+            searchQuery={searchQuery}
+            filterStatus={filterStatus}
             onEditLocation={handleEditLocation}
             onDeleteLocation={handleDeleteLocation}
+            onToggleStatus={handleToggleStatus}
+            onViewQR={handleViewQR}
+            onBulkPrintQR={handleBulkPrintQR}
+            areas={areas}
             onEditArea={handleEditArea}
             onDeleteArea={handleDeleteArea}
-            onToggleStatus={handleToggleStatus}
-            onGenerateQR={handleGenerateQR}
-            onPrintQR={handlePrintQR}
-            onViewQR={handleViewQR}
+            activeTab={activeTab}
+            onTabChange={(tab) => { setActiveTab(tab); setSearchQuery(''); setFilterStatus('all'); }}
           />
         </Box>
       </Box>
 
-      {activeTab === 'locations' && (
-        <ServiceLocationFormDialog
-          open={addDialogOpen}
-          onClose={() => { setAddDialogOpen(false); setSelectedLocation(null); }}
-          onSave={handleSaveLocation}
-          location={selectedLocation}
-          areas={areas}
-        />
-      )}
+      {/* ── Dialogs ────────────────────────────────────────────────────────────── */}
 
-      {activeTab === 'areas' && (
-        <ServiceAreaFormDialog
-          open={addDialogOpen}
-          onClose={() => { setAddDialogOpen(false); setSelectedArea(null); }}
-          onSave={handleSaveArea}
-          area={selectedArea}
-        />
-      )}
+      {/* Location form */}
+      <ServiceLocationFormDialog
+        open={locationDialogOpen}
+        onClose={() => { setLocationDialogOpen(false); setSelectedLocation(null); }}
+        onSave={handleSaveLocation}
+        location={selectedLocation}
+      />
 
+      {/* Location delete */}
       <DeleteConfirmationDialog
-        open={deleteDialogOpen}
-        onClose={() => {
-          setDeleteDialogOpen(false);
-          setSelectedLocation(null);
-          setSelectedArea(null);
-        }}
-        onConfirm={handleConfirmDelete}
-        title={`Delete ${activeTab === 'locations' ? 'Location' : 'Area'}`}
-        itemName={selectedLocation?.name || selectedArea?.name || ''}
-        itemType={activeTab === 'locations' ? 'location' : 'area'}
-        description={`This will remove this ${activeTab === 'locations' ? 'location' : 'area'} from the system. This action can be undone later.`}
+        open={locationDeleteOpen}
+        onClose={() => { setLocationDeleteOpen(false); setSelectedLocation(null); }}
+        onConfirm={handleConfirmDeleteLocation}
+        title="Delete Location"
+        itemName={selectedLocation?.name || selectedLocation?.identifier || ''}
+        itemType="location"
+        description="This will remove this location from the system. This action can be undone later."
         requireTyping={false}
       />
 
+      {/* Area form */}
+      <ServiceAreaFormDialog
+        open={areaDialogOpen}
+        onClose={() => { setAreaDialogOpen(false); setSelectedArea(null); }}
+        onSave={handleSaveArea}
+        area={selectedArea}
+      />
+
+      {/* Area delete */}
+      <DeleteConfirmationDialog
+        open={areaDeleteOpen}
+        onClose={() => { setAreaDeleteOpen(false); setSelectedArea(null); }}
+        onConfirm={handleConfirmDeleteArea}
+        title="Delete Area"
+        itemName={selectedArea?.name || ''}
+        itemType="area"
+        description="This will remove this area from the system. Locations in this area will not be deleted."
+        requireTyping={false}
+      />
+
+      {/* ── Bulk Print Style Picker ── */}
+      <Dialog
+        open={bulkStyleOpen}
+        onClose={() => setBulkStyleOpen(false)}
+        maxWidth="xs"
+        fullWidth
+        PaperProps={{ sx: { borderRadius: 3, overflow: 'hidden' } }}
+      >
+        <Box
+          sx={{
+            background: 'linear-gradient(135deg,#0f172a 0%,#1e1b4b 60%,#312e81 100%)',
+            px: 3, py: 2.5,
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          }}
+        >
+          <Box>
+            <Typography sx={{ color: '#fff', fontWeight: 700, fontSize: '1rem' }}>Print All QRs</Typography>
+            <Typography sx={{ color: 'rgba(199,210,254,0.7)', fontSize: '0.75rem', mt: 0.25 }}>
+              Choose a card style for all {getFilteredLocations().length} QR codes
+            </Typography>
+          </Box>
+          <IconButton size="small" onClick={() => setBulkStyleOpen(false)} sx={{ color: 'rgba(255,255,255,0.7)', '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' } }}>
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        </Box>
+        <DialogContent sx={{ p: 2.5 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+            {(
+              [
+                { value: 'classic',  label: 'Classic',  desc: 'Clean white card with subtle shadow' },
+                { value: 'rounded',  label: 'Rounded',  desc: 'Soft rounded corners, modern look' },
+                { value: 'dark',     label: 'Dark',     desc: 'Dark background, inverted QR' },
+                { value: 'branded',  label: 'Branded',  desc: 'Dino branded header above QR' },
+                { value: 'minimal',  label: 'Minimal',  desc: 'No border, clean and simple' },
+                { value: 'framed',   label: 'Framed',   desc: 'Bold decorative frame border' },
+              ] as { value: BulkQRStyle; label: string; desc: string }[]
+            ).map((s) => (
+              <Box
+                key={s.value}
+                onClick={() => setBulkStyle(s.value)}
+                sx={{
+                  display: 'flex', alignItems: 'center', gap: 1.5,
+                  px: 2, py: 1.25,
+                  borderRadius: 1.5,
+                  border: `1.5px solid ${bulkStyle === s.value ? '#312e81' : '#e2e8f0'}`,
+                  bgcolor: bulkStyle === s.value ? alpha('#312e81', 0.05) : '#fafafa',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s',
+                  '&:hover': { borderColor: '#312e81', bgcolor: alpha('#312e81', 0.04) },
+                }}
+              >
+                <Radio
+                  checked={bulkStyle === s.value}
+                  size="small"
+                  sx={{ p: 0, color: '#312e81', '&.Mui-checked': { color: '#312e81' } }}
+                />
+                <Box>
+                  <Typography sx={{ fontWeight: 700, fontSize: '0.875rem', color: '#0f172a', lineHeight: 1.2 }}>
+                    {s.label}
+                  </Typography>
+                  <Typography sx={{ fontSize: '0.75rem', color: '#64748b', lineHeight: 1.3 }}>
+                    {s.desc}
+                  </Typography>
+                </Box>
+              </Box>
+            ))}
+          </Box>
+        </DialogContent>
+        <DialogActions sx={{ px: 2.5, pb: 2.5, pt: 0, gap: 1 }}>
+          <Button
+            onClick={() => setBulkStyleOpen(false)}
+            sx={{ textTransform: 'none', fontWeight: 600, color: '#64748b', borderRadius: 1.5 }}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            onClick={handleBulkPrintConfirm}
+            startIcon={<PrintIcon />}
+            sx={{ textTransform: 'none', fontWeight: 700, bgcolor: '#0f172a', borderRadius: 1.5, boxShadow: 'none', '&:hover': { bgcolor: '#1e293b', boxShadow: 'none' } }}
+          >
+            Print All QRs
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* QR viewer */}
       <QRCodeDialog
         open={!!qrDialogLocation}
         location={qrDialogLocation}
-        areaName={areas.find(a => a.id === qrDialogLocation?.areaId)?.name}
-        organizationId={userData?.venue?.id || ''}
+        areaName={qrDialogLocation?.areaId ? areas.find((a) => a.id === qrDialogLocation.areaId)?.name : undefined}
+        organizationId={organizationId}
         onClose={() => setQrDialogLocation(null)}
       />
 
       <Snackbar
         open={snackbar.open}
-        autoHideDuration={6000}
-        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        autoHideDuration={4000}
+        onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
       >
         <Alert
           severity={snackbar.severity}
-          onClose={() => setSnackbar({ ...snackbar, open: false })}
+          onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
           sx={{ boxShadow: '0 4px 12px rgba(0,0,0,0.15)', borderRadius: 1.5 }}
         >
           {snackbar.message}

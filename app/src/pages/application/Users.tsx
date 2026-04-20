@@ -5,7 +5,7 @@
  * role-colored per ROLE_COLORS. Table layout aligned with system UserManagement.
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Box,
   MenuItem,
@@ -41,7 +41,6 @@ import {
   Block as BlockIcon,
   AdminPanelSettings as AdminIcon,
   Edit as EditIcon,
-  Delete as DeleteIcon,
   CalendarToday as CalendarTodayIcon,
   FilterAltOutlined,
 } from '@mui/icons-material';
@@ -50,7 +49,6 @@ import { usePermissions } from '../../hooks/usePermissions';
 import { useAuth } from '../../contexts/common/Auth';
 import { applicationUserService } from '../../services/application/user';
 import UserFormDialog from './Users/UserFormDialog';
-import { DeleteConfirmationDialog } from '../../components/dialogs';
 import { ROLE_COLORS } from '../../constants/app';
 
 // ─── Design tokens (mirrors system C object) ─────────────────────────────────
@@ -207,18 +205,28 @@ const UserManagement: React.FC = () => {
   const [snackbar, setSnackbar]     = useState({
     open: false, message: '', severity: 'success' as 'success' | 'error',
   });
-  const [deleteModal, setDeleteModal] = useState({
-    open: false, userId: '', userName: '', loading: false,
-  });
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // API — searchTerm is sent to the API; no client-side search duplication
+  // Debounce searchTerm into debouncedSearch with 300ms delay
+  useEffect(() => {
+    if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+    searchTimerRef.current = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+    }, 300);
+    return () => {
+      if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+    };
+  }, [searchTerm]);
+
+  // API — guard on workspaceId so we never fire before UserDataContext has resolved
   const loadUsers = useCallback(async () => {
+    if (!currentWorkspace?.id) return;
     try {
       setLoading(true);
-      const filters: any = {};
-      if (currentWorkspace?.id) filters.workspaceId = currentWorkspace.id;
-      if (currentVenue?.id)     filters.organizationId = currentVenue.id;
-      if (searchTerm)           filters.search = searchTerm;
+      const filters: any = { workspaceId: currentWorkspace.id };
+      if (currentVenue?.id) filters.organizationId = currentVenue.id;
+      if (debouncedSearch)  filters.search = debouncedSearch;
       const usersData = await applicationUserService.getUsers(1, 100, filters);
       setUsers(usersData);
     } catch (error: any) {
@@ -226,7 +234,7 @@ const UserManagement: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [currentWorkspace?.id, currentVenue?.id, searchTerm]);
+  }, [currentWorkspace?.id, currentVenue?.id, debouncedSearch]);
 
   useEffect(() => { loadUsers(); }, [loadUsers]);
 
@@ -241,19 +249,6 @@ const UserManagement: React.FC = () => {
       message: editingUser ? 'User updated successfully' : 'User created successfully',
       severity: 'success',
     });
-  };
-
-  const confirmDeleteUser = async () => {
-    try {
-      setDeleteModal(prev => ({ ...prev, loading: true }));
-      await applicationUserService.deleteUser(deleteModal.userId);
-      setSnackbar({ open: true, message: 'User deleted successfully', severity: 'success' });
-      loadUsers();
-      setDeleteModal({ open: false, userId: '', userName: '', loading: false });
-    } catch (error: any) {
-      setSnackbar({ open: true, message: error?.message || 'Failed to delete user', severity: 'error' });
-      setDeleteModal(prev => ({ ...prev, loading: false }));
-    }
   };
 
   const handleToggleUserStatus = async (userId: string, currentStatus: boolean) => {
@@ -394,7 +389,7 @@ const UserManagement: React.FC = () => {
       </Box>
 
       {/* ── Body ── */}
-      <Box sx={{ pb: 6 }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, pb: { md: 6 } }}>
 
         {/* Toolbar */}
         <Box sx={{ pt: 0, pb: 0 }}>
@@ -600,11 +595,23 @@ const UserManagement: React.FC = () => {
 
                           {/* Role */}
                           <TableCell>
-                            <Typography variant="body2" sx={{ color: C.slate, fontSize: '0.8125rem' }}>
-                              {typeof u.role === 'string'
-                                ? u.role
-                                : u.role?.displayName || u.role?.name || '—'}
-                            </Typography>
+                            {(() => {
+                              const chipStyle = getRoleChipStyle(typeof u.role === 'string' ? u.role : (u.role?.name || ''));
+                              return (
+                                <Chip
+                                  label={typeof u.role === 'string' ? u.role : (u.role?.displayName || u.role?.name || 'Unknown')}
+                                  size="small"
+                                  sx={{
+                                    bgcolor: chipStyle.bg,
+                                    color: chipStyle.color,
+                                    border: `1px solid ${chipStyle.border}`,
+                                    fontWeight: 600,
+                                    fontSize: '0.7rem',
+                                    height: 22,
+                                  }}
+                                />
+                              );
+                            })()}
                           </TableCell>
 
                           {/* Status */}
@@ -651,16 +658,6 @@ const UserManagement: React.FC = () => {
                                   }
                                 </IconButton>
                               </Tooltip>
-                              {/* FIX: Delete button now opens the deleteModal */}
-                              <Tooltip title="Delete user" arrow>
-                                <IconButton
-                                  size="small"
-                                  onClick={() => setDeleteModal({ open: true, userId: u.id, userName: u.email, loading: false })}
-                                  sx={{ color: C.muted, borderRadius: 1.5, '&:hover': { color: C.rose, bgcolor: alpha(C.rose, 0.08) } }}
-                                >
-                                  <DeleteIcon sx={{ fontSize: 16 }} />
-                                </IconButton>
-                              </Tooltip>
                             </Box>
                           </TableCell>
                         </TableRow>
@@ -693,8 +690,9 @@ const UserManagement: React.FC = () => {
 
         {/* Mobile Card List (xs / sm) */}
         {isMobile && (
-          <Box sx={{ borderBottom: `1px solid ${C.border}` }}>
-            <Box sx={{ px: { xs: 1.5, sm: 2 }, pt: 2, pb: 2 }}>
+          <>
+            {/* Cards — full width, flush, separated by dividers */}
+            <Box sx={{ bgcolor: C.surface }}>
               {loading ? (
                 <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 10 }}>
                   <CircularProgress sx={{ color: rc.primary }} />
@@ -726,15 +724,12 @@ const UserManagement: React.FC = () => {
                     : '—';
 
                   return (
-                    <Paper
+                    <Box
                       key={u.id}
-                      elevation={0}
                       sx={{
-                        border: `1px solid ${C.border}`,
-                        borderRadius: 2,
                         p: 2,
-                        mb: 1.5,
                         bgcolor: C.surface,
+                        borderBottom: `1px solid ${C.border}`,
                         transition: 'background-color 0.1s',
                         '&:hover': { bgcolor: '#fafafa' },
                       }}
@@ -799,44 +794,44 @@ const UserManagement: React.FC = () => {
                               {u.isActive ? <BlockIcon sx={{ fontSize: 16 }} /> : <CheckCircleIcon sx={{ fontSize: 16 }} />}
                             </IconButton>
                           </Tooltip>
-                          {/* FIX: Delete button now opens the deleteModal */}
-                          <Tooltip title="Delete user" arrow>
-                            <IconButton size="small"
-                              onClick={() => setDeleteModal({ open: true, userId: u.id, userName: u.email, loading: false })}
-                              sx={{ color: C.muted, borderRadius: 1.5, '&:hover': { color: C.rose, bgcolor: alpha(C.rose, 0.08) } }}>
-                              <DeleteIcon sx={{ fontSize: 16 }} />
-                            </IconButton>
-                          </Tooltip>
                         </Box>
                       </Box>
-                    </Paper>
+                    </Box>
                   );
                 })
               )}
             </Box>
-          </Box>
-        )}
 
-        {/* Mobile Pagination */}
-        {isMobile && !loading && (
-          <Paper elevation={0} sx={{ borderTop: `1px solid ${C.border}`, bgcolor: C.surface }}>
-            <TablePagination
-              component="div"
-              count={filteredUsers.length}
-              page={page}
-              onPageChange={(_, newPage) => setPage(newPage)}
-              rowsPerPage={rowsPerPage}
-              onRowsPerPageChange={(e) => { setRowsPerPage(parseInt(e.target.value, 10)); setPage(0); }}
-              rowsPerPageOptions={[]}
-              labelRowsPerPage=""
-              sx={{
-                '& .MuiTablePagination-toolbar': { color: C.slate, minHeight: 48, px: 1 },
-                '& .MuiTablePagination-displayedRows': { fontSize: '0.8rem', m: 0 },
-                '& .MuiTablePagination-selectLabel': { display: 'none' },
-                '& .MuiInputBase-root': { display: 'none' },
-              }}
-            />
-          </Paper>
+            {/* Pagination — sticky at bottom of the scrolling main container */}
+            {!loading && (
+              <Box
+                sx={{
+                  position: 'sticky',
+                  bottom: 0,
+                  zIndex: 10,
+                  borderTop: `1px solid ${C.border}`,
+                  bgcolor: C.surface,
+                }}
+              >
+                <TablePagination
+                  component="div"
+                  count={filteredUsers.length}
+                  page={page}
+                  onPageChange={(_, newPage) => setPage(newPage)}
+                  rowsPerPage={rowsPerPage}
+                  onRowsPerPageChange={(e) => { setRowsPerPage(parseInt(e.target.value, 10)); setPage(0); }}
+                  rowsPerPageOptions={[]}
+                  labelRowsPerPage=""
+                  sx={{
+                    '& .MuiTablePagination-toolbar': { color: C.slate, minHeight: 48, px: 1 },
+                    '& .MuiTablePagination-displayedRows': { fontSize: '0.8rem', m: 0 },
+                    '& .MuiTablePagination-selectLabel': { display: 'none' },
+                    '& .MuiInputBase-root': { display: 'none' },
+                  }}
+                />
+              </Box>
+            )}
+          </>
         )}
       </Box>
 
@@ -849,18 +844,6 @@ const UserManagement: React.FC = () => {
         workspaceId={currentWorkspace?.id || ''}
         venueId={currentVenue?.id || ''}
         venues={currentVenue ? [currentVenue] : []}
-      />
-
-      <DeleteConfirmationDialog
-        open={deleteModal.open}
-        onClose={() => setDeleteModal({ ...deleteModal, open: false })}
-        onConfirm={confirmDeleteUser}
-        title="Delete User"
-        itemName={deleteModal.userName}
-        itemType="user"
-        description="This will permanently remove the user from the system."
-        loading={deleteModal.loading}
-        requireTyping={false}
       />
 
       <Snackbar

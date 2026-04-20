@@ -445,7 +445,7 @@ export const cacheUtils = {
         dashboardCache.preload(
           CacheKeys.dashboardData('admin', venueId),
           () => import('../../services/application').then(({ dashboardService }) => 
-            dashboardService.getAdminDashboard()
+            dashboardService.getDashboard()
           )
         )
       );

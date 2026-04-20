@@ -73,17 +73,38 @@
   padding: 0;
 }
 
+/* ========================================
+   HIDE SCROLLBARS GLOBALLY — ALL BROWSERS
+   Scrolling still works; bars are invisible
+   ======================================== */
+
+/* WebKit / Blink — Chrome, Safari, Edge */
+*::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* Firefox */
+* {
+  scrollbar-width: none;
+}
+
+/* IE / old Edge */
+* {
+  -ms-overflow-style: none;
+}
+
 /* HTML and Body base styles */
 html {
   font-size: 16px;
   background-color: var(--color-bg-white);
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
-  overflow-x: hidden;
-  overflow-y: auto;
   width: 100%;
-  max-width: 100%;
-  height: 100%;
+  /* overflow-x hidden on html alone is enough to clip horizontal bleed */
+  overflow-x: hidden;
+  /* overscroll-behavior kills the bounce/rubber-band on all browsers */
   overscroll-behavior: none;
 }
 
@@ -95,23 +116,18 @@ body {
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.6;
   scroll-behavior: smooth;
-  overflow-x: hidden;
-  overflow-y: auto;
   background-color: var(--color-bg-white);
   width: 100%;
-  max-width: 100%;
-  height: 100%;
+  /* No overflow set on body — the document scrolls naturally */
   overscroll-behavior: none;
 }
 
-/* Root container */
+/* Root container — must NOT be a scroll container */
 #root {
   background-color: var(--color-bg-white);
   min-height: 100vh;
   width: 100%;
-  max-width: 100%;
-  overflow-x: hidden;
-  overflow-y: visible;
+  /* No overflow set — content flows into the document scroll */
 }
 
 /* Admin layout: lock body scroll, let the inner main element scroll */
@@ -760,47 +776,22 @@ input[type=number],
     padding-top: 16px;
   }
   
-  /* Enable momentum scrolling on iOS */
-  * {
+  /* iOS momentum scrolling — no bounce */
+  html, body {
     -webkit-overflow-scrolling: touch;
+    overscroll-behavior: none;
   }
-  
-  /* Fix mobile viewport */
-  html {
-    height: auto;
-    min-height: 100%;
-    overflow-y: auto;
-  }
-  
-  body {
-    height: auto;
-    min-height: 100%;
-    overflow-y: auto;
-    position: relative;
-  }
-  
+
   /* Scrollable areas */
-  .MuiContainer-root,
-  .admin-main-content,
-  .container-responsive,
-  main {
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-  
   .admin-main-content {
     height: auto;
     min-height: calc(100vh - 64px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
-  
+
   .container-responsive {
     max-height: none;
-  }
-  
-  #root {
-    overflow-y: auto;
-    height: auto;
-    min-height: 100vh;
   }
 }
 

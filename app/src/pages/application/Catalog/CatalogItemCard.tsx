@@ -1,22 +1,15 @@
-/**
- * CatalogItemCard Component - Clean Professional Design
- *
- * Display individual catalog item
- */
-
-import React from 'react';
+import React, { useRef } from 'react';
 import {
-  Box,
-  Paper,
-  Typography,
-  Chip,
-  IconButton,
-  Tooltip,
+  Box, Typography, Chip, IconButton, Tooltip,
 } from '@mui/material';
+import { alpha } from '@mui/material/styles';
 import {
   Edit as EditIcon,
   Delete as DeleteIcon,
   Image as ImageIcon,
+  CheckCircle as CheckCircleIcon,
+  Cancel as CancelIcon,
+  AccessTime as TimeIcon,
 } from '@mui/icons-material';
 import type { CatalogItem } from '../../../features/catalog/types';
 
@@ -30,234 +23,172 @@ interface CatalogItemCardProps {
 }
 
 const CatalogItemCard: React.FC<CatalogItemCardProps> = ({
-  item,
-  categoryName,
-  onEdit,
-  onDelete,
-  onToggleAvailability,
-  onImageUpload,
+  item, categoryName, onEdit, onDelete, onToggleAvailability, onImageUpload,
 }) => {
-  const handleImageClick = () => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
-    input.onchange = (e: any) => {
-      const file = e.target.files?.[0];
-      if (file) {
-        onImageUpload(item.id, file);
-      }
-    };
-    input.click();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const imageUrl = item.imageUrls?.[0];
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) onImageUpload(item.id, file);
+    e.target.value = '';
   };
 
+  const formatPrice = (price: number) =>
+    new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(price);
+
   return (
-    <Paper
-      elevation={0}
+    <Box
       sx={{
-        backgroundColor: '#ffffff',
+        bgcolor: '#fff',
         border: '1px solid #e2e8f0',
         borderRadius: 2,
         overflow: 'hidden',
         display: 'flex',
         flexDirection: 'column',
-        width: '100%',
-        transition: 'all 0.2s',
-        '&:hover': {
-          boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-        },
+        transition: 'box-shadow 0.15s, transform 0.15s',
+        '&:hover': { boxShadow: '0 4px 16px rgba(0,0,0,0.08)', transform: 'translateY(-1px)' },
       }}
     >
-      {/* Image */}
+      {/* Image area */}
       <Box
-        onClick={handleImageClick}
+        onClick={() => fileInputRef.current?.click()}
         sx={{
-          height: { xs: 160, sm: 180 },
-          backgroundColor: '#f8fafc',
+          position: 'relative',
+          height: 160,
+          bgcolor: '#f8fafc',
+          cursor: 'pointer',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          cursor: 'pointer',
-          position: 'relative',
-          '&:hover': {
-            backgroundColor: '#f1f5f9',
-          },
+          overflow: 'hidden',
+          '&:hover .upload-overlay': { opacity: 1 },
         }}
       >
-        {item.imageUrls && item.imageUrls.length > 0 ? (
-          <img
-            src={item.imageUrls[0]}
+        {imageUrl ? (
+          <Box
+            component="img"
+            src={imageUrl}
             alt={item.name}
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-            }}
+            sx={{ width: '100%', height: '100%', objectFit: 'cover' }}
           />
         ) : (
-          <ImageIcon sx={{ fontSize: 48, color: '#94a3b8' }} />
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5 }}>
+            <ImageIcon sx={{ fontSize: 36, color: '#cbd5e1' }} />
+            <Typography sx={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 500 }}>Click to upload</Typography>
+          </Box>
         )}
-        <Chip
-          label={item.isAvailable ? 'Available' : 'Unavailable'}
-          size="small"
-          onClick={(e) => {
-            e.stopPropagation();
-            onToggleAvailability(item.id);
-          }}
+
+        {/* Upload overlay */}
+        <Box
+          className="upload-overlay"
           sx={{
-            position: 'absolute',
-            top: 8,
-            right: 8,
-            backgroundColor: item.isAvailable
-              ? 'rgba(16,185,129,0.9)'
-              : 'rgba(239,68,68,0.9)',
-            color: '#ffffff',
-            border: 'none',
-            fontWeight: 600,
-            fontSize: '0.75rem',
-            height: 24,
-            cursor: 'pointer',
-            '&:hover': {
-              backgroundColor: item.isAvailable
-                ? 'rgba(16,185,129,1)'
-                : 'rgba(239,68,68,1)',
-            },
+            position: 'absolute', inset: 0,
+            bgcolor: 'rgba(15,23,42,0.45)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            opacity: 0, transition: 'opacity 0.15s',
           }}
-        />
+        >
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5 }}>
+            <ImageIcon sx={{ fontSize: 24, color: '#fff' }} />
+            <Typography sx={{ fontSize: '0.7rem', color: '#fff', fontWeight: 600 }}>Change Image</Typography>
+          </Box>
+        </Box>
+
+        {/* Availability badge */}
+        <Box
+          onClick={e => { e.stopPropagation(); onToggleAvailability(item.id); }}
+          sx={{
+            position: 'absolute', top: 8, right: 8,
+            display: 'flex', alignItems: 'center', gap: 0.4,
+            px: 1, py: 0.3,
+            borderRadius: 10,
+            bgcolor: item.isAvailable ? alpha('#10b981', 0.9) : alpha('#ef4444', 0.9),
+            backdropFilter: 'blur(4px)',
+            cursor: 'pointer',
+            transition: 'opacity 0.15s',
+            '&:hover': { opacity: 0.85 },
+          }}
+        >
+          {item.isAvailable
+            ? <CheckCircleIcon sx={{ fontSize: 11, color: '#fff' }} />
+            : <CancelIcon sx={{ fontSize: 11, color: '#fff' }} />
+          }
+          <Typography sx={{ fontSize: '0.65rem', color: '#fff', fontWeight: 700, lineHeight: 1 }}>
+            {item.isAvailable ? 'Available' : 'Unavailable'}
+          </Typography>
+        </Box>
+
+        {/* Veg indicator */}
+        {item.isVegetarian && (
+          <Box sx={{
+            position: 'absolute', top: 8, left: 8,
+            width: 20, height: 20, borderRadius: 0.5,
+            bgcolor: '#fff', border: '1.5px solid #16a34a',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: '#16a34a' }} />
+          </Box>
+        )}
+
+        <input ref={fileInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFileChange} />
       </Box>
 
       {/* Content */}
-      <Box sx={{ p: { xs: 2, sm: 2.5 }, flex: 1, display: 'flex', flexDirection: 'column' }}>
-        <Typography
-          variant="h6"
-          sx={{
-            fontWeight: 700,
-            color: '#0f172a',
-            fontSize: '1rem',
-            mb: 0.5,
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-          }}
-        >
+      <Box sx={{ p: 2, flex: 1, display: 'flex', flexDirection: 'column', gap: 0.75 }}>
+        {/* Category chip */}
+        {categoryName && (
+          <Chip
+            label={categoryName}
+            size="small"
+            sx={{ alignSelf: 'flex-start', height: 18, fontSize: '0.65rem', fontWeight: 600, bgcolor: '#f1f5f9', color: '#64748b', border: '1px solid #e2e8f0', '& .MuiChip-label': { px: 0.75 } }}
+          />
+        )}
+
+        {/* Name */}
+        <Typography sx={{ fontWeight: 700, color: '#0f172a', fontSize: '0.9rem', lineHeight: 1.3, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
           {item.name}
         </Typography>
 
-        {categoryName && (
-          <Typography
-            variant="body2"
-            sx={{ color: '#64748b', fontSize: '0.8125rem', mb: 1 }}
-          >
-            {categoryName}
-          </Typography>
-        )}
-
+        {/* Description */}
         {item.description && (
-          <Typography
-            variant="body2"
-            sx={{
-              color: '#64748b',
-              fontSize: '0.8125rem',
-              mb: 2,
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              display: '-webkit-box',
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: 'vertical',
-              flex: 1,
-            }}
-          >
+          <Typography sx={{ fontSize: '0.78rem', color: '#94a3b8', lineHeight: 1.4, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
             {item.description}
           </Typography>
         )}
 
-        {/* Price */}
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            mb: { xs: 1.5, sm: 2 },
-          }}
-        >
-          <Typography
-            variant="h6"
-            sx={{ fontWeight: 700, color: '#0f172a', fontSize: '1.125rem' }}
-          >
-            ${(item.basePrice ?? 0).toFixed(2)}
-          </Typography>
-          {item.preparationTime && (
-            <Typography
-              variant="caption"
-              sx={{ color: '#94a3b8', fontSize: '0.75rem' }}
-            >
+        {/* Prep time */}
+        {item.preparationTime && (
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <TimeIcon sx={{ fontSize: 13, color: '#94a3b8' }} />
+            <Typography sx={{ fontSize: '0.72rem', color: '#94a3b8', fontWeight: 500 }}>
               {item.preparationTime} min
             </Typography>
-          )}
-        </Box>
-
-        {/* Tags */}
-        {item.tags && item.tags.length > 0 && (
-          <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mb: { xs: 1.5, sm: 2 } }}>
-            {item.tags.slice(0, 3).map((tag, index) => (
-              <Chip
-                key={index}
-                label={tag}
-                size="small"
-                sx={{
-                  height: 20,
-                  fontSize: '0.6875rem',
-                  backgroundColor: 'rgba(25,118,210,0.06)',
-                  color: '#1976d2',
-                  border: '1px solid rgba(25,118,210,0.15)',
-                }}
-              />
-            ))}
           </Box>
         )}
 
-        {/* Actions */}
-        <Box
-          sx={{
-            display: 'flex',
-            gap: 1,
-            justifyContent: 'flex-end',
-            pt: { xs: 1.5, sm: 2 },
-            borderTop: '1px solid #f1f5f9',
-          }}
-        >
-          <Tooltip title="Edit item">
-            <IconButton
-              size="small"
-              onClick={() => onEdit(item)}
-              sx={{
-                color: '#94a3b8',
-                '&:hover': {
-                  color: '#0f172a',
-                  bgcolor: 'rgba(15,23,42,0.06)',
-                },
-              }}
-            >
-              <EditIcon sx={{ fontSize: 16 }} />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Delete item">
-            <IconButton
-              size="small"
-              onClick={() => onDelete(item)}
-              sx={{
-                color: '#94a3b8',
-                '&:hover': {
-                  color: '#f43f5e',
-                  bgcolor: 'rgba(244,63,94,0.08)',
-                },
-              }}
-            >
-              <DeleteIcon sx={{ fontSize: 16 }} />
-            </IconButton>
-          </Tooltip>
+        {/* Price + Actions */}
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 'auto', pt: 0.5 }}>
+          <Typography sx={{ fontWeight: 800, color: '#0f172a', fontSize: '1rem', letterSpacing: '-0.02em' }}>
+            {formatPrice(item.basePrice)}
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 0.25 }}>
+            <Tooltip title="Edit item" arrow>
+              <IconButton size="small" onClick={() => onEdit(item)}
+                sx={{ color: '#94a3b8', borderRadius: 1.5, '&:hover': { color: '#0f172a', bgcolor: alpha('#0f172a', 0.06) } }}>
+                <EditIcon sx={{ fontSize: 15 }} />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Delete item" arrow>
+              <IconButton size="small" onClick={() => onDelete(item)}
+                sx={{ color: '#94a3b8', borderRadius: 1.5, '&:hover': { color: '#ef4444', bgcolor: alpha('#ef4444', 0.08) } }}>
+                <DeleteIcon sx={{ fontSize: 15 }} />
+              </IconButton>
+            </Tooltip>
+          </Box>
         </Box>
       </Box>
-    </Paper>
+    </Box>
   );
 };
 

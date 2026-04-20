@@ -120,13 +120,27 @@ class VenueService {
     }
   }
 
-  async openVenue(venueId: string): Promise<ApiResponse<Venue>> {
-    return this.updateVenue(venueId, { is_open: true });
+  /**
+   * Toggle venue open/closed status via PUT to the dedicated status endpoint
+   */
+  async setVenueOpenStatus(venueId: string, isOpen: boolean, workspaceId: string): Promise<ApiResponse<Venue>> {
+    try {
+      const response = await apiService.put<Venue>(
+        `/application/organizations/${venueId}/status`,
+        { is_open: isOpen, workspace_id: workspaceId }
+      );
+      return { success: true, data: response.data };
+    } catch (error: any) {
+      throw new Error(error.message || 'Failed to update venue status');
+    }
   }
 
+  async openVenue(venueId: string, workspaceId: string): Promise<ApiResponse<Venue>> {
+    return this.setVenueOpenStatus(venueId, true, workspaceId);
+  }
 
-  async closeVenue(venueId: string): Promise<ApiResponse<Venue>> {
-    return this.updateVenue(venueId, { is_open: false });
+  async closeVenue(venueId: string, workspaceId: string): Promise<ApiResponse<Venue>> {
+    return this.setVenueOpenStatus(venueId, false, workspaceId);
   }
 
 }

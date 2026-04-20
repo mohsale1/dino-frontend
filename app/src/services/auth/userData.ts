@@ -248,11 +248,17 @@ class UserDataService {
   }
 
   async refreshUserData(): Promise<UserData | null> {
+    // Reset all debounce / in-flight state so the next call goes straight to the API
     this.lastCallTime = 0;
     this.currentRequest = null;
     StorageManager.clearVenueData();
     StorageManager.removeItem(StorageManager.KEYS.USER);
-    return this.getUserData();
+
+    // Also clear the HTTP-layer request queue so the GET isn't deduped
+    const { apiService } = await import('../../utils/api');
+    apiService.clearRequestQueue();
+
+    return this._fetchUserData();
   }
 
   clearPendingRequests(): void {

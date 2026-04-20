@@ -15,7 +15,8 @@ export interface RevenueDataPoint {
   customers_count: number;
 }
 
-export interface OrderStatusBreakdown {
+/** @deprecated Use OrderStatusBreakdown from responses.ts instead */
+export interface OrderStatusBreakdownLegacy {
   status: string;
   count: number;
   percentage: number;
