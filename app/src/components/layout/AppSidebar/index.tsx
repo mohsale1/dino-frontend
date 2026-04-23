@@ -43,8 +43,8 @@ import { getUserFirstName } from '../../../utils/data/userUtils';
 import DinoLogo from '../../ui/DinoLogo';
 import './AppSidebar.css';
 
-export const DRAWER_WIDTH = 260;
-export const COLLAPSED_WIDTH = 68;
+export const DRAWER_WIDTH = 240;
+export const COLLAPSED_WIDTH = 60;
 
 // Order type constants
 // 0 = online (QR / self-service), 1 = POS (manual / counter)
@@ -72,7 +72,7 @@ interface AppSidebarProps {
   isTablet?: boolean;
 }
 
-const SIDEBAR_BG = '#0f172a';
+const SIDEBAR_BG = '#ffffff';
 
 const allMenuItems: NavigationItem[] = [
   {
@@ -247,12 +247,12 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ isTablet = false }) => {
           sx={{
             px: collapsed ? 1 : 2,
             py: 1.5,
-            borderBottom: collapsed ? 'none' : '1px solid rgba(255,255,255,0.1)',
+            borderBottom: '1px solid #e2e8f0',
             minHeight: 64,
             display: 'flex',
             alignItems: 'center',
             justifyContent: collapsed ? 'center' : 'space-between',
-            backgroundColor: 'rgba(0,0,0,0.1)',
+            backgroundColor: '#ffffff',
             flexShrink: 0,
           }}
         >
@@ -266,7 +266,7 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ isTablet = false }) => {
                   sx={{
                     fontWeight: 700,
                     fontSize: '0.9rem',
-                    color: '#ffffff',
+                    color: '#0f172a',
                     lineHeight: 1.2,
                   }}
                 >
@@ -277,8 +277,8 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ isTablet = false }) => {
                   size="small"
                   sx={{
                     mt: 0.5,
-                    bgcolor: alpha('#ffffff', 0.15),
-                    color: '#ffffff',
+                    bgcolor: '#eef2ff',
+                    color: '#6366f1',
                     fontWeight: 600,
                     fontSize: '0.68rem',
                     height: 18,
@@ -299,9 +299,9 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ isTablet = false }) => {
                 onClick={toggleCollapsed}
                 size="small"
                 sx={{
-                  color: alpha('#ffffff', 0.6),
+                  color: '#94a3b8',
                   flexShrink: 0,
-                  '&:hover': { bgcolor: alpha('#ffffff', 0.1), color: '#ffffff' },
+                  '&:hover': { bgcolor: '#f1f5f9', color: '#0f172a' },
                 }}
               >
                 <ChevronLeft fontSize="small" />
@@ -315,8 +315,8 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ isTablet = false }) => {
               onClick={toggleCollapsed}
               size="small"
               sx={{
-                color: alpha('#ffffff', 0.6),
-                '&:hover': { bgcolor: alpha('#ffffff', 0.1), color: '#ffffff' },
+                color: '#94a3b8',
+                '&:hover': { bgcolor: '#f1f5f9', color: '#0f172a' },
               }}
             >
               <ChevronLeft fontSize="small" />
@@ -331,7 +331,7 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ isTablet = false }) => {
               px: 0.75,
               pt: 1,
               pb: 0.5,
-              borderBottom: '1px solid rgba(255,255,255,0.1)',
+              borderBottom: '1px solid #e2e8f0',
             }}
           >
             <Tooltip title="Expand sidebar" placement="right" arrow>
@@ -340,8 +340,8 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ isTablet = false }) => {
                 sx={{
                   width: '100%',
                   borderRadius: 1.5,
-                  color: alpha('#ffffff', 0.6),
-                  '&:hover': { bgcolor: alpha('#ffffff', 0.08), color: '#ffffff' },
+                  color: '#94a3b8',
+                  '&:hover': { bgcolor: '#f1f5f9', color: '#0f172a' },
                 }}
               >
                 <ChevronRight fontSize="small" />
@@ -365,7 +365,7 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ isTablet = false }) => {
         <Box
           sx={{
             p: 1,
-            borderBottom: '1px solid rgba(255,255,255,0.08)',
+            borderBottom: '1px solid #e2e8f0',
             display: 'flex',
             justifyContent: 'center',
           }}
@@ -382,24 +382,24 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ isTablet = false }) => {
                   width: 36,
                   height: 36,
                   backgroundColor: isOpen
-                    ? alpha('#22c55e', 0.15)
-                    : alpha('#ef4444', 0.12),
-                  border: `1.5px solid ${isOpen ? 'rgba(34,197,94,0.35)' : 'rgba(239,68,68,0.3)'}`,
+                    ? alpha('#16a34a', 0.08)
+                    : alpha('#dc2626', 0.08),
+                  border: `1.5px solid ${isOpen ? alpha('#16a34a', 0.3) : alpha('#dc2626', 0.25)}`,
                   borderRadius: 1.5,
                   '&:hover': {
                     backgroundColor: isOpen
-                      ? alpha('#22c55e', 0.25)
-                      : alpha('#ef4444', 0.22),
+                      ? alpha('#16a34a', 0.15)
+                      : alpha('#dc2626', 0.15),
                   },
                   '&:disabled': { opacity: 0.45 },
                 }}
               >
                 {statusLoading ? (
-                  <CircularProgress size={14} sx={{ color: '#ffffff' }} />
+                  <CircularProgress size={14} sx={{ color: '#64748b' }} />
                 ) : isOpen ? (
-                  <CheckCircle sx={{ fontSize: 18, color: '#4ade80' }} />
+                  <CheckCircle sx={{ fontSize: 18, color: '#16a34a' }} />
                 ) : (
-                  <Cancel sx={{ fontSize: 18, color: '#f87171' }} />
+                  <Cancel sx={{ fontSize: 18, color: '#dc2626' }} />
                 )}
               </IconButton>
             </span>
@@ -410,15 +410,15 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ isTablet = false }) => {
 
     return (
       <Box
-        sx={{ px: 1.5, py: 1.25, borderBottom: '1px solid rgba(255,255,255,0.08)' }}
+        sx={{ px: 1.5, py: 1.25, borderBottom: '1px solid #e2e8f0' }}
         data-tour="venue-status"
       >
         <Box
           sx={{
             borderRadius: 2,
             overflow: 'hidden',
-            border: `1px solid ${isOpen ? 'rgba(34,197,94,0.2)' : 'rgba(239,68,68,0.18)'}`,
-            bgcolor: isOpen ? 'rgba(34,197,94,0.07)' : 'rgba(239,68,68,0.06)',
+            border: `1px solid ${isOpen ? alpha('#16a34a', 0.2) : alpha('#dc2626', 0.18)}`,
+            bgcolor: isOpen ? alpha('#16a34a', 0.04) : alpha('#dc2626', 0.04),
           }}
         >
           {/* Status header row */}
@@ -439,18 +439,18 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ isTablet = false }) => {
                   width: 7,
                   height: 7,
                   borderRadius: '50%',
-                  bgcolor: isOpen ? '#4ade80' : '#f87171',
+                  bgcolor: isOpen ? '#16a34a' : '#dc2626',
                   flexShrink: 0,
                   boxShadow: isOpen
-                    ? '0 0 0 2px rgba(74,222,128,0.25)'
-                    : '0 0 0 2px rgba(248,113,113,0.25)',
+                    ? `0 0 0 2px ${alpha('#16a34a', 0.2)}`
+                    : `0 0 0 2px ${alpha('#dc2626', 0.2)}`,
                 }}
               />
               <Typography
                 sx={{
                   fontSize: '0.75rem',
                   fontWeight: 700,
-                  color: isOpen ? '#4ade80' : '#f87171',
+                  color: isOpen ? '#16a34a' : '#dc2626',
                   letterSpacing: '0.3px',
                   textTransform: 'uppercase',
                 }}
@@ -462,7 +462,7 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ isTablet = false }) => {
             {/* Toggle switch */}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
               {statusLoading && (
-                <CircularProgress size={11} sx={{ color: 'rgba(255,255,255,0.5)' }} />
+                <CircularProgress size={11} sx={{ color: '#94a3b8' }} />
               )}
               <Switch
                 checked={isOpen}
@@ -471,12 +471,12 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ isTablet = false }) => {
                 size="small"
                 sx={{
                   '& .MuiSwitch-switchBase.Mui-checked': {
-                    color: '#4ade80',
+                    color: '#16a34a',
                     '& + .MuiSwitch-track': { bgcolor: '#16a34a' },
                   },
                   '& .MuiSwitch-switchBase': {
-                    color: '#f87171',
-                    '& + .MuiSwitch-track': { bgcolor: '#b91c1c' },
+                    color: '#dc2626',
+                    '& + .MuiSwitch-track': { bgcolor: '#dc2626' },
                   },
                 }}
               />
@@ -488,14 +488,14 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ isTablet = false }) => {
             sx={{
               px: 1.5,
               pb: 1.25,
-              borderTop: '1px solid rgba(255,255,255,0.06)',
+              borderTop: '1px solid #e2e8f0',
               pt: 0.75,
             }}
           >
             <Typography
               sx={{
                 fontSize: '0.6875rem',
-                color: 'rgba(255,255,255,0.45)',
+                color: '#64748b',
                 fontWeight: 500,
                 lineHeight: 1.3,
               }}
@@ -521,9 +521,9 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ isTablet = false }) => {
           '&::-webkit-scrollbar': { width: '4px' },
           '&::-webkit-scrollbar-track': { backgroundColor: 'transparent' },
           '&::-webkit-scrollbar-thumb': {
-            backgroundColor: 'rgba(255,255,255,0.2)',
+            backgroundColor: '#e2e8f0',
             borderRadius: '2px',
-            '&:hover': { backgroundColor: 'rgba(255,255,255,0.3)' },
+            '&:hover': { backgroundColor: '#cbd5e1' },
           },
         }}
         data-tour="sidebar-navigation"
@@ -535,10 +535,10 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ isTablet = false }) => {
               <Typography
                 variant="overline"
                 sx={{
-                  color: 'rgba(255,255,255,0.4)',
+                  color: '#94a3b8',
                   fontWeight: 700,
-                  fontSize: '0.6875rem',
-                  letterSpacing: '1px',
+                  fontSize: '0.65rem',
+                  letterSpacing: '0.8px',
                   display: 'block',
                   px: 2,
                   pt: groupIndex === 0 ? 0.5 : 1.5,
@@ -551,7 +551,7 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ isTablet = false }) => {
 
             {/* Divider between groups in collapsed state */}
             {collapsed && groupIndex > 0 && (
-              <Divider sx={{ my: 1, borderColor: 'rgba(255,255,255,0.1)' }} />
+              <Divider sx={{ my: 1, borderColor: '#e2e8f0' }} />
             )}
 
             <List disablePadding sx={{ px: collapsed ? 0.75 : 1 }}>
@@ -562,18 +562,17 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ isTablet = false }) => {
                   <ListItemButton
                     onClick={() => navigate(item.path)}
                     sx={{
-                      borderRadius: 1.5,
+                      borderRadius: 1,
                       mb: 0.25,
-                      minHeight: collapsed ? 36 : 44,
-                      px: collapsed ? 0.75 : 1.5,
+                      minHeight: collapsed ? 36 : 34,
+                      px: collapsed ? 0.75 : 1.25,
                       justifyContent: collapsed ? 'center' : 'flex-start',
-                      bgcolor: isActive ? alpha('#ffffff', 0.15) : 'transparent',
+                      bgcolor: isActive ? '#eef2ff' : 'transparent',
+                      color: isActive ? '#6366f1' : '#475569',
                       position: 'relative',
                       overflow: 'hidden',
                       '&:hover': {
-                        bgcolor: isActive
-                          ? alpha('#ffffff', 0.18)
-                          : alpha('#ffffff', 0.08),
+                        bgcolor: isActive ? '#eef2ff' : '#f8fafc',
                       },
                       '&::before': isActive
                         ? {
@@ -583,7 +582,7 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ isTablet = false }) => {
                             top: 0,
                             bottom: 0,
                             width: 3,
-                            backgroundColor: '#ffffff',
+                            backgroundColor: '#6366f1',
                             borderRadius: '0 2px 2px 0',
                           }
                         : {},
@@ -592,9 +591,9 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ isTablet = false }) => {
                     <ListItemIcon
                       sx={{
                         minWidth: collapsed ? 0 : 32,
-                        color: isActive ? '#ffffff' : 'rgba(255,255,255,0.7)',
+                        color: 'inherit',
                         justifyContent: 'center',
-                        '& .MuiSvgIcon-root': { fontSize: collapsed ? '1rem' : '1.1rem' },
+                        '& .MuiSvgIcon-root': { fontSize: '1rem' },
                       }}
                     >
                       {item.icon}
@@ -603,9 +602,9 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ isTablet = false }) => {
                       <ListItemText
                         primary={item.label}
                         primaryTypographyProps={{
-                          fontSize: '0.875rem',
+                          fontSize: '0.8125rem',
                           fontWeight: isActive ? 600 : 500,
-                          color: isActive ? '#ffffff' : 'rgba(255,255,255,0.85)',
+                          color: 'inherit',
                           noWrap: true,
                         }}
                       />
@@ -637,8 +636,8 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ isTablet = false }) => {
         <Box
           sx={{
             flexShrink: 0,
-            borderTop: '1px solid rgba(255,255,255,0.1)',
-            backgroundColor: 'rgba(0,0,0,0.2)',
+            borderTop: '1px solid #e2e8f0',
+            backgroundColor: '#ffffff',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -653,12 +652,12 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ isTablet = false }) => {
               sx={{
                 width: 36,
                 height: 36,
-                bgcolor: '#1976d2',
+                bgcolor: '#6366f1',
                 fontSize: '0.875rem',
                 fontWeight: 700,
                 cursor: 'pointer',
-                border: '2px solid rgba(255,255,255,0.2)',
-                '&:hover': { border: '2px solid rgba(255,255,255,0.4)' },
+                border: '2px solid #e2e8f0',
+                '&:hover': { border: '2px solid #6366f1' },
               }}
             >
               {getUserFirstName(user)?.charAt(0) || user.email?.charAt(0) || 'U'}
@@ -669,10 +668,10 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ isTablet = false }) => {
               size="small"
               onClick={handleLogoutClick}
               sx={{
-                color: 'rgba(255,255,255,0.7)',
+                color: '#64748b',
                 '&:hover': {
-                  color: '#f87171',
-                  backgroundColor: alpha('#ef4444', 0.1),
+                  color: '#dc2626',
+                  backgroundColor: '#fef2f2',
                 },
               }}
             >
@@ -687,8 +686,8 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ isTablet = false }) => {
       <Box
         sx={{
           flexShrink: 0,
-          borderTop: '1px solid rgba(255,255,255,0.1)',
-          backgroundColor: 'rgba(0,0,0,0.2)',
+          borderTop: '1px solid #e2e8f0',
+          backgroundColor: '#ffffff',
           p: 2,
         }}
       >
@@ -698,11 +697,11 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ isTablet = false }) => {
             sx={{
               width: 40,
               height: 40,
-              bgcolor: '#1976d2',
+              bgcolor: '#6366f1',
               fontSize: '1rem',
               fontWeight: 700,
               flexShrink: 0,
-              border: '2px solid rgba(255,255,255,0.2)',
+              border: '2px solid #e2e8f0',
             }}
           >
             {getUserFirstName(user)?.charAt(0) || user.email?.charAt(0) || 'U'}
@@ -712,7 +711,7 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ isTablet = false }) => {
               variant="subtitle2"
               sx={{
                 fontWeight: 700,
-                color: '#ffffff',
+                color: '#0f172a',
                 fontSize: '0.875rem',
                 lineHeight: 1.2,
                 overflow: 'hidden',
@@ -726,7 +725,7 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ isTablet = false }) => {
             <Typography
               variant="caption"
               sx={{
-                color: 'rgba(255,255,255,0.6)',
+                color: '#64748b',
                 fontSize: '0.75rem',
                 fontWeight: 500,
                 display: 'block',
@@ -747,15 +746,16 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ isTablet = false }) => {
           startIcon={<Logout />}
           onClick={handleLogoutClick}
           sx={{
-            borderColor: alpha('#ffffff', 0.3),
-            color: '#ffffff',
+            borderColor: '#e2e8f0',
+            color: '#64748b',
             fontSize: '0.8125rem',
             fontWeight: 500,
             borderRadius: 1.5,
             py: 0.75,
             '&:hover': {
-              borderColor: '#ffffff',
-              bgcolor: alpha('#ffffff', 0.1),
+              borderColor: '#fecaca',
+              color: '#dc2626',
+              bgcolor: '#fef2f2',
             },
           }}
         >
@@ -803,7 +803,7 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ isTablet = false }) => {
             bgcolor: SIDEBAR_BG,
             transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
             overflowX: 'hidden',
-            boxShadow: '4px 0 12px rgba(0,0,0,0.3)',
+            boxShadow: '1px 0 0 #e2e8f0',
           },
         }}
         open
@@ -824,7 +824,7 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ isTablet = false }) => {
             boxSizing: 'border-box',
             border: 'none',
             bgcolor: SIDEBAR_BG,
-            boxShadow: '4px 0 24px rgba(0,0,0,0.4)',
+            boxShadow: '1px 0 0 #e2e8f0',
             overflow: 'hidden',
             height: '100%',
             position: 'fixed',

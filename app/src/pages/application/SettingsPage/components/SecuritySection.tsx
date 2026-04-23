@@ -16,12 +16,10 @@ import {
 } from '@mui/material';
 import {
   LockOutlined,
-  ShieldOutlined,
   Visibility,
   VisibilityOff,
   CheckCircle,
   Cancel,
-  NotificationsOutlined,
 } from '@mui/icons-material';
 import { authService } from '../../../../services/auth';
 
@@ -130,11 +128,13 @@ const SecuritySection: React.FC<SecuritySectionProps> = () => {
   const [pwSuccess,   setPwSuccess]   = useState('');
   const [pwError,     setPwError]     = useState('');
 
-  // ── Preferences state ──
-  const [twoFactor,          setTwoFactor]          = useState(false);
-  const [loginNotifications, setLoginNotifications] = useState(true);
-  const [prefsDirty,         setPrefsDirty]         = useState(false);
-  const [prefsSaving,        setPrefsSaving]        = useState(false);
+  // ── Preferences state (reserved for future use) ──
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [_twoFactor,          _setTwoFactor]          = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [_loginNotifications, _setLoginNotifications] = useState(true);
+  const [, setPrefsDirty]  = useState(false);
+  const [, setPrefsSaving] = useState(false);
 
   // ── Derived ──
   const strength = useMemo(() => getPasswordStrength(newPw), [newPw]);
@@ -172,7 +172,8 @@ const SecuritySection: React.FC<SecuritySectionProps> = () => {
     }
   };
 
-  const handleSavePrefs = async () => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _handleSavePrefs = async () => {
     setPrefsSaving(true);
     await new Promise((r) => setTimeout(r, 600)); // placeholder
     setPrefsDirty(false);
@@ -180,7 +181,8 @@ const SecuritySection: React.FC<SecuritySectionProps> = () => {
   };
 
   // ── Toggle row helper ──
-  const ToggleRow = ({
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _ToggleRow = ({
     icon, title, subtitle, checked, onChange,
   }: { icon: React.ReactNode; title: string; subtitle: string; checked: boolean; onChange: (v: boolean) => void }) => (
     // Fix 1: py responsive, icon size responsive

@@ -48,6 +48,7 @@ export const CatalogItemFormDialog: React.FC<CatalogItemFormDialogProps> = ({
     isVegetarian: false,
     tags: [] as string[],
   });
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [tagInput, setTagInput] = useState('');

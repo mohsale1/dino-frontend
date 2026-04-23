@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode, useMemo, useCallback, useRef } from 'react';
+﻿import React, { createContext, useContext, useState, useEffect, ReactNode, useMemo, useCallback, useRef } from 'react';
 import { UserProfile, UserRegistration } from '../../types';
 import { AuthUser, ROLES, PermissionName, RoleName } from '../../types/auth';
 import { normalizeRole } from '../../types/auth/roles';
@@ -40,7 +40,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [userPermissions, setUserPermissions] = useState<any | null>(null);
 
-const derivePermissionsFromUser = async (userData: any, isSystemUser?: boolean): Promise<any> => {
+  const derivePermissionsFromUser = async (userData: any, isSystemUser?: boolean): Promise<any> => {
     const userRole = userData?.role;
     const roleName = typeof userRole === 'string' ? userRole : userRole?.name;
 
@@ -52,14 +52,13 @@ const derivePermissionsFromUser = async (userData: any, isSystemUser?: boolean):
 
     if (!userType) {
       // Application user â€” fetch from dedicated application permissions endpoint
+      // Response shape: { success, data: [{category, resource, action, id, ...}], pagination }
       try {
         const response = await apiService.get<any>('/application/permissions');
         const payload = response.data as any;
-        // Response shape: { role: {...}, permissions: [...] }
-        const role = payload?.role ?? { name: roleName };
-        const permissions: any[] = payload?.permissions ?? [];
+        const permissions: any[] = payload?.data ?? [];
         permissionsState = {
-          role,
+          role: { name: roleName },
           permissions,
           capabilities: {},
         };
@@ -67,8 +66,8 @@ const derivePermissionsFromUser = async (userData: any, isSystemUser?: boolean):
         // Fallback: derive from embedded role permissions if API fails
         const rolePermissions: any[] = userRole?.permissions || [];
         const resolved = rolePermissions
-          .filter((p: any) => typeof p === 'object' && p?.name)
-          .map((p: any) => ({ name: p.name, id: p.id, resource: p.resource, action: p.action, description: p.description }));
+          .filter((p: any) => typeof p === 'object' && p?.category && p?.resource && p?.action)
+          .map((p: any) => ({ id: p.id, category: p.category, resource: p.resource, action: p.action }));
         permissionsState = {
           role: { name: roleName },
           permissions: resolved,
@@ -76,14 +75,18 @@ const derivePermissionsFromUser = async (userData: any, isSystemUser?: boolean):
         };
       }
     } else {
-      // System user â€” resolve from /system/permissions (paginated)
+      // System user â€” resolve permission IDs from /system/permissions (paginated)
       const rolePermissions: any[] = userRole?.permissions || [];
-      const alreadyResolved = rolePermissions
-        .filter((p: any) => typeof p === 'object' && p?.name)
-        .map((p: any) => ({ name: p.name, id: p.id, resource: p.resource, action: p.action, description: p.description }));
-      const ids = rolePermissions.filter((p: any) => typeof p === 'string');
 
-      let resolved: { name: string }[] = [];
+      // Already-resolved objects have category + resource + action fields
+      const alreadyResolved = rolePermissions
+        .filter((p: any) => typeof p === 'object' && p?.category && p?.resource && p?.action)
+        .map((p: any) => ({ id: p.id, category: p.category, resource: p.resource, action: p.action }));
+
+      // Numeric/string IDs that still need to be resolved
+      const ids = rolePermissions.filter((p: any) => typeof p === 'string' || typeof p === 'number');
+
+      let resolved: any[] = [];
       if (ids.length > 0) {
         try {
           let allPerms: any[] = [];
@@ -103,13 +106,14 @@ const derivePermissionsFromUser = async (userData: any, isSystemUser?: boolean):
           resolved = ids.map(id => {
             const perm = idToName[id];
             return perm
-              ? { name: perm.name, id: perm.id, resource: perm.resource, action: perm.action, description: perm.description }
-              : { name: id };
-          });
+              ? { id: perm.id, category: perm.category, resource: perm.resource, action: perm.action }
+              : null;
+          }).filter(Boolean);
         } catch {
-          resolved = ids.map(id => ({ name: id }));
+          resolved = [];
         }
       }
+
       permissionsState = {
         role: { name: roleName },
         permissions: [...alreadyResolved, ...resolved],
@@ -120,9 +124,6 @@ const derivePermissionsFromUser = async (userData: any, isSystemUser?: boolean):
     StorageManager.setPermissions(permissionsState);
     return permissionsState;
   };
-
-
-
 
   const isTokenExpired = (token: string): boolean => {
     try {
@@ -334,7 +335,7 @@ const derivePermissionsFromUser = async (userData: any, isSystemUser?: boolean):
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
-  }, [user, userPermissions]);
+  }, [user]);
 
   const hasPermission = useCallback((permission: PermissionName): boolean => {
     return PermissionService.hasPermission(getUserWithRole, permission);
@@ -388,14 +389,23 @@ const derivePermissionsFromUser = async (userData: any, isSystemUser?: boolean):
     }
   }, []);
 
+  // Reconstruct dot-notation as category.toLowerCase() + '.' + resource + '.' + action
+  // Backend returns category in UPPERCASE ('SYSTEM', 'APPLICATION') â€” no 'name' field exists.
   const getPermissionsList = (): string[] => {
     if (!userPermissions?.permissions) return [];
-    return userPermissions.permissions.map((p: any) => p.name);
+    return userPermissions.permissions
+      .filter((p: any) => p?.category && p?.resource && p?.action)
+      .map((p: any) => `${p.category.toLowerCase()}.${p.resource}.${p.action}`);
   };
 
   const hasBackendPermission = (permission: string): boolean => {
     if (!userPermissions?.permissions) return false;
-    return userPermissions.permissions.some((p: any) => p.name === permission);
+    return userPermissions.permissions.some((p: any) => {
+      if (p?.category && p?.resource && p?.action) {
+        return `${p.category.toLowerCase()}.${p.resource}.${p.action}` === permission;
+      }
+      return false;
+    });
   };
 
   const value: AuthContextType = {

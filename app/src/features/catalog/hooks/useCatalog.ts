@@ -211,6 +211,7 @@ export function useCatalog({ workspaceId, autoLoad = true }: UseCatalogOptions):
     if (autoLoad && workspaceId) {
       refresh();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoLoad, workspaceId]); // Only run on mount or workspaceId change
 
   return {

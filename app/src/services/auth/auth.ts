@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { AuthToken, UserProfile, WorkspaceRegistration, ApiResponse } from '../../types';
 import { apiService } from '../../utils/api';
 import StorageManager from '../../utils/storage';
@@ -149,11 +150,6 @@ class AuthService {
       
       throw new Error('Failed to get user profile');
     } catch (error: any) {
-      // If unauthorized, clear tokens
-      if (error.response?.status === 401) {
-        // Temporarily disable automatic logout to debug the issue
-        // this.clearTokens();
-      }
       throw new Error(error.response?.data?.detail || error.message || 'Failed to get user profile');
     }
   }
@@ -209,8 +205,6 @@ class AuthService {
       // Create the refresh promise using direct axios to avoid interceptor loops
       this.refreshPromise = (async () => {
         try {
-          // Import axios directly to bypass interceptors
-          const axios = (await import('axios')).default;
           const baseURL = (apiService as any).axiosInstance.defaults.baseURL;
           const storedUserType = StorageManager.getItem<string>('user_type');
           const refreshEndpoint = storedUserType === 'system'
@@ -246,20 +240,6 @@ class AuthService {
     }
   }
 
-  private setTokens(tokenData: AuthToken): void {    
-    // Use StorageManager for consistent storage
-    StorageManager.setItem(this.TOKEN_KEY, tokenData.access_token);
-    
-    // Only store user data if it exists (for backward compatibility)
-    if (tokenData.user) {
-      StorageManager.setUserData(tokenData.user);
-    }
-    
-    if (tokenData.refresh_token) {
-      StorageManager.setItem(this.REFRESH_TOKEN_KEY, tokenData.refresh_token);    } else {    }
-    
-    // No need to store separate expiry - JWT contains expiry in payload
-  }
 
   private clearTokens(): void {    StorageManager.removeItem(this.TOKEN_KEY);
     StorageManager.removeItem(this.USER_KEY);
@@ -331,18 +311,6 @@ class AuthService {
     return expiresIn > 60 * 1000 && expiresIn < 5 * 60 * 1000; // Between 1-5 minutes
   }
 
-  /**
-   * Debug method to check authentication state
-   */
-  debugAuthState(): void {
-    const token = this.getToken();
-    const user = this.getStoredUser();
-    const refreshToken = this.getRefreshToken();
-    const expiryInfo = this.getTokenExpiryInfo();    if (user) {    }
-    if (token) {
-      try {
-        const payload = JSON.parse(atob(token.split('.')[1]));      } catch (e) {      }
-    }  }
 
   /**
    * Force clear refresh state (for debugging)
@@ -353,8 +321,3 @@ class AuthService {
 }
 
 export const authService = new AuthService();
-
-// Make authService available globally for debugging
-if (typeof window !== 'undefined') {
-  (window as any).authService = authService;
-}

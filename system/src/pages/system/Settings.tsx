@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Typography,
@@ -9,6 +9,8 @@ import {
   TextField,
   Button,
   Divider,
+  Snackbar,
+  Alert,
   alpha,
 } from '@mui/material';
 import {
@@ -21,6 +23,43 @@ import {
 } from '@mui/icons-material';
 
 const Settings: React.FC = () => {
+  // General
+  const [systemName, setSystemName] = useState('Dino Platform');
+  const [supportEmail, setSupportEmail] = useState('support@dino.in');
+  const [adminEmail, setAdminEmail] = useState('admin@dino.in');
+  const [enableRegistration, setEnableRegistration] = useState(true);
+  const [enableEmailNotifications, setEnableEmailNotifications] = useState(true);
+  const [maintenanceMode, setMaintenanceMode] = useState(false);
+
+  // Security
+  const [sessionTimeout, setSessionTimeout] = useState('30');
+  const [maxLoginAttempts, setMaxLoginAttempts] = useState('5');
+  const [passwordMinLength, setPasswordMinLength] = useState('8');
+  const [requireStrongPasswords, setRequireStrongPasswords] = useState(true);
+  const [enableTwoFactor, setEnableTwoFactor] = useState(true);
+  const [enableJWT, setEnableJWT] = useState(true);
+
+  // Email
+  const [smtpHost, setSmtpHost] = useState('smtp.gmail.com');
+  const [smtpPort, setSmtpPort] = useState('587');
+  const [smtpUsername, setSmtpUsername] = useState('noreply@dino.in');
+  const [smtpPassword, setSmtpPassword] = useState('');
+  const [useTLS, setUseTLS] = useState(true);
+
+  // Billing
+  const [currency, setCurrency] = useState('USD');
+  const [taxRate, setTaxRate] = useState('10');
+  const [trialPeriod, setTrialPeriod] = useState('14');
+  const [enableFreeTrial, setEnableFreeTrial] = useState(true);
+  const [autoCharge, setAutoCharge] = useState(true);
+
+  // Snackbar
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+
+  const handleSave = () => {
+    setSnackbarOpen(true);
+  };
+
   return (
     <Box sx={{ width: '100%', minHeight: '100vh', bgcolor: '#f1f5f9' }}>
       {/* Hero */}
@@ -115,6 +154,7 @@ const Settings: React.FC = () => {
           <Button
             variant="contained"
             startIcon={<Save />}
+            onClick={handleSave}
             sx={{
               mt: 1,
               bgcolor: alpha('#ffffff', 0.15),
@@ -158,23 +198,59 @@ const Settings: React.FC = () => {
                 </Typography>
               </Box>
 
-              <TextField fullWidth label="System Name" defaultValue="Dino Platform" sx={{ mb: 2 }} />
-              <TextField fullWidth label="Support Email" defaultValue="support@dino.in" sx={{ mb: 2 }} />
-              <TextField fullWidth label="Admin Email" defaultValue="admin@dino.in" sx={{ mb: 2 }} />
+              <TextField
+                fullWidth
+                label="System Name"
+                value={systemName}
+                onChange={(e) => setSystemName(e.target.value)}
+                sx={{ mb: 2 }}
+              />
+              <TextField
+                fullWidth
+                label="Support Email"
+                value={supportEmail}
+                onChange={(e) => setSupportEmail(e.target.value)}
+                sx={{ mb: 2 }}
+              />
+              <TextField
+                fullWidth
+                label="Admin Email"
+                value={adminEmail}
+                onChange={(e) => setAdminEmail(e.target.value)}
+                sx={{ mb: 2 }}
+              />
 
               <Divider sx={{ my: 2 }} />
 
               <FormControlLabel
-                control={<Switch defaultChecked />}
+                control={
+                  <Switch
+                    checked={enableRegistration}
+                    onChange={(e) => setEnableRegistration(e.target.checked)}
+                  />
+                }
                 label="Enable User Registration"
                 sx={{ mb: 1 }}
               />
               <FormControlLabel
-                control={<Switch defaultChecked />}
+                control={
+                  <Switch
+                    checked={enableEmailNotifications}
+                    onChange={(e) => setEnableEmailNotifications(e.target.checked)}
+                  />
+                }
                 label="Enable Email Notifications"
                 sx={{ mb: 1 }}
               />
-              <FormControlLabel control={<Switch />} label="Maintenance Mode" />
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={maintenanceMode}
+                    onChange={(e) => setMaintenanceMode(e.target.checked)}
+                  />
+                }
+                label="Maintenance Mode"
+              />
             </Paper>
           </Grid>
 
@@ -203,37 +279,58 @@ const Settings: React.FC = () => {
                 fullWidth
                 label="Session Timeout (minutes)"
                 type="number"
-                defaultValue="30"
+                value={sessionTimeout}
+                onChange={(e) => setSessionTimeout(e.target.value)}
                 sx={{ mb: 2 }}
               />
               <TextField
                 fullWidth
                 label="Max Login Attempts"
                 type="number"
-                defaultValue="5"
+                value={maxLoginAttempts}
+                onChange={(e) => setMaxLoginAttempts(e.target.value)}
                 sx={{ mb: 2 }}
               />
               <TextField
                 fullWidth
                 label="Password Min Length"
                 type="number"
-                defaultValue="8"
+                value={passwordMinLength}
+                onChange={(e) => setPasswordMinLength(e.target.value)}
                 sx={{ mb: 2 }}
               />
 
               <Divider sx={{ my: 2 }} />
 
               <FormControlLabel
-                control={<Switch defaultChecked />}
+                control={
+                  <Switch
+                    checked={requireStrongPasswords}
+                    onChange={(e) => setRequireStrongPasswords(e.target.checked)}
+                  />
+                }
                 label="Require Strong Passwords"
                 sx={{ mb: 1 }}
               />
               <FormControlLabel
-                control={<Switch defaultChecked />}
+                control={
+                  <Switch
+                    checked={enableTwoFactor}
+                    onChange={(e) => setEnableTwoFactor(e.target.checked)}
+                  />
+                }
                 label="Enable Two-Factor Authentication"
                 sx={{ mb: 1 }}
               />
-              <FormControlLabel control={<Switch defaultChecked />} label="Enable JWT Authentication" />
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={enableJWT}
+                    onChange={(e) => setEnableJWT(e.target.checked)}
+                  />
+                }
+                label="Enable JWT Authentication"
+              />
             </Paper>
           </Grid>
 
@@ -258,24 +355,46 @@ const Settings: React.FC = () => {
                 </Typography>
               </Box>
 
-              <TextField fullWidth label="SMTP Host" defaultValue="smtp.gmail.com" sx={{ mb: 2 }} />
+              <TextField
+                fullWidth
+                label="SMTP Host"
+                value={smtpHost}
+                onChange={(e) => setSmtpHost(e.target.value)}
+                sx={{ mb: 2 }}
+              />
               <TextField
                 fullWidth
                 label="SMTP Port"
                 type="number"
-                defaultValue="587"
+                value={smtpPort}
+                onChange={(e) => setSmtpPort(e.target.value)}
                 sx={{ mb: 2 }}
               />
-              <TextField fullWidth label="SMTP Username" defaultValue="noreply@dino.in" sx={{ mb: 2 }} />
+              <TextField
+                fullWidth
+                label="SMTP Username"
+                value={smtpUsername}
+                onChange={(e) => setSmtpUsername(e.target.value)}
+                sx={{ mb: 2 }}
+              />
               <TextField
                 fullWidth
                 label="SMTP Password"
                 type="password"
-                defaultValue="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+                value={smtpPassword}
+                onChange={(e) => setSmtpPassword(e.target.value)}
                 sx={{ mb: 2 }}
               />
 
-              <FormControlLabel control={<Switch defaultChecked />} label="Use TLS" />
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={useTLS}
+                    onChange={(e) => setUseTLS(e.target.checked)}
+                  />
+                }
+                label="Use TLS"
+              />
             </Paper>
           </Grid>
 
@@ -300,34 +419,71 @@ const Settings: React.FC = () => {
                 </Typography>
               </Box>
 
-              <TextField fullWidth label="Currency" defaultValue="USD" sx={{ mb: 2 }} />
+              <TextField
+                fullWidth
+                label="Currency"
+                value={currency}
+                onChange={(e) => setCurrency(e.target.value)}
+                sx={{ mb: 2 }}
+              />
               <TextField
                 fullWidth
                 label="Tax Rate (%)"
                 type="number"
-                defaultValue="10"
+                value={taxRate}
+                onChange={(e) => setTaxRate(e.target.value)}
                 sx={{ mb: 2 }}
               />
               <TextField
                 fullWidth
                 label="Trial Period (days)"
                 type="number"
-                defaultValue="14"
+                value={trialPeriod}
+                onChange={(e) => setTrialPeriod(e.target.value)}
                 sx={{ mb: 2 }}
               />
 
               <Divider sx={{ my: 2 }} />
 
               <FormControlLabel
-                control={<Switch defaultChecked />}
+                control={
+                  <Switch
+                    checked={enableFreeTrial}
+                    onChange={(e) => setEnableFreeTrial(e.target.checked)}
+                  />
+                }
                 label="Enable Free Trial"
                 sx={{ mb: 1 }}
               />
-              <FormControlLabel control={<Switch defaultChecked />} label="Auto-charge on Trial End" />
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={autoCharge}
+                    onChange={(e) => setAutoCharge(e.target.checked)}
+                  />
+                }
+                label="Auto-charge on Trial End"
+              />
             </Paper>
           </Grid>
         </Grid>
       </Box>
+
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <Alert
+          onClose={() => setSnackbarOpen(false)}
+          severity="success"
+          variant="filled"
+          sx={{ fontWeight: 600 }}
+        >
+          Settings saved successfully.
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

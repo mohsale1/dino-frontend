@@ -62,6 +62,17 @@
   --radius-lg: 12px;
   --radius-xl: 16px;
   --radius-full: 9999px;
+
+  /* Layout dimensions */
+  --sidebar-width: 240px;
+  --sidebar-collapsed: 60px;
+  --topbar-height: 52px;
+  --card-radius: 10px;
+
+  /* Accent color */
+  --color-accent: #6366f1;
+  --color-accent-light: #eef2ff;
+  --color-accent-hover: #4f46e5;
 }
 
 /* Reset and base styles */
@@ -474,34 +485,34 @@ input[type=number],
 
 /* Button sizes */
 .MuiButton-root {
-  min-height: 36px;
+  min-height: 34px;
   position: relative;
   overflow: hidden;
 }
 
 .MuiButton-sizeSmall {
-  min-height: 30px;
+  min-height: 28px;
 }
 
 .MuiButton-sizeLarge {
-  min-height: 42px;
+  min-height: 40px;
 }
 
 /* Icon button sizes */
 .MuiIconButton-root {
   flex-shrink: 0;
-  width: 48px;
-  height: 48px;
+  width: 32px;
+  height: 32px;
 }
 
 .MuiIconButton-sizeSmall {
-  width: 40px;
-  height: 40px;
+  width: 28px;
+  height: 28px;
 }
 
 .MuiIconButton-sizeLarge {
-  width: 56px;
-  height: 56px;
+  width: 40px;
+  height: 40px;
 }
 
 /* Stable layouts */
@@ -533,7 +544,7 @@ input[type=number],
 .MuiMenuItem-root,
 .MuiListItem-root,
 .MuiListItemButton-root {
-  min-height: 48px;
+  min-height: 36px;
   display: flex;
   align-items: center;
   box-sizing: border-box;
@@ -565,7 +576,7 @@ input[type=number],
 
 /* Toolbar */
 .MuiToolbar-root {
-  min-height: 64px;
+  min-height: 56px;
   box-sizing: border-box;
 }
 

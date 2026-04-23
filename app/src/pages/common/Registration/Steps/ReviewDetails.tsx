@@ -16,9 +16,7 @@ import {
   LocationOn,
   Email,
   Phone,
-  CheckCircle,
   VpnKey,
-  Payment,
 } from '@mui/icons-material';
 import { RegistrationFormData } from '../types';
 
@@ -102,33 +100,6 @@ const ReviewStep: React.FC<ReviewStepProps> = ({ formData }) => {
 
   return (
     <Box>
-      {/* Header */}
-      <Box sx={{ mb: 3.5, display: 'flex', alignItems: 'center', gap: 2 }}>
-        <Box
-          sx={{
-            width: 48,
-            height: 48,
-            borderRadius: 2,
-            backgroundColor: alpha('#10b981', 0.1),
-            border: `1.5px solid ${alpha('#10b981', 0.3)}`,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0,
-          }}
-        >
-          <CheckCircle sx={{ fontSize: 26, color: '#10b981' }} />
-        </Box>
-        <Box>
-          <Typography variant="h6" sx={{ color: '#0f172a', fontWeight: 700 }}>
-            Review Your Information
-          </Typography>
-          <Typography variant="body2" sx={{ color: '#64748b' }}>
-            Please review all details carefully before submitting. You can go back to edit any information.
-          </Typography>
-        </Box>
-      </Box>
-
       {/* Referral Code */}
       <Paper
         elevation={0}
@@ -159,13 +130,11 @@ const ReviewStep: React.FC<ReviewStepProps> = ({ formData }) => {
         </Box>
         <Box>
           <Typography variant="body2" sx={{ color: '#064e3b', fontWeight: 700 }}>
-            Referral Code: {formData.referralCode}
+            Referral Code: ••••
           </Typography>
-          {formData.referredByName && (
-            <Typography variant="caption" sx={{ color: '#065f46' }}>
-              Referred by: {formData.referredByName}
-            </Typography>
-          )}
+          <Typography variant="caption" sx={{ color: '#065f46' }}>
+            Code verified successfully
+          </Typography>
         </Box>
       </Paper>
 
@@ -187,45 +156,6 @@ const ReviewStep: React.FC<ReviewStepProps> = ({ formData }) => {
             value={formData.workspaceDescription}
           />
         )}
-      </Paper>
-
-      {/* Billing Information */}
-      <Paper elevation={0} sx={cardSx}>
-        <SectionHeader
-          icon={<Payment sx={{ color: '#1976D2', fontSize: 22 }} />}
-          title="Billing Information"
-        />
-
-        <InfoRow
-          icon={<Person fontSize="small" />}
-          label="Billing Name"
-          value={formData.billingName}
-        />
-
-        <Grid container spacing={2}>
-          <Grid item xs={12} sm={6}>
-            <InfoRow
-              icon={<Email fontSize="small" />}
-              label="Email"
-              value={formData.billingEmail}
-            />
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <InfoRow
-              icon={<Phone fontSize="small" />}
-              label="Phone"
-              value={formData.billingPhone}
-            />
-          </Grid>
-        </Grid>
-
-        <Divider sx={{ my: 2, borderColor: alpha('#1976D2', 0.1) }} />
-
-        <InfoRow
-          icon={<LocationOn fontSize="small" />}
-          label="Billing Address"
-          value={`${formData.billingAddress.address}, ${formData.billingAddress.city}, ${formData.billingAddress.state} ${formData.billingAddress.postal_code}`}
-        />
       </Paper>
 
       {/* Organization Information */}

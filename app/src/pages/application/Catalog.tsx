@@ -1,96 +1,79 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
-  Box, Typography, Button,
-  Snackbar, Alert, Skeleton,
+  Box, Grid, Typography, Skeleton, Snackbar, Alert,
 } from '@mui/material';
-import { alpha } from '@mui/material/styles';
 import {
-  Add as AddIcon, CalendarToday,
   Inventory as InventoryIcon,
-  CheckCircle as CheckCircleIcon,
-  Cancel as CancelIcon,
   Category as CategoryIcon,
 } from '@mui/icons-material';
-import CatalogTabs from './Catalog/CatalogTabs';
+
+import CatalogToolbar from './Catalog/components/CatalogToolbar';
+import CatalogItemCard from './Catalog/CatalogItemCard';
+import CategoryCard from './Catalog/CategoryCard';
 import { CatalogItemFormDialog, CategoryFormDialog } from '../../features/catalog/components';
 import { DeleteConfirmationDialog } from '../../components/dialogs';
 import { useUserData } from '../../contexts/application/UserData';
-import { useAuth } from '../../contexts/common/Auth';
 import { usePermissions } from '../../hooks/usePermissions';
-import { ROLE_COLORS } from '../../constants/app';
 import { useCatalog } from '../../features/catalog/hooks';
 import type { CatalogItem, Category } from '../../features/catalog/types';
 
-const useCountUp = (target: number, duration = 900) => {
-  const [count, setCount] = React.useState(0);
-  React.useEffect(() => {
-    if (target === 0) { setCount(0); return; }
-    let start: number | null = null;
-    const step = (ts: number) => {
-      if (!start) start = ts;
-      const p = Math.min((ts - start) / duration, 1);
-      setCount(Math.round((1 - Math.pow(1 - p, 3)) * target));
-      if (p < 1) requestAnimationFrame(step);
-    };
-    requestAnimationFrame(step);
-  }, [target, duration]);
-  return count;
-};
-
-const HeroStat: React.FC<{
-  label: string; value: number; icon: React.ReactElement;
-  rc: typeof ROLE_COLORS[keyof typeof ROLE_COLORS]; loading?: boolean;
-}> = ({ label, value, icon, rc, loading }) => {
-  const animated = useCountUp(value);
-  return (
-    <Box sx={{
-      width: '100%', px: { xs: 1.5, sm: 2 }, py: 1.75,
-      borderRadius: 2.5, bgcolor: 'rgba(255,255,255,0.07)',
-      border: '1px solid rgba(255,255,255,0.12)', backdropFilter: 'blur(8px)',
-      '&:hover': { bgcolor: 'rgba(255,255,255,0.11)' },
-    }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-        <Box sx={{
-          width: 34, height: 34, borderRadius: 1.5,
-          bgcolor: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          color: alpha(rc.chipText, 0.9), flexShrink: 0,
-        }}>
-          {React.cloneElement(icon, { sx: { fontSize: 17 } })}
-        </Box>
-        <Box>
-          {loading ? (
-            <Skeleton variant="text" width={40} height={28} sx={{ bgcolor: 'rgba(255,255,255,0.15)' }} />
-          ) : (
-            <Typography sx={{ fontWeight: 700, color: rc.statValue, fontSize: { xs: '1.2rem', sm: '1.5rem' }, letterSpacing: '-0.03em', lineHeight: 1 }}>
-              {animated}
-            </Typography>
-          )}
-          <Typography sx={{ color: rc.statLabel, fontSize: '0.72rem', fontWeight: 500, mt: 0.25 }}>
-            {label}
-          </Typography>
+// ── Skeleton cards ────────────────────────────────────────────────────────────
+const ItemSkeleton: React.FC = () => (
+  <Box sx={{ bgcolor: '#fff', border: '1px solid #e2e8f0', borderRadius: 2.5, overflow: 'hidden' }}>
+    <Skeleton variant="rectangular" height={150} sx={{ bgcolor: '#f1f5f9' }} />
+    <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 0.75 }}>
+      <Skeleton variant="rounded" width={70} height={18} sx={{ borderRadius: 1 }} />
+      <Skeleton variant="text" width="70%" height={20} />
+      <Skeleton variant="text" width="90%" height={16} />
+      <Skeleton variant="text" width="60%" height={16} />
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pt: 0.5 }}>
+        <Skeleton variant="text" width={60} height={24} />
+        <Box sx={{ display: 'flex', gap: 0.5 }}>
+          <Skeleton variant="circular" width={28} height={28} />
+          <Skeleton variant="circular" width={28} height={28} />
         </Box>
       </Box>
     </Box>
-  );
-};
+  </Box>
+);
 
+const CategorySkeleton: React.FC = () => (
+  <Box sx={{ bgcolor: '#fff', border: '1px solid #e2e8f0', borderRadius: 2.5, overflow: 'hidden' }}>
+    <Skeleton variant="rectangular" height={90} sx={{ bgcolor: '#f1f5f9' }} />
+    <Box sx={{ px: 2.5, pt: 1.5, pb: 1.75, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+      <Skeleton variant="text" width="55%" height={20} />
+      <Skeleton variant="text" width="80%" height={16} />
+    </Box>
+    <Box sx={{ px: 2, py: 1, borderTop: '1px solid #f1f5f9', display: 'flex', justifyContent: 'flex-end', gap: 0.5 }}>
+      <Skeleton variant="circular" width={28} height={28} />
+      <Skeleton variant="circular" width={28} height={28} />
+    </Box>
+  </Box>
+);
+
+// ── Empty state ───────────────────────────────────────────────────────────────
+const EmptyState: React.FC<{ tab: string }> = ({ tab }) => (
+  <Box sx={{ py: 12, textAlign: 'center' }}>
+    <Box sx={{ width: 64, height: 64, borderRadius: '50%', bgcolor: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', mx: 'auto', mb: 2 }}>
+      {tab === 'items'
+        ? <InventoryIcon sx={{ fontSize: 30, color: '#cbd5e1' }} />
+        : <CategoryIcon sx={{ fontSize: 30, color: '#cbd5e1' }} />
+      }
+    </Box>
+    <Typography sx={{ fontWeight: 600, color: '#94a3b8', fontSize: '0.9rem' }}>
+      No {tab === 'items' ? 'items' : 'categories'} found
+    </Typography>
+    <Typography sx={{ color: '#cbd5e1', fontSize: '0.8rem', mt: 0.5 }}>
+      Try adjusting your search or filters
+    </Typography>
+  </Box>
+);
+
+// ── Main page ─────────────────────────────────────────────────────────────────
 const CatalogManagementPage: React.FC = () => {
   const { userData } = useUserData();
   const workspaceId = userData?.venue?.workspaceId || '';
   const { canCreateCatalogItems, canCreateCategories } = usePermissions();
-  const { user, userPermissions } = useAuth();
-
-  const rawRole = (
-    userPermissions?.role?.name ||
-    (user as any)?.role?.name ||
-    (user as any)?.role || ''
-  ).toLowerCase();
-  const roleKey: 'Owner' | 'Manager' | 'User' =
-    rawRole.includes('owner') || rawRole.includes('super') ? 'Owner'
-    : rawRole.includes('manager') || rawRole.includes('admin') ? 'Manager'
-    : 'User';
-  const rc = ROLE_COLORS[roleKey];
 
   const {
     items, categories, loading,
@@ -99,8 +82,13 @@ const CatalogManagementPage: React.FC = () => {
     createCategory, updateCategory, deleteCategory,
   } = useCatalog({ workspaceId, autoLoad: true });
 
+  // ── UI state ────────────────────────────────────────────────────────────────
   const [activeTab, setActiveTab] = useState('items');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('all');
+  const [availFilter, setAvailFilter] = useState('all');
 
+  // ── Dialog state ────────────────────────────────────────────────────────────
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<CatalogItem | null>(null);
@@ -108,17 +96,35 @@ const CatalogManagementPage: React.FC = () => {
   const [formLoading, setFormLoading] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
 
-  const stats = {
-    totalItems: items.length,
-    available: items.filter(i => i.isAvailable).length,
-    unavailable: items.filter(i => !i.isAvailable).length,
-    categories: categories.length,
-  };
-
   const showSnack = (message: string, severity: 'success' | 'error') =>
     setSnackbar({ open: true, message, severity });
 
-  const handleAddNew = () => {
+  // ── Filtering ───────────────────────────────────────────────────────────────
+  const q = searchQuery.toLowerCase();
+
+  const filteredItems = useMemo(() => items.filter(item => {
+    const matchSearch = !q || item.name?.toLowerCase().includes(q) || item.description?.toLowerCase().includes(q);
+    const matchCat = categoryFilter === 'all' || item.categoryId === categoryFilter;
+    const matchAvail = availFilter === 'all' ? true
+      : availFilter === 'available' ? item.isAvailable : !item.isAvailable;
+    return matchSearch && matchCat && matchAvail;
+  }), [items, q, categoryFilter, availFilter]);
+
+  const filteredCategories = useMemo(() => categories.filter(cat =>
+    !q || cat.name?.toLowerCase().includes(q) || cat.description?.toLowerCase().includes(q)
+  ), [categories, q]);
+
+  const getCategoryItemCount = (catId: string) => items.filter(i => i.categoryId === catId).length;
+
+  // ── Handlers ────────────────────────────────────────────────────────────────
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    setSearchQuery('');
+    setCategoryFilter('all');
+    setAvailFilter('all');
+  };
+
+  const handleAdd = () => {
     setSelectedItem(null);
     setSelectedCategory(null);
     setAddDialogOpen(true);
@@ -143,9 +149,7 @@ const CatalogManagementPage: React.FC = () => {
       setSelectedItem(null);
     } catch (err: any) {
       showSnack(err?.message || 'Failed to save item', 'error');
-    } finally {
-      setFormLoading(false);
-    }
+    } finally { setFormLoading(false); }
   };
 
   const handleSaveCategory = async (data: any) => {
@@ -162,19 +166,17 @@ const CatalogManagementPage: React.FC = () => {
       setSelectedCategory(null);
     } catch (err: any) {
       showSnack(err?.message || 'Failed to save category', 'error');
-    } finally {
-      setFormLoading(false);
-    }
+    } finally { setFormLoading(false); }
   };
 
   const handleConfirmDelete = async () => {
     try {
       if (selectedItem) {
         await deleteItem(selectedItem.id);
-        showSnack('Item deleted successfully', 'success');
+        showSnack('Item deleted', 'success');
       } else if (selectedCategory) {
         await deleteCategory(selectedCategory.id);
-        showSnack('Category deleted successfully', 'success');
+        showSnack('Category deleted', 'success');
       }
       setDeleteDialogOpen(false);
       setSelectedItem(null);
@@ -191,111 +193,102 @@ const CatalogManagementPage: React.FC = () => {
       await toggleItemAvailability(itemId, !item.isAvailable);
       showSnack('Availability updated', 'success');
     } catch (err: any) {
-      showSnack(err?.message || 'Failed to update availability', 'error');
+      showSnack(err?.message || 'Failed to update', 'error');
     }
   };
 
   const handleImageUpload = async (itemId: string, file: File) => {
     try {
       await uploadItemImage(itemId, file);
-      showSnack('Image uploaded successfully', 'success');
+      showSnack('Image uploaded', 'success');
     } catch (err: any) {
       showSnack(err?.message || 'Failed to upload image', 'error');
     }
   };
 
-  const today = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  const canAdd = activeTab === 'items' ? canCreateCatalogItems : canCreateCategories;
+  const filteredCount = activeTab === 'items' ? filteredItems.length : filteredCategories.length;
 
+  // ── Render ──────────────────────────────────────────────────────────────────
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100%', bgcolor: '#f1f5f9' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100%', bgcolor: '#f8fafc' }}>
 
-      {/* Hero */}
-      <Box sx={{
-        background: rc.gradient,
-        px: { xs: 2, sm: 4, md: 6 },
-        pt: { xs: 2.5, md: 4 },
-        pb: { xs: 2.5, md: 4 },
-        position: 'relative',
-        '&::before': {
-          content: '""', position: 'absolute', top: -80, right: -80,
-          width: 360, height: 360, borderRadius: '50%',
-          background: `radial-gradient(circle, ${rc.glowA} 0%, transparent 70%)`,
-          pointerEvents: 'none',
-        },
-        '&::after': {
-          content: '""', position: 'absolute', bottom: -60, left: '25%',
-          width: 280, height: 280, borderRadius: '50%',
-          background: `radial-gradient(circle, ${rc.glowB} 0%, transparent 70%)`,
-          pointerEvents: 'none',
-        },
-      }}>
-        <Box sx={{
-          position: 'absolute', inset: 0,
-          backgroundImage: 'linear-gradient(rgba(255,255,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.03) 1px,transparent 1px)',
-          backgroundSize: '40px 40px', pointerEvents: 'none',
-        }} />
-        <Box sx={{ position: 'relative', zIndex: 1 }}>
-          <Typography sx={{ color: alpha(rc.chipText, 0.75), fontWeight: 700, letterSpacing: 3, fontSize: '0.65rem', textTransform: 'uppercase', mb: 1 }}>
-            APPLICATION CONTROL CENTER
-          </Typography>
-          <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { xs: 'flex-start', sm: 'flex-start' }, justifyContent: 'space-between', gap: 2, mb: 4 }}>
-            <Box>
-              <Typography variant="h4" sx={{ fontWeight: 800, color: '#fff', letterSpacing: '-0.025em', lineHeight: 1.2, fontSize: { xs: '1.4rem', md: '2rem' } }}>
-                Catalog
-              </Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mt: 0.75 }}>
-                <CalendarToday sx={{ fontSize: 13, color: alpha(rc.chipText, 0.6) }} />
-                <Typography variant="caption" sx={{ color: alpha(rc.chipText, 0.6), fontWeight: 500, fontSize: '0.75rem' }}>
-                  {today}
-                </Typography>
-              </Box>
-            </Box>
-            {(canCreateCatalogItems || canCreateCategories) && (
-              <Button
-                variant="contained"
-                startIcon={<AddIcon />}
-                onClick={handleAddNew}
-                sx={{
-                  bgcolor: alpha('#fff', 0.15), color: '#fff',
-                  border: '1px solid rgba(255,255,255,0.25)', backdropFilter: 'blur(8px)',
-                  boxShadow: 'none', fontWeight: 600, borderRadius: 2,
-                  textTransform: 'none', px: 2.5, py: 1,
-                  alignSelf: { xs: 'stretch', sm: 'flex-start' },
-                  width: { xs: '100%', sm: 'auto' },
-                  '&:hover': { bgcolor: alpha('#fff', 0.25), boxShadow: 'none' },
-                }}
-              >
-                Add {activeTab === 'items' ? 'Item' : 'Category'}
-              </Button>
-            )}
-          </Box>
-          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' }, gap: { xs: 1.5, sm: 2 } }}>
-            <HeroStat label="Total Items" value={stats.totalItems} icon={<InventoryIcon />} rc={rc} loading={loading} />
-            <HeroStat label="Available" value={stats.available} icon={<CheckCircleIcon />} rc={rc} loading={loading} />
-            <HeroStat label="Unavailable" value={stats.unavailable} icon={<CancelIcon />} rc={rc} loading={loading} />
-            <HeroStat label="Categories" value={stats.categories} icon={<CategoryIcon />} rc={rc} loading={loading} />
-          </Box>
-        </Box>
+      {/* Toolbar: title + search + filters + tabs */}
+      <CatalogToolbar
+        activeTab={activeTab}
+        onTabChange={handleTabChange}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        categoryFilter={categoryFilter}
+        onCategoryFilterChange={setCategoryFilter}
+        availFilter={availFilter}
+        onAvailFilterChange={setAvailFilter}
+        categories={categories}
+        itemCount={items.length}
+        categoryCount={categories.length}
+        filteredCount={filteredCount}
+        canAdd={canAdd}
+        onAdd={handleAdd}
+      />
+
+      {/* Card grid */}
+      <Box sx={{ flex: 1, p: { xs: 1.5, sm: 2, md: 2.5 } }}>
+        {activeTab === 'items' ? (
+          loading ? (
+            <Grid container spacing={2}>
+              {Array.from({ length: 8 }).map((_, i) => (
+                <Grid item xs={12} sm={6} md={4} lg={3} key={i}>
+                  <ItemSkeleton />
+                </Grid>
+              ))}
+            </Grid>
+          ) : filteredItems.length === 0 ? (
+            <EmptyState tab="items" />
+          ) : (
+            <Grid container spacing={2}>
+              {filteredItems.map(item => (
+                <Grid item xs={12} sm={6} md={4} lg={3} key={item.id}>
+                  <CatalogItemCard
+                    item={item}
+                    categoryName={categories.find(c => c.id === item.categoryId)?.name}
+                    onEdit={handleEditItem}
+                    onDelete={handleDeleteItem}
+                    onToggleAvailability={handleToggleAvailability}
+                    onImageUpload={handleImageUpload}
+                  />
+                </Grid>
+              ))}
+            </Grid>
+          )
+        ) : (
+          loading ? (
+            <Grid container spacing={2}>
+              {Array.from({ length: 6 }).map((_, i) => (
+                <Grid item xs={12} sm={6} md={4} lg={3} key={i}>
+                  <CategorySkeleton />
+                </Grid>
+              ))}
+            </Grid>
+          ) : filteredCategories.length === 0 ? (
+            <EmptyState tab="categories" />
+          ) : (
+            <Grid container spacing={2}>
+              {filteredCategories.map(cat => (
+                <Grid item xs={12} sm={6} md={4} lg={3} key={cat.id}>
+                  <CategoryCard
+                    category={cat}
+                    itemCount={getCategoryItemCount(cat.id)}
+                    onEdit={handleEditCategory}
+                    onDelete={handleDeleteCategory}
+                  />
+                </Grid>
+              ))}
+            </Grid>
+          )
+        )}
       </Box>
 
-      {/* Body */}
-      <Box>
-        <CatalogTabs
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-          items={items}
-          categories={categories}
-          loading={loading}
-          onEditItem={handleEditItem}
-          onDeleteItem={handleDeleteItem}
-          onEditCategory={handleEditCategory}
-          onDeleteCategory={handleDeleteCategory}
-          onToggleAvailability={handleToggleAvailability}
-          onImageUpload={handleImageUpload}
-        />
-      </Box>
-
-      {/* Item Form Dialog */}
+      {/* Item form dialog */}
       {activeTab === 'items' && (
         <CatalogItemFormDialog
           open={addDialogOpen}
@@ -307,7 +300,7 @@ const CatalogManagementPage: React.FC = () => {
         />
       )}
 
-      {/* Category Form Dialog */}
+      {/* Category form dialog */}
       {activeTab === 'categories' && (
         <CategoryFormDialog
           open={addDialogOpen}
@@ -318,6 +311,7 @@ const CatalogManagementPage: React.FC = () => {
         />
       )}
 
+      {/* Delete confirmation */}
       <DeleteConfirmationDialog
         open={deleteDialogOpen}
         onClose={() => { setDeleteDialogOpen(false); setSelectedItem(null); setSelectedCategory(null); }}
@@ -325,12 +319,22 @@ const CatalogManagementPage: React.FC = () => {
         title={`Delete ${selectedItem ? 'Item' : 'Category'}`}
         itemName={selectedItem?.name || selectedCategory?.name || ''}
         itemType={selectedItem ? 'item' : 'category'}
-        description={`This will remove this ${selectedItem ? 'item' : 'category'} from the system.`}
+        description={`This will permanently remove this ${selectedItem ? 'item' : 'category'}.`}
         requireTyping={false}
       />
 
-      <Snackbar open={snackbar.open} autoHideDuration={5000} onClose={() => setSnackbar(s => ({ ...s, open: false }))} anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
-        <Alert severity={snackbar.severity} onClose={() => setSnackbar(s => ({ ...s, open: false }))} sx={{ boxShadow: '0 4px 12px rgba(0,0,0,0.15)', borderRadius: 1.5 }}>
+      {/* Snackbar */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={() => setSnackbar(s => ({ ...s, open: false }))}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <Alert
+          severity={snackbar.severity}
+          onClose={() => setSnackbar(s => ({ ...s, open: false }))}
+          sx={{ boxShadow: '0 4px 16px rgba(0,0,0,0.12)', borderRadius: 2, fontWeight: 600 }}
+        >
           {snackbar.message}
         </Alert>
       </Snackbar>

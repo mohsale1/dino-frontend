@@ -1,7 +1,7 @@
 
 /**
  * Runtime Configuration Loader
- * 
+ *
  * This module loads configuration from window.APP_CONFIG which is set by /config.js
  * The config.js file is generated at container startup from environment variables
  */
@@ -12,12 +12,12 @@ export interface RuntimeConfig {
   API_BASE_URL: string;
   WS_URL: string;
   BACKEND_URL: string;
-  
+
   // App Configuration
   APP_NAME: string;
   APP_VERSION: string;
   APP_ENV: string;
-  
+
   // Feature Flags
   DEBUG_MODE: boolean;
   ENABLE_ANALYTICS: boolean;
@@ -27,30 +27,30 @@ export interface RuntimeConfig {
   ENABLE_ANIMATIONS: boolean;
   ENABLE_IMAGE_OPTIMIZATION: boolean;
   ENABLE_SERVICE_WORKER: boolean;
-  
+
   // API Configuration
   API_TIMEOUT: number;
   API_RATE_LIMIT: number;
-  
+
   // Authentication
   JWT_EXPIRY_HOURS: number;
   SESSION_TIMEOUT_MINUTES: number;
   MIN_PASSWORD_LENGTH: number;
-  
+
   // UI Configuration
   DEFAULT_THEME: string;
-  
+
   // Chart Configuration
   CHART_ANIMATION_INTERVAL: number;
   CHART_ANIMATION_DURATION: number;
   CHART_ANIMATION_EASING: string;
   CHART_ANIMATIONS_ENABLED: boolean;
   CHART_AUTO_REFRESH_ENABLED: boolean;
-  
+
   // Logging
   LOG_LEVEL: string;
   ENABLE_CONSOLE_LOGGING: boolean;
-  
+
   // Development Settings
   ENABLE_HOT_RELOAD: boolean;
   GENERATE_SOURCEMAP: boolean;
@@ -69,12 +69,12 @@ const DEFAULT_CONFIG: RuntimeConfig = {
   API_BASE_URL: '/api/v1',
   WS_URL: '/ws',
   BACKEND_URL: 'https://dino-backend-prod-781503667260.us-central1.run.app',
-  
+
   // App Configuration
   APP_NAME: 'Dino',
   APP_VERSION: '1.0.0',
   APP_ENV: 'production',
-  
+
   // Feature Flags
   DEBUG_MODE: false,
   ENABLE_ANALYTICS: true,
@@ -84,38 +84,38 @@ const DEFAULT_CONFIG: RuntimeConfig = {
   ENABLE_ANIMATIONS: true,
   ENABLE_IMAGE_OPTIMIZATION: true,
   ENABLE_SERVICE_WORKER: true,
-  
+
   // API Configuration
   API_TIMEOUT: 30000,
   API_RATE_LIMIT: 100,
-  
+
   // Authentication
   JWT_EXPIRY_HOURS: 24,
   SESSION_TIMEOUT_MINUTES: 60,
   MIN_PASSWORD_LENGTH: 8,
-  
+
   // UI Configuration
   DEFAULT_THEME: 'light',
-  
+
   // Chart Configuration
   CHART_ANIMATION_INTERVAL: 30000,
   CHART_ANIMATION_DURATION: 1000,
   CHART_ANIMATION_EASING: 'easeInOutQuart',
   CHART_ANIMATIONS_ENABLED: true,
   CHART_AUTO_REFRESH_ENABLED: true,
-  
+
   // Logging
   LOG_LEVEL: 'info',
   ENABLE_CONSOLE_LOGGING: false,
-  
+
   // Development Settings
   ENABLE_HOT_RELOAD: false,
-  GENERATE_SOURCEMAP: false
+  GENERATE_SOURCEMAP: false,
 };
 
 /**
  * Get runtime configuration
- * Priority: 
+ * Priority:
  * - Development: process.env (from .env files) > DEFAULT_CONFIG
  * - Production: window.APP_CONFIG (runtime) > DEFAULT_CONFIG
  */
@@ -153,15 +153,15 @@ export const getRuntimeConfig = (): RuntimeConfig => {
       LOG_LEVEL: process.env.REACT_APP_LOG_LEVEL || DEFAULT_CONFIG.LOG_LEVEL,
       ENABLE_CONSOLE_LOGGING: process.env.REACT_APP_ENABLE_CONSOLE_LOGGING === 'true',
       ENABLE_HOT_RELOAD: process.env.REACT_APP_ENABLE_HOT_RELOAD === 'true',
-      GENERATE_SOURCEMAP: process.env.REACT_APP_GENERATE_SOURCEMAP === 'true'
+      GENERATE_SOURCEMAP: process.env.REACT_APP_GENERATE_SOURCEMAP === 'true',
     };
   }
-  
+
   // In production, try to get from window.APP_CONFIG (runtime)
   if (typeof window !== 'undefined' && window.APP_CONFIG) {
     return { ...DEFAULT_CONFIG, ...window.APP_CONFIG };
   }
-  
+
   // Use default configuration as final fallback
   return DEFAULT_CONFIG;
 };
@@ -188,29 +188,5 @@ export const isProduction = (): boolean => {
   return getConfigValue('APP_ENV') === 'production' || process.env.NODE_ENV === 'production';
 };
 
-/**
- * Log current configuration (for debugging)
- */
-export const logRuntimeConfig = (): void => {
-  const config = getRuntimeConfig();
-  if (config.DEBUG_MODE || isDevelopment()) {
-    // Configuration logging disabled in production
-  }
-};
-
-// Use a Proxy so every property access calls getRuntimeConfig() fresh.
-// This prevents the config from being frozen at module-load time before
-// window.APP_CONFIG or process.env values are fully available.
-export const RUNTIME_CONFIG: RuntimeConfig = new Proxy({} as RuntimeConfig, {
-  get(_target, prop: string) {
-    return getRuntimeConfig()[prop as keyof RuntimeConfig];
-  },
-});
-
-
-if (typeof window !== 'undefined') {
-  // Delay logging to ensure window.APP_CONFIG is loaded
-  setTimeout(() => {
-    logRuntimeConfig();
-  }, 100);
-}
+// Export the runtime configuration instance
+export const RUNTIME_CONFIG = getRuntimeConfig();

@@ -64,17 +64,17 @@ const UserTable: React.FC<UserTableProps> = ({
 
   return (
     <Box>
-      <TableContainer>
+      <TableContainer sx={{ overflowX: 'auto' }}>
         <Table>
           <TableHead>
             <TableRow sx={{ backgroundColor: '#f8fafc' }}>
               <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.875rem', borderBottom: '1px solid #e2e8f0' }}>
                 User
               </TableCell>
-              <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.875rem', borderBottom: '1px solid #e2e8f0' }}>
+              <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.875rem', borderBottom: '1px solid #e2e8f0', display: { xs: 'none', sm: 'table-cell' } }}>
                 Email
               </TableCell>
-              <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.875rem', borderBottom: '1px solid #e2e8f0' }}>
+              <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.875rem', borderBottom: '1px solid #e2e8f0', display: { xs: 'none', sm: 'table-cell' } }}>
                 Phone
               </TableCell>
               <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.875rem', borderBottom: '1px solid #e2e8f0' }}>
@@ -152,12 +152,12 @@ const UserTable: React.FC<UserTableProps> = ({
                         </Box>
                       </Box>
                     </TableCell>
-                    <TableCell sx={{ borderBottom: '1px solid #f1f5f9' }}>
+                    <TableCell sx={{ borderBottom: '1px solid #f1f5f9', display: { xs: 'none', sm: 'table-cell' } }}>
                       <Typography variant="body2" sx={{ color: '#6b7280', fontSize: '0.875rem' }}>
                         {user.email}
                       </Typography>
                     </TableCell>
-                    <TableCell sx={{ borderBottom: '1px solid #f1f5f9' }}>
+                    <TableCell sx={{ borderBottom: '1px solid #f1f5f9', display: { xs: 'none', sm: 'table-cell' } }}>
                       <Typography variant="body2" sx={{ color: '#6b7280', fontSize: '0.875rem' }}>
                         {user.phone || '-'}
                       </Typography>
@@ -246,9 +246,17 @@ const UserTable: React.FC<UserTableProps> = ({
           borderTop: '1px solid #e2e8f0',
           '& .MuiTablePagination-toolbar': {
             color: '#6b7280',
+            flexWrap: 'wrap',
+            px: { xs: 1, sm: 2 },
           },
           '& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows': {
             fontSize: '0.875rem',
+          },
+          '& .MuiTablePagination-selectLabel': {
+            display: { xs: 'none', sm: 'block' },
+          },
+          '& .MuiTablePagination-select': {
+            display: { xs: 'none', sm: 'block' },
           },
         }}
       />

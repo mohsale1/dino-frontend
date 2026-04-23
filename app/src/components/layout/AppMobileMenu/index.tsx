@@ -15,8 +15,6 @@ import {
   Switch,
   FormControlLabel,
   CircularProgress,
-  useMediaQuery,
-  useTheme,
   Divider,
   alpha,
 } from '@mui/material';
@@ -90,8 +88,6 @@ const AppMobileMenu: React.FC<AppMobileMenuProps> = ({
   } | null>(null);
   const [statusLoading, setStatusLoading] = useState(false);
 
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const canManageVenue = hasBackendPermission(PERMISSIONS.WORKSPACE_UPDATE);
 
@@ -264,7 +260,7 @@ const AppMobileMenu: React.FC<AppMobileMenuProps> = ({
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <DinoLogo size={isMobile ? 28 : 30} animated={false} />
+          <DinoLogo size={30} animated={false} />
           <Box>
             <Typography sx={{ color: '#ffffff', fontWeight: 700, fontSize: '1.05rem', lineHeight: 1.2, letterSpacing: '-0.01em' }}>
               Dino
@@ -290,13 +286,13 @@ const AppMobileMenu: React.FC<AppMobileMenuProps> = ({
         </IconButton>
       </Box>
 
-      {/* ── Content — flex column, fills remaining height, NO overflow ─────────── */}
+      {/* ── Content — flex column, fills remaining height, scrollable ─────────── */}
       <Box
         sx={{
           flex: 1,
           display: 'flex',
           flexDirection: 'column',
-          overflow: 'hidden',          // absolutely no scroll
+          overflowY: 'auto',           // scrollable on short screens
           position: 'relative',
           zIndex: 1,
           pt: 1.5,

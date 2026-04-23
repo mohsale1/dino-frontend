@@ -3,7 +3,6 @@ import { Grid, Box, Paper, Typography, Stack } from '@mui/material';
 import {
   Inventory,
   CheckCircle,
-  Cancel,
   Category as CategoryIcon,
 } from '@mui/icons-material';
 import { formatCurrency } from '../../../utils/data';

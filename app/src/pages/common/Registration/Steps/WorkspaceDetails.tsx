@@ -1,6 +1,5 @@
 import React from 'react';
-import { Box, TextField, Typography, alpha } from '@mui/material';
-import { Business } from '@mui/icons-material';
+import { Box, TextField } from '@mui/material';
 import { RegistrationFormData } from '../types';
 
 interface WorkspaceDetailsStepProps {
@@ -24,32 +23,6 @@ const WorkspaceDetailsStep: React.FC<WorkspaceDetailsStepProps> = ({
 }) => {
   return (
     <Box>
-      <Box sx={{ mb: 3.5, display: 'flex', alignItems: 'center', gap: 2 }}>
-        <Box
-          sx={{
-            width: 48,
-            height: 48,
-            borderRadius: 2,
-            backgroundColor: alpha('#1976D2', 0.1),
-            border: `1.5px solid ${alpha('#1976D2', 0.25)}`,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0,
-          }}
-        >
-          <Business sx={{ fontSize: 26, color: '#1976D2' }} />
-        </Box>
-        <Box>
-          <Typography variant="h6" sx={{ color: '#0f172a', fontWeight: 700 }}>
-            Workspace Details
-          </Typography>
-          <Typography variant="body2" sx={{ color: '#64748b' }}>
-            Set up your workspace information
-          </Typography>
-        </Box>
-      </Box>
-
       <TextField
         fullWidth
         label="Workspace Name"

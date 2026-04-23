@@ -6,7 +6,6 @@ import {
   Tab,
   Skeleton,
 } from '@mui/material';
-import { alpha } from '@mui/material/styles';
 import {
   Dashboard,
   TrendingUp,
@@ -65,10 +64,10 @@ function TabPanel({ children, value, index }: TabPanelProps) {
 // ---------------------------------------------------------------------------
 
 const TAB_DEFINITIONS = [
-  { label: 'Overview',        icon: <Dashboard sx={{ fontSize: 18 }} /> },
-  { label: 'Sales & Revenue', icon: <TrendingUp sx={{ fontSize: 18 }} /> },
-  { label: 'Menu & Items',    icon: <Restaurant sx={{ fontSize: 18 }} /> },
-  { label: 'Tables & Orders', icon: <TableRestaurant sx={{ fontSize: 18 }} /> },
+  { label: 'Overview',        icon: <Dashboard sx={{ fontSize: 16 }} /> },
+  { label: 'Sales & Revenue', icon: <TrendingUp sx={{ fontSize: 16 }} /> },
+  { label: 'Menu & Items',    icon: <Restaurant sx={{ fontSize: 16 }} /> },
+  { label: 'Tables & Orders', icon: <TableRestaurant sx={{ fontSize: 16 }} /> },
 ];
 
 // ---------------------------------------------------------------------------
@@ -77,10 +76,31 @@ const TAB_DEFINITIONS = [
 
 function LoadingSkeleton() {
   return (
-    <Box sx={{ p: { xs: 2, sm: 3 }, display: 'flex', flexDirection: 'column', gap: 2 }}>
-      <Skeleton variant="rounded" height={220} sx={{ borderRadius: 2 }} />
-      <Skeleton variant="rounded" height={320} sx={{ borderRadius: 2 }} />
-      <Skeleton variant="rounded" height={260} sx={{ borderRadius: 2 }} />
+    <Box
+      sx={{
+        px: { xs: 2, sm: 3, md: 4 },
+        pt: 2.5,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 2,
+        bgcolor: '#0f172a',
+      }}
+    >
+      <Skeleton
+        variant="rounded"
+        height={220}
+        sx={{ borderRadius: '12px', bgcolor: '#1e293b' }}
+      />
+      <Skeleton
+        variant="rounded"
+        height={320}
+        sx={{ borderRadius: '12px', bgcolor: '#1e293b' }}
+      />
+      <Skeleton
+        variant="rounded"
+        height={260}
+        sx={{ borderRadius: '12px', bgcolor: '#1e293b' }}
+      />
     </Box>
   );
 }
@@ -106,16 +126,16 @@ const TabbedDashboard: React.FC<TabbedDashboardProps> = ({
   const summary        = dashboardData?.summary        ?? {};
 
   return (
-    <Box sx={{ bgcolor: '#f8fafc' }}>
+    <Box sx={{ bgcolor: '#0f172a' }}>
 
       {/* Tab navigation bar */}
       <Paper
         elevation={0}
         square
         sx={{
-          bgcolor: '#ffffff',
-          borderBottom: '1px solid #e2e8f0',
-          px: 2,
+          bgcolor: '#1e293b',
+          borderBottom: '1px solid rgba(255,255,255,0.08)',
+          px: { xs: 2, md: 4 },
         }}
       >
         <Tabs
@@ -125,27 +145,31 @@ const TabbedDashboard: React.FC<TabbedDashboardProps> = ({
           variant="scrollable"
           scrollButtons="auto"
           sx={{
-            minHeight: 46,
+            minHeight: 48,
             '& .MuiTabs-indicator': {
-              backgroundColor: '#1976d2',
-              height: 3,
-              borderRadius: '3px 3px 0 0',
+              backgroundColor: '#42A5F5',
+              height: 2,
+              borderRadius: '2px 2px 0 0',
             },
             '& .MuiTab-root': {
               textTransform: 'none',
-              minHeight: 46,
+              minHeight: 48,
               fontSize: '0.875rem',
               fontWeight: 500,
-              color: 'text.secondary',
-              px: 2.5,
+              color: '#64748b',
+              px: 2,
               gap: 0.75,
-              transition: 'color 0.2s, background-color 0.2s',
+              transition: 'background-color 0.15s ease, color 0.15s ease',
+              '& .MuiTab-iconWrapper': {
+                color: 'inherit',
+              },
               '&.Mui-selected': {
-                color: '#1976d2',
+                color: '#f1f5f9',
                 fontWeight: 600,
               },
               '&:hover': {
-                bgcolor: (theme) => alpha(theme.palette.primary.main, 0.04),
+                bgcolor: 'rgba(255,255,255,0.04)',
+                color: '#f1f5f9',
               },
             },
           }}

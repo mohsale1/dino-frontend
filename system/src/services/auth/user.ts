@@ -244,7 +244,7 @@ class UserService {
     }
 
     // Check for wildcard permissions (both : and . notation)
-    const [resource, action] = permission.split(/[:.]/);
+    const [resource] = permission.split(/[:.]/);
     const wildcardPermissionDot = `${resource}.*`;
     const wildcardPermissionColon = `${resource}:*`;
     

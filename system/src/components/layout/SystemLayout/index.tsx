@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+﻿import React, { useState, useMemo } from 'react';
 import {
   Box,
   Drawer,
@@ -28,6 +28,7 @@ import {
   ChevronLeft,
   ChevronRight,
   AccountCircle,
+  QrCode2,
 } from '@mui/icons-material';
 import { useNavigate, useLocation, Outlet } from 'react-router-dom';
 import DinoLogo from '../../ui/DinoLogo';
@@ -52,7 +53,7 @@ const SystemLayout: React.FC = () => {
 
   // Mobile drawer open/close
   const [mobileOpen, setMobileOpen] = useState(false);
-  // Desktop sidebar collapsed (icon-only mode) — does NOT affect mobile
+  // Desktop sidebar collapsed (icon-only mode) â€” does NOT affect mobile
   const [collapsed, setCollapsed] = useState(false);
   const [showLogout, setShowLogout] = useState(false);
 
@@ -67,22 +68,32 @@ const SystemLayout: React.FC = () => {
     return typeof name === 'string' ? name : '';
   }, [userPermissions, user]);
 
-  const menuItems: MenuItem[] = [
-    { title: 'Dashboard',          icon: <DashboardIcon fontSize="small" />,      permission: PERMISSIONS.SYSTEM_DASHBOARD_VIEW,    path: '/system/dashboard' },
-    { title: 'Users',              icon: <People fontSize="small" />,             permission: PERMISSIONS.SYSTEM_USERS_VIEW,        path: '/system/users' },
-    { title: 'Billing',            icon: <Payment fontSize="small" />,            permission: PERMISSIONS.SYSTEM_BILLING_VIEW,      path: '/system/billing' },
-    { title: 'Workspaces',         icon: <Business fontSize="small" />,           permission: PERMISSIONS.SYSTEM_WORKSPACES_VIEW,   path: '/system/workspaces' },
-    { title: 'Roles & Permissions',icon: <AdminPanelSettings fontSize="small" />, permission: PERMISSIONS.SYSTEM_ROLES_VIEW,        path: '/system/roles-permissions' },
-    { title: 'Registration Codes', icon: <Settings fontSize="small" />,           permission: PERMISSIONS.SYSTEM_REGISTRATION_VIEW, path: '/system/registration-codes' },
-    { title: 'Appearance',         icon: <Palette fontSize="small" />,            permission: PERMISSIONS.SYSTEM_SETTINGS_VIEW,     path: '/system/appearance' },
-    { title: 'Profile',            icon: <AccountCircle fontSize="small" />,                                              path: '/system/profile' },
-    { title: 'Settings',           icon: <Settings fontSize="small" />,           permission: PERMISSIONS.SYSTEM_SETTINGS_VIEW,     path: '/system/settings' },
-  ];
+  // menuItems is memoized with empty deps since icons and paths are all static constants
+  const menuItems = useMemo<MenuItem[]>(() => [
+    { title: 'Dashboard',           icon: <DashboardIcon fontSize="small" />,      permission: PERMISSIONS.SYSTEM_DASHBOARD_VIEW,    path: '/system/dashboard' },
+    { title: 'Users',               icon: <People fontSize="small" />,             permission: PERMISSIONS.SYSTEM_USERS_VIEW,        path: '/system/users' },
+    { title: 'Billing',             icon: <Payment fontSize="small" />,            permission: PERMISSIONS.SYSTEM_BILLING_VIEW,      path: '/system/billing' },
+    { title: 'Workspaces',          icon: <Business fontSize="small" />,           permission: PERMISSIONS.SYSTEM_WORKSPACES_VIEW,   path: '/system/workspaces' },
+    { title: 'Roles & Permissions', icon: <AdminPanelSettings fontSize="small" />, permission: PERMISSIONS.SYSTEM_ROLES_VIEW,        path: '/system/roles-permissions' },
+    { title: 'Registration Codes',  icon: <QrCode2 fontSize="small" />,            permission: PERMISSIONS.SYSTEM_REGISTRATION_VIEW, path: '/system/registration-codes' },
+    { title: 'Appearance',          icon: <Palette fontSize="small" />,            permission: PERMISSIONS.SYSTEM_SETTINGS_VIEW,     path: '/system/appearance' },
+    { title: 'Profile',             icon: <AccountCircle fontSize="small" />,                                                        path: '/system/profile' },
+    { title: 'Settings',            icon: <Settings fontSize="small" />,           permission: PERMISSIONS.SYSTEM_SETTINGS_VIEW,     path: '/system/settings' },
+  ], []);
 
   const availableMenuItems = useMemo(
     () => menuItems.filter(item => !item.permission || hasBackendPermission(item.permission)),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [userPermissions],
+    [menuItems, hasBackendPermission],
+  );
+
+  // Items that require a permission (used to detect "no access" state)
+  const permissionedItems = useMemo(
+    () => menuItems.filter(item => !!item.permission),
+    [menuItems],
+  );
+  const hasNoModuleAccess = useMemo(
+    () => permissionedItems.every(item => !hasBackendPermission(item.permission!)),
+    [permissionedItems, hasBackendPermission],
   );
 
   const handleNav = (path: string) => {
@@ -90,7 +101,7 @@ const SystemLayout: React.FC = () => {
     if (mobileOpen) setMobileOpen(false);
   };
 
-  // ── Shared nav list (used in both mobile full drawer and desktop collapsed/expanded) ──
+  // â”€â”€ Shared nav list (used in both mobile full drawer and desktop collapsed/expanded) â”€â”€
   const navList = (isCollapsedMode: boolean) => (
     <List sx={{
       flexGrow: 1,
@@ -101,6 +112,14 @@ const SystemLayout: React.FC = () => {
       '&::-webkit-scrollbar': { width: 4 },
       '&::-webkit-scrollbar-thumb': { bgcolor: 'rgba(255,255,255,0.2)', borderRadius: 2 },
     }}>
+      {/* No-access notice â€” shown when user has no module view permissions */}
+      {hasNoModuleAccess && !isCollapsedMode && (
+        <Box sx={{ px: 1.5, py: 2, mx: 0.5, mb: 1, borderRadius: 1.5, bgcolor: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}>
+          <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.72rem', lineHeight: 1.5, display: 'block' }}>
+            No modules are assigned to your role. Contact a system administrator to request access.
+          </Typography>
+        </Box>
+      )}
       {availableMenuItems.map((item, index) => {
         const isActive = location.pathname === item.path;
         const btn = (
@@ -145,12 +164,12 @@ const SystemLayout: React.FC = () => {
     </List>
   );
 
-  // ── Full sidebar content (mobile always full, desktop depends on collapsed) ──
+  // â”€â”€ Full sidebar content (mobile always full, desktop depends on collapsed) â”€â”€
   // isMobile: true when rendered inside the temporary mobile drawer
   const sidebarContent = (isCollapsedMode: boolean, isMobile = false) => (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', bgcolor: '#0f172a' }}>
 
-      {/* ── Logo header ── */}
+      {/* â”€â”€ Logo header â”€â”€ */}
       <Box sx={{
         px: isCollapsedMode ? 1 : 2.5,
         py: 2,
@@ -180,7 +199,7 @@ const SystemLayout: React.FC = () => {
           <DinoLogo size={28} animated={false} />
         )}
 
-        {/* Mobile: close (X) button — closes the drawer */}
+        {/* Mobile: close (X) button â€” closes the drawer */}
         {isMobile && (
           <IconButton
             onClick={() => setMobileOpen(false)}
@@ -217,12 +236,12 @@ const SystemLayout: React.FC = () => {
         </Box>
       )}
 
-      {/* ── Nav list ── */}
+      {/* â”€â”€ Nav list â”€â”€ */}
       {navList(isCollapsedMode)}
 
       <Divider sx={{ borderColor: alpha('#ffffff', 0.1) }} />
 
-      {/* ── User footer ── */}
+      {/* â”€â”€ User footer â”€â”€ */}
       <Box sx={{ p: isCollapsedMode ? 0.75 : 2 }}>
         {!isCollapsedMode ? (
           <>
@@ -310,7 +329,7 @@ const SystemLayout: React.FC = () => {
     <>
       <Box sx={{ display: 'flex', minHeight: '100vh', width: '100%' }}>
 
-        {/* ── Mobile drawer — always full width, no collapse ── */}
+        {/* â”€â”€ Mobile drawer â€” always full width, no collapse â”€â”€ */}
         <Drawer
           variant="temporary"
           open={mobileOpen}
@@ -328,7 +347,7 @@ const SystemLayout: React.FC = () => {
           {sidebarContent(false, true)}
         </Drawer>
 
-        {/* ── Desktop drawer — collapsible ── */}
+        {/* â”€â”€ Desktop drawer â€” collapsible â”€â”€ */}
         <Drawer
           variant="permanent"
           sx={{
@@ -352,7 +371,7 @@ const SystemLayout: React.FC = () => {
           {sidebarContent(collapsed)}
         </Drawer>
 
-        {/* ── Main content ── */}
+        {/* â”€â”€ Main content â”€â”€ */}
         <Box
           component="main"
           sx={{
@@ -368,7 +387,7 @@ const SystemLayout: React.FC = () => {
             pt: { xs: '56px', md: 0 },
           }}
         >
-          {/* ── Mobile top navbar ── */}
+          {/* â”€â”€ Mobile top navbar â”€â”€ */}
           <Box sx={{
             display: { xs: 'flex', md: 'none' },
             position: 'fixed',
@@ -391,7 +410,7 @@ const SystemLayout: React.FC = () => {
               System Admin
             </Typography>
 
-            {/* Avatar — clickable → profile */}
+            {/* Avatar â€” clickable â†’ profile */}
             <Avatar
               onClick={() => navigate('/system/profile')}
               sx={{

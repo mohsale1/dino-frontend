@@ -1,14 +1,13 @@
-import { Permission, UserRoleObject, PERMISSIONS, ROLES, PermissionName, RoleName, AuthUser } from '../../types/auth';
+import { Permission, PERMISSIONS, ROLES, PermissionName, RoleName, AuthUser } from '../../types/auth';
 import { isOwner, isManager, isUser, normalizeRole, getRoleDisplayName as getDisplayName } from '../../types/auth/roles';
 import StorageManager from '../../utils/storage';
-import { apiService } from '../../utils/api';
 
 class PermissionService {
   private static permissionsCache: Map<string, { permissions: any[], role: any, timestamp: number }> = new Map();
   private static readonly CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
   
   /**
-   * Get user permissions â€” reads from localStorage cache populated by Auth context.
+   * Get user permissions — reads from localStorage cache populated by Auth context.
    * The Auth context derives permissions from user.role.permissions (IDs resolved via
    * /system/permissions) on every login and page load. This method simply reads that
    * cached result so other parts of the app can access it synchronously.
@@ -18,7 +17,7 @@ class PermissionService {
    */
   static async fetchUserPermissions(forceRefresh: boolean = false): Promise<{ permissions: any[], role: any } | null> {
     // Always read from the localStorage cache that Auth context maintains.
-    // forceRefresh is a no-op here â€” the Auth context handles re-fetching via refreshPermissions().
+    // forceRefresh is a no-op here — the Auth context handles re-fetching via refreshPermissions().
     return this.getStoredPermissions();
   }
 

@@ -106,7 +106,7 @@ export const UserDataProvider: React.FC<UserDataProviderProps> = ({ children }) 
       setInitialized(false);
       loadingRef.current = false;
     }
-  }, [isAuthenticated, initialized]);
+  }, [isAuthenticated, initialized, loadUserData]);
 
   // Refresh user data — bypasses the debounce so status changes reflect immediately
   const refreshUserData = async () => {

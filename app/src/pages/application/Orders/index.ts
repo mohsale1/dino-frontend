@@ -1,4 +1,2 @@
-/**
- * Orders Components Index
- */
+export { default } from './Orders';
 export { default as OrderCard } from './OrderCard';

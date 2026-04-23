@@ -244,7 +244,8 @@ class UserService {
     }
 
     // Check for wildcard permissions (both : and . notation)
-    const [resource, action] = permission.split(/[:.]/);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const [resource, _action] = permission.split(/[:.]/);
     const wildcardPermissionDot = `${resource}.*`;
     const wildcardPermissionColon = `${resource}:*`;
     

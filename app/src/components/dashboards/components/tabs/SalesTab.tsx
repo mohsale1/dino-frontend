@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Grid, Typography, LinearProgress } from '@mui/material';
+import { Box, Grid, Typography, LinearProgress, Chip } from '@mui/material';
 import RevenueChart from '../../charts/RevenueChart';
 
 interface SalesTabProps {
@@ -23,27 +23,109 @@ interface SalesTabProps {
   };
 }
 
-const CATEGORY_COLORS = ['#6366f1', '#f59e0b', '#10b981', '#3b82f6', '#ef4444', '#8b5cf6'];
+// ─── Constants ────────────────────────────────────────────────────────────────
 
-const cardStyle = {
-  bgcolor: '#fff',
-  borderRadius: 2,
-  boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
-  p: 2.5,
-} as const;
+const CATEGORY_COLORS = [
+  '#1976D2',
+  '#8b5cf6',
+  '#10b981',
+  '#f59e0b',
+  '#f43f5e',
+  '#0ea5e9',
+];
 
-const cardTitleStyle = {
-  fontWeight: 700,
-  fontSize: '0.875rem',
-  color: '#0f172a',
-  mb: 2,
-} as const;
+const PAYMENT_COLORS = [
+  '#1976D2',
+  '#10b981',
+  '#f59e0b',
+  '#8b5cf6',
+  '#0ea5e9',
+  '#f43f5e',
+];
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
 
 const formatINR = (value?: number): string =>
-  `\u20B9${(value ?? 0).toLocaleString('en-IN')}`;
+  new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: 'INR',
+    maximumFractionDigits: 0,
+  }).format(value ?? 0);
 
 const capitalize = (str: string): string =>
   str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+
+// ─── Shared Styles ────────────────────────────────────────────────────────────
+
+const CARD_SX = {
+  bgcolor: '#1e293b',
+  border: '1px solid rgba(255,255,255,0.08)',
+  borderRadius: '12px',
+  p: 2.5,
+} as const;
+
+// ─── SectionTitle ─────────────────────────────────────────────────────────────
+
+interface SectionTitleProps {
+  label: string;
+  accentColor: string;
+}
+
+const SectionTitle: React.FC<SectionTitleProps> = ({ label, accentColor }) => (
+  <Box sx={{ borderLeft: `3px solid ${accentColor}`, pl: 1.5, mb: 2 }}>
+    <Typography sx={{ fontSize: '0.875rem', fontWeight: 700, color: '#f1f5f9' }}>
+      {label}
+    </Typography>
+  </Box>
+);
+
+// ─── StatCard ─────────────────────────────────────────────────────────────────
+
+interface StatCardProps {
+  label: string;
+  value: string;
+  subtext: string;
+  accentColor: string;
+}
+
+const StatCard: React.FC<StatCardProps> = ({ label, value, subtext, accentColor }) => (
+  <Box
+    sx={{
+      ...CARD_SX,
+      borderTop: `3px solid ${accentColor}`,
+      height: '100%',
+    }}
+  >
+    <Typography
+      sx={{
+        fontSize: '0.68rem',
+        fontWeight: 600,
+        color: '#64748b',
+        textTransform: 'uppercase',
+        letterSpacing: '0.08em',
+        mb: 0.75,
+      }}
+    >
+      {label}
+    </Typography>
+    <Typography
+      sx={{
+        fontSize: '1.75rem',
+        fontWeight: 800,
+        color: '#f1f5f9',
+        lineHeight: 1.1,
+        mb: 0.5,
+      }}
+    >
+      {value}
+    </Typography>
+    <Typography sx={{ fontSize: '0.75rem', color: '#64748b' }}>
+      {subtext}
+    </Typography>
+  </Box>
+);
+
+// ─── Main Component ───────────────────────────────────────────────────────────
 
 const SalesTab: React.FC<SalesTabProps> = ({ dashboardData }) => {
   const summary = dashboardData?.summary ?? {};
@@ -57,117 +139,133 @@ const SalesTab: React.FC<SalesTabProps> = ({ dashboardData }) => {
   const categoryPerformance = analytics.categoryPerformance ?? [];
 
   return (
-    <Box sx={{ px: { xs: 2, sm: 3, md: 4 }, py: 3, bgcolor: '#f8fafc' }}>
+    <Box sx={{ px: { xs: 2, sm: 3, md: 4 }, py: 3, bgcolor: '#0f172a' }}>
 
       {/* Row 1 — Stat Cards */}
-      <Grid container spacing={2.5} sx={{ mb: 2.5 }}>
-        {/* Total Revenue */}
+      <Grid container spacing={2.5}>
         <Grid item xs={12} sm={4}>
-          <Box
-            sx={{
-              ...cardStyle,
-              borderLeft: '4px solid #1976d2',
-            }}
-          >
-            <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 600, fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-              Total Revenue
-            </Typography>
-            <Typography sx={{ fontWeight: 700, fontSize: '1.5rem', color: '#0f172a', mt: 0.5 }}>
-              {formatINR(summary.totalRevenue)}
-            </Typography>
-          </Box>
+          <StatCard
+            label="Total Revenue"
+            value={formatINR(summary.totalRevenue ?? 0)}
+            subtext="All time"
+            accentColor="#1976D2"
+          />
         </Grid>
-
-        {/* Today's Revenue */}
         <Grid item xs={12} sm={4}>
-          <Box
-            sx={{
-              ...cardStyle,
-              borderLeft: '4px solid #0288d1',
-            }}
-          >
-            <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 600, fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-              Today's Revenue
-            </Typography>
-            <Typography sx={{ fontWeight: 700, fontSize: '1.5rem', color: '#0f172a', mt: 0.5 }}>
-              {formatINR(summary.todaysRevenue)}
-            </Typography>
-          </Box>
+          <StatCard
+            label="Today's Revenue"
+            value={formatINR(summary.todaysRevenue ?? 0)}
+            subtext="Since midnight"
+            accentColor="#10b981"
+          />
         </Grid>
-
-        {/* Avg Order Value */}
         <Grid item xs={12} sm={4}>
-          <Box
-            sx={{
-              ...cardStyle,
-              borderLeft: '4px solid #388e3c',
-            }}
-          >
-            <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 600, fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-              Avg Order Value
-            </Typography>
-            <Typography sx={{ fontWeight: 700, fontSize: '1.5rem', color: '#0f172a', mt: 0.5 }}>
-              {formatINR(summary.avgOrderValue)}
-            </Typography>
-          </Box>
+          <StatCard
+            label="Avg Order Value"
+            value={formatINR(summary.avgOrderValue ?? 0)}
+            subtext="Per transaction"
+            accentColor="#f59e0b"
+          />
         </Grid>
       </Grid>
 
       {/* Row 2 — Revenue Trend */}
-      <Box sx={{ ...cardStyle, mb: 2.5 }}>
-        <Typography sx={cardTitleStyle}>Revenue Trend</Typography>
-        <RevenueChart data={analytics.revenueTrend ?? []} height={300} />
+      <Box sx={{ ...CARD_SX, mt: 2.5 }}>
+        <SectionTitle label="Revenue Trend" accentColor="#1976D2" />
+        <RevenueChart data={analytics.revenueTrend ?? []} height={280} />
       </Box>
 
       {/* Row 3 — Payment Methods + Category Performance */}
-      <Grid container spacing={2.5}>
+      <Grid container spacing={2.5} sx={{ mt: 0 }}>
 
         {/* Payment Methods */}
         <Grid item xs={12} md={6}>
-          <Box sx={cardStyle}>
-            <Typography sx={cardTitleStyle}>Payment Methods</Typography>
+          <Box sx={CARD_SX}>
+            <SectionTitle label="Payment Methods" accentColor="#0ea5e9" />
 
             {paymentMethods.length === 0 ? (
-              <Typography variant="body2" sx={{ color: '#94a3b8', textAlign: 'center', py: 4 }}>
+              <Typography
+                sx={{ fontSize: '0.8125rem', color: '#94a3b8', textAlign: 'center', py: 4 }}
+              >
                 No payment data
               </Typography>
             ) : (
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                {paymentMethods.map((pm) => (
-                  <Box key={pm.method}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', mb: 0.5 }}>
-                      <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
-                        <Typography sx={{ fontWeight: 600, fontSize: '0.8rem', color: '#0f172a', textTransform: 'capitalize' }}>
-                          {capitalize(pm.method)}
-                        </Typography>
-                        <Typography sx={{ fontSize: '0.72rem', color: '#94a3b8' }}>
-                          {pm.count} transactions
-                        </Typography>
-                      </Box>
-                      <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
-                        <Typography sx={{ fontWeight: 700, fontSize: '0.8rem', color: '#0f172a' }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+                {paymentMethods.map((pm, idx) => {
+                  const barColor = PAYMENT_COLORS[idx % PAYMENT_COLORS.length];
+                  return (
+                    <Box key={pm.method}>
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          mb: 0.75,
+                        }}
+                      >
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Box
+                            sx={{
+                              width: 8,
+                              height: 8,
+                              borderRadius: '50%',
+                              bgcolor: barColor,
+                              flexShrink: 0,
+                            }}
+                          />
+                          <Typography
+                            sx={{ fontSize: '0.8125rem', fontWeight: 600, color: '#f1f5f9' }}
+                          >
+                            {capitalize(pm.method)}
+                          </Typography>
+                          <Chip
+                            label={`${pm.count} orders`}
+                            size="small"
+                            sx={{
+                              height: 18,
+                              fontSize: '0.65rem',
+                              fontWeight: 500,
+                              bgcolor: 'rgba(255,255,255,0.06)',
+                              color: '#94a3b8',
+                              borderRadius: '4px',
+                              '& .MuiChip-label': { px: 0.75 },
+                            }}
+                          />
+                        </Box>
+                        <Typography
+                          sx={{ fontSize: '0.8125rem', fontWeight: 700, color: '#f1f5f9' }}
+                        >
                           {formatINR(pm.revenue)}
                         </Typography>
-                        <Typography sx={{ fontSize: '0.72rem', color: '#1976d2', fontWeight: 600 }}>
-                          {pm.percentage.toFixed(1)}%
-                        </Typography>
                       </Box>
+                      <Box sx={{ position: 'relative' }}>
+                        <LinearProgress
+                          variant="determinate"
+                          value={Math.min(pm.percentage, 100)}
+                          sx={{
+                            height: 6,
+                            borderRadius: 3,
+                            bgcolor: '#334155',
+                            '& .MuiLinearProgress-bar': {
+                              borderRadius: 3,
+                              bgcolor: barColor,
+                            },
+                          }}
+                        />
+                      </Box>
+                      <Typography
+                        sx={{
+                          fontSize: '0.7rem',
+                          color: '#64748b',
+                          textAlign: 'right',
+                          mt: 0.5,
+                        }}
+                      >
+                        {pm.percentage.toFixed(1)}%
+                      </Typography>
                     </Box>
-                    <LinearProgress
-                      variant="determinate"
-                      value={pm.percentage}
-                      sx={{
-                        height: 6,
-                        borderRadius: 3,
-                        bgcolor: '#e2e8f0',
-                        '& .MuiLinearProgress-bar': {
-                          borderRadius: 3,
-                          bgcolor: '#1976d2',
-                        },
-                      }}
-                    />
-                  </Box>
-                ))}
+                  );
+                })}
               </Box>
             )}
           </Box>
@@ -175,50 +273,87 @@ const SalesTab: React.FC<SalesTabProps> = ({ dashboardData }) => {
 
         {/* Category Performance */}
         <Grid item xs={12} md={6}>
-          <Box sx={cardStyle}>
-            <Typography sx={cardTitleStyle}>Category Performance</Typography>
+          <Box sx={CARD_SX}>
+            <SectionTitle label="Category Performance" accentColor="#10b981" />
 
             {categoryPerformance.length === 0 ? (
-              <Typography variant="body2" sx={{ color: '#94a3b8', textAlign: 'center', py: 4 }}>
+              <Typography
+                sx={{ fontSize: '0.8125rem', color: '#94a3b8', textAlign: 'center', py: 4 }}
+              >
                 No category data
               </Typography>
             ) : (
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
                 {categoryPerformance.map((cat, idx) => {
-                  const color = CATEGORY_COLORS[idx % CATEGORY_COLORS.length];
+                  const barColor = CATEGORY_COLORS[idx % CATEGORY_COLORS.length];
                   return (
                     <Box key={cat.category}>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', mb: 0.5 }}>
-                        <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
-                          <Typography sx={{ fontWeight: 600, fontSize: '0.8rem', color: '#0f172a' }}>
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          mb: 0.75,
+                        }}
+                      >
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Box
+                            sx={{
+                              width: 8,
+                              height: 8,
+                              borderRadius: '50%',
+                              bgcolor: barColor,
+                              flexShrink: 0,
+                            }}
+                          />
+                          <Typography
+                            sx={{ fontSize: '0.8125rem', fontWeight: 600, color: '#f1f5f9' }}
+                          >
                             {cat.category}
                           </Typography>
-                          <Typography sx={{ fontSize: '0.72rem', color: '#94a3b8' }}>
-                            {cat.orders} orders
-                          </Typography>
+                          <Chip
+                            label={`${cat.orders} orders`}
+                            size="small"
+                            sx={{
+                              height: 18,
+                              fontSize: '0.65rem',
+                              fontWeight: 500,
+                              bgcolor: 'rgba(255,255,255,0.06)',
+                              color: '#94a3b8',
+                              borderRadius: '4px',
+                              '& .MuiChip-label': { px: 0.75 },
+                            }}
+                          />
                         </Box>
-                        <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
-                          <Typography sx={{ fontWeight: 700, fontSize: '0.8rem', color: '#0f172a' }}>
-                            {formatINR(cat.revenue)}
-                          </Typography>
-                          <Typography sx={{ fontSize: '0.72rem', fontWeight: 600, color }}>
-                            {cat.percentage.toFixed(1)}%
-                          </Typography>
-                        </Box>
+                        <Typography
+                          sx={{ fontSize: '0.8125rem', fontWeight: 700, color: '#f1f5f9' }}
+                        >
+                          {formatINR(cat.revenue)}
+                        </Typography>
                       </Box>
                       <LinearProgress
                         variant="determinate"
-                        value={cat.percentage}
+                        value={Math.min(cat.percentage, 100)}
                         sx={{
                           height: 6,
                           borderRadius: 3,
-                          bgcolor: '#e2e8f0',
+                          bgcolor: '#334155',
                           '& .MuiLinearProgress-bar': {
                             borderRadius: 3,
-                            bgcolor: color,
+                            bgcolor: barColor,
                           },
                         }}
                       />
+                      <Typography
+                        sx={{
+                          fontSize: '0.7rem',
+                          color: '#64748b',
+                          textAlign: 'right',
+                          mt: 0.5,
+                        }}
+                      >
+                        {cat.percentage.toFixed(1)}%
+                      </Typography>
                     </Box>
                   );
                 })}

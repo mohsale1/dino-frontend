@@ -7,7 +7,7 @@ import { ProtectedRoute, PermissionSync } from './components/auth';
 import SystemLayout from './components/layout/SystemLayout';
 import { AppInitializer } from './components/common';
 
-import { AuthProvider, useAuth } from './contexts/common/Auth';
+import { AuthProvider } from './contexts/common/Auth';
 import { ToastProvider } from './contexts/common/Toast';
 import { SidebarProvider } from './contexts/common/Sidebar';
 
@@ -29,7 +29,6 @@ import { StorageCleanup } from './utils/storage';
 import { tokenRefreshScheduler } from './utils/auth';
 import { apiService } from './utils/api';
 import { initializePerformanceMonitoring } from './utils/performance';
-import { PageTransitionLoader, usePageTransition } from './components/ui/PageTransitionLoader';
 
 const theme = createTheme({
   palette: {
@@ -39,15 +38,8 @@ const theme = createTheme({
 
 // Inner component — has access to both auth context and router context
 const AppContent = memo(() => {
-  const { loading } = useAuth();
-  const { transitioning } = usePageTransition();
-
   return (
     <>
-      <PageTransitionLoader
-        visible={loading || transitioning}
-        message={loading ? 'Initialising...' : 'Loading...'}
-      />
       <Suspense fallback={null}>
         <Routes>
           {/* Root redirects to login */}

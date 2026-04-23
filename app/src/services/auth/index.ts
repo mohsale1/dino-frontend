@@ -3,8 +3,7 @@
  * Centralized exports for all authentication-related services
  */
 
-// Use the wrapper that automatically switches between mock and real
-export { authService } from './authServiceWrapper';
+export { authService } from './auth';
 export { default as PermissionService, default } from './permission';
 export { userService } from './user';
 export { roleService } from './role';

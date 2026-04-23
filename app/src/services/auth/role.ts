@@ -1,5 +1,5 @@
 import { apiService } from '../../utils/api';
-import { ApiResponse, PaginatedResponse } from '../../types';
+import { PaginatedResponse } from '../../types';
 
 export interface Role {
   id: string;

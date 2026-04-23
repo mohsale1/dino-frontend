@@ -205,10 +205,16 @@ const LoginPage: React.FC = () => {
         flexDirection: 'column',
         justifyContent: 'center',
         alignItems: 'center',
-        width: { md: 460, lg: 500 },
+        width: { md: 480, lg: 520 },
+        flexShrink: 0,
         px: { md: 6, lg: 7 },
         bgcolor: '#ffffff',
         overflow: 'hidden',
+        animation: 'authPanelIn 0.28s cubic-bezier(0.22,1,0.36,1) both',
+        '@keyframes authPanelIn': {
+          from: { opacity: 0, transform: 'translateX(18px)' },
+          to:   { opacity: 1, transform: 'translateX(0)' },
+        },
       }}>
         <Box width="100%" maxWidth={380}>
           <Box display="flex" flexDirection="column" mb={4}>
@@ -245,6 +251,11 @@ const LoginPage: React.FC = () => {
         overflowY: 'auto',
         px: 3,
         py: 5,
+        animation: 'authPanelIn 0.28s cubic-bezier(0.22,1,0.36,1) both',
+        '@keyframes authPanelIn': {
+          from: { opacity: 0, transform: 'translateX(18px)' },
+          to:   { opacity: 1, transform: 'translateX(0)' },
+        },
       }}>
         <Box sx={{ width: '100%', maxWidth: 360, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <DinoLogo size={40} />

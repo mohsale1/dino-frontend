@@ -1,14 +1,5 @@
 import React, { useMemo } from 'react';
-import {
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Cell,
-} from 'recharts';
+import ReactECharts from 'echarts-for-react';
 import { Box, Typography } from '@mui/material';
 
 interface DataPoint {
@@ -36,42 +27,12 @@ const formatHourShort = (hour: number): string => {
   return `${hour - 12}P`;
 };
 
-const formatINR = (value: number) =>
-  new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(value);
-
-const getBarColor = (orders: number, maxOrders: number): string => {
-  const ratio = maxOrders > 0 ? orders / maxOrders : 0;
-  if (ratio > 0.7) return '#ef4444';
-  if (ratio > 0.4) return '#f59e0b';
-  return '#10b981';
-};
-
-const CustomTooltip = ({ active, payload }: any) => {
-  if (!active || !payload || !payload.length) return null;
-  const d = payload[0]?.payload as DataPoint;
-  return (
-    <Box
-      sx={{
-        background: '#fff',
-        border: '1px solid #e2e8f0',
-        borderRadius: 1.5,
-        p: 1.25,
-        boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-        minWidth: 140,
-      }}
-    >
-      <Typography sx={{ fontWeight: 600, fontSize: '0.75rem', color: '#0f172a', mb: 0.5 }}>
-        {formatHour(d.hour)}
-      </Typography>
-      <Typography sx={{ fontSize: '0.72rem', color: '#374151', mb: 0.25 }}>
-        Orders: {d.orders}
-      </Typography>
-      <Typography sx={{ fontSize: '0.72rem', color: '#64748b' }}>
-        Revenue: {formatINR(d.revenue)}
-      </Typography>
-    </Box>
-  );
-};
+const formatINR = (value: number): string =>
+  new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: 'INR',
+    maximumFractionDigits: 0,
+  }).format(value);
 
 const PeakHoursChart: React.FC<Props> = ({ data, height = 220 }) => {
   const maxOrders = useMemo(() => Math.max(...data.map((d) => d.orders), 1), [data]);
@@ -86,32 +47,93 @@ const PeakHoursChart: React.FC<Props> = ({ data, height = 220 }) => {
     );
   }
 
+  const xLabels = data.map((d) => formatHourShort(d.hour));
+  const orderValues = data.map((d) => d.orders);
+
+  const option = {
+    backgroundColor: 'transparent',
+    textStyle: { fontFamily: 'inherit' },
+    tooltip: {
+      trigger: 'axis',
+      axisPointer: { type: 'shadow' },
+      backgroundColor: '#1e293b',
+      borderColor: 'rgba(255,255,255,0.12)',
+      borderWidth: 1,
+      borderRadius: 8,
+      textStyle: { color: '#f1f5f9', fontSize: 12 },
+      padding: [10, 14],
+      formatter: (params: any[]) => {
+        const idx = params[0]?.dataIndex ?? 0;
+        const d = data[idx];
+        if (!d) return '';
+        return `
+          <div style="font-weight:700;font-size:12px;color:#f1f5f9;margin-bottom:6px">${formatHour(d.hour)}</div>
+          <div style="font-size:11px;color:#94a3b8;margin-bottom:3px">Orders: <strong style="color:#f1f5f9">${d.orders}</strong></div>
+          <div style="font-size:11px;color:#94a3b8">Revenue: <strong style="color:#f1f5f9">${formatINR(d.revenue)}</strong></div>
+        `;
+      },
+    },
+    visualMap: {
+      show: false,
+      min: 0,
+      max: maxOrders,
+      inRange: {
+        color: ['#10b981', '#f59e0b', '#f43f5e'],
+      },
+      dimension: 1,
+    },
+    grid: {
+      top: 8,
+      right: 8,
+      bottom: 28,
+      left: 36,
+      containLabel: false,
+    },
+    xAxis: {
+      type: 'category',
+      data: xLabels,
+      axisLine: { show: false },
+      axisTick: { show: false },
+      axisLabel: {
+        color: '#94a3b8',
+        fontSize: 10,
+        interval: (index: number) => index % 3 === 0,
+      },
+      splitLine: { show: false },
+    },
+    yAxis: {
+      type: 'value',
+      axisLine: { show: false },
+      axisTick: { show: false },
+      axisLabel: { color: '#94a3b8', fontSize: 10 },
+      splitLine: { lineStyle: { color: 'rgba(255,255,255,0.06)', type: 'solid' } },
+    },
+    series: [
+      {
+        name: 'Orders',
+        type: 'bar',
+        data: orderValues,
+        barMaxWidth: 20,
+        itemStyle: {
+          borderRadius: [3, 3, 0, 0],
+        },
+        emphasis: {
+          itemStyle: {
+            shadowBlur: 12,
+            shadowColor: 'rgba(0,0,0,0.40)',
+          },
+        },
+      },
+    ],
+  };
+
   return (
-    <ResponsiveContainer width="100%" height={height}>
-      <BarChart data={data} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-        <XAxis
-          dataKey="hour"
-          tickFormatter={(v) => (v % 6 === 0 ? formatHourShort(v) : '')}
-          tick={{ fontSize: 10, fill: '#64748b' }}
-          axisLine={{ stroke: '#e2e8f0' }}
-          tickLine={false}
-          interval={0}
-        />
-        <YAxis
-          tick={{ fontSize: 10, fill: '#64748b' }}
-          axisLine={false}
-          tickLine={false}
-          width={28}
-        />
-        <Tooltip content={<CustomTooltip />} cursor={{ fill: '#f8fafc' }} />
-        <Bar dataKey="orders" name="Orders" radius={[3, 3, 0, 0]} maxBarSize={20}>
-          {data.map((entry) => (
-            <Cell key={`cell-${entry.hour}`} fill={getBarColor(entry.orders, maxOrders)} />
-          ))}
-        </Bar>
-      </BarChart>
-    </ResponsiveContainer>
+    <ReactECharts
+      option={option}
+      style={{ height, width: '100%' }}
+      opts={{ renderer: 'svg' }}
+      notMerge
+    />
   );
 };
 

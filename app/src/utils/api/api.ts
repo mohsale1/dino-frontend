@@ -23,17 +23,17 @@ class DataTransformer {
 
     if (typeof obj === 'object' && obj.constructor === Object) {
       const camelCaseObj: any = {};
-      
+
       for (const [key, value] of Object.entries(obj)) {
         const camelKey = DataTransformer.snakeToCamel(key);
         camelCaseObj[camelKey] = DataTransformer.toCamelCase(value);
-        
+
         // Keep original snake_case for API compatibility
         if (key !== camelKey) {
           camelCaseObj[key] = value;
         }
       }
-      
+
       return camelCaseObj;
     }
 
@@ -54,12 +54,12 @@ class DataTransformer {
 
     if (typeof obj === 'object' && obj.constructor === Object) {
       const snakeCaseObj: any = {};
-      
+
       for (const [key, value] of Object.entries(obj)) {
         const snakeKey = DataTransformer.camelToSnake(key);
         snakeCaseObj[snakeKey] = DataTransformer.toSnakeCase(value);
       }
-      
+
       return snakeCaseObj;
     }
 
@@ -89,15 +89,8 @@ interface ApiResponse<T = any> {
 class ApiService {
   private axiosInstance: AxiosInstance;
   private requestQueue: Map<string, Promise<any>> = new Map();
-  
-  // Add debugConfiguration method signature
-  debugConfiguration?: () => void;
 
   constructor() {
-    // Log configuration during initialization    
-    // Force verification of the base URL
-    if (API_CONFIG.BASE_URL.includes('localhost')) {    } else {    }
-    
     this.axiosInstance = axios.create({
       baseURL: API_CONFIG.BASE_URL,
       timeout: API_CONFIG.TIMEOUT,
@@ -113,30 +106,31 @@ class ApiService {
       async (config) => {
         // Skip token refresh for auth endpoints to prevent loops
         const isAuthEndpoint = config.url?.includes('/auth/');
-        
+
         // Only check token refresh for non-auth endpoints
         if (!isAuthEndpoint && authService.shouldRefreshToken()) {
-          try {            await authService.refreshToken();
+          try {
+            await authService.refreshToken();
           } catch (error) {
-      // Error handled silently
-    }
+            // Refresh attempt failed — continue with existing token
+          }
         }
-        
+
         // Add authentication token
         const token = authService.getToken();
         if (token) {
-          config.headers.Authorization = `Bearer ${token}`;        } else {        }
+          config.headers.Authorization = `Bearer ${token}`;
+        }
 
         // Convert request data to snake_case
         if (config.data && typeof config.data === 'object') {
           config.data = DataTransformer.toSnakeCase(config.data);
         }
 
-        // Log request with detailed URL info for debugging
-        const fullUrl = `${config.baseURL}${config.url}`;
         return config;
       },
-      (error) => {        return Promise.reject(error);
+      (error) => {
+        return Promise.reject(error);
       }
     );
 
@@ -148,7 +142,6 @@ class ApiService {
           response.data = DataTransformer.toCamelCase(response.data);
         }
 
-        // Log response
         return response;
       },
       async (error) => {
@@ -158,31 +151,34 @@ class ApiService {
         if (error.response?.status === 401 && !originalRequest._retry) {
           // Skip retry for auth endpoints to prevent infinite loops
           const isAuthEndpoint = originalRequest.url?.includes('/auth/');
-          if (isAuthEndpoint) {            return Promise.reject(error);
+          if (isAuthEndpoint) {
+            return Promise.reject(error);
           }
 
           originalRequest._retry = true;
           try {
             const newToken = await authService.refreshToken();
-            if (newToken && newToken.access_token) {              // Update the authorization header with new token
+            if (newToken && newToken.access_token) {
+              // Update the authorization header with new token
               originalRequest.headers.Authorization = `Bearer ${newToken.access_token}`;
               // Also update the default headers for future requests
               this.axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${newToken.access_token}`;
               // Retry the original request
               return this.axiosInstance(originalRequest);
-            } else {              // No valid token received, logout
+            } else {
+              // No valid token received, logout
               authService.logout();
               window.location.href = '/login';
               return Promise.reject(new Error('Token refresh failed'));
             }
-          } catch (refreshError) {            // Refresh failed, redirect to login
+          } catch (refreshError) {
+            // Refresh failed, redirect to login
             authService.logout();
             window.location.href = '/login';
             return Promise.reject(refreshError);
           }
         }
 
-        // Log error
         return Promise.reject(error);
       }
     );
@@ -194,9 +190,10 @@ class ApiService {
   async get<T>(url: string, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
     try {
       const cacheKey = `GET:${url}:${JSON.stringify(config?.params || {})}`;
-      
+
       // Check if request is already in progress
-      if (this.requestQueue.has(cacheKey)) {        return await this.requestQueue.get(cacheKey);
+      if (this.requestQueue.has(cacheKey)) {
+        return await this.requestQueue.get(cacheKey);
       }
 
       // Make request and process response
@@ -204,7 +201,7 @@ class ApiService {
         const response = await this.axiosInstance.get<ApiResponse<T>>(url, config);
         return this.handleResponse(response);
       })();
-      
+
       this.requestQueue.set(cacheKey, requestPromise);
 
       try {
@@ -272,8 +269,8 @@ class ApiService {
    * File upload with progress tracking
    */
   async uploadFile<T>(
-    url: string, 
-    file: File, 
+    url: string,
+    file: File,
     onProgress?: (progress: number) => void
   ): Promise<ApiResponse<T>> {
     try {
@@ -315,7 +312,7 @@ class ApiService {
       return {
         success: true,
         data: data as T,
-        message: 'Request successful'
+        message: 'Request successful',
       };
     }
 
@@ -323,7 +320,7 @@ class ApiService {
     return {
       success: true,
       data: data as T,
-      message: 'Request successful'
+      message: 'Request successful',
     };
   }
 
@@ -337,14 +334,13 @@ class ApiService {
     if (error.response) {
       // Server responded with error status
       const responseData = error.response.data;
-      
+
       if (responseData) {
         if (typeof responseData === 'string') {
           errorMessage = responseData;
         } else if (responseData.detail) {
           // Handle Pydantic validation errors
           if (Array.isArray(responseData.detail)) {
-            // Pydantic validation error format
             const validationErrors = responseData.detail.map((err: any) => {
               const field = err.loc ? err.loc.join('.') : 'field';
               const message = err.msg || 'Invalid value';
@@ -352,7 +348,6 @@ class ApiService {
             }).join(', ');
             errorMessage = `Validation error: ${validationErrors}`;
           } else if (typeof responseData.detail === 'object') {
-            // Handle object detail (convert [object Object] to readable format)
             try {
               errorMessage = JSON.stringify(responseData.detail);
             } catch {
@@ -366,7 +361,6 @@ class ApiService {
         } else if (responseData.error) {
           errorMessage = responseData.error;
         } else if (typeof responseData === 'object') {
-          // Handle cases where the entire response is an error object
           try {
             errorMessage = JSON.stringify(responseData);
           } catch {
@@ -425,10 +419,8 @@ class ApiService {
     if (runtimeConfig && runtimeConfig.API_BASE_URL) {
       if (this.axiosInstance.defaults.baseURL !== runtimeConfig.API_BASE_URL) {
         this.setBaseURL(runtimeConfig.API_BASE_URL);
-        } else {
-        }
-    } else {
       }
+    }
   }
 
   /**
@@ -437,9 +429,9 @@ class ApiService {
   setAuthorizationHeader(token: string | null): void {
     if (token) {
       this.axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      } else {
+    } else {
       delete this.axiosInstance.defaults.headers.common['Authorization'];
-      }
+    }
   }
 
   /**
@@ -449,20 +441,13 @@ class ApiService {
     try {
       const response = await this.get('/health');
       return response.success;
-    } catch (error) {      return false;
+    } catch {
+      return false;
     }
   }
 }
 
 // Export singleton instance
 export const apiService = new ApiService();
-
-// Make apiService available globally for debugging
-if (typeof window !== 'undefined') {
-  (window as any).apiService = apiService;
-}
-
-// Add debug method to the instance
-apiService.debugConfiguration = function() {};
 
 export default apiService;

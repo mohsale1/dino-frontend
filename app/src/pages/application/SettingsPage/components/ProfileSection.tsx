@@ -311,11 +311,11 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ onSave }) => {
                   justifyContent: 'space-between',
                   alignItems: 'flex-start',
                   gap: { xs: 1, sm: 1.5 },
-                  flexWrap: 'nowrap',
+                  flexWrap: 'wrap',
                   mb: 3,
                 }}
               >
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, minWidth: 0 }}>
                   <Box
                     sx={{
                       width: 36,
@@ -332,7 +332,7 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ onSave }) => {
                   >
                     <PersonOutlined sx={{ fontSize: 20 }} />
                   </Box>
-                  <Box>
+                  <Box sx={{ minWidth: 0 }}>
                     <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#0f172a' }}>
                       Personal Information
                     </Typography>

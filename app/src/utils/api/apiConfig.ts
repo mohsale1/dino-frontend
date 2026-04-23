@@ -10,7 +10,7 @@ export function getApiBaseUrl(): string {
   if (process.env.REACT_APP_API_BASE_URL) {
     return process.env.REACT_APP_API_BASE_URL;
   }
-    
+
   // In production, use current origin
   return window.location.origin;
 }
@@ -22,28 +22,4 @@ export function createApiUrl(path: string): string {
   const baseUrl = getApiBaseUrl();
   const cleanPath = path.startsWith('/') ? path : `/${path}`;
   return `${baseUrl}${cleanPath}`;
-}
-
-/**
- * Default fetch options with common headers
- */
-export function getDefaultFetchOptions(): RequestInit {
-  return {
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  };
-}
-
-/**
- * Fetch with authentication
- */
-export function getAuthenticatedFetchOptions(token: string): RequestInit {
-  return {
-    ...getDefaultFetchOptions(),
-    headers: {
-      ...getDefaultFetchOptions().headers,
-      'Authorization': `Bearer ${token}`,
-    },
-  };
 }

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, CardContent, Typography, Box, Chip, Stack } from '@mui/material';
+import { Card, CardContent, Typography, Box, Chip } from '@mui/material';
 import { People, CheckCircle, Cancel, Schedule, Build } from '@mui/icons-material';
 import type { ServiceLocation, LocationStatus } from '../types';
 

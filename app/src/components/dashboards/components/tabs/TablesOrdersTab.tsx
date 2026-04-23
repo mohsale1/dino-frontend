@@ -59,7 +59,7 @@ function formatINR(value: number): string {
   return new Intl.NumberFormat('en-IN', {
     style: 'currency',
     currency: 'INR',
-    maximumFractionDigits: 2,
+    maximumFractionDigits: 0,
   }).format(value);
 }
 
@@ -76,68 +76,103 @@ function timeAgo(dateStr: string): string {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const STATUS_COLOR: Record<TableStatus, string> = {
-  available: '#10b981',
-  occupied: '#f59e0b',
-  reserved: '#3b82f6',
-  maintenance: '#94a3b8',
-};
-
 const STATUS_LABEL: Record<TableStatus, string> = {
-  available: 'Available',
-  occupied: 'Occupied',
-  reserved: 'Reserved',
-  maintenance: 'Maintenance',
+  available:   'Available',
+  occupied:    'Occupied',
+  reserved:    'Reserved',
+  maintenance: 'Maint.',
 };
 
 const ORDER_STATUS_COLOR: Record<string, { bg: string; color: string }> = {
-  pending:    { bg: '#fef3c7', color: '#92400e' },
-  confirmed:  { bg: '#dbeafe', color: '#1e40af' },
-  preparing:  { bg: '#ede9fe', color: '#5b21b6' },
-  ready:      { bg: '#d1fae5', color: '#065f46' },
+  pending:   { bg: 'rgba(245,158,11,0.15)',  color: '#f59e0b' },
+  confirmed: { bg: 'rgba(14,165,233,0.15)',  color: '#0ea5e9' },
+  preparing: { bg: 'rgba(139,92,246,0.15)',  color: '#8b5cf6' },
+  ready:     { bg: 'rgba(16,185,129,0.15)',  color: '#10b981' },
+  served:    { bg: 'rgba(14,165,233,0.15)',  color: '#0ea5e9' },
+  completed: { bg: 'rgba(16,185,129,0.15)',  color: '#10b981' },
+  cancelled: { bg: 'rgba(244,63,94,0.15)',   color: '#f43f5e' },
 };
 
 const ACTIVE_STATUSES = new Set(['pending', 'confirmed', 'preparing', 'ready']);
 
+// ─── Table cell palette by status ────────────────────────────────────────────
+
+const TABLE_CELL_STYLE: Record<TableStatus, { bg: string; border: string; text: string; dot: string }> = {
+  available:   { bg: 'rgba(16,185,129,0.10)',  border: 'rgba(16,185,129,0.30)',  text: '#10b981', dot: '#10b981' },
+  occupied:    { bg: 'rgba(244,63,94,0.10)',   border: 'rgba(244,63,94,0.30)',   text: '#f43f5e', dot: '#f43f5e' },
+  reserved:    { bg: 'rgba(245,158,11,0.10)',  border: 'rgba(245,158,11,0.30)',  text: '#f59e0b', dot: '#f59e0b' },
+  maintenance: { bg: 'rgba(100,116,139,0.10)', border: 'rgba(100,116,139,0.25)', text: '#64748b', dot: '#94a3b8' },
+};
+
+// ─── Shared card sx ──────────────────────────────────────────────────────────
+
 const CARD_SX = {
-  bgcolor: '#fff',
-  borderRadius: 2,
-  boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
+  bgcolor: '#1e293b',
+  border: '1px solid rgba(255,255,255,0.08)',
+  borderRadius: '12px',
   p: 2.5,
-};
+} as const;
 
-const CARD_TITLE_SX = {
-  fontWeight: 700,
-  fontSize: '0.875rem',
-  color: '#0f172a',
-  mb: 2,
-};
+// ─── SectionTitle ─────────────────────────────────────────────────────────────
 
-// ─── Sub-components ───────────────────────────────────────────────────────────
+function SectionTitle({ label, accentColor }: { label: string; accentColor: string }) {
+  return (
+    <Box sx={{ borderLeft: `3px solid ${accentColor}`, pl: 1.5, mb: 2 }}>
+      <Typography sx={{ fontSize: '0.875rem', fontWeight: 700, color: '#f1f5f9', lineHeight: 1.3 }}>
+        {label}
+      </Typography>
+    </Box>
+  );
+}
+
+// ─── StatCard ─────────────────────────────────────────────────────────────────
 
 interface StatCardProps {
   label: string;
-  count: number;
-  borderColor: string;
+  value: number | string;
+  subtext?: string;
+  accentColor: string;
 }
 
-function StatCard({ label, count, borderColor }: StatCardProps) {
+function StatCard({ label, value, subtext, accentColor }: StatCardProps) {
   return (
     <Box
       sx={{
         ...CARD_SX,
-        borderTop: `3px solid ${borderColor}`,
+        borderTop: `3px solid ${accentColor}`,
         display: 'flex',
         flexDirection: 'column',
-        gap: 0.5,
+        height: '100%',
       }}
     >
-      <Typography sx={{ fontWeight: 700, fontSize: '1.75rem', color: '#0f172a', lineHeight: 1 }}>
-        {count}
-      </Typography>
-      <Typography sx={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 500 }}>
+      <Typography
+        sx={{
+          fontSize: '0.68rem',
+          fontWeight: 600,
+          color: '#64748b',
+          textTransform: 'uppercase',
+          letterSpacing: '0.08em',
+          mb: 0.75,
+        }}
+      >
         {label}
       </Typography>
+      <Typography
+        sx={{
+          fontSize: '1.75rem',
+          fontWeight: 800,
+          color: '#f1f5f9',
+          lineHeight: 1.1,
+          mb: 0.5,
+        }}
+      >
+        {value}
+      </Typography>
+      {subtext && (
+        <Typography sx={{ fontSize: '0.75rem', color: '#64748b' }}>
+          {subtext}
+        </Typography>
+      )}
     </Box>
   );
 }
@@ -147,12 +182,12 @@ function StatCard({ label, count, borderColor }: StatCardProps) {
 export default function TablesOrdersTab({ dashboardData }: TablesOrdersTabProps) {
   const { tableStatuses, summary, recentActivity } = dashboardData;
 
-  // Stat counts
+  // Stat counts computed from tableStatuses
   const counts = useMemo(() => {
     const result: Record<TableStatus, number> = {
-      available: 0,
-      occupied: 0,
-      reserved: 0,
+      available:   0,
+      occupied:    0,
+      reserved:    0,
       maintenance: 0,
     };
     for (const t of tableStatuses) {
@@ -161,10 +196,20 @@ export default function TablesOrdersTab({ dashboardData }: TablesOrdersTabProps)
     return result;
   }, [tableStatuses]);
 
-  // Occupancy banner
-  const occupancyRate = summary.tableOccupancyRate ?? 0;
-  const totalTables = summary.totalTables ?? tableStatuses.length;
-  const occupiedTables = summary.occupiedTables ?? counts.occupied;
+  const totalTables     = summary.totalTables    ?? tableStatuses.length;
+  const occupiedTables  = summary.occupiedTables ?? counts.occupied;
+  const availableTables = totalTables - occupiedTables;
+  const occupancyRate   = summary.tableOccupancyRate ?? 0;
+
+  const progressColor =
+    occupancyRate > 70 ? '#f43f5e' : occupancyRate > 40 ? '#f59e0b' : '#10b981';
+
+  const progressBg =
+    occupancyRate > 70
+      ? 'rgba(244,63,94,0.12)'
+      : occupancyRate > 40
+      ? 'rgba(245,158,11,0.12)'
+      : 'rgba(16,185,129,0.12)';
 
   // Group tables by areaId
   const tablesByArea = useMemo(() => {
@@ -180,114 +225,188 @@ export default function TablesOrdersTab({ dashboardData }: TablesOrdersTabProps)
   // Active orders
   const activeOrders = useMemo(
     () => recentActivity.filter((a) => ACTIVE_STATUSES.has(a.status.toLowerCase())),
-    [recentActivity]
+    [recentActivity],
   );
 
   return (
-    <Box sx={{ px: { xs: 2, sm: 3, md: 4 }, py: 3, bgcolor: '#f8fafc' }}>
+    <Box sx={{ px: { xs: 2, sm: 3, md: 4 }, py: 3, bgcolor: '#0f172a' }}>
 
-      {/* ── Row 1: Stat Cards ── */}
-      <Grid container spacing={2} sx={{ mb: 2 }}>
-        {(
-          [
-            { label: 'Available Tables', status: 'available' as TableStatus, border: '#10b981' },
-            { label: 'Occupied',         status: 'occupied'   as TableStatus, border: '#f59e0b' },
-            { label: 'Reserved',         status: 'reserved'   as TableStatus, border: '#3b82f6' },
-            { label: 'Maintenance',      status: 'maintenance' as TableStatus, border: '#94a3b8' },
-          ] as const
-        ).map(({ label, status, border }) => (
-          <Grid item xs={6} sm={3} key={status}>
-            <StatCard label={label} count={counts[status]} borderColor={border} />
-          </Grid>
-        ))}
+      {/* Row 1 — Stat Cards */}
+      <Grid container spacing={2.5}>
+        <Grid item xs={6} sm={3}>
+          <StatCard
+            label="Available"
+            value={availableTables}
+            subtext="Tables free"
+            accentColor="#10b981"
+          />
+        </Grid>
+        <Grid item xs={6} sm={3}>
+          <StatCard
+            label="Occupied"
+            value={occupiedTables}
+            subtext="In use"
+            accentColor="#f43f5e"
+          />
+        </Grid>
+        <Grid item xs={6} sm={3}>
+          <StatCard
+            label="Reserved"
+            value={counts.reserved}
+            subtext="Booked ahead"
+            accentColor="#f59e0b"
+          />
+        </Grid>
+        <Grid item xs={6} sm={3}>
+          <StatCard
+            label="Total Tables"
+            value={totalTables}
+            subtext="Configured"
+            accentColor="#1976D2"
+          />
+        </Grid>
       </Grid>
 
-      {/* ── Row 2: Occupancy Rate Banner ── */}
-      <Box sx={{ ...CARD_SX, mb: 2 }}>
-        <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1.5, mb: 1 }}>
-          <Typography sx={{ fontWeight: 800, fontSize: '2.5rem', color: '#0f172a', lineHeight: 1 }}>
-            {occupancyRate.toFixed(1)}%
-          </Typography>
-          <Typography sx={{ fontWeight: 700, fontSize: '0.875rem', color: '#64748b' }}>
+      {/* Row 2 — Occupancy Rate Banner */}
+      <Box
+        sx={{
+          ...CARD_SX,
+          mt: 2.5,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 3,
+        }}
+      >
+        <Box sx={{ flexShrink: 0 }}>
+          <Typography
+            sx={{
+              fontSize: '0.68rem',
+              fontWeight: 600,
+              color: '#64748b',
+              textTransform: 'uppercase',
+              letterSpacing: '0.08em',
+              mb: 0.5,
+            }}
+          >
             Occupancy Rate
           </Typography>
+          <Typography sx={{ fontSize: '1.5rem', fontWeight: 800, color: '#f1f5f9', lineHeight: 1 }}>
+            {occupiedTables} / {totalTables}
+          </Typography>
         </Box>
-        <LinearProgress
-          variant="determinate"
-          value={Math.min(occupancyRate, 100)}
+        <Box sx={{ flex: 1 }}>
+          <LinearProgress
+            variant="determinate"
+            value={Math.min(occupancyRate, 100)}
+            sx={{
+              height: 8,
+              borderRadius: 4,
+              bgcolor: '#334155',
+              '& .MuiLinearProgress-bar': { bgcolor: progressColor, borderRadius: 4 },
+            }}
+          />
+        </Box>
+        <Box
           sx={{
-            height: 8,
-            borderRadius: 4,
-            mb: 1,
-            bgcolor: '#e2e8f0',
-            '& .MuiLinearProgress-bar': { bgcolor: '#f59e0b', borderRadius: 4 },
+            flexShrink: 0,
+            bgcolor: progressBg,
+            borderRadius: '8px',
+            px: 1.5,
+            py: 0.5,
           }}
-        />
-        <Typography sx={{ fontSize: '0.8rem', color: '#64748b' }}>
-          {occupiedTables} of {totalTables} tables occupied
-        </Typography>
+        >
+          <Typography
+            sx={{
+              fontSize: '1rem',
+              fontWeight: 800,
+              color: progressColor,
+              lineHeight: 1,
+            }}
+          >
+            {occupancyRate.toFixed(1)}%
+          </Typography>
+        </Box>
       </Box>
 
-      {/* ── Row 3: Table Grid + Active Orders ── */}
-      <Grid container spacing={2}>
+      {/* Row 3 — Table Grid + Active Orders */}
+      <Grid container spacing={2.5} sx={{ mt: 0 }}>
 
         {/* Left: Table Grid */}
         <Grid item xs={12} md={7}>
           <Box sx={{ ...CARD_SX, height: '100%' }}>
-            <Typography sx={CARD_TITLE_SX}>Table Grid</Typography>
+            <SectionTitle label="Table Status" accentColor="#1976D2" />
 
             {tableStatuses.length === 0 ? (
-              <Typography sx={{ fontSize: '0.85rem', color: '#94a3b8' }}>No table data</Typography>
+              <Typography sx={{ fontSize: '0.8125rem', color: '#94a3b8' }}>
+                No tables configured
+              </Typography>
             ) : (
               Array.from(tablesByArea.entries()).map(([areaId, tables]) => (
                 <Box key={areaId} sx={{ mb: 2.5 }}>
                   <Typography
                     sx={{
-                      fontSize: '0.7rem',
+                      fontSize: '0.68rem',
                       fontWeight: 700,
                       color: '#64748b',
                       textTransform: 'uppercase',
-                      letterSpacing: '0.06em',
-                      mb: 1,
+                      letterSpacing: '0.08em',
+                      mb: 1.25,
                     }}
                   >
                     {areaId}
                   </Typography>
                   <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                     {tables.map((table) => {
-                      const color = STATUS_COLOR[table.status] ?? '#94a3b8';
+                      const style = TABLE_CELL_STYLE[table.status] ?? TABLE_CELL_STYLE.maintenance;
                       return (
                         <Box
                           key={table.id}
                           sx={{
+                            width: 72,
+                            height: 60,
+                            borderRadius: '10px',
+                            border: `1.5px solid ${style.border}`,
+                            bgcolor: style.bg,
                             display: 'flex',
+                            flexDirection: 'column',
                             alignItems: 'center',
-                            gap: 0.75,
-                            bgcolor: '#f8fafc',
-                            border: '1px solid #e2e8f0',
-                            borderRadius: 1.5,
-                            px: 1.25,
-                            py: 0.6,
-                            minWidth: 80,
+                            justifyContent: 'center',
+                            gap: 0.5,
+                            cursor: 'default',
+                            transition: 'transform 0.15s',
+                            '&:hover': { transform: 'scale(1.04)' },
                           }}
                         >
                           <Box
                             sx={{
-                              width: 8,
-                              height: 8,
+                              width: 6,
+                              height: 6,
                               borderRadius: '50%',
-                              bgcolor: color,
-                              flexShrink: 0,
+                              bgcolor: style.dot,
                             }}
                           />
-                          <Box>
-                            <Typography sx={{ fontWeight: 700, fontSize: '0.78rem', color: '#0f172a', lineHeight: 1.2 }}>
-                              {table.tableNumber}
-                            </Typography>
-                            <Typography sx={{ fontSize: '0.68rem', color: '#64748b', lineHeight: 1.2 }}>
-                              {STATUS_LABEL[table.status]}
-                            </Typography>
-                          </Box>
+                          <Typography
+                            sx={{
+                              fontSize: '0.875rem',
+                              fontWeight: 800,
+                              color: style.text,
+                              lineHeight: 1,
+                            }}
+                          >
+                            {table.tableNumber}
+                          </Typography>
+                          <Typography
+                            sx={{
+                              fontSize: '0.58rem',
+                              textTransform: 'uppercase',
+                              color: style.text,
+                              lineHeight: 1,
+                              letterSpacing: '0.04em',
+                              opacity: 0.8,
+                            }}
+                          >
+                            {STATUS_LABEL[table.status]}
+                          </Typography>
                         </Box>
                       );
                     })}
@@ -301,60 +420,103 @@ export default function TablesOrdersTab({ dashboardData }: TablesOrdersTabProps)
         {/* Right: Active Orders */}
         <Grid item xs={12} md={5}>
           <Box sx={{ ...CARD_SX, height: '100%' }}>
-            <Typography sx={CARD_TITLE_SX}>Active Orders</Typography>
+            <SectionTitle label="Active Orders" accentColor="#f59e0b" />
 
             {activeOrders.length === 0 ? (
-              <Typography sx={{ fontSize: '0.85rem', color: '#94a3b8' }}>No active orders</Typography>
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  py: 6,
+                }}
+              >
+                <Typography sx={{ fontSize: '0.8125rem', color: '#94a3b8' }}>
+                  No active orders
+                </Typography>
+              </Box>
             ) : (
-              <Box sx={{ maxHeight: 360, overflowY: 'auto', pr: 0.5 }}>
+              <Box sx={{ maxHeight: 360, overflowY: 'auto' }}>
                 {activeOrders.map((order, idx) => {
                   const statusKey = order.status.toLowerCase();
-                  const chipStyle = ORDER_STATUS_COLOR[statusKey] ?? { bg: '#f1f5f9', color: '#475569' };
+                  const chipStyle = ORDER_STATUS_COLOR[statusKey] ?? {
+                    bg: 'rgba(255,255,255,0.06)',
+                    color: '#94a3b8',
+                  };
                   return (
                     <Box
                       key={order.id}
                       sx={{
+                        py: 1.25,
+                        borderBottom:
+                          idx < activeOrders.length - 1
+                            ? '1px solid rgba(255,255,255,0.05)'
+                            : 'none',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'space-between',
-                        py: 1.25,
-                        borderBottom: idx < activeOrders.length - 1 ? '1px solid #f1f5f9' : 'none',
                         gap: 1,
                       }}
                     >
-                      {/* Left: order info */}
+                      {/* Left */}
                       <Box sx={{ minWidth: 0, flex: 1 }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.25 }}>
-                          <Typography sx={{ fontWeight: 700, fontSize: '0.82rem', color: '#0f172a' }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.5 }}>
+                          <Typography
+                            sx={{ fontSize: '0.8rem', fontWeight: 700, color: '#f1f5f9' }}
+                          >
                             {order.orderNumber}
                           </Typography>
                           {order.tableNumber && (
-                            <Typography sx={{ fontSize: '0.75rem', color: '#64748b' }}>
-                              Table {order.tableNumber}
-                            </Typography>
+                            <Chip
+                              label={`T${order.tableNumber}`}
+                              size="small"
+                              sx={{
+                                height: 18,
+                                fontSize: '0.65rem',
+                                bgcolor: 'rgba(25,118,210,0.18)',
+                                color: '#42A5F5',
+                                fontWeight: 600,
+                                borderRadius: '4px',
+                                '& .MuiChip-label': { px: 0.75 },
+                              }}
+                            />
                           )}
                         </Box>
-                        <Typography sx={{ fontSize: '0.72rem', color: '#94a3b8' }}>
+                        <Typography sx={{ fontSize: '0.7rem', color: '#64748b' }}>
                           {timeAgo(order.createdAt)}
                         </Typography>
                       </Box>
 
-                      {/* Right: status chip + amount */}
-                      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 0.5, flexShrink: 0 }}>
+                      {/* Right */}
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'flex-end',
+                          gap: 0.5,
+                          flexShrink: 0,
+                        }}
+                      >
                         <Chip
-                          label={order.status.charAt(0).toUpperCase() + order.status.slice(1).toLowerCase()}
+                          label={
+                            order.status.charAt(0).toUpperCase() +
+                            order.status.slice(1).toLowerCase()
+                          }
                           size="small"
                           sx={{
+                            height: 20,
+                            fontSize: '0.65rem',
+                            borderRadius: '4px',
                             bgcolor: chipStyle.bg,
                             color: chipStyle.color,
-                            fontWeight: 600,
-                            fontSize: '0.68rem',
-                            height: 20,
-                            '& .MuiChip-label': { px: 1 },
+                            fontWeight: 700,
+                            '& .MuiChip-label': { px: 0.75 },
                           }}
                         />
                         {order.totalAmount != null && (
-                          <Typography sx={{ fontWeight: 700, fontSize: '0.78rem', color: '#0f172a' }}>
+                          <Typography
+                            sx={{ fontSize: '0.8rem', fontWeight: 700, color: '#f1f5f9' }}
+                          >
                             {formatINR(order.totalAmount)}
                           </Typography>
                         )}

@@ -3,6 +3,7 @@ import { Workspace, Venue, PriceRange } from '../../types';
 import { workspaceService } from '../../services/application/workspace.service';
 import { useAuth } from '../common/Auth';
 import { useUserData } from './UserData';
+import { StorageManager } from '../../utils/storage';
 
 interface WorkspaceContextType {
   // Current workspace and venue
@@ -65,19 +66,14 @@ export const WorkspaceProvider: React.FC<WorkspaceProviderProps> = ({ children }
   const loadVenues = useCallback(async (force: boolean = false) => {
     // Prevent duplicate calls - check loading state and if already loaded
     if (!user?.workspaceId || !isAuthenticated) {
-      console.log('[WorkspaceContext] loadVenues: No workspace ID or not authenticated');
       return;
     }
     if (venuesLoading) {
-      console.log('[WorkspaceContext] loadVenues: Already loading, skipping');
       return;
     }
     if (!force && venuesLoadedRef.current) {
-      console.log('[WorkspaceContext] loadVenues: Already loaded, skipping (use force=true to reload)');
       return;
     }
-    
-    console.log(`[WorkspaceContext] loadVenues: Loading venues for workspace ${user.workspaceId} (force=${force})`);
     setVenuesLoadingState(true);
     try {
       const venueList = await workspaceService.getVenues(user.workspaceId);
@@ -121,13 +117,11 @@ export const WorkspaceProvider: React.FC<WorkspaceProviderProps> = ({ children }
       });
       setVenues(mappedVenues);
       venuesLoadedRef.current = true;
-      console.log(`[WorkspaceContext] loadVenues: Successfully loaded ${mappedVenues.length} venues`);
       
       // Auto-select first active venue if none selected
       if (!currentVenue && mappedVenues.length > 0) {
         const activeVenue = mappedVenues.find((venue: any) => venue.isActive) || mappedVenues[0];
         setCurrentVenue(activeVenue);
-        console.log(`[WorkspaceContext] loadVenues: Auto-selected venue: ${activeVenue.name}`);
       }
     } catch (error) {
       console.error('[WorkspaceContext] loadVenues: Error loading venues:', error);
@@ -142,20 +136,15 @@ export const WorkspaceProvider: React.FC<WorkspaceProviderProps> = ({ children }
   const currentVenueLoadedRef = useRef(false);
   const loadCurrentVenue = useCallback(async (force: boolean = false) => {
     if (!isAuthenticated) {
-      console.log('[WorkspaceContext] loadCurrentVenue: Not authenticated');
       return;
     }
     if (!force && currentVenueLoadedRef.current) {
-      console.log('[WorkspaceContext] loadCurrentVenue: Already loaded, skipping');
       return;
     }
-    
-    console.log(`[WorkspaceContext] loadCurrentVenue: Loading venue from UserDataContext (force=${force})`);
     
     // Get venue data from UserDataContext instead of making API call
     if (userData?.venue) {
       const venue = userData.venue;
-      console.log(`[WorkspaceContext] loadCurrentVenue: Using venue from UserDataContext: ${venue.name}`);
       
       // Handle location mapping properly
       const location = venue.location ? venue.location : {
@@ -195,16 +184,13 @@ export const WorkspaceProvider: React.FC<WorkspaceProviderProps> = ({ children }
       setCurrentVenue(venueData);
       currentVenueLoadedRef.current = true;
     } else {
-      console.log('[WorkspaceContext] loadCurrentVenue: No venue in UserDataContext');
       currentVenueLoadedRef.current = false;
     }
   }, [isAuthenticated, userData?.venue]);
 
   // Load venues for workspace directly (no caching)
-  const loadVenuesForWorkspace = useCallback(async (workspaceId: string) => {
-    if (workspaceId) {
-      await loadVenues();
-    }
+  const loadVenuesForWorkspace = useCallback(async () => {
+    await loadVenues();
   }, [loadVenues]);
 
   // Optimized initialization - now uses cached data
@@ -249,6 +235,7 @@ export const WorkspaceProvider: React.FC<WorkspaceProviderProps> = ({ children }
     } finally {
       setLoading(false);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.workspaceId, user?.id, isAuthenticated]);
 
   // Initialize workspace data when user is authenticated - SINGLE EFFECT ONLY
@@ -265,6 +252,7 @@ export const WorkspaceProvider: React.FC<WorkspaceProviderProps> = ({ children }
       venuesLoadedRef.current = false;
       currentVenueLoadedRef.current = false;
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated, user?.id]); // Only depend on user.id to prevent loops
 
   const refreshWorkspaces = async () => {
@@ -305,10 +293,10 @@ export const WorkspaceProvider: React.FC<WorkspaceProviderProps> = ({ children }
       if (workspace) {
         setCurrentWorkspace(workspace);
         setCurrentVenue(null); // Clear current venue when switching workspace
-        await loadVenuesForWorkspace(workspaceId);
+        await loadVenuesForWorkspace();
         
-        // Store in localStorage for persistence
-        localStorage.setItem('dino_current_workspace', workspaceId);
+        // Store in storage for persistence
+        StorageManager.setItem(StorageManager.KEYS.WORKSPACE, workspaceId);
       }
     } catch (error) {
       throw error;
@@ -321,8 +309,8 @@ export const WorkspaceProvider: React.FC<WorkspaceProviderProps> = ({ children }
       if (venue) {
         setCurrentVenue(venue);
         
-        // Store in localStorage for persistence
-        localStorage.setItem('dino_current_venue', venueId);
+        // Store in storage for persistence
+        StorageManager.setItem(StorageManager.KEYS.VENUE, venueId);
       }
     } catch (error) {
       throw error;
@@ -508,7 +496,6 @@ export const WorkspaceProvider: React.FC<WorkspaceProviderProps> = ({ children }
   };
 
   const initializeVenueFromUser = async () => {
-    console.log('[WorkspaceContext] initializeVenueFromUser: Using loadCurrentVenue instead');
     // Simply call loadCurrentVenue which now uses UserDataContext
     await loadCurrentVenue(true);
   };

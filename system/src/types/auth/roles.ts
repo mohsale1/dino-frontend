@@ -1,178 +1,225 @@
-/**
+﻿/**
  * Role Types, Constants, and Utilities
- * 
+ *
  * Defines all role-related types, constants, hierarchy, and utility functions
  * for role-based access control (RBAC).
- * 
- * Application Roles: Owner, Manager, User
+ *
+ * Application Roles (roleType=1): Owner, Manager, User
+ * System      Roles (roleType=0): SuperAdmin, Admin, Operator
  */
 
 // ============================================================================
-// ROLE DEFINITIONS
+// APPLICATION ROLE DEFINITIONS
 // ============================================================================
 
 export const ROLES = {
-  OWNER: 'Owner',
+  OWNER:   'Owner',
   MANAGER: 'Manager',
-  USER: 'User',
+  USER:    'User',
 } as const;
 
 export type RoleName = typeof ROLES[keyof typeof ROLES];
 
-// Ensure proper typing for role names
-export type OwnerRole = typeof ROLES.OWNER;
+export type OwnerRole   = typeof ROLES.OWNER;
 export type ManagerRole = typeof ROLES.MANAGER;
-export type UserRole = typeof ROLES.USER;
+export type UserRole    = typeof ROLES.USER;
 
 // ============================================================================
-// ROLE HIERARCHY AND DISPLAY
+// SYSTEM ROLE DEFINITIONS
 // ============================================================================
 
-// Role Hierarchy (higher number = more permissions)
+export const SYSTEM_ROLES = {
+  SUPERADMIN: 'SuperAdmin',
+  ADMIN:      'Admin',
+  OPERATOR:   'Operator',
+} as const;
+
+export type SystemRoleName = typeof SYSTEM_ROLES[keyof typeof SYSTEM_ROLES];
+
+// ============================================================================
+// APPLICATION ROLE HIERARCHY AND DISPLAY
+// ============================================================================
+
 export const ROLE_HIERARCHY: Record<RoleName, number> = {
-  [ROLES.USER]: 1,
+  [ROLES.USER]:    1,
   [ROLES.MANAGER]: 2,
-  [ROLES.OWNER]: 3,
+  [ROLES.OWNER]:   3,
 } as const;
 
-// Role Display Names
 export const ROLE_DISPLAY_NAMES: Record<RoleName, string> = {
-  [ROLES.OWNER]: 'Owner',
+  [ROLES.OWNER]:   'Owner',
   [ROLES.MANAGER]: 'Manager',
-  [ROLES.USER]: 'User',
+  [ROLES.USER]:    'User',
 } as const;
 
-// Available roles for assignment
 export const ASSIGNABLE_ROLES: readonly RoleName[] = [
   ROLES.USER,
   ROLES.MANAGER,
   ROLES.OWNER,
 ] as const;
 
-// Roles that can be assigned by different user levels
 export const ROLE_ASSIGNMENT_PERMISSIONS: Record<RoleName, readonly RoleName[]> = {
-  [ROLES.OWNER]: [ROLES.OWNER, ROLES.MANAGER, ROLES.USER],
+  [ROLES.OWNER]:   [ROLES.OWNER, ROLES.MANAGER, ROLES.USER],
   [ROLES.MANAGER]: [ROLES.USER],
-  [ROLES.USER]: [],
+  [ROLES.USER]:    [],
 } as const;
 
 // ============================================================================
-// ROLE CHECK UTILITIES
+// SYSTEM ROLE HIERARCHY AND DISPLAY
+// ============================================================================
+
+export const SYSTEM_ROLE_HIERARCHY: Record<SystemRoleName, number> = {
+  [SYSTEM_ROLES.OPERATOR]:   1,
+  [SYSTEM_ROLES.ADMIN]:      2,
+  [SYSTEM_ROLES.SUPERADMIN]: 3,
+} as const;
+
+export const SYSTEM_ROLE_DISPLAY_NAMES: Record<SystemRoleName, string> = {
+  [SYSTEM_ROLES.SUPERADMIN]: 'Super Admin',
+  [SYSTEM_ROLES.ADMIN]:      'Admin',
+  [SYSTEM_ROLES.OPERATOR]:   'Operator',
+} as const;
+
+// ============================================================================
+// APPLICATION ROLE CHECK UTILITIES
 // ============================================================================
 
 /**
- * Normalize role name to standard format
+ * Normalize application role name to standard format.
+ * Only maps application roles â€” does NOT map system roles.
  */
 export const normalizeRole = (role?: string | object | null): RoleName | null => {
   if (!role) return null;
 
-  // Backend may pass the full role object â€” extract the name string
   const roleStr = typeof role === 'object' ? (role as any)?.name : role;
   if (!roleStr || typeof roleStr !== 'string') return null;
 
   const normalized = roleStr.trim().toLowerCase();
-  
-  // Map various formats to standard roles
+
   if (normalized === 'owner') return ROLES.OWNER;
-  if (normalized === 'manager' || normalized === 'admin' || normalized === 'administrator') return ROLES.MANAGER;
-  if (normalized === 'user' || normalized === 'operator' || normalized === 'staff') return ROLES.USER;
-  
-  // System role mappings â†’ nearest application equivalent
-  if (normalized === 'superadmin' || normalized === 'super_admin') return ROLES.OWNER;
-  if (normalized === 'admin') return ROLES.MANAGER;
-  if (normalized === 'operator') return ROLES.USER;
+  if (normalized === 'manager' || normalized === 'administrator') return ROLES.MANAGER;
+  if (normalized === 'user' || normalized === 'staff') return ROLES.USER;
 
   return null;
 };
 
-/**
- * Check if role is Owner
- */
 export const isOwner = (role?: string | null): boolean => {
   const normalized = normalizeRole(role);
   return normalized === ROLES.OWNER;
 };
 
-/**
- * Check if role is Manager
- */
 export const isManager = (role?: string | null): boolean => {
   const normalized = normalizeRole(role);
   return normalized === ROLES.MANAGER;
 };
 
-/**
- * Check if role is User
- */
 export const isUser = (role?: string | null): boolean => {
   const normalized = normalizeRole(role);
   return normalized === ROLES.USER;
 };
 
-/**
- * Check if role has admin-level access (Owner or Manager)
- */
 export const isAdminLevel = (role?: string | null): boolean => {
   return isOwner(role) || isManager(role);
 };
 
-/**
- * Check if a string is a valid role
- */
 export const isValidRole = (role?: string | null): role is RoleName => {
   return normalizeRole(role) !== null;
 };
 
 // ============================================================================
-// ROLE INFORMATION UTILITIES
+// SYSTEM ROLE CHECK UTILITIES
 // ============================================================================
 
 /**
- * Get display name for a role
+ * Normalize system role name to standard format.
+ * Independent from application role normalizer.
  */
+export const normalizeSystemRole = (role?: string | object | null): SystemRoleName | null => {
+  if (!role) return null;
+
+  const roleStr = typeof role === 'object' ? (role as any)?.name : role;
+  if (!roleStr || typeof roleStr !== 'string') return null;
+
+  const normalized = roleStr.trim().toLowerCase();
+
+  if (normalized === 'superadmin' || normalized === 'super_admin') return SYSTEM_ROLES.SUPERADMIN;
+  if (normalized === 'admin')                                       return SYSTEM_ROLES.ADMIN;
+  if (normalized === 'operator')                                    return SYSTEM_ROLES.OPERATOR;
+
+  return null;
+};
+
+export const isSuperAdmin = (role?: string | null): boolean => {
+  return normalizeSystemRole(role) === SYSTEM_ROLES.SUPERADMIN;
+};
+
+export const isAdmin = (role?: string | null): boolean => {
+  return normalizeSystemRole(role) === SYSTEM_ROLES.ADMIN;
+};
+
+export const isOperator = (role?: string | null): boolean => {
+  return normalizeSystemRole(role) === SYSTEM_ROLES.OPERATOR;
+};
+
+export const isValidSystemRole = (role?: string | null): role is SystemRoleName => {
+  return normalizeSystemRole(role) !== null;
+};
+
+// ============================================================================
+// APPLICATION ROLE INFORMATION UTILITIES
+// ============================================================================
+
 export const getRoleDisplayName = (role?: string | null): string => {
   const normalized = normalizeRole(role);
   if (!normalized) return 'Unknown';
   return ROLE_DISPLAY_NAMES[normalized];
 };
 
-/**
- * Get hierarchy level for a role
- */
 export const getRoleHierarchy = (role?: string | null): number => {
   const normalized = normalizeRole(role);
   if (!normalized) return 0;
   return ROLE_HIERARCHY[normalized];
 };
 
-/**
- * Get all available roles
- */
 export const getAllRoles = (): readonly RoleName[] => {
   return Object.values(ROLES);
 };
 
 // ============================================================================
-// ROLE COMPARISON UTILITIES
+// SYSTEM ROLE INFORMATION UTILITIES
 // ============================================================================
 
-/**
- * Check if user role has higher or equal hierarchy than required role
- */
+export const getSystemRoleDisplayName = (role?: string | null): string => {
+  const normalized = normalizeSystemRole(role);
+  if (!normalized) return 'Unknown';
+  return SYSTEM_ROLE_DISPLAY_NAMES[normalized];
+};
+
+export const getSystemRoleHierarchy = (role?: string | null): number => {
+  const normalized = normalizeSystemRole(role);
+  if (!normalized) return 0;
+  return SYSTEM_ROLE_HIERARCHY[normalized];
+};
+
+export const getAllSystemRoles = (): readonly SystemRoleName[] => {
+  return Object.values(SYSTEM_ROLES);
+};
+
+// ============================================================================
+// APPLICATION ROLE COMPARISON UTILITIES
+// ============================================================================
+
 export const hasHigherOrEqualRole = (userRole?: string | null, requiredRole?: string | null): boolean => {
   if (!userRole || !requiredRole) return false;
   return getRoleHierarchy(userRole) >= getRoleHierarchy(requiredRole);
 };
 
-/**
- * Check if assigner can assign target role
- */
 export const canAssignRole = (assignerRole?: string | null, targetRole?: string | null): boolean => {
   const normalizedAssigner = normalizeRole(assignerRole);
-  const normalizedTarget = normalizeRole(targetRole);
-  
+  const normalizedTarget   = normalizeRole(targetRole);
+
   if (!normalizedAssigner || !normalizedTarget) return false;
-  
+
   const permissions = ROLE_ASSIGNMENT_PERMISSIONS[normalizedAssigner];
   return permissions ? permissions.includes(normalizedTarget) : false;
 };
@@ -181,46 +228,33 @@ export const canAssignRole = (assignerRole?: string | null, targetRole?: string 
 // PERMISSION CHECK UTILITIES
 // ============================================================================
 
-/**
- * Check if role can access admin features
- */
 export const canAccessAdminFeatures = (role?: string | null): boolean => {
   return isAdminLevel(role);
 };
 
-/**
- * Check if role can manage users
- */
 export const canManageUsers = (role?: string | null): boolean => {
   return isOwner(role) || isManager(role);
 };
 
-/**
- * Check if role can manage items
- */
 export const canManageItems = (role?: string | null): boolean => {
   return isAdminLevel(role);
 };
 
-/**
- * Check if role can manage orders
- */
 export const canManageOrders = (role?: string | null): boolean => {
   return isAdminLevel(role) || isUser(role);
 };
 
-/**
- * Check if role can view analytics
- */
 export const canViewAnalytics = (role?: string | null): boolean => {
   return isAdminLevel(role);
 };
 
 // ============================================================================
-// LEGACY COMPATIBILITY
+// LEGACY COMPATIBILITY ALIASES
 // ============================================================================
 
-// Aliases for backward compatibility
-export const isSuperAdmin = isOwner;
-export const isAdmin = isManager;
-export const isOperator = isUser;
+/** @deprecated Use isOwner() for application roles */
+export const isAppOwner = isOwner;
+/** @deprecated Use isManager() for application roles */
+export const isAppManager = isManager;
+/** @deprecated Use isUser() for application roles */
+export const isAppUser = isUser;

@@ -1,5 +1,4 @@
 import { apiService } from '../../utils/api';
-import { ApiResponse } from '../../types';
 import { ROLES } from '../../types/auth';
 import { isOwner, isManager, isUser, normalizeRole } from '../../types/auth/roles';
 import StorageManager from '../../utils/storage';
@@ -74,26 +73,21 @@ class UserDataService {
   private lastCallTime: number = 0;
   private debounceDelay: number = 2000; // Increased to 2 seconds
   private currentRequest: Promise<UserData | null> | null = null;
-  private requestCount: number = 0;
 
   async getUserData(): Promise<UserData | null> {
     const now = Date.now();
     
     // If there's already a request in progress, return it
     if (this.currentRequest) {
-      console.log('[UserDataService] Reusing existing request');
       return this.currentRequest;
     }
     
     // Debounce: if called too soon after last call, wait
     if (now - this.lastCallTime < this.debounceDelay) {
       const waitTime = this.debounceDelay - (now - this.lastCallTime);
-      console.log(`[UserDataService] Debouncing request, waiting ${waitTime}ms`);
       await new Promise(resolve => setTimeout(resolve, waitTime));
     }
     
-    this.requestCount++;
-    console.log(`[UserDataService] Making API call #${this.requestCount} to /users/me/data`);
     this.lastCallTime = Date.now();
     this.currentRequest = this._fetchUserData();
     
@@ -115,13 +109,6 @@ class UserDataService {
         
         if (userData.venue) {
           const venueAny = userData.venue as any;
-          
-          console.log('[UserDataService] Raw venue from API:', JSON.stringify({
-            id: venueAny.id,
-            name: venueAny.name,
-            order_type: venueAny.order_type,
-            orderType: venueAny.orderType,
-          }));
 
           // Normalize isOpen from backend (is_open, isOpen, status)
           const isOpen = venueAny.is_open !== undefined 

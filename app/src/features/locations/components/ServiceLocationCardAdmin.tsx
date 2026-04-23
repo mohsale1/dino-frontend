@@ -22,7 +22,7 @@ import {
   Schedule,
   Build,
 } from '@mui/icons-material';
-import { IconButton, Badge, Chip } from '@mui/material';
+import { IconButton, Chip } from '@mui/material';
 import type { ServiceLocation, LocationStatus } from '../types';
 
 export interface ServiceLocationCardAdminProps {

@@ -39,6 +39,8 @@ interface OverviewTabProps {
   };
 }
 
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
 function timeAgo(dateStr: string): string {
   const now = new Date();
   const date = new Date(dateStr);
@@ -63,77 +65,135 @@ function formatINR(value: number): string {
   }).format(value);
 }
 
-const STATUS_COLORS: Record<string, string> = {
-  pending: '#f59e0b',
-  preparing: '#8b5cf6',
-  ready: '#10b981',
-  completed: '#22c55e',
-  cancelled: '#ef4444',
+// ─── Constants ────────────────────────────────────────────────────────────────
+
+// Dark-themed status colors: vivid text color + 10% opacity background
+const STATUS_CONFIG: Record<string, { color: string; bg: string }> = {
+  pending:   { color: '#FBBF24', bg: 'rgba(251,191,36,0.10)'  },
+  confirmed: { color: '#38BDF8', bg: 'rgba(56,189,248,0.10)'  },
+  preparing: { color: '#A78BFA', bg: 'rgba(167,139,250,0.10)' },
+  ready:     { color: '#34D399', bg: 'rgba(52,211,153,0.10)'  },
+  served:    { color: '#60A5FA', bg: 'rgba(96,165,250,0.10)'  },
+  completed: { color: '#4ADE80', bg: 'rgba(74,222,128,0.10)'  },
+  cancelled: { color: '#F87171', bg: 'rgba(248,113,113,0.10)' },
 };
 
 function getStatusColor(status: string): string {
-  return STATUS_COLORS[status.toLowerCase()] ?? '#64748b';
+  return STATUS_CONFIG[status.toLowerCase()]?.color ?? '#94a3b8';
 }
 
-const cardSx = {
-  bgcolor: '#fff',
-  borderRadius: 2,
-  boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
+function getStatusBg(status: string): string {
+  return STATUS_CONFIG[status.toLowerCase()]?.bg ?? 'rgba(148,163,184,0.10)';
+}
+
+// ─── Shared Styles ────────────────────────────────────────────────────────────
+
+const CARD_SX = {
+  bgcolor: '#1e293b',
+  border: '1px solid rgba(255,255,255,0.08)',
+  borderRadius: '12px',
   p: 2.5,
   height: '100%',
-};
+} as const;
 
-const cardTitleSx = {
-  fontWeight: 700,
-  fontSize: '0.875rem',
-  color: '#0f172a',
-  mb: 2,
-};
+// ─── SectionTitle ─────────────────────────────────────────────────────────────
+
+interface SectionTitleProps {
+  label: string;
+  accentColor: string;
+}
+
+const SectionTitle: React.FC<SectionTitleProps> = ({ label, accentColor }) => (
+  <Box
+    sx={{
+      borderLeft: `3px solid ${accentColor}`,
+      pl: 1.5,
+      mb: 2,
+    }}
+  >
+    <Typography
+      sx={{
+        fontSize: '0.875rem',
+        fontWeight: 700,
+        color: '#f1f5f9',
+        lineHeight: 1.3,
+      }}
+    >
+      {label}
+    </Typography>
+  </Box>
+);
+
+// ─── Main Component ───────────────────────────────────────────────────────────
 
 const OverviewTab: React.FC<OverviewTabProps> = ({ dashboardData }) => {
   const { analytics, recentActivity } = dashboardData;
 
   return (
-    <Box px={{ xs: 2, sm: 3, md: 4 }} py={3} bgcolor="#f8fafc">
-      {/* Row 1 */}
-      <Grid container spacing={2.5} mb={2.5}>
+    <Box px={{ xs: 2, sm: 3, md: 4 }} py={3} bgcolor="#0f172a">
+
+      {/* Row 1 — Revenue + Order Status */}
+      <Grid container spacing={2.5}>
         <Grid item xs={12} md={8}>
-          <Box sx={cardSx}>
-            <Typography sx={cardTitleSx}>Revenue Trend</Typography>
-            <RevenueChart data={analytics.revenueTrend ?? []} height={280} />
+          <Box sx={CARD_SX}>
+            <SectionTitle label="Revenue Trend" accentColor="#1976D2" />
+            <RevenueChart data={analytics.revenueTrend ?? []} height={260} />
           </Box>
         </Grid>
 
         <Grid item xs={12} md={4}>
-          <Box sx={cardSx}>
-            <Typography sx={cardTitleSx}>Order Status</Typography>
-            <OrderStatusChart data={analytics.orderStatusBreakdown ?? {}} height={280} />
+          <Box sx={CARD_SX}>
+            <SectionTitle label="Order Status" accentColor="#42A5F5" />
+            <OrderStatusChart data={analytics.orderStatusBreakdown ?? {}} height={260} />
           </Box>
         </Grid>
       </Grid>
 
-      {/* Row 2 */}
-      <Grid container spacing={2.5}>
+      {/* Row 2 — Peak Hours + Recent Orders */}
+      <Grid container spacing={2.5} mt={0.5}>
         <Grid item xs={12} md={7}>
-          <Box sx={cardSx}>
-            <Typography sx={cardTitleSx}>Peak Hours</Typography>
-            <PeakHoursChart data={analytics.peakHours ?? []} height={220} />
+          <Box sx={CARD_SX}>
+            <SectionTitle label="Peak Hours" accentColor="#FBBF24" />
+            <PeakHoursChart data={analytics.peakHours ?? []} height={200} />
           </Box>
         </Grid>
 
         <Grid item xs={12} md={5}>
-          <Box sx={cardSx}>
-            <Typography sx={cardTitleSx}>Recent Activity</Typography>
+          <Box sx={CARD_SX}>
+            <SectionTitle label="Recent Orders" accentColor="#34D399" />
 
             {recentActivity.length === 0 ? (
-              <Typography fontSize="0.8125rem" color="#64748b">
-                No recent activity
-              </Typography>
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  height: 200,
+                }}
+              >
+                <Typography sx={{ fontSize: '0.8125rem', color: '#64748b' }}>
+                  No recent orders
+                </Typography>
+              </Box>
             ) : (
-              <Box sx={{ maxHeight: 280, overflowY: 'auto' }}>
+              <Box
+                sx={{
+                  maxHeight: 280,
+                  overflowY: 'auto',
+                  '&::-webkit-scrollbar': { width: 4 },
+                  '&::-webkit-scrollbar-track': { bgcolor: 'transparent' },
+                  '&::-webkit-scrollbar-thumb': {
+                    bgcolor: 'rgba(255,255,255,0.10)',
+                    borderRadius: 2,
+                  },
+                }}
+              >
                 {recentActivity.map((order, index) => {
                   const amount = order.totalAmount ?? order.subtotal ?? 0;
-                  const statusColor = getStatusColor(order.status);
+                  const statusKey = order.status.toLowerCase();
+                  const statusColor = getStatusColor(statusKey);
+                  const statusBg = getStatusBg(statusKey);
+                  const isLast = index === recentActivity.length - 1;
 
                   return (
                     <Box
@@ -142,70 +202,81 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ dashboardData }) => {
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'space-between',
-                        py: 1,
-                        borderBottom:
-                          index < recentActivity.length - 1
-                            ? '1px solid #f1f5f9'
-                            : 'none',
+                        py: 1.25,
+                        borderBottom: isLast ? 'none' : '1px solid rgba(255,255,255,0.06)',
                         gap: 1,
                       }}
                     >
-                      {/* Left: order number + table */}
+                      {/* Left */}
                       <Box sx={{ minWidth: 0, flex: 1 }}>
-                        <Typography
+                        <Box
                           sx={{
-                            fontWeight: 700,
-                            fontSize: '0.8125rem',
-                            color: '#0f172a',
-                            lineHeight: 1.3,
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 0.75,
+                            flexWrap: 'wrap',
+                            mb: 0.25,
                           }}
                         >
-                          {order.orderNumber}
-                        </Typography>
-                        {order.tableNumber && (
                           <Typography
-                            variant="caption"
-                            sx={{ color: '#64748b', lineHeight: 1.3 }}
+                            sx={{
+                              fontSize: '0.8rem',
+                              fontWeight: 700,
+                              color: '#f1f5f9',
+                              lineHeight: 1.3,
+                              whiteSpace: 'nowrap',
+                            }}
                           >
-                            Table {order.tableNumber}
+                            {order.orderNumber}
                           </Typography>
-                        )}
+                          {order.tableNumber && (
+                            <Typography
+                              sx={{
+                                fontSize: '0.7rem',
+                                color: '#64748b',
+                                lineHeight: 1.3,
+                                whiteSpace: 'nowrap',
+                              }}
+                            >
+                              Table {order.tableNumber}
+                            </Typography>
+                          )}
+                        </Box>
+                        <Chip
+                          label={order.status}
+                          size="small"
+                          sx={{
+                            bgcolor: statusBg,
+                            color: statusColor,
+                            fontWeight: 600,
+                            fontSize: '0.65rem',
+                            height: 18,
+                            borderRadius: '4px',
+                            textTransform: 'capitalize',
+                            '& .MuiChip-label': { px: 0.75 },
+                          }}
+                        />
                       </Box>
 
-                      {/* Center: status chip */}
-                      <Chip
-                        label={order.status}
-                        size="small"
-                        sx={{
-                          bgcolor: `${statusColor}18`,
-                          color: statusColor,
-                          fontWeight: 600,
-                          fontSize: '0.6875rem',
-                          height: 22,
-                          textTransform: 'capitalize',
-                          flexShrink: 0,
-                          '& .MuiChip-label': { px: 1 },
-                        }}
-                      />
-
-                      {/* Right: time + amount */}
+                      {/* Right */}
                       <Box sx={{ textAlign: 'right', flexShrink: 0 }}>
                         <Typography
                           sx={{
-                            fontSize: '0.8125rem',
-                            fontWeight: 600,
-                            color: '#0f172a',
+                            fontSize: '0.8rem',
+                            fontWeight: 700,
+                            color: '#f1f5f9',
                             lineHeight: 1.3,
                           }}
                         >
                           {formatINR(amount)}
                         </Typography>
                         <Typography
-                          variant="caption"
-                          sx={{ color: '#64748b', lineHeight: 1.3 }}
+                          sx={{
+                            fontSize: '0.7rem',
+                            color: '#94a3b8',
+                            lineHeight: 1.3,
+                            mt: 0.25,
+                          }}
                         >
                           {timeAgo(order.createdAt)}
                         </Typography>

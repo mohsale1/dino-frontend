@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../contexts/common/Auth';
 import { useUserData } from '../contexts/application/UserData';
 
@@ -10,64 +10,49 @@ export const useUserDataInitializer = () => {
   const { isAuthenticated, user } = useAuth();
   const { userData, loading, refreshUserData } = useUserData();
   const initAttempted = useRef(false);
-  const retryCount = useRef(0);
-  const maxRetries = 3;
+  const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
     const initializeUserData = async () => {
-      // Only attempt if user is authenticated and we haven't tried yet
-      if (!isAuthenticated || !user) {        initAttempted.current = false;
-        retryCount.current = 0;
+      if (!isAuthenticated || !user) {
+        initAttempted.current = false;
         return;
       }
 
-      // If we already have data, no need to retry
       if (userData) {
-        // Reduced logging to prevent spam
-        if (!initAttempted.current) {        }
         initAttempted.current = true;
-        retryCount.current = 0;
         return;
       }
 
-      // If currently loading, wait - this prevents duplicate calls
       if (loading) {
-        // Reduced logging to prevent spam
         return;
       }
 
-      // FIXED: Only trigger refresh if UserDataContext hasn't already initialized
-      // This prevents duplicate API calls to /auth/user-data
-      if (!initAttempted.current && retryCount.current === 0) {        initAttempted.current = true;
-        
-        // Wait a bit longer for UserDataContext to complete its initialization
-        setTimeout(() => {
-          // Only retry if we still don't have data after UserDataContext had time to load
-          if (!userData && !loading && retryCount.current < maxRetries) {            retryCount.current++;
-            
-            refreshUserData().catch(error => {              
-              if (retryCount.current < maxRetries) {                setTimeout(() => {
-                  initializeUserData();
-                }, 2000);
-              } else {              }
-            });
+      if (!initAttempted.current) {
+        initAttempted.current = true;
+
+        setTimeout(async () => {
+          if (!userData && !loading) {
+            try {
+              await refreshUserData();
+            } catch (err) {
+              setError(err instanceof Error ? err : new Error(String(err)));
+            }
           }
-        }, 2000); // Give UserDataContext 2 seconds to complete
+        }, 2000);
       }
     };
 
-    // Small delay to ensure contexts are properly initialized
     const timer = setTimeout(initializeUserData, 500);
-    
+
     return () => clearTimeout(timer);
   }, [isAuthenticated, user, userData, loading, refreshUserData]);
 
-  // Return status for debugging
   return {
     isInitialized: !!userData,
     isLoading: loading,
-    retryCount: retryCount.current,
     hasUser: !!user,
-    isAuthenticated
+    isAuthenticated,
+    error,
   };
 };

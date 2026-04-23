@@ -12,7 +12,6 @@ import {
   Store as StoreIcon,
   ContactSupport as ContactIcon,
 } from '@mui/icons-material';
-import { useAuth } from '../../contexts/common/Auth';
 import { useVenueCheck } from '../../hooks/useVenueCheck';
 
 interface VenueAssignmentCheckProps {
@@ -26,8 +25,6 @@ const VenueAssignmentCheck: React.FC<VenueAssignmentCheckProps> = ({
   showFullPage = false,
   customMessage
 }) => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { user } = useAuth();
   const { requiresVenueAssignment, canBypassVenueCheck } = useVenueCheck();
   
   // If user can bypass venue check or has venue assigned, show children
@@ -95,10 +92,10 @@ const VenueAssignmentCheck: React.FC<VenueAssignmentCheckProps> = ({
                 What you can do:
               </Typography>
               <Typography variant="body2" component="div">
-                â€¢ Contact your system administrator<br/>
-                â€¢ Check your account settings<br/>
-                â€¢ Verify your role permissions<br/>
-                â€¢ Request venue assignment
+                • Contact your system administrator<br/>
+                • Check your account settings<br/>
+                • Verify your role permissions<br/>
+                • Request venue assignment
               </Typography>
             </Alert>
           </CardContent>

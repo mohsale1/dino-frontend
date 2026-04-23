@@ -98,12 +98,16 @@ const HeroStat: React.FC<HeroStatProps> = ({ icon, value, label }) => {
     <Box
       sx={{
         flex: '1 1 140px',
+        minWidth: 0,
         px: 2.5,
         py: 2,
         borderRadius: 2.5,
         bgcolor: 'rgba(255,255,255,0.07)',
         border: '1px solid rgba(255,255,255,0.12)',
         backdropFilter: 'blur(8px)',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 2,
       }}
     >
       <Box
@@ -117,25 +121,27 @@ const HeroStat: React.FC<HeroStatProps> = ({ icon, value, label }) => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          mb: 1,
+          flexShrink: 0,
         }}
       >
         {icon}
       </Box>
-      <Typography
-        sx={{
-          color: '#ffffff',
-          fontWeight: 700,
-          fontSize: { xs: '1.35rem', md: '1.6rem' },
-          letterSpacing: '-0.03em',
-          lineHeight: 1,
-        }}
-      >
-        {animated}
-      </Typography>
-      <Typography sx={{ color: 'rgba(144,202,249,0.65)', fontSize: '0.75rem', mt: 0.5 }}>
-        {label}
-      </Typography>
+      <Box>
+        <Typography
+          sx={{
+            color: '#ffffff',
+            fontWeight: 700,
+            fontSize: { xs: '1.35rem', md: '1.6rem' },
+            letterSpacing: '-0.03em',
+            lineHeight: 1,
+          }}
+        >
+          {animated}
+        </Typography>
+        <Typography sx={{ color: 'rgba(144,202,249,0.65)', fontSize: '0.75rem', mt: 0.25 }}>
+          {label}
+        </Typography>
+      </Box>
     </Box>
   );
 };
@@ -490,6 +496,10 @@ const RegistrationCodes: React.FC = () => {
                               py: 0.5,
                               borderRadius: 1,
                               fontSize: '0.8125rem',
+                              maxWidth: { xs: 120, sm: 'none' },
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap',
                             }}
                           >
                             {code.code}
@@ -639,7 +649,7 @@ const RegistrationCodes: React.FC = () => {
 
         <DialogContent sx={{ pt: 3 }}>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <FormControl fullWidth required>
+            <FormControl fullWidth required size="small">
               <InputLabel>Workspace</InputLabel>
               <Select
                 value={createForm.workspaceId}
@@ -660,6 +670,7 @@ const RegistrationCodes: React.FC = () => {
               onChange={(e) => setCreateForm({ ...createForm, maxUses: parseInt(e.target.value) || 1 })}
               fullWidth
               required
+              size="small"
               inputProps={{ min: 1 }}
               helperText="Number of times this code can be used"
             />
@@ -670,6 +681,7 @@ const RegistrationCodes: React.FC = () => {
               onChange={(e) => setCreateForm({ ...createForm, expiresInDays: parseInt(e.target.value) || 30 })}
               fullWidth
               required
+              size="small"
               inputProps={{ min: 1 }}
               helperText="Number of days until the code expires"
             />

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Grid, GridProps } from '@mui/material';
+import { Grid } from '@mui/material';
 
 export interface DataGridProps<T = any> {
   data: T[];

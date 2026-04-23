@@ -66,7 +66,8 @@ const NotificationCenter: React.FC = () => {
     }
   };
 
-  const formatTime = (timestamp: Date | string) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _formatTime = (timestamp: Date | string) => {
     const now = new Date();
     const date = typeof timestamp === 'string' ? new Date(timestamp) : timestamp;
     const diff = now.getTime() - date.getTime();
@@ -236,7 +237,7 @@ const NotificationCenter: React.FC = () => {
                               )}
                               {notification.data.amount && (
                                 <Chip
-                                  label={`â‚¹${notification.data.amount}`}
+                                  label={`₹${notification.data.amount}`}
                                   size="small"
                                   variant="outlined"
                                   color="success"

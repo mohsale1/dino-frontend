@@ -8,9 +8,7 @@ import {
   FormControl,
   InputLabel,
   Select,
-  alpha,
 } from '@mui/material';
-import { Store } from '@mui/icons-material';
 import { RegistrationFormData } from '../types';
 
 interface OrganizationInformationStepProps {
@@ -39,32 +37,6 @@ const OrganizationInformationStep: React.FC<OrganizationInformationStepProps> = 
 }) => {
   return (
     <Box>
-      <Box sx={{ mb: 3.5, display: 'flex', alignItems: 'center', gap: 2 }}>
-        <Box
-          sx={{
-            width: 48,
-            height: 48,
-            borderRadius: 2,
-            backgroundColor: alpha('#1976D2', 0.1),
-            border: `1.5px solid ${alpha('#1976D2', 0.25)}`,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0,
-          }}
-        >
-          <Store sx={{ fontSize: 26, color: '#1976D2' }} />
-        </Box>
-        <Box>
-          <Typography variant="h6" sx={{ color: '#0f172a', fontWeight: 700 }}>
-            Organization Details
-          </Typography>
-          <Typography variant="body2" sx={{ color: '#64748b' }}>
-            Tell us about your first venue/branch
-          </Typography>
-        </Box>
-      </Box>
-
       <TextField
         fullWidth
         label="Organization Name"

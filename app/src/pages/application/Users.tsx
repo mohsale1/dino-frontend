@@ -329,7 +329,7 @@ const UserManagement: React.FC = () => {
             alignItems: { xs: 'flex-start', sm: 'flex-start' },
             justifyContent: 'space-between',
             gap: 2,
-            mb: 4,
+            mb: { xs: 2, md: 4 },
           }}
         >
           <Box>
@@ -406,7 +406,7 @@ const UserManagement: React.FC = () => {
           >
             <Box
               sx={{
-                px: 2.5,
+                px: { xs: 2, sm: 2.5 },
                 pt: 2,
                 pb: 1.5,
                 display: 'flex',

@@ -11,7 +11,6 @@ export {
   getConfigValue,
   isDevelopment,
   isProduction,
-  logRuntimeConfig,
   RUNTIME_CONFIG,
   type RuntimeConfig
 } from './runtime';
@@ -20,8 +19,6 @@ export {
 export {
   getApiBaseUrl,
   createApiUrl,
-  getDefaultFetchOptions,
-  getAuthenticatedFetchOptions
 } from '../utils/api';
 
 // Storage configuration

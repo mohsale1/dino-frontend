@@ -179,7 +179,7 @@ const buildBulkPrintHtml = (items: BulkQRItem[], style: BulkQRStyle = 'classic')
 </head>
 <body>
   <div class="grid">${cards}</div>
-  <script>window.onload = function() { window.print(); }<\/script>
+  <script>window.onload = function() { window.print(); }</script>
 </body>
 </html>`;
 };

@@ -2,13 +2,11 @@ import React from 'react';
 import {
   Box,
   TextField,
-  Typography,
   Grid,
   IconButton,
   InputAdornment,
-  alpha,
 } from '@mui/material';
-import { Person, Visibility, VisibilityOff } from '@mui/icons-material';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { RegistrationFormData } from '../types';
 
 interface AdminAccountStepProps {
@@ -40,32 +38,6 @@ const AdminAccountStep: React.FC<AdminAccountStepProps> = ({
 }) => {
   return (
     <Box>
-      <Box sx={{ mb: 3.5, display: 'flex', alignItems: 'center', gap: 2 }}>
-        <Box
-          sx={{
-            width: 48,
-            height: 48,
-            borderRadius: 2,
-            backgroundColor: alpha('#1976D2', 0.1),
-            border: `1.5px solid ${alpha('#1976D2', 0.25)}`,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0,
-          }}
-        >
-          <Person sx={{ fontSize: 26, color: '#1976D2' }} />
-        </Box>
-        <Box>
-          <Typography variant="h6" sx={{ color: '#0f172a', fontWeight: 700 }}>
-            Admin Account
-          </Typography>
-          <Typography variant="body2" sx={{ color: '#64748b' }}>
-            Create your administrator account
-          </Typography>
-        </Box>
-      </Box>
-
       <Grid container spacing={2} sx={{ mb: 3.5 }}>
         <Grid item xs={12} sm={6}>
           <TextField

@@ -356,7 +356,7 @@ const Coupons: React.FC = () => {
               alignItems: { xs: 'flex-start', sm: 'flex-start' },
               justifyContent: 'space-between',
               gap: 2,
-              mb: 4,
+              mb: { xs: 2, md: 4 },
             }}
           >
             <Box>
@@ -422,7 +422,7 @@ const Coupons: React.FC = () => {
           <Box
             sx={{
               display: 'grid',
-              gridTemplateColumns: { xs: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' },
+              gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' },
               gap: { xs: 1.5, sm: 2 },
             }}
           >
@@ -450,7 +450,7 @@ const Coupons: React.FC = () => {
           >
             <Box
               sx={{
-                px: 2.5,
+                px: { xs: 2, sm: 2.5 },
                 py: 1.5,
                 display: 'flex',
                 alignItems: 'center',
@@ -492,7 +492,7 @@ const Coupons: React.FC = () => {
               </Box>
 
               {/* Status filter */}
-              <FormControl size="small" sx={{ minWidth: 130, flexShrink: 0 }}>
+              <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 130 }, flexGrow: { xs: 1, sm: 0 }, flexShrink: 0 }}>
                 <Select
                   value={filterStatus}
                   onChange={(e) => setFilterStatus(e.target.value)}
@@ -508,7 +508,7 @@ const Coupons: React.FC = () => {
               </FormControl>
 
               {/* Type filter */}
-              <FormControl size="small" sx={{ minWidth: 130, flexShrink: 0 }}>
+              <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 130 }, flexGrow: { xs: 1, sm: 0 }, flexShrink: 0 }}>
                 <Select
                   value={filterType}
                   onChange={(e) => setFilterType(e.target.value)}

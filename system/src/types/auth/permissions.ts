@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Permission Types and Constants
  *
  * Defines all permission types and constants using dot notation (scope.module.action)
@@ -76,7 +76,7 @@ export const PERMISSIONS = {
   SYSTEM_PERMISSIONS_DELETE: 'system.permissions.delete',
 
   // ==================== APPLICATION - MODULE VISIBILITY ====================
-  // Tenant app sidebar visibility — used by the system admin when managing
+  // Tenant app sidebar visibility â€” used by the system admin when managing
   // role permissions that apply to the application (tenant) scope.
 
   APPLICATION_DASHBOARD_VIEW: 'application.dashboard.view',
@@ -140,6 +140,9 @@ export const PERMISSIONS = {
   ORDERS_STATUS:  'application.orders.status',
   ORDERS_PAYMENT: 'application.orders.payment',
 
+  // Status permissions
+  STATUS_UPDATE: 'application.status.update',
+
   // User permissions (application)
   USERS_READ:   'application.users.read',
   USERS_CREATE: 'application.users.create',
@@ -164,7 +167,7 @@ export type PermissionName = typeof PERMISSIONS[keyof typeof PERMISSIONS];
 
 export const PERMISSION_GROUPS = {
   // --------------------------------------------------------------------------
-  // System module view permissions — admin sidebar visibility gates
+  // System module view permissions â€” admin sidebar visibility gates
   // --------------------------------------------------------------------------
   MODULE_VIEW_PERMISSIONS: {
     label: 'Module Visibility',
@@ -180,7 +183,7 @@ export const PERMISSION_GROUPS = {
   },
 
   // --------------------------------------------------------------------------
-  // Application module view permissions — tenant sidebar visibility gates
+  // Application module view permissions â€” tenant sidebar visibility gates
   // --------------------------------------------------------------------------
   APPLICATION_MODULE_VIEW_PERMISSIONS: {
     label: 'Application Module Visibility',
@@ -300,6 +303,12 @@ export const PERMISSION_GROUPS = {
       PERMISSIONS.ORDERS_PAYMENT,
     ],
   },
+  STATUS: {
+    label: 'Status Management',
+    permissions: [
+      PERMISSIONS.STATUS_UPDATE,
+    ],
+  },
   USERS: {
     label: 'User Management',
     permissions: [
@@ -332,7 +341,7 @@ export const PERMISSION_GROUPS = {
 
 /**
  * Check if a user's permission set includes the required permission.
- * Uses exact match only — no wildcards.
+ * Uses exact match only â€” no wildcards.
  */
 export const hasPermission = (userPermissions: string[], requiredPermission: string): boolean => {
   return userPermissions.includes(requiredPermission);

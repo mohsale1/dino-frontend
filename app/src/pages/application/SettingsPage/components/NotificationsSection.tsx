@@ -93,7 +93,7 @@ const NotificationsSection: React.FC<NotificationsSectionProps> = ({
         py: 2,
       }}
     >
-      <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, flex: 1 }}>
+      <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, flex: 1, minWidth: 0 }}>
         <Box
           sx={{
             width: 40,
@@ -109,7 +109,7 @@ const NotificationsSection: React.FC<NotificationsSectionProps> = ({
         >
           {icon}
         </Box>
-        <Box>
+        <Box sx={{ minWidth: 0 }}>
           <Typography
             variant="body1"
             sx={{
@@ -275,7 +275,8 @@ const NotificationsSection: React.FC<NotificationsSectionProps> = ({
               pt: 3,
               borderTop: '1px solid #f3f4f6',
               display: 'flex',
-              justifyContent: 'flex-end',
+              flexDirection: { xs: 'column-reverse', sm: 'row' },
+              justifyContent: { xs: 'stretch', sm: 'flex-end' },
               gap: 2,
             }}
           >
@@ -300,6 +301,7 @@ const NotificationsSection: React.FC<NotificationsSectionProps> = ({
                 px: 3,
                 borderColor: '#e5e7eb',
                 color: '#374151',
+                width: { xs: '100%', sm: 'auto' },
                 '&:hover': {
                   borderColor: '#9ca3af',
                   backgroundColor: '#f9fafb',
@@ -319,6 +321,7 @@ const NotificationsSection: React.FC<NotificationsSectionProps> = ({
                 borderRadius: 1.5,
                 px: 3,
                 backgroundColor: '#1a1a1a',
+                width: { xs: '100%', sm: 'auto' },
                 '&:hover': {
                   backgroundColor: '#374151',
                 },

@@ -141,8 +141,8 @@ class StorageCleanup {
     // Show dino-specific items
     const dinoItems = info.items.filter(key => key.startsWith('dino_'));
     if (dinoItems.length > 0) {      dinoItems.forEach(key => {
-        const value = localStorage.getItem(key);
-        const size = value ? value.length : 0;      });
+        localStorage.getItem(key);
+      });
     }  }
 }
 

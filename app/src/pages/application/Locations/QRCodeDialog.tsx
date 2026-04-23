@@ -178,7 +178,7 @@ const buildSingleHtml = (qrUrl: string, name: string, area: string, menuUrl: str
   <p class="scan">Scan to view menu</p>
   <p class="url">${menuUrl}</p>
 </div>
-<script>window.onload=()=>{window.print();}<\/script>
+<script>window.onload=()=>{window.print();}</script>
 </body></html>`;
 
 const buildTwoUpHtml = (qrUrl: string, name: string, area: string, menuUrl: string, style: QRStyleDef) => {
@@ -203,7 +203,7 @@ const buildTwoUpHtml = (qrUrl: string, name: string, area: string, menuUrl: stri
   .url { font-size: 9px; color: #94a3b8; word-break: break-all; font-family: monospace; margin-top: 10px; }
 </style></head><body>
 ${card}${card}
-<script>window.onload=()=>{window.print();}<\/script>
+<script>window.onload=()=>{window.print();}</script>
 </body></html>`;
 };
 
@@ -229,7 +229,7 @@ const buildFourUpHtml = (qrUrl: string, name: string, area: string, menuUrl: str
   .url { font-size: 8px; color: #94a3b8; word-break: break-all; font-family: monospace; margin-top: 6px; }
 </style></head><body>
 ${card}${card}${card}${card}
-<script>window.onload=()=>{window.print();}<\/script>
+<script>window.onload=()=>{window.print();}</script>
 </body></html>`;
 };
 
@@ -256,7 +256,7 @@ ${style.printWrap(qrUrl)}
   <p class="scan">Scan to view menu</p>
   <p class="url">${menuUrl}</p>
 </div>
-<script>window.onload=()=>{window.print();}<\/script>
+<script>window.onload=()=>{window.print();}</script>
 </body></html>`;
 
 const buildPosterHtml = (qrUrl: string, name: string, area: string, menuUrl: string, style: QRStyleDef) => `
@@ -284,7 +284,7 @@ const buildPosterHtml = (qrUrl: string, name: string, area: string, menuUrl: str
   <p class="url">${menuUrl}</p>
 </div>
 <p class="footer">Powered by Dino</p>
-<script>window.onload=()=>{window.print();}<\/script>
+<script>window.onload=()=>{window.print();}</script>
 </body></html>`;
 
 // ─── Dot-grid texture ───────────────────────────────────────────────────────────

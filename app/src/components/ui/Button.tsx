@@ -3,7 +3,6 @@ import {
   Button as MuiButton, 
   ButtonProps as MuiButtonProps,
   CircularProgress,
-  Box,
   useTheme,
   useMediaQuery,
 } from '@mui/material';
@@ -162,26 +161,6 @@ export const Button: React.FC<ButtonProps> = ({
 
   // Convert custom variants to Material-UI variants
   const muiVariant = ['soft', 'gradient', 'danger', 'success'].includes(variant) ? 'contained' : variant as 'contained' | 'outlined' | 'text';
-
-  // Loading state content
-  const loadingContent = (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-      <CircularProgress 
-        size={responsiveSize === 'small' ? 14 : responsiveSize === 'large' ? 18 : 16} 
-        color="inherit" 
-      />
-      {loadingText && loadingText}
-    </Box>
-  );
-
-  // Button content with icon support
-  const buttonContent = loading ? loadingContent : (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-      {icon && iconPosition === 'start' && icon}
-      {children}
-      {icon && iconPosition === 'end' && icon}
-    </Box>
-  );
 
   return (
     <MuiButton

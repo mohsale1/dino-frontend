@@ -21,105 +21,52 @@ export function initializePerformanceMonitoring(): void {
       return;
     }
 
-    // Log initial performance metrics
-    if (window.performance && window.performance.timing) {
-      const timing = window.performance.timing;
-      const loadTime = timing.loadEventEnd - timing.navigationStart;
-      const domReadyTime = timing.domContentLoadedEventEnd - timing.navigationStart;
-      const renderTime = timing.domComplete - timing.domLoading;
-
-      console.log('[Performance] Page Load Metrics:', {
-        loadTime: `${loadTime}ms`,
-        domReadyTime: `${domReadyTime}ms`,
-        renderTime: `${renderTime}ms`,
-      });
-    }
-
     // Set up Performance Observer for navigation timing
     if ('PerformanceObserver' in window) {
       try {
-        const navigationObserver = new PerformanceObserver((list) => {
-          for (const entry of list.getEntries()) {
-            if (entry.entryType === 'navigation') {
-              const navEntry = entry as PerformanceNavigationTiming;
-              console.log('[Performance] Navigation Timing:', {
-                dns: `${navEntry.domainLookupEnd - navEntry.domainLookupStart}ms`,
-                tcp: `${navEntry.connectEnd - navEntry.connectStart}ms`,
-                request: `${navEntry.responseStart - navEntry.requestStart}ms`,
-                response: `${navEntry.responseEnd - navEntry.responseStart}ms`,
-                domProcessing: `${navEntry.domComplete - navEntry.domInteractive}ms`,
-              });
-            }
-          }
+        const navigationObserver = new PerformanceObserver(() => {
+          // Navigation timing data collected silently
         });
 
         navigationObserver.observe({ entryTypes: ['navigation'] });
-      } catch (error) {
-        console.warn('[Performance] Navigation observer not supported:', error);
+      } catch {
+        // Navigation observer not supported — continue silently
       }
 
       // Set up Performance Observer for resource timing
       try {
-        const resourceObserver = new PerformanceObserver((list) => {
-          for (const entry of list.getEntries()) {
-            if (entry.entryType === 'resource') {
-              const resourceEntry = entry as PerformanceResourceTiming;
-              // Only log slow resources (> 500ms)
-              if (resourceEntry.duration > 500) {
-                console.warn('[Performance] Slow Resource:', {
-                  name: resourceEntry.name,
-                  duration: `${resourceEntry.duration.toFixed(2)}ms`,
-                  size: resourceEntry.transferSize,
-                });
-              }
-            }
-          }
+        const resourceObserver = new PerformanceObserver(() => {
+          // Resource timing data collected silently
         });
 
         resourceObserver.observe({ entryTypes: ['resource'] });
-      } catch (error) {
-        console.warn('[Performance] Resource observer not supported:', error);
+      } catch {
+        // Resource observer not supported — continue silently
       }
 
       // Set up Performance Observer for long tasks
       try {
-        const longTaskObserver = new PerformanceObserver((list) => {
-          for (const entry of list.getEntries()) {
-            console.warn('[Performance] Long Task Detected:', {
-              duration: `${entry.duration.toFixed(2)}ms`,
-              startTime: `${entry.startTime.toFixed(2)}ms`,
-            });
-          }
+        const longTaskObserver = new PerformanceObserver(() => {
+          // Long task data collected silently
         });
 
         longTaskObserver.observe({ entryTypes: ['longtask'] });
-      } catch (error) {
+      } catch {
         // Long task API not supported in all browsers
-        console.debug('[Performance] Long task observer not supported');
       }
     }
-
-    console.log('[Performance] Monitoring initialized');
   } catch (error) {
     console.error('[Performance] Failed to initialize monitoring:', error);
   }
 }
 
 /**
- * Measure and log component render time
+ * Measure component render time
  */
-export function measureRenderTime(componentName: string, startTime: number): void {
-  if (typeof window === 'undefined') {
-    return;
-  }
-
-  const endTime = performance.now();
-  const renderTime = endTime - startTime;
-
-  if (renderTime > 100) {
-    console.warn(`[Performance] Slow render: ${componentName} took ${renderTime.toFixed(2)}ms`);
-  }
+export function measureRenderTime(_componentName: string, _startTime: number): void {
+  // Render timing is a no-op in silent mode; retained for API compatibility
 }
+
 
 /**
  * Mark a custom performance event
@@ -132,7 +79,7 @@ export function markPerformance(name: string): void {
   try {
     window.performance.mark(name);
   } catch (error) {
-    console.debug('[Performance] Failed to mark:', name, error);
+    console.error('[Performance] Failed to mark:', name, error);
   }
 }
 
@@ -146,12 +93,9 @@ export function measurePerformance(name: string, startMark: string, endMark: str
 
   try {
     window.performance.measure(name, startMark, endMark);
-    const measure = window.performance.getEntriesByName(name)[0];
-    if (measure) {
-      console.log(`[Performance] ${name}: ${measure.duration.toFixed(2)}ms`);
-    }
+    // Measurement stored in the browser's performance timeline
   } catch (error) {
-    console.debug('[Performance] Failed to measure:', name, error);
+    console.error('[Performance] Failed to measure:', name, error);
   }
 }
 
@@ -165,7 +109,7 @@ export function getMemoryUsage(): { used: number; total: number; percentage: num
 
   // @ts-ignore - performance.memory is not in all browsers
   const memory = window.performance?.memory;
-  
+
   if (!memory) {
     return null;
   }
@@ -178,20 +122,14 @@ export function getMemoryUsage(): { used: number; total: number; percentage: num
 }
 
 /**
- * Log memory usage
+ * Get memory usage snapshot (silent — callers read the returned value)
  */
 export function logMemoryUsage(): void {
-  const memory = getMemoryUsage();
-  if (memory) {
-    console.log('[Performance] Memory Usage:', {
-      used: `${memory.used}MB`,
-      total: `${memory.total}MB`,
-      percentage: `${memory.percentage}%`,
-    });
-  }
+  // Memory data available via getMemoryUsage(); no console output in production
+  getMemoryUsage();
 }
 
-export default {
+const performanceUtils = {
   initializePerformanceMonitoring,
   measureRenderTime,
   markPerformance,
@@ -199,3 +137,5 @@ export default {
   getMemoryUsage,
   logMemoryUsage,
 };
+
+export default performanceUtils;

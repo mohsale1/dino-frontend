@@ -385,7 +385,8 @@ const AppearanceSection: React.FC<AppearanceSectionProps> = ({
               pt: 3,
               borderTop: '1px solid #f3f4f6',
               display: 'flex',
-              justifyContent: 'flex-end',
+              flexDirection: { xs: 'column-reverse', sm: 'row' },
+              justifyContent: { xs: 'stretch', sm: 'flex-end' },
               gap: 2,
             }}
           >
@@ -406,6 +407,7 @@ const AppearanceSection: React.FC<AppearanceSectionProps> = ({
                 px: 3,
                 borderColor: '#e5e7eb',
                 color: '#374151',
+                width: { xs: '100%', sm: 'auto' },
                 '&:hover': {
                   borderColor: '#9ca3af',
                   backgroundColor: '#f9fafb',
@@ -425,6 +427,7 @@ const AppearanceSection: React.FC<AppearanceSectionProps> = ({
                 borderRadius: 1.5,
                 px: 3,
                 backgroundColor: '#1a1a1a',
+                width: { xs: '100%', sm: 'auto' },
                 '&:hover': {
                   backgroundColor: '#374151',
                 },

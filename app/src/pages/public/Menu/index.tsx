@@ -99,6 +99,177 @@ const SkeletonUI: React.FC = () => (
   </Box>
 );
 
+// ─── Menu Not Found UI ────────────────────────────────────────────────────────
+const MenuNotFoundUI: React.FC = () => (
+  <Box
+    sx={{
+      minHeight: '100dvh',
+      display: 'flex',
+      flexDirection: 'column',
+      bgcolor: '#ffffff',
+      overflow: 'hidden',
+    }}
+  >
+    {/* Top accent bar */}
+    <Box sx={{ height: 4, background: 'linear-gradient(90deg, #f97316, #fb923c, #fdba74)' }} />
+
+    {/* Main content */}
+    <Box
+      sx={{
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        px: 3,
+        textAlign: 'center',
+      }}
+    >
+      {/* Bouncing 404 */}
+      <Box sx={{ display: 'flex', alignItems: 'flex-end', gap: '2px', mb: 4, lineHeight: 1 }}>
+        {['4', '0', '4'].map((char, i) => (
+          <Typography
+            key={i}
+            component="span"
+            sx={{
+              fontSize: '6rem',
+              fontWeight: 900,
+              letterSpacing: '-0.05em',
+              color: i === 1 ? C.accent : '#0f172a',
+              display: 'inline-block',
+              animation: `mnfBounce 0.65s ease-in-out ${i * 0.13}s infinite alternate`,
+              '@keyframes mnfBounce': {
+                '0%':   { transform: 'translateY(0px)' },
+                '100%': { transform: 'translateY(-16px)' },
+              },
+            }}
+          >
+            {char}
+          </Typography>
+        ))}
+      </Box>
+
+      {/* QR icon illustration */}
+      <Box
+        sx={{
+          width: 80,
+          height: 80,
+          borderRadius: 3,
+          bgcolor: '#fff7ed',
+          border: '1.5px solid #fed7aa',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          mb: 3,
+          boxShadow: '0 4px 20px rgba(249,115,22,0.12)',
+        }}
+      >
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+          {/* QR code pattern */}
+          <rect x="2"  y="2"  width="16" height="16" rx="2" fill="none" stroke="#f97316" strokeWidth="2.5" />
+          <rect x="6"  y="6"  width="8"  height="8"  rx="1" fill="#f97316" />
+          <rect x="22" y="2"  width="16" height="16" rx="2" fill="none" stroke="#f97316" strokeWidth="2.5" />
+          <rect x="26" y="6"  width="8"  height="8"  rx="1" fill="#f97316" />
+          <rect x="2"  y="22" width="16" height="16" rx="2" fill="none" stroke="#f97316" strokeWidth="2.5" />
+          <rect x="6"  y="26" width="8"  height="8"  rx="1" fill="#f97316" />
+          {/* Dots bottom right */}
+          <rect x="22" y="22" width="5" height="5" rx="1" fill="#f97316" />
+          <rect x="29" y="22" width="5" height="5" rx="1" fill="#f97316" />
+          <rect x="22" y="29" width="5" height="5" rx="1" fill="#f97316" />
+          <rect x="29" y="29" width="5" height="5" rx="1" fill="#f97316" />
+          {/* X mark overlay */}
+          <line x1="24" y1="24" x2="36" y2="36" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" />
+          <line x1="36" y1="24" x2="24" y2="36" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" />
+        </svg>
+      </Box>
+
+      {/* Heading */}
+      <Typography
+        sx={{
+          fontSize: '1.25rem',
+          fontWeight: 800,
+          color: '#0f172a',
+          mb: 1,
+          letterSpacing: '-0.3px',
+        }}
+      >
+        Menu not found
+      </Typography>
+
+      {/* Subtext */}
+      <Typography
+        sx={{
+          fontSize: '0.875rem',
+          color: '#64748b',
+          lineHeight: 1.7,
+          maxWidth: 260,
+          mb: 4,
+        }}
+      >
+        This link is invalid or no longer available. Please scan the QR code on your table to try again.
+      </Typography>
+
+      {/* Divider */}
+      <Box sx={{ width: 40, height: 2, borderRadius: 1, bgcolor: '#f1f5f9', mb: 4 }} />
+
+      {/* Steps card */}
+      <Box
+        sx={{
+          width: '100%',
+          maxWidth: 300,
+          bgcolor: '#fafafa',
+          border: '1px solid #f1f5f9',
+          borderRadius: 3,
+          p: 2.5,
+          textAlign: 'left',
+        }}
+      >
+        <Typography sx={{ fontSize: '0.72rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.08em', mb: 1.5 }}>
+          What to do
+        </Typography>
+        {[
+          'Look for the QR code on your table',
+          'Open your camera and scan it',
+          'The menu will load automatically',
+        ].map((step, i) => (
+          <Box key={i} sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5, mb: i < 2 ? 1.5 : 0 }}>
+            <Box
+              sx={{
+                width: 22,
+                height: 22,
+                borderRadius: '50%',
+                bgcolor: C.accent,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+                mt: '1px',
+              }}
+            >
+              <Typography sx={{ fontSize: '0.65rem', fontWeight: 800, color: '#fff' }}>{i + 1}</Typography>
+            </Box>
+            <Typography sx={{ fontSize: '0.82rem', color: '#475569', lineHeight: 1.5 }}>{step}</Typography>
+          </Box>
+        ))}
+      </Box>
+    </Box>
+
+    {/* Footer */}
+    <Box
+      sx={{
+        px: 3,
+        py: 2.5,
+        textAlign: 'center',
+        borderTop: '1px solid #f1f5f9',
+      }}
+    >
+      <Typography sx={{ fontSize: '0.75rem', color: '#94a3b8', lineHeight: 1.6 }}>
+        Still having trouble? Ask a staff member for assistance.
+      </Typography>
+    </Box>
+  </Box>
+);
+
 // ─── Error UI ─────────────────────────────────────────────────────────────────
 const ErrorUI: React.FC<{ message: string; onRetry: () => void }> = ({ message, onRetry }) => (
   <Box sx={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', bgcolor: C.bg, px: 3, textAlign: 'center' }}>
@@ -146,6 +317,7 @@ const PublicMenu: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [menuData, setMenuData] = useState<any>(null);
   const [orgUnavailable, setOrgUnavailable] = useState(false);
+  const [menuNotFound, setMenuNotFound] = useState(false);
 
   const [showCustomerDetails, setShowCustomerDetails] = useState(false);
   const [showCheckout, setShowCheckout] = useState(false);
@@ -176,15 +348,22 @@ const PublicMenu: React.FC = () => {
       setLoading(true);
       setError(null);
       setOrgUnavailable(false);
+      setMenuNotFound(false);
       const data = await publicMenuService.getMenuData(organizationId, tableId);
       setMenuData(data);
     } catch (err: any) {
       const status = err?.response?.status;
       const detail = err?.response?.data?.detail || err?.response?.data?.message || '';
 
-      // Org inactive / not found
+      // Network error (no response) or not found / server error → show not-found page
+      const isNetworkError = !err?.response;
+      if (isNetworkError || status === 404 || (status >= 500 && status <= 599)) {
+        setMenuNotFound(true);
+        return;
+      }
+
+      // Org inactive / unavailable
       if (
-        status === 404 ||
         status === 403 ||
         detail.toLowerCase().includes('inactive') ||
         detail.toLowerCase().includes('not active') ||
@@ -240,6 +419,9 @@ const PublicMenu: React.FC = () => {
   // ── Loading ──────────────────────────────────────────────────────────────────
   if (loading) return <SkeletonUI />;
 
+  // ── Not found / server error ─────────────────────────────────────────────────
+  if (menuNotFound) return <MenuNotFoundUI />;
+
   // ── Org unavailable ──────────────────────────────────────────────────────────
   if (orgUnavailable) {
     return <UnavailableView orgName={menuData?.organization?.name} />;
@@ -274,11 +456,11 @@ const PublicMenu: React.FC = () => {
   return (
     <Box sx={{ height: '100dvh', display: 'flex', flexDirection: 'column', bgcolor: C.bg, overflow: 'hidden' }}>
 
-      {/* ── Header ──────────────────────────────────────────────────────────── */}
+      {/* ── Header — hidden on Home tab ─────────────────────────────────────── */}
       <AppBar
         position="static"
         elevation={0}
-        sx={{ bgcolor: C.card, borderBottom: `1px solid ${C.border}`, flexShrink: 0, zIndex: 10 }}
+        sx={{ bgcolor: C.card, borderBottom: `1px solid ${C.border}`, flexShrink: 0, zIndex: 10, display: activeTab === 0 ? 'none' : 'block' }}
       >
         <Toolbar
           disableGutters

@@ -22,6 +22,7 @@ import {
   Divider,
   Avatar,
   Chip,
+  InputAdornment,
 } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import {
@@ -611,7 +612,7 @@ const Appearance: React.FC = () => {
                     fullWidth label="Email" type="email"
                     value={contact.email || ''} onChange={e => updateContact('email', e.target.value)}
                     sx={fieldSx}
-                    InputProps={{ startAdornment: <Email sx={{ fontSize: 18, color: '#94a3b8', mr: 1 }} /> }}
+                    InputProps={{ startAdornment: <InputAdornment position="start"><Email sx={{ fontSize: 18, color: '#94a3b8' }} /></InputAdornment> }}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
@@ -619,7 +620,7 @@ const Appearance: React.FC = () => {
                     fullWidth label="Phone"
                     value={contact.phone || ''} onChange={e => updateContact('phone', e.target.value)}
                     sx={fieldSx}
-                    InputProps={{ startAdornment: <Phone sx={{ fontSize: 18, color: '#94a3b8', mr: 1 }} /> }}
+                    InputProps={{ startAdornment: <InputAdornment position="start"><Phone sx={{ fontSize: 18, color: '#94a3b8' }} /></InputAdornment> }}
                   />
                 </Grid>
               </Grid>
@@ -652,7 +653,7 @@ const Appearance: React.FC = () => {
                     fullWidth label="Postal Code"
                     value={contact.postal_code || ''} onChange={e => updateContact('postal_code', e.target.value)}
                     sx={fieldSx}
-                    InputProps={{ startAdornment: <Tag sx={{ fontSize: 18, color: '#94a3b8', mr: 1 }} /> }}
+                    InputProps={{ startAdornment: <InputAdornment position="start"><Tag sx={{ fontSize: 18, color: '#94a3b8' }} /></InputAdornment> }}
                   />
                 </Grid>
               </Grid>

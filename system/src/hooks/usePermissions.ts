@@ -1,4 +1,4 @@
-/**
+﻿/**
  * usePermissions Hook
  * Delegates all permission checks to the Auth context via hasBackendPermission.
  * No role-based logic. No hardcoded booleans.
@@ -29,28 +29,35 @@ export interface UsePermissionsReturn {
   canViewSettings: boolean;
 
   // --- Workspace action flags ---
+  canReadWorkspaces: boolean;
   canCreateWorkspaces: boolean;
   canUpdateWorkspaces: boolean;
   canDeleteWorkspaces: boolean;
 
   // --- User action flags ---
+  canReadUsers: boolean;
   canCreateUsers: boolean;
   canUpdateUsers: boolean;
   canDeleteUsers: boolean;
 
   // --- Role action flags ---
+  canReadRoles: boolean;
   canCreateRoles: boolean;
   canUpdateRoles: boolean;
   canDeleteRoles: boolean;
 
   // --- Billing action flags ---
+  canReadBilling: boolean;
+  canUpdateBilling: boolean;
   canManageBilling: boolean;
 
   // --- Registration action flags ---
+  canReadRegistration: boolean;
   canCreateRegistration: boolean;
   canDeleteRegistration: boolean;
 
   // --- Permission action flags ---
+  canReadPermissions: boolean;
   canCreatePermissions: boolean;
   canUpdatePermissions: boolean;
   canDeletePermissions: boolean;
@@ -157,6 +164,11 @@ export const usePermissions = (): UsePermissionsReturn => {
 
   // --- Workspace action flags ---
 
+  const canReadWorkspaces = useMemo(
+    () => hasBackendPermission(PERMISSIONS.SYSTEM_WORKSPACES_READ),
+    [hasBackendPermission]
+  );
+
   const canCreateWorkspaces = useMemo(
     () => hasBackendPermission(PERMISSIONS.SYSTEM_WORKSPACES_CREATE),
     [hasBackendPermission]
@@ -173,6 +185,11 @@ export const usePermissions = (): UsePermissionsReturn => {
   );
 
   // --- User action flags ---
+
+  const canReadUsers = useMemo(
+    () => hasBackendPermission(PERMISSIONS.SYSTEM_USERS_READ),
+    [hasBackendPermission]
+  );
 
   const canCreateUsers = useMemo(
     () => hasBackendPermission(PERMISSIONS.SYSTEM_USERS_CREATE),
@@ -191,6 +208,11 @@ export const usePermissions = (): UsePermissionsReturn => {
 
   // --- Role action flags ---
 
+  const canReadRoles = useMemo(
+    () => hasBackendPermission(PERMISSIONS.SYSTEM_ROLES_READ),
+    [hasBackendPermission]
+  );
+
   const canCreateRoles = useMemo(
     () => hasBackendPermission(PERMISSIONS.SYSTEM_ROLES_CREATE),
     [hasBackendPermission]
@@ -208,12 +230,27 @@ export const usePermissions = (): UsePermissionsReturn => {
 
   // --- Billing action flags ---
 
+  const canReadBilling = useMemo(
+    () => hasBackendPermission(PERMISSIONS.SYSTEM_BILLING_READ),
+    [hasBackendPermission]
+  );
+
+  const canUpdateBilling = useMemo(
+    () => hasBackendPermission(PERMISSIONS.SYSTEM_BILLING_UPDATE),
+    [hasBackendPermission]
+  );
+
   const canManageBilling = useMemo(
     () => hasBackendPermission(PERMISSIONS.SYSTEM_BILLING_SUBSCRIPTION),
     [hasBackendPermission]
   );
 
   // --- Registration action flags ---
+
+  const canReadRegistration = useMemo(
+    () => hasBackendPermission(PERMISSIONS.SYSTEM_REGISTRATION_READ),
+    [hasBackendPermission]
+  );
 
   const canCreateRegistration = useMemo(
     () => hasBackendPermission(PERMISSIONS.SYSTEM_REGISTRATION_CREATE),
@@ -226,6 +263,11 @@ export const usePermissions = (): UsePermissionsReturn => {
   );
 
   // --- Permission action flags ---
+
+  const canReadPermissions = useMemo(
+    () => hasBackendPermission(PERMISSIONS.SYSTEM_PERMISSIONS_READ),
+    [hasBackendPermission]
+  );
 
   const canCreatePermissions = useMemo(
     () => hasBackendPermission(PERMISSIONS.SYSTEM_PERMISSIONS_CREATE),
@@ -297,18 +339,25 @@ export const usePermissions = (): UsePermissionsReturn => {
     canViewBilling,
     canViewRegistration,
     canViewSettings,
+    canReadWorkspaces,
     canCreateWorkspaces,
     canUpdateWorkspaces,
     canDeleteWorkspaces,
+    canReadUsers,
     canCreateUsers,
     canUpdateUsers,
     canDeleteUsers,
+    canReadRoles,
     canCreateRoles,
     canUpdateRoles,
     canDeleteRoles,
+    canReadBilling,
+    canUpdateBilling,
     canManageBilling,
+    canReadRegistration,
     canCreateRegistration,
     canDeleteRegistration,
+    canReadPermissions,
     canCreatePermissions,
     canUpdatePermissions,
     canDeletePermissions,

@@ -1,5 +1,4 @@
 import { apiService } from '../../utils/api';
-import { ApiResponse } from '../../types';
 import { ROLES } from '../../types/auth';
 import { isOwner, isManager, isUser, normalizeRole } from '../../types/auth/roles';
 import StorageManager from '../../utils/storage';

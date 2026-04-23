@@ -335,11 +335,11 @@ class AuthService {
   debugAuthState(): void {
     const token = this.getToken();
     const user = this.getStoredUser();
-    const refreshToken = this.getRefreshToken();
-    const expiryInfo = this.getTokenExpiryInfo();    if (user) {    }
+    this.getRefreshToken();
+    this.getTokenExpiryInfo();    if (user) {    }
     if (token) {
       try {
-        const payload = JSON.parse(atob(token.split('.')[1]));      } catch (e) {      }
+        JSON.parse(atob(token.split('.')[1]));      } catch (e) {      }
     }  }
 
   /**

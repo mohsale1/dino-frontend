@@ -12,7 +12,7 @@ const WorkspaceErrorBoundary = ({
   fallback 
 }: WorkspaceErrorBoundaryProps): React.ReactElement => {
   const { workspaces, workspacesLoading, currentWorkspace } = useWorkspace();
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated } = useAuth();
 
   // If not authenticated, show authentication message
   if (!isAuthenticated) {

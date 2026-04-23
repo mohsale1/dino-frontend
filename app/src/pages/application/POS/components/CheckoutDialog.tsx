@@ -1,0 +1,501 @@
+import React from 'react';
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Box,
+  Typography,
+  Stack,
+  Paper,
+  Divider,
+  TextField,
+  InputAdornment,
+  FormControl,
+  Select,
+  MenuItem,
+  InputLabel,
+  Button,
+  IconButton,
+  Alert,
+  Chip,
+} from '@mui/material';
+import {
+  PointOfSale,
+  Close,
+  Person,
+  Phone,
+  TableRestaurant,
+  Notes,
+  AttachMoney,
+  CreditCard,
+  AccountBalanceWallet,
+  Receipt,
+} from '@mui/icons-material';
+import { CartItem } from '../pos.types';
+
+interface CheckoutDialogProps {
+  open: boolean;
+  onClose: () => void;
+  cart: CartItem[];
+  subtotal: number;
+  discount: number;
+  tax: number;
+  total: number;
+  totalItems: number;
+  tables: Array<{ id: string; table_number?: string; tableNumber?: string }>;
+  customerName: string;
+  setCustomerName: (v: string) => void;
+  customerPhone: string;
+  setCustomerPhone: (v: string) => void;
+  selectedTableId: string;
+  setSelectedTableId: (v: string) => void;
+  orderNotes: string;
+  setOrderNotes: (v: string) => void;
+  paymentMethod: 'cash' | 'card' | 'wallet';
+  setPaymentMethod: (v: 'cash' | 'card' | 'wallet') => void;
+  processingOrder: boolean;
+  orderError: string;
+  onPlaceOrder: () => void;
+  formatINR: (n: number) => string;
+}
+
+const PAYMENT_METHODS: Array<{
+  value: 'cash' | 'card' | 'wallet';
+  label: string;
+  icon: React.ReactNode;
+}> = [
+  { value: 'cash', label: 'Cash', icon: <AttachMoney fontSize="small" /> },
+  { value: 'card', label: 'Card', icon: <CreditCard fontSize="small" /> },
+  { value: 'wallet', label: 'Wallet', icon: <AccountBalanceWallet fontSize="small" /> },
+];
+
+const SectionLabel: React.FC<{ icon: React.ReactNode; label: string }> = ({ icon, label }) => (
+  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: '#6366f1',
+      }}
+    >
+      {icon}
+    </Box>
+    <Typography variant="subtitle2" fontWeight={600} color="#0f172a">
+      {label}
+    </Typography>
+  </Box>
+);
+
+const SummaryRow: React.FC<{
+  label: string;
+  value: string;
+  bold?: boolean;
+  color?: string;
+}> = ({ label, value, bold = false, color }) => (
+  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+    <Typography
+      variant={bold ? 'subtitle1' : 'body2'}
+      fontWeight={bold ? 700 : 400}
+      color={color ?? (bold ? '#0f172a' : '#64748b')}
+    >
+      {label}
+    </Typography>
+    <Typography
+      variant={bold ? 'subtitle1' : 'body2'}
+      fontWeight={bold ? 700 : 500}
+      color={color ?? (bold ? '#0f172a' : '#0f172a')}
+    >
+      {value}
+    </Typography>
+  </Box>
+);
+
+const CheckoutDialog: React.FC<CheckoutDialogProps> = ({
+  open,
+  onClose,
+  cart,
+  subtotal,
+  discount,
+  tax,
+  total,
+  totalItems,
+  tables,
+  customerName,
+  setCustomerName,
+  customerPhone,
+  setCustomerPhone,
+  selectedTableId,
+  setSelectedTableId,
+  orderNotes,
+  setOrderNotes,
+  paymentMethod,
+  setPaymentMethod,
+  processingOrder,
+  orderError,
+  onPlaceOrder,
+  formatINR,
+}) => {
+  return (
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="sm"
+      fullWidth
+      PaperProps={{
+        sx: { borderRadius: 2 },
+      }}
+    >
+      {/* Dialog Title */}
+      <DialogTitle sx={{ p: 0 }}>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 2,
+            px: 3,
+            py: 2,
+            borderBottom: '1px solid #e2e8f0',
+          }}
+        >
+          {/* Icon Box */}
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: 44,
+              height: 44,
+              borderRadius: 1.5,
+              bgcolor: '#0f172a',
+              color: '#fff',
+              flexShrink: 0,
+            }}
+          >
+            <PointOfSale fontSize="small" />
+          </Box>
+
+          {/* Title + Subtitle */}
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Typography variant="h6" fontWeight={700} color="#0f172a" lineHeight={1.2}>
+              Checkout
+            </Typography>
+            <Typography variant="caption" color="#64748b">
+              {totalItems} {totalItems === 1 ? 'item' : 'items'} &bull; {formatINR(total)}
+            </Typography>
+          </Box>
+
+          {/* Close Button */}
+          <IconButton
+            onClick={onClose}
+            size="small"
+            sx={{
+              color: '#64748b',
+              '&:hover': { bgcolor: '#f1f5f9', color: '#0f172a' },
+            }}
+          >
+            <Close fontSize="small" />
+          </IconButton>
+        </Box>
+      </DialogTitle>
+
+      {/* Dialog Content */}
+      <DialogContent sx={{ px: 3, py: 3 }}>
+        <Stack spacing={3}>
+          {/* 1. Order Summary */}
+          <Paper
+            elevation={0}
+            sx={{
+              bgcolor: '#f8fafc',
+              border: '1px solid #e2e8f0',
+              borderRadius: 1.5,
+              overflow: 'hidden',
+            }}
+          >
+            <Box sx={{ px: 2, pt: 2, pb: 1 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
+                <Receipt fontSize="small" sx={{ color: '#6366f1' }} />
+                <Typography variant="subtitle2" fontWeight={600} color="#0f172a">
+                  Order Summary
+                </Typography>
+              </Box>
+
+              {/* Cart Items */}
+              <Stack spacing={1} sx={{ mb: 1.5 }}>
+                {cart.map((item) => (
+                  <Box
+                    key={item.id}
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 1.5,
+                    }}
+                  >
+                    <Chip
+                      label={item.quantity}
+                      size="small"
+                      sx={{
+                        bgcolor: '#0f172a',
+                        color: '#fff',
+                        fontWeight: 700,
+                        fontSize: '0.7rem',
+                        height: 22,
+                        minWidth: 28,
+                        borderRadius: 1,
+                        '& .MuiChip-label': { px: 0.75 },
+                      }}
+                    />
+                    <Typography
+                      variant="body2"
+                      color="#0f172a"
+                      sx={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                    >
+                      {item.name}
+                    </Typography>
+                    <Typography variant="body2" fontWeight={500} color="#0f172a" sx={{ flexShrink: 0 }}>
+                      {formatINR(item.price * item.quantity)}
+                    </Typography>
+                  </Box>
+                ))}
+              </Stack>
+            </Box>
+
+            <Divider sx={{ borderColor: '#e2e8f0' }} />
+
+            {/* Totals */}
+            <Stack spacing={0.75} sx={{ px: 2, py: 1.5 }}>
+              <SummaryRow label="Subtotal" value={formatINR(subtotal)} />
+              {discount > 0 && (
+                <SummaryRow label="Discount" value={`-${formatINR(discount)}`} color="#16a34a" />
+              )}
+              <SummaryRow label="Tax" value={formatINR(tax)} />
+              <Divider sx={{ borderColor: '#e2e8f0', my: 0.5 }} />
+              <SummaryRow label="Total" value={formatINR(total)} bold />
+            </Stack>
+          </Paper>
+
+          {/* 2. Customer Details */}
+          <Box>
+            <SectionLabel icon={<Person fontSize="small" />} label="Customer Details" />
+            <Stack spacing={2}>
+              <TextField
+                label="Customer Name"
+                required
+                fullWidth
+                size="small"
+                value={customerName}
+                onChange={(e) => setCustomerName(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Person fontSize="small" sx={{ color: '#64748b' }} />
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 1.5,
+                    '&:hover fieldset': { borderColor: '#6366f1' },
+                    '&.Mui-focused fieldset': { borderColor: '#6366f1' },
+                  },
+                  '& label.Mui-focused': { color: '#6366f1' },
+                }}
+              />
+              <TextField
+                label="Phone Number"
+                fullWidth
+                size="small"
+                value={customerPhone}
+                onChange={(e) => setCustomerPhone(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Phone fontSize="small" sx={{ color: '#64748b' }} />
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 1.5,
+                    '&:hover fieldset': { borderColor: '#6366f1' },
+                    '&.Mui-focused fieldset': { borderColor: '#6366f1' },
+                  },
+                  '& label.Mui-focused': { color: '#6366f1' },
+                }}
+              />
+            </Stack>
+          </Box>
+
+          {/* 3. Order Details */}
+          <Box>
+            <SectionLabel icon={<Notes fontSize="small" />} label="Order Details" />
+            <Stack spacing={2}>
+              {tables.length > 0 && (
+                <FormControl fullWidth size="small">
+                  <InputLabel
+                    sx={{
+                      '&.Mui-focused': { color: '#6366f1' },
+                    }}
+                  >
+                    Table (optional)
+                  </InputLabel>
+                  <Select
+                    value={selectedTableId}
+                    label="Table (optional)"
+                    onChange={(e) => setSelectedTableId(e.target.value)}
+                    startAdornment={
+                      <InputAdornment position="start">
+                        <TableRestaurant fontSize="small" sx={{ color: '#64748b' }} />
+                      </InputAdornment>
+                    }
+                    sx={{
+                      borderRadius: 1.5,
+                      '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#6366f1' },
+                      '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#6366f1' },
+                    }}
+                  >
+                    <MenuItem value="">
+                      <Typography color="#64748b">No table</Typography>
+                    </MenuItem>
+                    {tables.map((table) => (
+                      <MenuItem key={table.id} value={table.id}>
+                        {table.table_number ?? table.tableNumber ?? table.id}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              )}
+              <TextField
+                label="Order Notes"
+                fullWidth
+                size="small"
+                multiline
+                rows={2}
+                value={orderNotes}
+                onChange={(e) => setOrderNotes(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start" sx={{ alignSelf: 'flex-start', mt: 1 }}>
+                      <Notes fontSize="small" sx={{ color: '#64748b' }} />
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 1.5,
+                    '&:hover fieldset': { borderColor: '#6366f1' },
+                    '&.Mui-focused fieldset': { borderColor: '#6366f1' },
+                  },
+                  '& label.Mui-focused': { color: '#6366f1' },
+                }}
+              />
+            </Stack>
+          </Box>
+
+          {/* 4. Payment Method */}
+          <Box>
+            <SectionLabel icon={<CreditCard fontSize="small" />} label="Payment Method" />
+            <Box sx={{ display: 'flex', gap: 1.5 }}>
+              {PAYMENT_METHODS.map((method) => {
+                const isActive = paymentMethod === method.value;
+                return (
+                  <Button
+                    key={method.value}
+                    variant={isActive ? 'contained' : 'outlined'}
+                    startIcon={method.icon}
+                    onClick={() => setPaymentMethod(method.value)}
+                    sx={{
+                      flex: 1,
+                      borderRadius: 1.5,
+                      textTransform: 'none',
+                      fontWeight: 600,
+                      fontSize: '0.875rem',
+                      py: 1,
+                      ...(isActive
+                        ? {
+                            bgcolor: '#0f172a',
+                            color: '#fff',
+                            borderColor: '#0f172a',
+                            '&:hover': { bgcolor: '#1e293b', borderColor: '#1e293b' },
+                          }
+                        : {
+                            bgcolor: '#fff',
+                            color: '#64748b',
+                            borderColor: '#e2e8f0',
+                            '&:hover': {
+                              borderColor: '#0f172a',
+                              color: '#0f172a',
+                              bgcolor: '#f8fafc',
+                            },
+                          }),
+                    }}
+                  >
+                    {method.label}
+                  </Button>
+                );
+              })}
+            </Box>
+          </Box>
+
+          {/* 5. Error Alert */}
+          {orderError && (
+            <Alert
+              severity="error"
+              sx={{
+                borderRadius: 1.5,
+                '& .MuiAlert-message': { fontSize: '0.875rem' },
+              }}
+            >
+              {orderError}
+            </Alert>
+          )}
+        </Stack>
+      </DialogContent>
+
+      {/* Dialog Actions */}
+      <DialogActions
+        sx={{
+          px: 3,
+          py: 2,
+          borderTop: '1px solid #e2e8f0',
+          gap: 1.5,
+        }}
+      >
+        <Button
+          onClick={onClose}
+          variant="outlined"
+          sx={{
+            borderRadius: 1.5,
+            textTransform: 'none',
+            fontWeight: 600,
+            color: '#64748b',
+            borderColor: '#e2e8f0',
+            '&:hover': { borderColor: '#0f172a', color: '#0f172a', bgcolor: '#f8fafc' },
+          }}
+        >
+          Cancel
+        </Button>
+        <Button
+          onClick={onPlaceOrder}
+          variant="contained"
+          disabled={processingOrder || !customerName.trim()}
+          sx={{
+            borderRadius: 1.5,
+            textTransform: 'none',
+            fontWeight: 600,
+            bgcolor: '#0f172a',
+            color: '#fff',
+            px: 3,
+            '&:hover': { bgcolor: '#1e293b' },
+            '&.Mui-disabled': { bgcolor: '#e2e8f0', color: '#94a3b8' },
+          }}
+        >
+          {processingOrder ? 'Placing Order...' : 'Place Order'}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+};
+
+export default CheckoutDialog;

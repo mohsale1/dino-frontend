@@ -12,7 +12,6 @@ import {
   useTheme,
   useMediaQuery,
 } from '@mui/material';
-import { NavigateBefore, NavigateNext } from '@mui/icons-material';
 
 export interface PaginationState {
   page: number;

@@ -4,16 +4,6 @@ export interface RegistrationFormData {
   referredByName: string;
   workspaceName: string;
   workspaceDescription: string;
-  billingName: string;
-  billingEmail: string;
-  billingPhone: string;
-  billingAddress: {
-    address: string;
-    city: string;
-    state: string;
-    postal_code: string;
-    country: string;
-  };
   organizationName: string;
   organizationDescription: string;
   organizationLocation: {
@@ -41,16 +31,6 @@ export const initialFormData: RegistrationFormData = {
   referredByName: '',
   workspaceName: '',
   workspaceDescription: '',
-  billingName: '',
-  billingEmail: '',
-  billingPhone: '',
-  billingAddress: {
-    address: '',
-    city: '',
-    state: '',
-    postal_code: '',
-    country: 'India',
-  },
   organizationName: '',
   organizationDescription: '',
   organizationLocation: {

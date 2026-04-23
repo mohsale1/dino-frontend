@@ -61,7 +61,6 @@ class CacheService {
     if (this.persistent) {
       this.saveToStorage(key, item);
     }
-
   }
 
   /**
@@ -101,9 +100,6 @@ class CacheService {
       this.removeFromStorage(key);
     }
 
-    if (deleted) {
-      }
-
     return deleted;
   }
 
@@ -116,8 +112,7 @@ class CacheService {
     if (this.persistent) {
       this.clearStorage();
     }
-
-    }
+  }
 
   /**
    * Get or set pattern - fetch data if not in cache
@@ -223,7 +218,6 @@ class CacheService {
   getStats(): {
     size: number;
     maxSize: number;
-    hitRate: number;
     items: Array<{ key: string; age: number; ttl: number }>;
   } {
     const items = Array.from(this.cache.entries()).map(([key, item]) => ({
@@ -235,7 +229,6 @@ class CacheService {
     return {
       size: this.cache.size,
       maxSize: this.maxSize,
-      hitRate: 0, // Would need to track hits/misses for accurate calculation
       items,
     };
   }
@@ -248,8 +241,9 @@ class CacheService {
       try {
         const data = await fetchFunction();
         this.set(key, data, ttl);
-        } catch (error) {
-        }
+      } catch (error) {
+        // Error handled silently
+      }
     }
   }
 
@@ -296,9 +290,6 @@ class CacheService {
     });
 
     expiredKeys.forEach(key => this.delete(key));
-
-    if (expiredKeys.length > 0) {
-      }
   }
 
   private loadFromStorage(): void {
@@ -321,8 +312,9 @@ class CacheService {
         }
       }
 
-      } catch (error) {
-      }
+    } catch (error) {
+      // Error handled silently
+    }
   }
 
   private saveToStorage(key: string, item: CacheItem<any>): void {
@@ -330,7 +322,8 @@ class CacheService {
       const storageKey = `dino_cache_${key}`;
       localStorage.setItem(storageKey, JSON.stringify(item));
     } catch (error) {
-      }
+      // Error handled silently
+    }
   }
 
   private removeFromStorage(key: string): void {
@@ -338,7 +331,8 @@ class CacheService {
       const storageKey = `dino_cache_${key}`;
       localStorage.removeItem(storageKey);
     } catch (error) {
-      }
+      // Error handled silently
+    }
   }
 
   private clearStorage(): void {
@@ -346,7 +340,8 @@ class CacheService {
       const keys = Object.keys(localStorage).filter(key => key.startsWith('dino_cache_'));
       keys.forEach(key => localStorage.removeItem(key));
     } catch (error) {
-      }
+      // Error handled silently
+    }
   }
 }
 

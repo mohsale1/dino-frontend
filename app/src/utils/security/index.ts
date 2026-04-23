@@ -50,7 +50,7 @@ export function validatePasswordStrength(password: string): PasswordStrength {
   }
 
   // Check for special characters
-  if (/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+  if (/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password)) {
     score++;
   } else {
     feedback.push('Include special characters');
@@ -156,7 +156,7 @@ export function generateSecureToken(length: number = 32): string {
   return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
 }
 
-export default {
+const securityUtils = {
   validatePasswordStrength,
   getPasswordStrengthLabel,
   getPasswordStrengthColor,
@@ -164,3 +164,5 @@ export default {
   isValidEmail,
   generateSecureToken,
 };
+
+export default securityUtils;

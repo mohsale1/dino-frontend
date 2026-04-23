@@ -10,12 +10,7 @@ interface AppInitializerProps {
  * This wraps the app content and ensures UserData is loaded when needed
  */
 const AppInitializer: React.FC<AppInitializerProps> = ({ children }) => {
-  const initStatus = useUserDataInitializer();
-
-  // Log initialization status for debugging (reduced frequency)
-  React.useEffect(() => {
-    if (initStatus.retryCount === 0) {    }
-  }, [initStatus]); // Only log on meaningful changes
+  useUserDataInitializer();
 
   return <>{children}</>;
 };

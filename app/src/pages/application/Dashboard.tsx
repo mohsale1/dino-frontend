@@ -13,7 +13,8 @@ interface DashboardRouterProps {
  */
 const DashboardRouter: React.FC<DashboardRouterProps> = ({ className }) => {
   const { user, isAuthenticated } = useAuth();
-  const { userData } = useUserData();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { userData: _userData } = useUserData();
 
   // Don't block UI with loading state
   // Show dashboard immediately even if loading

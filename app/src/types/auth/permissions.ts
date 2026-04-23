@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Permission Types and Constants
  *
  * Defines all permission types and constants using dot notation (scope.module.action)
@@ -35,7 +35,7 @@ export const PERMISSIONS = {
   // Controls which sidebar entries are rendered (UI gate only).
   // Checked via hasBackendPermission() in AppSidebar before rendering each nav item.
 
-  // Cross-app system permission — used to detect system-admin users in the application frontend
+  // Cross-app system permission â€” used to detect system-admin users in the application frontend
   SYSTEM_WORKSPACES_READ: 'system.workspaces.read',
 
   APPLICATION_DASHBOARD_VIEW: 'application.dashboard.view',
@@ -99,6 +99,9 @@ export const PERMISSIONS = {
   ORDERS_STATUS:  'application.orders.status',
   ORDERS_PAYMENT: 'application.orders.payment',
 
+  // Status permissions
+  STATUS_UPDATE: 'application.status.update',
+
   // User permissions (application)
   USERS_READ:   'application.users.read',
   USERS_CREATE: 'application.users.create',
@@ -123,7 +126,7 @@ export type PermissionName = typeof PERMISSIONS[keyof typeof PERMISSIONS];
 
 export const PERMISSION_GROUPS = {
   // --------------------------------------------------------------------------
-  // Module view permissions — sidebar visibility gates (application scope only)
+  // Module view permissions â€” sidebar visibility gates (application scope only)
   // --------------------------------------------------------------------------
   MODULE_VIEW_PERMISSIONS: {
     label: 'Module Visibility',
@@ -216,6 +219,12 @@ export const PERMISSION_GROUPS = {
       PERMISSIONS.ORDERS_PAYMENT,
     ],
   },
+  STATUS: {
+    label: 'Status Management',
+    permissions: [
+      PERMISSIONS.STATUS_UPDATE,
+    ],
+  },
   USERS: {
     label: 'User Management',
     permissions: [
@@ -248,7 +257,7 @@ export const PERMISSION_GROUPS = {
 
 /**
  * Check if a user's permission set includes the required permission.
- * Uses exact match only — no wildcards.
+ * Uses exact match only â€” no wildcards.
  */
 export const hasPermission = (userPermissions: string[], requiredPermission: string): boolean => {
   return userPermissions.includes(requiredPermission);

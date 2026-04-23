@@ -123,7 +123,7 @@ const WorkspaceSection: React.FC<WorkspaceSectionProps> = ({ onSave }) => {
       });
       setDirty(false);
     }
-  }, [venue?.id]);
+  }, [venue]);
 
   const handleChange = (field: string, value: string | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -183,7 +183,7 @@ const WorkspaceSection: React.FC<WorkspaceSectionProps> = ({ onSave }) => {
   // ---------------------------------------------------------------------------
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 2, sm: 3 } }}>
 
       {/* ── Card 1: Venue Overview ── */}
       <Card elevation={0} sx={{ borderRadius: 3, border: '1px solid #e2e8f0', overflow: 'hidden' }}>

@@ -102,7 +102,6 @@ class ApiService {
       baseURL: API_CONFIG.BASE_URL,
       timeout: API_CONFIG.TIMEOUT,
       headers: API_CONFIG.DEFAULT_HEADERS,
-      adapter: 'fetch',
     });
 
     this.setupInterceptors();
@@ -134,7 +133,6 @@ class ApiService {
         }
 
         // Log request with detailed URL info for debugging
-        const fullUrl = `${config.baseURL}${config.url}`;
         return config;
       },
       (error) => {        return Promise.reject(error);

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * usePermissions Hook
  * Delegates all permission checks to the Auth context via hasBackendPermission.
  * No role-based logic. No hardcoded booleans.
@@ -30,6 +30,9 @@ const P = {
   ORDERS_DELETE:         'application.orders.delete',
   ORDERS_STATUS:         'application.orders.status',
   ORDERS_PAYMENT:        'application.orders.payment',
+
+  // Status
+  STATUS_UPDATE:         'application.status.update',
 
   // Catalog (module view)
   CATALOG_VIEW:          'application.catalog.view',
@@ -120,6 +123,7 @@ export interface UsePermissionsReturn {
   canUpdateOrderStatus: boolean;
   canDeleteOrders: boolean;
   canProcessPayments: boolean;
+  canUpdateStatus: boolean;
 
   // --- Catalog / Items action flags ---
   canReadCatalog: boolean;
@@ -300,6 +304,11 @@ export const usePermissions = (): UsePermissionsReturn => {
     [hasBackendPermission]
   );
 
+  const canUpdateStatus = useMemo(
+    () => hasBackendPermission(P.STATUS_UPDATE),
+    [hasBackendPermission]
+  );
+
   // --- Catalog / Items action flags ---
 
   const canReadCatalog = useMemo(
@@ -473,6 +482,7 @@ export const usePermissions = (): UsePermissionsReturn => {
     canUpdateOrderStatus,
     canDeleteOrders,
     canProcessPayments,
+    canUpdateStatus,
 
     // Catalog / Items
     canReadCatalog,

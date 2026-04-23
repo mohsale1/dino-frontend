@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from 'recharts';
+import ReactECharts from 'echarts-for-react';
 import { Box, Typography } from '@mui/material';
 
 interface Props {
@@ -16,40 +16,16 @@ interface Props {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  pending: '#f59e0b',
-  confirmed: '#3b82f6',
+  pending:   '#f59e0b',
+  confirmed: '#42A5F5',
   preparing: '#8b5cf6',
-  ready: '#10b981',
-  served: '#06b6d4',
-  completed: '#22c55e',
-  cancelled: '#ef4444',
+  ready:     '#10b981',
+  served:    '#0ea5e9',
+  completed: '#10b981',
+  cancelled: '#f43f5e',
 };
 
 const STATUS_ORDER = ['pending', 'confirmed', 'preparing', 'ready', 'served', 'completed', 'cancelled'];
-
-const CustomTooltip = ({ active, payload }: any) => {
-  if (!active || !payload || !payload.length) return null;
-  const entry = payload[0];
-  return (
-    <Box
-      sx={{
-        background: '#fff',
-        border: '1px solid #e2e8f0',
-        borderRadius: 1.5,
-        p: 1.25,
-        boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-      }}
-    >
-      <Typography sx={{ fontSize: '0.75rem', fontWeight: 600, color: '#0f172a' }}>
-        {entry.name}: {entry.value}
-      </Typography>
-      <Typography sx={{ fontSize: '0.7rem', color: '#64748b' }}>
-        {((entry.value / entry.payload.total) * 100).toFixed(1)}%
-      </Typography>
-    </Box>
-  );
-};
-
 
 const OrderStatusChart: React.FC<Props> = ({ data, height = 280 }) => {
   const entries = useMemo(
@@ -67,11 +43,6 @@ const OrderStatusChart: React.FC<Props> = ({ data, height = 280 }) => {
 
   const total = useMemo(() => entries.reduce((s, e) => s + e.value, 0), [entries]);
 
-  const chartData = useMemo(
-    () => entries.map((e) => ({ ...e, total })),
-    [entries, total],
-  );
-
   if (total === 0) {
     return (
       <Box sx={{ height, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -82,48 +53,89 @@ const OrderStatusChart: React.FC<Props> = ({ data, height = 280 }) => {
     );
   }
 
+  const chartHeight = height - 64;
+
+  const option = {
+    backgroundColor: 'transparent',
+    textStyle: { fontFamily: 'inherit' },
+    tooltip: {
+      trigger: 'item',
+      backgroundColor: '#1e293b',
+      borderColor: 'rgba(255,255,255,0.12)',
+      borderWidth: 1,
+      borderRadius: 8,
+      textStyle: { color: '#f1f5f9', fontSize: 12 },
+      padding: [10, 14],
+      formatter: (params: any) => {
+        const pct = total > 0 ? ((params.value / total) * 100).toFixed(1) : '0.0';
+        return `
+          <div style="font-weight:700;font-size:12px;color:#f1f5f9;margin-bottom:4px">${params.name}</div>
+          <div style="font-size:11px;color:#94a3b8">${params.value} orders &nbsp;<span style="color:#64748b">(${pct}%)</span></div>
+        `;
+      },
+    },
+    series: [
+      {
+        type: 'pie',
+        radius: ['48%', '72%'],
+        center: ['50%', '50%'],
+        avoidLabelOverlap: false,
+        label: { show: false },
+        labelLine: { show: false },
+        emphasis: {
+          scale: true,
+          scaleSize: 6,
+          itemStyle: { shadowBlur: 16, shadowColor: 'rgba(0,0,0,0.40)' },
+        },
+        itemStyle: {
+          borderColor: '#1e293b',
+          borderWidth: 2,
+          borderRadius: 4,
+        },
+        data: entries.map((e) => ({
+          name: e.name,
+          value: e.value,
+          itemStyle: { color: e.color },
+        })),
+      },
+    ],
+    graphic: [
+      {
+        type: 'text',
+        left: 'center',
+        top: '42%',
+        style: {
+          text: String(total),
+          textAlign: 'center',
+          fill: '#f1f5f9',
+          fontSize: 22,
+          fontWeight: '800',
+          fontFamily: 'inherit',
+        },
+      },
+      {
+        type: 'text',
+        left: 'center',
+        top: '56%',
+        style: {
+          text: 'Total Orders',
+          textAlign: 'center',
+          fill: '#94a3b8',
+          fontSize: 11,
+          fontFamily: 'inherit',
+        },
+      },
+    ],
+  };
+
   return (
     <Box>
-      <ResponsiveContainer width="100%" height={height - 56}>
-        <PieChart>
-          <Pie
-            data={chartData}
-            cx="50%"
-            cy="50%"
-            innerRadius={60}
-            outerRadius={90}
-            dataKey="value"
-            strokeWidth={2}
-            stroke="#fff"
-          >
-            {chartData.map((entry) => (
-              <Cell key={entry.key} fill={entry.color} />
-            ))}
-          </Pie>
-          <Tooltip content={<CustomTooltip />} />
-          {/* Center label rendered via customized label */}
-          <text
-            x="50%"
-            y="50%"
-            textAnchor="middle"
-            dominantBaseline="middle"
-            style={{ fontSize: 20, fontWeight: 700, fill: '#0f172a' }}
-            dy={-8}
-          >
-            {total}
-          </text>
-          <text
-            x="50%"
-            y="50%"
-            textAnchor="middle"
-            dominantBaseline="middle"
-            style={{ fontSize: 11, fill: '#64748b' }}
-            dy={14}
-          >
-            Orders
-          </text>
-        </PieChart>
-      </ResponsiveContainer>
+      <ReactECharts
+        option={option}
+        style={{ height: chartHeight, width: '100%' }}
+        opts={{ renderer: 'svg' }}
+        notMerge
+      />
 
       {/* Custom legend */}
       <Box
@@ -131,29 +143,25 @@ const OrderStatusChart: React.FC<Props> = ({ data, height = 280 }) => {
           display: 'flex',
           flexWrap: 'wrap',
           justifyContent: 'center',
-          gap: 1,
-          mt: 1,
+          gap: '6px 12px',
           px: 1,
         }}
       >
         {entries.map((entry) => (
-          <Box
-            key={entry.key}
-            sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}
-          >
+          <Box key={entry.key} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
             <Box
               sx={{
                 width: 8,
                 height: 8,
                 borderRadius: '50%',
-                backgroundColor: entry.color,
+                bgcolor: entry.color,
                 flexShrink: 0,
               }}
             />
-            <Typography sx={{ fontSize: '0.7rem', color: '#374151' }}>
+            <Typography sx={{ fontSize: '0.7rem', color: '#94a3b8' }}>
               {entry.name}
             </Typography>
-            <Typography sx={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 600 }}>
+            <Typography sx={{ fontSize: '0.7rem', color: '#f1f5f9', fontWeight: 700 }}>
               {entry.value}
             </Typography>
           </Box>

@@ -119,6 +119,7 @@ const AppFooter: React.FC<AppFooterProps> = ({ variant = 'default' }) => {
       {/* Glow blob — top-right */}
       <Box
         sx={{
+          display: { xs: 'none', md: 'block' },
           position: 'absolute',
           top: '-10%', right: '-5%',
           width: 400, height: 400,
@@ -131,6 +132,7 @@ const AppFooter: React.FC<AppFooterProps> = ({ variant = 'default' }) => {
       {/* Glow blob — bottom-left */}
       <Box
         sx={{
+          display: { xs: 'none', md: 'block' },
           position: 'absolute',
           bottom: '-10%', left: '-5%',
           width: 350, height: 350,
@@ -154,7 +156,7 @@ const AppFooter: React.FC<AppFooterProps> = ({ variant = 'default' }) => {
 
             <Typography
               variant="caption"
-              sx={{ display: 'block', color: 'rgba(255,255,255,0.45)', mb: 2.5, pl: '50px' }}
+              sx={{ display: 'block', color: 'rgba(255,255,255,0.45)', mb: 2.5, pl: 0 }}
             >
               Smart Ordering Solutions
             </Typography>

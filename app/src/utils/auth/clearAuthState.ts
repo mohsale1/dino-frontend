@@ -15,16 +15,21 @@ export const clearAuthState = () => {
     StorageManager.clearAuthData();
     StorageManager.clearCache();
     
-    // Clear any remaining localStorage items
-    localStorage.clear();
+    // Remove remaining dino_ prefixed keys not covered by clearAuthData/clearCache
+    [
+      StorageManager.KEYS.MENU_CACHE,
+      StorageManager.KEYS.SETTINGS,
+      StorageManager.KEYS.THEME,
+      'dino_current_workspace',
+      'dino_current_venue',
+    ].forEach(key => StorageManager.removeItem(key));
     
     // Clear sessionStorage
     sessionStorage.clear();
     
-    console.log('âœ… Authentication state cleared successfully');
     return true;
   } catch (error) {
-    console.error('âŒ Error clearing authentication state:', error);
+    console.error('Error clearing authentication state:', error);
     return false;
   }
 };
@@ -72,26 +77,15 @@ export const autoFixJWTIssues = (): boolean => {
   const health = checkJWTHealth();
   
   if (!health.healthy) {
-    console.warn(`JWT issue detected: ${health.message}`);
-    console.log('Attempting auto-fix...');
-    
     const cleared = clearAuthState();
     
     if (cleared) {
-      console.log('âœ… Auto-fix successful. Please login again.');
       return true;
     } else {
-      console.error('âŒ Auto-fix failed. Please clear browser cache manually.');
+      console.error('Auto-fix failed. Please clear browser cache manually.');
       return false;
     }
   }
   
   return false;
 };
-
-// Make utilities available globally for debugging
-if (typeof window !== 'undefined') {
-  (window as any).clearAuthState = clearAuthState;
-  (window as any).checkJWTHealth = checkJWTHealth;
-  (window as any).autoFixJWTIssues = autoFixJWTIssues;
-}

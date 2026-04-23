@@ -1,4 +1,4 @@
-import React, { useEffect, memo, Suspense } from 'react';
+﻿import React, { useEffect, memo, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider as MuiThemeProvider, createTheme, CssBaseline } from '@mui/material';
 
@@ -7,7 +7,7 @@ import { ProtectedRoute, PermissionSync } from './components/auth';
 import AppLayout from './components/layout/AppLayout';
 import { AppInitializer } from './components/common';
 
-import { AuthProvider, useAuth } from './contexts/common/Auth';
+import { AuthProvider } from './contexts/common/Auth';
 import { ToastProvider } from './contexts/common/Toast';
 import { SidebarProvider } from './contexts/common/Sidebar';
 import { NotificationProvider } from './contexts/common/Notification';
@@ -31,9 +31,6 @@ import { StorageCleanup } from './utils/storage';
 import { tokenRefreshScheduler } from './utils/auth';
 import { apiService } from './utils/api';
 import { initializePerformanceMonitoring } from './utils/performance';
-import { PageTransitionLoader, usePageTransition } from './components/ui/PageTransitionLoader';
-import { ROLE_COLORS } from './constants/app';
-import { useLocation } from 'react-router-dom';
 
 const theme = createTheme({
   palette: {
@@ -48,29 +45,10 @@ const theme = createTheme({
 
 const PublicMenu = React.lazy(() => import('./pages/public/Menu'));
 
-// Inner component — has access to both AuthContext and RouterContext
+// Inner component â€” has access to both AuthContext and RouterContext
 const AppContent = memo(() => {
-  const { loading, userPermissions } = useAuth();
-  const { transitioning } = usePageTransition();
-  const location = useLocation();
-
-  const isPublicMenu = /^\/[^/]+\/[^/]+\/menu/.test(location.pathname);
-
-  const rawRole = (userPermissions?.role?.name || '').toLowerCase();
-  const roleKey: keyof typeof ROLE_COLORS = rawRole.includes('owner') || rawRole.includes('super')
-    ? 'Owner'
-    : rawRole.includes('manager') || rawRole.includes('admin')
-    ? 'Manager'
-    : 'User';
-  const loaderColor = ROLE_COLORS[roleKey].primary;
-
   return (
     <>
-      <PageTransitionLoader
-        visible={!isPublicMenu && (loading || transitioning)}
-        message={loading ? 'Initialising...' : 'Loading...'}
-        color={loaderColor}
-      />
       <Suspense fallback={null}>
         <Routes>
           {/* Public routes */}
@@ -85,14 +63,14 @@ const AppContent = memo(() => {
           {/* Protected application routes */}
           <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
             <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
-            <Route path="/admin/dashboard" element={<AppDashboard />} />
-            <Route path="/admin/pos" element={<POS />} />
-            <Route path="/admin/catalog" element={<Catalog />} />
-            <Route path="/admin/locations" element={<Locations />} />
-            <Route path="/admin/orders" element={<Orders />} />
-            <Route path="/admin/users" element={<Users />} />
-            <Route path="/admin/coupons" element={<Coupons />} />
-            <Route path="/admin/settings" element={<Settings />} />
+            <Route path="/admin/dashboard" element={<ProtectedRoute requiredPermission="application.dashboard.view"><AppDashboard /></ProtectedRoute>} />
+            <Route path="/admin/pos" element={<ProtectedRoute requiredPermission="application.pos.view"><POS /></ProtectedRoute>} />
+            <Route path="/admin/catalog" element={<ProtectedRoute requiredPermission="application.catalog.view"><Catalog /></ProtectedRoute>} />
+            <Route path="/admin/locations" element={<ProtectedRoute requiredPermission="application.locations.view"><Locations /></ProtectedRoute>} />
+            <Route path="/admin/orders" element={<ProtectedRoute requiredPermission="application.orders.view"><Orders /></ProtectedRoute>} />
+            <Route path="/admin/users" element={<ProtectedRoute requiredPermission="application.users.view"><Users /></ProtectedRoute>} />
+            <Route path="/admin/coupons" element={<ProtectedRoute requiredPermission="application.coupons.view"><Coupons /></ProtectedRoute>} />
+            <Route path="/admin/settings" element={<ProtectedRoute requiredPermission="application.settings.view"><Settings /></ProtectedRoute>} />
           </Route>
 
           {/* 404 */}

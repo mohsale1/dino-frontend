@@ -80,7 +80,7 @@ function useCountUp(target: number, duration = 900) {
 const HeroStat: React.FC<{ icon: React.ReactNode; value: number; label: string }> = ({ icon, value, label }) => {
   const count = useCountUp(value);
   return (
-    <Box sx={{ flex: '1 1 140px', px: 2.5, py: 2, borderRadius: 2.5, bgcolor: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', gap: 2 }}>
+    <Box sx={{ flex: '1 1 140px', minWidth: 0, px: 2.5, py: 2, borderRadius: 2.5, bgcolor: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', gap: 2 }}>
       <Box sx={{ width: 36, height: 36, borderRadius: 1.5, bgcolor: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)', color: 'rgba(144,202,249,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
         {icon}
       </Box>
@@ -112,7 +112,7 @@ const DialogHeader: React.FC<{ title: string; subtitle: string; onClose: () => v
         <Typography variant="h6" sx={{ color: '#ffffff', fontWeight: 700, lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{title}</Typography>
         <Typography variant="caption" sx={{ color: 'rgba(144,202,249,0.7)', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{subtitle}</Typography>
       </Box>
-      <IconButton onClick={onClose} size="small" sx={{ color: 'rgba(255,255,255,0.8)', flexShrink: 0, '&:hover': { bgcolor: 'rgba(255,255,255,0.15)' } }}>
+      <IconButton onClick={onClose} size="small" sx={{ color: 'rgba(255,255,255,0.8)', flexShrink: 0, alignSelf: 'flex-start', mt: 0.5, '&:hover': { bgcolor: 'rgba(255,255,255,0.15)' } }}>
         <Close fontSize="small" />
       </IconButton>
     </Box>
@@ -195,10 +195,10 @@ const RolesPermissions: React.FC = () => {
     if (!permRole) return;
     setSavingPerms(true);
     try {
-      const current = new Set<string>(permRole.permissions || []);
-      const next    = new Set<string>(selectedPerms);
-      const toAdd   = selectedPerms.filter(p => !current.has(p));
-      const toRemove = (permRole.permissions || []).filter((p: string) => !next.has(p));
+      const currentNames = new Set<string>(resolvePermNames(permRole.permissions || []));
+      const nextNames    = new Set<string>(selectedPerms);
+      const toAdd        = selectedPerms.filter(p => !currentNames.has(p));
+      const toRemove     = Array.from(currentNames).filter(p => !nextNames.has(p));
       if (toAdd.length    > 0) await systemRoleService.addPermissions(permRole.id, toAdd);
       if (toRemove.length > 0) await systemRoleService.removePermissions(permRole.id, toRemove);
       setSnackbar({ open: true, message: 'Permissions updated successfully.', severity: 'success' });
@@ -416,7 +416,7 @@ const RolesPermissions: React.FC = () => {
         onClose={() => setViewDialogOpen(false)}
         maxWidth="sm"
         fullWidth
-        PaperProps={{ sx: { borderRadius: 3, overflow: 'hidden', maxHeight: '80vh', display: 'flex', flexDirection: 'column' } }}
+        PaperProps={{ sx: { borderRadius: 3, overflow: 'hidden', maxHeight: '85vh', display: 'flex', flexDirection: 'column' } }}
       >
         <DialogHeader
           title={viewingRole?.name || ''}
@@ -517,7 +517,7 @@ const RolesPermissions: React.FC = () => {
         onClose={() => setPermDialogOpen(false)}
         maxWidth="md"
         fullWidth
-        PaperProps={{ sx: { borderRadius: 3, overflow: 'hidden', height: '85vh', display: 'flex', flexDirection: 'column' } }}
+        PaperProps={{ sx: { borderRadius: 3, overflow: 'hidden', height: 'auto', maxHeight: '90vh', display: 'flex', flexDirection: 'column' } }}
       >
         <DialogHeader
           title="Edit Permissions"

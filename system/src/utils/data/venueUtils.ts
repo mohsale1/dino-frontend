@@ -7,7 +7,7 @@
 
 import { UserProfile } from '../../types';
 import { UserData } from '../../services/auth/userData';
-import { isOwner, normalizeRole } from '../../types/auth/roles';
+import { isOwner } from '../../types/auth/roles';
 
 export interface VenueValidationResult {
   hasVenue: boolean;

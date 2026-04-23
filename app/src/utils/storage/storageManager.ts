@@ -254,8 +254,6 @@ export class StorageManager {
    */
   static performCleanup(): void {
     const keysToRemove: string[] = [];
-    let expiredCount = 0;
-    let corruptedCount = 0;
 
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
@@ -276,12 +274,10 @@ export class StorageManager {
         // Check for expiration
         if (item.ttl && Date.now() - item.timestamp > item.ttl) {
           keysToRemove.push(key);
-          expiredCount++;
         }
       } catch (error) {
         // Corrupted item
         keysToRemove.push(key);
-        corruptedCount++;
       }
     }
 

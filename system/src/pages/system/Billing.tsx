@@ -25,7 +25,9 @@ import {
   Divider,
   InputBase,
   Chip,
+  useMediaQuery,
 } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import {
   Visibility,
   Edit,
@@ -198,6 +200,9 @@ const isActiveStatus = (status: string) => status?.toLowerCase() === 'active';
 // Main component
 // ---------------------------------------------------------------------------
 const Billing: React.FC = () => {
+  const theme = useTheme();
+  const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
+
   const [subscriptions, setSubscriptions] = useState<any[]>([]);
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -565,8 +570,8 @@ const Billing: React.FC = () => {
                       }}
                     >
                       {/* Workspace */}
-                      <TableCell>
-                        <Typography variant="body2" sx={{ fontWeight: 600, color: COLORS.dark0 }}>
+                      <TableCell sx={{ maxWidth: { xs: 140, sm: 'none' } }}>
+                        <Typography variant="body2" sx={{ fontWeight: 600, color: COLORS.dark0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {sub.workspace_name || sub.workspace_id}
                         </Typography>
                       </TableCell>
@@ -667,7 +672,8 @@ const Billing: React.FC = () => {
         onClose={() => setDetailsDialogOpen(false)}
         maxWidth="sm"
         fullWidth
-        PaperProps={{ sx: { borderRadius: 3, overflow: 'hidden', maxHeight: '85vh', display: 'flex', flexDirection: 'column' } }}
+        fullScreen={fullScreen}
+        PaperProps={{ sx: { borderRadius: fullScreen ? 0 : 3, overflow: 'hidden', maxHeight: fullScreen ? '100vh' : '85vh', display: 'flex', flexDirection: 'column' } }}
       >
         {/* Header */}
         <Box sx={{
@@ -816,7 +822,8 @@ const Billing: React.FC = () => {
         onClose={() => setEditDialogOpen(false)}
         maxWidth="sm"
         fullWidth
-        PaperProps={{ sx: { borderRadius: 3, overflow: 'hidden' } }}
+        fullScreen={fullScreen}
+        PaperProps={{ sx: { borderRadius: fullScreen ? 0 : 3, overflow: 'hidden' } }}
       >
         <DialogHeader
           title="Edit Subscription"

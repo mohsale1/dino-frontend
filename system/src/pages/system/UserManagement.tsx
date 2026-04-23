@@ -62,7 +62,7 @@ import { systemRoleService } from '../../services/system/role';
 import { systemWorkspaceService } from '../../services/system/workspace';
 import { DeleteConfirmationDialog, PasswordUpdateDialog } from '../../components/dialogs';
 
-// â”€â”€â”€ Design tokens â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Design tokens ─────────────────────────────────────────────────────────────
 const C = {
   indigo:  '#6366f1',
   emerald: '#10b981',
@@ -80,7 +80,7 @@ const C = {
   bg:      '#f1f5f9',
 };
 
-// â”€â”€â”€ Animated counter hook â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Animated counter hook ──────────────────────────────────────────────────────
 const useCountUp = (target: number, duration = 900) => {
   const [count, setCount] = useState(0);
   const raf = useRef<number>(0);
@@ -100,7 +100,7 @@ const useCountUp = (target: number, duration = 900) => {
   return count;
 };
 
-// â”€â”€â”€ Hero stat card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Hero stat card ─────────────────────────────────────────────────────────────
 interface HeroStatProps {
   label: string;
   value: number;
@@ -159,7 +159,7 @@ const HeroStat: React.FC<HeroStatProps> = ({ label, value, icon }) => {
   );
 };
 
-// â”€â”€â”€ Tab panel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Tab panel ─────────────────────────────────────────────────────────────────
 interface TabPanelProps { children?: React.ReactNode; index: number; value: number; }
 const TabPanel: React.FC<TabPanelProps> = ({ children, value, index }) => (
   <div role="tabpanel" hidden={value !== index}>
@@ -167,7 +167,7 @@ const TabPanel: React.FC<TabPanelProps> = ({ children, value, index }) => (
   </div>
 );
 
-// â”€â”€â”€ Main component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Main component ─────────────────────────────────────────────────────────────
 const UserManagement: React.FC = () => {
   const [tabValue, setTabValue]                 = useState(0);
   const [systemUsers, setSystemUsers]           = useState<any[]>([]);
@@ -192,20 +192,25 @@ const UserManagement: React.FC = () => {
 
   const [userForm, setUserForm] = useState({ email: '', firstName: '', lastName: '', phone: '', roleId: '', password: '' });
 
-  // â”€â”€ Data fetching â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Data fetching ─────────────────────────────────────────────────────────────
+  // FIX 1: Fetch roles first, then fetch all users once and split by roleType.
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
-      const [sysUsers, appUsers, rolesData, wsData] = await Promise.all([
-        systemUserService.getUsers(1, 100),
-        systemUserService.getUsers(1, 100),
+      const [rolesData, wsData] = await Promise.all([
         systemRoleService.getRoles(1, 100),
         systemWorkspaceService.getWorkspaces(1, 100),
       ]);
-      setSystemUsers(Array.isArray(sysUsers) ? sysUsers : []);
-      setApplicationUsers(Array.isArray(appUsers) ? appUsers : []);
-      setRoles(Array.isArray(rolesData) ? rolesData : []);
+      const resolvedRoles = Array.isArray(rolesData) ? rolesData : [];
+      setRoles(resolvedRoles);
       setWorkspaces(Array.isArray(wsData) ? wsData : []);
+
+      const allUsers = await systemUserService.getUsers(1, 100);
+      const usersArray = Array.isArray(allUsers) ? allUsers : [];
+      const sysUsers = usersArray.filter(u => resolvedRoles.find(r => r.id === u.roleId)?.roleType === 0);
+      const appUsers = usersArray.filter(u => resolvedRoles.find(r => r.id === u.roleId)?.roleType === 1);
+      setSystemUsers(sysUsers);
+      setApplicationUsers(appUsers);
       setError(null);
     } catch (err: any) {
       setError(err.message || 'Failed to load data');
@@ -216,7 +221,7 @@ const UserManagement: React.FC = () => {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
-  // â”€â”€ Handlers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Handlers ──────────────────────────────────────────────────────────────────
   const handleTabChange = (_: React.SyntheticEvent, v: number) => {
     setTabValue(v);
     setSearchQuery(''); setRoleFilter(''); setStatusFilter(''); setWorkspaceFilter('');
@@ -236,13 +241,12 @@ const UserManagement: React.FC = () => {
 
   const handleSaveUser = async () => {
     try {
-      const selectedRole = roles.find(r => r.id === userForm.roleId);
-      const service = selectedRole?.roleType === 0 ? systemUserService : systemUserService;
+      // FIX 2: Remove dead ternary — always use systemUserService directly.
       if (editingUser) {
-        await service.updateUser(editingUser.id, { firstName: userForm.firstName, lastName: userForm.lastName, phone: userForm.phone, roleId: userForm.roleId });
+        await systemUserService.updateUser(editingUser.id, { firstName: userForm.firstName, lastName: userForm.lastName, phone: userForm.phone, roleId: userForm.roleId });
         setSnackbar({ open: true, message: 'User updated successfully', severity: 'success' });
       } else {
-        await service.createUser({ email: userForm.email, password: userForm.password, firstName: userForm.firstName, lastName: userForm.lastName, phone: userForm.phone, roleId: userForm.roleId });
+        await systemUserService.createUser({ email: userForm.email, password: userForm.password, firstName: userForm.firstName, lastName: userForm.lastName, phone: userForm.phone, roleId: userForm.roleId });
         setSnackbar({ open: true, message: 'User created successfully', severity: 'success' });
       }
       setUserDialogOpen(false);
@@ -260,9 +264,8 @@ const UserManagement: React.FC = () => {
   const handleConfirmDelete = async () => {
     if (!selectedUser) return;
     try {
-      const selectedRole = roles.find(r => r.id === selectedUser.roleId);
-      const service = selectedRole?.roleType === 0 ? systemUserService : systemUserService;
-      await service.deleteUser(selectedUser.id);
+      // FIX 3: Remove dead ternary — always use systemUserService directly.
+      await systemUserService.deleteUser(selectedUser.id);
       setSnackbar({ open: true, message: 'User deactivated successfully', severity: 'success' });
       setDeleteDialogOpen(false); setSelectedUser(null);
       await fetchData();
@@ -273,13 +276,12 @@ const UserManagement: React.FC = () => {
 
   const handleToggleActive = async (user: any) => {
     try {
-      const selectedRole = roles.find(r => r.id === user.roleId);
-      const service = selectedRole?.roleType === 0 ? systemUserService : systemUserService;
+      // FIX 4: Remove dead ternary — always use systemUserService directly.
       if (user.isActive) {
-        await service.deactivateUser(user.id);
+        await systemUserService.deactivateUser(user.id);
         setSnackbar({ open: true, message: 'User deactivated', severity: 'success' });
       } else {
-        await service.activateUser(user.id);
+        await systemUserService.activateUser(user.id);
         setSnackbar({ open: true, message: 'User activated', severity: 'success' });
       }
       await fetchData();
@@ -291,9 +293,8 @@ const UserManagement: React.FC = () => {
   const handlePasswordUpdate = async (newPassword: string) => {
     if (!selectedUser) return;
     try {
-      const selectedRole = roles.find(r => r.id === selectedUser.roleId);
-      const service = selectedRole?.roleType === 0 ? systemUserService : systemUserService;
-      await service.updateUser(selectedUser.id, { password: newPassword } as any);
+      // FIX 5: Remove dead ternary — always use systemUserService directly.
+      await systemUserService.updateUser(selectedUser.id, { password: newPassword } as any);
       setSnackbar({ open: true, message: 'Password updated successfully', severity: 'success' });
       setPasswordDialogOpen(false); setSelectedUser(null);
     } catch (err: any) {
@@ -301,7 +302,7 @@ const UserManagement: React.FC = () => {
     }
   };
 
-  // â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Helpers ───────────────────────────────────────────────────────────────────
   const getUserName = (user: any) => {
     if (!user) return 'Unknown';
     if (user.firstName && user.lastName) return `${user.firstName} ${user.lastName}`;
@@ -328,7 +329,7 @@ const UserManagement: React.FC = () => {
 
   const activeCount = [...systemUsers, ...applicationUsers].filter(u => u.isActive).length;
 
-  // â”€â”€ Table renderer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Table renderer ────────────────────────────────────────────────────────────
   const renderUserTable = (users: any[], showWorkspace = false) => {
     const filtered = filterUsers(users);
 
@@ -352,10 +353,12 @@ const UserManagement: React.FC = () => {
           <TableHead>
             <TableRow sx={{ bgcolor: '#f8fafc', borderBottom: `2px solid ${C.border}` }}>
               <TableCell sx={{ fontWeight: 600, color: C.slate, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em', py: 1.5, width: '28%' }}>User</TableCell>
-              <TableCell sx={{ fontWeight: 600, color: C.slate, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em', width: '16%' }}>Role</TableCell>
+              {/* FIX 6: Hide Role column on xs screens */}
+              <TableCell sx={{ fontWeight: 600, color: C.slate, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em', width: '16%', display: { xs: 'none', sm: 'table-cell' } }}>Role</TableCell>
               {showWorkspace && <TableCell sx={{ fontWeight: 600, color: C.slate, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em', width: '20%' }}>Workspaces</TableCell>}
               <TableCell sx={{ fontWeight: 600, color: C.slate, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em', width: '12%' }}>Status</TableCell>
-              <TableCell sx={{ fontWeight: 600, color: C.slate, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em', width: '14%' }}>Joined</TableCell>
+              {/* FIX 6: Hide Joined column on xs screens */}
+              <TableCell sx={{ fontWeight: 600, color: C.slate, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em', width: '14%', display: { xs: 'none', sm: 'table-cell' } }}>Joined</TableCell>
               <TableCell align="right" sx={{ fontWeight: 600, color: C.slate, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em', width: '18%' }}>Actions</TableCell>
             </TableRow>
           </TableHead>
@@ -396,8 +399,8 @@ const UserManagement: React.FC = () => {
                     </Box>
                   </TableCell>
 
-                  {/* Role */}
-                  <TableCell>
+                  {/* Role — FIX 6: hidden on xs */}
+                  <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>
                     <Typography variant="body2" sx={{ color: C.slate, fontSize: '0.8125rem' }}>
                       {getRoleName(user.roleId)}
                     </Typography>
@@ -408,7 +411,7 @@ const UserManagement: React.FC = () => {
                     <TableCell>
                       {(() => {
                         const wsIds = user.workspaceIds || (user.workspaceId ? [user.workspaceId] : []);
-                        if (wsIds.length === 0) return <Typography variant="caption" sx={{ color: C.muted }}>â€”</Typography>;
+                        if (wsIds.length === 0) return <Typography variant="caption" sx={{ color: C.muted }}>—</Typography>;
                         return (
                           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                             {wsIds.slice(0, 2).map((id: string) => (
@@ -438,10 +441,10 @@ const UserManagement: React.FC = () => {
                     </Box>
                   </TableCell>
 
-                  {/* Joined */}
-                  <TableCell>
+                  {/* Joined — FIX 6: hidden on xs */}
+                  <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>
                     <Typography variant="body2" sx={{ color: C.slate, fontSize: '0.8125rem' }}>
-                      {user.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'â€”'}
+                      {user.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}
                     </Typography>
                   </TableCell>
 
@@ -489,7 +492,7 @@ const UserManagement: React.FC = () => {
     );
   };
 
-  // â”€â”€ Loading / error â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Loading / error ───────────────────────────────────────────────────────────
   if (loading) {
     return (
       <Box sx={{ width: '100%', minHeight: '100vh', bgcolor: C.bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -509,11 +512,11 @@ const UserManagement: React.FC = () => {
     );
   }
 
-  // â”€â”€ Render â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Render ────────────────────────────────────────────────────────────────────
   return (
     <Box sx={{ width: '100%', minHeight: '100vh', bgcolor: C.bg }}>
 
-      {/* â”€â”€ Hero (title + stats inside) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Hero (title + stats inside) ──────────────────────────────────────── */}
       <Box
         sx={{
           background: `linear-gradient(135deg, ${C.dark0} 0%, #1e1b4b 45%, #312e81 100%)`,
@@ -581,7 +584,7 @@ const UserManagement: React.FC = () => {
           </Button>
         </Box>
 
-        {/* Stats row â€” inside hero */}
+        {/* Stats row — FIX 7: added flexWrap: 'wrap' */}
         <Box sx={{ position: 'relative', display: 'flex', gap: 2, flexWrap: 'wrap' }}>
           <HeroStat label="Total Users"   value={systemUsers.length + applicationUsers.length} icon={<GroupOutlined />} />
           <HeroStat label="System Users"  value={systemUsers.length}                           icon={<AdminPanelSettingsOutlined />} />
@@ -590,7 +593,7 @@ const UserManagement: React.FC = () => {
         </Box>
       </Box>
 
-      {/* â”€â”€ Toolbar + Table (full width, no side padding) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Toolbar + Table (full width, no side padding) ─────────────────────── */}
       <Box sx={{ pb: 6 }}>
 
         {/* Toolbar */}
@@ -614,14 +617,15 @@ const UserManagement: React.FC = () => {
                 )}
               </Box>
 
-              <FormControl size="small" sx={{ minWidth: 130 }}>
+              {/* FIX 8: Responsive minWidth on FormControl elements */}
+              <FormControl size="small" sx={{ minWidth: { xs: 100, sm: 130 } }}>
                 <Select value={roleFilter} onChange={e => setRoleFilter(e.target.value)} displayEmpty sx={{ borderRadius: 2, fontSize: '0.875rem', bgcolor: '#f8fafc' }}>
                   <MenuItem value=""><Typography variant="body2" sx={{ color: C.muted }}>All Roles</Typography></MenuItem>
                   {roles.map(r => <MenuItem key={r.id} value={r.id}><Typography variant="body2">{r.name}</Typography></MenuItem>)}
                 </Select>
               </FormControl>
 
-              <FormControl size="small" sx={{ minWidth: 120 }}>
+              <FormControl size="small" sx={{ minWidth: { xs: 95, sm: 120 } }}>
                 <Select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} displayEmpty sx={{ borderRadius: 2, fontSize: '0.875rem', bgcolor: '#f8fafc' }}>
                   <MenuItem value=""><Typography variant="body2" sx={{ color: C.muted }}>All Status</Typography></MenuItem>
                   <MenuItem value="active"><Typography variant="body2">Active</Typography></MenuItem>
@@ -630,7 +634,7 @@ const UserManagement: React.FC = () => {
               </FormControl>
 
               {tabValue === 1 && (
-                <FormControl size="small" sx={{ minWidth: 140 }}>
+                <FormControl size="small" sx={{ minWidth: { xs: 110, sm: 140 } }}>
                   <Select value={workspaceFilter} onChange={e => setWorkspaceFilter(e.target.value)} displayEmpty sx={{ borderRadius: 2, fontSize: '0.875rem', bgcolor: '#f8fafc' }}>
                     <MenuItem value=""><Typography variant="body2" sx={{ color: C.muted }}>All Workspaces</Typography></MenuItem>
                     {workspaces.map(w => <MenuItem key={w.id} value={w.id}><Typography variant="body2">{w.name}</Typography></MenuItem>)}
@@ -660,16 +664,16 @@ const UserManagement: React.FC = () => {
           </Paper>
         </Box>
 
-        {/* Table â€” full width */}
+        {/* Table — full width */}
         <Box sx={{ borderBottom: `1px solid ${C.border}` }}>
           <TabPanel value={tabValue} index={0}>{renderUserTable(systemUsers, false)}</TabPanel>
           <TabPanel value={tabValue} index={1}>{renderUserTable(applicationUsers, true)}</TabPanel>
         </Box>
       </Box>
 
-      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+      {/* ════════════════════════════════════════════════════════════════════════
           Create / Edit User Dialog
-      â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+      ════════════════════════════════════════════════════════════════════════ */}
       <Dialog open={userDialogOpen} onClose={() => setUserDialogOpen(false)} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: 3, overflow: 'hidden' } }}>
         <Box sx={{
           background: `linear-gradient(135deg, ${C.dark0} 0%, #1e1b4b 60%, #312e81 100%)`,
@@ -782,9 +786,9 @@ const UserManagement: React.FC = () => {
         </DialogActions>
       </Dialog>
 
-      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+      {/* ════════════════════════════════════════════════════════════════════════
           User Details Dialog
-      â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+      ════════════════════════════════════════════════════════════════════════ */}
       <Dialog open={detailsDialogOpen} onClose={() => setDetailsDialogOpen(false)} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: 3, overflow: 'hidden' } }}>
         {selectedUser && (() => {
           const name = getUserName(selectedUser);
@@ -899,7 +903,7 @@ const UserManagement: React.FC = () => {
         </DialogActions>
       </Dialog>
 
-      {/* â”€â”€ Password + Delete â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Password + Delete ─────────────────────────────────────────────────── */}
       <PasswordUpdateDialog
         open={passwordDialogOpen}
         onClose={() => { setPasswordDialogOpen(false); setSelectedUser(null); }}
@@ -920,7 +924,7 @@ const UserManagement: React.FC = () => {
         additionalWarnings={['User data will be preserved', 'You can reactivate this user later', 'All user sessions will be terminated']}
       />
 
-      {/* â”€â”€ Snackbar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Snackbar ─────────────────────────────────────────────────────────── */}
       <Snackbar open={snackbar.open} autoHideDuration={5000} onClose={() => setSnackbar({ ...snackbar, open: false })} anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
         <Alert severity={snackbar.severity} onClose={() => setSnackbar({ ...snackbar, open: false })} sx={{ boxShadow: '0 8px 24px rgba(0,0,0,0.12)', borderRadius: 2 }}>
           {snackbar.message}

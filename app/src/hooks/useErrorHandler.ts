@@ -16,7 +16,6 @@ import {
 
 export interface UseErrorHandlerOptions {
   showToast?: boolean;
-  logError?: boolean;
   onAuthError?: () => void;
   onNetworkError?: () => void;
 }
@@ -34,7 +33,6 @@ export interface UseErrorHandlerReturn {
 export function useErrorHandler(options: UseErrorHandlerOptions = {}): UseErrorHandlerReturn {
   const {
     showToast = true,
-    logError = true,
     onAuthError,
     onNetworkError,
   } = options;
@@ -46,17 +44,12 @@ export function useErrorHandler(options: UseErrorHandlerOptions = {}): UseErrorH
    */
   const handleError = useCallback((error: any, customMessage?: string) => {
     const errorDetails = getErrorDetails(error);
-    
-    // Log error if enabled
-    if (logError) {    }
 
-    // Show toast notification if enabled
     if (showToast) {
       const message = customMessage || errorDetails.message;
       toast.showError(message);
     }
 
-    // Handle specific error types
     if (isAuthError(error) && onAuthError) {
       onAuthError();
     }
@@ -64,19 +57,14 @@ export function useErrorHandler(options: UseErrorHandlerOptions = {}): UseErrorH
     if (isNetworkError(error) && onNetworkError) {
       onNetworkError();
     }
-  }, [showToast, logError, toast, onAuthError, onNetworkError]);
+  }, [showToast, toast, onAuthError, onNetworkError]);
 
   /**
    * Handle API errors with context
    */
   const handleApiError = useCallback((error: any, context?: string) => {
-    const errorDetails = getErrorDetails(error);
     const formattedError = formatErrorForDisplay(error);
-    
-    // Log error with context
-    if (logError) {    }
 
-    // Show toast with formatted message
     if (showToast) {
       const severity = formattedError.severity;
       const message = context 
@@ -96,7 +84,6 @@ export function useErrorHandler(options: UseErrorHandlerOptions = {}): UseErrorH
       }
     }
 
-    // Handle specific error types
     if (isAuthError(error) && onAuthError) {
       onAuthError();
     }
@@ -104,7 +91,7 @@ export function useErrorHandler(options: UseErrorHandlerOptions = {}): UseErrorH
     if (isNetworkError(error) && onNetworkError) {
       onNetworkError();
     }
-  }, [showToast, logError, toast, onAuthError, onNetworkError]);
+  }, [showToast, toast, onAuthError, onNetworkError]);
 
   /**
    * Handle validation errors and return field errors
@@ -119,10 +106,6 @@ export function useErrorHandler(options: UseErrorHandlerOptions = {}): UseErrorH
         fieldErrors[field] = message;
       });
 
-      // Log validation errors
-      if (logError) {      }
-
-      // Show toast for validation errors
       if (showToast) {
         const errorCount = Object.keys(fieldErrors).length;
         toast.showWarning(
@@ -130,7 +113,6 @@ export function useErrorHandler(options: UseErrorHandlerOptions = {}): UseErrorH
         );
       }
     } else {
-      // Generic validation error
       const message = getUserFriendlyErrorMessage(error);
       fieldErrors.general = message;
 
@@ -140,15 +122,12 @@ export function useErrorHandler(options: UseErrorHandlerOptions = {}): UseErrorH
     }
 
     return fieldErrors;
-  }, [showToast, logError, toast]);
+  }, [showToast, toast]);
 
   /**
    * Clear error state (for manual error clearing)
    */
-  const clearError = useCallback(() => {
-    // This is a placeholder for future error state management
-    // Currently, toasts auto-dismiss, so no action needed
-  }, []);
+  const clearError = useCallback(() => {}, []);
 
   return {
     handleError,

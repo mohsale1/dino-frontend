@@ -191,7 +191,7 @@ export function logMemoryUsage(): void {
   }
 }
 
-export default {
+const performanceUtils = {
   initializePerformanceMonitoring,
   measureRenderTime,
   markPerformance,
@@ -199,3 +199,5 @@ export default {
   getMemoryUsage,
   logMemoryUsage,
 };
+
+export default performanceUtils;

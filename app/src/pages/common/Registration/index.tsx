@@ -1,10 +1,3 @@
-/**
- * Business Registration Page
- *
- * Multi-step registration form for new business accounts
- * UI matches the login page design with split layout
- */
-
 import React, { useState, useCallback } from 'react';
 import {
   Box,
@@ -15,11 +8,10 @@ import {
   StepLabel,
   Alert,
   CircularProgress,
-  useTheme,
   alpha,
-  useMediaQuery,
   Stack,
   Divider,
+  Link,
 } from '@mui/material';
 import {
   ArrowBack,
@@ -29,16 +21,14 @@ import {
   Store,
   Person,
   Preview,
-  Speed,
   Security,
   Tag,
-  Payment,
   CheckCircleOutline,
   QrCode2,
   Dashboard,
+  VpnKey,
 } from '@mui/icons-material';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
-import { Link } from '@mui/material';
 import { useAuth } from '../../../contexts/common/Auth';
 import { authService } from '../../../services/auth/auth';
 import { apiService } from '../../../utils/api';
@@ -47,14 +37,12 @@ import { useToast } from '../../../contexts/common/Toast';
 import {
   RegistrationCodeStep,
   WorkspaceDetailsStep,
-  BillingDetailsStep,
   OrganizationInformationStep,
   AdminAccountStep,
   ReviewStep,
 } from './Steps';
 import { RegistrationFormData, initialFormData } from './types';
 
-// ─── Design tokens (mirrors Login page BRAND) ────────────────────────────────
 const BRAND = {
   primary:      '#1976D2',
   primaryHover: '#1565C0',
@@ -67,38 +55,33 @@ const BRAND = {
   greenHover:   '#059669',
 };
 
-const steps = [
-  { label: 'Code',          icon: <Tag />,           description: 'Enter registration code' },
-  { label: 'Workspace',     icon: <BusinessIcon />,  description: 'Create your workspace' },
-  { label: 'Billing',       icon: <Payment />,       description: 'Billing information' },
-  { label: 'Organization',  icon: <Store />,         description: 'Add organization details' },
-  { label: 'Admin Account', icon: <Person />,        description: 'Set up admin account' },
-  { label: 'Review',        icon: <Preview />,       description: 'Review and submit' },
+// Per-step metadata: icon shown in the header box + title + subtitle
+const STEPS = [
+  { label: 'Code',          icon: <VpnKey />,       stepIcon: <Tag />,          title: 'Referral Code',       subtitle: 'Enter the 4-digit code provided by your agent' },
+  { label: 'Workspace',     icon: <BusinessIcon />, stepIcon: <BusinessIcon />, title: 'Workspace Details',   subtitle: 'Set up your workspace information' },
+  { label: 'Persona',       icon: <Store />,        stepIcon: <Store />,        title: 'Persona Details',     subtitle: 'Tell us about your first venue or branch' },
+  { label: 'Admin Account', icon: <Person />,       stepIcon: <Person />,       title: 'Admin Account',       subtitle: 'Create your administrator account' },
+  { label: 'Review',        icon: <Preview />,      stepIcon: <Preview />,      title: 'Review & Submit',     subtitle: 'Review all details before creating your account' },
 ];
 
-// Features shown in the left branding panel — mirrors Login APP_FEATURES style
 const APP_FEATURES = [
-  { icon: CheckCircleOutline, text: 'Quick 6-step setup process' },
-  { icon: Speed,              text: 'Start selling in minutes' },
+  { icon: CheckCircleOutline, text: 'Quick 5-step setup process' },
   { icon: QrCode2,            text: 'QR-based ordering system' },
   { icon: Dashboard,          text: 'Real-time analytics dashboard' },
   { icon: Store,              text: 'Full catalog & venue management' },
   { icon: Security,           text: 'Secure & reliable platform' },
 ];
 
-// Thin scrollbar mixin reused in multiple panels
-const thinScrollbar = {
+const scrollbarSx = {
   '&::-webkit-scrollbar':       { width: 4 },
   '&::-webkit-scrollbar-track': { background: 'transparent' },
-  '&::-webkit-scrollbar-thumb': { background: 'rgba(0,0,0,0.15)', borderRadius: 2 },
+  '&::-webkit-scrollbar-thumb': { background: 'rgba(0,0,0,0.12)', borderRadius: 2 },
 };
 
 const RegisterPage: React.FC = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
   const { showToast } = useToast();
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const [activeStep,          setActiveStep]          = useState(0);
   const [loading,             setLoading]             = useState(false);
@@ -108,57 +91,35 @@ const RegisterPage: React.FC = () => {
   const [showPassword,        setShowPassword]        = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  // Auto-redirect if already authenticated
   React.useEffect(() => {
-    if (isAuthenticated) {
-      navigate('/admin', { replace: true });
-    }
+    if (isAuthenticated) navigate('/admin', { replace: true });
   }, [isAuthenticated, navigate]);
 
   const handleInputChange = useCallback((field: string, value: any) => {
-    // Handle nested fields (e.g., 'venueLocation.address')
     if (field.includes('.')) {
       const [parent, child] = field.split('.');
-      setFormData(prev => ({
-        ...prev,
-        [parent]: {
-          ...(prev as any)[parent],
-          [child]: value,
-        },
-      }));
+      setFormData(prev => ({ ...prev, [parent]: { ...(prev as any)[parent], [child]: value } }));
     } else {
-      setFormData(prev => ({
-        ...prev,
-        [field]: value,
-      }));
+      setFormData(prev => ({ ...prev, [field]: value }));
     }
-
-    // Clear validation error for this field
     if (validationErrors[field]) {
-      setValidationErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors[field];
-        return newErrors;
-      });
+      setValidationErrors(prev => { const n = { ...prev }; delete n[field]; return n; });
     }
     setError('');
   }, [validationErrors]);
 
   const validateStep = async (step: number): Promise<boolean> => {
     const errors: Record<string, string> = {};
-
     switch (step) {
-      case 0: // Referral Code (Required)
+      case 0:
         if (!formData.referralCode || formData.referralCode.length !== 4) {
           errors.referralCode = 'Referral code is required (4 digits)';
         } else if (!/^\d{4}$/.test(formData.referralCode)) {
           errors.referralCode = 'Code must contain only numbers';
         } else if (!formData.referralCodeValid) {
-          // Validate the referral code via API
           try {
             setLoading(true);
             const response = await apiService.get(`/application/auth/validate-referral?code=${formData.referralCode}`);
-
             if (response.success && response.data) {
               const data = response.data as any;
               const firstName = data.firstName || data.first_name || '';
@@ -166,147 +127,69 @@ const RegisterPage: React.FC = () => {
               const referredByName = `${firstName} ${lastName}`.trim() || data.email;
               handleInputChange('referralCodeValid', true);
               handleInputChange('referredByName', referredByName);
-
-              // Show success toast with referred by info
               showToast(`Referral code validated! Referred by: ${referredByName}`, 'success');
             } else {
               errors.referralCode = 'Invalid referral code';
             }
-          } catch (error: any) {
-            errors.referralCode = error.message || 'Invalid referral code';
+          } catch (err: any) {
+            errors.referralCode = err.message || 'Invalid referral code';
           } finally {
             setLoading(false);
           }
         }
         break;
-
-      case 1: // Workspace Details
-        if (!formData.workspaceName.trim()) {
-          errors.workspaceName = 'Workspace name is required';
-        }
+      case 1:
+        if (!formData.workspaceName.trim()) errors.workspaceName = 'Workspace name is required';
         break;
-
-      case 2: // Billing Details
-        if (!formData.billingName || !formData.billingName.trim()) {
-          errors.billingName = 'Billing name is required';
-        }
-        if (!formData.billingEmail || !formData.billingEmail.trim()) {
-          errors.billingEmail = 'Email is required';
-        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.billingEmail)) {
-          errors.billingEmail = 'Invalid email format';
-        }
-        if (!formData.billingPhone || !formData.billingPhone.trim()) {
-          errors.billingPhone = 'Phone number is required';
-        }
-        if (!formData.billingAddress.address || !formData.billingAddress.address.trim()) {
-          errors['billingAddress.address'] = 'Address is required';
-        }
-        if (!formData.billingAddress.city || !formData.billingAddress.city.trim()) {
-          errors['billingAddress.city'] = 'City is required';
-        }
-        if (!formData.billingAddress.state || !formData.billingAddress.state.trim()) {
-          errors['billingAddress.state'] = 'State is required';
-        }
-        if (!formData.billingAddress.postal_code || !formData.billingAddress.postal_code.trim()) {
-          errors['billingAddress.postal_code'] = 'Postal code is required';
-        }
-        break;
-
-      case 3: // Organization Information
-        if (!formData.organizationName.trim()) {
-          errors.organizationName = 'Organization name is required';
-        }
-        if (!formData.organizationPhone.trim()) {
-          errors.organizationPhone = 'Phone number is required';
-        }
+      case 2:
+        if (!formData.organizationName.trim())  errors.organizationName = 'Organization name is required';
+        if (!formData.organizationPhone.trim())  errors.organizationPhone = 'Phone number is required';
         if (!formData.organizationEmail.trim()) {
           errors.organizationEmail = 'Email is required';
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.organizationEmail)) {
           errors.organizationEmail = 'Invalid email format';
         }
-        if (!formData.organizationLocation.address.trim()) {
-          errors['organizationLocation.address'] = 'Address is required';
-        }
-        if (!formData.organizationLocation.city.trim()) {
-          errors['organizationLocation.city'] = 'City is required';
-        }
-        if (!formData.organizationLocation.state.trim()) {
-          errors['organizationLocation.state'] = 'State is required';
-        }
-        if (!formData.organizationLocation.postal_code.trim()) {
-          errors['organizationLocation.postal_code'] = 'Postal code is required';
-        }
+        if (!formData.organizationLocation.address.trim())     errors['organizationLocation.address']     = 'Address is required';
+        if (!formData.organizationLocation.city.trim())        errors['organizationLocation.city']        = 'City is required';
+        if (!formData.organizationLocation.state.trim())       errors['organizationLocation.state']       = 'State is required';
+        if (!formData.organizationLocation.postal_code.trim()) errors['organizationLocation.postal_code'] = 'Postal code is required';
         break;
-
-      case 4: // Admin Account
-        if (!formData.adminFirstName.trim()) {
-          errors.adminFirstName = 'First name is required';
-        }
-        if (!formData.adminLastName.trim()) {
-          errors.adminLastName = 'Last name is required';
-        }
+      case 3:
+        if (!formData.adminFirstName.trim()) errors.adminFirstName = 'First name is required';
+        if (!formData.adminLastName.trim())  errors.adminLastName  = 'Last name is required';
         if (!formData.adminEmail.trim()) {
           errors.adminEmail = 'Email is required';
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.adminEmail)) {
           errors.adminEmail = 'Invalid email format';
         }
-        if (!formData.adminPhone.trim()) {
-          errors.adminPhone = 'Phone number is required';
-        }
+        if (!formData.adminPhone.trim()) errors.adminPhone = 'Phone number is required';
         if (!formData.adminPassword) {
           errors.adminPassword = 'Password is required';
         } else if (formData.adminPassword.length < 8) {
           errors.adminPassword = 'Password must be at least 8 characters';
         }
-        if (formData.adminPassword !== formData.confirmPassword) {
-          errors.confirmPassword = 'Passwords do not match';
-        }
+        if (formData.adminPassword !== formData.confirmPassword) errors.confirmPassword = 'Passwords do not match';
         break;
     }
-
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
   };
 
   const handleNext = async () => {
-    if (await validateStep(activeStep)) {
-      setActiveStep(prev => prev + 1);
-    }
+    if (await validateStep(activeStep)) setActiveStep(p => p + 1);
   };
 
-  const handleBack = () => {
-    setActiveStep(prev => prev - 1);
-    setError('');
-  };
+  const handleBack = () => { setActiveStep(p => p - 1); setError(''); };
 
   const handleSubmit = async () => {
-    if (!validateStep(activeStep)) {
-      return;
-    }
-
+    if (!validateStep(activeStep)) return;
     setLoading(true);
     setError('');
-
     try {
-      // Prepare registration data according to new backend API
-      const registrationData = {
-        referral_code: formData.referralCode,
-
-        // Workspace
+      await authService.signup({
+        referral_code:         formData.referralCode,
         workspace_name:        formData.workspaceName,
         workspace_description: formData.workspaceDescription,
-
-        // Billing Information
-        billing_name:        formData.billingName,
-        billing_email:       formData.billingEmail,
-        billing_phone:       formData.billingPhone,
-        billing_address:     formData.billingAddress.address,
-        billing_city:        formData.billingAddress.city,
-        billing_state:       formData.billingAddress.state,
-        billing_postal_code: formData.billingAddress.postal_code,
-        billing_country:     formData.billingAddress.country,
-
-        // Organization
         organization: {
           name:              formData.organizationName,
           description:       formData.organizationDescription,
@@ -320,8 +203,6 @@ const RegisterPage: React.FC = () => {
           organization_type: formData.organizationType,
           order_type:        formData.orderType,
         },
-
-        // Admin User
         admin_user: {
           email:      formData.adminEmail,
           password:   formData.adminPassword,
@@ -329,32 +210,15 @@ const RegisterPage: React.FC = () => {
           last_name:  formData.adminLastName,
           phone:      formData.adminPhone,
         },
-      };
-
-      await authService.signup(registrationData);
-
-      // Navigate to login with success message
-      navigate('/login', {
-        replace: true,
-        state: {
-          message: 'Registration successful! Please sign in to continue.',
-          email:   formData.adminEmail,
-        },
       });
+      navigate('/login', { replace: true, state: { message: 'Registration successful! Please sign in to continue.', email: formData.adminEmail } });
     } catch (err: any) {
-      const errorMessage = err.response?.data?.detail || err.message || 'Registration failed. Please try again.';
-      setError(errorMessage);
-
-      // If error is related to a specific field, scroll to that step
-      if (errorMessage.toLowerCase().includes('referral') || errorMessage.toLowerCase().includes('code')) {
-        setActiveStep(0);
-      } else if (errorMessage.toLowerCase().includes('workspace')) {
-        setActiveStep(1);
-      } else if (errorMessage.toLowerCase().includes('organization') || errorMessage.toLowerCase().includes('venue')) {
-        setActiveStep(2);
-      } else if (errorMessage.toLowerCase().includes('email') || errorMessage.toLowerCase().includes('admin')) {
-        setActiveStep(3);
-      }
+      const msg = err.response?.data?.detail || err.message || 'Registration failed. Please try again.';
+      setError(msg);
+      if (msg.toLowerCase().includes('referral') || msg.toLowerCase().includes('code'))         setActiveStep(0);
+      else if (msg.toLowerCase().includes('workspace'))                                          setActiveStep(1);
+      else if (msg.toLowerCase().includes('organization') || msg.toLowerCase().includes('venue')) setActiveStep(2);
+      else if (msg.toLowerCase().includes('admin') || msg.toLowerCase().includes('email'))       setActiveStep(3);
     } finally {
       setLoading(false);
     }
@@ -362,101 +226,48 @@ const RegisterPage: React.FC = () => {
 
   const renderStepContent = (step: number) => {
     switch (step) {
-      case 0:
-        return (
-          <RegistrationCodeStep
-            formData={formData}
-            onInputChange={handleInputChange}
-            errors={validationErrors}
-          />
-        );
-      case 1:
-        return (
-          <WorkspaceDetailsStep
-            formData={formData}
-            onInputChange={handleInputChange}
-            errors={validationErrors}
-          />
-        );
-      case 2:
-        return (
-          <BillingDetailsStep
-            formData={formData}
-            onInputChange={handleInputChange}
-            errors={validationErrors}
-          />
-        );
-      case 3:
-        return (
-          <OrganizationInformationStep
-            formData={formData}
-            onInputChange={handleInputChange}
-            errors={validationErrors}
-          />
-        );
-      case 4:
-        return (
-          <AdminAccountStep
-            formData={formData}
-            onInputChange={handleInputChange}
-            errors={validationErrors}
-            showPassword={showPassword}
-            showConfirmPassword={showConfirmPassword}
-            onTogglePassword={() => setShowPassword(!showPassword)}
-            onToggleConfirmPassword={() => setShowConfirmPassword(!showConfirmPassword)}
-          />
-        );
-      case 5:
-        return (
-          <ReviewStep
-            formData={formData}
-          />
-        );
-      default:
-        return null;
+      case 0: return <RegistrationCodeStep formData={formData} onInputChange={handleInputChange} errors={validationErrors} />;
+      case 1: return <WorkspaceDetailsStep formData={formData} onInputChange={handleInputChange} errors={validationErrors} />;
+      case 2: return <OrganizationInformationStep formData={formData} onInputChange={handleInputChange} errors={validationErrors} />;
+      case 3: return (
+        <AdminAccountStep
+          formData={formData} onInputChange={handleInputChange} errors={validationErrors}
+          showPassword={showPassword} showConfirmPassword={showConfirmPassword}
+          onTogglePassword={() => setShowPassword(p => !p)}
+          onToggleConfirmPassword={() => setShowConfirmPassword(p => !p)}
+        />
+      );
+      case 4: return <ReviewStep formData={formData} />;
+      default: return null;
     }
   };
 
-  // ─── Compact stepper (right panel, desktop) ───────────────────────────────
-  const compactStepper = (
-    <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 0 }}>
-      {steps.map((step, index) => (
+  // ─── Stepper ──────────────────────────────────────────────────────────────
+  const renderStepper = (showLabels: boolean) => (
+    <Stepper activeStep={activeStep} alternativeLabel>
+      {STEPS.map((step, index) => (
         <Step key={step.label}>
           <StepLabel
             StepIconComponent={() => (
-              <Box
-                sx={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: '50%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  backgroundColor:
-                    index < activeStep
-                      ? BRAND.green
-                      : index === activeStep
-                      ? BRAND.primary
-                      : '#e2e8f0',
-                  color: index <= activeStep ? '#ffffff' : '#94a3b8',
-                  transition: 'all 0.3s ease',
-                  flexShrink: 0,
-                  boxShadow:
-                    index === activeStep
-                      ? `0 0 0 3px ${alpha(BRAND.primary, 0.18)}`
-                      : index < activeStep
-                      ? `0 0 0 3px ${alpha(BRAND.green, 0.15)}`
-                      : 'none',
-                }}
-              >
+              <Box sx={{
+                width: showLabels ? 32 : 28,
+                height: showLabels ? 32 : 28,
+                borderRadius: '50%',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                backgroundColor: index < activeStep ? BRAND.green : index === activeStep ? BRAND.primary : '#e2e8f0',
+                color: index <= activeStep ? '#ffffff' : '#94a3b8',
+                transition: 'all 0.3s ease',
+                flexShrink: 0,
+                boxShadow: index === activeStep ? `0 0 0 3px ${alpha(BRAND.primary, 0.18)}` : index < activeStep ? `0 0 0 3px ${alpha(BRAND.green, 0.15)}` : 'none',
+              }}>
                 {index < activeStep
-                  ? <CheckCircle sx={{ fontSize: 18 }} />
-                  : React.cloneElement(step.icon, { sx: { fontSize: 16 } })}
+                  ? <CheckCircle sx={{ fontSize: showLabels ? 18 : 15 }} />
+                  : React.cloneElement(step.stepIcon, { sx: { fontSize: showLabels ? 16 : 14 } })}
               </Box>
             )}
             sx={{
               '& .MuiStepLabel-label': {
-                display: { xs: 'none', sm: 'block' },
+                display: showLabels ? { xs: 'none', sm: 'block' } : 'none',
                 color: index <= activeStep ? '#0f172a' : '#94a3b8',
                 fontWeight: index === activeStep ? 700 : 500,
                 fontSize: '0.75rem',
@@ -471,391 +282,218 @@ const RegisterPage: React.FC = () => {
     </Stepper>
   );
 
-  // ─── Back to Home link (matches Login page style) ─────────────────────────
-  const backToHomeLink = (
-    <Typography variant="body2" textAlign="center" mt={1}>
-      <Link
-        component={RouterLink}
-        to="/"
-        sx={{ color: '#94a3b8', fontSize: '0.8125rem', textDecorationColor: 'transparent', '&:hover': { color: '#64748b' } }}
-      >
-        Back to Home
-      </Link>
-    </Typography>
+  // ─── Step header (icon box + title + subtitle) — mirrors Login form header ─
+  const stepHeader = (
+    <Box display="flex" flexDirection="column" mb={4}>
+      <Box sx={{
+        width: 44, height: 44, borderRadius: 2,
+        bgcolor: alpha(BRAND.primary, 0.1),
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        mb: 2,
+      }}>
+        {React.cloneElement(STEPS[activeStep].icon, { sx: { color: BRAND.primary, fontSize: 22 } })}
+      </Box>
+      <Typography variant="h5" fontWeight={700} color="#0f172a" letterSpacing="-0.3px">
+        {STEPS[activeStep].title}
+      </Typography>
+      <Typography variant="body2" color="text.secondary" mt={0.5}>
+        {STEPS[activeStep].subtitle}
+      </Typography>
+    </Box>
   );
 
-  // ─── Navigation buttons + sign-in link ───────────────────────────────────
-  const navigationButtons = (
+  // ─── Nav buttons ──────────────────────────────────────────────────────────
+  const navButtons = (
     <>
-      <Stack direction="row" spacing={2} justifyContent="space-between" sx={{ mt: 3 }}>
+      <Stack direction="row" spacing={2} sx={{ mt: 3 }}>
         <Button
           variant="outlined"
           startIcon={<ArrowBack />}
           onClick={handleBack}
           disabled={activeStep === 0 || loading}
           sx={{
-            borderRadius: 2,
-            textTransform: 'none',
-            fontWeight: 600,
-            px: 3,
-            py: 1.5,
-            fontSize: '1rem',
-            borderWidth: 1.5,
-            borderColor: '#e2e8f0',
-            color: '#64748b',
-            '&:hover': {
-              borderWidth: 1.5,
-              borderColor: BRAND.primary,
-              backgroundColor: alpha(BRAND.primary, 0.04),
-              color: BRAND.primary,
-            },
-            '&:disabled': {
-              borderColor: '#e2e8f0',
-              color: '#cbd5e1',
-            },
+            borderRadius: 2, textTransform: 'none', fontWeight: 600,
+            px: 3, py: 1.5, fontSize: '1rem', borderWidth: 1.5,
+            borderColor: '#e2e8f0', color: '#64748b',
+            '&:hover': { borderWidth: 1.5, borderColor: BRAND.primary, backgroundColor: alpha(BRAND.primary, 0.04), color: BRAND.primary },
+            '&:disabled': { borderColor: '#e2e8f0', color: '#cbd5e1' },
           }}
         >
           Back
         </Button>
 
-        {activeStep < steps.length - 1 ? (
+        {activeStep < STEPS.length - 1 ? (
           <Button
-            variant="contained"
-            endIcon={<ArrowForward />}
-            onClick={handleNext}
-            disabled={loading}
+            variant="contained" endIcon={loading ? undefined : <ArrowForward />}
+            onClick={handleNext} disabled={loading}
             sx={{
-              flex: 1,
-              borderRadius: 2,
-              textTransform: 'none',
-              fontWeight: 700,
-              px: 4,
-              py: 1.5,
-              fontSize: '1rem',
-              backgroundColor: BRAND.primary,
-              color: '#ffffff',
+              flex: 1, borderRadius: 2, textTransform: 'none', fontWeight: 700,
+              py: 1.5, fontSize: '1rem', bgcolor: BRAND.primary,
               boxShadow: '0 4px 14px rgba(25,118,210,0.3)',
-              '&:hover': {
-                backgroundColor: BRAND.primaryHover,
-                boxShadow: '0 6px 20px rgba(25,118,210,0.4)',
-                transform: 'translateY(-1px)',
-              },
-              '&:disabled': {
-                backgroundColor: alpha(BRAND.primary, 0.4),
-                color: 'rgba(255,255,255,0.7)',
-              },
+              '&:hover': { bgcolor: BRAND.primaryHover, boxShadow: '0 6px 20px rgba(25,118,210,0.4)', transform: 'translateY(-1px)' },
+              '&:disabled': { bgcolor: alpha(BRAND.primary, 0.4), color: 'rgba(255,255,255,0.7)' },
               transition: 'all 0.2s ease',
             }}
           >
-            {loading ? <CircularProgress size={22} sx={{ color: '#ffffff' }} /> : 'Continue'}
+            {loading ? <CircularProgress size={22} sx={{ color: '#fff' }} /> : 'Continue'}
           </Button>
         ) : (
           <Button
-            variant="contained"
-            endIcon={loading ? undefined : <CheckCircle />}
-            onClick={handleSubmit}
-            disabled={loading}
+            variant="contained" endIcon={loading ? undefined : <CheckCircle />}
+            onClick={handleSubmit} disabled={loading}
             sx={{
-              flex: 1,
-              borderRadius: 2,
-              textTransform: 'none',
-              fontWeight: 700,
-              px: 4,
-              py: 1.5,
-              fontSize: '1rem',
-              backgroundColor: BRAND.green,
-              color: '#ffffff',
+              flex: 1, borderRadius: 2, textTransform: 'none', fontWeight: 700,
+              py: 1.5, fontSize: '1rem', bgcolor: BRAND.green,
               boxShadow: '0 4px 14px rgba(16,185,129,0.25)',
-              '&:hover': {
-                backgroundColor: BRAND.greenHover,
-                boxShadow: '0 6px 20px rgba(16,185,129,0.35)',
-                transform: 'translateY(-1px)',
-              },
-              '&:disabled': {
-                backgroundColor: '#cbd5e1',
-                color: '#64748b',
-              },
+              '&:hover': { bgcolor: BRAND.greenHover, boxShadow: '0 6px 20px rgba(16,185,129,0.35)', transform: 'translateY(-1px)' },
+              '&:disabled': { bgcolor: '#cbd5e1', color: '#64748b' },
               transition: 'all 0.2s ease',
             }}
           >
-            {loading ? <CircularProgress size={24} sx={{ color: '#ffffff' }} /> : 'Create Account'}
+            {loading ? <CircularProgress size={24} sx={{ color: '#fff' }} /> : 'Create Account'}
           </Button>
         )}
       </Stack>
 
-      <Divider sx={{ my: 2.5, borderColor: '#e2e8f0' }} />
-      <Box sx={{ textAlign: 'center', pb: 1 }}>
-        <Typography variant="body2" sx={{ color: '#64748b' }}>
-          Already have an account?{' '}
-          <Button
-            variant="text"
-            onClick={() => navigate('/login')}
-            sx={{
-              textTransform: 'none',
-              fontWeight: 700,
-              p: 0,
-              minWidth: 'auto',
-              color: BRAND.primary,
-              '&:hover': { backgroundColor: 'transparent', textDecoration: 'underline' },
-            }}
-          >
-            Sign In
-          </Button>
-        </Typography>
-        {backToHomeLink}
-      </Box>
+      <Typography variant="body2" textAlign="center" color="text.secondary" mt={3}>
+        Already have an account?{' '}
+        <Link component={RouterLink} to="/login" fontWeight={600} sx={{ color: BRAND.primary }}>
+          Sign In
+        </Link>
+      </Typography>
+      <Typography variant="body2" textAlign="center" mt={1.5}>
+        <Link component={RouterLink} to="/" sx={{ color: 'text.disabled', fontSize: '0.8125rem' }}>
+          Back to Home
+        </Link>
+      </Typography>
     </>
   );
 
-  // ─── Shared error alert ───────────────────────────────────────────────────
+  // ─── Error alert ──────────────────────────────────────────────────────────
   const errorAlert = error ? (
-    <Alert
-      severity="error"
-      onClose={() => setError('')}
-      sx={{
-        mb: 2.5,
-        borderRadius: 2,
-        backgroundColor: alpha('#ef4444', 0.1),
-        color: '#dc2626',
-        border: `1px solid ${alpha('#ef4444', 0.3)}`,
-        '& .MuiAlert-icon': { color: '#ef4444' },
-      }}
-    >
+    <Alert severity="error" onClose={() => setError('')} sx={{ mb: 2.5, borderRadius: 2 }}>
       {error}
     </Alert>
   ) : null;
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // DESKTOP LAYOUT (md+)
-  // ═══════════════════════════════════════════════════════════════════════════
-  const desktopLayout = (
-    <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: BRAND.panelBg }}>
+  // ─── Form content (shared between desktop + mobile) ───────────────────────
+  const formContent = (
+    <Box width="100%" maxWidth={380}>
+      {stepHeader}
+      {errorAlert}
+      {renderStepContent(activeStep)}
+      {navButtons}
+    </Box>
+  );
+
+  return (
+    <Box sx={{ display: 'flex', height: '100vh', overflow: 'hidden', bgcolor: BRAND.panelBg }}>
 
       {/* LEFT BRANDING PANEL */}
-      <Box
-        sx={{
+      <Box sx={{
+        display: { xs: 'none', md: 'flex' },
+        flex: 1,
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        px: { md: 6, lg: 10 },
+        py: 8,
+        background: `linear-gradient(160deg, ${BRAND.panelBg} 0%, ${BRAND.panelBg2} 60%, ${BRAND.panelBg} 100%)`,
+        borderRight: `1px solid ${BRAND.accentBorder}`,
+        position: 'relative',
+        overflow: 'hidden',
+      }}>
+        <Box sx={{
+          position: 'absolute', top: '20%', left: '50%', transform: 'translateX(-50%)',
+          width: 320, height: 320, borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(25,118,210,0.08) 0%, transparent 70%)',
+          pointerEvents: 'none',
+        }} />
+        <DinoLogo size={72} animated />
+        <Typography variant="h4" fontWeight={700} color="white" mt={3} textAlign="center" sx={{ letterSpacing: '-0.5px' }}>
+          Join Dino Today
+        </Typography>
+        <Typography variant="body1" color="rgba(255,255,255,0.55)" mt={1.5} textAlign="center" maxWidth={300} lineHeight={1.6}>
+          Start your digital transformation journey
+        </Typography>
+        <Divider sx={{ width: 48, borderColor: BRAND.accentBorder, my: 4 }} />
+        <Box display="flex" flexDirection="column" gap={2} width="100%" maxWidth={300}>
+          {APP_FEATURES.map(({ icon: Icon, text }, i) => (
+            <Box key={i} display="flex" alignItems="center" gap={2} sx={{ px: 2, py: 1.25, borderRadius: 2, bgcolor: BRAND.accent, border: `1px solid ${BRAND.accentBorder}` }}>
+              <Icon sx={{ fontSize: 20, color: BRAND.primaryLight, flexShrink: 0 }} />
+              <Typography variant="body2" color="rgba(255,255,255,0.8)" fontWeight={500}>{text}</Typography>
+            </Box>
+          ))}
+        </Box>
+        <Typography variant="caption" color="rgba(255,255,255,0.25)" mt={6} textAlign="center">
+          Dino &copy; {new Date().getFullYear()}
+        </Typography>
+      </Box>
+
+      {/* RIGHT FORM PANEL (desktop) */}
+      <Box sx={{
+        display: { xs: 'none', md: 'flex' },
+        flexDirection: 'column',
+        width: { md: 480, lg: 520 },
+        flexShrink: 0,
+        bgcolor: '#ffffff',
+        overflowY: 'auto',
+        animation: 'authPanelIn 0.28s cubic-bezier(0.22,1,0.36,1) both',
+        '@keyframes authPanelIn': {
+          from: { opacity: 0, transform: 'translateX(18px)' },
+          to:   { opacity: 1, transform: 'translateX(0)' },
+        },
+        ...scrollbarSx,
+      }}>
+        {/* Stepper pinned at top */}
+        <Box sx={{ flexShrink: 0, px: { md: 5, lg: 6 }, pt: 3.5, pb: 2, borderBottom: '1px solid #f1f5f9' }}>
+          {renderStepper(true)}
+        </Box>
+
+        {/* Form — centred vertically in remaining space */}
+        <Box sx={{
           flex: 1,
           display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
           alignItems: 'center',
-          px: { md: 6, lg: 10 },
-          py: 8,
-          background: `linear-gradient(160deg, ${BRAND.panelBg} 0%, ${BRAND.panelBg2} 60%, ${BRAND.panelBg} 100%)`,
-          borderRight: `1px solid ${BRAND.accentBorder}`,
-          position: 'sticky',
-          top: 0,
-          height: '100vh',
-          overflow: 'hidden',
-        }}
-      >
-        {/* Blue radial glow — matches Login */}
-        <Box
-          sx={{
-            position: 'absolute',
-            top: '20%',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            width: 320,
-            height: 320,
-            borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(25,118,210,0.08) 0%, transparent 70%)',
-            pointerEvents: 'none',
-          }}
-        />
-        {/* Subtle grid pattern */}
-        <Box
-          sx={{
-            position: 'absolute',
-            inset: 0,
-            backgroundImage: `
-              linear-gradient(${alpha('#ffffff', 0.02)} 1px, transparent 1px),
-              linear-gradient(90deg, ${alpha('#ffffff', 0.02)} 1px, transparent 1px)
-            `,
-            backgroundSize: '60px 60px',
-            pointerEvents: 'none',
-          }}
-        />
-
-        <Box sx={{ position: 'relative', zIndex: 2, textAlign: 'center', maxWidth: 340, width: '100%' }}>
-          {/* Logo */}
-          <Box sx={{ mb: 3, display: 'flex', justifyContent: 'center' }}>
-            <DinoLogo size={72} animated />
-          </Box>
-
-          <Typography
-            variant="h4"
-            sx={{ color: '#ffffff', fontWeight: 700, mb: 1.5, letterSpacing: '-0.5px' }}
-          >
-            Join Dino Today
-          </Typography>
-
-          <Typography
-            variant="body1"
-            sx={{ color: 'rgba(255,255,255,0.55)', mb: 4, lineHeight: 1.6 }}
-          >
-            Start your digital transformation journey
-          </Typography>
-
-          <Divider sx={{ width: 48, borderColor: BRAND.accentBorder, mb: 4, mx: 'auto' }} />
-
-          {/* Feature list — Login APP_FEATURES style */}
-          <Box display="flex" flexDirection="column" gap={2} width="100%">
-            {APP_FEATURES.map(({ icon: Icon, text }, index) => (
-              <Box
-                key={index}
-                display="flex"
-                alignItems="center"
-                gap={2}
-                sx={{
-                  px: 2,
-                  py: 1.25,
-                  borderRadius: 2,
-                  bgcolor: BRAND.accent,
-                  border: `1px solid ${BRAND.accentBorder}`,
-                  textAlign: 'left',
-                }}
-              >
-                <Icon sx={{ fontSize: 20, color: BRAND.primaryLight, flexShrink: 0 }} />
-                <Typography variant="body2" color="rgba(255,255,255,0.8)" fontWeight={500}>
-                  {text}
-                </Typography>
-              </Box>
-            ))}
-          </Box>
-
-          <Typography variant="caption" color="rgba(255,255,255,0.25)" mt={5} display="block" textAlign="center">
-            Dino &copy; {new Date().getFullYear()}
-          </Typography>
+          justifyContent: 'center',
+          px: { md: 5, lg: 6 },
+          py: 4,
+        }}>
+          {formContent}
         </Box>
       </Box>
 
-      {/* RIGHT FORM PANEL */}
-      <Box
-        sx={{
-          width: { md: 560, lg: 640 },
-          flexShrink: 0,
-          display: 'flex',
-          flexDirection: 'column',
-          backgroundColor: '#ffffff',
-        }}
-      >
-        {/* Stepper */}
-        <Box sx={{ flexShrink: 0, px: { md: 5, lg: 6 }, pt: 3.5, pb: 1 }}>
-          {compactStepper}
-        </Box>
-
-        {/* Form area */}
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            px: { md: 5, lg: 6 },
-            pt: 2,
-            pb: 4,
-          }}
-        >
-          {errorAlert}
-
-          <Box sx={{ mb: 1 }}>
-            {renderStepContent(activeStep)}
-          </Box>
-
-          {navigationButtons}
-        </Box>
-      </Box>
-    </Box>
-  );
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // MOBILE LAYOUT (xs–sm) — plain white, no dark hero
-  // ═══════════════════════════════════════════════════════════════════════════
-  const mobileLayout = (
-    <Box
-      sx={{
-        minHeight: '100vh',
-        bgcolor: '#ffffff',
-        display: 'flex',
+      {/* MOBILE LAYOUT */}
+      <Box sx={{
+        display: { xs: 'flex', md: 'none' },
         flexDirection: 'column',
+        alignItems: 'center',
+        width: '100%',
+        bgcolor: '#ffffff',
         overflowY: 'auto',
-        px: { xs: 3, sm: 5 },
-        pt: 4,
-        pb: 4,
-        ...thinScrollbar,
-      }}
-    >
-      {/* Logo */}
-      <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2.5 }}>
-        <DinoLogo size={40} animated />
-      </Box>
-
-      {/* Title + step subtitle */}
-      <Box sx={{ textAlign: 'center', mb: 2.5 }}>
-        <Typography variant="h6" fontWeight={800} color="#0f172a" letterSpacing="-0.3px">
-          Create Your Account
+        px: 3,
+        py: 4,
+        animation: 'authPanelIn 0.28s cubic-bezier(0.22,1,0.36,1) both',
+        '@keyframes authPanelIn': {
+          from: { opacity: 0, transform: 'translateX(18px)' },
+          to:   { opacity: 1, transform: 'translateX(0)' },
+        },
+        ...scrollbarSx,
+      }}>
+        <DinoLogo size={40} />
+        <Typography variant="body2" color="#64748b" mt={1.5} mb={3}>
+          Step {activeStep + 1} of {STEPS.length}: {STEPS[activeStep].label}
         </Typography>
-        <Typography variant="body2" color="#64748b" mt={0.5}>
-          Step {activeStep + 1} of {steps.length}: {steps[activeStep].label}
-        </Typography>
+        <Box sx={{ width: '100%', mb: 3 }}>
+          {renderStepper(false)}
+        </Box>
+        <Box sx={{ width: '100%', maxWidth: 400 }}>
+          {formContent}
+        </Box>
       </Box>
 
-      {/* Icon-only stepper */}
-      <Box sx={{ mb: 2.5 }}>
-        <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 0 }}>
-          {steps.map((step, index) => (
-            <Step key={step.label}>
-              <StepLabel
-                StepIconComponent={() => (
-                  <Box
-                    sx={{
-                      width: 28,
-                      height: 28,
-                      borderRadius: '50%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      backgroundColor:
-                        index < activeStep
-                          ? BRAND.green
-                          : index === activeStep
-                          ? BRAND.primary
-                          : '#e2e8f0',
-                      color: index <= activeStep ? '#ffffff' : '#94a3b8',
-                      transition: 'all 0.3s ease',
-                      flexShrink: 0,
-                      boxShadow:
-                        index === activeStep
-                          ? `0 0 0 3px ${alpha(BRAND.primary, 0.18)}`
-                          : index < activeStep
-                          ? `0 0 0 3px ${alpha(BRAND.green, 0.15)}`
-                          : 'none',
-                    }}
-                  >
-                    {index < activeStep
-                      ? <CheckCircle sx={{ fontSize: 15 }} />
-                      : React.cloneElement(step.icon, { sx: { fontSize: 14 } })}
-                  </Box>
-                )}
-                sx={{ '& .MuiStepLabel-label': { display: 'none' } }}
-              >
-                {step.label}
-              </StepLabel>
-            </Step>
-          ))}
-        </Stepper>
-      </Box>
-
-      {errorAlert}
-
-      <Box sx={{ mb: 1 }}>
-        {renderStepContent(activeStep)}
-      </Box>
-
-      {navigationButtons}
     </Box>
   );
-
-  return isMobile ? mobileLayout : desktopLayout;
 };
 
 export default RegisterPage;

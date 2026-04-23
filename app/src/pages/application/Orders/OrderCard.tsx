@@ -165,7 +165,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
         <Divider sx={{ borderColor: '#f1f5f9', mb: 1.5 }} />
 
         {/* Bottom: total + actions */}
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 1 }}>
           <Typography
             variant="h6"
             sx={{
@@ -173,13 +173,14 @@ const OrderCard: React.FC<OrderCardProps> = ({
               fontSize: '1.125rem',
               color: '#0f172a',
               letterSpacing: '-0.01em',
+              minWidth: 0,
             }}
           >
             {formatCurrency(order.total)}
           </Typography>
 
           <Box
-            sx={{ display: 'flex', gap: 0.75 }}
+            sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap' }}
             onClick={(e) => e.stopPropagation()}
           >
             {canCancel && (
