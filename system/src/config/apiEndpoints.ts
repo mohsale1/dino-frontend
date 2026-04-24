@@ -1,4 +1,4 @@
-/**
+﻿/**
  * API Endpoints Configuration
  * Centralized list of all API endpoints for easy reference and maintenance
  * 
@@ -65,6 +65,14 @@ export const API_ENDPOINTS = {
       BY_ID: (id: string) => `/system/workspaces/${id}`,
       RESTORE: (id: string) => `/system/workspaces/${id}/restore`,
     },
+
+    // Workspace Requests (Approvals)
+    WORKSPACE_REQUESTS: {
+      BASE: '/system/workspace-requests',
+      BY_ID: (id: string | number) => `/system/workspace-requests/${id}`,
+      APPROVE: (id: string | number) => `/system/workspace-requests/${id}/approve`,
+      REJECT: (id: string | number) => `/system/workspace-requests/${id}/reject`,
+    },
     
     // Billing
     BILLING: {
@@ -74,12 +82,14 @@ export const API_ENDPOINTS = {
       BILLING_INFO: (id: string) => `/system/billing/workspaces/${id}/billing-info`,
     },
     
-    // Registration Codes
+    // Registration / Referral Codes
     REGISTRATION: {
       CODES: '/system/registration/codes',
       BY_CODE: (code: string) => `/system/registration/codes/${code}`,
       RESTORE: (id: string) => `/system/registration/codes/${id}/restore`,
       VALIDATE: '/application/auth/validate-referral',
+      STATS: '/system/registration/stats',
+      REFERRAL_GROUPS: '/system/registration/referral-groups',
     },
     
     // UI Config

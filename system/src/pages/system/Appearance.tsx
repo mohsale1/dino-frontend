@@ -1,10 +1,7 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Box,
   Typography,
-  Paper,
-  Tabs,
-  Tab,
   TextField,
   Button,
   Grid,
@@ -12,262 +9,332 @@ import {
   CircularProgress,
   Alert,
   Snackbar,
-  Card,
-  CardContent,
+  Avatar,
   Rating,
-  MenuItem,
+  Divider,
+  Chip,
+  Dialog,
+  DialogContent,
+  DialogActions,
+  InputBase,
+  Tooltip,
+  Switch,
+  FormControlLabel,
   Select,
+  MenuItem,
   FormControl,
   InputLabel,
-  Divider,
-  Avatar,
-  Chip,
-  InputAdornment,
+  ToggleButton,
+  ToggleButtonGroup,
 } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import {
-  Assessment,
-  RateReview,
-  ContactMail,
-  Save,
   Add,
   Delete,
-  CalendarToday,
-  BarChart,
+  Edit,
+  Save,
+  Close,
+  Search,
+  CheckCircle,
+  Cancel,
   FormatQuote,
-  LocationOn,
-  Email,
-  Phone,
-  Tag,
+  Star,
+  FilterList,
+  Refresh,
+  VisibilityOutlined,
+  VisibilityOffOutlined,
 } from '@mui/icons-material';
-import { homePageService } from '../../services/api/homePage';
+import { homePageService, Testimonial } from '../../services/api/homePage';
 
-// ─── Brand ───────────────────────────────────────────────────────────────────
-const BRAND = {
-  primary:       '#1976D2',
-  primaryHover:  '#1565C0',
-  primaryLight:  '#42A5F5',
-  primaryBg:     'rgba(25,118,210,0.07)',
-  primaryBorder: 'rgba(25,118,210,0.2)',
-};
+// ── Design tokens ─────────────────────────────────────────────────────────────
+const P   = '#00A6CA';
+const PH  = '#005F8D';
+const PB  = 'rgba(0,166,202,0.08)';
+const PBR = 'rgba(0,166,202,0.2)';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-interface StatItem {
-  title: string;
-  value: string;
-  number: number;
-  suffix: string;
-  label: string;
-  icon: string;
-}
-
-interface TestimonialItem {
-  name: string;
-  role?: string;
-  restaurant?: string;
-  location?: string;
-  rating: number;
-  comment: string;
-  avatar?: string;
-  created_at?: string;
-}
-
-interface ContactInfo {
-  email?: string;
-  phone?: string;
-  address?: string;
-  city?: string;
-  state?: string;
-  country?: string;
-  postal_code?: string;
-}
-
-const ICON_OPTIONS = [
-  'business', 'shopping_cart', 'sentiment_satisfied', 'cloud_done',
-  'restaurant', 'people', 'menu_book', 'thumb_up', 'trending_up',
-  'star', 'local_dining', 'assessment', 'speed', 'verified',
-];
-
-// ─── TabPanel ─────────────────────────────────────────────────────────────────
-interface TabPanelProps { children?: React.ReactNode; index: number; value: number; }
-const TabPanel: React.FC<TabPanelProps> = ({ children, value, index }) => (
-  <div role="tabpanel" hidden={value !== index}>
-    {value === index && <Box sx={{ pt: 3 }}>{children}</Box>}
-  </div>
-);
-
-// ─── Section toolbar ──────────────────────────────────────────────────────────
-interface SectionToolbarProps {
-  title: string;
-  subtitle: string;
-  onAdd?: () => void;
-  addLabel?: string;
-  onSave: () => void;
-  saveLabel: string;
-  saving: boolean;
-}
-const SectionToolbar: React.FC<SectionToolbarProps> = ({ title, subtitle, onAdd, addLabel, onSave, saveLabel, saving }) => (
-  <Box sx={{
-    display: 'flex',
-    alignItems: { xs: 'flex-start', sm: 'center' },
-    justifyContent: 'space-between',
-    flexDirection: { xs: 'column', sm: 'row' },
-    gap: 2,
-    mb: 3,
-  }}>
-    <Box>
-      <Typography variant="h6" sx={{ fontWeight: 700, color: '#0f172a', fontSize: { xs: '1rem', sm: '1.125rem' } }}>
-        {title}
-      </Typography>
-      <Typography variant="caption" color="text.secondary">{subtitle}</Typography>
-    </Box>
-    <Box sx={{ display: 'flex', gap: 1.5, flexShrink: 0 }}>
-      {onAdd && (
-        <Button
-          variant="outlined"
-          startIcon={<Add />}
-          onClick={onAdd}
-          size="small"
-          sx={{
-            textTransform: 'none',
-            fontWeight: 600,
-            borderRadius: 2,
-            borderColor: BRAND.primaryBorder,
-            color: BRAND.primary,
-            '&:hover': { borderColor: BRAND.primary, bgcolor: BRAND.primaryBg },
-          }}
-        >
-          {addLabel}
-        </Button>
-      )}
-      <Button
-        variant="contained"
-        startIcon={saving ? <CircularProgress size={14} color="inherit" /> : <Save />}
-        onClick={onSave}
-        disabled={saving}
-        size="small"
-        sx={{
-          textTransform: 'none',
-          fontWeight: 600,
-          borderRadius: 2,
-          bgcolor: BRAND.primary,
-          boxShadow: 'none',
-          '&:hover': { bgcolor: BRAND.primaryHover, boxShadow: 'none' },
-          '&:disabled': { bgcolor: alpha(BRAND.primary, 0.4) },
-        }}
-      >
-        {saving ? 'Saving...' : saveLabel}
-      </Button>
-    </Box>
-  </Box>
-);
-
-// ─── Empty state ──────────────────────────────────────────────────────────────
-const EmptyState: React.FC<{ icon: React.ReactNode; message: string; onAdd: () => void; addLabel: string }> = ({ icon, message, onAdd, addLabel }) => (
-  <Box sx={{
-    textAlign: 'center',
-    py: { xs: 6, sm: 8 },
-    px: 3,
-    border: '2px dashed #e2e8f0',
-    borderRadius: 3,
-    bgcolor: '#fafafa',
-  }}>
-    <Box sx={{
-      width: 56, height: 56, borderRadius: 3,
-      bgcolor: BRAND.primaryBg, border: `1px solid ${BRAND.primaryBorder}`,
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      mx: 'auto', mb: 2, color: BRAND.primary,
-    }}>
-      {icon}
-    </Box>
-    <Typography variant="body1" sx={{ color: '#64748b', mb: 2.5, fontWeight: 500 }}>
-      {message}
-    </Typography>
-    <Button
-      variant="contained"
-      startIcon={<Add />}
-      onClick={onAdd}
-      sx={{
-        bgcolor: BRAND.primary,
-        '&:hover': { bgcolor: BRAND.primaryHover },
-        textTransform: 'none',
-        fontWeight: 600,
-        borderRadius: 2,
-        boxShadow: 'none',
-      }}
-    >
-      {addLabel}
-    </Button>
-  </Box>
-);
-
-// ─── Field sx ─────────────────────────────────────────────────────────────────
 const fieldSx = {
   '& .MuiOutlinedInput-root': {
     borderRadius: 1.5,
-    '&.Mui-focused fieldset': { borderColor: BRAND.primary },
+    '&.Mui-focused fieldset': { borderColor: P },
   },
-  '& label.Mui-focused': { color: BRAND.primary },
+  '& label.Mui-focused': { color: P },
 };
 
-// ─── Main component ───────────────────────────────────────────────────────────
+// ── Helpers ───────────────────────────────────────────────────────────────────
+const initials = (name: string) =>
+  name ? name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) : '?';
+
+const avatarColor = (name: string) => {
+  const colors = ['#00A6CA', '#005F8D', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444', '#3b82f6'];
+  let h = 0;
+  for (let i = 0; i < name.length; i++) h = name.charCodeAt(i) + ((h << 5) - h);
+  return colors[Math.abs(h) % colors.length];
+};
+
+const EMPTY_TESTIMONIAL: Testimonial = {
+  name: '', role: '', restaurant: '', location: '',
+  rating: 5, comment: '', avatar: '', is_approved: false,
+  created_at: new Date().toISOString(),
+};
+
+// ── Testimonial card ──────────────────────────────────────────────────────────
+interface CardProps {
+  t: Testimonial;
+  index: number;
+  onEdit: () => void;
+  onDelete: () => void;
+  onToggleApprove: () => void;
+}
+
+const TestimonialCard: React.FC<CardProps> = ({ t, onEdit, onDelete, onToggleApprove }) => {
+  const approved = !!t.is_approved;
+  return (
+    <Box
+      sx={{
+        bgcolor: '#ffffff',
+        border: `1px solid ${approved ? 'rgba(16,185,129,0.3)' : '#e0e0e0'}`,
+        borderRadius: 2,
+        p: 2.5,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 1.5,
+        position: 'relative',
+        transition: 'box-shadow 0.15s',
+        '&:hover': { boxShadow: '0 4px 16px rgba(0,0,0,0.07)' },
+      }}
+    >
+      {/* Approval badge */}
+      <Box sx={{ position: 'absolute', top: 12, right: 12 }}>
+        <Chip
+          icon={approved
+            ? <CheckCircle sx={{ fontSize: '13px !important', color: '#10b981 !important' }} />
+            : <Cancel sx={{ fontSize: '13px !important', color: '#999999 !important' }} />
+          }
+          label={approved ? 'Approved' : 'Hidden'}
+          size="small"
+          sx={{
+            height: 22,
+            fontSize: '0.7rem',
+            fontWeight: 600,
+            bgcolor: approved ? 'rgba(16,185,129,0.1)' : '#f5f5f5',
+            color: approved ? '#10b981' : '#999999',
+            border: `1px solid ${approved ? 'rgba(16,185,129,0.3)' : '#e0e0e0'}`,
+          }}
+        />
+      </Box>
+
+      {/* Header */}
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, pr: 8 }}>
+        <Avatar sx={{ width: 40, height: 40, bgcolor: avatarColor(t.name), fontSize: '0.875rem', fontWeight: 700, flexShrink: 0 }}>
+          {t.avatar && !t.avatar.startsWith('http') ? t.avatar.toUpperCase().slice(0, 2) : initials(t.name)}
+        </Avatar>
+        <Box sx={{ minWidth: 0 }}>
+          <Typography sx={{ fontWeight: 700, fontSize: '0.9rem', color: '#1C1C1E', lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {t.name || 'Unnamed'}
+          </Typography>
+          <Typography sx={{ fontSize: '0.78rem', color: '#666666', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {[t.role, t.restaurant].filter(Boolean).join(' · ') || 'No role'}
+          </Typography>
+        </Box>
+      </Box>
+
+      {/* Rating */}
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Rating value={t.rating} readOnly size="small" sx={{ '& .MuiRating-iconFilled': { color: '#f59e0b' } }} />
+        <Typography sx={{ fontSize: '0.78rem', color: '#999999' }}>{t.rating}/5</Typography>
+      </Box>
+
+      {/* Comment */}
+      <Box sx={{ bgcolor: '#f8fafc', borderRadius: 1.5, px: 1.5, py: 1, position: 'relative' }}>
+        <FormatQuote sx={{ fontSize: 16, color: '#d1d5db', position: 'absolute', top: 6, left: 8 }} />
+        <Typography sx={{ fontSize: '0.8125rem', color: '#444444', lineHeight: 1.6, pl: 2.5, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+          {t.comment || 'No comment provided.'}
+        </Typography>
+      </Box>
+
+      {/* Location + date */}
+      {(t.location || t.created_at) && (
+        <Typography sx={{ fontSize: '0.72rem', color: '#999999' }}>
+          {[t.location, t.created_at ? new Date(t.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : ''].filter(Boolean).join(' · ')}
+        </Typography>
+      )}
+
+      {/* Actions */}
+      <Divider sx={{ borderColor: '#f2f2f2' }} />
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Tooltip title={approved ? 'Hide from homepage' : 'Approve for homepage'} arrow>
+          <Button
+            size="small"
+            variant={approved ? 'outlined' : 'contained'}
+            startIcon={approved ? <VisibilityOffOutlined sx={{ fontSize: 15 }} /> : <VisibilityOutlined sx={{ fontSize: 15 }} />}
+            onClick={onToggleApprove}
+            sx={{
+              textTransform: 'none',
+              fontWeight: 600,
+              fontSize: '0.78rem',
+              borderRadius: 1.5,
+              px: 1.5,
+              py: 0.5,
+              ...(approved
+                ? { borderColor: 'rgba(0,0,0,0.15)', color: '#666666', '&:hover': { borderColor: '#ef4444', color: '#ef4444', bgcolor: 'rgba(239,68,68,0.04)' } }
+                : { bgcolor: '#10b981', boxShadow: 'none', '&:hover': { bgcolor: '#059669', boxShadow: 'none' } }
+              ),
+            }}
+          >
+            {approved ? 'Hide' : 'Approve'}
+          </Button>
+        </Tooltip>
+        <Box sx={{ flex: 1 }} />
+        <Tooltip title="Edit" arrow>
+          <IconButton size="small" onClick={onEdit} sx={{ color: '#999999', '&:hover': { color: P, bgcolor: PB } }}>
+            <Edit sx={{ fontSize: 17 }} />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="Delete" arrow>
+          <IconButton size="small" onClick={onDelete} sx={{ color: '#999999', '&:hover': { color: '#ef4444', bgcolor: 'rgba(239,68,68,0.06)' } }}>
+            <Delete sx={{ fontSize: 17 }} />
+          </IconButton>
+        </Tooltip>
+      </Box>
+    </Box>
+  );
+};
+
+// ── Edit / Add dialog ─────────────────────────────────────────────────────────
+interface EditDialogProps {
+  open: boolean;
+  testimonial: Testimonial;
+  isNew: boolean;
+  onChange: (field: keyof Testimonial, value: any) => void;
+  onSave: () => void;
+  onClose: () => void;
+}
+
+const EditDialog: React.FC<EditDialogProps> = ({ open, testimonial: t, isNew, onChange, onSave, onClose }) => (
+  <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: 3, overflow: 'hidden' } }}>
+    {/* Header */}
+    <Box sx={{ px: 3, pt: 2.5, pb: 2, borderBottom: '1px solid #e0e0e0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <Box>
+        <Typography sx={{ fontWeight: 700, fontSize: '1rem', color: '#1C1C1E' }}>
+          {isNew ? 'Add Testimonial' : 'Edit Testimonial'}
+        </Typography>
+        <Typography sx={{ fontSize: '0.8rem', color: '#666666', mt: 0.25 }}>
+          {isNew ? 'Create a new customer review' : 'Update the testimonial details'}
+        </Typography>
+      </Box>
+      <IconButton onClick={onClose} size="small" sx={{ color: 'rgba(0,0,0,0.45)', '&:hover': { bgcolor: 'rgba(0,0,0,0.04)' } }}>
+        <Close fontSize="small" />
+      </IconButton>
+    </Box>
+
+    <DialogContent sx={{ pt: 2.5, pb: 1 }}>
+      <Grid container spacing={2}>
+        <Grid item xs={12} sm={6}>
+          <TextField fullWidth size="small" label="Customer Name *" value={t.name} onChange={e => onChange('name', e.target.value)} sx={fieldSx} />
+        </Grid>
+        <Grid item xs={12} sm={6}>
+          <TextField fullWidth size="small" label="Role / Title" value={t.role || ''} onChange={e => onChange('role', e.target.value)} placeholder="e.g. Owner, Manager" sx={fieldSx} />
+        </Grid>
+        <Grid item xs={12} sm={6}>
+          <TextField fullWidth size="small" label="Restaurant / Business" value={t.restaurant || ''} onChange={e => onChange('restaurant', e.target.value)} sx={fieldSx} />
+        </Grid>
+        <Grid item xs={12} sm={6}>
+          <TextField fullWidth size="small" label="Location" value={t.location || ''} onChange={e => onChange('location', e.target.value)} placeholder="e.g. Mumbai, India" sx={fieldSx} />
+        </Grid>
+        <Grid item xs={12} sm={6}>
+          <TextField fullWidth size="small" label="Avatar (initials or URL)" value={t.avatar || ''} onChange={e => onChange('avatar', e.target.value)} placeholder="JD or https://..." sx={fieldSx} />
+        </Grid>
+        <Grid item xs={12} sm={6}>
+          <Box>
+            <Typography variant="caption" sx={{ color: '#666666', display: 'block', mb: 0.75, fontWeight: 500 }}>Rating *</Typography>
+            <Rating
+              value={t.rating}
+              onChange={(_, v) => onChange('rating', v || 5)}
+              sx={{ '& .MuiRating-iconFilled': { color: '#f59e0b' } }}
+            />
+          </Box>
+        </Grid>
+        <Grid item xs={12}>
+          <TextField
+            fullWidth multiline rows={3} size="small"
+            label="Testimonial Comment *"
+            value={t.comment}
+            onChange={e => onChange('comment', e.target.value)}
+            sx={fieldSx}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={!!t.is_approved}
+                onChange={e => onChange('is_approved', e.target.checked)}
+                sx={{
+                  '& .MuiSwitch-switchBase.Mui-checked': { color: '#10b981' },
+                  '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { bgcolor: '#10b981' },
+                }}
+              />
+            }
+            label={
+              <Box>
+                <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: '#1C1C1E' }}>
+                  Approve for homepage
+                </Typography>
+                <Typography sx={{ fontSize: '0.75rem', color: '#666666' }}>
+                  Approved testimonials are visible on the public homepage
+                </Typography>
+              </Box>
+            }
+          />
+        </Grid>
+      </Grid>
+    </DialogContent>
+
+    <DialogActions sx={{ px: 3, py: 2, borderTop: '1px solid #e0e0e0', gap: 1 }}>
+      <Button onClick={onClose} sx={{ textTransform: 'none', color: '#666666', fontWeight: 500 }}>
+        Cancel
+      </Button>
+      <Button
+        onClick={onSave}
+        variant="contained"
+        disabled={!t.name.trim() || !t.comment.trim()}
+        sx={{ textTransform: 'none', fontWeight: 600, bgcolor: P, borderRadius: 2, boxShadow: 'none', '&:hover': { bgcolor: PH, boxShadow: 'none' } }}
+      >
+        {isNew ? 'Add Testimonial' : 'Save Changes'}
+      </Button>
+    </DialogActions>
+  </Dialog>
+);
+
+// ── Main component ────────────────────────────────────────────────────────────
 const Appearance: React.FC = () => {
-  const [tabValue,     setTabValue]     = useState(0);
+  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [loading,      setLoading]      = useState(true);
   const [saving,       setSaving]       = useState(false);
   const [fetchError,   setFetchError]   = useState<string | null>(null);
   const [snackbar,     setSnackbar]     = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
+  const [hasChanges,   setHasChanges]   = useState(false);
 
-  const [stats,        setStats]        = useState<StatItem[]>([]);
-  const [testimonials, setTestimonials] = useState<TestimonialItem[]>([]);
-  const [contact,      setContact]      = useState<ContactInfo>({});
+  // Filters
+  const [search,         setSearch]         = useState('');
+  const [filterApproval, setFilterApproval] = useState<'all' | 'approved' | 'hidden'>('all');
+  const [filterRating,   setFilterRating]   = useState<number | ''>('');
 
-  // ── Fetch — call each endpoint individually so one failure doesn't block all ──
+  // Dialog
+  const [dialogOpen,   setDialogOpen]   = useState(false);
+  const [editIndex,    setEditIndex]    = useState<number | null>(null);
+  const [editDraft,    setEditDraft]    = useState<Testimonial>(EMPTY_TESTIMONIAL);
+
+  // ── Fetch ──────────────────────────────────────────────────────────────────
   const fetchData = useCallback(async () => {
     setLoading(true);
     setFetchError(null);
     try {
-      const [statsData, testimonialsData, contactData] = await Promise.allSettled([
-        homePageService.getStats(),
-        homePageService.getTestimonials(),
-        homePageService.getContactInfo(),
-      ]);
-
-      if (statsData.status === 'fulfilled') {
-        setStats((statsData.value || []).map((s: any) => ({
-          title:  s.title  || '',
-          value:  s.value  || '0',
-          number: s.number || 0,
-          suffix: s.suffix || '+',
-          label:  s.label  || '',
-          icon:   s.icon   || 'star',
-        })));
-      }
-
-      if (testimonialsData.status === 'fulfilled') {
-        setTestimonials(testimonialsData.value || []);
-      }
-
-      if (contactData.status === 'fulfilled') {
-        const c: any = contactData.value || {};
-        setContact({
-          email:       c.email       || '',
-          phone:       c.phone       || '',
-          address:     c.address     || '',
-          city:        c.city        || '',
-          state:       c.state       || '',
-          country:     c.country     || '',
-          postal_code: c.postal_code || '',
-        });
-      }
-
-      // Surface a warning if all three failed
-      const allFailed = [statsData, testimonialsData, contactData].every(r => r.status === 'rejected');
-      if (allFailed) {
-        setFetchError('Could not load homepage data. The backend may be unavailable.');
-      }
+      const data = await homePageService.getTestimonials();
+      setTestimonials(data);
+      setHasChanges(false);
     } catch (err: any) {
-      setFetchError(err.message || 'Failed to load homepage data.');
+      setFetchError(err.message || 'Failed to load testimonials.');
     } finally {
       setLoading(false);
     }
@@ -275,23 +342,12 @@ const Appearance: React.FC = () => {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
-  // ── Save handlers ─────────────────────────────────────────────────────────
-  const handleSaveStats = async () => {
-    try {
-      setSaving(true);
-      await homePageService.updateStats(stats);
-      setSnackbar({ open: true, message: 'Stats saved successfully.', severity: 'success' });
-    } catch (err: any) {
-      setSnackbar({ open: true, message: err.message || 'Failed to save stats.', severity: 'error' });
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleSaveTestimonials = async () => {
+  // ── Save all ───────────────────────────────────────────────────────────────
+  const handleSaveAll = async () => {
     try {
       setSaving(true);
       await homePageService.updateTestimonials(testimonials);
+      setHasChanges(false);
       setSnackbar({ open: true, message: 'Testimonials saved successfully.', severity: 'success' });
     } catch (err: any) {
       setSnackbar({ open: true, message: err.message || 'Failed to save testimonials.', severity: 'error' });
@@ -300,109 +356,201 @@ const Appearance: React.FC = () => {
     }
   };
 
-  const handleSaveContact = async () => {
-    try {
-      setSaving(true);
-      await homePageService.updateContact(contact);
-      setSnackbar({ open: true, message: 'Contact information saved successfully.', severity: 'success' });
-    } catch (err: any) {
-      setSnackbar({ open: true, message: err.message || 'Failed to save contact information.', severity: 'error' });
-    } finally {
-      setSaving(false);
+  // ── CRUD helpers ───────────────────────────────────────────────────────────
+  const mutate = (next: Testimonial[]) => { setTestimonials(next); setHasChanges(true); };
+
+  const openAdd = () => {
+    setEditIndex(null);
+    setEditDraft({ ...EMPTY_TESTIMONIAL, created_at: new Date().toISOString() });
+    setDialogOpen(true);
+  };
+
+  const openEdit = (index: number) => {
+    setEditIndex(index);
+    setEditDraft({ ...testimonials[index] });
+    setDialogOpen(true);
+  };
+
+  const handleDialogSave = () => {
+    if (editIndex === null) {
+      mutate([...testimonials, editDraft]);
+    } else {
+      const next = [...testimonials];
+      next[editIndex] = editDraft;
+      mutate(next);
     }
+    setDialogOpen(false);
   };
 
-  // ── Stats CRUD ────────────────────────────────────────────────────────────
-  const addStat = () => setStats(prev => [...prev, { title: '', value: '0', number: 0, suffix: '+', label: '', icon: 'star' }]);
-  const deleteStat = (i: number) => setStats(prev => prev.filter((_, idx) => idx !== i));
-  const updateStat = (i: number, field: keyof StatItem, value: any) => {
-    setStats(prev => {
-      const next = [...prev];
-      next[i] = { ...next[i], [field]: value };
-      if (field === 'number') next[i].value = value.toString();
-      return next;
-    });
+  const handleDelete = (index: number) => {
+    mutate(testimonials.filter((_, i) => i !== index));
   };
 
-  // ── Testimonials CRUD ─────────────────────────────────────────────────────
-  const addTestimonial = () => setTestimonials(prev => [...prev, { name: '', role: '', restaurant: '', location: '', rating: 5, comment: '', avatar: '', created_at: new Date().toISOString() }]);
-  const deleteTestimonial = (i: number) => setTestimonials(prev => prev.filter((_, idx) => idx !== i));
-  const updateTestimonial = (i: number, field: keyof TestimonialItem, value: any) => {
-    setTestimonials(prev => { const next = [...prev]; next[i] = { ...next[i], [field]: value }; return next; });
+  const handleToggleApprove = (index: number) => {
+    const next = [...testimonials];
+    next[index] = { ...next[index], is_approved: !next[index].is_approved };
+    mutate(next);
   };
 
-  // ── Contact ───────────────────────────────────────────────────────────────
-  const updateContact = (field: keyof ContactInfo, value: string) => setContact(prev => ({ ...prev, [field]: value }));
+  // ── Filtered list ──────────────────────────────────────────────────────────
+  const filtered = useMemo(() => {
+    return testimonials
+      .map((t, i) => ({ t, i }))
+      .filter(({ t }) => {
+        if (search && !t.name.toLowerCase().includes(search.toLowerCase()) &&
+            !t.comment.toLowerCase().includes(search.toLowerCase()) &&
+            !(t.restaurant || '').toLowerCase().includes(search.toLowerCase())) return false;
+        if (filterApproval === 'approved' && !t.is_approved) return false;
+        if (filterApproval === 'hidden'   &&  t.is_approved) return false;
+        if (filterRating !== '' && t.rating !== filterRating) return false;
+        return true;
+      });
+  }, [testimonials, search, filterApproval, filterRating]);
 
-  // ── Loading ───────────────────────────────────────────────────────────────
-  if (loading) {
-    return (
-      <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minHeight: '60vh', gap: 2 }}>
-        <CircularProgress sx={{ color: BRAND.primary }} />
-        <Typography variant="body2" color="text.secondary">Loading homepage data...</Typography>
-      </Box>
-    );
-  }
+  // ── Stats summary ──────────────────────────────────────────────────────────
+  const totalCount    = testimonials.length;
+  const approvedCount = testimonials.filter(t => t.is_approved).length;
+  const hiddenCount   = totalCount - approvedCount;
+  const avgRating     = totalCount > 0
+    ? (testimonials.reduce((s, t) => s + t.rating, 0) / totalCount).toFixed(1)
+    : '—';
 
   return (
-    <Box sx={{ width: '100%', minHeight: '100vh', bgcolor: '#f1f5f9' }}>
+    <Box sx={{ width: '100%', minHeight: '100vh', bgcolor: '#f8fafc' }}>
 
-      {/* ── Hero ── */}
+      {/* ── Page Header ── */}
       <Box sx={{
-        background: 'linear-gradient(135deg, #0d1b2e 0%, #0f2744 45%, #1565C0 100%)',
-        px: { xs: 2.5, sm: 4, md: 6 },
-        pt: { xs: 3, md: 4 },
-        pb: { xs: 4, md: 5 },
-        position: 'relative',
-        overflow: 'hidden',
-        '&::before': { content: '""', position: 'absolute', top: -100, right: -60, width: 360, height: 360, borderRadius: '50%', background: 'radial-gradient(circle, rgba(25,118,210,0.22) 0%, transparent 70%)', pointerEvents: 'none' },
-        '&::after':  { content: '""', position: 'absolute', bottom: -80, left: '25%', width: 280, height: 280, borderRadius: '50%', background: 'radial-gradient(circle, rgba(66,165,245,0.15) 0%, transparent 70%)', pointerEvents: 'none' },
+        bgcolor: '#ffffff',
+        px: { xs: 3, sm: 4, md: 5 },
+        pt: 3, pb: 3,
+        borderBottom: '1px solid #e0e0e0',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2,
       }}>
-        <Box sx={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)', backgroundSize: '40px 40px', pointerEvents: 'none' }} />
-        <Box sx={{ position: 'relative' }}>
-          <Typography variant="overline" sx={{ color: 'rgba(144,202,249,0.75)', fontWeight: 700, letterSpacing: 3, fontSize: '0.65rem' }}>
-            SYSTEM CONTROL CENTER
+        <Box>
+          <Typography sx={{ fontSize: '22px', fontWeight: 700, color: '#1C1C1E', letterSpacing: '-0.3px' }}>
+            Testimonials
           </Typography>
-          <Typography variant="h4" sx={{ color: '#fff', fontWeight: 800, mt: 0.5, fontSize: { xs: '1.5rem', md: '2rem' }, letterSpacing: '-0.025em', lineHeight: 1.2 }}>
-            Homepage Management
+          <Typography sx={{ fontSize: '13px', color: '#666666', mt: 0.5 }}>
+            Manage customer reviews shown on the public homepage
           </Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mt: 1 }}>
-            <CalendarToday sx={{ fontSize: 13, color: 'rgba(144,202,249,0.6)' }} />
-            <Typography variant="caption" sx={{ color: 'rgba(144,202,249,0.6)', fontWeight: 500, fontSize: '0.75rem' }}>
-              {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-            </Typography>
-          </Box>
+        </Box>
+        <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
+          <Tooltip title="Refresh from server" arrow>
+            <IconButton onClick={fetchData} size="small" sx={{ border: '1px solid #e0e0e0', borderRadius: 2, color: '#666666', '&:hover': { bgcolor: PB, color: P, borderColor: PBR } }}>
+              <Refresh fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          <Button
+            variant="outlined"
+            startIcon={<Add />}
+            onClick={openAdd}
+            sx={{ textTransform: 'none', fontWeight: 600, borderRadius: 2, borderColor: PBR, color: P, '&:hover': { borderColor: P, bgcolor: PB } }}
+          >
+            Add Testimonial
+          </Button>
+          <Button
+            variant="contained"
+            startIcon={saving ? <CircularProgress size={14} color="inherit" /> : <Save />}
+            onClick={handleSaveAll}
+            disabled={saving || !hasChanges}
+            sx={{
+              textTransform: 'none', fontWeight: 600, borderRadius: 2,
+              bgcolor: P, boxShadow: 'none',
+              '&:hover': { bgcolor: PH, boxShadow: 'none' },
+              '&:disabled': { bgcolor: alpha(P, 0.35) },
+            }}
+          >
+            {saving ? 'Saving...' : `Save Changes${hasChanges ? ' *' : ''}`}
+          </Button>
         </Box>
       </Box>
 
-      {/* ── Tabs bar — flush to hero, full width, no gap ── */}
-      <Paper elevation={0} sx={{ borderRadius: 0, border: 'none', borderBottom: '1px solid #e2e8f0', bgcolor: '#ffffff' }}>
-        <Tabs
-          value={tabValue}
-          onChange={(_, v) => setTabValue(v)}
-          variant="fullWidth"
+      {/* ── Stats bar ── */}
+      <Box sx={{ bgcolor: '#ffffff', borderBottom: '1px solid #e0e0e0', px: { xs: 3, sm: 4, md: 5 }, py: 2, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+        {[
+          { label: 'Total',    value: totalCount,    color: '#1C1C1E' },
+          { label: 'Approved', value: approvedCount, color: '#10b981' },
+          { label: 'Hidden',   value: hiddenCount,   color: '#999999' },
+          { label: 'Avg Rating', value: avgRating,   color: '#f59e0b', suffix: <Star sx={{ fontSize: 13, color: '#f59e0b', ml: 0.25, mb: '-2px' }} /> },
+        ].map(({ label, value, color, suffix }) => (
+          <Box key={label} sx={{ flex: '1 1 100px', bgcolor: '#f8fafc', border: '1px solid #e0e0e0', borderRadius: 2, px: 2, py: 1.5, display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <Box>
+              <Typography sx={{ fontSize: '1.25rem', fontWeight: 700, color, lineHeight: 1, display: 'flex', alignItems: 'center' }}>
+                {value}{suffix}
+              </Typography>
+              <Typography sx={{ fontSize: '0.72rem', color: '#999999', mt: 0.25 }}>{label}</Typography>
+            </Box>
+          </Box>
+        ))}
+      </Box>
+
+      {/* ── Toolbar ── */}
+      <Box sx={{ bgcolor: '#ffffff', borderBottom: '1px solid #e0e0e0', px: { xs: 2, sm: 3, md: 5 }, py: 1.5, display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap' }}>
+        {/* Search */}
+        <Box sx={{ flex: '1 1 220px', display: 'flex', alignItems: 'center', gap: 1, bgcolor: '#f8fafc', border: '1px solid #e0e0e0', borderRadius: 2, px: 1.5, py: 0.75 }}>
+          <Search sx={{ fontSize: 17, color: '#999999', flexShrink: 0 }} />
+          <InputBase
+            placeholder="Search by name, comment, business..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            sx={{ flex: 1, fontSize: '0.875rem' }}
+          />
+          {search && (
+            <IconButton size="small" onClick={() => setSearch('')} sx={{ p: 0.25, color: '#999999' }}>
+              <Close sx={{ fontSize: 14 }} />
+            </IconButton>
+          )}
+        </Box>
+
+        {/* Approval filter */}
+        <ToggleButtonGroup
+          value={filterApproval}
+          exclusive
+          onChange={(_, v) => { if (v) setFilterApproval(v); }}
+          size="small"
           sx={{
-            minHeight: 50,
-            '& .MuiTab-root': {
-              textTransform: 'none',
-              fontWeight: 600,
-              fontSize: { xs: '0.8rem', sm: '0.875rem' },
-              minHeight: 50,
-              color: '#64748b',
-              gap: 0.75,
-            },
-            '& .Mui-selected': { color: BRAND.primary },
-            '& .MuiTabs-indicator': { bgcolor: BRAND.primary, height: 3 },
+            '& .MuiToggleButton-root': { textTransform: 'none', fontWeight: 600, fontSize: '0.8rem', px: 1.5, py: 0.5, border: '1px solid #e0e0e0', color: '#666666' },
+            '& .Mui-selected': { bgcolor: `${PB} !important`, color: `${P} !important`, borderColor: `${PBR} !important` },
           }}
         >
-          <Tab icon={<BarChart sx={{ fontSize: 18 }} />} iconPosition="start" label="Stats" />
-          <Tab icon={<FormatQuote sx={{ fontSize: 18 }} />} iconPosition="start" label="Testimonials" />
-          <Tab icon={<ContactMail sx={{ fontSize: 18 }} />} iconPosition="start" label="Contact" />
-        </Tabs>
-      </Paper>
+          <ToggleButton value="all">All</ToggleButton>
+          <ToggleButton value="approved">Approved</ToggleButton>
+          <ToggleButton value="hidden">Hidden</ToggleButton>
+        </ToggleButtonGroup>
+
+        {/* Rating filter */}
+        <FormControl size="small" sx={{ minWidth: 120 }}>
+          <Select
+            value={filterRating}
+            onChange={e => setFilterRating(e.target.value as number | '')}
+            displayEmpty
+            sx={{ borderRadius: 2, fontSize: '0.875rem', bgcolor: '#f8fafc' }}
+          >
+            <MenuItem value="">All Ratings</MenuItem>
+            {[5, 4, 3, 2, 1].map(r => (
+              <MenuItem key={r} value={r}>{r} Star{r !== 1 ? 's' : ''}</MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        {/* Clear filters */}
+        {(search || filterApproval !== 'all' || filterRating !== '') && (
+          <Button
+            size="small"
+            onClick={() => { setSearch(''); setFilterApproval('all'); setFilterRating(''); }}
+            sx={{ textTransform: 'none', color: '#666666', fontWeight: 600, fontSize: '0.8125rem', borderRadius: 2 }}
+          >
+            Clear
+          </Button>
+        )}
+
+        <Typography sx={{ ml: 'auto', fontSize: '0.8rem', color: '#999999', flexShrink: 0 }}>
+          {filtered.length} of {totalCount}
+        </Typography>
+      </Box>
 
       {/* ── Content ── */}
-      <Box sx={{ px: { xs: 1.5, sm: 3, md: 5 }, pt: { xs: 2.5, sm: 3 }, pb: { xs: 4, sm: 6 } }}>
+      <Box sx={{ px: { xs: 2, sm: 3, md: 5 }, py: 3 }}>
 
         {fetchError && (
           <Alert severity="warning" sx={{ mb: 3, borderRadius: 2 }} onClose={() => setFetchError(null)}>
@@ -410,257 +558,67 @@ const Appearance: React.FC = () => {
           </Alert>
         )}
 
-        {/* ══════════════════════════════════════════════════════════════════ */}
-        {/* STATS TAB                                                          */}
-        {/* ══════════════════════════════════════════════════════════════════ */}
-        <TabPanel value={tabValue} index={0}>
-          <SectionToolbar
-            title="Platform Statistics"
-            subtitle="Numbers displayed on the public homepage"
-            onAdd={addStat}
-            addLabel="Add Stat"
-            onSave={handleSaveStats}
-            saveLabel="Save Stats"
-            saving={saving}
-          />
+        {hasChanges && (
+          <Alert
+            severity="info"
+            sx={{ mb: 3, borderRadius: 2 }}
+            action={
+              <Button size="small" onClick={handleSaveAll} disabled={saving} sx={{ textTransform: 'none', fontWeight: 600, color: P }}>
+                Save Now
+              </Button>
+            }
+          >
+            You have unsaved changes. Click "Save Changes" to publish to the homepage.
+          </Alert>
+        )}
 
-          {stats.length === 0 ? (
-            <EmptyState
-              icon={<Assessment sx={{ fontSize: 26 }} />}
-              message="No stats configured yet. Add your first stat to display on the homepage."
-              onAdd={addStat}
-              addLabel="Add Your First Stat"
-            />
-          ) : (
-            <Grid container spacing={{ xs: 2, sm: 3 }}>
-              {stats.map((stat, index) => (
-                <Grid item xs={12} sm={6} key={index}>
-                  <Card elevation={0} sx={{ border: '1px solid #e2e8f0', borderRadius: 3, transition: 'box-shadow 0.2s', '&:hover': { boxShadow: '0 4px 16px rgba(0,0,0,0.06)' } }}>
-                    <CardContent sx={{ p: { xs: 2, sm: 2.5 } }}>
-
-                      {/* Card header */}
-                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                          <Box sx={{ width: 32, height: 32, borderRadius: 1.5, bgcolor: BRAND.primaryBg, border: `1px solid ${BRAND.primaryBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <BarChart sx={{ fontSize: 16, color: BRAND.primary }} />
-                          </Box>
-                          <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#0f172a' }}>
-                            Stat {index + 1}
-                          </Typography>
-                        </Box>
-                        <IconButton size="small" onClick={() => deleteStat(index)} sx={{ color: '#94a3b8', '&:hover': { color: '#ef4444', bgcolor: alpha('#ef4444', 0.08) } }}>
-                          <Delete fontSize="small" />
-                        </IconButton>
-                      </Box>
-
-                      <Divider sx={{ mb: 2 }} />
-
-                      <Grid container spacing={1.5}>
-                        <Grid item xs={12} sm={6}>
-                          <TextField fullWidth size="small" label="Title" value={stat.title} onChange={e => updateStat(index, 'title', e.target.value)} sx={fieldSx} />
-                        </Grid>
-                        <Grid item xs={12} sm={6}>
-                          <TextField fullWidth size="small" label="Label" value={stat.label} onChange={e => updateStat(index, 'label', e.target.value)} sx={fieldSx} />
-                        </Grid>
-                        <Grid item xs={6} sm={4}>
-                          <TextField fullWidth size="small" label="Number" type="number" inputProps={{ step: '0.1' }} value={stat.number} onChange={e => updateStat(index, 'number', parseFloat(e.target.value) || 0)} sx={fieldSx} />
-                        </Grid>
-                        <Grid item xs={6} sm={4}>
-                          <TextField fullWidth size="small" label="Display Value" value={stat.value} onChange={e => updateStat(index, 'value', e.target.value)} helperText="e.g. 10K, 500+" sx={fieldSx} />
-                        </Grid>
-                        <Grid item xs={6} sm={4}>
-                          <TextField fullWidth size="small" label="Suffix" value={stat.suffix} onChange={e => updateStat(index, 'suffix', e.target.value)} placeholder="+" sx={fieldSx} />
-                        </Grid>
-                        <Grid item xs={12}>
-                          <FormControl fullWidth size="small" sx={fieldSx}>
-                            <InputLabel>Icon</InputLabel>
-                            <Select value={stat.icon} label="Icon" onChange={e => updateStat(index, 'icon', e.target.value)}>
-                              {ICON_OPTIONS.map(icon => (
-                                <MenuItem key={icon} value={icon}>{icon.replace(/_/g, ' ')}</MenuItem>
-                              ))}
-                            </Select>
-                          </FormControl>
-                        </Grid>
-                      </Grid>
-
-                      {/* Preview pill */}
-                      <Box sx={{ mt: 2, pt: 2, borderTop: '1px dashed #e2e8f0', display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Typography variant="caption" color="text.secondary">Preview:</Typography>
-                        <Chip
-                          label={`${stat.value || stat.number}${stat.suffix} — ${stat.label || stat.title}`}
-                          size="small"
-                          sx={{ bgcolor: BRAND.primaryBg, color: BRAND.primary, border: `1px solid ${BRAND.primaryBorder}`, fontWeight: 600, fontSize: '0.7rem' }}
-                        />
-                      </Box>
-                    </CardContent>
-                  </Card>
-                </Grid>
-              ))}
-            </Grid>
-          )}
-        </TabPanel>
-
-        {/* ══════════════════════════════════════════════════════════════════ */}
-        {/* TESTIMONIALS TAB                                                   */}
-        {/* ══════════════════════════════════════════════════════════════════ */}
-        <TabPanel value={tabValue} index={1}>
-          <SectionToolbar
-            title="Customer Testimonials"
-            subtitle="Reviews displayed on the public homepage"
-            onAdd={addTestimonial}
-            addLabel="Add Testimonial"
-            onSave={handleSaveTestimonials}
-            saveLabel="Save Testimonials"
-            saving={saving}
-          />
-
-          {testimonials.length === 0 ? (
-            <EmptyState
-              icon={<RateReview sx={{ fontSize: 26 }} />}
-              message="No testimonials added yet. Add your first customer review."
-              onAdd={addTestimonial}
-              addLabel="Add Your First Testimonial"
-            />
-          ) : (
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 2, sm: 3 } }}>
-              {testimonials.map((t, index) => (
-                <Card key={index} elevation={0} sx={{ border: '1px solid #e2e8f0', borderRadius: 3, transition: 'box-shadow 0.2s', '&:hover': { boxShadow: '0 4px 16px rgba(0,0,0,0.06)' } }}>
-                  <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-
-                    {/* Card header */}
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2.5 }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                        <Avatar sx={{ width: 36, height: 36, bgcolor: BRAND.primary, fontSize: '0.875rem', fontWeight: 700 }}>
-                          {t.name ? t.name.charAt(0).toUpperCase() : '#'}
-                        </Avatar>
-                        <Box>
-                          <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#0f172a', lineHeight: 1.2 }}>
-                            {t.name || `Testimonial ${index + 1}`}
-                          </Typography>
-                          {t.role && <Typography variant="caption" color="text.secondary">{t.role}</Typography>}
-                        </Box>
-                      </Box>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Rating value={t.rating} readOnly size="small" />
-                        <IconButton size="small" onClick={() => deleteTestimonial(index)} sx={{ color: '#94a3b8', '&:hover': { color: '#ef4444', bgcolor: alpha('#ef4444', 0.08) } }}>
-                          <Delete fontSize="small" />
-                        </IconButton>
-                      </Box>
-                    </Box>
-
-                    <Divider sx={{ mb: 2.5 }} />
-
-                    <Grid container spacing={1.5}>
-                      <Grid item xs={12} sm={6}>
-                        <TextField fullWidth size="small" label="Customer Name" value={t.name} onChange={e => updateTestimonial(index, 'name', e.target.value)} required sx={fieldSx} />
-                      </Grid>
-                      <Grid item xs={12} sm={6}>
-                        <TextField fullWidth size="small" label="Role / Title" value={t.role || ''} onChange={e => updateTestimonial(index, 'role', e.target.value)} placeholder="e.g. Owner, Manager" sx={fieldSx} />
-                      </Grid>
-                      <Grid item xs={12} sm={6}>
-                        <TextField fullWidth size="small" label="Restaurant / Business" value={t.restaurant || ''} onChange={e => updateTestimonial(index, 'restaurant', e.target.value)} sx={fieldSx} />
-                      </Grid>
-                      <Grid item xs={12} sm={6}>
-                        <TextField fullWidth size="small" label="Location" value={t.location || ''} onChange={e => updateTestimonial(index, 'location', e.target.value)} placeholder="e.g. Mumbai, Maharashtra" sx={fieldSx} />
-                      </Grid>
-                      <Grid item xs={12} sm={6}>
-                        <TextField fullWidth size="small" label="Avatar (initials or URL)" value={t.avatar || ''} onChange={e => updateTestimonial(index, 'avatar', e.target.value)} placeholder="JD or https://..." sx={fieldSx} />
-                      </Grid>
-                      <Grid item xs={12} sm={6}>
-                        <Box sx={{ px: 0.5 }}>
-                          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.75 }}>Rating</Typography>
-                          <Rating value={t.rating} onChange={(_, v) => updateTestimonial(index, 'rating', v || 5)} />
-                        </Box>
-                      </Grid>
-                      <Grid item xs={12}>
-                        <TextField fullWidth multiline rows={3} size="small" label="Testimonial Comment" value={t.comment} onChange={e => updateTestimonial(index, 'comment', e.target.value)} required sx={fieldSx} />
-                      </Grid>
-                    </Grid>
-                  </CardContent>
-                </Card>
-              ))}
+        {filtered.length === 0 ? (
+          <Box sx={{ textAlign: 'center', py: 10, border: '2px dashed #e0e0e0', borderRadius: 3, bgcolor: '#fafafa' }}>
+            <Box sx={{ width: 56, height: 56, borderRadius: 3, bgcolor: PB, border: `1px solid ${PBR}`, display: 'flex', alignItems: 'center', justifyContent: 'center', mx: 'auto', mb: 2, color: P }}>
+              <FormatQuote sx={{ fontSize: 26 }} />
             </Box>
-          )}
-        </TabPanel>
-
-        {/* ══════════════════════════════════════════════════════════════════ */}
-        {/* CONTACT TAB                                                        */}
-        {/* ══════════════════════════════════════════════════════════════════ */}
-        <TabPanel value={tabValue} index={2}>
-          <SectionToolbar
-            title="Contact Information"
-            subtitle="Details shown on the public homepage contact section"
-            onSave={handleSaveContact}
-            saveLabel="Save Contact"
-            saving={saving}
-          />
-
-          <Card elevation={0} sx={{ border: '1px solid #e2e8f0', borderRadius: 3 }}>
-            <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-
-              {/* Email & Phone */}
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
-                <Box sx={{ width: 32, height: 32, borderRadius: 1.5, bgcolor: BRAND.primaryBg, border: `1px solid ${BRAND.primaryBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <ContactMail sx={{ fontSize: 16, color: BRAND.primary }} />
-                </Box>
-                <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#0f172a' }}>Contact Details</Typography>
-              </Box>
-
-              <Grid container spacing={{ xs: 1.5, sm: 2 }} sx={{ mb: 3 }}>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth label="Email" type="email"
-                    value={contact.email || ''} onChange={e => updateContact('email', e.target.value)}
-                    sx={fieldSx}
-                    InputProps={{ startAdornment: <InputAdornment position="start"><Email sx={{ fontSize: 18, color: '#94a3b8' }} /></InputAdornment> }}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth label="Phone"
-                    value={contact.phone || ''} onChange={e => updateContact('phone', e.target.value)}
-                    sx={fieldSx}
-                    InputProps={{ startAdornment: <InputAdornment position="start"><Phone sx={{ fontSize: 18, color: '#94a3b8' }} /></InputAdornment> }}
-                  />
-                </Grid>
+            <Typography sx={{ fontWeight: 600, color: '#1C1C1E', mb: 0.5 }}>
+              {totalCount === 0 ? 'No testimonials yet' : 'No results match your filters'}
+            </Typography>
+            <Typography variant="body2" sx={{ color: '#666666', mb: 3 }}>
+              {totalCount === 0
+                ? 'Add your first customer review to display on the homepage.'
+                : 'Try adjusting your search or filter criteria.'}
+            </Typography>
+            {totalCount === 0 && (
+              <Button variant="contained" startIcon={<Add />} onClick={openAdd}
+                sx={{ textTransform: 'none', fontWeight: 600, bgcolor: P, borderRadius: 2, boxShadow: 'none', '&:hover': { bgcolor: PH, boxShadow: 'none' } }}>
+                Add First Testimonial
+              </Button>
+            )}
+          </Box>
+        ) : (
+          <Grid container spacing={2.5}>
+            {filtered.map(({ t, i }) => (
+              <Grid item xs={12} sm={6} lg={4} key={i}>
+                <TestimonialCard
+                  t={t}
+                  index={i}
+                  onEdit={() => openEdit(i)}
+                  onDelete={() => handleDelete(i)}
+                  onToggleApprove={() => handleToggleApprove(i)}
+                />
               </Grid>
-
-              <Divider sx={{ mb: 3 }} />
-
-              {/* Address */}
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
-                <Box sx={{ width: 32, height: 32, borderRadius: 1.5, bgcolor: BRAND.primaryBg, border: `1px solid ${BRAND.primaryBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <LocationOn sx={{ fontSize: 16, color: BRAND.primary }} />
-                </Box>
-                <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#0f172a' }}>Address</Typography>
-              </Box>
-
-              <Grid container spacing={{ xs: 1.5, sm: 2 }}>
-                <Grid item xs={12}>
-                  <TextField fullWidth label="Street Address" value={contact.address || ''} onChange={e => updateContact('address', e.target.value)} sx={fieldSx} />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField fullWidth label="City" value={contact.city || ''} onChange={e => updateContact('city', e.target.value)} sx={fieldSx} />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField fullWidth label="State / Province" value={contact.state || ''} onChange={e => updateContact('state', e.target.value)} sx={fieldSx} />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField fullWidth label="Country" value={contact.country || ''} onChange={e => updateContact('country', e.target.value)} sx={fieldSx} />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth label="Postal Code"
-                    value={contact.postal_code || ''} onChange={e => updateContact('postal_code', e.target.value)}
-                    sx={fieldSx}
-                    InputProps={{ startAdornment: <InputAdornment position="start"><Tag sx={{ fontSize: 18, color: '#94a3b8' }} /></InputAdornment> }}
-                  />
-                </Grid>
-              </Grid>
-            </CardContent>
-          </Card>
-        </TabPanel>
+            ))}
+          </Grid>
+        )}
       </Box>
+
+
+      {/* ── Edit / Add Dialog ── */}
+      <EditDialog
+        open={dialogOpen}
+        testimonial={editDraft}
+        isNew={editIndex === null}
+        onChange={(field, value) => setEditDraft(prev => ({ ...prev, [field]: value }))}
+        onSave={handleDialogSave}
+        onClose={() => setDialogOpen(false)}
+      />
 
       {/* ── Snackbar ── */}
       <Snackbar

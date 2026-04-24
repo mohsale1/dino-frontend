@@ -787,18 +787,18 @@ input[type=number],
     padding-top: 16px;
   }
   
-  /* iOS momentum scrolling — no bounce */
-  html, body {
+  /* iOS momentum scrolling — targeted only */
+  main,
+  .admin-main-content,
+  .table-responsive {
     -webkit-overflow-scrolling: touch;
-    overscroll-behavior: none;
   }
 
   /* Scrollable areas */
   .admin-main-content {
     height: auto;
-    min-height: calc(100vh - 64px);
+    min-height: calc(100vh - 56px);
     overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
   }
 
   .container-responsive {

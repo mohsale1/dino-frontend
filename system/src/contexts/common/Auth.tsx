@@ -12,7 +12,7 @@ import { apiService } from '../../utils/api';
 
 interface AuthContextType {
   user: UserProfile | null;
-  login: (email: string, password: string, isSystemUser?: boolean) => Promise<{ user: UserProfile }>;
+  login: (email: string, password: string, isSystemUser?: boolean) => Promise<{ user: UserProfile; permissions: any }>;
   register: (userData: UserRegistration) => Promise<void>;
   logout: () => void;
   updateUser: (userData: Partial<UserProfile>) => Promise<void>;
@@ -31,6 +31,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+
 interface AuthProviderProps {
   children: ReactNode;
 }
@@ -42,7 +43,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const derivePermissionsFromUser = async (userData: any, isSystemUser?: boolean): Promise<any> => {
     const userRole = userData?.role;
-    const roleName = typeof userRole === 'string' ? userRole : userRole?.name;
+    const roleName = typeof userRole === 'string' ? userRole : (userRole?.name ?? '');
 
     const userType = isSystemUser !== undefined
       ? isSystemUser
@@ -51,79 +52,115 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     let permissionsState: any;
 
     if (!userType) {
-      // Application user â€” fetch from dedicated application permissions endpoint
-      // Response shape: { success, data: [{category, resource, action, id, ...}], pagination }
+      // ── Application user ──────────────────────────────────────────────
       try {
         const response = await apiService.get<any>('/application/permissions');
-        const payload = response.data as any;
+        const payload  = response.data as any;
         const permissions: any[] = payload?.data ?? [];
-        permissionsState = {
-          role: { name: roleName },
-          permissions,
-          capabilities: {},
-        };
+        permissionsState = { role: { name: roleName }, permissions, capabilities: {} };
       } catch {
-        // Fallback: derive from embedded role permissions if API fails
-        const rolePermissions: any[] = userRole?.permissions || [];
-        const resolved = rolePermissions
-          .filter((p: any) => typeof p === 'object' && p?.category && p?.resource && p?.action)
-          .map((p: any) => ({ id: p.id, category: p.category, resource: p.resource, action: p.action }));
-        permissionsState = {
-          role: { name: roleName },
-          permissions: resolved,
-          capabilities: {},
-        };
+        permissionsState = { role: { name: roleName }, permissions: [], capabilities: {} };
       }
     } else {
-      // System user â€” resolve permission IDs from /system/permissions (paginated)
-      const rolePermissions: any[] = userRole?.permissions || [];
+      // ── System user ───────────────────────────────────────────────────
+      // Resolve roleId — /system/auth/me may return role as:
+      //   { id, name, ... }  → use id directly
+      //   "Operator"         → look up by name via GET /system/roles
+      let roleId: number | null =
+        typeof userRole === 'object' && userRole?.id ? Number(userRole.id) : null;
 
-      // Already-resolved objects have category + resource + action fields
-      const alreadyResolved = rolePermissions
-        .filter((p: any) => typeof p === 'object' && p?.category && p?.resource && p?.action)
-        .map((p: any) => ({ id: p.id, category: p.category, resource: p.resource, action: p.action }));
-
-      // Numeric/string IDs that still need to be resolved
-      const ids = rolePermissions.filter((p: any) => typeof p === 'string' || typeof p === 'number');
-
-      let resolved: any[] = [];
-      if (ids.length > 0) {
+      if (!roleId && roleName) {
         try {
-          let allPerms: any[] = [];
-          let page = 1;
-          let hasNext = true;
-          while (hasNext) {
-            const response = await apiService.get<any>('/system/permissions', {
-              params: { page, page_size: 100 },
-            });
-            const items: any[] = response.data?.data ?? response.data ?? [];
-            allPerms = allPerms.concat(items);
-            hasNext = response.data?.pagination?.hasNext ?? response.data?.pagination?.has_next ?? false;
-            page++;
-          }
-          const idToName: Record<string, any> = {};
-          allPerms.forEach((p: any) => { if (p.id) idToName[p.id] = p; });
-          resolved = ids.map(id => {
-            const perm = idToName[id];
-            return perm
-              ? { id: perm.id, category: perm.category, resource: perm.resource, action: perm.action }
-              : null;
-          }).filter(Boolean);
+          const rolesResp = await apiService.get<any>('/system/roles', {
+            params: { page: 1, page_size: 100 },
+          });
+          const rolesRaw = rolesResp.data as any;
+          const roles: any[] = Array.isArray(rolesRaw) ? rolesRaw : (rolesRaw?.data ?? []);
+          const match = roles.find(
+            (r: any) => r.name?.toLowerCase() === roleName.toLowerCase()
+          );
+          if (match?.id) roleId = Number(match.id);
         } catch {
-          resolved = [];
+          roleId = null;
         }
       }
 
-      permissionsState = {
-        role: { name: roleName },
-        permissions: [...alreadyResolved, ...resolved],
-        capabilities: {},
-      };
+      console.log('[Auth] system user | roleName:', roleName, '| roleId:', roleId);
+
+      let permissions: any[] = [];
+
+      if (roleId) {
+        try {
+          // Step 1 — permission IDs assigned to this role
+          const idsResp = await apiService.get<any>(`/system/roles/${roleId}/permissions`);
+          const idsRaw  = idsResp.data as any;
+          console.log('[Auth] role permissions raw:', idsRaw);
+
+          const permissionIds: number[] = (
+            Array.isArray(idsRaw) ? idsRaw : (idsRaw?.data ?? [])
+          ).map(Number).filter((n: number) => !isNaN(n) && n > 0);
+
+          console.log('[Auth] permissionIds:', permissionIds);
+
+          if (permissionIds.length > 0) {
+            const idSet = new Set(permissionIds);
+
+            // Step 2 — fetch all permission objects, paginate until complete
+            let page = 1;
+            const PAGE_SIZE = 100;
+            let collected: any[] = [];
+
+            while (true) {
+              const resp  = await apiService.get<any>('/system/permissions', {
+                params: { page, page_size: PAGE_SIZE },
+              });
+              const raw   = resp.data as any;
+              const batch: any[] = Array.isArray(raw) ? raw : (raw?.data ?? []);
+              collected = collected.concat(batch);
+
+              const total: number =
+                raw?.total ?? raw?.pagination?.total ?? raw?.count ?? 0;
+              if (batch.length < PAGE_SIZE || collected.length >= total || total === 0) break;
+              page++;
+            }
+
+            permissions = collected
+              .filter((p: any) => idSet.has(Number(p.id)))
+              .map((p: any) => ({
+                id:       p.id,
+                category: (p.category ?? 'system').toLowerCase(),
+                resource: p.resource,
+                action:   p.action,
+              }));
+
+            console.log('[Auth] collected:', collected.length, '| matched:', permissions.length);
+            console.log('[Auth] view perms:', permissions.filter(p => p.action === 'view'));
+          }
+        } catch (err) {
+          console.error('[Auth] permission fetch failed:', err);
+          permissions = [];
+        }
+      } else {
+        console.warn('[Auth] could not resolve roleId for role:', roleName);
+      }
+
+      permissionsState = { role: { name: roleName }, permissions, capabilities: {} };
     }
 
     StorageManager.setPermissions(permissionsState);
     return permissionsState;
   };
+
+
+
+
+
+
+
+
+
+
+
 
   const isTokenExpired = (token: string): boolean => {
     try {
@@ -198,7 +235,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     initializeAuth();
   }, []);
 
-  const login = async (email: string, password: string, isSystemUser: boolean = false): Promise<{ user: UserProfile }> => {
+  const login = async (email: string, password: string, isSystemUser: boolean = false): Promise<{ user: UserProfile; permissions: any }> => {
     try {
       setLoading(true);
 
@@ -232,10 +269,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setUser(localUser);
       StorageManager.setUserData(localUser);
 
+      let resolvedPermissions: any = null;
       try {
-        const permissions = await derivePermissionsFromUser(response.user, isSystemUser);
-        setUserPermissions(permissions);
-        StorageManager.setPermissions(permissions);
+        resolvedPermissions = await derivePermissionsFromUser(response.user, isSystemUser);
+        setUserPermissions(resolvedPermissions);
+        StorageManager.setPermissions(resolvedPermissions);
       } catch (permError: any) {
         console.warn('Failed to derive permissions from login response:', permError);
       }
@@ -246,7 +284,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         cacheUtils.preloadCriticalData(localUser.id, localUser.venueId);
       }, 100);
 
-      return { user: localUser };
+      return { user: localUser, permissions: resolvedPermissions };
     } catch (error: any) {
       StorageManager.removeItem(StorageManager.KEYS.TOKEN);
       StorageManager.removeItem(StorageManager.KEYS.USER);
@@ -389,20 +427,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }, []);
 
-  // Reconstruct dot-notation as category.toLowerCase() + '.' + resource + '.' + action
-  // Backend returns category in UPPERCASE ('SYSTEM', 'APPLICATION') â€” no 'name' field exists.
+  // Returns "resource:action" strings — matching the backend codename format.
   const getPermissionsList = (): string[] => {
     if (!userPermissions?.permissions) return [];
     return userPermissions.permissions
-      .filter((p: any) => p?.category && p?.resource && p?.action)
-      .map((p: any) => `${p.category.toLowerCase()}.${p.resource}.${p.action}`);
+      .filter((p: any) => p?.resource && p?.action)
+      .map((p: any) => `${p.resource}:${p.action}`);
   };
 
   const hasBackendPermission = (permission: string): boolean => {
     if (!userPermissions?.permissions) return false;
     return userPermissions.permissions.some((p: any) => {
-      if (p?.category && p?.resource && p?.action) {
-        return `${p.category.toLowerCase()}.${p.resource}.${p.action}` === permission;
+      if (p?.resource && p?.action) {
+        return `${p.resource}:${p.action}` === permission;
       }
       return false;
     });

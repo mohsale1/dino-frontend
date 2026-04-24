@@ -1,20 +1,19 @@
 import React, { useState, useMemo } from 'react';
 import {
   Box,
-  Card,
-  CardContent,
   Typography,
   TextField,
   Button,
   Alert,
   CircularProgress,
   Avatar,
-  Grid,
   InputAdornment,
   IconButton,
   Divider,
   LinearProgress,
   Chip,
+  Tab,
+  Tabs,
 } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import {
@@ -22,136 +21,90 @@ import {
   VisibilityOff,
   LockOutlined,
   EmailOutlined,
-  CalendarToday,
   CheckCircle,
   Cancel,
   ShieldOutlined,
   PersonOutlined,
   BadgeOutlined,
+  AdminPanelSettingsOutlined,
+  VerifiedOutlined,
 } from '@mui/icons-material';
 import { useAuth } from '../../contexts/common/Auth';
 import { authService } from '../../services/auth/auth';
 
-// ─── Brand ───────────────────────────────────────────────────────────────────
-const BRAND = {
-  primary:      '#1976D2',
-  primaryHover: '#1565C0',
-  primaryLight: '#42A5F5',
-  primaryBg:    'rgba(25,118,210,0.08)',
-  primaryBorder:'rgba(25,118,210,0.2)',
-};
+// ── Design tokens ─────────────────────────────────────────────────────────────
+const P  = '#00A6CA';
+const PH = '#005F8D';
+const PB = 'rgba(0,166,202,0.08)';
+const PBR = 'rgba(0,166,202,0.2)';
 
-// ─── Password strength ────────────────────────────────────────────────────────
-interface StrengthResult {
-  score: number;       // 0–4
-  label: string;
-  color: string;
-}
-
-function getPasswordStrength(password: string): StrengthResult {
-  if (!password) return { score: 0, label: '', color: '#e2e8f0' };
-  let score = 0;
-  if (password.length >= 8)  score++;
-  if (password.length >= 12) score++;
-  if (/[A-Z]/.test(password) && /[a-z]/.test(password)) score++;
-  if (/\d/.test(password))   score++;
-  if (/[^A-Za-z0-9]/.test(password)) score++;
-  score = Math.min(score, 4);
+// ── Password strength ─────────────────────────────────────────────────────────
+function getPasswordStrength(pw: string) {
+  if (!pw) return { score: 0, label: '', color: '#e0e0e0' };
+  let s = 0;
+  if (pw.length >= 8)  s++;
+  if (pw.length >= 12) s++;
+  if (/[A-Z]/.test(pw) && /[a-z]/.test(pw)) s++;
+  if (/\d/.test(pw))   s++;
+  if (/[^A-Za-z0-9]/.test(pw)) s++;
+  s = Math.min(s, 4);
   const map: Record<number, { label: string; color: string }> = {
-    0: { label: '',          color: '#e2e8f0' },
-    1: { label: 'Weak',      color: '#ef4444' },
-    2: { label: 'Fair',      color: '#f59e0b' },
-    3: { label: 'Good',      color: '#3b82f6' },
-    4: { label: 'Strong',    color: '#10b981' },
+    0: { label: '',       color: '#e0e0e0' },
+    1: { label: 'Weak',   color: '#ef4444' },
+    2: { label: 'Fair',   color: '#f59e0b' },
+    3: { label: 'Good',   color: '#3b82f6' },
+    4: { label: 'Strong', color: '#10b981' },
   };
-  return { score, ...map[score] };
+  return { score: s, ...map[s] };
 }
 
-// ─── Password requirement row ─────────────────────────────────────────────────
-const Requirement: React.FC<{ met: boolean; label: string }> = ({ met, label }) => (
-  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+// ── Sub-components ────────────────────────────────────────────────────────────
+const Req: React.FC<{ met: boolean; label: string }> = ({ met, label }) => (
+  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
     {met
-      ? <CheckCircle sx={{ fontSize: 15, color: '#10b981' }} />
-      : <Cancel      sx={{ fontSize: 15, color: '#cbd5e1' }} />
+      ? <CheckCircle sx={{ fontSize: 14, color: '#10b981' }} />
+      : <Cancel      sx={{ fontSize: 14, color: '#d1d5db' }} />
     }
-    <Typography variant="caption" sx={{ color: met ? '#10b981' : '#94a3b8', fontWeight: met ? 600 : 400 }}>
+    <Typography variant="caption" sx={{ color: met ? '#10b981' : '#9ca3af', fontWeight: met ? 600 : 400, fontSize: '0.75rem' }}>
       {label}
     </Typography>
   </Box>
 );
 
-// ─── Info row ─────────────────────────────────────────────────────────────────
-const InfoRow: React.FC<{ icon: React.ReactNode; label: string; value: string }> = ({ icon, label, value }) => (
-  <Box sx={{
-    display: 'flex',
-    alignItems: 'center',
-    gap: 1.5,
-    px: 1.5,
-    py: 1.5,
-    borderRadius: 2,
-    bgcolor: '#f8fafc',
-    border: '1px solid #e2e8f0',
-    minWidth: 0,
-  }}>
-    <Box sx={{
-      width: 34,
-      height: 34,
-      borderRadius: 1.5,
-      bgcolor: BRAND.primaryBg,
-      border: `1px solid ${BRAND.primaryBorder}`,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      flexShrink: 0,
-      color: BRAND.primary,
-    }}>
+const InfoItem: React.FC<{ icon: React.ReactNode; label: string; value: string }> = ({ icon, label, value }) => (
+  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, py: 1.5, borderBottom: '1px solid #f2f2f2', '&:last-child': { borderBottom: 'none' } }}>
+    <Box sx={{ width: 36, height: 36, borderRadius: '50%', bgcolor: PB, border: `1px solid ${PBR}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: P }}>
       {icon}
     </Box>
     <Box sx={{ minWidth: 0, flex: 1 }}>
-      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', lineHeight: 1.2 }}>
+      <Typography sx={{ fontSize: '0.7rem', color: '#999999', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.04em', lineHeight: 1 }}>
         {label}
       </Typography>
-      <Typography variant="body2" sx={{ fontWeight: 600, color: '#0f172a', mt: 0.25, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+      <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: '#1C1C1E', mt: 0.25, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
         {value}
       </Typography>
     </Box>
   </Box>
 );
 
-// ─── Section header ───────────────────────────────────────────────────────────
-const SectionHeader: React.FC<{ icon: React.ReactNode; title: string; subtitle?: string }> = ({ icon, title, subtitle }) => (
-  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: { xs: 2, sm: 3 } }}>
-    <Box sx={{
-      width: { xs: 34, sm: 38 },
-      height: { xs: 34, sm: 38 },
-      borderRadius: 2,
-      bgcolor: BRAND.primaryBg,
-      border: `1px solid ${BRAND.primaryBorder}`,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      color: BRAND.primary,
-      flexShrink: 0,
-    }}>
-      {icon}
-    </Box>
-    <Box sx={{ minWidth: 0 }}>
-      <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#0f172a', lineHeight: 1.2, fontSize: { xs: '0.9rem', sm: '1rem' } }}>
-        {title}
-      </Typography>
-      {subtitle && (
-        <Typography variant="caption" color="text.secondary" sx={{ display: { xs: 'none', sm: 'block' } }}>{subtitle}</Typography>
-      )}
-    </Box>
-  </Box>
-);
+const fieldSx = {
+  '& .MuiOutlinedInput-root': {
+    borderRadius: 2,
+    bgcolor: '#fafafa',
+    '&.Mui-focused fieldset': { borderColor: P },
+    '&.Mui-disabled': { bgcolor: '#f5f5f5' },
+  },
+  '& label.Mui-focused': { color: P },
+};
 
-// ─── Main component ───────────────────────────────────────────────────────────
+// ── Main component ────────────────────────────────────────────────────────────
 const ProfilePage: React.FC = () => {
   const { user } = useAuth();
-  const [loading, setLoading]   = useState(false);
-  const [success, setSuccess]   = useState('');
-  const [error,   setError]     = useState('');
+  const [tab, setTab] = useState(0);
+
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState('');
+  const [error,   setError]   = useState('');
 
   const [oldPassword,     setOldPassword]     = useState('');
   const [newPassword,     setNewPassword]     = useState('');
@@ -161,48 +114,30 @@ const ProfilePage: React.FC = () => {
   const [showConf, setShowConf] = useState(false);
 
   const strength = useMemo(() => getPasswordStrength(newPassword), [newPassword]);
-
   const requirements = useMemo(() => [
-    { met: newPassword.length >= 8,                                          label: 'At least 8 characters' },
-    { met: /[A-Z]/.test(newPassword) && /[a-z]/.test(newPassword),          label: 'Upper & lowercase letters' },
-    { met: /\d/.test(newPassword),                                           label: 'At least one number' },
-    { met: /[^A-Za-z0-9]/.test(newPassword),                                label: 'At least one special character' },
+    { met: newPassword.length >= 8,                                        label: 'At least 8 characters' },
+    { met: /[A-Z]/.test(newPassword) && /[a-z]/.test(newPassword),        label: 'Upper & lowercase' },
+    { met: /\d/.test(newPassword),                                         label: 'At least one number' },
+    { met: /[^A-Za-z0-9]/.test(newPassword),                              label: 'Special character' },
   ], [newPassword]);
 
-  const passwordsMatch = confirmPassword.length > 0 && newPassword === confirmPassword;
+  const passwordsMatch   = confirmPassword.length > 0 && newPassword === confirmPassword;
   const passwordsMismatch = confirmPassword.length > 0 && newPassword !== confirmPassword;
 
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
-
-    if (!oldPassword || !newPassword || !confirmPassword) {
-      setError('All fields are required.');
-      return;
-    }
-    if (newPassword.length < 8) {
-      setError('New password must be at least 8 characters long.');
-      return;
-    }
-    if (newPassword !== confirmPassword) {
-      setError('New passwords do not match.');
-      return;
-    }
-    if (oldPassword === newPassword) {
-      setError('New password must be different from the current password.');
-      return;
-    }
-
+    setError(''); setSuccess('');
+    if (!oldPassword || !newPassword || !confirmPassword) { setError('All fields are required.'); return; }
+    if (newPassword.length < 8)          { setError('New password must be at least 8 characters.'); return; }
+    if (newPassword !== confirmPassword)  { setError('New passwords do not match.'); return; }
+    if (oldPassword === newPassword)      { setError('New password must differ from current.'); return; }
     try {
       setLoading(true);
       await authService.changePassword(oldPassword, newPassword);
       setSuccess('Password updated successfully.');
-      setOldPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
+      setOldPassword(''); setNewPassword(''); setConfirmPassword('');
     } catch (err: any) {
-      setError(err.message || 'Failed to change password. Please try again.');
+      setError(err.message || 'Failed to change password.');
     } finally {
       setLoading(false);
     }
@@ -211,153 +146,122 @@ const ProfilePage: React.FC = () => {
   const displayName = user?.email?.split('@')[0] || 'User';
   const initials    = (user?.email?.charAt(0) || 'U').toUpperCase();
 
-  const fieldSx = {
-    '& .MuiOutlinedInput-root': {
-      borderRadius: 2,
-      '&.Mui-focused fieldset': { borderColor: BRAND.primary },
-    },
-    '& label.Mui-focused': { color: BRAND.primary },
-  };
-
   return (
-    <Box sx={{ width: '100%', minHeight: '100vh', bgcolor: '#f1f5f9' }}>
+    <Box sx={{ width: '100%', minHeight: '100vh', bgcolor: '#f4f6f8' }}>
 
-      {/* ── Hero (unchanged) ── */}
+      {/* ── Cover photo ── */}
       <Box
         sx={{
-          background: 'linear-gradient(135deg, #0d1b2e 0%, #0f2744 45%, #1565C0 100%)',
-          px: { xs: 2.5, sm: 4, md: 6 },
-          pt: { xs: 3, md: 4 },
-          pb: { xs: 4, md: 5 },
+          height: { xs: 90, sm: 100, md: 110 },
+          background: `linear-gradient(135deg, #004364 0%, #00A6CA 50%, #00c4ee 100%)`,
           position: 'relative',
           overflow: 'hidden',
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: -100, right: -60,
-            width: 360, height: 360,
-            borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(25,118,210,0.22) 0%, transparent 70%)',
-            pointerEvents: 'none',
-          },
-          '&::after': {
-            content: '""',
-            position: 'absolute',
-            bottom: -80, left: '25%',
-            width: 280, height: 280,
-            borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(66,165,245,0.15) 0%, transparent 70%)',
-            pointerEvents: 'none',
-          },
         }}
       >
+        {/* Subtle pattern overlay */}
         <Box sx={{
           position: 'absolute', inset: 0,
-          backgroundImage: 'linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)',
-          backgroundSize: '40px 40px',
+          backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(255,255,255,0.08) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255,255,255,0.06) 0%, transparent 40%)',
           pointerEvents: 'none',
         }} />
-        <Box sx={{ position: 'relative' }}>
-          <Typography variant="overline" sx={{ color: 'rgba(144,202,249,0.75)', fontWeight: 700, letterSpacing: 3, fontSize: '0.65rem' }}>
-            SYSTEM CONTROL CENTER
-          </Typography>
-          <Typography variant="h4" sx={{ color: '#fff', fontWeight: 800, mt: 0.5, fontSize: { xs: '1.5rem', md: '2rem' }, letterSpacing: '-0.025em', lineHeight: 1.2 }}>
-            My Profile
-          </Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mt: 1 }}>
-            <CalendarToday sx={{ fontSize: 13, color: 'rgba(144,202,249,0.6)' }} />
-            <Typography variant="caption" sx={{ color: 'rgba(144,202,249,0.6)', fontWeight: 500, fontSize: '0.75rem' }}>
-              {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-            </Typography>
-          </Box>
-        </Box>
       </Box>
 
-      {/* ── Content ── */}
-      <Box sx={{ px: { xs: 1.5, sm: 3, md: 5 }, pt: { xs: 2.5, sm: 4 }, pb: { xs: 4, sm: 6 } }}>
-        <Grid container spacing={{ xs: 2, sm: 3 }} alignItems="flex-start">
+      {/* ── Profile identity strip ── */}
+      <Box sx={{ bgcolor: '#ffffff', borderBottom: '1px solid #e0e0e0', px: { xs: 2, sm: 3, md: 5 }, pb: 0 }}>
+        <Box sx={{ display: 'flex', alignItems: 'flex-end', gap: { xs: 2, sm: 3 }, mt: { xs: '-40px', sm: '-52px', md: '-56px' }, mb: 2, flexWrap: 'wrap' }}>
 
-          {/* ── Left column: identity card ── */}
-          <Grid item xs={12} md={4}>
-            <Card elevation={0} sx={{ borderRadius: 3, border: '1px solid #e2e8f0', overflow: 'hidden' }}>
+          {/* Avatar */}
+          <Avatar
+            sx={{
+              width:  { xs: 80, sm: 100, md: 112 },
+              height: { xs: 80, sm: 100, md: 112 },
+              bgcolor: P,
+              fontSize: { xs: '2rem', sm: '2.5rem', md: '2.75rem' },
+              fontWeight: 700,
+              border: '4px solid #ffffff',
+              boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+              flexShrink: 0,
+            }}
+          >
+            {initials}
+          </Avatar>
 
-              {/* Dark band — fixed height, no avatar inside */}
-              <Box sx={{
-                background: 'linear-gradient(135deg, #0d1b2e 0%, #0f2744 100%)',
-                height: 80,
-                borderRadius: '12px 12px 0 0',
-              }} />
+          {/* Name + meta */}
+          <Box sx={{ flex: 1, minWidth: 0, pb: 1, pt: { xs: '44px', sm: '56px', md: '60px' } }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+              <Typography sx={{ fontSize: { xs: '1.125rem', sm: '1.375rem' }, fontWeight: 700, color: '#1C1C1E', lineHeight: 1.2 }}>
+                {displayName}
+              </Typography>
+              <VerifiedOutlined sx={{ fontSize: 18, color: P }} />
+            </Box>
+            <Typography sx={{ fontSize: '0.875rem', color: '#666666', mt: 0.25, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {user?.email}
+            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1, flexWrap: 'wrap' }}>
+              <Chip
+                icon={<AdminPanelSettingsOutlined sx={{ fontSize: '14px !important' }} />}
+                label="System Administrator"
+                size="small"
+                sx={{ bgcolor: PB, color: P, border: `1px solid ${PBR}`, fontWeight: 600, fontSize: '0.72rem', height: 22 }}
+              />
+              <Chip
+                label="System"
+                size="small"
+                sx={{ bgcolor: '#f2f2f2', color: '#666666', fontSize: '0.72rem', height: 22 }}
+              />
+            </Box>
+          </Box>
+        </Box>
 
-              {/* Avatar centred on the band/white boundary */}
-              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mt: '-40px', px: { xs: 2, sm: 3 }, pb: 2.5 }}>
-                <Avatar sx={{
-                  width: 80,
-                  height: 80,
-                  bgcolor: BRAND.primary,
-                  fontSize: '2rem',
-                  fontWeight: 700,
-                  border: '4px solid #ffffff',
-                  boxShadow: '0 4px 16px rgba(25,118,210,0.3)',
-                  mb: 1.5,
-                }}>
-                  {initials}
-                </Avatar>
+        {/* ── Tabs ── */}
+        <Tabs
+          value={tab}
+          onChange={(_, v) => setTab(v)}
+          sx={{
+            minHeight: 44,
+            '& .MuiTab-root': { textTransform: 'none', fontWeight: 600, fontSize: '0.875rem', minHeight: 44, color: '#666666', px: 2 },
+            '& .Mui-selected': { color: P },
+            '& .MuiTabs-indicator': { bgcolor: P, height: 2.5 },
+          }}
+        >
+          <Tab label="Overview" />
+          <Tab label="Security" />
+        </Tabs>
+      </Box>
 
-                <Typography variant="h6" sx={{ fontWeight: 700, color: '#0f172a', lineHeight: 1.2, textAlign: 'center' }}>
-                  {displayName}
-                </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5, textAlign: 'center', wordBreak: 'break-all' }}>
-                  {user?.email}
-                </Typography>
-                <Chip
-                  label="System Administrator"
-                  size="small"
-                  sx={{
-                    mt: 1.5,
-                    bgcolor: BRAND.primaryBg,
-                    color: BRAND.primary,
-                    border: `1px solid ${BRAND.primaryBorder}`,
-                    fontWeight: 600,
-                    fontSize: '0.72rem',
-                    height: 24,
-                  }}
-                />
+      {/* ── Tab content ── */}
+      <Box sx={{ px: { xs: 2, sm: 3, md: 5 }, py: 3, maxWidth: 900, mx: 'auto' }}>
+
+        {/* ══ OVERVIEW TAB ══ */}
+        {tab === 0 && (
+          <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 3, alignItems: 'flex-start' }}>
+
+            {/* Left — about card */}
+            <Box sx={{ width: { xs: '100%', md: 300 }, flexShrink: 0 }}>
+              <Box sx={{ bgcolor: '#ffffff', border: '1px solid #e0e0e0', borderRadius: 2, overflow: 'hidden' }}>
+                <Box sx={{ px: 2.5, pt: 2.5, pb: 1 }}>
+                  <Typography sx={{ fontWeight: 700, fontSize: '0.9375rem', color: '#1C1C1E', mb: 0.5 }}>
+                    About
+                  </Typography>
+                  <Typography sx={{ fontSize: '0.8125rem', color: '#666666', lineHeight: 1.6 }}>
+                    System administrator account with full platform access.
+                  </Typography>
+                </Box>
+                <Box sx={{ px: 2, pb: 1.5 }}>
+                  <InfoItem icon={<EmailOutlined sx={{ fontSize: 17 }} />}              label="Email"        value={user?.email || '—'} />
+                  <InfoItem icon={<BadgeOutlined sx={{ fontSize: 17 }} />}              label="Role"         value="System Administrator" />
+                  <InfoItem icon={<PersonOutlined sx={{ fontSize: 17 }} />}             label="Account Type" value="System" />
+                  <InfoItem icon={<AdminPanelSettingsOutlined sx={{ fontSize: 17 }} />} label="Access Level" value="Full Access" />
+                </Box>
               </Box>
+            </Box>
 
-              <Divider />
-
-              {/* Quick info rows */}
-              <Box sx={{ px: { xs: 1.5, sm: 2.5 }, py: 2, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-                <InfoRow
-                  icon={<EmailOutlined sx={{ fontSize: 18 }} />}
-                  label="Email"
-                  value={user?.email || '—'}
-                />
-                <InfoRow
-                  icon={<BadgeOutlined sx={{ fontSize: 18 }} />}
-                  label="Role"
-                  value="System Administrator"
-                />
-                <InfoRow
-                  icon={<PersonOutlined sx={{ fontSize: 18 }} />}
-                  label="Account Type"
-                  value="System"
-                />
-              </Box>
-            </Card>
-          </Grid>
-
-          {/* ── Right column: account info + password ── */}
-          <Grid item xs={12} md={8}>
-
-            {/* Account information */}
-            <Card elevation={0} sx={{ borderRadius: 3, border: '1px solid #e2e8f0', mb: 3 }}>
-              <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-                <SectionHeader
-                  icon={<PersonOutlined sx={{ fontSize: 20 }} />}
-                  title="Account Information"
-                  subtitle="Your account details managed by the system"
-                />
+            {/* Right — account info card */}
+            <Box sx={{ flex: 1, minWidth: 0 }}>
+              <Box sx={{ bgcolor: '#ffffff', border: '1px solid #e0e0e0', borderRadius: 2, p: { xs: 2, sm: 3 } }}>
+                <Typography sx={{ fontWeight: 700, fontSize: '0.9375rem', color: '#1C1C1E', mb: 2.5 }}>
+                  Account Information
+                </Typography>
 
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                   <TextField
@@ -365,17 +269,11 @@ const ProfilePage: React.FC = () => {
                     label="Email Address"
                     value={user?.email || ''}
                     disabled
-                    sx={{
-                      ...fieldSx,
-                      '& .MuiOutlinedInput-root': {
-                        borderRadius: 2,
-                        bgcolor: '#f8fafc',
-                      },
-                    }}
+                    sx={fieldSx}
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
-                          <EmailOutlined sx={{ fontSize: 18, color: '#94a3b8' }} />
+                          <EmailOutlined sx={{ fontSize: 18, color: '#999999' }} />
                         </InputAdornment>
                       ),
                     }}
@@ -385,17 +283,11 @@ const ProfilePage: React.FC = () => {
                     label="Display Name"
                     value={displayName}
                     disabled
-                    sx={{
-                      ...fieldSx,
-                      '& .MuiOutlinedInput-root': {
-                        borderRadius: 2,
-                        bgcolor: '#f8fafc',
-                      },
-                    }}
+                    sx={fieldSx}
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
-                          <PersonOutlined sx={{ fontSize: 18, color: '#94a3b8' }} />
+                          <PersonOutlined sx={{ fontSize: 18, color: '#999999' }} />
                         </InputAdornment>
                       ),
                     }}
@@ -403,217 +295,185 @@ const ProfilePage: React.FC = () => {
                 </Box>
 
                 <Box sx={{
-                  mt: 2.5,
-                  px: 2,
-                  py: 1.5,
-                  borderRadius: 2,
-                  bgcolor: alpha(BRAND.primary, 0.04),
-                  border: `1px solid ${BRAND.primaryBorder}`,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1,
+                  mt: 2.5, px: 2, py: 1.5, borderRadius: 2,
+                  bgcolor: alpha(P, 0.04), border: `1px solid ${PBR}`,
+                  display: 'flex', alignItems: 'center', gap: 1,
                 }}>
-                  <ShieldOutlined sx={{ fontSize: 16, color: BRAND.primary, flexShrink: 0 }} />
-                  <Typography variant="caption" sx={{ color: '#475569' }}>
+                  <ShieldOutlined sx={{ fontSize: 15, color: P, flexShrink: 0 }} />
+                  <Typography variant="caption" sx={{ color: '#666666', fontSize: '0.78rem' }}>
                     Account details are managed by the system and cannot be edited directly.
                   </Typography>
                 </Box>
-              </CardContent>
-            </Card>
+              </Box>
+            </Box>
+          </Box>
+        )}
 
-            {/* Change password */}
-            <Card elevation={0} sx={{ borderRadius: 3, border: '1px solid #e2e8f0' }}>
-              <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-                <SectionHeader
-                  icon={<LockOutlined sx={{ fontSize: 20 }} />}
-                  title="Change Password"
-                  subtitle="Update your password to keep your account secure"
+        {/* ══ SECURITY TAB ══ */}
+        {tab === 1 && (
+          <Box sx={{ maxWidth: 560 }}>
+            <Box sx={{ bgcolor: '#ffffff', border: '1px solid #e0e0e0', borderRadius: 2, p: { xs: 2, sm: 3 } }}>
+
+              {/* Header */}
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
+                <Box sx={{ width: 40, height: 40, borderRadius: '50%', bgcolor: PB, border: `1px solid ${PBR}`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: P, flexShrink: 0 }}>
+                  <LockOutlined sx={{ fontSize: 20 }} />
+                </Box>
+                <Box>
+                  <Typography sx={{ fontWeight: 700, fontSize: '0.9375rem', color: '#1C1C1E', lineHeight: 1.2 }}>
+                    Change Password
+                  </Typography>
+                  <Typography sx={{ fontSize: '0.8rem', color: '#666666' }}>
+                    Keep your account secure with a strong password
+                  </Typography>
+                </Box>
+              </Box>
+
+              {success && (
+                <Alert severity="success" sx={{ mb: 2.5, borderRadius: 2 }} onClose={() => setSuccess('')}>
+                  {success}
+                </Alert>
+              )}
+              {error && (
+                <Alert severity="error" sx={{ mb: 2.5, borderRadius: 2 }} onClose={() => setError('')}>
+                  {error}
+                </Alert>
+              )}
+
+              <Box component="form" onSubmit={handlePasswordChange} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+
+                {/* Current password */}
+                <TextField
+                  fullWidth
+                  label="Current Password"
+                  type={showOld ? 'text' : 'password'}
+                  value={oldPassword}
+                  onChange={e => setOldPassword(e.target.value)}
+                  required
+                  disabled={loading}
+                  sx={fieldSx}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton onClick={() => setShowOld(p => !p)} edge="end" disabled={loading} size="small" sx={{ color: '#999999', '&:hover': { color: P } }}>
+                          {showOld ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
                 />
 
-                {success && (
-                  <Alert
-                    severity="success"
-                    sx={{ mb: 3, borderRadius: 2 }}
-                    onClose={() => setSuccess('')}
-                  >
-                    {success}
-                  </Alert>
-                )}
-                {error && (
-                  <Alert
-                    severity="error"
-                    sx={{ mb: 3, borderRadius: 2 }}
-                    onClose={() => setError('')}
-                  >
-                    {error}
-                  </Alert>
-                )}
+                <Divider sx={{ borderStyle: 'dashed', borderColor: '#e0e0e0' }} />
 
-                <Box component="form" onSubmit={handlePasswordChange} sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
-
-                  {/* Current password */}
+                {/* New password */}
+                <Box>
                   <TextField
                     fullWidth
-                    label="Current Password"
-                    type={showOld ? 'text' : 'password'}
-                    value={oldPassword}
-                    onChange={e => setOldPassword(e.target.value)}
+                    label="New Password"
+                    type={showNew ? 'text' : 'password'}
+                    value={newPassword}
+                    onChange={e => setNewPassword(e.target.value)}
                     required
                     disabled={loading}
                     sx={fieldSx}
                     InputProps={{
                       endAdornment: (
                         <InputAdornment position="end">
-                          <IconButton onClick={() => setShowOld(p => !p)} edge="end" disabled={loading} sx={{ color: BRAND.primary }}>
-                            {showOld ? <VisibilityOff /> : <Visibility />}
+                          <IconButton onClick={() => setShowNew(p => !p)} edge="end" disabled={loading} size="small" sx={{ color: '#999999', '&:hover': { color: P } }}>
+                            {showNew ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
                           </IconButton>
                         </InputAdornment>
                       ),
                     }}
                   />
 
-                  <Divider sx={{ borderStyle: 'dashed' }} />
-
-                  {/* New password */}
-                  <Box>
-                    <TextField
-                      fullWidth
-                      label="New Password"
-                      type={showNew ? 'text' : 'password'}
-                      value={newPassword}
-                      onChange={e => setNewPassword(e.target.value)}
-                      required
-                      disabled={loading}
-                      sx={fieldSx}
-                      InputProps={{
-                        endAdornment: (
-                          <InputAdornment position="end">
-                            <IconButton onClick={() => setShowNew(p => !p)} edge="end" disabled={loading} sx={{ color: BRAND.primary }}>
-                              {showNew ? <VisibilityOff /> : <Visibility />}
-                            </IconButton>
-                          </InputAdornment>
-                        ),
-                      }}
-                    />
-
-                    {/* Strength bar */}
-                    {newPassword.length > 0 && (
-                      <Box sx={{ mt: 1.5 }}>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.75 }}>
-                          <Typography variant="caption" color="text.secondary">Password strength</Typography>
-                          {strength.label && (
-                            <Typography variant="caption" sx={{ fontWeight: 700, color: strength.color }}>
-                              {strength.label}
-                            </Typography>
-                          )}
-                        </Box>
-                        <Box sx={{ display: 'flex', gap: 0.5 }}>
-                          {[1, 2, 3, 4].map(i => (
-                            <LinearProgress
-                              key={i}
-                              variant="determinate"
-                              value={strength.score >= i ? 100 : 0}
-                              sx={{
-                                flex: 1,
-                                height: 4,
-                                borderRadius: 2,
-                                bgcolor: '#e2e8f0',
-                                '& .MuiLinearProgress-bar': {
-                                  bgcolor: strength.color,
-                                  borderRadius: 2,
-                                  transition: 'none',
-                                },
-                              }}
-                            />
-                          ))}
-                        </Box>
-
-                        {/* Requirements */}
-                        <Box sx={{
-                          mt: 1.5,
-                          p: 1.5,
-                          borderRadius: 2,
-                          bgcolor: '#f8fafc',
-                          border: '1px solid #e2e8f0',
-                          display: 'grid',
-                          gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' },
-                          gap: 0.75,
-                        }}>
-                          {requirements.map((r, i) => (
-                            <Requirement key={i} met={r.met} label={r.label} />
-                          ))}
-                        </Box>
+                  {/* Strength indicator */}
+                  {newPassword.length > 0 && (
+                    <Box sx={{ mt: 1.5 }}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.75 }}>
+                        <Typography variant="caption" sx={{ color: '#999999', fontSize: '0.75rem' }}>Password strength</Typography>
+                        {strength.label && (
+                          <Typography variant="caption" sx={{ fontWeight: 700, color: strength.color, fontSize: '0.75rem' }}>
+                            {strength.label}
+                          </Typography>
+                        )}
                       </Box>
-                    )}
-                  </Box>
-
-                  {/* Confirm password */}
-                  <TextField
-                    fullWidth
-                    label="Confirm New Password"
-                    type={showConf ? 'text' : 'password'}
-                    value={confirmPassword}
-                    onChange={e => setConfirmPassword(e.target.value)}
-                    required
-                    disabled={loading}
-                    error={passwordsMismatch}
-                    helperText={
-                      passwordsMismatch ? 'Passwords do not match' :
-                      passwordsMatch    ? 'Passwords match'        : ''
-                    }
-                    FormHelperTextProps={{
-                      sx: { color: passwordsMatch ? '#10b981' : undefined },
-                    }}
-                    sx={{
-                      ...fieldSx,
-                      '& .MuiOutlinedInput-root.Mui-focused fieldset': {
-                        borderColor: passwordsMismatch ? '#ef4444' : passwordsMatch ? '#10b981' : BRAND.primary,
-                      },
-                    }}
-                    InputProps={{
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <IconButton onClick={() => setShowConf(p => !p)} edge="end" disabled={loading} sx={{ color: BRAND.primary }}>
-                            {showConf ? <VisibilityOff /> : <Visibility />}
-                          </IconButton>
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-
-                  {/* Submit */}
-                  <Button
-                    type="submit"
-                    variant="contained"
-                    fullWidth
-                    disabled={loading}
-                    sx={{
-                      py: 1.5,
-                      mt: 0.5,
-                      bgcolor: BRAND.primary,
-                      textTransform: 'none',
-                      fontWeight: 600,
-                      fontSize: '0.95rem',
-                      borderRadius: 2,
-                      boxShadow: `0 4px 14px rgba(25,118,210,0.35)`,
-                      '&:hover:not(:disabled)': {
-                        bgcolor: BRAND.primaryHover,
-                        boxShadow: `0 6px 20px rgba(25,118,210,0.45)`,
-                      },
-                      '&:disabled': { bgcolor: alpha(BRAND.primary, 0.4) },
-                    }}
-                  >
-                    {loading
-                      ? <CircularProgress size={22} sx={{ color: '#ffffff' }} />
-                      : 'Update Password'
-                    }
-                  </Button>
+                      <Box sx={{ display: 'flex', gap: 0.5, mb: 1.5 }}>
+                        {[1, 2, 3, 4].map(i => (
+                          <LinearProgress
+                            key={i}
+                            variant="determinate"
+                            value={strength.score >= i ? 100 : 0}
+                            sx={{
+                              flex: 1, height: 3, borderRadius: 2, bgcolor: '#e0e0e0',
+                              '& .MuiLinearProgress-bar': { bgcolor: strength.color, borderRadius: 2, transition: 'none' },
+                            }}
+                          />
+                        ))}
+                      </Box>
+                      <Box sx={{
+                        display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0.75,
+                        p: 1.5, borderRadius: 2, bgcolor: '#f8fafc', border: '1px solid #e0e0e0',
+                      }}>
+                        {requirements.map((r, i) => <Req key={i} met={r.met} label={r.label} />)}
+                      </Box>
+                    </Box>
+                  )}
                 </Box>
-              </CardContent>
-            </Card>
 
-          </Grid>
-        </Grid>
+                {/* Confirm password */}
+                <TextField
+                  fullWidth
+                  label="Confirm New Password"
+                  type={showConf ? 'text' : 'password'}
+                  value={confirmPassword}
+                  onChange={e => setConfirmPassword(e.target.value)}
+                  required
+                  disabled={loading}
+                  error={passwordsMismatch}
+                  helperText={passwordsMismatch ? 'Passwords do not match' : passwordsMatch ? 'Passwords match' : ''}
+                  FormHelperTextProps={{ sx: { color: passwordsMatch ? '#10b981' : undefined } }}
+                  sx={{
+                    ...fieldSx,
+                    '& .MuiOutlinedInput-root.Mui-focused fieldset': {
+                      borderColor: passwordsMismatch ? '#ef4444' : passwordsMatch ? '#10b981' : P,
+                    },
+                  }}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton onClick={() => setShowConf(p => !p)} edge="end" disabled={loading} size="small" sx={{ color: '#999999', '&:hover': { color: P } }}>
+                          {showConf ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+
+                {/* Submit */}
+                <Button
+                  type="submit"
+                  variant="contained"
+                  fullWidth
+                  disabled={loading}
+                  sx={{
+                    mt: 0.5, py: 1.25,
+                    bgcolor: P,
+                    textTransform: 'none',
+                    fontWeight: 600,
+                    fontSize: '0.9375rem',
+                    borderRadius: 2,
+                    boxShadow: 'none',
+                    '&:hover:not(:disabled)': { bgcolor: PH, boxShadow: 'none' },
+                    '&:disabled': { bgcolor: alpha(P, 0.4) },
+                  }}
+                >
+                  {loading ? <CircularProgress size={20} sx={{ color: '#ffffff' }} /> : 'Update Password'}
+                </Button>
+              </Box>
+            </Box>
+          </Box>
+        )}
       </Box>
     </Box>
   );

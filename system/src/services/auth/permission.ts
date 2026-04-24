@@ -1,4 +1,4 @@
-import { Permission, PERMISSIONS, ROLES, PermissionName, RoleName, AuthUser } from '../../types/auth';
+import { Permission, ROLES, PermissionName, RoleName, AuthUser } from '../../types/auth';
 import { isOwner, isManager, isUser, normalizeRole, getRoleDisplayName as getDisplayName } from '../../types/auth/roles';
 import StorageManager from '../../utils/storage';
 
@@ -291,7 +291,7 @@ class PermissionService {
    * Check if user can manage workspace
    */
   static canManageWorkspace(user: AuthUser | null): boolean {
-    return this.isOwner(user) || this.hasPermission(user, PERMISSIONS.WORKSPACE_UPDATE);
+    return this.isOwner(user) || this.hasPermission(user, 'workspace:update' as any);
   }
 
   /**

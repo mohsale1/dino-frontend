@@ -5,3 +5,4 @@
 
 export * from './clearAuthState';
 export * from './tokenRefreshScheduler';
+export * from './getFirstAccessibleRoute';

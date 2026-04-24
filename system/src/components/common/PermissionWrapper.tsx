@@ -8,7 +8,6 @@
 import React from 'react';
 import { Alert, Box, Typography } from '@mui/material';
 import { useAuth } from '../../contexts/common/Auth';
-import { PERMISSIONS, PermissionName } from '../../types/auth/permissions';
 import { RoleName } from '../../types/auth';
 
 // ============================================================================
@@ -19,8 +18,8 @@ interface PermissionWrapperProps {
   children: React.ReactNode;
 
   // Permission-based access
-  permission?: PermissionName;
-  permissions?: PermissionName[];
+  permission?: string;
+  permissions?: string[];
   requireAllPermissions?: boolean; // true = ALL required; false = ANY sufficient
 
   // Role-based access (fallback when no permission prop is provided)
@@ -42,7 +41,7 @@ interface PermissionWrapperProps {
   // Loading state override
   loading?: React.ReactNode;
 
-  // Inverse logic â€” render children when user LACKS the permission
+  // Inverse logic — render children when user LACKS the permission
   inverse?: boolean;
 
   // Wrapper styling
@@ -89,7 +88,7 @@ const PermissionWrapper: React.FC<PermissionWrapperProps> = ({
     if (!isAuthenticated) {
       hasAccess = false;
     } else {
-      const allPerms: PermissionName[] = [
+      const allPerms: string[] = [
         ...(permission ? [permission] : []),
         ...permissions,
       ];
@@ -111,7 +110,7 @@ const PermissionWrapper: React.FC<PermissionWrapperProps> = ({
         : allRoles.some((r) => hasRole(r));
     }
   } else {
-    // 4. No restriction specified â€” default to open
+    // 4. No restriction specified — default to open
     hasAccess = true;
   }
 
@@ -149,13 +148,13 @@ export default PermissionWrapper;
 // ============================================================================
 
 export const CanViewDashboard: React.FC<Omit<PermissionWrapperProps, 'permission' | 'permissions' | 'customCheck'>> = (props) => (
-  <PermissionWrapper {...props} permission={PERMISSIONS.DASHBOARD_READ} />
+  <PermissionWrapper {...props} permission="dashboard:read" />
 );
 
 export const CanManageOrders: React.FC<Omit<PermissionWrapperProps, 'permission' | 'permissions' | 'customCheck'>> = (props) => (
   <PermissionWrapper
     {...props}
-    permissions={[PERMISSIONS.ORDERS_READ, PERMISSIONS.ORDERS_CREATE, PERMISSIONS.ORDERS_UPDATE]}
+    permissions={['orders:read', 'orders:create', 'orders:update']}
     requireAllPermissions={false}
   />
 );
@@ -164,12 +163,12 @@ export const CanManageMenu: React.FC<Omit<PermissionWrapperProps, 'permission' |
   <PermissionWrapper
     {...props}
     permissions={[
-      PERMISSIONS.ITEMS_READ,
-      PERMISSIONS.ITEMS_CREATE,
-      PERMISSIONS.ITEMS_UPDATE,
-      PERMISSIONS.CATEGORIES_READ,
-      PERMISSIONS.CATEGORIES_CREATE,
-      PERMISSIONS.CATEGORIES_UPDATE,
+      'items:read',
+      'items:create',
+      'items:update',
+      'categories:read',
+      'categories:create',
+      'categories:update',
     ]}
     requireAllPermissions={false}
   />
@@ -178,7 +177,7 @@ export const CanManageMenu: React.FC<Omit<PermissionWrapperProps, 'permission' |
 export const CanManageTables: React.FC<Omit<PermissionWrapperProps, 'permission' | 'permissions' | 'customCheck'>> = (props) => (
   <PermissionWrapper
     {...props}
-    permissions={[PERMISSIONS.TABLES_READ, PERMISSIONS.TABLES_CREATE, PERMISSIONS.TABLES_UPDATE]}
+    permissions={['tables:read', 'tables:create', 'tables:update']}
     requireAllPermissions={false}
   />
 );
@@ -186,7 +185,7 @@ export const CanManageTables: React.FC<Omit<PermissionWrapperProps, 'permission'
 export const CanManageUsers: React.FC<Omit<PermissionWrapperProps, 'permission' | 'permissions' | 'customCheck'>> = (props) => (
   <PermissionWrapper
     {...props}
-    permissions={[PERMISSIONS.USERS_READ, PERMISSIONS.USERS_CREATE, PERMISSIONS.USERS_UPDATE]}
+    permissions={['users:read', 'users:create', 'users:update']}
     requireAllPermissions={false}
   />
 );
@@ -194,7 +193,7 @@ export const CanManageUsers: React.FC<Omit<PermissionWrapperProps, 'permission' 
 export const CanManageVenues: React.FC<Omit<PermissionWrapperProps, 'permission' | 'permissions' | 'customCheck'>> = (props) => (
   <PermissionWrapper
     {...props}
-    permissions={[PERMISSIONS.ORGANIZATION_READ, PERMISSIONS.ORGANIZATION_UPDATE, PERMISSIONS.WORKSPACE_MANAGE]}
+    permissions={['organization:read', 'organization:update', 'workspace:manage']}
     requireAllPermissions={false}
   />
 );
@@ -202,7 +201,7 @@ export const CanManageVenues: React.FC<Omit<PermissionWrapperProps, 'permission'
 export const CanViewSettings: React.FC<Omit<PermissionWrapperProps, 'permission' | 'permissions' | 'customCheck'>> = (props) => (
   <PermissionWrapper
     {...props}
-    permissions={[PERMISSIONS.WORKSPACE_READ, PERMISSIONS.WORKSPACE_UPDATE, PERMISSIONS.WORKSPACE_MANAGE]}
+    permissions={['workspace:read', 'workspace:update', 'workspace:manage']}
     requireAllPermissions={false}
   />
 );
@@ -225,18 +224,18 @@ export const withPermissions = <P extends object>(
 };
 
 // ============================================================================
-// HOOK â€” usePermissionCheck
+// HOOK — usePermissionCheck
 // ============================================================================
 
 export const usePermissionCheck = () => {
   const { user, isAuthenticated, hasBackendPermission, hasRole } = useAuth();
 
-  const checkPermission = (permission: PermissionName): boolean => {
+  const checkPermission = (permission: string): boolean => {
     if (!isAuthenticated || !user) return false;
     return hasBackendPermission(permission);
   };
 
-  const checkPermissions = (perms: PermissionName[], requireAll = false): boolean => {
+  const checkPermissions = (perms: string[], requireAll = false): boolean => {
     if (!isAuthenticated || !user) return false;
     return requireAll
       ? perms.every((p) => hasBackendPermission(p))

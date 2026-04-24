@@ -6,7 +6,6 @@
 
 import { useMemo, useCallback } from 'react';
 import { useAuth } from '../contexts/common/Auth';
-import { PERMISSIONS } from '../types/auth/permissions';
 
 export interface UsePermissionsReturn {
   // --- Core helpers ---
@@ -25,6 +24,9 @@ export interface UsePermissionsReturn {
   canViewUsers: boolean;
   canViewRoles: boolean;
   canViewBilling: boolean;
+  canViewReferrals: boolean;
+  canViewAppearance: boolean;
+  /** @deprecated use canViewReferrals */
   canViewRegistration: boolean;
   canViewSettings: boolean;
 
@@ -84,6 +86,16 @@ export const usePermissions = (): UsePermissionsReturn => {
     userPermissions,
   } = useAuth();
 
+  // Single generic helper — checks the backend permission objects directly.
+  // Avoids any hardcoded "resource:action" string constants.
+  const hasPerm = useCallback(
+    (resource: string, action: string): boolean => {
+      const perms: any[] = (userPermissions as any)?.permissions ?? [];
+      return perms.some((p: any) => p?.resource === resource && p?.action === action);
+    },
+    [userPermissions]
+  );
+
   // --- Core permission checks ---
 
   const hasPermission = useCallback(
@@ -100,8 +112,6 @@ export const usePermissions = (): UsePermissionsReturn => {
     (permissions: string[]): boolean => permissions.every((p) => hasBackendPermission(p)),
     [hasBackendPermission]
   );
-
-  // --- Route / action / module helpers ---
 
   const canAccessRoute = useCallback(
     (route: string): boolean => hasBackendPermission(route),
@@ -125,191 +135,67 @@ export const usePermissions = (): UsePermissionsReturn => {
 
   const getAccessibleModules = useCallback((): any[] => [], []);
 
-  // --- Module-visibility flags (system.*.view) ---
+  // --- Module-visibility flags — derived from backend objects, no string constants ---
 
-  const canViewDashboard = useMemo(
-    () => hasBackendPermission(PERMISSIONS.SYSTEM_DASHBOARD_VIEW),
-    [hasBackendPermission]
-  );
+  const canViewDashboard  = useMemo(() => hasPerm('dashboard',  'view'), [hasPerm]);
+  const canViewWorkspaces = useMemo(() => hasPerm('workspaces', 'view'), [hasPerm]);
+  const canViewUsers      = useMemo(() => hasPerm('users',      'view'), [hasPerm]);
+  const canViewRoles      = useMemo(() => hasPerm('roles',      'view'), [hasPerm]);
+  const canViewBilling    = useMemo(() => hasPerm('billing',    'view'), [hasPerm]);
+  const canViewReferrals  = useMemo(() => hasPerm('referrals',  'view'), [hasPerm]);
+  const canViewAppearance = useMemo(() => hasPerm('appearance', 'view'), [hasPerm]);
+  const canViewSettings   = useMemo(() => hasPerm('settings',   'view'), [hasPerm]);
 
-  const canViewWorkspaces = useMemo(
-    () => hasBackendPermission(PERMISSIONS.SYSTEM_WORKSPACES_VIEW),
-    [hasBackendPermission]
-  );
-
-  const canViewUsers = useMemo(
-    () => hasBackendPermission(PERMISSIONS.SYSTEM_USERS_VIEW),
-    [hasBackendPermission]
-  );
-
-  const canViewRoles = useMemo(
-    () => hasBackendPermission(PERMISSIONS.SYSTEM_ROLES_VIEW),
-    [hasBackendPermission]
-  );
-
-  const canViewBilling = useMemo(
-    () => hasBackendPermission(PERMISSIONS.SYSTEM_BILLING_VIEW),
-    [hasBackendPermission]
-  );
-
-  const canViewRegistration = useMemo(
-    () => hasBackendPermission(PERMISSIONS.SYSTEM_REGISTRATION_VIEW),
-    [hasBackendPermission]
-  );
-
-  const canViewSettings = useMemo(
-    () => hasBackendPermission(PERMISSIONS.SYSTEM_SETTINGS_VIEW),
-    [hasBackendPermission]
-  );
+  // @deprecated — kept for backward compatibility
+  const canViewRegistration = canViewReferrals;
 
   // --- Workspace action flags ---
 
-  const canReadWorkspaces = useMemo(
-    () => hasBackendPermission(PERMISSIONS.SYSTEM_WORKSPACES_READ),
-    [hasBackendPermission]
-  );
-
-  const canCreateWorkspaces = useMemo(
-    () => hasBackendPermission(PERMISSIONS.SYSTEM_WORKSPACES_CREATE),
-    [hasBackendPermission]
-  );
-
-  const canUpdateWorkspaces = useMemo(
-    () => hasBackendPermission(PERMISSIONS.SYSTEM_WORKSPACES_UPDATE),
-    [hasBackendPermission]
-  );
-
-  const canDeleteWorkspaces = useMemo(
-    () => hasBackendPermission(PERMISSIONS.SYSTEM_WORKSPACES_DELETE),
-    [hasBackendPermission]
-  );
+  const canReadWorkspaces   = useMemo(() => hasPerm('workspaces', 'read'),   [hasPerm]);
+  const canCreateWorkspaces = useMemo(() => hasPerm('workspaces', 'create'), [hasPerm]);
+  const canUpdateWorkspaces = useMemo(() => hasPerm('workspaces', 'update'), [hasPerm]);
+  const canDeleteWorkspaces = useMemo(() => hasPerm('workspaces', 'delete'), [hasPerm]);
 
   // --- User action flags ---
 
-  const canReadUsers = useMemo(
-    () => hasBackendPermission(PERMISSIONS.SYSTEM_USERS_READ),
-    [hasBackendPermission]
-  );
-
-  const canCreateUsers = useMemo(
-    () => hasBackendPermission(PERMISSIONS.SYSTEM_USERS_CREATE),
-    [hasBackendPermission]
-  );
-
-  const canUpdateUsers = useMemo(
-    () => hasBackendPermission(PERMISSIONS.SYSTEM_USERS_UPDATE),
-    [hasBackendPermission]
-  );
-
-  const canDeleteUsers = useMemo(
-    () => hasBackendPermission(PERMISSIONS.SYSTEM_USERS_DELETE),
-    [hasBackendPermission]
-  );
+  const canReadUsers   = useMemo(() => hasPerm('users', 'read'),   [hasPerm]);
+  const canCreateUsers = useMemo(() => hasPerm('users', 'create'), [hasPerm]);
+  const canUpdateUsers = useMemo(() => hasPerm('users', 'update'), [hasPerm]);
+  const canDeleteUsers = useMemo(() => hasPerm('users', 'delete'), [hasPerm]);
 
   // --- Role action flags ---
 
-  const canReadRoles = useMemo(
-    () => hasBackendPermission(PERMISSIONS.SYSTEM_ROLES_READ),
-    [hasBackendPermission]
-  );
-
-  const canCreateRoles = useMemo(
-    () => hasBackendPermission(PERMISSIONS.SYSTEM_ROLES_CREATE),
-    [hasBackendPermission]
-  );
-
-  const canUpdateRoles = useMemo(
-    () => hasBackendPermission(PERMISSIONS.SYSTEM_ROLES_UPDATE),
-    [hasBackendPermission]
-  );
-
-  const canDeleteRoles = useMemo(
-    () => hasBackendPermission(PERMISSIONS.SYSTEM_ROLES_DELETE),
-    [hasBackendPermission]
-  );
+  const canReadRoles   = useMemo(() => hasPerm('roles', 'read'),   [hasPerm]);
+  const canCreateRoles = useMemo(() => hasPerm('roles', 'create'), [hasPerm]);
+  const canUpdateRoles = useMemo(() => hasPerm('roles', 'update'), [hasPerm]);
+  const canDeleteRoles = useMemo(() => hasPerm('roles', 'delete'), [hasPerm]);
 
   // --- Billing action flags ---
 
-  const canReadBilling = useMemo(
-    () => hasBackendPermission(PERMISSIONS.SYSTEM_BILLING_READ),
-    [hasBackendPermission]
-  );
+  const canReadBilling   = useMemo(() => hasPerm('billing', 'read'),         [hasPerm]);
+  const canUpdateBilling = useMemo(() => hasPerm('billing', 'update'),       [hasPerm]);
+  const canManageBilling = useMemo(() => hasPerm('billing', 'subscription'), [hasPerm]);
 
-  const canUpdateBilling = useMemo(
-    () => hasBackendPermission(PERMISSIONS.SYSTEM_BILLING_UPDATE),
-    [hasBackendPermission]
-  );
+  // --- Referral action flags ---
 
-  const canManageBilling = useMemo(
-    () => hasBackendPermission(PERMISSIONS.SYSTEM_BILLING_SUBSCRIPTION),
-    [hasBackendPermission]
-  );
-
-  // --- Registration action flags ---
-
-  const canReadRegistration = useMemo(
-    () => hasBackendPermission(PERMISSIONS.SYSTEM_REGISTRATION_READ),
-    [hasBackendPermission]
-  );
-
-  const canCreateRegistration = useMemo(
-    () => hasBackendPermission(PERMISSIONS.SYSTEM_REGISTRATION_CREATE),
-    [hasBackendPermission]
-  );
-
-  const canDeleteRegistration = useMemo(
-    () => hasBackendPermission(PERMISSIONS.SYSTEM_REGISTRATION_DELETE),
-    [hasBackendPermission]
-  );
+  const canReadRegistration   = useMemo(() => hasPerm('referrals', 'read'),   [hasPerm]);
+  const canCreateRegistration = useMemo(() => hasPerm('referrals', 'create'), [hasPerm]);
+  const canDeleteRegistration = useMemo(() => hasPerm('referrals', 'delete'), [hasPerm]);
 
   // --- Permission action flags ---
 
-  const canReadPermissions = useMemo(
-    () => hasBackendPermission(PERMISSIONS.SYSTEM_PERMISSIONS_READ),
-    [hasBackendPermission]
-  );
-
-  const canCreatePermissions = useMemo(
-    () => hasBackendPermission(PERMISSIONS.SYSTEM_PERMISSIONS_CREATE),
-    [hasBackendPermission]
-  );
-
-  const canUpdatePermissions = useMemo(
-    () => hasBackendPermission(PERMISSIONS.SYSTEM_PERMISSIONS_UPDATE),
-    [hasBackendPermission]
-  );
-
-  const canDeletePermissions = useMemo(
-    () => hasBackendPermission(PERMISSIONS.SYSTEM_PERMISSIONS_DELETE),
-    [hasBackendPermission]
-  );
+  const canReadPermissions   = useMemo(() => hasPerm('permissions', 'read'),   [hasPerm]);
+  const canCreatePermissions = useMemo(() => hasPerm('permissions', 'create'), [hasPerm]);
+  const canUpdatePermissions = useMemo(() => hasPerm('permissions', 'update'), [hasPerm]);
+  const canDeletePermissions = useMemo(() => hasPerm('permissions', 'delete'), [hasPerm]);
 
   // --- Legacy flags (kept for backward compatibility) ---
 
-  const canManageUsers = useMemo(
-    () => hasBackendPermission(PERMISSIONS.SYSTEM_USERS_VIEW),
-    [hasBackendPermission]
-  );
-
-  const canManageVenues = useMemo(
-    () => hasBackendPermission(PERMISSIONS.SYSTEM_WORKSPACES_UPDATE),
-    [hasBackendPermission]
-  );
-
-  const canManageOrders = useMemo(
-    () => hasBackendPermission(PERMISSIONS.SYSTEM_WORKSPACES_VIEW),
-    [hasBackendPermission]
-  );
-
-  const canManageMenu = useMemo(
-    () => hasBackendPermission(PERMISSIONS.SYSTEM_WORKSPACES_VIEW),
-    [hasBackendPermission]
-  );
-
-  const canManageTables = useMemo(
-    () => hasBackendPermission(PERMISSIONS.SYSTEM_WORKSPACES_VIEW),
-    [hasBackendPermission]
-  );
+  const canManageUsers   = canViewUsers;
+  const canManageVenues  = canUpdateWorkspaces;
+  const canManageOrders  = canViewWorkspaces;
+  const canManageMenu    = canViewWorkspaces;
+  const canManageTables  = canViewWorkspaces;
 
   // --- Derived data ---
 
@@ -337,6 +223,8 @@ export const usePermissions = (): UsePermissionsReturn => {
     canViewUsers,
     canViewRoles,
     canViewBilling,
+    canViewReferrals,
+    canViewAppearance,
     canViewRegistration,
     canViewSettings,
     canReadWorkspaces,
@@ -372,5 +260,6 @@ export const usePermissions = (): UsePermissionsReturn => {
     user,
   };
 };
+
 
 export default usePermissions;

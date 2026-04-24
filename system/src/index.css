@@ -125,6 +125,27 @@ body.admin-layout #root {
   overflow: hidden;
 }
 
+/* ========================================
+   HIDDEN SCROLLBARS (functional, not visible)
+   ======================================== */
+
+/* Webkit (Chrome, Safari, Edge) */
+*::-webkit-scrollbar {
+  width: 0px;
+  height: 0px;
+  background: transparent;
+}
+
+/* Firefox */
+* {
+  scrollbar-width: none;
+}
+
+/* IE / Edge legacy */
+* {
+  -ms-overflow-style: none;
+}
+
 /* Code blocks */
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
@@ -760,47 +781,21 @@ input[type=number],
     padding-top: 16px;
   }
   
-  /* Enable momentum scrolling on iOS */
-  * {
-    -webkit-overflow-scrolling: touch;
-  }
-  
-  /* Fix mobile viewport */
-  html {
-    height: auto;
-    min-height: 100%;
-    overflow-y: auto;
-  }
-  
-  body {
-    height: auto;
-    min-height: 100%;
-    overflow-y: auto;
-    position: relative;
-  }
-  
-  /* Scrollable areas */
-  .MuiContainer-root,
+  /* iOS momentum scrolling — targeted, not global */
+  main,
   .admin-main-content,
-  .container-responsive,
-  main {
-    overflow-y: auto;
+  .table-responsive {
     -webkit-overflow-scrolling: touch;
   }
-  
+
+  /* Scrollable areas */
   .admin-main-content {
     height: auto;
-    min-height: calc(100vh - 64px);
+    min-height: calc(100vh - 56px);
   }
-  
+
   .container-responsive {
     max-height: none;
-  }
-  
-  #root {
-    overflow-y: auto;
-    height: auto;
-    min-height: 100vh;
   }
 }
 

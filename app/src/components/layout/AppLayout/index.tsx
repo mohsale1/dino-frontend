@@ -25,14 +25,14 @@ const AppLayout: React.FC = () => {
 
   if (isAdmin) {
     return (
-      <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', height: '100dvh', overflow: 'hidden' }}>
         <AppHeader />
         <Box
           component="main"
           sx={{
             flex: 1,
             pt: '64px',
-            height: '100vh',
+            height: '100dvh',
             overflowY: isPosRoute ? 'hidden' : 'auto',
             overflowX: 'hidden',
             bgcolor: '#f8fafc',

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Typography,
@@ -33,112 +33,79 @@ import {
   Person,
   LocationOn,
   CalendarToday,
-  CheckCircleOutline,
   AttachMoneyOutlined,
-  TrendingUpOutlined,
-  BusinessOutlined,
   Visibility,
   Search,
+  CheckCircleOutline,
+  CancelOutlined,
+  WorkspacesOutlined,
+  GroupOutlined,
 } from '@mui/icons-material';
 import { systemWorkspaceService } from '../../services/system/workspace';
 
-// ---------------------------------------------------------------------------
-// useCountUp hook
-// ---------------------------------------------------------------------------
-const useCountUp = (target: number, duration = 900) => {
-  const [count, setCount] = React.useState(0);
-  const raf = useRef<number>(0);
-  React.useEffect(() => {
-    if (target === 0) { setCount(0); return; }
-    const start = performance.now();
-    const tick = (now: number) => {
-      const progress = Math.min((now - start) / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      setCount(Math.round(eased * target));
-      if (progress < 1) raf.current = requestAnimationFrame(tick);
-    };
-    raf.current = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf.current);
-  }, [target, duration]);
-  return count;
+// ── Design tokens ─────────────────────────────────────────────────────────────
+const C = {
+  primary: '#00A6CA',
+  hover:   '#005F8D',
+  border:  '#e0e0e0',
+  bg:      '#f8fafc',
+  surface: '#ffffff',
+  text:    '#1C1C1E',
+  sub:     '#666666',
+  muted:   '#999999',
 };
 
-// ---------------------------------------------------------------------------
-// HeroStat component
-// ---------------------------------------------------------------------------
-interface HeroStatProps { label: string; value: number; icon: React.ReactElement; }
-const HeroStat: React.FC<HeroStatProps> = ({ label, value, icon }) => {
-  const animated = useCountUp(value);
-  return (
-    <Box sx={{
-      flex: '1 1 140px',
-      px: 2.5,
-      py: 2,
-      borderRadius: 2.5,
-      bgcolor: alpha('#ffffff', 0.07),
-      border: `1px solid ${alpha('#ffffff', 0.12)}`,
-      backdropFilter: 'blur(8px)',
-      display: 'flex',
-      alignItems: 'center',
-      gap: 2,
-      transition: 'background-color 0.2s',
-      '&:hover': { bgcolor: alpha('#ffffff', 0.11) },
-    }}>
-      <Box sx={{
-        width: 36,
-        height: 36,
-        borderRadius: 1.5,
-        flexShrink: 0,
-        bgcolor: alpha('#ffffff', 0.1),
-        border: `1px solid ${alpha('#ffffff', 0.15)}`,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        color: 'rgba(144,202,249,0.9)',
-        '& svg': { fontSize: 18 },
-      }}>
-        {icon}
-      </Box>
-      <Box>
-        <Typography sx={{
-          fontWeight: 700,
-          color: '#ffffff',
-          fontSize: { xs: '1.35rem', md: '1.6rem' },
-          lineHeight: 1,
-          letterSpacing: '-0.03em',
-          fontVariantNumeric: 'tabular-nums',
-        }}>
-          {animated}
-        </Typography>
-        <Typography variant="caption" sx={{ color: 'rgba(144,202,249,0.65)', fontSize: '0.75rem', fontWeight: 500 }}>
-          {label}
-        </Typography>
-      </Box>
+// ── Helpers ───────────────────────────────────────────────────────────────────
+const getPlanColor = (plan: string) => {
+  switch (plan?.toLowerCase()) {
+    case 'premium': case 'pro':        return '#FF871F';
+    case 'standard': case 'basic':     return '#00A6CA';
+    case 'enterprise':                 return '#005F8D';
+    default:                           return '#999999';
+  }
+};
+
+const getStatusColor = (status: string) => {
+  switch (status?.toLowerCase()) {
+    case 'active':                     return '#10b981';
+    case 'inactive': case 'suspended': return '#ef4444';
+    case 'trial':                      return '#f59e0b';
+    default:                           return '#999999';
+  }
+};
+
+// ── Stat card ─────────────────────────────────────────────────────────────────
+const StatCard: React.FC<{ icon: React.ReactNode; value: number | string; label: string }> = ({ icon, value, label }) => (
+  <Box sx={{ flex: '1 1 140px', bgcolor: C.bg, border: `1px solid ${C.border}`, borderRadius: 2, px: 2.5, py: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
+    <Box sx={{ width: 36, height: 36, borderRadius: 1.5, bgcolor: 'rgba(0,166,202,0.10)', color: C.primary, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, '& svg': { fontSize: 18 } }}>
+      {icon}
     </Box>
-  );
-};
+    <Box>
+      <Typography sx={{ fontWeight: 700, fontSize: '1.4rem', color: C.text, lineHeight: 1 }}>{value}</Typography>
+      <Typography sx={{ fontSize: '0.75rem', color: C.sub, mt: 0.25 }}>{label}</Typography>
+    </Box>
+  </Box>
+);
 
-// ---------------------------------------------------------------------------
-// Main component
-// ---------------------------------------------------------------------------
+// ── Main component ────────────────────────────────────────────────────────────
 const Workspaces: React.FC = () => {
-  const [workspaces, setWorkspaces] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [workspaces,      setWorkspaces]      = useState<any[]>([]);
+  const [loading,         setLoading]         = useState(true);
+  const [error,           setError]           = useState<string | null>(null);
+  const [snackbar,        setSnackbar]        = useState({ open: false, message: '', severity: 'error' as 'success' | 'error' });
 
-  // Filter state
-  const [searchQuery, setSearchQuery] = useState('');
+  // Filters
+  const [searchQuery,  setSearchQuery]  = useState('');
   const [statusFilter, setStatusFilter] = useState('');
-  const [planFilter, setPlanFilter] = useState('');
+  const [planFilter,   setPlanFilter]   = useState('');
 
-  // Dialog state
+  // Dialog
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [selectedWorkspace, setSelectedWorkspace] = useState<any | null>(null);
-  const [workspaceDetails, setWorkspaceDetails] = useState<any | null>(null);
-  const [detailsLoading, setDetailsLoading] = useState(false);
+  const [workspaceDetails,  setWorkspaceDetails]  = useState<any | null>(null);
+  const [detailsLoading,    setDetailsLoading]    = useState(false);
 
+  // ── Fetch ──────────────────────────────────────────────────────────────────
   const fetchWorkspaces = useCallback(async () => {
     try {
       setLoading(true);
@@ -146,49 +113,34 @@ const Workspaces: React.FC = () => {
       setWorkspaces(data);
       setError(null);
     } catch (err: any) {
-      console.error('Failed to fetch workspaces:', err);
       const msg = err.message || 'Failed to load workspaces';
       setError(msg);
-      setSnackbarMessage(msg);
-      setSnackbarOpen(true);
+      setSnackbar({ open: true, message: msg, severity: 'error' });
     } finally {
       setLoading(false);
     }
   }, []);
 
-  useEffect(() => {
-    fetchWorkspaces();
-  }, [fetchWorkspaces]);
+  useEffect(() => { fetchWorkspaces(); }, [fetchWorkspaces]);
 
-  const getPlanColor = (plan: string) => {
-    switch (plan?.toLowerCase()) {
-      case 'premium':
-      case 'pro':
-        return '#f59e0b';
-      case 'standard':
-      case 'basic':
-        return '#3b82f6';
-      case 'enterprise':
-        return '#1976D2';
-      default:
-        return '#64748b';
-    }
-  };
+  // ── Stats ──────────────────────────────────────────────────────────────────
+  const total    = workspaces.length;
+  const active   = workspaces.filter(w => w.isActive).length;
+  const inactive = total - active;
+  const plans    = new Set(workspaces.map(w => w.subscriptionPlan).filter(Boolean)).size;
 
-  const getStatusColor = (status: string) => {
-    switch (status?.toLowerCase()) {
-      case 'active':
-        return '#10b981';
-      case 'inactive':
-      case 'suspended':
-        return '#ef4444';
-      case 'trial':
-        return '#f59e0b';
-      default:
-        return '#64748b';
-    }
-  };
+  // ── Filters ────────────────────────────────────────────────────────────────
+  const filtered = workspaces.filter(w => {
+    const matchSearch = !searchQuery || w.name?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchStatus = !statusFilter || (statusFilter === 'active' ? w.isActive : !w.isActive);
+    const matchPlan   = !planFilter   || w.subscriptionPlan?.toLowerCase() === planFilter.toLowerCase();
+    return matchSearch && matchStatus && matchPlan;
+  });
 
+  const hasFilters = !!(searchQuery || statusFilter || planFilter);
+  const clearFilters = () => { setSearchQuery(''); setStatusFilter(''); setPlanFilter(''); };
+
+  // ── View details ───────────────────────────────────────────────────────────
   const handleViewDetails = async (workspace: any) => {
     setSelectedWorkspace(workspace);
     setDetailsDialogOpen(true);
@@ -196,8 +148,7 @@ const Workspaces: React.FC = () => {
     try {
       const details = await systemWorkspaceService.getWorkspace(workspace.id);
       setWorkspaceDetails(details);
-    } catch (err: any) {
-      console.error('Failed to fetch workspace details:', err);
+    } catch {
       setWorkspaceDetails(workspace);
     } finally {
       setDetailsLoading(false);
@@ -210,180 +161,66 @@ const Workspaces: React.FC = () => {
     setWorkspaceDetails(null);
   };
 
-  const filterWorkspaces = (list: any[]) => {
-    return list.filter(w => {
-      const matchesSearch = !searchQuery || w.name?.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesStatus = !statusFilter || (statusFilter === 'active' ? w.isActive : !w.isActive);
-      const matchesPlan = !planFilter || w.subscriptionPlan?.toLowerCase() === planFilter.toLowerCase();
-      return matchesSearch && matchesStatus && matchesPlan;
-    });
-  };
 
-  const hasActiveFilters = searchQuery || statusFilter || planFilter;
-  const handleClearFilters = () => {
-    setSearchQuery('');
-    setStatusFilter('');
-    setPlanFilter('');
-  };
-
-  // Derived stat values
-  const totalWorkspaces = workspaces.length;
-  const activeWorkspaces = workspaces.filter(w => w.isActive).length;
-  const activeSubscriptions = workspaces.filter(w => w.subscriptionStatus?.toLowerCase() === 'active').length;
-  const premiumPlans = workspaces.filter(w =>
-    w.subscriptionPlan?.toLowerCase() === 'premium' || w.subscriptionPlan?.toLowerCase() === 'pro'
-  ).length;
-
-  const filteredWorkspaces = filterWorkspaces(workspaces);
-
-  if (loading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', bgcolor: '#f1f5f9' }}>
-        <CircularProgress sx={{ color: '#1976D2' }} />
-      </Box>
-    );
-  }
-
-  if (error && workspaces.length === 0) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', bgcolor: '#f1f5f9' }}>
-        <Alert severity="error">{error}</Alert>
-      </Box>
-    );
-  }
-
+  // ── Render ─────────────────────────────────────────────────────────────────
   return (
-    <Box sx={{ width: '100%', minHeight: '100vh', bgcolor: '#f1f5f9' }}>
+    <Box sx={{ width: '100%', minHeight: '100vh', bgcolor: C.bg }}>
 
-      {/* ------------------------------------------------------------------ */}
-      {/* Hero Header                                                          */}
-      {/* ------------------------------------------------------------------ */}
-      <Box
-        sx={{
-          background: 'linear-gradient(135deg, #0d1b2e 0%, #0f2744 45%, #1565C0 100%)',
-          px: { xs: 2.5, sm: 4, md: 6 },
-          pt: { xs: 3, md: 4 },
-          pb: { xs: 4, md: 5 },
-          position: 'relative',
-          overflow: 'hidden',
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: -100,
-            right: -60,
-            width: 360,
-            height: 360,
-            borderRadius: '50%',
-            background: `radial-gradient(circle, ${alpha('#1976D2', 0.22)} 0%, transparent 70%)`,
-            pointerEvents: 'none',
-          },
-          '&::after': {
-            content: '""',
-            position: 'absolute',
-            bottom: -80,
-            left: '25%',
-            width: 280,
-            height: 280,
-            borderRadius: '50%',
-            background: `radial-gradient(circle, ${alpha('#42A5F5', 0.15)} 0%, transparent 70%)`,
-            pointerEvents: 'none',
-          },
-        }}
-      >
-        {/* Grid overlay */}
-        <Box
-          sx={{
-            position: 'absolute',
-            inset: 0,
-            backgroundImage: `linear-gradient(${alpha('#ffffff', 0.03)} 1px, transparent 1px), linear-gradient(90deg, ${alpha('#ffffff', 0.03)} 1px, transparent 1px)`,
-            backgroundSize: '40px 40px',
-            pointerEvents: 'none',
-          }}
-        />
-
-        <Box sx={{ position: 'relative' }}>
-          {/* Title row */}
-          <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2, mb: 4 }}>
-            <Box>
-              <Typography variant="overline" sx={{ color: 'rgba(144,202,249,0.75)', fontWeight: 700, letterSpacing: 3, fontSize: '0.65rem' }}>
-                SYSTEM CONTROL CENTER
-              </Typography>
-              <Typography variant="h4" sx={{ color: '#ffffff', fontWeight: 800, mt: 0.5, fontSize: { xs: '1.5rem', md: '2rem' }, letterSpacing: '-0.025em', lineHeight: 1.2 }}>
-                Workspaces
-              </Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mt: 1 }}>
-                <CalendarToday sx={{ fontSize: 13, color: 'rgba(144,202,249,0.6)' }} />
-                <Typography variant="caption" sx={{ color: 'rgba(144,202,249,0.6)', fontWeight: 500, fontSize: '0.75rem' }}>
-                  {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-                </Typography>
-              </Box>
-            </Box>
-          </Box>
-
-          {/* Hero Stats */}
-          <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-            <HeroStat label="Total Workspaces" value={totalWorkspaces} icon={<BusinessOutlined />} />
-            <HeroStat label="Active" value={activeWorkspaces} icon={<CheckCircleOutline />} />
-            <HeroStat label="Active Subscriptions" value={activeSubscriptions} icon={<AttachMoneyOutlined />} />
-            <HeroStat label="Premium Plans" value={premiumPlans} icon={<TrendingUpOutlined />} />
-          </Box>
+      {/* ── Page Header ── */}
+      <Box sx={{
+        bgcolor: C.surface,
+        px: { xs: 3, sm: 4, md: 5 },
+        pt: 3, pb: 3,
+        borderBottom: `1px solid ${C.border}`,
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2,
+      }}>
+        <Box>
+          <Typography sx={{ fontSize: '22px', fontWeight: 700, color: C.text, letterSpacing: '-0.3px' }}>
+            Workspaces
+          </Typography>
+          <Typography sx={{ fontSize: '13px', color: C.sub, mt: 0.5 }}>
+            Manage platform workspaces and subscriptions
+          </Typography>
+        </Box>
+        <Box sx={{ bgcolor: '#f2f2f2', color: C.sub, fontSize: '12px', borderRadius: 2, px: 1.5, py: 0.5 }}>
+          {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
         </Box>
       </Box>
 
-      {/* ------------------------------------------------------------------ */}
-      {/* Content Area                                                         */}
-      {/* ------------------------------------------------------------------ */}
-      <Box sx={{ pb: { xs: 4, sm: 6 } }}>
+      {/* ── Stat Cards ── */}
+      <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', px: { xs: 3, sm: 4, md: 5 }, py: 2.5, bgcolor: C.surface, borderBottom: `1px solid ${C.border}` }}>
+        <StatCard icon={<WorkspacesOutlined />} value={total}    label="Total Workspaces" />
+        <StatCard icon={<CheckCircleOutline />} value={active}   label="Active" />
+        <StatCard icon={<CancelOutlined />}     value={inactive} label="Inactive" />
+        <StatCard icon={<GroupOutlined />}      value={plans}    label="Unique Plans" />
+      </Box>
 
-        {/* Filter Toolbar */}
-        <Paper
-          elevation={0}
-          sx={{
-            borderRadius: 0,
-            border: 'none',
-            borderTop: '1px solid #e2e8f0',
-            borderBottom: '1px solid #e2e8f0',
-            bgcolor: '#ffffff',
-          }}
-        >
-          <Box sx={{ px: { xs: 1.5, sm: 2.5 }, py: 1.5, display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap' }}>
+      {/* ── Content ── */}
+      <Box sx={{ pb: 6 }}>
+
+        {/* Filter toolbar — identical structure to Billing */}
+        <Paper elevation={0} sx={{ borderRadius: 0, border: 'none', borderBottom: `1px solid ${C.border}`, bgcolor: C.surface }}>
+          <Box sx={{ px: 2.5, py: 1.5, display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap' }}>
 
             {/* Search */}
-            <Box sx={{
-              flex: '1 1 220px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 1,
-              bgcolor: '#f8fafc',
-              border: '1px solid #e2e8f0',
-              borderRadius: 2,
-              px: 1.5,
-              py: 0.75,
-            }}>
-              <Search sx={{ fontSize: 18, color: '#94a3b8', flexShrink: 0 }} />
+            <Box sx={{ flex: '1 1 220px', display: 'flex', alignItems: 'center', gap: 1, bgcolor: C.bg, border: `1px solid ${C.border}`, borderRadius: 2, px: 1.5, py: 0.75 }}>
+              <Search sx={{ fontSize: 17, color: C.muted, flexShrink: 0 }} />
               <InputBase
-                placeholder="Search workspaces..."
+                placeholder="Search workspace..."
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                sx={{ flex: 1, fontSize: '0.875rem', color: '#0f172a', '& input::placeholder': { color: '#94a3b8' } }}
+                sx={{ flex: 1, fontSize: '0.875rem' }}
               />
+              {searchQuery && (
+                <IconButton size="small" onClick={() => setSearchQuery('')} sx={{ p: 0.25, color: C.muted }}>
+                  <Close sx={{ fontSize: 14 }} />
+                </IconButton>
+              )}
             </Box>
 
             {/* Status filter */}
-            <FormControl size="small">
-              <Select
-                value={statusFilter}
-                onChange={e => setStatusFilter(e.target.value)}
-                displayEmpty
-                sx={{
-                  minWidth: { xs: 110, sm: 130 },
-                  borderRadius: 2,
-                  bgcolor: '#f8fafc',
-                  fontSize: '0.875rem',
-                  '& .MuiOutlinedInput-notchedOutline': { borderColor: '#e2e8f0' },
-                  '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#cbd5e1' },
-                }}
-              >
+            <FormControl size="small" sx={{ minWidth: { xs: 110, sm: 130 } }}>
+              <Select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} displayEmpty sx={{ borderRadius: 2, fontSize: '0.875rem', bgcolor: C.bg }}>
                 <MenuItem value="">All Status</MenuItem>
                 <MenuItem value="active">Active</MenuItem>
                 <MenuItem value="inactive">Inactive</MenuItem>
@@ -391,20 +228,8 @@ const Workspaces: React.FC = () => {
             </FormControl>
 
             {/* Plan filter */}
-            <FormControl size="small">
-              <Select
-                value={planFilter}
-                onChange={e => setPlanFilter(e.target.value)}
-                displayEmpty
-                sx={{
-                  minWidth: { xs: 110, sm: 130 },
-                  borderRadius: 2,
-                  bgcolor: '#f8fafc',
-                  fontSize: '0.875rem',
-                  '& .MuiOutlinedInput-notchedOutline': { borderColor: '#e2e8f0' },
-                  '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#cbd5e1' },
-                }}
-              >
+            <FormControl size="small" sx={{ minWidth: { xs: 110, sm: 130 } }}>
+              <Select value={planFilter} onChange={e => setPlanFilter(e.target.value)} displayEmpty sx={{ borderRadius: 2, fontSize: '0.875rem', bgcolor: C.bg }}>
                 <MenuItem value="">All Plans</MenuItem>
                 <MenuItem value="free">Free</MenuItem>
                 <MenuItem value="basic">Basic</MenuItem>
@@ -415,145 +240,77 @@ const Workspaces: React.FC = () => {
               </Select>
             </FormControl>
 
-            {/* Clear button */}
-            {hasActiveFilters && (
-              <Button
-                onClick={handleClearFilters}
-                size="small"
-                sx={{ textTransform: 'none', color: '#64748b', fontWeight: 600, flexShrink: 0 }}
-              >
+            {/* Clear */}
+            {hasFilters && (
+              <Button size="small" onClick={clearFilters} sx={{ textTransform: 'none', color: C.sub, fontWeight: 600, fontSize: '0.8125rem', borderRadius: 2, px: 1.5 }}>
                 Clear
               </Button>
             )}
-
-            {/* Result count */}
-            <Box sx={{ ml: 'auto', flexShrink: 0, display: { xs: 'none', sm: 'block' } }}>
-              <Typography variant="caption" sx={{ color: '#94a3b8', fontWeight: 500 }}>
-                {filteredWorkspaces.length} of {workspaces.length} workspaces
-              </Typography>
-            </Box>
           </Box>
         </Paper>
 
-        {/* Table */}
-        {filteredWorkspaces.length === 0 ? (
-          <Box sx={{ px: { xs: 2, sm: 3, md: 5 }, pt: 4 }}>
-            <Paper
-              elevation={0}
-              sx={{
-                p: 6,
-                textAlign: 'center',
-                border: '1px solid #e2e8f0',
-                borderRadius: 3,
-                bgcolor: '#ffffff',
-                mx: 'auto',
-                maxWidth: 480,
-              }}
-            >
-              <Business sx={{ fontSize: 64, color: '#cbd5e1', mb: 2 }} />
-              <Typography variant="h6" sx={{ fontWeight: 600, color: '#64748b', mb: 1 }}>
+        {/* Table / Empty state */}
+        {filtered.length === 0 ? (
+          <Box sx={{ px: { xs: 2, sm: 3, md: 5 } }}>
+            <Paper elevation={0} sx={{ p: 6, textAlign: 'center', border: `1px solid ${C.border}`, borderRadius: 3, bgcolor: C.surface, mt: 3 }}>
+              <Business sx={{ fontSize: 48, color: C.muted, mb: 2 }} />
+              <Typography variant="h6" sx={{ fontWeight: 600, color: C.sub, mb: 1 }}>
                 No Workspaces Found
               </Typography>
-              <Typography variant="body2" color="text.secondary">
-                {hasActiveFilters
-                  ? 'No workspaces match your current filters. Try adjusting or clearing them.'
-                  : 'There are no workspaces in the system yet.'}
+              <Typography variant="body2" sx={{ color: C.muted }}>
+                {hasFilters ? 'Try adjusting your filters.' : 'There are no workspaces in the system yet.'}
               </Typography>
-              {hasActiveFilters && (
-                <Button
-                  onClick={handleClearFilters}
-                  variant="outlined"
-                  size="small"
-                  sx={{ mt: 2, textTransform: 'none', fontWeight: 600, borderColor: 'rgba(25,118,210,0.3)', color: '#1976D2', borderRadius: 2 }}
-                >
+              {hasFilters && (
+                <Button onClick={clearFilters} variant="outlined" size="small"
+                  sx={{ mt: 2, textTransform: 'none', fontWeight: 600, borderRadius: 2, borderColor: 'rgba(0,166,202,0.3)', color: C.primary, '&:hover': { borderColor: C.primary, bgcolor: 'rgba(0,166,202,0.04)' } }}>
                   Clear Filters
                 </Button>
               )}
             </Paper>
           </Box>
         ) : (
-          <Box sx={{ borderTop: '1px solid #e2e8f0', borderBottom: '1px solid #e2e8f0' }}>
-            <TableContainer
-              component={Paper}
-              elevation={0}
-              sx={{ borderRadius: 0, border: 'none', bgcolor: '#ffffff', overflowX: 'auto' }}
-            >
+          <Box sx={{ borderBottom: `1px solid ${C.border}` }}>
+            <TableContainer component={Paper} elevation={0} sx={{ borderRadius: 0, border: 'none', bgcolor: C.surface, overflowX: 'auto' }}>
               <Table sx={{ minWidth: 500 }}>
                 <TableHead>
-                  <TableRow sx={{ bgcolor: '#f8fafc', borderBottom: '2px solid #e2e8f0' }}>
+                  <TableRow sx={{ bgcolor: C.bg, borderBottom: `2px solid ${C.border}` }}>
                     {[
-                      { label: 'Workspace', display: undefined },
-                      { label: 'Plan', display: undefined },
-                      { label: 'Status', display: undefined },
-                      { label: 'Subscription', display: { xs: 'none', sm: 'table-cell' } },
-                      { label: 'Created', display: { xs: 'none', md: 'table-cell' } },
-                      { label: 'Actions', display: undefined },
-                    ].map(({ label, display }) => (
-                      <TableCell
-                        key={label}
-                        align={label === 'Actions' ? 'right' : 'left'}
+                      { label: 'Workspace',    hide: false },
+                      { label: 'Plan',         hide: false },
+                      { label: 'Status',       hide: false },
+                      { label: 'Subscription', hide: false, xs: true },
+                      { label: 'Created',      hide: false, md: true },
+                      { label: 'Actions',      hide: false, right: true },
+                    ].map(({ label, xs, md, right }) => (
+                      <TableCell key={label} align={right ? 'right' : 'left'}
                         sx={{
-                          fontWeight: 600,
-                          color: '#64748b',
-                          fontSize: '0.75rem',
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.06em',
-                          py: 1.5,
-                          px: label === 'Workspace' ? 3 : 2,
-                          whiteSpace: 'nowrap',
-                          ...(display ? { display } : {}),
-                        }}
-                      >
+                          fontWeight: 600, color: C.sub, fontSize: '0.75rem',
+                          textTransform: 'uppercase', letterSpacing: '0.06em',
+                          ...(xs ? { display: { xs: 'none', sm: 'table-cell' } } : {}),
+                          ...(md ? { display: { xs: 'none', md: 'table-cell' } } : {}),
+                        }}>
                         {label}
                       </TableCell>
                     ))}
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {filteredWorkspaces.map((workspace, idx) => (
-                    <TableRow
-                      key={workspace.id}
-                      sx={{
-                        bgcolor: '#ffffff',
-                        borderBottom: idx < filteredWorkspaces.length - 1 ? '1px solid #e2e8f0' : 'none',
-                        '&:last-child td': { border: 0 },
-                        '&:hover': { bgcolor: '#fafafa' },
-                        transition: 'background-color 0.15s',
-                      }}
-                    >
+                  {filtered.map(w => (
+                    <TableRow key={w.id} sx={{ bgcolor: C.surface, borderBottom: `1px solid ${C.border}`, '&:last-child': { borderBottom: 'none' }, '&:hover': { bgcolor: '#fafafa' } }}>
+
                       {/* Workspace */}
-                      <TableCell sx={{ px: 3, py: 2, maxWidth: { xs: 160, sm: 260 } }}>
+                      <TableCell sx={{ maxWidth: { xs: 160, sm: 260 } }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                          <Box sx={{
-                            width: 36,
-                            height: 36,
-                            borderRadius: 1.5,
-                            bgcolor: 'rgba(25,118,210,0.08)',
-                            border: '1px solid rgba(25,118,210,0.2)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            flexShrink: 0,
-                          }}>
-                            <Business sx={{ fontSize: 18, color: '#1976D2' }} />
+                          <Box sx={{ width: 36, height: 36, borderRadius: 1.5, bgcolor: 'rgba(0,166,202,0.08)', border: '1px solid rgba(0,166,202,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                            <Business sx={{ fontSize: 18, color: C.primary }} />
                           </Box>
                           <Box sx={{ minWidth: 0 }}>
-                            <Typography variant="body2" sx={{ fontWeight: 700, color: '#0f172a', lineHeight: 1.3 }}>
-                              {workspace.name}
+                            <Typography variant="body2" sx={{ fontWeight: 700, color: C.text, lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              {w.name}
                             </Typography>
-                            {workspace.description && (
-                              <Typography
-                                variant="caption"
-                                sx={{
-                                  color: '#94a3b8',
-                                  display: 'block',
-                                  overflow: 'hidden',
-                                  textOverflow: 'ellipsis',
-                                  whiteSpace: 'nowrap',
-                                  maxWidth: { xs: 120, sm: 200 },
-                                }}
-                              >
-                                {workspace.description}
+                            {w.description && (
+                              <Typography variant="caption" sx={{ color: C.muted, display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: { xs: 120, sm: 200 } }}>
+                                {w.description}
                               </Typography>
                             )}
                           </Box>
@@ -561,74 +318,47 @@ const Workspaces: React.FC = () => {
                       </TableCell>
 
                       {/* Plan */}
-                      <TableCell sx={{ px: 2, py: 2 }}>
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            fontWeight: 600,
-                            color: getPlanColor(workspace.subscriptionPlan),
-                          }}
-                        >
-                          {workspace.subscriptionPlan || 'Free'}
+                      <TableCell>
+                        <Typography variant="body2" sx={{ fontWeight: 600, color: getPlanColor(w.subscriptionPlan) }}>
+                          {w.subscriptionPlan || 'Free'}
                         </Typography>
                       </TableCell>
 
                       {/* Status */}
-                      <TableCell sx={{ px: 2, py: 2 }}>
+                      <TableCell>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-                          <Box sx={{
-                            width: 7,
-                            height: 7,
-                            borderRadius: '50%',
-                            bgcolor: workspace.isActive ? '#10b981' : '#94a3b8',
-                            flexShrink: 0,
-                          }} />
-                          <Typography variant="body2" sx={{ color: '#374151', fontWeight: 500 }}>
-                            {workspace.isActive ? 'Active' : 'Inactive'}
+                          <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: w.isActive ? '#10b981' : C.muted, flexShrink: 0 }} />
+                          <Typography variant="body2" sx={{ fontWeight: 500, color: w.isActive ? C.text : C.muted, fontSize: '0.8125rem' }}>
+                            {w.isActive ? 'Active' : 'Inactive'}
                           </Typography>
                         </Box>
                       </TableCell>
 
                       {/* Subscription */}
-                      <TableCell sx={{ px: 2, py: 2, display: { xs: 'none', sm: 'table-cell' } }}>
-                        {workspace.subscriptionStatus ? (
+                      <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>
+                        {w.subscriptionStatus ? (
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-                            <Box sx={{
-                              width: 7,
-                              height: 7,
-                              borderRadius: '50%',
-                              bgcolor: getStatusColor(workspace.subscriptionStatus),
-                              flexShrink: 0,
-                            }} />
-                            <Typography variant="body2" sx={{ color: '#374151', fontWeight: 500, textTransform: 'capitalize' }}>
-                              {workspace.subscriptionStatus}
+                            <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: getStatusColor(w.subscriptionStatus), flexShrink: 0 }} />
+                            <Typography variant="body2" sx={{ fontWeight: 500, color: C.text, fontSize: '0.8125rem', textTransform: 'capitalize' }}>
+                              {w.subscriptionStatus}
                             </Typography>
                           </Box>
                         ) : (
-                          <Typography variant="body2" sx={{ color: '#94a3b8' }}>—</Typography>
+                          <Typography variant="body2" sx={{ color: C.muted }}>—</Typography>
                         )}
                       </TableCell>
 
                       {/* Created */}
-                      <TableCell sx={{ px: 2, py: 2, whiteSpace: 'nowrap', display: { xs: 'none', md: 'table-cell' } }}>
-                        <Typography variant="body2" sx={{ color: '#374151' }}>
-                          {workspace.createdAt
-                            ? new Date(workspace.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
-                            : '—'}
+                      <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
+                        <Typography variant="body2" sx={{ color: C.sub }}>
+                          {w.createdAt ? new Date(w.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}
                         </Typography>
                       </TableCell>
 
                       {/* Actions */}
-                      <TableCell sx={{ px: 2, py: 2 }} align="right">
-                        <Tooltip title="View Details" placement="left">
-                          <IconButton
-                            size="small"
-                            onClick={() => handleViewDetails(workspace)}
-                            sx={{
-                              color: '#64748b',
-                              '&:hover': { bgcolor: 'rgba(25,118,210,0.08)', color: '#1976D2' },
-                            }}
-                          >
+                      <TableCell align="right">
+                        <Tooltip title="View Details">
+                          <IconButton size="small" onClick={() => handleViewDetails(w)} sx={{ color: C.muted, '&:hover': { color: C.text } }}>
                             <Visibility fontSize="small" />
                           </IconButton>
                         </Tooltip>
@@ -642,9 +372,7 @@ const Workspaces: React.FC = () => {
         )}
       </Box>
 
-      {/* ------------------------------------------------------------------ */}
-      {/* Workspace Details Dialog                                             */}
-      {/* ------------------------------------------------------------------ */}
+      {/* ── Details Dialog ── */}
       <Dialog
         open={detailsDialogOpen}
         onClose={handleCloseDetails}
@@ -653,96 +381,66 @@ const Workspaces: React.FC = () => {
         PaperProps={{ sx: { borderRadius: 3, overflow: 'hidden', maxHeight: '85vh', display: 'flex', flexDirection: 'column' } }}
       >
         {/* Header */}
-        <Box sx={{
-          background: 'linear-gradient(135deg, #0d1b2e 0%, #0f2744 60%, #1565C0 100%)',
-          px: 3, pt: 2.5, pb: 2.5, position: 'relative', overflow: 'hidden', flexShrink: 0,
-          '&::before': { content: '""', position: 'absolute', top: -60, right: -40, width: 180, height: 180, borderRadius: '50%', background: 'radial-gradient(circle, rgba(25,118,210,0.25) 0%, transparent 70%)', pointerEvents: 'none' },
-        }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, position: 'relative' }}>
-            <Box sx={{ minWidth: 0, flex: 1 }}>
-              <Typography sx={{ color: '#ffffff', fontWeight: 700, fontSize: '1.05rem', lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {selectedWorkspace?.name || 'Workspace Details'}
-              </Typography>
-              <Typography variant="caption" sx={{ color: 'rgba(144,202,249,0.7)', display: 'block' }}>
-                Workspace Details
-              </Typography>
-            </Box>
-            <IconButton onClick={handleCloseDetails} size="small" sx={{ color: 'rgba(255,255,255,0.8)', flexShrink: 0, alignSelf: 'flex-start', mt: 0.5, '&:hover': { bgcolor: 'rgba(255,255,255,0.15)' } }}>
-              <Close fontSize="small" />
-            </IconButton>
+        <Box sx={{ bgcolor: C.surface, px: 3, pt: 2.5, pb: 2, borderBottom: `1px solid ${C.border}`, flexShrink: 0, display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Box sx={{ minWidth: 0, flex: 1 }}>
+            <Typography sx={{ fontWeight: 700, color: C.text, fontSize: '1rem', lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {selectedWorkspace?.name || 'Workspace Details'}
+            </Typography>
+            <Typography variant="caption" sx={{ color: C.sub, fontSize: '0.8125rem', display: 'block' }}>
+              Workspace Details
+            </Typography>
           </Box>
+          <IconButton onClick={handleCloseDetails} size="small" sx={{ color: 'rgba(0,0,0,0.45)', flexShrink: 0, '&:hover': { bgcolor: 'rgba(0,0,0,0.04)' } }}>
+            <Close fontSize="small" />
+          </IconButton>
         </Box>
 
         <DialogContent sx={{ p: 0, overflowY: 'auto', flex: 1 }}>
           {detailsLoading ? (
             <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8 }}>
-              <CircularProgress sx={{ color: '#1976D2' }} />
+              <CircularProgress sx={{ color: C.primary }} />
             </Box>
           ) : workspaceDetails ? (
             <Box>
-
-              {/* ── Overview chips ── */}
+              {/* Status chips */}
               <Box sx={{ px: 3, pt: 3, pb: 2.5, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
                 <Chip
                   label={workspaceDetails.isActive ? 'Active' : 'Inactive'}
                   size="small"
-                  sx={{
-                    fontWeight: 600, fontSize: '0.72rem', height: 24,
-                    bgcolor: alpha(getStatusColor(workspaceDetails.isActive ? 'active' : 'inactive'), 0.1),
-                    color: getStatusColor(workspaceDetails.isActive ? 'active' : 'inactive'),
-                    border: `1px solid ${alpha(getStatusColor(workspaceDetails.isActive ? 'active' : 'inactive'), 0.3)}`,
-                  }}
+                  sx={{ fontWeight: 600, fontSize: '0.72rem', height: 24, bgcolor: alpha(getStatusColor(workspaceDetails.isActive ? 'active' : 'inactive'), 0.1), color: getStatusColor(workspaceDetails.isActive ? 'active' : 'inactive'), border: `1px solid ${alpha(getStatusColor(workspaceDetails.isActive ? 'active' : 'inactive'), 0.3)}` }}
                 />
                 {workspaceDetails.subscriptionPlan && (
-                  <Chip
-                    label={workspaceDetails.subscriptionPlan}
-                    size="small"
-                    sx={{
-                      fontWeight: 600, fontSize: '0.72rem', height: 24,
-                      bgcolor: alpha(getPlanColor(workspaceDetails.subscriptionPlan), 0.1),
-                      color: getPlanColor(workspaceDetails.subscriptionPlan),
-                      border: `1px solid ${alpha(getPlanColor(workspaceDetails.subscriptionPlan), 0.3)}`,
-                    }}
+                  <Chip label={workspaceDetails.subscriptionPlan} size="small"
+                    sx={{ fontWeight: 600, fontSize: '0.72rem', height: 24, bgcolor: alpha(getPlanColor(workspaceDetails.subscriptionPlan), 0.1), color: getPlanColor(workspaceDetails.subscriptionPlan), border: `1px solid ${alpha(getPlanColor(workspaceDetails.subscriptionPlan), 0.3)}` }}
                   />
                 )}
                 {workspaceDetails.subscriptionStatus && (
-                  <Chip
-                    label={workspaceDetails.subscriptionStatus}
-                    size="small"
-                    sx={{
-                      fontWeight: 600, fontSize: '0.72rem', height: 24,
-                      bgcolor: alpha(getStatusColor(workspaceDetails.subscriptionStatus), 0.1),
-                      color: getStatusColor(workspaceDetails.subscriptionStatus),
-                      border: `1px solid ${alpha(getStatusColor(workspaceDetails.subscriptionStatus), 0.3)}`,
-                    }}
+                  <Chip label={workspaceDetails.subscriptionStatus} size="small"
+                    sx={{ fontWeight: 600, fontSize: '0.72rem', height: 24, bgcolor: alpha(getStatusColor(workspaceDetails.subscriptionStatus), 0.1), color: getStatusColor(workspaceDetails.subscriptionStatus), border: `1px solid ${alpha(getStatusColor(workspaceDetails.subscriptionStatus), 0.3)}` }}
                   />
                 )}
                 {workspaceDetails.orderType !== undefined && (
-                  <Chip
-                    label={workspaceDetails.orderType === 0 ? 'Online' : 'Manual'}
-                    size="small"
-                    sx={{ fontWeight: 600, fontSize: '0.72rem', height: 24, bgcolor: 'rgba(25,118,210,0.08)', color: '#1976D2', border: '1px solid rgba(25,118,210,0.2)' }}
+                  <Chip label={workspaceDetails.orderType === 0 ? 'Online' : 'Manual'} size="small"
+                    sx={{ fontWeight: 600, fontSize: '0.72rem', height: 24, bgcolor: 'rgba(0,166,202,0.08)', color: C.primary, border: '1px solid rgba(0,166,202,0.2)' }}
                   />
                 )}
               </Box>
 
               {workspaceDetails.description && (
                 <Box sx={{ px: 3, pb: 2.5 }}>
-                  <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6 }}>
-                    {workspaceDetails.description}
-                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6 }}>{workspaceDetails.description}</Typography>
                 </Box>
               )}
 
               <Divider />
 
-              {/* ── Owner ── */}
+              {/* Owner */}
               <Box sx={{ px: 3, pt: 2.5, pb: 2.5 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
-                  <Box sx={{ width: 30, height: 30, borderRadius: 1.5, bgcolor: 'rgba(25,118,210,0.08)', border: '1px solid rgba(25,118,210,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <Person sx={{ fontSize: 16, color: '#1976D2' }} />
+                  <Box sx={{ width: 30, height: 30, borderRadius: 1.5, bgcolor: 'rgba(0,166,202,0.08)', border: '1px solid rgba(0,166,202,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <Person sx={{ fontSize: 16, color: C.primary }} />
                   </Box>
-                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#0f172a' }}>Owner</Typography>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: C.text }}>Owner</Typography>
                 </Box>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
                   {[
@@ -750,44 +448,42 @@ const Workspaces: React.FC = () => {
                     { label: 'Email', value: workspaceDetails.ownerEmail || '—' },
                     ...(workspaceDetails.ownerPhone ? [{ label: 'Phone', value: workspaceDetails.ownerPhone }] : []),
                   ].map(({ label, value }) => (
-                    <Box key={label} sx={{ display: 'flex', alignItems: 'center', gap: 2, px: 1.5, py: 1.25, borderRadius: 2, bgcolor: '#f8fafc', border: '1px solid #e2e8f0' }}>
-                      <Box sx={{ minWidth: 72, flexShrink: 0 }}>
-                        <Typography variant="caption" color="text.secondary">{label}</Typography>
-                      </Box>
-                      <Typography variant="body2" sx={{ fontWeight: 600, color: '#0f172a', wordBreak: 'break-all' }}>{value}</Typography>
+                    <Box key={label} sx={{ display: 'flex', alignItems: 'center', gap: 2, px: 1.5, py: 1.25, borderRadius: 2, bgcolor: C.bg, border: `1px solid ${C.border}` }}>
+                      <Box sx={{ minWidth: 72, flexShrink: 0 }}><Typography variant="caption" color="text.secondary">{label}</Typography></Box>
+                      <Typography variant="body2" sx={{ fontWeight: 600, color: C.text, wordBreak: 'break-all' }}>{value}</Typography>
                     </Box>
                   ))}
                 </Box>
               </Box>
 
-              {/* ── Contact & Location ── */}
+              {/* Contact & Location */}
               {(workspaceDetails.address || workspaceDetails.city || workspaceDetails.phone || workspaceDetails.email) && (
                 <>
                   <Divider />
                   <Box sx={{ px: 3, pt: 2.5, pb: 2.5 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
-                      <Box sx={{ width: 30, height: 30, borderRadius: 1.5, bgcolor: 'rgba(25,118,210,0.08)', border: '1px solid rgba(25,118,210,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                        <LocationOn sx={{ fontSize: 16, color: '#1976D2' }} />
+                      <Box sx={{ width: 30, height: 30, borderRadius: 1.5, bgcolor: 'rgba(0,166,202,0.08)', border: '1px solid rgba(0,166,202,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <LocationOn sx={{ fontSize: 16, color: C.primary }} />
                       </Box>
-                      <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#0f172a' }}>Contact & Location</Typography>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 700, color: C.text }}>Contact &amp; Location</Typography>
                     </Box>
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
                       {workspaceDetails.email && (
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, px: 1.5, py: 1.25, borderRadius: 2, bgcolor: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, px: 1.5, py: 1.25, borderRadius: 2, bgcolor: C.bg, border: `1px solid ${C.border}` }}>
                           <Box sx={{ minWidth: 72, flexShrink: 0 }}><Typography variant="caption" color="text.secondary">Email</Typography></Box>
-                          <Typography variant="body2" sx={{ fontWeight: 600, color: '#0f172a', wordBreak: 'break-all' }}>{workspaceDetails.email}</Typography>
+                          <Typography variant="body2" sx={{ fontWeight: 600, color: C.text, wordBreak: 'break-all' }}>{workspaceDetails.email}</Typography>
                         </Box>
                       )}
                       {workspaceDetails.phone && (
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, px: 1.5, py: 1.25, borderRadius: 2, bgcolor: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, px: 1.5, py: 1.25, borderRadius: 2, bgcolor: C.bg, border: `1px solid ${C.border}` }}>
                           <Box sx={{ minWidth: 72, flexShrink: 0 }}><Typography variant="caption" color="text.secondary">Phone</Typography></Box>
-                          <Typography variant="body2" sx={{ fontWeight: 600, color: '#0f172a' }}>{workspaceDetails.phone}</Typography>
+                          <Typography variant="body2" sx={{ fontWeight: 600, color: C.text }}>{workspaceDetails.phone}</Typography>
                         </Box>
                       )}
                       {(workspaceDetails.address || workspaceDetails.city) && (
-                        <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, px: 1.5, py: 1.25, borderRadius: 2, bgcolor: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                        <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, px: 1.5, py: 1.25, borderRadius: 2, bgcolor: C.bg, border: `1px solid ${C.border}` }}>
                           <Box sx={{ minWidth: 72, flexShrink: 0, pt: 0.1 }}><Typography variant="caption" color="text.secondary">Address</Typography></Box>
-                          <Typography variant="body2" sx={{ fontWeight: 600, color: '#0f172a' }}>
+                          <Typography variant="body2" sx={{ fontWeight: 600, color: C.text }}>
                             {[workspaceDetails.address, workspaceDetails.city, workspaceDetails.state, workspaceDetails.postalCode, workspaceDetails.country].filter(Boolean).join(', ')}
                           </Typography>
                         </Box>
@@ -797,28 +493,28 @@ const Workspaces: React.FC = () => {
                 </>
               )}
 
-              {/* ── Billing ── */}
+              {/* Billing */}
               {(workspaceDetails.billingEmail || workspaceDetails.billingAddress) && (
                 <>
                   <Divider />
                   <Box sx={{ px: 3, pt: 2.5, pb: 2.5 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
-                      <Box sx={{ width: 30, height: 30, borderRadius: 1.5, bgcolor: 'rgba(25,118,210,0.08)', border: '1px solid rgba(25,118,210,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                        <AttachMoneyOutlined sx={{ fontSize: 16, color: '#1976D2' }} />
+                      <Box sx={{ width: 30, height: 30, borderRadius: 1.5, bgcolor: 'rgba(0,166,202,0.08)', border: '1px solid rgba(0,166,202,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <AttachMoneyOutlined sx={{ fontSize: 16, color: C.primary }} />
                       </Box>
-                      <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#0f172a' }}>Billing</Typography>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 700, color: C.text }}>Billing</Typography>
                     </Box>
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
                       {workspaceDetails.billingEmail && (
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, px: 1.5, py: 1.25, borderRadius: 2, bgcolor: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, px: 1.5, py: 1.25, borderRadius: 2, bgcolor: C.bg, border: `1px solid ${C.border}` }}>
                           <Box sx={{ minWidth: 72, flexShrink: 0 }}><Typography variant="caption" color="text.secondary">Email</Typography></Box>
-                          <Typography variant="body2" sx={{ fontWeight: 600, color: '#0f172a', wordBreak: 'break-all' }}>{workspaceDetails.billingEmail}</Typography>
+                          <Typography variant="body2" sx={{ fontWeight: 600, color: C.text, wordBreak: 'break-all' }}>{workspaceDetails.billingEmail}</Typography>
                         </Box>
                       )}
                       {workspaceDetails.billingAddress && (
-                        <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, px: 1.5, py: 1.25, borderRadius: 2, bgcolor: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                        <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, px: 1.5, py: 1.25, borderRadius: 2, bgcolor: C.bg, border: `1px solid ${C.border}` }}>
                           <Box sx={{ minWidth: 72, flexShrink: 0, pt: 0.1 }}><Typography variant="caption" color="text.secondary">Address</Typography></Box>
-                          <Typography variant="body2" sx={{ fontWeight: 600, color: '#0f172a' }}>{workspaceDetails.billingAddress}</Typography>
+                          <Typography variant="body2" sx={{ fontWeight: 600, color: C.text }}>{workspaceDetails.billingAddress}</Typography>
                         </Box>
                       )}
                     </Box>
@@ -826,35 +522,31 @@ const Workspaces: React.FC = () => {
                 </>
               )}
 
-              {/* ── Timestamps ── */}
+              {/* Timeline */}
               <Divider />
-              <Box sx={{ px: 3, pt: 2.5, pb: 3, bgcolor: '#f8fafc' }}>
+              <Box sx={{ px: 3, pt: 2.5, pb: 3, bgcolor: C.bg }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
-                  <Box sx={{ width: 30, height: 30, borderRadius: 1.5, bgcolor: 'rgba(25,118,210,0.08)', border: '1px solid rgba(25,118,210,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <CalendarToday sx={{ fontSize: 14, color: '#1976D2' }} />
+                  <Box sx={{ width: 30, height: 30, borderRadius: 1.5, bgcolor: 'rgba(0,166,202,0.08)', border: '1px solid rgba(0,166,202,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <CalendarToday sx={{ fontSize: 14, color: C.primary }} />
                   </Box>
-                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#0f172a' }}>Timeline</Typography>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: C.text }}>Timeline</Typography>
                 </Box>
                 <Grid container spacing={1.5}>
-                  <Grid item xs={12} sm={6}>
-                    <Box sx={{ px: 1.5, py: 1.25, borderRadius: 2, bgcolor: '#ffffff', border: '1px solid #e2e8f0' }}>
-                      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.25 }}>Created</Typography>
-                      <Typography variant="body2" sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.8rem' }}>
-                        {workspaceDetails.createdAt ? new Date(workspaceDetails.createdAt).toLocaleString() : '—'}
-                      </Typography>
-                    </Box>
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <Box sx={{ px: 1.5, py: 1.25, borderRadius: 2, bgcolor: '#ffffff', border: '1px solid #e2e8f0' }}>
-                      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.25 }}>Last Updated</Typography>
-                      <Typography variant="body2" sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.8rem' }}>
-                        {workspaceDetails.updatedAt ? new Date(workspaceDetails.updatedAt).toLocaleString() : '—'}
-                      </Typography>
-                    </Box>
-                  </Grid>
+                  {[
+                    { label: 'Created',      value: workspaceDetails.createdAt },
+                    { label: 'Last Updated', value: workspaceDetails.updatedAt },
+                  ].map(({ label, value }) => (
+                    <Grid item xs={12} sm={6} key={label}>
+                      <Box sx={{ px: 1.5, py: 1.25, borderRadius: 2, bgcolor: C.surface, border: `1px solid ${C.border}` }}>
+                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.25 }}>{label}</Typography>
+                        <Typography variant="body2" sx={{ fontWeight: 600, color: C.text, fontSize: '0.8rem' }}>
+                          {value ? new Date(value).toLocaleString() : '—'}
+                        </Typography>
+                      </Box>
+                    </Grid>
+                  ))}
                 </Grid>
               </Box>
-
             </Box>
           ) : (
             <Box sx={{ p: 4, textAlign: 'center' }}>
@@ -863,26 +555,23 @@ const Workspaces: React.FC = () => {
           )}
         </DialogContent>
 
-        <DialogActions sx={{ px: 3, py: 2, borderTop: '1px solid #e2e8f0', flexShrink: 0 }}>
-          <Button
-            onClick={handleCloseDetails}
-            variant="contained"
-            sx={{ textTransform: 'none', fontWeight: 600, bgcolor: '#1976D2', '&:hover': { bgcolor: '#1565C0' }, borderRadius: 2, boxShadow: 'none' }}
-          >
+        <DialogActions sx={{ px: 3, py: 2, borderTop: `1px solid ${C.border}`, flexShrink: 0 }}>
+          <Button onClick={handleCloseDetails} variant="contained"
+            sx={{ textTransform: 'none', fontWeight: 600, bgcolor: C.primary, '&:hover': { bgcolor: C.hover }, borderRadius: 2, boxShadow: 'none' }}>
             Close
           </Button>
         </DialogActions>
       </Dialog>
 
-      {/* Error Snackbar */}
+      {/* ── Snackbar ── */}
       <Snackbar
-        open={snackbarOpen}
+        open={snackbar.open}
         autoHideDuration={5000}
-        onClose={() => setSnackbarOpen(false)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        onClose={() => setSnackbar(s => ({ ...s, open: false }))}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
       >
-        <Alert severity="error" onClose={() => setSnackbarOpen(false)} sx={{ width: '100%' }}>
-          {snackbarMessage}
+        <Alert severity={snackbar.severity} onClose={() => setSnackbar(s => ({ ...s, open: false }))} sx={{ boxShadow: '0 4px 12px rgba(0,0,0,0.15)', borderRadius: 1.5 }}>
+          {snackbar.message}
         </Alert>
       </Snackbar>
     </Box>

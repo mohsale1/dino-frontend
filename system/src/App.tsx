@@ -7,7 +7,7 @@ import { ProtectedRoute, PermissionSync } from './components/auth';
 import SystemLayout from './components/layout/SystemLayout';
 import { AppInitializer } from './components/common';
 
-import { AuthProvider } from './contexts/common/Auth';
+import { AuthProvider, useAuth } from './contexts/common/Auth';
 import { ToastProvider } from './contexts/common/Toast';
 import { SidebarProvider } from './contexts/common/Sidebar';
 
@@ -17,8 +17,9 @@ import {
   RolesPermissions,
   UserManagement,
   Workspaces,
+  Approvals,
   Billing,
-  RegistrationCodes,
+  Referrals,
   Settings as SystemSettings,
   Appearance,
   Profile,
@@ -26,7 +27,7 @@ import {
 
 import { RUNTIME_CONFIG } from './config/runtime';
 import { StorageCleanup } from './utils/storage';
-import { tokenRefreshScheduler } from './utils/auth';
+import { tokenRefreshScheduler, getFirstAccessibleRoute } from './utils/auth';
 import { apiService } from './utils/api';
 import { initializePerformanceMonitoring } from './utils/performance';
 
@@ -35,6 +36,13 @@ const theme = createTheme({
     mode: (RUNTIME_CONFIG.DEFAULT_THEME as 'light' | 'dark') || 'light',
   },
 });
+
+const SystemIndexRedirect = () => {
+  const { userPermissions, loading } = useAuth();
+  // Wait for permissions to resolve before redirecting.
+  if (loading || !userPermissions) return null;
+  return <Navigate to={getFirstAccessibleRoute(userPermissions)} replace />;
+};
 
 // Inner component — has access to both auth context and router context
 const AppContent = memo(() => {
@@ -50,13 +58,14 @@ const AppContent = memo(() => {
 
           {/* Protected system routes */}
           <Route element={<ProtectedRoute redirectTo="/login"><SystemLayout /></ProtectedRoute>}>
-            <Route path="/system" element={<Navigate to="/system/dashboard" replace />} />
+            <Route path="/system" element={<SystemIndexRedirect />} />
             <Route path="/system/dashboard" element={<SystemDashboard />} />
             <Route path="/system/users" element={<UserManagement />} />
             <Route path="/system/roles-permissions" element={<RolesPermissions />} />
             <Route path="/system/workspaces" element={<Workspaces />} />
+            <Route path="/system/approvals" element={<Approvals />} />
             <Route path="/system/billing" element={<Billing />} />
-            <Route path="/system/registration-codes" element={<RegistrationCodes />} />
+            <Route path="/system/referrals" element={<Referrals />} />
             <Route path="/system/settings" element={<SystemSettings />} />
             <Route path="/system/appearance" element={<Appearance />} />
             <Route path="/system/profile" element={<Profile />} />

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Typography,
@@ -35,10 +35,8 @@ import {
   Close,
   Security,
   Search,
-  CalendarToday,
   AdminPanelSettingsOutlined,
   StoreOutlined,
-  SecurityOutlined,
   Visibility,
   CheckCircleOutline,
   RemoveCircleOutline,
@@ -48,50 +46,41 @@ import { systemPermissionService } from '../../services/system/permission';
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const BRAND = {
-  primary:       '#1976D2',
-  primaryHover:  '#1565C0',
-  primaryLight:  '#42A5F5',
-  primaryBg:     'rgba(25,118,210,0.08)',
-  primaryBorder: 'rgba(25,118,210,0.2)',
+  primary:       '#00A6CA',
+  primaryHover:  '#005F8D',
+  primaryBg:     'rgba(0,166,202,0.08)',
+  primaryBorder: 'rgba(0,166,202,0.2)',
 };
 
-// ─── useCountUp ───────────────────────────────────────────────────────────────
-function useCountUp(target: number, duration = 900) {
-  const [value, setValue] = useState(0);
-  const raf   = useRef<number | null>(null);
-  const start = useRef<number | null>(null);
-  useEffect(() => {
-    if (target === 0) { setValue(0); return; }
-    start.current = null;
-    const step = (ts: number) => {
-      if (start.current === null) start.current = ts;
-      const p = Math.min((ts - start.current) / duration, 1);
-      setValue(Math.floor(p * target));
-      if (p < 1) raf.current = requestAnimationFrame(step);
-      else setValue(target);
-    };
-    raf.current = requestAnimationFrame(step);
-    return () => { if (raf.current !== null) cancelAnimationFrame(raf.current); };
-  }, [target, duration]);
-  return value;
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+/**
+ * Normalise a raw permission object from the backend.
+ * The backend returns snake_case fields; map to a consistent shape.
+ */
+function normalisePermission(p: any): any {
+  return {
+    id:          String(p.id ?? p.permission_id ?? ''),
+    name:        p.name        ?? `${p.resource}:${p.action}`,
+    displayName: p.display_name ?? p.displayName ?? p.name ?? `${p.resource}:${p.action}`,
+    description: p.description ?? '',
+    category:    p.category    ?? '',
+    resource:    p.resource    ?? '',
+    action:      p.action      ?? '',
+    isActive:    p.is_active   ?? p.isActive ?? true,
+  };
 }
 
-// ─── HeroStat ─────────────────────────────────────────────────────────────────
-const HeroStat: React.FC<{ icon: React.ReactNode; value: number; label: string }> = ({ icon, value, label }) => {
-  const count = useCountUp(value);
-  return (
-    <Box sx={{ flex: '1 1 140px', minWidth: 0, px: 2.5, py: 2, borderRadius: 2.5, bgcolor: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', gap: 2 }}>
-      <Box sx={{ width: 36, height: 36, borderRadius: 1.5, bgcolor: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)', color: 'rgba(144,202,249,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-        {icon}
-      </Box>
-      <Box>
-        <Typography sx={{ color: '#ffffff', fontWeight: 700, fontSize: { xs: '1.35rem', md: '1.6rem' }, letterSpacing: '-0.03em', lineHeight: 1 }}>{count}</Typography>
-        <Typography sx={{ color: 'rgba(144,202,249,0.65)', fontSize: '0.75rem', mt: 0.25 }}>{label}</Typography>
-      </Box>
-    </Box>
-  );
-};
-
+/**
+ * Build a human-readable label for a permission.
+ * Prefers display_name, falls back to "Resource - Action" capitalised.
+ */
+function permLabel(p: any): string {
+  if (p.displayName && p.displayName !== p.name) return p.displayName;
+  const res = p.resource ? p.resource.charAt(0).toUpperCase() + p.resource.slice(1) : '';
+  const act = p.action   ? p.action.charAt(0).toUpperCase()   + p.action.slice(1)   : '';
+  return res && act ? `${res} — ${act}` : p.name || String(p.id);
+}
 
 // ─── TabPanel ─────────────────────────────────────────────────────────────────
 const TabPanel: React.FC<{ children?: React.ReactNode; index: number; value: number }> = ({ children, value, index }) => (
@@ -102,17 +91,17 @@ const TabPanel: React.FC<{ children?: React.ReactNode; index: number; value: num
 
 // ─── Dialog header ────────────────────────────────────────────────────────────
 const DialogHeader: React.FC<{ title: string; subtitle: string; onClose: () => void }> = ({ title, subtitle, onClose }) => (
-  <Box sx={{
-    background: 'linear-gradient(135deg, #0d1b2e 0%, #0f2744 60%, #1565C0 100%)',
-    px: 3, pt: 2.5, pb: 2.5, position: 'relative', overflow: 'hidden',
-    '&::before': { content: '""', position: 'absolute', top: -60, right: -40, width: 180, height: 180, borderRadius: '50%', background: 'radial-gradient(circle, rgba(25,118,210,0.25) 0%, transparent 70%)', pointerEvents: 'none' },
-  }}>
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, position: 'relative' }}>
+  <Box sx={{ bgcolor: '#ffffff', px: 3, pt: 2.5, pb: 2, borderBottom: '1px solid #e0e0e0' }}>
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
       <Box sx={{ minWidth: 0, flex: 1 }}>
-        <Typography variant="h6" sx={{ color: '#ffffff', fontWeight: 700, lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{title}</Typography>
-        <Typography variant="caption" sx={{ color: 'rgba(144,202,249,0.7)', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{subtitle}</Typography>
+        <Typography sx={{ fontWeight: 700, color: '#1C1C1E', fontSize: '1rem', lineHeight: 1.3 }}>
+          {title}
+        </Typography>
+        <Typography variant="caption" sx={{ color: '#666666', fontSize: '0.8125rem', display: 'block' }}>
+          {subtitle}
+        </Typography>
       </Box>
-      <IconButton onClick={onClose} size="small" sx={{ color: 'rgba(255,255,255,0.8)', flexShrink: 0, alignSelf: 'flex-start', mt: 0.5, '&:hover': { bgcolor: 'rgba(255,255,255,0.15)' } }}>
+      <IconButton onClick={onClose} size="small" sx={{ color: '#999999', flexShrink: 0, '&:hover': { bgcolor: '#f5f5f5' } }}>
         <Close fontSize="small" />
       </IconButton>
     </Box>
@@ -121,37 +110,39 @@ const DialogHeader: React.FC<{ title: string; subtitle: string; onClose: () => v
 
 // ─── Main component ───────────────────────────────────────────────────────────
 const RolesPermissions: React.FC = () => {
-  const [tabValue,          setTabValue]          = useState(0);
-  const [systemRoles,       setSystemRoles]       = useState<any[]>([]);
-  const [applicationRoles,  setApplicationRoles]  = useState<any[]>([]);
-  const [allPermissions,    setAllPermissions]    = useState<any[]>([]);
-  const [loading,           setLoading]           = useState(true);
-  const [error,             setError]             = useState<string | null>(null);
-  const [snackbar,          setSnackbar]          = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
+  const [tabValue,         setTabValue]         = useState(0);
+  const [systemRoles,      setSystemRoles]      = useState<any[]>([]);
+  const [applicationRoles, setApplicationRoles] = useState<any[]>([]);
+  const [allPermissions,   setAllPermissions]   = useState<any[]>([]); // normalised
+  const [loading,          setLoading]          = useState(true);
+  const [error,            setError]            = useState<string | null>(null);
+  const [snackbar,         setSnackbar]         = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
 
   // View dialog
-  const [viewDialogOpen,    setViewDialogOpen]    = useState(false);
-  const [viewingRole,       setViewingRole]       = useState<any | null>(null);
+  const [viewDialogOpen, setViewDialogOpen] = useState(false);
+  const [viewingRole,    setViewingRole]    = useState<any | null>(null);
+  const [viewPermIds,    setViewPermIds]    = useState<Set<string>>(new Set()); // IDs assigned to viewed role
 
-  // Permission dialog (edit = add/remove permissions only)
-  const [permDialogOpen,    setPermDialogOpen]    = useState(false);
-  const [permRole,          setPermRole]          = useState<any | null>(null);
-  const [selectedPerms,     setSelectedPerms]     = useState<string[]>([]);
-  const [permSearch,        setPermSearch]        = useState('');
-  const [savingPerms,       setSavingPerms]       = useState(false);
+  // Permission edit dialog
+  const [permDialogOpen, setPermDialogOpen] = useState(false);
+  const [permRole,       setPermRole]       = useState<any | null>(null);
+  const [selectedPerms,  setSelectedPerms]  = useState<Set<string>>(new Set()); // numeric ID strings
+  const [permSearch,     setPermSearch]     = useState('');
+  const [savingPerms,    setSavingPerms]    = useState(false);
+  const [loadingPerms,   setLoadingPerms]   = useState(false);
 
-  // ── Fetch ─────────────────────────────────────────────────────────────────
+  // ── Fetch all roles + all permissions ─────────────────────────────────────
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
-      const [sysRoles, appRoles, permissions] = await Promise.all([
+      const [sysRoles, appRoles, rawPerms] = await Promise.all([
         systemRoleService.getSystemRoles(),
         systemRoleService.getApplicationRoles(),
         systemPermissionService.getPermissions(1, 100),
       ]);
       setSystemRoles(sysRoles);
       setApplicationRoles(appRoles);
-      setAllPermissions(permissions);
+      setAllPermissions((rawPerms as any[]).map(normalisePermission));
       setError(null);
     } catch (err: any) {
       setError(err.message || 'Failed to load data');
@@ -162,45 +153,66 @@ const RolesPermissions: React.FC = () => {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
-  // ── Resolve permission IDs or names → always return name strings ──────────
-  // role.permissions may contain IDs or names depending on the backend response.
-  // We normalise to names so matching against allPermissions (by name) always works.
-  const resolvePermNames = useCallback((rawPerms: string[]): string[] => {
-    return rawPerms.map(raw => {
-      // Try matching by id first, then by name
-      const found = allPermissions.find(p => p.id === raw || p.name === raw);
-      return found ? found.name : raw;
-    });
-  }, [allPermissions]);
+  // ── Fetch assigned permission IDs for a specific role ─────────────────────
+  // GET /system/roles/{id}/permissions → [1, 5, 12, ...]  (integer IDs)
+  const fetchRolePermIds = useCallback(async (roleId: any): Promise<Set<string>> => {
+    try {
+      const response = await systemRoleService.getRolePermissions(roleId);
+      const ids = (response as any[]).map(id => String(id));
+      return new Set(ids);
+    } catch {
+      return new Set();
+    }
+  }, []);
 
   // ── View role ─────────────────────────────────────────────────────────────
-  const handleViewRole = (role: any) => {
+  const handleViewRole = async (role: any) => {
     setViewingRole(role);
+    setViewPermIds(new Set());
     setViewDialogOpen(true);
+    const ids = await fetchRolePermIds(role.id);
+    setViewPermIds(ids);
   };
 
-  // ── Manage permissions ────────────────────────────────────────────────────
-  const handleEditPermissions = (role: any) => {
+  // ── Open permissions edit dialog ──────────────────────────────────────────
+  const handleEditPermissions = async (role: any) => {
     setPermRole(role);
-    setSelectedPerms(resolvePermNames(role.permissions || []));
+    setSelectedPerms(new Set());
     setPermSearch('');
     setPermDialogOpen(true);
+    setLoadingPerms(true);
+    try {
+      const ids = await fetchRolePermIds(role.id);
+      setSelectedPerms(ids);
+    } finally {
+      setLoadingPerms(false);
+    }
   };
 
-  const handleTogglePerm = (name: string) => {
-    setSelectedPerms(prev => prev.includes(name) ? prev.filter(p => p !== name) : [...prev, name]);
+  const handleTogglePerm = (id: string) => {
+    setSelectedPerms(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
   };
 
+  // ── Save permission changes ───────────────────────────────────────────────
   const handleSavePerms = async () => {
     if (!permRole) return;
     setSavingPerms(true);
     try {
-      const currentNames = new Set<string>(resolvePermNames(permRole.permissions || []));
-      const nextNames    = new Set<string>(selectedPerms);
-      const toAdd        = selectedPerms.filter(p => !currentNames.has(p));
-      const toRemove     = Array.from(currentNames).filter(p => !nextNames.has(p));
+      // Re-fetch current state from server to diff accurately
+      const currentIds = await fetchRolePermIds(permRole.id);
+      const nextIds    = selectedPerms;
+
+      const toAdd    = Array.from(nextIds).filter(id => !currentIds.has(id));
+      const toRemove = Array.from(currentIds).filter(id => !nextIds.has(id));
+
       if (toAdd.length    > 0) await systemRoleService.addPermissions(permRole.id, toAdd);
       if (toRemove.length > 0) await systemRoleService.removePermissions(permRole.id, toRemove);
+
       setSnackbar({ open: true, message: 'Permissions updated successfully.', severity: 'success' });
       setPermDialogOpen(false);
       setPermRole(null);
@@ -212,71 +224,77 @@ const RolesPermissions: React.FC = () => {
     }
   };
 
-  // ── Filtered permissions ──────────────────────────────────────────────────
-  const filteredPerms = allPermissions.filter(p =>
-    permSearch === '' ||
-    p.name.toLowerCase().includes(permSearch.toLowerCase()) ||
-    p.description?.toLowerCase().includes(permSearch.toLowerCase()) ||
-    p.category?.toLowerCase().includes(permSearch.toLowerCase())
-  );
+  // ── Filtered permissions list ─────────────────────────────────────────────
+  const filteredPerms = allPermissions.filter(p => {
+    if (!permSearch) return true;
+    const q = permSearch.toLowerCase();
+    return (
+      p.name?.toLowerCase().includes(q) ||
+      p.displayName?.toLowerCase().includes(q) ||
+      p.description?.toLowerCase().includes(q) ||
+      p.category?.toLowerCase().includes(q) ||
+      p.resource?.toLowerCase().includes(q) ||
+      p.action?.toLowerCase().includes(q)
+    );
+  });
 
   // ── Role card ─────────────────────────────────────────────────────────────
   const renderRoleCard = (role: any) => {
-    const permCount = (role.permissions || []).length;
+    // role_type from backend is snake_case; handle both
+    const roleType = role.role_type ?? role.roleType ?? 0;
+    const isSystem = role.is_system ?? role.isSystem ?? false;
+
     return (
       <Grid item xs={12} sm={6} lg={4} key={role.id}>
         <Card elevation={0} sx={{
-          border: '1px solid #e2e8f0',
-          borderRadius: 3,
+          bgcolor: '#ffffff',
+          border: '1px solid #e0e0e0',
+          borderRadius: 2,
           height: '100%',
           display: 'flex',
           flexDirection: 'column',
-          transition: 'all 0.2s',
-          '&:hover': { boxShadow: '0 4px 20px rgba(0,0,0,0.07)', transform: 'translateY(-1px)' },
+          transition: 'box-shadow 0.15s',
+          '&:hover': { boxShadow: '0 4px 16px rgba(0,0,0,0.08)' },
         }}>
           <CardContent sx={{ p: { xs: 2, sm: 2.5 }, flex: 1, display: 'flex', flexDirection: 'column' }}>
 
             {/* Header */}
             <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5, mb: 1.5 }}>
               <Avatar sx={{ width: 44, height: 44, bgcolor: BRAND.primaryBg, border: `1px solid ${BRAND.primaryBorder}`, flexShrink: 0 }}>
-                {role.roleType === 0
+                {roleType === 0
                   ? <Business sx={{ fontSize: 22, color: BRAND.primary }} />
                   : <Store     sx={{ fontSize: 22, color: BRAND.primary }} />
                 }
               </Avatar>
               <Box sx={{ minWidth: 0, flex: 1 }}>
-                <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#0f172a', lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <Typography sx={{ fontWeight: 700, color: '#1C1C1E', fontSize: '0.9375rem', lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {role.name}
                 </Typography>
                 <Box sx={{ display: 'flex', gap: 0.75, mt: 0.5, flexWrap: 'wrap' }}>
                   <Chip
-                    label={role.roleType === 0 ? 'System' : 'Application'}
+                    label={roleType === 0 ? 'System' : 'Application'}
                     size="small"
-                    sx={{ fontSize: '0.68rem', height: 18, bgcolor: alpha('#0f172a', 0.06), color: '#334155', border: '1px solid #e2e8f0' }}
+                    sx={{ fontSize: '0.68rem', height: 18, bgcolor: 'rgba(0,0,0,0.05)', color: '#666666', border: '1px solid #e0e0e0' }}
                   />
-                  {role.isSystem && (
-                    <Chip label="Protected" size="small" sx={{ fontSize: '0.68rem', height: 18, bgcolor: alpha('#f43f5e', 0.08), color: '#f43f5e', border: '1px solid rgba(244,63,94,0.25)' }} />
+                  {isSystem && (
+                    <Chip
+                      label="Protected"
+                      size="small"
+                      sx={{ fontSize: '0.68rem', height: 18, bgcolor: 'rgba(235,0,0,0.07)', color: '#c00', border: '1px solid rgba(200,0,0,0.2)' }}
+                    />
                   )}
                 </Box>
               </Box>
             </Box>
 
             {/* Description */}
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2, fontSize: '0.8125rem', flex: 1 }}>
+            <Typography variant="body2" sx={{ mb: 2, fontSize: '0.8125rem', color: '#666666', flex: 1, lineHeight: 1.5 }}>
               {role.description || 'No description provided.'}
             </Typography>
 
-            {/* Permission count badge */}
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2, px: 1.5, py: 1, borderRadius: 1.5, bgcolor: '#f8fafc', border: '1px solid #e2e8f0' }}>
-              <Security sx={{ fontSize: 15, color: BRAND.primary }} />
-              <Typography variant="caption" sx={{ fontWeight: 600, color: '#334155' }}>
-                {permCount} permission{permCount !== 1 ? 's' : ''} assigned
-              </Typography>
-            </Box>
-
             <Divider sx={{ mb: 2 }} />
 
-            {/* Actions — View + Edit Permissions only */}
+            {/* Actions */}
             <Box sx={{ display: 'flex', gap: 1 }}>
               <Button
                 size="small"
@@ -288,8 +306,8 @@ const RolesPermissions: React.FC = () => {
                   textTransform: 'none',
                   fontSize: '0.8rem',
                   borderRadius: 2,
-                  borderColor: '#e2e8f0',
-                  color: '#64748b',
+                  borderColor: '#e0e0e0',
+                  color: '#666666',
                   '&:hover': { borderColor: BRAND.primary, color: BRAND.primary, bgcolor: BRAND.primaryBg },
                 }}
               >
@@ -319,19 +337,10 @@ const RolesPermissions: React.FC = () => {
     );
   };
 
-  // ── Loading / error ───────────────────────────────────────────────────────
-  if (loading) {
-    return (
-      <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minHeight: '60vh', gap: 2 }}>
-        <CircularProgress sx={{ color: BRAND.primary }} />
-        <Typography variant="body2" color="text.secondary">Loading roles...</Typography>
-      </Box>
-    );
-  }
 
   if (error) {
     return (
-      <Box sx={{ p: 4 }}>
+      <Box sx={{ p: 4, bgcolor: '#f8fafc' }}>
         <Alert severity="error" onClose={() => setError(null)}>{error}</Alert>
       </Box>
     );
@@ -339,52 +348,29 @@ const RolesPermissions: React.FC = () => {
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
-    <Box sx={{ width: '100%', minHeight: '100vh', bgcolor: '#f1f5f9' }}>
+    <Box sx={{ width: '100%', minHeight: '100vh', bgcolor: '#f8fafc' }}>
 
-      {/* ── Hero ── */}
-      <Box sx={{
-        background: 'linear-gradient(135deg, #0d1b2e 0%, #0f2744 45%, #1565C0 100%)',
-        px: { xs: 2.5, sm: 4, md: 6 },
-        pt: { xs: 3, md: 4 },
-        pb: { xs: 4, md: 5 },
-        position: 'relative',
-        overflow: 'hidden',
-        '&::before': { content: '""', position: 'absolute', top: -100, right: -60, width: 360, height: 360, borderRadius: '50%', background: 'radial-gradient(circle, rgba(25,118,210,0.22) 0%, transparent 70%)', pointerEvents: 'none' },
-        '&::after':  { content: '""', position: 'absolute', bottom: -80, left: '25%', width: 280, height: 280, borderRadius: '50%', background: 'radial-gradient(circle, rgba(66,165,245,0.15) 0%, transparent 70%)', pointerEvents: 'none' },
-      }}>
-        <Box sx={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)', backgroundSize: '40px 40px', pointerEvents: 'none' }} />
-        <Box sx={{ position: 'relative', mb: 3 }}>
-          <Typography variant="overline" sx={{ color: 'rgba(144,202,249,0.75)', fontWeight: 700, letterSpacing: 3, fontSize: '0.65rem' }}>
-            SYSTEM CONTROL CENTER
-          </Typography>
-          <Typography variant="h4" sx={{ color: '#ffffff', fontWeight: 800, mt: 0.5, fontSize: { xs: '1.5rem', md: '2rem' }, letterSpacing: '-0.025em', lineHeight: 1.2 }}>
-            Roles &amp; Permissions
-          </Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mt: 1 }}>
-            <CalendarToday sx={{ fontSize: 13, color: 'rgba(144,202,249,0.6)' }} />
-            <Typography variant="caption" sx={{ color: 'rgba(144,202,249,0.6)', fontWeight: 500, fontSize: '0.75rem' }}>
-              {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-            </Typography>
-          </Box>
-        </Box>
-        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', position: 'relative' }}>
-          <HeroStat icon={<AdminPanelSettingsOutlined sx={{ fontSize: 18 }} />} value={systemRoles.length}      label="System Roles" />
-          <HeroStat icon={<StoreOutlined            sx={{ fontSize: 18 }} />} value={applicationRoles.length}  label="App Roles" />
-          <HeroStat icon={<SecurityOutlined         sx={{ fontSize: 18 }} />} value={allPermissions.length}    label="Total Permissions" />
-        </Box>
+      {/* ── Page Header ── */}
+      <Box sx={{ bgcolor: '#ffffff', px: { xs: 3, sm: 4, md: 5 }, pt: 3, pb: 3, borderBottom: '1px solid #e0e0e0' }}>
+        <Typography sx={{ fontWeight: 700, color: '#1C1C1E', fontSize: '22px', letterSpacing: '-0.3px' }}>
+          Roles &amp; Permissions
+        </Typography>
+        <Typography sx={{ fontSize: '13px', color: '#666666', mt: 0.5 }}>
+          Manage system and application roles and their permission assignments
+        </Typography>
       </Box>
 
-      {/* ── Tabs — flush to hero, full width ── */}
-      <Paper elevation={0} sx={{ borderRadius: 0, border: 'none', borderBottom: '1px solid #e2e8f0', bgcolor: '#ffffff' }}>
+      {/* ── Tabs ── */}
+      <Paper elevation={0} sx={{ borderRadius: 0, border: 'none', borderBottom: '1px solid #e0e0e0', bgcolor: '#ffffff' }}>
         <Tabs
           value={tabValue}
           onChange={(_, v) => setTabValue(v)}
           variant="fullWidth"
           sx={{
             minHeight: 50,
-            '& .MuiTab-root': { textTransform: 'none', fontWeight: 600, fontSize: { xs: '0.8rem', sm: '0.875rem' }, minHeight: 50, color: '#64748b' },
+            '& .MuiTab-root': { textTransform: 'none', fontWeight: 600, fontSize: { xs: '0.8rem', sm: '0.875rem' }, minHeight: 50, color: '#666666' },
             '& .Mui-selected': { color: BRAND.primary },
-            '& .MuiTabs-indicator': { bgcolor: BRAND.primary, height: 3 },
+            '& .MuiTabs-indicator': { bgcolor: BRAND.primary, height: 2.5 },
           }}
         >
           <Tab icon={<AdminPanelSettingsOutlined sx={{ fontSize: 18 }} />} iconPosition="start" label={`System Roles (${systemRoles.length})`} />
@@ -393,7 +379,7 @@ const RolesPermissions: React.FC = () => {
       </Paper>
 
       {/* ── Content ── */}
-      <Box sx={{ px: { xs: 1.5, sm: 3, md: 5 }, pb: { xs: 4, sm: 6 } }}>
+      <Box sx={{ px: { xs: 2, sm: 3, md: 5 }, pb: { xs: 4, sm: 6 } }}>
         <TabPanel value={tabValue} index={0}>
           {systemRoles.length === 0
             ? <Box sx={{ textAlign: 'center', py: 8 }}><Typography color="text.secondary">No system roles found.</Typography></Box>
@@ -420,7 +406,7 @@ const RolesPermissions: React.FC = () => {
       >
         <DialogHeader
           title={viewingRole?.name || ''}
-          subtitle={viewingRole?.roleType === 0 ? 'System Role' : 'Application Role'}
+          subtitle={(viewingRole?.role_type ?? viewingRole?.roleType) === 0 ? 'System Role' : 'Application Role'}
           onClose={() => setViewDialogOpen(false)}
         />
 
@@ -428,22 +414,26 @@ const RolesPermissions: React.FC = () => {
           {viewingRole && (
             <Box>
               {/* Info rows */}
-              <Box sx={{ px: 3, pt: 3, pb: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <Box sx={{ display: 'flex', gap: 1.5 }}>
-                  <Typography variant="body2" sx={{ fontWeight: 600, color: '#64748b', minWidth: 110 }}>Type</Typography>
-                  <Chip
-                    label={viewingRole.roleType === 0 ? 'System' : 'Application'}
-                    size="small"
-                    sx={{ fontSize: '0.72rem', height: 20, bgcolor: BRAND.primaryBg, color: BRAND.primary, border: `1px solid ${BRAND.primaryBorder}` }}
-                  />
-                  {viewingRole.isSystem && (
-                    <Chip label="Protected" size="small" sx={{ fontSize: '0.72rem', height: 20, bgcolor: alpha('#f43f5e', 0.08), color: '#f43f5e', border: '1px solid rgba(244,63,94,0.25)' }} />
-                  )}
+              <Box sx={{ px: 3, pt: 3, pb: 2.5, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                  <Typography variant="body2" sx={{ fontWeight: 600, color: '#666666', minWidth: 100, flexShrink: 0 }}>Type</Typography>
+                  <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap' }}>
+                    <Chip
+                      label={(viewingRole.role_type ?? viewingRole.roleType) === 0 ? 'System' : 'Application'}
+                      size="small"
+                      sx={{ fontSize: '0.72rem', height: 20, bgcolor: BRAND.primaryBg, color: BRAND.primary, border: `1px solid ${BRAND.primaryBorder}` }}
+                    />
+                    {(viewingRole.is_system ?? viewingRole.isSystem) && (
+                      <Chip label="Protected" size="small" sx={{ fontSize: '0.72rem', height: 20, bgcolor: 'rgba(235,0,0,0.07)', color: '#c00', border: '1px solid rgba(200,0,0,0.2)' }} />
+                    )}
+                  </Box>
                 </Box>
-                <Box sx={{ display: 'flex', gap: 1.5 }}>
-                  <Typography variant="body2" sx={{ fontWeight: 600, color: '#64748b', minWidth: 110 }}>Description</Typography>
-                  <Typography variant="body2" color="text.secondary">{viewingRole.description || 'No description provided.'}</Typography>
-                </Box>
+                {viewingRole.description && (
+                  <Box sx={{ display: 'flex', gap: 1.5 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 600, color: '#666666', minWidth: 100, flexShrink: 0 }}>Description</Typography>
+                    <Typography variant="body2" sx={{ color: '#444444', lineHeight: 1.6 }}>{viewingRole.description}</Typography>
+                  </Box>
+                )}
               </Box>
 
               <Divider />
@@ -452,37 +442,49 @@ const RolesPermissions: React.FC = () => {
               <Box sx={{ px: 3, pt: 2.5, pb: 3 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
                   <Security sx={{ fontSize: 16, color: BRAND.primary }} />
-                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#0f172a' }}>
-                    Permissions ({(viewingRole.permissions || []).length})
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1C1C1E' }}>
+                    Assigned Permissions ({viewPermIds.size})
                   </Typography>
                 </Box>
 
-                {(viewingRole.permissions || []).length === 0 ? (
-                  <Box sx={{ textAlign: 'center', py: 3, bgcolor: '#f8fafc', borderRadius: 2, border: '1px solid #e2e8f0' }}>
+                {viewPermIds.size === 0 ? (
+                  <Box sx={{ textAlign: 'center', py: 4, bgcolor: '#f8fafc', borderRadius: 2, border: '1px solid #e0e0e0' }}>
+                    <Security sx={{ fontSize: 32, color: '#d1d5db', mb: 1 }} />
                     <Typography variant="body2" color="text.secondary">No permissions assigned to this role.</Typography>
                   </Box>
                 ) : (
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    {(viewingRole.permissions as string[]).map((permName, i) => {
-                      const full = allPermissions.find(p => p.id === permName || p.name === permName);
+                    {Array.from(viewPermIds).map(id => {
+                      const perm = allPermissions.find(p => p.id === id);
                       return (
-                        <Box key={i} sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5, px: 1.5, py: 1.25, borderRadius: 2, bgcolor: BRAND.primaryBg, border: `1px solid ${BRAND.primaryBorder}` }}>
-                          <CheckCircleOutline sx={{ fontSize: 16, color: BRAND.primary, mt: 0.1, flexShrink: 0 }} />
-                          <Box sx={{ minWidth: 0 }}>
-                            <Typography variant="body2" sx={{ fontWeight: 600, color: '#0f172a', lineHeight: 1.3 }}>
-                              {full?.displayName || full?.name || permName}
+                        <Box
+                          key={id}
+                          sx={{
+                            display: 'flex', alignItems: 'flex-start', gap: 1.5,
+                            px: 1.5, py: 1.25, borderRadius: 2,
+                            bgcolor: BRAND.primaryBg, border: `1px solid ${BRAND.primaryBorder}`,
+                          }}
+                        >
+                          <CheckCircleOutline sx={{ fontSize: 16, color: BRAND.primary, mt: 0.15, flexShrink: 0 }} />
+                          <Box sx={{ minWidth: 0, flex: 1 }}>
+                            <Typography variant="body2" sx={{ fontWeight: 600, color: '#1C1C1E', lineHeight: 1.3 }}>
+                              {perm ? permLabel(perm) : `Permission #${id}`}
                             </Typography>
-                            {full?.description && (
-                              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.25 }}>
-                                {full.description}
+                            {perm?.description && (
+                              <Typography variant="caption" sx={{ color: '#666666', display: 'block', mt: 0.25, lineHeight: 1.4 }}>
+                                {perm.description}
                               </Typography>
                             )}
                             <Typography variant="caption" sx={{ fontFamily: 'monospace', fontSize: '0.68rem', color: BRAND.primary, mt: 0.25, display: 'block' }}>
-                              {permName}
+                              {perm ? `${perm.resource}:${perm.action}` : id}
                             </Typography>
                           </Box>
-                          {full?.category && (
-                            <Chip label={full.category} size="small" sx={{ height: 18, fontSize: '0.62rem', bgcolor: '#ffffff', border: '1px solid #e2e8f0', color: '#334155', ml: 'auto', flexShrink: 0 }} />
+                          {perm?.category && (
+                            <Chip
+                              label={perm.category}
+                              size="small"
+                              sx={{ height: 18, fontSize: '0.62rem', bgcolor: '#ffffff', border: '1px solid #e0e0e0', color: '#666666', ml: 'auto', flexShrink: 0 }}
+                            />
                           )}
                         </Box>
                       );
@@ -494,8 +496,8 @@ const RolesPermissions: React.FC = () => {
           )}
         </DialogContent>
 
-        <DialogActions sx={{ px: 3, py: 2, borderTop: '1px solid #e2e8f0', gap: 1 }}>
-          <Button onClick={() => setViewDialogOpen(false)} sx={{ textTransform: 'none', color: '#64748b' }}>
+        <DialogActions sx={{ px: 3, py: 2, borderTop: '1px solid #e0e0e0', gap: 1 }}>
+          <Button onClick={() => setViewDialogOpen(false)} sx={{ textTransform: 'none', color: '#666666' }}>
             Close
           </Button>
           <Button
@@ -510,28 +512,28 @@ const RolesPermissions: React.FC = () => {
       </Dialog>
 
       {/* ══════════════════════════════════════════════════════════════════════ */}
-      {/* PERMISSIONS DIALOG — add / remove only                                */}
+      {/* PERMISSIONS EDIT DIALOG                                                */}
       {/* ══════════════════════════════════════════════════════════════════════ */}
       <Dialog
         open={permDialogOpen}
         onClose={() => setPermDialogOpen(false)}
         maxWidth="md"
         fullWidth
-        PaperProps={{ sx: { borderRadius: 3, overflow: 'hidden', height: 'auto', maxHeight: '90vh', display: 'flex', flexDirection: 'column' } }}
+        PaperProps={{ sx: { borderRadius: 3, overflow: 'hidden', maxHeight: '90vh', display: 'flex', flexDirection: 'column' } }}
       >
         <DialogHeader
-          title="Edit Permissions"
-          subtitle={permRole?.name || ''}
+          title={`Edit Permissions — ${permRole?.name || ''}`}
+          subtitle={`${selectedPerms.size} of ${allPermissions.length} permissions assigned`}
           onClose={() => setPermDialogOpen(false)}
         />
 
         <DialogContent sx={{ p: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden', flex: 1 }}>
 
-          {/* Search + counts */}
-          <Box sx={{ px: 3, pt: 2.5, pb: 1.5, borderBottom: '1px solid #e2e8f0' }}>
+          {/* Search + counts bar */}
+          <Box sx={{ px: 3, pt: 2.5, pb: 1.5, borderBottom: '1px solid #e0e0e0', flexShrink: 0 }}>
             <TextField
               fullWidth
-              placeholder="Search permissions..."
+              placeholder="Search by name, resource, action, category..."
               value={permSearch}
               onChange={e => setPermSearch(e.target.value)}
               size="small"
@@ -539,47 +541,67 @@ const RolesPermissions: React.FC = () => {
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <Search sx={{ fontSize: 18, color: '#94a3b8' }} />
+                    <Search sx={{ fontSize: 18, color: '#999999' }} />
                   </InputAdornment>
                 ),
+                endAdornment: permSearch ? (
+                  <InputAdornment position="end">
+                    <IconButton size="small" onClick={() => setPermSearch('')} sx={{ color: '#999999' }}>
+                      <Close sx={{ fontSize: 14 }} />
+                    </IconButton>
+                  </InputAdornment>
+                ) : null,
               }}
             />
-            <Box sx={{ display: 'flex', gap: 2 }}>
+            <Box sx={{ display: 'flex', gap: 2.5 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
                 <CheckCircleOutline sx={{ fontSize: 15, color: '#10b981' }} />
                 <Typography variant="caption" sx={{ fontWeight: 600, color: '#10b981' }}>
-                  {selectedPerms.length} assigned
+                  {selectedPerms.size} assigned
                 </Typography>
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-                <RemoveCircleOutline sx={{ fontSize: 15, color: '#94a3b8' }} />
-                <Typography variant="caption" sx={{ fontWeight: 600, color: '#94a3b8' }}>
-                  {allPermissions.length - selectedPerms.length} unassigned
+                <RemoveCircleOutline sx={{ fontSize: 15, color: '#999999' }} />
+                <Typography variant="caption" sx={{ fontWeight: 600, color: '#999999' }}>
+                  {allPermissions.length - selectedPerms.size} unassigned
                 </Typography>
               </Box>
+              {filteredPerms.length !== allPermissions.length && (
+                <Typography variant="caption" sx={{ color: '#999999', ml: 'auto' }}>
+                  Showing {filteredPerms.length} of {allPermissions.length}
+                </Typography>
+              )}
             </Box>
           </Box>
 
-          {/* Permission list — Assigned first, then Unassigned */}
-          <Box sx={{ flex: 1, overflowY: 'auto', '&::-webkit-scrollbar': { width: 4 }, '&::-webkit-scrollbar-thumb': { bgcolor: '#e2e8f0', borderRadius: 2 } }}>
-            {filteredPerms.length === 0 ? (
-              <Box sx={{ textAlign: 'center', py: 5 }}>
+          {/* Permission list */}
+          <Box sx={{ flex: 1, overflowY: 'auto' }}>
+            {loadingPerms ? (
+              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8 }}>
+                <CircularProgress size={28} sx={{ color: BRAND.primary }} />
+              </Box>
+            ) : filteredPerms.length === 0 ? (
+              <Box sx={{ textAlign: 'center', py: 6 }}>
                 <Typography variant="body2" color="text.secondary">No permissions match your search.</Typography>
               </Box>
             ) : (() => {
-              const assigned   = filteredPerms.filter(p => selectedPerms.includes(p.name));
-              const unassigned = filteredPerms.filter(p => !selectedPerms.includes(p.name));
+              const assigned   = filteredPerms.filter(p => selectedPerms.has(p.id));
+              const unassigned = filteredPerms.filter(p => !selectedPerms.has(p.id));
 
               const renderRow = (permission: any, isSelected: boolean) => (
                 <ListItem key={permission.id} disablePadding sx={{ mb: 0.5 }}>
                   <ListItemButton
-                    onClick={() => handleTogglePerm(permission.name)}
+                    onClick={() => handleTogglePerm(permission.id)}
                     sx={{
                       borderRadius: 2,
                       border: '1px solid',
-                      borderColor: isSelected ? BRAND.primaryBorder : '#f1f5f9',
+                      borderColor: isSelected ? BRAND.primaryBorder : '#f0f0f0',
                       bgcolor: isSelected ? BRAND.primaryBg : '#fafafa',
-                      '&:hover': { bgcolor: isSelected ? 'rgba(25,118,210,0.12)' : '#f1f5f9', borderColor: isSelected ? BRAND.primaryBorder : '#e2e8f0' },
+                      py: 1,
+                      '&:hover': {
+                        bgcolor: isSelected ? 'rgba(0,166,202,0.12)' : '#f2f2f2',
+                        borderColor: isSelected ? BRAND.primaryBorder : '#e0e0e0',
+                      },
                     }}
                   >
                     <ListItemIcon sx={{ minWidth: 36 }}>
@@ -589,30 +611,34 @@ const RolesPermissions: React.FC = () => {
                         tabIndex={-1}
                         disableRipple
                         size="small"
-                        sx={{ color: 'rgba(25,118,210,0.3)', '&.Mui-checked': { color: BRAND.primary }, p: 0 }}
+                        sx={{ color: 'rgba(0,166,202,0.3)', '&.Mui-checked': { color: BRAND.primary }, p: 0 }}
                       />
                     </ListItemIcon>
                     <ListItemText
                       disableTypography
                       primary={
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap', mb: 0.25 }}>
-                          <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.8375rem', color: isSelected ? BRAND.primary : '#0f172a', lineHeight: 1.3 }}>
-                            {permission.displayName || permission.name}
+                          <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.8375rem', color: '#1C1C1E', lineHeight: 1.3 }}>
+                            {permLabel(permission)}
                           </Typography>
                           {permission.category && (
-                            <Chip label={permission.category} size="small" sx={{ height: 16, fontSize: '0.62rem', bgcolor: '#f1f5f9', border: '1px solid #e2e8f0', color: '#334155' }} />
+                            <Chip
+                              label={permission.category}
+                              size="small"
+                              sx={{ height: 16, fontSize: '0.62rem', bgcolor: '#f2f2f2', border: '1px solid #e0e0e0', color: '#666666' }}
+                            />
                           )}
                         </Box>
                       }
                       secondary={
                         <Box>
                           {permission.description && (
-                            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', fontSize: '0.72rem', lineHeight: 1.4 }}>
+                            <Typography variant="caption" sx={{ color: '#666666', display: 'block', fontSize: '0.72rem', lineHeight: 1.4 }}>
                               {permission.description}
                             </Typography>
                           )}
-                          <Typography variant="caption" sx={{ fontFamily: 'monospace', fontSize: '0.68rem', color: isSelected ? BRAND.primary : '#94a3b8', display: 'block', mt: 0.25 }}>
-                            {permission.name}
+                          <Typography variant="caption" sx={{ fontFamily: 'monospace', fontSize: '0.68rem', color: isSelected ? BRAND.primary : '#999999', display: 'block', mt: 0.25 }}>
+                            {permission.resource}:{permission.action}
                           </Typography>
                         </Box>
                       }
@@ -623,7 +649,6 @@ const RolesPermissions: React.FC = () => {
 
               return (
                 <>
-                  {/* ── Assigned section ── */}
                   {assigned.length > 0 && (
                     <Box sx={{ px: 1.5, pt: 1.5 }}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1, px: 0.5 }}>
@@ -632,29 +657,23 @@ const RolesPermissions: React.FC = () => {
                           Assigned ({assigned.length})
                         </Typography>
                       </Box>
-                      <List disablePadding>
-                        {assigned.map(p => renderRow(p, true))}
-                      </List>
+                      <List disablePadding>{assigned.map(p => renderRow(p, true))}</List>
                     </Box>
                   )}
 
-                  {/* ── Divider between sections ── */}
                   {assigned.length > 0 && unassigned.length > 0 && (
                     <Divider sx={{ mx: 1.5, my: 1.5 }} />
                   )}
 
-                  {/* ── Unassigned section ── */}
                   {unassigned.length > 0 && (
                     <Box sx={{ px: 1.5, pb: 1.5, pt: assigned.length === 0 ? 1.5 : 0 }}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1, px: 0.5 }}>
-                        <RemoveCircleOutline sx={{ fontSize: 14, color: '#94a3b8' }} />
-                        <Typography variant="caption" sx={{ fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em', fontSize: '0.68rem' }}>
+                        <RemoveCircleOutline sx={{ fontSize: 14, color: '#999999' }} />
+                        <Typography variant="caption" sx={{ fontWeight: 700, color: '#999999', textTransform: 'uppercase', letterSpacing: '0.06em', fontSize: '0.68rem' }}>
                           Unassigned ({unassigned.length})
                         </Typography>
                       </Box>
-                      <List disablePadding>
-                        {unassigned.map(p => renderRow(p, false))}
-                      </List>
+                      <List disablePadding>{unassigned.map(p => renderRow(p, false))}</List>
                     </Box>
                   )}
                 </>
@@ -663,16 +682,22 @@ const RolesPermissions: React.FC = () => {
           </Box>
         </DialogContent>
 
-        <DialogActions sx={{ px: 3, py: 2, borderTop: '1px solid #e2e8f0', gap: 1 }}>
-          <Button onClick={() => setPermDialogOpen(false)} sx={{ textTransform: 'none', color: '#64748b' }}>
+        <DialogActions sx={{ px: 3, py: 2, borderTop: '1px solid #e0e0e0', gap: 1, flexShrink: 0 }}>
+          <Button onClick={() => setPermDialogOpen(false)} sx={{ textTransform: 'none', color: '#666666' }}>
             Cancel
           </Button>
           <Button
             onClick={handleSavePerms}
             variant="contained"
-            disabled={savingPerms}
+            disabled={savingPerms || loadingPerms}
             startIcon={savingPerms ? <CircularProgress size={14} color="inherit" /> : <Security sx={{ fontSize: 16 }} />}
-            sx={{ textTransform: 'none', bgcolor: BRAND.primary, '&:hover': { bgcolor: BRAND.primaryHover }, boxShadow: 'none', '&:disabled': { bgcolor: alpha(BRAND.primary, 0.4) } }}
+            sx={{
+              textTransform: 'none',
+              bgcolor: BRAND.primary,
+              '&:hover': { bgcolor: BRAND.primaryHover },
+              boxShadow: 'none',
+              '&:disabled': { bgcolor: alpha(BRAND.primary, 0.4) },
+            }}
           >
             {savingPerms ? 'Saving...' : 'Save Permissions'}
           </Button>

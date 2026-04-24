@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Typography,
@@ -45,94 +45,21 @@ import { systemBillingService } from '../../services/system/billing';
 // Design tokens
 // ---------------------------------------------------------------------------
 const COLORS = {
-  primary:  '#1976D2',
-  dark0:    '#0f172a',
+  primary:  '#00A6CA',
+  dark0:    '#1C1C1E',
   dark1:    '#1e293b',
-  slate:    '#64748b',
-  muted:    '#94a3b8',
-  border:   '#e2e8f0',
+  slate:    '#666666',
+  muted:    '#999999',
+  border:   '#e0e0e0',
   surface:  '#ffffff',
-  bg:       '#f1f5f9',
+  bg:       '#f8fafc',
   emerald:  '#10b981',
   rose:     '#f43f5e',
   amber:    '#f59e0b',
 };
 
 // ---------------------------------------------------------------------------
-// useCountUp hook
-// ---------------------------------------------------------------------------
-function useCountUp(target: number, duration = 900): number {
-  const [value, setValue] = useState(0);
-  const rafRef = useRef<number | null>(null);
-  const startRef = useRef<number | null>(null);
-
-  useEffect(() => {
-    if (target === 0) { setValue(0); return; }
-    startRef.current = null;
-    const step = (timestamp: number) => {
-      if (!startRef.current) startRef.current = timestamp;
-      const progress = Math.min((timestamp - startRef.current) / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      setValue(Math.round(eased * target));
-      if (progress < 1) rafRef.current = requestAnimationFrame(step);
-    };
-    rafRef.current = requestAnimationFrame(step);
-    return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
-  }, [target, duration]);
-
-  return value;
-}
-
-// ---------------------------------------------------------------------------
-// HeroStat component — icon beside value
-// ---------------------------------------------------------------------------
-interface HeroStatProps {
-  icon: React.ReactNode;
-  value: number;
-  label: string;
-}
-
-const HeroStat: React.FC<HeroStatProps> = ({ icon, value, label }) => {
-  const animated = useCountUp(value);
-  return (
-    <Box sx={{ flex: '1 1 140px', px: 2.5, py: 2, borderRadius: 2.5, bgcolor: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', gap: 2 }}>
-      <Box sx={{ width: 36, height: 36, borderRadius: 1.5, bgcolor: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)', color: 'rgba(144,202,249,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, '& svg': { fontSize: 18 } }}>
-        {icon}
-      </Box>
-      <Box>
-        <Typography sx={{ color: '#ffffff', fontWeight: 700, fontSize: { xs: '1.35rem', md: '1.6rem' }, letterSpacing: '-0.03em', lineHeight: 1 }}>
-          {animated}
-        </Typography>
-        <Typography sx={{ color: 'rgba(144,202,249,0.65)', fontSize: '0.75rem', mt: 0.25 }}>{label}</Typography>
-      </Box>
-    </Box>
-  );
-};
-
-
-// ---------------------------------------------------------------------------
-// HeroStatCurrency — prefixes animated value with '$', icon beside value
-// ---------------------------------------------------------------------------
-const HeroStatCurrency: React.FC<HeroStatProps> = ({ icon, value, label }) => {
-  const animated = useCountUp(value);
-  return (
-    <Box sx={{ flex: '1 1 140px', px: 2.5, py: 2, borderRadius: 2.5, bgcolor: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', gap: 2 }}>
-      <Box sx={{ width: 36, height: 36, borderRadius: 1.5, bgcolor: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)', color: 'rgba(144,202,249,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, '& svg': { fontSize: 18 } }}>
-        {icon}
-      </Box>
-      <Box>
-        <Typography sx={{ color: '#ffffff', fontWeight: 700, fontSize: { xs: '1.35rem', md: '1.6rem' }, letterSpacing: '-0.03em', lineHeight: 1 }}>
-          ${animated}
-        </Typography>
-        <Typography sx={{ color: 'rgba(144,202,249,0.65)', fontSize: '0.75rem', mt: 0.25 }}>{label}</Typography>
-      </Box>
-    </Box>
-  );
-};
-
-
-// ---------------------------------------------------------------------------
-// Gradient dialog header
+// DialogHeader — white, clean
 // ---------------------------------------------------------------------------
 interface DialogHeaderProps {
   title: string;
@@ -143,40 +70,33 @@ interface DialogHeaderProps {
 const DialogHeader: React.FC<DialogHeaderProps> = ({ title, subtitle, onClose }) => (
   <Box
     sx={{
-      background: 'linear-gradient(135deg, #0d1b2e 0%, #0f2744 60%, #1565C0 100%)',
+      bgcolor: '#ffffff',
       px: 3,
-      pt: 3,
-      pb: 3,
-      position: 'relative',
-      overflow: 'hidden',
-      '&::before': {
-        content: '""',
-        position: 'absolute',
-        top: -60,
-        right: -40,
-        width: 180,
-        height: 180,
-        borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(25,118,210,0.25) 0%, transparent 70%)',
-        pointerEvents: 'none',
-      },
+      pt: 2.5,
+      pb: 2,
+      borderBottom: '1px solid #e0e0e0',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
     }}
   >
-    <Box sx={{ position: 'relative', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-      <Box>
-        <Typography sx={{ color: '#ffffff', fontWeight: 700, fontSize: '1.125rem' }}>
-          {title}
+    <Box>
+      <Typography sx={{ fontWeight: 700, fontSize: '1rem', color: '#1C1C1E' }}>
+        {title}
+      </Typography>
+      {subtitle && (
+        <Typography sx={{ fontSize: '0.8rem', color: '#666666', mt: 0.25 }}>
+          {subtitle}
         </Typography>
-        {subtitle && (
-          <Typography sx={{ color: 'rgba(144,202,249,0.7)', fontSize: '0.8rem', mt: 0.25 }}>
-            {subtitle}
-          </Typography>
-        )}
-      </Box>
-      <IconButton onClick={onClose} size="small" sx={{ color: 'rgba(255,255,255,0.7)', mt: -0.5 }}>
-        <Close fontSize="small" />
-      </IconButton>
+      )}
     </Box>
+    <IconButton
+      onClick={onClose}
+      size="small"
+      sx={{ color: 'rgba(0,0,0,0.45)', '&:hover': { bgcolor: 'rgba(0,0,0,0.04)' } }}
+    >
+      <Close fontSize="small" />
+    </IconButton>
   </Box>
 );
 
@@ -296,17 +216,6 @@ const Billing: React.FC = () => {
   const hasActiveFilters = !!(searchQuery || planFilter || statusFilter);
   const filteredSubscriptions = filterSubscriptions(subscriptions);
 
-  // ---------------------------------------------------------------------------
-  // Loading / error states
-  // ---------------------------------------------------------------------------
-  if (loading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
-        <CircularProgress sx={{ color: '#1976D2' }} />
-      </Box>
-    );
-  }
-
   if (error) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
@@ -322,123 +231,224 @@ const Billing: React.FC = () => {
     <Box sx={{ width: '100%', minHeight: '100vh', bgcolor: COLORS.bg }}>
 
       {/* ------------------------------------------------------------------ */}
-      {/* Hero                                                                */}
+      {/* Page Header                                                         */}
       {/* ------------------------------------------------------------------ */}
       <Box
         sx={{
-          background: 'linear-gradient(135deg, #0d1b2e 0%, #0f2744 45%, #1565C0 100%)',
-          px: { xs: 2.5, sm: 4, md: 6 },
-          pt: { xs: 3, md: 4 },
-          pb: { xs: 4, md: 5 },
-          position: 'relative',
-          overflow: 'hidden',
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: -100,
-            right: -60,
-            width: 360,
-            height: 360,
-            borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(25,118,210,0.22) 0%, transparent 70%)',
-            pointerEvents: 'none',
-          },
-          '&::after': {
-            content: '""',
-            position: 'absolute',
-            bottom: -80,
-            left: '25%',
-            width: 280,
-            height: 280,
-            borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(66,165,245,0.15) 0%, transparent 70%)',
-            pointerEvents: 'none',
-          },
+          bgcolor: '#ffffff',
+          px: { xs: 3, sm: 4, md: 5 },
+          pt: 3,
+          pb: 3,
+          borderBottom: '1px solid #e0e0e0',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: 2,
         }}
       >
-        {/* Grid overlay */}
+        <Box>
+          <Typography sx={{ fontSize: '22px', fontWeight: 700, color: '#1C1C1E', letterSpacing: '-0.3px' }}>
+            Billing Management
+          </Typography>
+          <Typography sx={{ fontSize: '13px', color: '#666666', mt: 0.5 }}>
+            Manage workspace subscriptions and billing
+          </Typography>
+        </Box>
         <Box
           sx={{
-            position: 'absolute',
-            inset: 0,
-            backgroundImage: `linear-gradient(${alpha('#ffffff', 0.03)} 1px, transparent 1px), linear-gradient(90deg, ${alpha('#ffffff', 0.03)} 1px, transparent 1px)`,
-            backgroundSize: '40px 40px',
-            pointerEvents: 'none',
+            bgcolor: '#f2f2f2',
+            color: '#666666',
+            fontSize: '12px',
+            borderRadius: 2,
+            px: 1.5,
+            py: 0.5,
           }}
-        />
-
-        <Box sx={{ position: 'relative' }}>
-          {/* Overline */}
-          <Typography
-            variant="overline"
-            sx={{ color: 'rgba(144,202,249,0.75)', fontWeight: 700, letterSpacing: 3, fontSize: '0.65rem' }}
-          >
-            SYSTEM CONTROL CENTER
-          </Typography>
-
-          {/* Title row */}
-          <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2, mt: 0.5 }}>
-            <Box>
-              <Typography
-                variant="h4"
-                sx={{
-                  color: '#ffffff',
-                  fontWeight: 800,
-                  fontSize: { xs: '1.5rem', md: '2rem' },
-                  letterSpacing: '-0.025em',
-                  lineHeight: 1.2,
-                }}
-              >
-                Billing Management
-              </Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mt: 1.5 }}>
-                <CalendarToday sx={{ fontSize: 13, color: 'rgba(144,202,249,0.6)' }} />
-                <Typography variant="caption" sx={{ color: 'rgba(144,202,249,0.6)', fontWeight: 500, fontSize: '0.75rem' }}>
-                  {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-                </Typography>
-              </Box>
-            </Box>
-          </Box>
-
-          {/* Hero stats */}
-          {stats && (
-            <Box sx={{ display: 'flex', flexDirection: 'row', gap: 2, flexWrap: 'wrap', mt: 3, position: 'relative' }}>
-              <HeroStat
-                icon={<PaymentOutlined sx={{ fontSize: 18 }} />}
-                value={stats?.active_subscriptions || 0}
-                label="Active Subscriptions"
-              />
-              <HeroStatCurrency
-                icon={<TrendingUpOutlined sx={{ fontSize: 18 }} />}
-                value={stats?.monthly_revenue || 0}
-                label="Monthly Revenue"
-              />
-              <HeroStat
-                icon={<ReceiptOutlined sx={{ fontSize: 18 }} />}
-                value={stats?.total_invoices || 0}
-                label="Total Invoices"
-              />
-              <HeroStat
-                icon={<WarningAmberOutlined sx={{ fontSize: 18 }} />}
-                value={stats?.past_due || 0}
-                label="Past Due"
-              />
-            </Box>
-          )}
+        >
+          {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
         </Box>
       </Box>
 
       {/* ------------------------------------------------------------------ */}
+      {/* Stat Cards                                                          */}
+      {/* ------------------------------------------------------------------ */}
+      {stats && (
+        <Box
+          sx={{
+            display: 'flex',
+            gap: 2,
+            flexWrap: 'wrap',
+            px: { xs: 3, sm: 4, md: 5 },
+            py: 2.5,
+            bgcolor: '#ffffff',
+            borderBottom: '1px solid #e0e0e0',
+          }}
+        >
+          {/* Active Subscriptions */}
+          <Box
+            sx={{
+              flex: '1 1 140px',
+              bgcolor: '#f8fafc',
+              border: '1px solid #e0e0e0',
+              borderRadius: 2,
+              px: 2.5,
+              py: 2,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 2,
+            }}
+          >
+            <Box
+              sx={{
+                width: 36,
+                height: 36,
+                borderRadius: 1.5,
+                bgcolor: 'rgba(0,166,202,0.10)',
+                color: '#00A6CA',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+                '& svg': { fontSize: 18 },
+              }}
+            >
+              <PaymentOutlined />
+            </Box>
+            <Box>
+              <Typography sx={{ fontWeight: 700, fontSize: '1.4rem', color: '#1C1C1E', lineHeight: 1 }}>
+                {stats.active_subscriptions || 0}
+              </Typography>
+              <Typography sx={{ fontSize: '0.75rem', color: '#666666', mt: 0.25 }}>Active Subscriptions</Typography>
+            </Box>
+          </Box>
+
+          {/* Monthly Revenue */}
+          <Box
+            sx={{
+              flex: '1 1 140px',
+              bgcolor: '#f8fafc',
+              border: '1px solid #e0e0e0',
+              borderRadius: 2,
+              px: 2.5,
+              py: 2,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 2,
+            }}
+          >
+            <Box
+              sx={{
+                width: 36,
+                height: 36,
+                borderRadius: 1.5,
+                bgcolor: 'rgba(0,166,202,0.10)',
+                color: '#00A6CA',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+                '& svg': { fontSize: 18 },
+              }}
+            >
+              <TrendingUpOutlined />
+            </Box>
+            <Box>
+              <Typography sx={{ fontWeight: 700, fontSize: '1.4rem', color: '#1C1C1E', lineHeight: 1 }}>
+                ${stats.monthly_revenue || 0}
+              </Typography>
+              <Typography sx={{ fontSize: '0.75rem', color: '#666666', mt: 0.25 }}>Monthly Revenue</Typography>
+            </Box>
+          </Box>
+
+          {/* Total Invoices */}
+          <Box
+            sx={{
+              flex: '1 1 140px',
+              bgcolor: '#f8fafc',
+              border: '1px solid #e0e0e0',
+              borderRadius: 2,
+              px: 2.5,
+              py: 2,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 2,
+            }}
+          >
+            <Box
+              sx={{
+                width: 36,
+                height: 36,
+                borderRadius: 1.5,
+                bgcolor: 'rgba(0,166,202,0.10)',
+                color: '#00A6CA',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+                '& svg': { fontSize: 18 },
+              }}
+            >
+              <ReceiptOutlined />
+            </Box>
+            <Box>
+              <Typography sx={{ fontWeight: 700, fontSize: '1.4rem', color: '#1C1C1E', lineHeight: 1 }}>
+                {stats.total_invoices || 0}
+              </Typography>
+              <Typography sx={{ fontSize: '0.75rem', color: '#666666', mt: 0.25 }}>Total Invoices</Typography>
+            </Box>
+          </Box>
+
+          {/* Past Due */}
+          <Box
+            sx={{
+              flex: '1 1 140px',
+              bgcolor: '#f8fafc',
+              border: '1px solid #e0e0e0',
+              borderRadius: 2,
+              px: 2.5,
+              py: 2,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 2,
+            }}
+          >
+            <Box
+              sx={{
+                width: 36,
+                height: 36,
+                borderRadius: 1.5,
+                bgcolor: 'rgba(0,166,202,0.10)',
+                color: '#00A6CA',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+                '& svg': { fontSize: 18 },
+              }}
+            >
+              <WarningAmberOutlined />
+            </Box>
+            <Box>
+              <Typography sx={{ fontWeight: 700, fontSize: '1.4rem', color: '#1C1C1E', lineHeight: 1 }}>
+                {stats.past_due || 0}
+              </Typography>
+              <Typography sx={{ fontSize: '0.75rem', color: '#666666', mt: 0.25 }}>Past Due</Typography>
+            </Box>
+          </Box>
+        </Box>
+      )}
+
+      {/* ------------------------------------------------------------------ */}
       {/* Content area                                                        */}
       {/* ------------------------------------------------------------------ */}
-      <Box sx={{ pt: { xs: 0, sm: 0 }, pb: 6 }}>
+      <Box sx={{ pb: 6 }}>
 
         {/* Filter toolbar */}
-        <Paper elevation={0} sx={{ borderRadius: 0, border: 'none', borderTop: '1px solid #e2e8f0', borderBottom: '1px solid #e2e8f0', bgcolor: '#ffffff' }}>
+        <Paper elevation={0} sx={{ borderRadius: 0, border: 'none', borderBottom: '1px solid #e0e0e0', bgcolor: '#ffffff' }}>
           <Box sx={{ px: 2.5, py: 1.5, display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap' }}>
             {/* Search */}
-            <Box sx={{ flex: '1 1 220px', display: 'flex', alignItems: 'center', gap: 1, bgcolor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 2, px: 1.5, py: 0.75 }}>
-              <Search sx={{ fontSize: 17, color: '#94a3b8', flexShrink: 0 }} />
+            <Box sx={{ flex: '1 1 220px', display: 'flex', alignItems: 'center', gap: 1, bgcolor: '#f8fafc', border: '1px solid #e0e0e0', borderRadius: 2, px: 1.5, py: 0.75 }}>
+              <Search sx={{ fontSize: 17, color: COLORS.muted, flexShrink: 0 }} />
               <InputBase
                 placeholder="Search workspace..."
                 value={searchQuery}
@@ -446,7 +456,7 @@ const Billing: React.FC = () => {
                 sx={{ flex: 1, fontSize: '0.875rem' }}
               />
               {searchQuery && (
-                <IconButton size="small" onClick={() => setSearchQuery('')} sx={{ p: 0.25, color: '#94a3b8' }}>
+                <IconButton size="small" onClick={() => setSearchQuery('')} sx={{ p: 0.25, color: COLORS.muted }}>
                   <Close sx={{ fontSize: 14 }} />
                 </IconButton>
               )}
@@ -489,7 +499,7 @@ const Billing: React.FC = () => {
               <Button
                 size="small"
                 onClick={() => { setSearchQuery(''); setPlanFilter(''); setStatusFilter(''); }}
-                sx={{ textTransform: 'none', color: '#64748b', fontWeight: 600, fontSize: '0.8125rem', borderRadius: 2, px: 1.5 }}
+                sx={{ textTransform: 'none', color: COLORS.slate, fontWeight: 600, fontSize: '0.8125rem', borderRadius: 2, px: 1.5 }}
               >
                 Clear
               </Button>
@@ -523,7 +533,7 @@ const Billing: React.FC = () => {
             </Paper>
           </Box>
         ) : (
-          <Box sx={{ borderTop: `1px solid ${COLORS.border}`, borderBottom: `1px solid ${COLORS.border}` }}>
+          <Box sx={{ borderBottom: `1px solid ${COLORS.border}` }}>
             <TableContainer
               component={Paper}
               elevation={0}
@@ -531,28 +541,22 @@ const Billing: React.FC = () => {
             >
               <Table sx={{ minWidth: 500 }}>
                 <TableHead>
-                  <TableRow sx={{ bgcolor: '#f8fafc', borderBottom: '2px solid #e2e8f0' }}>
-                    {/* Workspace */}
+                  <TableRow sx={{ bgcolor: '#f8fafc', borderBottom: '2px solid #e0e0e0' }}>
                     <TableCell sx={{ fontWeight: 600, color: COLORS.slate, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                       Workspace
                     </TableCell>
-                    {/* Plan */}
                     <TableCell sx={{ fontWeight: 600, color: COLORS.slate, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                       Plan
                     </TableCell>
-                    {/* Status */}
                     <TableCell sx={{ fontWeight: 600, color: COLORS.slate, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                       Status
                     </TableCell>
-                    {/* Amount — hidden on xs */}
                     <TableCell sx={{ fontWeight: 600, color: COLORS.slate, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em', display: { xs: 'none', md: 'table-cell' } }}>
                       Amount
                     </TableCell>
-                    {/* Next Billing — hidden on xs */}
                     <TableCell sx={{ fontWeight: 600, color: COLORS.slate, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em', display: { xs: 'none', sm: 'table-cell' } }}>
                       Next Billing
                     </TableCell>
-                    {/* Actions */}
                     <TableCell align="right" sx={{ fontWeight: 600, color: COLORS.slate, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                       Actions
                     </TableCell>
@@ -576,7 +580,7 @@ const Billing: React.FC = () => {
                         </Typography>
                       </TableCell>
 
-                      {/* Plan — plain text, no chip */}
+                      {/* Plan */}
                       <TableCell>
                         <Typography variant="body2" sx={{ fontWeight: 500, color: COLORS.dark0 }}>
                           {sub.subscription_plan || 'Free'}
@@ -608,14 +612,14 @@ const Billing: React.FC = () => {
                         </Box>
                       </TableCell>
 
-                      {/* Amount — hidden on xs */}
+                      {/* Amount */}
                       <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
                         <Typography variant="body2" sx={{ fontWeight: 600, color: COLORS.dark0 }}>
                           ${sub.amount || 0}/{sub.billing_cycle === 'Yearly' ? 'yr' : 'mo'}
                         </Typography>
                       </TableCell>
 
-                      {/* Next Billing — hidden on xs */}
+                      {/* Next Billing */}
                       <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>
                         <Typography variant="body2" sx={{ color: COLORS.slate }}>
                           {sub.next_billing_date
@@ -634,10 +638,7 @@ const Billing: React.FC = () => {
                           <IconButton
                             size="small"
                             onClick={() => handleViewDetails(sub)}
-                            sx={{
-                              color: COLORS.muted,
-                              '&:hover': { color: COLORS.dark0 },
-                            }}
+                            sx={{ color: COLORS.muted, '&:hover': { color: COLORS.dark0 } }}
                           >
                             <Visibility fontSize="small" />
                           </IconButton>
@@ -646,10 +647,7 @@ const Billing: React.FC = () => {
                           <IconButton
                             size="small"
                             onClick={() => handleEditSubscription(sub)}
-                            sx={{
-                              color: COLORS.muted,
-                              '&:hover': { color: COLORS.dark0 },
-                            }}
+                            sx={{ color: COLORS.muted, '&:hover': { color: COLORS.dark0 } }}
                           >
                             <Edit fontSize="small" />
                           </IconButton>
@@ -676,28 +674,38 @@ const Billing: React.FC = () => {
         PaperProps={{ sx: { borderRadius: fullScreen ? 0 : 3, overflow: 'hidden', maxHeight: fullScreen ? '100vh' : '85vh', display: 'flex', flexDirection: 'column' } }}
       >
         {/* Header */}
-        <Box sx={{
-          background: 'linear-gradient(135deg, #0d1b2e 0%, #0f2744 60%, #1565C0 100%)',
-          px: 3, pt: 2.5, pb: 2.5, position: 'relative', overflow: 'hidden', flexShrink: 0,
-          '&::before': { content: '""', position: 'absolute', top: -60, right: -40, width: 180, height: 180, borderRadius: '50%', background: 'radial-gradient(circle, rgba(25,118,210,0.25) 0%, transparent 70%)', pointerEvents: 'none' },
-        }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, position: 'relative' }}>
-            <Box sx={{ minWidth: 0, flex: 1 }}>
-              <Typography sx={{ color: '#ffffff', fontWeight: 700, fontSize: '1.05rem', lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {selectedWorkspace?.workspace_name || selectedWorkspace?.workspace_id || 'Billing Details'}
-              </Typography>
-              <Typography variant="caption" sx={{ color: 'rgba(144,202,249,0.7)', display: 'block' }}>Billing Details</Typography>
-            </Box>
-            <IconButton onClick={() => setDetailsDialogOpen(false)} size="small" sx={{ color: 'rgba(255,255,255,0.8)', flexShrink: 0, alignSelf: 'flex-start', mt: 0.5, '&:hover': { bgcolor: 'rgba(255,255,255,0.15)' } }}>
-              <Close fontSize="small" />
-            </IconButton>
+        <Box
+          sx={{
+            bgcolor: '#ffffff',
+            px: 3,
+            pt: 2.5,
+            pb: 2,
+            borderBottom: '1px solid #e0e0e0',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexShrink: 0,
+          }}
+        >
+          <Box sx={{ minWidth: 0, flex: 1 }}>
+            <Typography sx={{ fontWeight: 700, fontSize: '1rem', color: '#1C1C1E', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {selectedWorkspace?.workspace_name || selectedWorkspace?.workspace_id || 'Billing Details'}
+            </Typography>
+            <Typography sx={{ fontSize: '0.8rem', color: '#666666', mt: 0.25 }}>Billing Details</Typography>
           </Box>
+          <IconButton
+            onClick={() => setDetailsDialogOpen(false)}
+            size="small"
+            sx={{ color: 'rgba(0,0,0,0.45)', flexShrink: 0, ml: 1, '&:hover': { bgcolor: 'rgba(0,0,0,0.04)' } }}
+          >
+            <Close fontSize="small" />
+          </IconButton>
         </Box>
 
         <DialogContent sx={{ p: 0, overflowY: 'auto', flex: 1 }}>
           {detailsLoading ? (
             <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8 }}>
-              <CircularProgress sx={{ color: '#1976D2' }} />
+              <CircularProgress sx={{ color: COLORS.primary }} />
             </Box>
           ) : workspaceDetails ? (
             <Box>
@@ -716,7 +724,7 @@ const Billing: React.FC = () => {
                 )}
                 {workspaceDetails.billing_cycle && (
                   <Chip label={workspaceDetails.billing_cycle} size="small"
-                    sx={{ fontWeight: 600, fontSize: '0.72rem', height: 24, bgcolor: 'rgba(25,118,210,0.08)', color: '#1976D2', border: '1px solid rgba(25,118,210,0.2)' }} />
+                    sx={{ fontWeight: 600, fontSize: '0.72rem', height: 24, bgcolor: 'rgba(0,166,202,0.08)', color: '#00A6CA', border: '1px solid rgba(0,166,202,0.2)' }} />
                 )}
               </Box>
 
@@ -725,10 +733,10 @@ const Billing: React.FC = () => {
               {/* Subscription section */}
               <Box sx={{ px: 3, pt: 2.5, pb: 2.5 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
-                  <Box sx={{ width: 30, height: 30, borderRadius: 1.5, bgcolor: 'rgba(25,118,210,0.08)', border: '1px solid rgba(25,118,210,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <PaymentOutlined sx={{ fontSize: 16, color: '#1976D2' }} />
+                  <Box sx={{ width: 30, height: 30, borderRadius: 1.5, bgcolor: 'rgba(0,166,202,0.08)', border: '1px solid rgba(0,166,202,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <PaymentOutlined sx={{ fontSize: 16, color: '#00A6CA' }} />
                   </Box>
-                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#0f172a' }}>Subscription</Typography>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1C1C1E' }}>Subscription</Typography>
                 </Box>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
                   {[
@@ -737,9 +745,9 @@ const Billing: React.FC = () => {
                     { label: 'Cycle',   value: workspaceDetails.billing_cycle        || 'Monthly' },
                     { label: 'Amount',  value: `$${workspaceDetails.amount || 0} ${workspaceDetails.currency || 'USD'}` },
                   ].map(({ label, value }) => (
-                    <Box key={label} sx={{ display: 'flex', alignItems: 'center', gap: 2, px: 1.5, py: 1.25, borderRadius: 2, bgcolor: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                    <Box key={label} sx={{ display: 'flex', alignItems: 'center', gap: 2, px: 1.5, py: 1.25, borderRadius: 2, bgcolor: '#f8fafc', border: '1px solid #e0e0e0' }}>
                       <Box sx={{ minWidth: 72, flexShrink: 0 }}><Typography variant="caption" color="text.secondary">{label}</Typography></Box>
-                      <Typography variant="body2" sx={{ fontWeight: 600, color: '#0f172a' }}>{value}</Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600, color: '#1C1C1E' }}>{value}</Typography>
                     </Box>
                   ))}
                 </Box>
@@ -750,10 +758,10 @@ const Billing: React.FC = () => {
               {/* Billing contact section */}
               <Box sx={{ px: 3, pt: 2.5, pb: 2.5 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
-                  <Box sx={{ width: 30, height: 30, borderRadius: 1.5, bgcolor: 'rgba(25,118,210,0.08)', border: '1px solid rgba(25,118,210,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <ReceiptOutlined sx={{ fontSize: 16, color: '#1976D2' }} />
+                  <Box sx={{ width: 30, height: 30, borderRadius: 1.5, bgcolor: 'rgba(0,166,202,0.08)', border: '1px solid rgba(0,166,202,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <ReceiptOutlined sx={{ fontSize: 16, color: '#00A6CA' }} />
                   </Box>
-                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#0f172a' }}>Billing Contact</Typography>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1C1C1E' }}>Billing Contact</Typography>
                 </Box>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
                   {[
@@ -761,9 +769,9 @@ const Billing: React.FC = () => {
                     { label: 'Address', value: workspaceDetails.billing_address || '—' },
                     { label: 'Method',  value: workspaceDetails.payment_method  || 'Not Set' },
                   ].map(({ label, value }) => (
-                    <Box key={label} sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, px: 1.5, py: 1.25, borderRadius: 2, bgcolor: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                    <Box key={label} sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, px: 1.5, py: 1.25, borderRadius: 2, bgcolor: '#f8fafc', border: '1px solid #e0e0e0' }}>
                       <Box sx={{ minWidth: 72, flexShrink: 0, pt: 0.1 }}><Typography variant="caption" color="text.secondary">{label}</Typography></Box>
-                      <Typography variant="body2" sx={{ fontWeight: 600, color: '#0f172a', wordBreak: 'break-all' }}>{value}</Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600, color: '#1C1C1E', wordBreak: 'break-all' }}>{value}</Typography>
                     </Box>
                   ))}
                 </Box>
@@ -774,14 +782,14 @@ const Billing: React.FC = () => {
               {/* Timeline */}
               <Box sx={{ px: 3, pt: 2.5, pb: 3, bgcolor: '#f8fafc' }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
-                  <Box sx={{ width: 30, height: 30, borderRadius: 1.5, bgcolor: 'rgba(25,118,210,0.08)', border: '1px solid rgba(25,118,210,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <CalendarToday sx={{ fontSize: 14, color: '#1976D2' }} />
+                  <Box sx={{ width: 30, height: 30, borderRadius: 1.5, bgcolor: 'rgba(0,166,202,0.08)', border: '1px solid rgba(0,166,202,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <CalendarToday sx={{ fontSize: 14, color: '#00A6CA' }} />
                   </Box>
-                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#0f172a' }}>Next Billing</Typography>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1C1C1E' }}>Next Billing</Typography>
                 </Box>
-                <Box sx={{ px: 1.5, py: 1.25, borderRadius: 2, bgcolor: '#ffffff', border: '1px solid #e2e8f0' }}>
+                <Box sx={{ px: 1.5, py: 1.25, borderRadius: 2, bgcolor: '#ffffff', border: '1px solid #e0e0e0' }}>
                   <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.25 }}>Next Billing Date</Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.8rem' }}>
+                  <Typography variant="body2" sx={{ fontWeight: 600, color: '#1C1C1E', fontSize: '0.8rem' }}>
                     {workspaceDetails.next_billing_date
                       ? new Date(workspaceDetails.next_billing_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
                       : 'N/A'}
@@ -796,18 +804,32 @@ const Billing: React.FC = () => {
           )}
         </DialogContent>
 
-        <DialogActions sx={{ px: 3, py: 2, borderTop: '1px solid #e2e8f0', flexShrink: 0, gap: 1 }}>
+        <DialogActions sx={{ px: 3, py: 2, borderTop: '1px solid #e0e0e0', flexShrink: 0, gap: 1 }}>
           <Button
             onClick={() => { setDetailsDialogOpen(false); if (selectedWorkspace) handleEditSubscription(selectedWorkspace); }}
             variant="outlined"
-            sx={{ textTransform: 'none', fontWeight: 600, borderColor: 'rgba(25,118,210,0.3)', color: '#1976D2', borderRadius: 2, '&:hover': { bgcolor: 'rgba(25,118,210,0.04)' } }}
+            sx={{
+              textTransform: 'none',
+              fontWeight: 600,
+              borderRadius: 2,
+              borderColor: 'rgba(0,166,202,0.4)',
+              color: '#00A6CA',
+              '&:hover': { borderColor: '#00A6CA', bgcolor: 'rgba(0,166,202,0.04)' },
+            }}
           >
             Edit Subscription
           </Button>
           <Button
             onClick={() => setDetailsDialogOpen(false)}
             variant="contained"
-            sx={{ textTransform: 'none', fontWeight: 600, bgcolor: '#1976D2', '&:hover': { bgcolor: '#1565C0' }, borderRadius: 2, boxShadow: 'none' }}
+            sx={{
+              textTransform: 'none',
+              fontWeight: 600,
+              borderRadius: 2,
+              boxShadow: 'none',
+              bgcolor: '#00A6CA',
+              '&:hover': { bgcolor: '#005F8D', boxShadow: 'none' },
+            }}
           >
             Close
           </Button>
@@ -871,10 +893,10 @@ const Billing: React.FC = () => {
             </Box>
           </Box>
         </DialogContent>
-        <DialogActions sx={{ px: 3, py: 2.5 }}>
+        <DialogActions sx={{ px: 3, py: 2.5, borderTop: '1px solid #e0e0e0' }}>
           <Button
             onClick={() => setEditDialogOpen(false)}
-            sx={{ textTransform: 'none', color: COLORS.slate }}
+            sx={{ textTransform: 'none', color: COLORS.slate, fontWeight: 600, borderRadius: 2 }}
           >
             Cancel
           </Button>
@@ -883,9 +905,11 @@ const Billing: React.FC = () => {
             variant="contained"
             sx={{
               textTransform: 'none',
-              bgcolor: '#1976D2',
-              borderRadius: 1.5,
-              '&:hover': { bgcolor: '#1565C0' },
+              fontWeight: 600,
+              borderRadius: 2,
+              boxShadow: 'none',
+              bgcolor: '#00A6CA',
+              '&:hover': { bgcolor: '#005F8D', boxShadow: 'none' },
             }}
           >
             Save Changes

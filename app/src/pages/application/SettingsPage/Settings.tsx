@@ -2,244 +2,448 @@ import React, { useState } from 'react';
 import {
   Box,
   Typography,
-  Tabs,
-  Tab,
+  Paper,
+  Grid,
+  Switch,
+  FormControlLabel,
+  TextField,
+  Button,
+  Divider,
   Snackbar,
   Alert,
 } from '@mui/material';
 import {
-  PersonOutlined,
-  BusinessOutlined,
-  LockOutlined,
-  CalendarToday,
+  Settings as SettingsIcon,
+  Save,
+  SecurityOutlined,
+  EmailOutlined,
+  PaymentOutlined,
 } from '@mui/icons-material';
-import { useAuth } from '../../../contexts/common/Auth';
-import { useUserData } from '../../../contexts/application/UserData';
-import { getUserFirstName } from '../../../utils/data/userUtils';
-import { ROLE_COLORS } from '../../../constants/app';
-import ProfileSection from './components/ProfileSection';
-import SecuritySection from './components/SecuritySection';
-import WorkspaceSection from './components/WorkspaceSection';
 
-const BRAND = {
-  primary: '#1976D2',
-  primaryHover: '#1565C0',
-  primaryBg: 'rgba(25,118,210,0.08)',
-  primaryBorder: 'rgba(25,118,210,0.2)',
+const textFieldSx = {
+  '& .MuiOutlinedInput-root.Mui-focused fieldset': { borderColor: '#00A6CA' },
+  '& label.Mui-focused': { color: '#00A6CA' },
 };
 
-const ROLE_DISPLAY: Record<string, string> = {
-  superadmin: 'Super Admin',
-  admin: 'Admin',
-  operator: 'Operator',
-  customer: 'Customer',
+const switchSx = {
+  '& .MuiSwitch-switchBase.Mui-checked': { color: '#00A6CA' },
+  '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { bgcolor: '#00A6CA' },
 };
 
-const SECTIONS = [
-  { id: 'profile',   label: 'Profile',   icon: <PersonOutlined fontSize="small" />   },
-  { id: 'workspace', label: 'Workspace', icon: <BusinessOutlined fontSize="small" /> },
-  { id: 'security',  label: 'Security',  icon: <LockOutlined fontSize="small" />     },
-];
+const sectionIconBoxSx = {
+  width: 36,
+  height: 36,
+  borderRadius: 2,
+  bgcolor: 'rgba(0,166,202,0.10)',
+  border: '1px solid rgba(0,166,202,0.2)',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+};
 
 const Settings: React.FC = () => {
-  const { user, userPermissions } = useAuth();
-  useUserData(); // keep provider active
+  // General
+  const [systemName, setSystemName] = useState('Dino Platform');
+  const [supportEmail, setSupportEmail] = useState('support@dino.in');
+  const [adminEmail, setAdminEmail] = useState('admin@dino.in');
+  const [enableRegistration, setEnableRegistration] = useState(true);
+  const [enableEmailNotifications, setEnableEmailNotifications] = useState(true);
+  const [maintenanceMode, setMaintenanceMode] = useState(false);
 
-  const [activeTab, setActiveTab] = useState(0);
-  const [snackbar, setSnackbar] = useState<{
-    open: boolean;
-    message: string;
-    severity: 'success' | 'error' | 'info' | 'warning';
-  }>({ open: false, message: '', severity: 'success' });
+  // Security
+  const [sessionTimeout, setSessionTimeout] = useState('30');
+  const [maxLoginAttempts, setMaxLoginAttempts] = useState('5');
+  const [passwordMinLength, setPasswordMinLength] = useState('8');
+  const [requireStrongPasswords, setRequireStrongPasswords] = useState(true);
+  const [enableTwoFactor, setEnableTwoFactor] = useState(true);
+  const [enableJWT, setEnableJWT] = useState(true);
 
-  const firstName  = user ? getUserFirstName(user) : '';
-  const roleLabel  = user?.role ? (ROLE_DISPLAY[user.role] ?? user.role) : '';
+  // Email
+  const [smtpHost, setSmtpHost] = useState('smtp.gmail.com');
+  const [smtpPort, setSmtpPort] = useState('587');
+  const [smtpUsername, setSmtpUsername] = useState('noreply@dino.in');
+  const [smtpPassword, setSmtpPassword] = useState('');
+  const [useTLS, setUseTLS] = useState(true);
 
-  const rawRole = (userPermissions?.role?.name || (user as any)?.role?.name || user?.role || '').toLowerCase();
-  const roleKey: keyof typeof ROLE_COLORS = rawRole.includes('owner') || rawRole.includes('super')
-    ? 'Owner'
-    : rawRole.includes('manager') || rawRole.includes('admin')
-    ? 'Manager'
-    : 'User';
-  const rc = ROLE_COLORS[roleKey];
+  // Billing
+  const [currency, setCurrency] = useState('USD');
+  const [taxRate, setTaxRate] = useState('10');
+  const [trialPeriod, setTrialPeriod] = useState('14');
+  const [enableFreeTrial, setEnableFreeTrial] = useState(true);
+  const [autoCharge, setAutoCharge] = useState(true);
 
-  const handleSave = async (_data: unknown, section: string) => {
-    try {
-      setSnackbar({ open: true, message: `${section} settings saved successfully`, severity: 'success' });
-    } catch {
-      setSnackbar({ open: true, message: `Failed to save ${section} settings`, severity: 'error' });
-    }
-  };
+  // Snackbar
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
 
-  const handleSnackbarClose = () =>
-    setSnackbar((prev) => ({ ...prev, open: false }));
-
-  const renderSection = () => {
-    switch (SECTIONS[activeTab]?.id) {
-      case 'profile':
-        return <ProfileSection />;
-      case 'workspace':
-        return <WorkspaceSection onSave={() => handleSave(null, 'Workspace')} />;
-      case 'security':
-        return <SecuritySection />;
-      default:
-        return null;
-    }
+  const handleSave = () => {
+    setSnackbarOpen(true);
   };
 
   return (
-    <Box sx={{ width: '100%', minHeight: '100vh', bgcolor: '#f1f5f9' }}>
-
-      {/* ── Hero Banner ── */}
-      <Box
-        sx={{
-          background: rc.gradient,
-          px: { xs: 2.5, sm: 4, md: 6 },
-          pt: { xs: 3, md: 4 },
-          pb: { xs: 4, md: 5 },
-          position: 'relative',
-          overflow: 'hidden',
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: -100,
-            right: -60,
-            width: 360,
-            height: 360,
-            borderRadius: '50%',
-            background: `radial-gradient(circle, ${rc.glowA} 0%, transparent 70%)`,
-            pointerEvents: 'none',
-          },
-          '&::after': {
-            content: '""',
-            position: 'absolute',
-            bottom: -80,
-            left: '25%',
-            width: 280,
-            height: 280,
-            borderRadius: '50%',
-            background: `radial-gradient(circle, ${rc.glowB} 0%, transparent 70%)`,
-            pointerEvents: 'none',
-          },
-        }}
-      >
-        {/* Grid overlay */}
-        <Box
-          sx={{
-            position: 'absolute',
-            inset: 0,
-            backgroundImage: `
-              linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)
-            `,
-            backgroundSize: '40px 40px',
-            pointerEvents: 'none',
-          }}
-        />
-
-        {/* Hero content */}
-        <Box sx={{ position: 'relative' }}>
-          <Typography
-            variant="overline"
-            sx={{ color: `${rc.chipText}bf`, fontWeight: 700, letterSpacing: 3, fontSize: '0.65rem' }}
-          >
-            {[firstName, roleLabel].filter(Boolean).join(' · ') || 'ACCOUNT'}
-          </Typography>
-          <Typography
-            variant="h4"
-            sx={{
-              color: '#fff',
-              fontWeight: 800,
-              mt: 0.5,
-              fontSize: { xs: '1.5rem', md: '2rem' },
-              letterSpacing: '-0.025em',
-              lineHeight: 1.2,
-            }}
-          >
-            Settings
-          </Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mt: 1 }}>
-            <CalendarToday sx={{ fontSize: 13, color: `${rc.chipText}99` }} />
-            <Typography
-              variant="caption"
-              sx={{ color: `${rc.chipText}99`, fontWeight: 500, fontSize: '0.75rem' }}
-            >
-              {new Date().toLocaleDateString('en-US', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-              })}
-            </Typography>
-          </Box>
-        </Box>
-      </Box>
-
-      {/* ── Tab Bar ── */}
+    <Box sx={{ width: '100%', minHeight: '100vh', bgcolor: '#f8fafc' }}>
+      {/* Page Header */}
       <Box
         sx={{
           bgcolor: '#ffffff',
-          borderBottom: '1px solid #e2e8f0',
-          px: { xs: 1, sm: 2, md: 4 },
+          px: { xs: 3, sm: 4, md: 5 },
+          pt: 3,
+          pb: 3,
+          borderBottom: '1px solid #e0e0e0',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: 2,
         }}
       >
-        <Tabs
-          value={activeTab}
-          onChange={(_e, val) => setActiveTab(val)}
-          variant="scrollable"
-          scrollButtons="auto"
-          TabIndicatorProps={{
-            style: { backgroundColor: BRAND.primary, height: 3 },
-          }}
+        <Box>
+          <Typography sx={{ fontSize: '22px', fontWeight: 700, color: '#1C1C1E', letterSpacing: '-0.3px' }}>
+            System Settings
+          </Typography>
+          <Typography sx={{ fontSize: '13px', color: '#666666', mt: 0.5 }}>
+            Configure platform-wide settings
+          </Typography>
+        </Box>
+
+        <Button
+          variant="contained"
+          startIcon={<Save />}
+          onClick={handleSave}
           sx={{
-            minHeight: 52,
-            '& .MuiTab-root': {
-              textTransform: 'none',
-              fontWeight: 600,
-              fontSize: '0.875rem',
-              minHeight: 52,
-              color: '#64748b',
-              gap: 0.75,
-              '&.Mui-selected': {
-                color: BRAND.primary,
-              },
-            },
+            bgcolor: '#00A6CA',
+            color: '#ffffff',
+            textTransform: 'none',
+            fontWeight: 600,
+            borderRadius: 2,
+            boxShadow: 'none',
+            '&:hover': { bgcolor: '#005F8D', boxShadow: 'none' },
           }}
         >
-          {SECTIONS.map((section) => (
-            <Tab
-              key={section.id}
-              label={section.label}
-              icon={section.icon}
-              iconPosition="start"
-            />
-          ))}
-        </Tabs>
+          Save Changes
+        </Button>
       </Box>
 
-      {/* ── Content Area ── */}
-      <Box sx={{ px: { xs: 1.5, sm: 3, md: 5 }, pt: { xs: 2.5, sm: 4 }, pb: { xs: 4, sm: 6 } }}>
-        {renderSection()}
+      {/* Content */}
+      <Box sx={{ px: { xs: 2, sm: 3, md: 5 }, pt: 3, pb: 6 }}>
+        <Grid container spacing={3}>
+          {/* General Settings */}
+          <Grid item xs={12} md={6}>
+            <Paper
+              elevation={0}
+              sx={{
+                p: 3,
+                border: '1px solid #e0e0e0',
+                borderRadius: 3,
+                bgcolor: '#ffffff',
+                height: '100%',
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
+                <Box sx={sectionIconBoxSx}>
+                  <SettingsIcon sx={{ fontSize: 18, color: '#00A6CA' }} />
+                </Box>
+                <Typography variant="h6" sx={{ fontWeight: 700, color: '#1C1C1E', fontSize: '0.9375rem' }}>
+                  General Settings
+                </Typography>
+              </Box>
+
+              <TextField
+                fullWidth
+                label="System Name"
+                value={systemName}
+                onChange={(e) => setSystemName(e.target.value)}
+                sx={{ mb: 2, ...textFieldSx }}
+              />
+              <TextField
+                fullWidth
+                label="Support Email"
+                value={supportEmail}
+                onChange={(e) => setSupportEmail(e.target.value)}
+                sx={{ mb: 2, ...textFieldSx }}
+              />
+              <TextField
+                fullWidth
+                label="Admin Email"
+                value={adminEmail}
+                onChange={(e) => setAdminEmail(e.target.value)}
+                sx={{ mb: 2, ...textFieldSx }}
+              />
+
+              <Divider sx={{ my: 2 }} />
+
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={enableRegistration}
+                    onChange={(e) => setEnableRegistration(e.target.checked)}
+                    sx={switchSx}
+                  />
+                }
+                label="Enable User Registration"
+                sx={{ mb: 1 }}
+              />
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={enableEmailNotifications}
+                    onChange={(e) => setEnableEmailNotifications(e.target.checked)}
+                    sx={switchSx}
+                  />
+                }
+                label="Enable Email Notifications"
+                sx={{ mb: 1 }}
+              />
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={maintenanceMode}
+                    onChange={(e) => setMaintenanceMode(e.target.checked)}
+                    sx={switchSx}
+                  />
+                }
+                label="Maintenance Mode"
+              />
+            </Paper>
+          </Grid>
+
+          {/* Security Settings */}
+          <Grid item xs={12} md={6}>
+            <Paper
+              elevation={0}
+              sx={{
+                p: 3,
+                border: '1px solid #e0e0e0',
+                borderRadius: 3,
+                bgcolor: '#ffffff',
+                height: '100%',
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
+                <Box sx={sectionIconBoxSx}>
+                  <SecurityOutlined sx={{ fontSize: 18, color: '#00A6CA' }} />
+                </Box>
+                <Typography variant="h6" sx={{ fontWeight: 700, color: '#1C1C1E', fontSize: '0.9375rem' }}>
+                  Security Settings
+                </Typography>
+              </Box>
+
+              <TextField
+                fullWidth
+                label="Session Timeout (minutes)"
+                type="number"
+                value={sessionTimeout}
+                onChange={(e) => setSessionTimeout(e.target.value)}
+                sx={{ mb: 2, ...textFieldSx }}
+              />
+              <TextField
+                fullWidth
+                label="Max Login Attempts"
+                type="number"
+                value={maxLoginAttempts}
+                onChange={(e) => setMaxLoginAttempts(e.target.value)}
+                sx={{ mb: 2, ...textFieldSx }}
+              />
+              <TextField
+                fullWidth
+                label="Password Min Length"
+                type="number"
+                value={passwordMinLength}
+                onChange={(e) => setPasswordMinLength(e.target.value)}
+                sx={{ mb: 2, ...textFieldSx }}
+              />
+
+              <Divider sx={{ my: 2 }} />
+
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={requireStrongPasswords}
+                    onChange={(e) => setRequireStrongPasswords(e.target.checked)}
+                    sx={switchSx}
+                  />
+                }
+                label="Require Strong Passwords"
+                sx={{ mb: 1 }}
+              />
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={enableTwoFactor}
+                    onChange={(e) => setEnableTwoFactor(e.target.checked)}
+                    sx={switchSx}
+                  />
+                }
+                label="Enable Two-Factor Authentication"
+                sx={{ mb: 1 }}
+              />
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={enableJWT}
+                    onChange={(e) => setEnableJWT(e.target.checked)}
+                    sx={switchSx}
+                  />
+                }
+                label="Enable JWT Authentication"
+              />
+            </Paper>
+          </Grid>
+
+          {/* Email Settings */}
+          <Grid item xs={12} md={6}>
+            <Paper
+              elevation={0}
+              sx={{
+                p: 3,
+                border: '1px solid #e0e0e0',
+                borderRadius: 3,
+                bgcolor: '#ffffff',
+                height: '100%',
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
+                <Box sx={sectionIconBoxSx}>
+                  <EmailOutlined sx={{ fontSize: 18, color: '#00A6CA' }} />
+                </Box>
+                <Typography variant="h6" sx={{ fontWeight: 700, color: '#1C1C1E', fontSize: '0.9375rem' }}>
+                  Email Configuration
+                </Typography>
+              </Box>
+
+              <TextField
+                fullWidth
+                label="SMTP Host"
+                value={smtpHost}
+                onChange={(e) => setSmtpHost(e.target.value)}
+                sx={{ mb: 2, ...textFieldSx }}
+              />
+              <TextField
+                fullWidth
+                label="SMTP Port"
+                type="number"
+                value={smtpPort}
+                onChange={(e) => setSmtpPort(e.target.value)}
+                sx={{ mb: 2, ...textFieldSx }}
+              />
+              <TextField
+                fullWidth
+                label="SMTP Username"
+                value={smtpUsername}
+                onChange={(e) => setSmtpUsername(e.target.value)}
+                sx={{ mb: 2, ...textFieldSx }}
+              />
+              <TextField
+                fullWidth
+                label="SMTP Password"
+                type="password"
+                value={smtpPassword}
+                onChange={(e) => setSmtpPassword(e.target.value)}
+                sx={{ mb: 2, ...textFieldSx }}
+              />
+
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={useTLS}
+                    onChange={(e) => setUseTLS(e.target.checked)}
+                    sx={switchSx}
+                  />
+                }
+                label="Use TLS"
+              />
+            </Paper>
+          </Grid>
+
+          {/* Billing Settings */}
+          <Grid item xs={12} md={6}>
+            <Paper
+              elevation={0}
+              sx={{
+                p: 3,
+                border: '1px solid #e0e0e0',
+                borderRadius: 3,
+                bgcolor: '#ffffff',
+                height: '100%',
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
+                <Box sx={sectionIconBoxSx}>
+                  <PaymentOutlined sx={{ fontSize: 18, color: '#00A6CA' }} />
+                </Box>
+                <Typography variant="h6" sx={{ fontWeight: 700, color: '#1C1C1E', fontSize: '0.9375rem' }}>
+                  Billing Configuration
+                </Typography>
+              </Box>
+
+              <TextField
+                fullWidth
+                label="Currency"
+                value={currency}
+                onChange={(e) => setCurrency(e.target.value)}
+                sx={{ mb: 2, ...textFieldSx }}
+              />
+              <TextField
+                fullWidth
+                label="Tax Rate (%)"
+                type="number"
+                value={taxRate}
+                onChange={(e) => setTaxRate(e.target.value)}
+                sx={{ mb: 2, ...textFieldSx }}
+              />
+              <TextField
+                fullWidth
+                label="Trial Period (days)"
+                type="number"
+                value={trialPeriod}
+                onChange={(e) => setTrialPeriod(e.target.value)}
+                sx={{ mb: 2, ...textFieldSx }}
+              />
+
+              <Divider sx={{ my: 2 }} />
+
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={enableFreeTrial}
+                    onChange={(e) => setEnableFreeTrial(e.target.checked)}
+                    sx={switchSx}
+                  />
+                }
+                label="Enable Free Trial"
+                sx={{ mb: 1 }}
+              />
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={autoCharge}
+                    onChange={(e) => setAutoCharge(e.target.checked)}
+                    sx={switchSx}
+                  />
+                }
+                label="Auto-charge on Trial End"
+              />
+            </Paper>
+          </Grid>
+        </Grid>
       </Box>
 
-      {/* ── Snackbar ── */}
       <Snackbar
-        open={snackbar.open}
-        autoHideDuration={6000}
-        onClose={handleSnackbarClose}
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={() => setSnackbarOpen(false)}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
       >
         <Alert
-          severity={snackbar.severity}
-          onClose={handleSnackbarClose}
-          sx={{ boxShadow: '0 4px 12px rgba(0,0,0,0.15)', borderRadius: 1 }}
+          onClose={() => setSnackbarOpen(false)}
+          severity="success"
+          variant="filled"
+          sx={{ fontWeight: 600 }}
         >
-          {snackbar.message}
+          Settings saved successfully.
         </Alert>
       </Snackbar>
     </Box>
   );
 };
-
 
 export default Settings;
