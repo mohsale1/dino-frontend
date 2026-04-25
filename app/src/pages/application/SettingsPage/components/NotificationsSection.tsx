@@ -67,8 +67,8 @@ const NotificationsSection: React.FC<NotificationsSectionProps> = ({
       setSaving(true);
       await onSave(formData);
       setHasChanges(false);
-    } catch (error) {
-      console.error('Failed to save notifications:', error);
+    } catch {
+      // silently handle save errors — parent onSave is responsible for error reporting
     } finally {
       setSaving(false);
     }

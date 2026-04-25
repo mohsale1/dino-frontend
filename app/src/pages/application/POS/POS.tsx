@@ -24,7 +24,7 @@ const POS: React.FC = () => {
 
   const { userData } = useUserData();
   const currentVenue = userData?.venue;
-  const currentWorkspace = userData?.workspace;
+  const currentWorkspace = userData?.workspace; // used for catalog loading
 
   // ── Data state ──────────────────────────────────────────────────────────────
   const [menuItems, setMenuItems] = useState<PosMenuItem[]>([]);
@@ -155,39 +155,33 @@ const POS: React.FC = () => {
     });
   }, [menuItems, selectedCategory, searchTerm]);
 
-  // ── Place order ───────────────────────────────────────────────────────────────
-  const handlePlaceOrder = async () => {
+const handlePlaceOrder = async () => {
     if (!customerName.trim()) return;
-    if (!currentWorkspace?.id) { setOrderError('No workspace found.'); return; }
-    if (!currentVenue?.id) { setOrderError('No venue found.'); return; }
+    const personaId = userData?.venue?.personaId || (currentVenue?.id ? Number(currentVenue.id) : undefined);
+    if (!personaId) { setOrderError('No venue persona found.'); return; }
     setProcessingOrder(true);
     setOrderError('');
     try {
       const selectedTable = tables.find(t => t.id === selectedTableId);
-      const safeSubtotal = Number(subtotal) || 0;
       const safeDiscount = Number(discount) || 0;
       const safeTax = Number(tax) || 0;
-      const safeTotal = Number(total) || 0;
       const payload: any = {
-        organization_id: currentVenue.id,
-        workspace_id: currentWorkspace.id,
-        customer_name: customerName.trim(),
-        customer_phone: customerPhone.trim() || undefined,
-        table_number: selectedTable?.table_number || (selectedTable as any)?.tableNumber || undefined,
-        payment_method: paymentMethod,
-        order_type: 'pos',
-        notes: orderNotes.trim() || undefined,
-        subtotal: safeSubtotal,
-        discount_amount: safeDiscount,
+        persona_id: personaId,
+        order_type: 'dine_in',
+        customer_name: customerName.trim() || 'Guest',
+        table_id: selectedTable ? Number(selectedTable.id) : undefined,
+        currency: 'INR',
         tax_amount: safeTax,
-        total: safeTotal,
-        items: cart.map(c => {
-          const unitPrice = Number(c.price) || 0;
-          const qty = Number(c.quantity) || 1;
-          return { product_id: c.id, product_name: c.name, quantity: qty, unit_price: unitPrice, total_price: parseFloat((unitPrice * qty).toFixed(2)) };
-        }),
+        discount_amount: safeDiscount,
+        special_instructions: orderNotes.trim() || undefined,
+        items: cart.map(c => ({
+          item_id: Number(c.id),
+          quantity: Number(c.quantity),
+        })),
       };
       const response = await orderService.createOrder(payload);
+      const safeSubtotal = Number(subtotal) || 0;
+      const safeTotal = Number(total) || 0;
       const orderData = {
         orderNumber: (response.data as any)?.order_number || `POS-${Date.now()}`,
         orderId: (response.data as any)?.id,
@@ -218,6 +212,7 @@ const POS: React.FC = () => {
       setProcessingOrder(false);
     }
   };
+
 
   // ── Print receipt ─────────────────────────────────────────────────────────────
   const handlePrintReceipt = () => {

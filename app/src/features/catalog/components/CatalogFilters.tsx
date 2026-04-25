@@ -62,7 +62,7 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
 
   const activeFiltersCount = [
     filters.categoryId,
-    filters.availability !== 'all',
+    !!filters.availability && filters.availability !== 'all',
     filters.dietary.vegetarian,
     filters.dietary.vegan,
     filters.dietary.glutenFree,

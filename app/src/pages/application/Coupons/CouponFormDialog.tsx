@@ -12,10 +12,12 @@ import {
   Typography,
   IconButton,
   InputAdornment,
+  Alert,
   useTheme,
   useMediaQuery,
 } from '@mui/material';
 import { Close as CloseIcon, LocalOffer, AddCircleOutline } from '@mui/icons-material';
+import type { Coupon } from '../../../features/coupons/types';
 
 interface CouponFormData {
   code: string;
@@ -38,7 +40,7 @@ interface CouponFormDialogProps {
   open: boolean;
   onClose: () => void;
   onSave: (data: CouponFormData) => Promise<void>;
-  editingCoupon?: any | null;
+  editingCoupon?: Coupon | null;
 }
 
 const textFieldSx = {
@@ -75,9 +77,11 @@ const CouponFormDialog: React.FC<CouponFormDialogProps> = ({
 
   const [formData, setFormData] = useState<CouponFormData>(defaultFormData);
   const [loading, setLoading] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   useEffect(() => {
     if (open) {
+      setSaveError(null);
       if (editingCoupon) {
         setFormData({
           // code is editable and must be included in the update payload
@@ -108,18 +112,19 @@ const CouponFormDialog: React.FC<CouponFormDialogProps> = ({
   }, [open, editingCoupon]);
 
   const handleSubmit = async () => {
+    setSaveError(null);
     try {
       setLoading(true);
       await onSave(formData);
-    } catch (error) {
-      console.error('Failed to save coupon:', error);
+    } catch (error: any) {
+      setSaveError(error?.message || 'Failed to save coupon. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
   const generateCode = () => {
-    const code = Math.random().toString(36).substring(2, 10).toUpperCase();
+    const code = Math.random().toString(36).substring(2, 10).toUpperCase().padEnd(8, '0');
     setFormData({ ...formData, code });
   };
 
@@ -138,37 +143,25 @@ const CouponFormDialog: React.FC<CouponFormDialogProps> = ({
         },
       }}
     >
-      {/* Dark gradient header */}
+      {/* Light header */}
       <Box
         sx={{
-          background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 60%, #312e81 100%)',
+          bgcolor: '#ffffff',
+          borderBottom: '1px solid #e0e0e0',
           px: 3,
           pt: 3,
           pb: 3,
-          position: 'relative',
-          overflow: 'hidden',
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: -60,
-            right: -40,
-            width: 180,
-            height: 180,
-            borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(99,102,241,0.25) 0%, transparent 70%)',
-            pointerEvents: 'none',
-          },
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative', zIndex: 1 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
             <Box
               sx={{
                 width: 40,
                 height: 40,
                 borderRadius: 2,
-                bgcolor: 'rgba(255,255,255,0.12)',
-                border: '1px solid rgba(255,255,255,0.20)',
+                bgcolor: 'rgba(25,118,210,0.08)',
+                border: '1px solid rgba(25,118,210,0.2)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -176,16 +169,16 @@ const CouponFormDialog: React.FC<CouponFormDialogProps> = ({
               }}
             >
               {editingCoupon ? (
-                <LocalOffer sx={{ fontSize: 20, color: '#ffffff' }} />
+                <LocalOffer sx={{ fontSize: 20, color: '#1976D2' }} />
               ) : (
-                <AddCircleOutline sx={{ fontSize: 20, color: '#ffffff' }} />
+                <AddCircleOutline sx={{ fontSize: 20, color: '#1976D2' }} />
               )}
             </Box>
             <Box>
-              <Typography variant="h6" sx={{ fontWeight: 700, color: '#ffffff', lineHeight: 1.2 }}>
+              <Typography variant="h6" sx={{ fontWeight: 700, color: '#1C1C1E', lineHeight: 1.2 }}>
                 {editingCoupon ? 'Edit Coupon' : 'Create New Coupon'}
               </Typography>
-              <Typography variant="caption" sx={{ color: 'rgba(199,210,254,0.7)', fontSize: '0.75rem' }}>
+              <Typography variant="caption" sx={{ color: '#666666', fontSize: '0.75rem' }}>
                 {editingCoupon ? 'Update coupon information' : 'Create a new discount code or promotion'}
               </Typography>
             </Box>
@@ -194,8 +187,8 @@ const CouponFormDialog: React.FC<CouponFormDialogProps> = ({
             onClick={onClose}
             size="small"
             sx={{
-              color: 'rgba(255,255,255,0.7)',
-              '&:hover': { backgroundColor: 'rgba(255,255,255,0.10)' },
+              color: '#666666',
+              '&:hover': { backgroundColor: 'rgba(0,0,0,0.04)' },
             }}
           >
             <CloseIcon fontSize="small" />
@@ -204,6 +197,11 @@ const CouponFormDialog: React.FC<CouponFormDialogProps> = ({
       </Box>
 
       <DialogContent sx={{ p: 3 }}>
+        {saveError && (
+          <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }} onClose={() => setSaveError(null)}>
+            {saveError}
+          </Alert>
+        )}
         <Grid container spacing={2.5}>
 
           {/* Coupon Code + Generate */}
@@ -229,10 +227,10 @@ const CouponFormDialog: React.FC<CouponFormDialogProps> = ({
                 textTransform: 'none',
                 fontWeight: 600,
                 borderRadius: 2,
-                borderColor: '#e2e8f0',
-                color: '#475569',
+                borderColor: '#e0e0e0',
+                color: '#666666',
                 '&:hover': {
-                  borderColor: '#94a3b8',
+                  borderColor: '#999999',
                   backgroundColor: 'transparent',
                 },
               }}
@@ -435,10 +433,10 @@ const CouponFormDialog: React.FC<CouponFormDialogProps> = ({
                   <LocalOffer sx={{ fontSize: 17, color: formData.isAvailable ? '#10b981' : '#94a3b8' }} />
                 </Box>
                 <Box>
-                  <Typography variant="body2" sx={{ fontWeight: 600, color: '#0f172a', lineHeight: 1.3 }}>
+                  <Typography variant="body2" sx={{ fontWeight: 600, color: '#1C1C1E', lineHeight: 1.3 }}>
                     {formData.isAvailable ? 'Available' : 'Unavailable'}
                   </Typography>
-                  <Typography variant="caption" sx={{ color: '#64748b', fontSize: '0.75rem' }}>
+                  <Typography variant="caption" sx={{ color: '#666666', fontSize: '0.75rem' }}>
                     {formData.isAvailable ? 'Coupon can be used by customers' : 'Coupon is disabled'}
                   </Typography>
                 </Box>
@@ -455,14 +453,14 @@ const CouponFormDialog: React.FC<CouponFormDialogProps> = ({
         </Grid>
       </DialogContent>
 
-      <DialogActions sx={{ px: 3, py: 2.5, borderTop: '1px solid #e2e8f0', gap: 1 }}>
+      <DialogActions sx={{ px: 3, py: 2.5, borderTop: '1px solid #e0e0e0', gap: 1 }}>
         <Button
           onClick={onClose}
           disabled={loading}
           sx={{
             textTransform: 'none',
             fontWeight: 600,
-            color: '#64748b',
+            color: '#666666',
             borderRadius: 2,
             px: 2.5,
             '&:hover': { backgroundColor: '#f8fafc' },
@@ -479,8 +477,8 @@ const CouponFormDialog: React.FC<CouponFormDialogProps> = ({
             fontWeight: 700,
             borderRadius: 2,
             px: 3,
-            bgcolor: '#0f172a',
-            '&:hover': { bgcolor: '#1e293b' },
+            bgcolor: '#1976D2',
+            '&:hover': { bgcolor: '#1565C0' },
           }}
         >
           {editingCoupon ? 'Update Coupon' : 'Create Coupon'}

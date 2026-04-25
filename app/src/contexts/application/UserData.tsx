@@ -14,6 +14,10 @@ interface UserDataContextType {
   // Actions
   refreshUserData: () => Promise<void>;
   
+  // Persona switching
+  activePersonaId: number | null;
+  switchPersona: (personaId: number) => Promise<void>;
+  
   // Convenience methods
   hasPermission: (permission: string) => boolean;
   getUserRole: () => string;
@@ -49,6 +53,11 @@ export const UserDataProvider: React.FC<UserDataProviderProps> = ({ children }) 
   const [loading, setLoading] = useState(false);
   const [initialized, setInitialized] = useState(false);
   const loadingRef = useRef(false);
+
+  const [activePersonaId, setActivePersonaId] = useState<number | null>(() => {
+    const stored = localStorage.getItem('active_persona_id');
+    return stored ? Number(stored) : null;
+  });
 
   // Load user data when authenticated
   const loadUserData = useCallback(async (force: boolean = false) => {
@@ -123,6 +132,24 @@ export const UserDataProvider: React.FC<UserDataProviderProps> = ({ children }) 
     }
   };
 
+  // Auto-set activePersonaId from userData when not yet stored
+  useEffect(() => {
+    if (userData && activePersonaId === null) {
+      const personaId = userData.venue?.personaId ?? null;
+      if (personaId !== null && personaId !== undefined) {
+        localStorage.setItem('active_persona_id', String(personaId));
+        setActivePersonaId(Number(personaId));
+      }
+    }
+  }, [userData, activePersonaId]);
+
+  // Persona switching — persists selection and refreshes user data
+  const switchPersona = async (personaId: number): Promise<void> => {
+    localStorage.setItem('active_persona_id', String(personaId));
+    setActivePersonaId(personaId);
+    await refreshUserData();
+  };
+
   // SECURITY FIX: Venue switching functionality removed
   // Reason: It allowed superadmin to access all venue data, violating security principles
   // Users should only access their assigned venue
@@ -179,6 +206,8 @@ export const UserDataProvider: React.FC<UserDataProviderProps> = ({ children }) 
     userData,
     loading,
     refreshUserData,
+    activePersonaId,
+    switchPersona,
     hasPermission,
     getUserRole,
     isUser,

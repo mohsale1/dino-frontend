@@ -115,7 +115,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
               fontWeight: 700,
               fontFamily: 'monospace',
               fontSize: '0.9375rem',
-              color: '#1e293b',
+              color: '#1C1C1E',
               letterSpacing: '0.02em',
             }}
           >
@@ -171,7 +171,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
             sx={{
               fontWeight: 700,
               fontSize: '1.125rem',
-              color: '#0f172a',
+              color: '#1C1C1E',
               letterSpacing: '-0.01em',
               minWidth: 0,
             }}

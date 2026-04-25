@@ -21,12 +21,11 @@ import {
   DialogContent,
   DialogActions,
   Radio,
+  Grid,
 } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
-import { alpha } from '@mui/material/styles';
 import {
   Add as AddIcon,
-  CalendarToday,
   LocationOn as LocationIcon,
   CheckCircle as CheckCircleIcon,
   People as OccupiedIcon,
@@ -41,89 +40,64 @@ import { ServiceLocationFormDialog, ServiceAreaFormDialog } from '../../features
 import { DeleteConfirmationDialog } from '../../components/dialogs';
 import { locationService } from '../../services/application';
 import { useUserData } from '../../contexts/application/UserData';
-import { useAuth } from '../../contexts/common/Auth';
 import { usePermissions } from '../../hooks/usePermissions';
-import { ROLE_COLORS } from '../../constants/app';
 import type { ServiceLocation, ServiceArea } from '../../features/locations/types';
 
-// ─── useCountUp ────────────────────────────────────────────────────────────────
+// ─── StatCard ──────────────────────────────────────────────────────────────────
 
-const useCountUp = (target: number, duration = 900) => {
-  const [count, setCount] = React.useState(0);
-  React.useEffect(() => {
-    if (target === 0) { setCount(0); return; }
-    let start: number | null = null;
-    const step = (ts: number) => {
-      if (!start) start = ts;
-      const p = Math.min((ts - start) / duration, 1);
-      setCount(Math.round((1 - Math.pow(1 - p, 3)) * target));
-      if (p < 1) requestAnimationFrame(step);
-    };
-    requestAnimationFrame(step);
-  }, [target, duration]);
-  return count;
-};
-
-// ─── HeroStat ─────────────────────────────────────────────────────────────────
-
-const HeroStat: React.FC<{
+const StatCard: React.FC<{
   label: string;
   value: number;
   icon: React.ReactElement;
-  rc: typeof ROLE_COLORS[keyof typeof ROLE_COLORS];
-}> = ({ label, value, icon, rc }) => {
-  const animated = useCountUp(value);
-  return (
+}> = ({ label, value, icon }) => (
+  <Box
+    sx={{
+      bgcolor: '#ffffff',
+      border: '1px solid #e0e0e0',
+      borderRadius: '12px',
+      p: '20px',
+      display: 'flex',
+      alignItems: 'center',
+      gap: 2,
+      height: '100%',
+    }}
+  >
     <Box
       sx={{
-        width: '100%',
-        px: { xs: 1.5, sm: 2 },
-        py: { xs: 1.25, sm: 1.75 },
-        borderRadius: 2.5,
-        bgcolor: 'rgba(255,255,255,0.07)',
-        border: '1px solid rgba(255,255,255,0.12)',
-        backdropFilter: 'blur(8px)',
-        transition: 'background 0.2s',
-        '&:hover': { bgcolor: 'rgba(255,255,255,0.11)' },
+        width: 40,
+        height: 40,
+        borderRadius: '8px',
+        flexShrink: 0,
+        bgcolor: 'rgba(25,118,210,0.08)',
+        border: '1px solid rgba(25,118,210,0.2)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: '#1976D2',
+        '& svg': { fontSize: 20 },
       }}
     >
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-        <Box
-          sx={{
-            width: { xs: 30, sm: 34 },
-            height: { xs: 30, sm: 34 },
-            borderRadius: 1.5,
-            bgcolor: 'rgba(255,255,255,0.1)',
-            border: '1px solid rgba(255,255,255,0.15)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: alpha(rc.chipText, 0.9),
-            flexShrink: 0,
-          }}
-        >
-          {React.cloneElement(icon, { sx: { fontSize: 17 } })}
-        </Box>
-        <Box>
-          <Typography
-            sx={{
-              fontWeight: 700,
-              color: rc.statValue,
-              fontSize: { xs: '1rem', sm: '1.4rem' },
-              letterSpacing: '-0.03em',
-              lineHeight: 1,
-            }}
-          >
-            {animated}
-          </Typography>
-          <Typography sx={{ color: rc.statLabel, fontSize: '0.68rem', fontWeight: 500, mt: 0.25 }}>
-            {label}
-          </Typography>
-        </Box>
-      </Box>
+      {icon}
     </Box>
-  );
-};
+    <Box>
+      <Typography
+        sx={{
+          fontWeight: 700,
+          fontSize: 24,
+          color: '#1C1C1E',
+          lineHeight: 1,
+          letterSpacing: '-0.02em',
+          fontVariantNumeric: 'tabular-nums',
+        }}
+      >
+        {value}
+      </Typography>
+      <Typography sx={{ fontSize: 12, color: '#666666', mt: 0.25, fontWeight: 500 }}>
+        {label}
+      </Typography>
+    </Box>
+  </Box>
+);
 
 // ─── Bulk Print ────────────────────────────────────────────────────────────────
 
@@ -191,16 +165,6 @@ const LocationsManagementPage: React.FC = () => {
   const workspaceId = userData?.venue?.workspaceId || '';
   const organizationId = userData?.venue?.id || '';
   const { canCreateTables, canCreateAreas } = usePermissions();
-
-  // Role detection
-  const { userPermissions } = useAuth();
-  const rawRole = (userPermissions?.role?.name || '').toLowerCase();
-  const roleKey: 'Owner' | 'Manager' | 'User' = rawRole.includes('owner') || rawRole.includes('super')
-    ? 'Owner'
-    : rawRole.includes('manager') || rawRole.includes('admin')
-    ? 'Manager'
-    : 'User';
-  const rc = ROLE_COLORS[roleKey];
 
   // ── State ──────────────────────────────────────────────────────────────────
   const [activeTab, setActiveTab]             = useState(0);
@@ -321,7 +285,7 @@ const LocationsManagementPage: React.FC = () => {
         await locationService.updateLocation(selectedLocation.id, data);
         showSnack('Location updated successfully', 'success');
       } else {
-        await locationService.createLocation({ ...data, workspaceId });
+        await locationService.createLocation(data);
         showSnack('Location created successfully', 'success');
       }
       setLocationDialogOpen(false);
@@ -354,7 +318,7 @@ const LocationsManagementPage: React.FC = () => {
       return;
     }
     try {
-      const newStatus = location.status === 'available' ? 'maintenance' : 'available';
+      const newStatus = location.status === 'available' ? 'out_of_service' : 'available';
       await locationService.updateLocationStatus(id, newStatus);
       showSnack('Status updated successfully', 'success');
       await fetchLocations();
@@ -390,7 +354,7 @@ const LocationsManagementPage: React.FC = () => {
         await locationService.updateArea(selectedArea.id, data);
         showSnack('Area updated successfully', 'success');
       } else {
-        await locationService.createArea({ ...data, workspaceId });
+        await locationService.createArea(data);
         showSnack('Area created successfully', 'success');
       }
       setAreaDialogOpen(false);
@@ -433,7 +397,7 @@ const LocationsManagementPage: React.FC = () => {
     try {
       const items = await Promise.all(
         visibleLocations.map(async (loc): Promise<BulkQRItem> => {
-          const qrUrl = await locationService.generateQRCode(loc.id);
+          const qrUrl = await locationService.generateQRCode(loc.id, workspaceId);
           const area = loc.areaId ? areas.find((a) => a.id === loc.areaId) : undefined;
           return { qrUrl, name: loc.name ?? loc.identifier, areaName: area?.name ?? '', menuUrl: qrUrl };
         }),
@@ -454,7 +418,7 @@ const LocationsManagementPage: React.FC = () => {
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', minHeight: 300 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', bgcolor: '#f8fafc' }}>
         <CircularProgress color="primary" />
       </Box>
     );
@@ -462,7 +426,7 @@ const LocationsManagementPage: React.FC = () => {
 
   if (error) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', p: 3 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', bgcolor: '#f8fafc', p: 3 }}>
         <Alert severity="error" sx={{ maxWidth: 480 }}>{error}</Alert>
       </Box>
     );
@@ -474,200 +438,123 @@ const LocationsManagementPage: React.FC = () => {
   const addLabel = activeTab === 0 ? 'Add Location' : 'Add Area';
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100%', bgcolor: '#f1f5f9' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', bgcolor: '#f8fafc' }}>
 
-      {/* ── Hero ──────────────────────────────────────────────────────────────── */}
+      {/* ── Page Header ───────────────────────────────────────────────────────── */}
       <Box
         sx={{
-          background: rc.gradient,
-          px: { xs: 2, sm: 3, md: 6 },
-          pt: { xs: 2.5, md: 4 },
-          pb: { xs: 2.5, md: 4 },
-          position: 'relative',
-          overflow: 'hidden',
-          zIndex: 0,
-          flexShrink: 0,
+          bgcolor: '#ffffff',
+          px: { xs: 2, sm: '32px' },
+          pt: '24px',
+          pb: '20px',
+          borderBottom: '1px solid #e0e0e0',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: 2,
         }}
       >
-        {/* Glow orb top-right */}
-        <Box sx={{
-          position: 'absolute', top: -80, right: -80,
-          width: 360, height: 360, borderRadius: '50%',
-          background: `radial-gradient(circle, ${rc.glowA} 0%, transparent 70%)`,
-          pointerEvents: 'none',
-        }} />
-        {/* Glow orb bottom-left */}
-        <Box sx={{
-          position: 'absolute', bottom: -60, left: '25%',
-          width: 280, height: 280, borderRadius: '50%',
-          background: `radial-gradient(circle, ${rc.glowB} 0%, transparent 70%)`,
-          pointerEvents: 'none',
-        }} />
-        {/* Grid overlay */}
-        <Box
-          sx={{
-            position: 'absolute',
-            inset: 0,
-            backgroundImage:
-              'linear-gradient(rgba(255,255,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.03) 1px,transparent 1px)',
-            backgroundSize: '40px 40px',
-            pointerEvents: 'none',
-          }}
-        />
-
-        <Box sx={{ position: 'relative', zIndex: 1 }}>
-          {/* Overline */}
-          <Typography
-            sx={{
-              color: alpha(rc.chipText, 0.75),
-              fontWeight: 700,
-              letterSpacing: 3,
-              fontSize: '0.65rem',
-              textTransform: 'uppercase',
-              mb: 1,
-            }}
-          >
-            Application Control Center
+        <Box>
+          <Typography sx={{ fontWeight: 700, color: '#1C1C1E', fontSize: 20, lineHeight: 1.3 }}>
+            Locations
           </Typography>
-
-          {/* Title row */}
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: { xs: 'column', sm: 'row' },
-              alignItems: { xs: 'flex-start', sm: 'flex-start' },
-              justifyContent: 'space-between',
-              gap: 2,
-              mb: { xs: 2.5, md: 4 },
-            }}
-          >
-            <Box>
-              <Typography
-                variant="h4"
-                sx={{
-                  fontWeight: 800,
-                  color: '#fff',
-                  letterSpacing: '-0.025em',
-                  lineHeight: 1.2,
-                  fontSize: { xs: '1.4rem', md: '2rem' },
-                }}
-              >
-                Locations
-              </Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mt: 0.75 }}>
-                <CalendarToday sx={{ fontSize: 13, color: alpha(rc.chipText, 0.6) }} />
-                <Typography
-                  variant="caption"
-                  sx={{ color: alpha(rc.chipText, 0.6), fontWeight: 500, fontSize: '0.75rem' }}
-                >
-                  {new Date().toLocaleDateString('en-US', {
-                    weekday: 'long',
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                  })}
-                </Typography>
-              </Box>
-            </Box>
-
-            {canAdd && (
-              <Button
-                variant="contained"
-                startIcon={<AddIcon />}
-                onClick={handleAddNew}
-                sx={{
-                  alignSelf: { xs: 'stretch', sm: 'flex-start' },
-                  width: { xs: '100%', sm: 'auto' },
-                  bgcolor: alpha('#fff', 0.15),
-                  color: '#fff',
-                  fontWeight: 600,
-                  textTransform: 'none',
-                  backdropFilter: 'blur(8px)',
-                  border: '1px solid rgba(255,255,255,0.25)',
-                  px: 2.5,
-                  py: { xs: 0.75, sm: 1 },
-                  fontSize: { xs: '0.8125rem', sm: '0.875rem' },
-                  borderRadius: 2,
-                  boxShadow: 'none',
-                  '&:hover': {
-                    bgcolor: alpha('#fff', 0.25),
-                    border: '1px solid rgba(255,255,255,0.4)',
-                    boxShadow: 'none',
-                  },
-                }}
-              >
-                {addLabel}
-              </Button>
-            )}
-          </Box>
-
-          {/* Stats grid */}
-          <Box
-            sx={{
-              display: 'grid',
-              gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(4, 1fr)' },
-              gap: { xs: 1, sm: 1.5 },
-            }}
-          >
-            <HeroStat label="Total Locations" value={stats.total}     icon={<LocationIcon />}   rc={rc} />
-            <HeroStat label="Available"        value={stats.available} icon={<CheckCircleIcon />} rc={rc} />
-            <HeroStat label="Occupied"         value={stats.occupied}  icon={<OccupiedIcon />}   rc={rc} />
-            <HeroStat label="Reserved"         value={stats.reserved}  icon={<ReservedIcon />}   rc={rc} />
-          </Box>
+          <Typography variant="body2" sx={{ color: '#666666', mt: 0.5 }}>
+            {locations.length} location{locations.length !== 1 ? 's' : ''} &middot; {areas.length} area{areas.length !== 1 ? 's' : ''}
+          </Typography>
         </Box>
+        {canAdd && (
+          <Button
+            variant="contained"
+            disableElevation
+            startIcon={<AddIcon />}
+            onClick={handleAddNew}
+            sx={{
+              bgcolor: '#1976D2',
+              color: '#ffffff',
+              fontWeight: 600,
+              textTransform: 'none',
+              borderRadius: '8px',
+              px: 2.5,
+              py: 1,
+              boxShadow: 'none',
+              '&:hover': { bgcolor: '#1565C0', boxShadow: 'none' },
+            }}
+          >
+            {addLabel}
+          </Button>
+        )}
       </Box>
 
-      {/* ── Body ──────────────────────────────────────────────────────────────── */}
-      <Box sx={{ position: 'relative', zIndex: 1 }}>
+      {/* ── Stat Cards ────────────────────────────────────────────────────────── */}
+      <Box sx={{ px: { xs: 2, sm: '32px' }, pt: 3, pb: 0 }}>
+        <Grid container spacing={2}>
+          <Grid item xs={12} sm={6} lg={3}>
+            <StatCard label="Total Locations" value={stats.total}     icon={<LocationIcon />} />
+          </Grid>
+          <Grid item xs={12} sm={6} lg={3}>
+            <StatCard label="Available"        value={stats.available} icon={<CheckCircleIcon />} />
+          </Grid>
+          <Grid item xs={12} sm={6} lg={3}>
+            <StatCard label="Occupied"         value={stats.occupied}  icon={<OccupiedIcon />} />
+          </Grid>
+          <Grid item xs={12} sm={6} lg={3}>
+            <StatCard label="Reserved"         value={stats.reserved}  icon={<ReservedIcon />} />
+          </Grid>
+        </Grid>
+      </Box>
 
-        {/* Search / filter toolbar */}
+      {/* ── Toolbar ───────────────────────────────────────────────────────────── */}
+      <Box sx={{ px: { xs: 2, sm: '32px' }, pt: 3 }}>
         <Paper
           elevation={0}
           sx={{
             borderRadius: 0,
             border: 'none',
-            borderBottom: '1px solid #e2e8f0',
+            borderTop: '1px solid #e0e0e0',
+            borderBottom: '1px solid #e0e0e0',
             bgcolor: '#ffffff',
+            overflow: 'hidden',
           }}
         >
           <Box
             sx={{
-              px: { xs: 2, sm: 3, md: 4 },
-              py: 1.5,
+              px: { xs: 2, sm: 2.5 },
+              pt: 2,
+              pb: 1.5,
               display: 'flex',
-              flexDirection: { xs: 'column', sm: 'row' },
-              alignItems: { xs: 'stretch', sm: 'center' },
+              alignItems: 'center',
               gap: 1.5,
+              flexWrap: 'wrap',
+              borderBottom: '1px solid #e0e0e0',
             }}
           >
             {/* Search */}
             <Box
               sx={{
-                flex: '1 1 auto',
+                flex: '1 1 220px',
                 display: 'flex',
                 alignItems: 'center',
                 gap: 1,
-                bgcolor: '#f8fafc',
-                border: '1px solid #e2e8f0',
+                bgcolor: '#f7f9fa',
+                border: '1px solid #e0e0e0',
                 borderRadius: 2,
                 px: 1.5,
                 py: 0.75,
-                transition: 'border-color 0.15s',
-                '&:focus-within': { borderColor: '#94a3b8' },
               }}
             >
-              <SearchIcon sx={{ fontSize: 17, color: '#94a3b8', flexShrink: 0 }} />
+              <SearchIcon sx={{ fontSize: 17, color: '#999999', flexShrink: 0 }} />
               <InputBase
                 placeholder={activeTab === 0 ? 'Search locations...' : 'Search areas...'}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                sx={{ flex: 1, fontSize: '0.875rem', color: '#0f172a' }}
+                sx={{ flex: 1, fontSize: '0.875rem', color: '#1C1C1E' }}
               />
               {searchQuery && (
                 <IconButton
                   size="small"
                   onClick={() => setSearchQuery('')}
-                  sx={{ p: 0.25, color: '#94a3b8' }}
+                  sx={{ p: 0.25, color: '#999999' }}
                 >
                   <CloseIcon sx={{ fontSize: 14 }} />
                 </IconButton>
@@ -675,15 +562,15 @@ const LocationsManagementPage: React.FC = () => {
             </Box>
 
             {/* Status filter */}
-            <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 140 }, flexShrink: 0 }}>
+            <FormControl size="small" sx={{ minWidth: 130 }}>
               <Select
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value)}
                 displayEmpty
-                sx={{ borderRadius: 2, fontSize: '0.875rem', bgcolor: '#f8fafc' }}
+                sx={{ borderRadius: 2, fontSize: '0.875rem', bgcolor: '#f7f9fa' }}
               >
                 <MenuItem value="all">
-                  <Typography variant="body2" sx={{ color: '#94a3b8' }}>All Status</Typography>
+                  <Typography variant="body2" sx={{ color: '#999999' }}>All Status</Typography>
                 </MenuItem>
                 <MenuItem value="available">Available</MenuItem>
                 <MenuItem value="occupied">Occupied</MenuItem>
@@ -693,25 +580,25 @@ const LocationsManagementPage: React.FC = () => {
             </FormControl>
           </Box>
         </Paper>
+      </Box>
 
-        {/* Content */}
-        <Box>
-          <LocationTabs
-            locations={locations}
-            searchQuery={searchQuery}
-            filterStatus={filterStatus}
-            onEditLocation={handleEditLocation}
-            onDeleteLocation={handleDeleteLocation}
-            onToggleStatus={handleToggleStatus}
-            onViewQR={handleViewQR}
-            onBulkPrintQR={handleBulkPrintQR}
-            areas={areas}
-            onEditArea={handleEditArea}
-            onDeleteArea={handleDeleteArea}
-            activeTab={activeTab}
-            onTabChange={(tab) => { setActiveTab(tab); setSearchQuery(''); setFilterStatus('all'); }}
-          />
-        </Box>
+      {/* ── Content ───────────────────────────────────────────────────────────── */}
+      <Box sx={{ px: { xs: 2, sm: '32px' }, pt: 3, pb: 6 }}>
+        <LocationTabs
+          locations={locations}
+          searchQuery={searchQuery}
+          filterStatus={filterStatus}
+          onEditLocation={handleEditLocation}
+          onDeleteLocation={handleDeleteLocation}
+          onToggleStatus={handleToggleStatus}
+          onViewQR={handleViewQR}
+          onBulkPrintQR={handleBulkPrintQR}
+          areas={areas}
+          onEditArea={handleEditArea}
+          onDeleteArea={handleDeleteArea}
+          activeTab={activeTab}
+          onTabChange={(tab) => { setActiveTab(tab); setSearchQuery(''); setFilterStatus('all'); }}
+        />
       </Box>
 
       {/* ── Dialogs ────────────────────────────────────────────────────────────── */}
@@ -762,22 +649,30 @@ const LocationsManagementPage: React.FC = () => {
         onClose={() => setBulkStyleOpen(false)}
         maxWidth="xs"
         fullWidth
-        PaperProps={{ sx: { borderRadius: 3, overflow: 'hidden' } }}
+        PaperProps={{ sx: { borderRadius: '12px', overflow: 'hidden' } }}
       >
         <Box
           sx={{
-            background: 'linear-gradient(135deg,#0f172a 0%,#1e1b4b 60%,#312e81 100%)',
-            px: 3, py: 2.5,
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            bgcolor: '#ffffff',
+            px: 3,
+            py: 2.5,
+            borderBottom: '1px solid #e0e0e0',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
           }}
         >
           <Box>
-            <Typography sx={{ color: '#fff', fontWeight: 700, fontSize: '1rem' }}>Print All QRs</Typography>
-            <Typography sx={{ color: 'rgba(199,210,254,0.7)', fontSize: '0.75rem', mt: 0.25 }}>
+            <Typography sx={{ color: '#1C1C1E', fontWeight: 700, fontSize: '1rem' }}>Print All QRs</Typography>
+            <Typography sx={{ color: '#666666', fontSize: '0.75rem', mt: 0.25 }}>
               Choose a card style for all {getFilteredLocations().length} QR codes
             </Typography>
           </Box>
-          <IconButton size="small" onClick={() => setBulkStyleOpen(false)} sx={{ color: 'rgba(255,255,255,0.7)', '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' } }}>
+          <IconButton
+            size="small"
+            onClick={() => setBulkStyleOpen(false)}
+            sx={{ color: '#999999', '&:hover': { bgcolor: 'rgba(0,0,0,0.04)' } }}
+          >
             <CloseIcon fontSize="small" />
           </IconButton>
         </Box>
@@ -797,26 +692,29 @@ const LocationsManagementPage: React.FC = () => {
                 key={s.value}
                 onClick={() => setBulkStyle(s.value)}
                 sx={{
-                  display: 'flex', alignItems: 'center', gap: 1.5,
-                  px: 2, py: 1.25,
-                  borderRadius: 1.5,
-                  border: `1.5px solid ${bulkStyle === s.value ? '#312e81' : '#e2e8f0'}`,
-                  bgcolor: bulkStyle === s.value ? alpha('#312e81', 0.05) : '#fafafa',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1.5,
+                  px: 2,
+                  py: 1.25,
+                  borderRadius: '8px',
+                  border: `1.5px solid ${bulkStyle === s.value ? '#1976D2' : '#e0e0e0'}`,
+                  bgcolor: bulkStyle === s.value ? 'rgba(25,118,210,0.04)' : '#fafafa',
                   cursor: 'pointer',
                   transition: 'all 0.15s',
-                  '&:hover': { borderColor: '#312e81', bgcolor: alpha('#312e81', 0.04) },
+                  '&:hover': { borderColor: '#1976D2', bgcolor: 'rgba(25,118,210,0.04)' },
                 }}
               >
                 <Radio
                   checked={bulkStyle === s.value}
                   size="small"
-                  sx={{ p: 0, color: '#312e81', '&.Mui-checked': { color: '#312e81' } }}
+                  sx={{ p: 0, color: '#1976D2', '&.Mui-checked': { color: '#1976D2' } }}
                 />
                 <Box>
-                  <Typography sx={{ fontWeight: 700, fontSize: '0.875rem', color: '#0f172a', lineHeight: 1.2 }}>
+                  <Typography sx={{ fontWeight: 700, fontSize: '0.875rem', color: '#1C1C1E', lineHeight: 1.2 }}>
                     {s.label}
                   </Typography>
-                  <Typography sx={{ fontSize: '0.75rem', color: '#64748b', lineHeight: 1.3 }}>
+                  <Typography sx={{ fontSize: '0.75rem', color: '#666666', lineHeight: 1.3 }}>
                     {s.desc}
                   </Typography>
                 </Box>
@@ -827,15 +725,23 @@ const LocationsManagementPage: React.FC = () => {
         <DialogActions sx={{ px: 2.5, pb: 2.5, pt: 0, gap: 1 }}>
           <Button
             onClick={() => setBulkStyleOpen(false)}
-            sx={{ textTransform: 'none', fontWeight: 600, color: '#64748b', borderRadius: 1.5 }}
+            sx={{ textTransform: 'none', fontWeight: 600, color: '#666666', borderRadius: '8px' }}
           >
             Cancel
           </Button>
           <Button
             variant="contained"
+            disableElevation
             onClick={handleBulkPrintConfirm}
             startIcon={<PrintIcon />}
-            sx={{ textTransform: 'none', fontWeight: 700, bgcolor: '#0f172a', borderRadius: 1.5, boxShadow: 'none', '&:hover': { bgcolor: '#1e293b', boxShadow: 'none' } }}
+            sx={{
+              textTransform: 'none',
+              fontWeight: 600,
+              bgcolor: '#1976D2',
+              borderRadius: '8px',
+              boxShadow: 'none',
+              '&:hover': { bgcolor: '#1565C0', boxShadow: 'none' },
+            }}
           >
             Print All QRs
           </Button>

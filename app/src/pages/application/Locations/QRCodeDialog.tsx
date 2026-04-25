@@ -406,7 +406,7 @@ const QRCodeDialog: React.FC<QRCodeDialogProps> = ({
     setError(null);
     setQrUrl(null);
     try {
-      const url = await locationService.generateQRCode(location.id);
+      const url = await locationService.generateQRCode(location.id, _organizationId || '');
       setQrUrl(url);
       setMenuUrl(url);
     } catch {

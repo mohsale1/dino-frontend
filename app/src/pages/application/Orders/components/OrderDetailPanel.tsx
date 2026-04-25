@@ -50,7 +50,6 @@ const STATUS_ICON: Partial<Record<Order['status'], React.ReactElement>> = {
   confirmed: <Whatshot sx={{ fontSize: 17 }} />,
   preparing: <TaskAlt sx={{ fontSize: 17 }} />,
   ready:     <DeliveryDining sx={{ fontSize: 17 }} />,
-  served:    <DoneAll sx={{ fontSize: 17 }} />,
 };
 
 const OrderDetailPanel: React.FC<OrderDetailPanelProps> = ({
@@ -113,7 +112,7 @@ const OrderDetailPanel: React.FC<OrderDetailPanelProps> = ({
           height: 'calc(100% - 64px)',
           bgcolor: '#ffffff',
           border: 'none',
-          boxShadow: '-8px 0 32px rgba(15,23,42,0.08)',
+          boxShadow: '-4px 0 16px rgba(0,0,0,0.06)',
           display: 'flex',
           flexDirection: 'column',
           overflow: 'hidden',
@@ -128,7 +127,7 @@ const OrderDetailPanel: React.FC<OrderDetailPanelProps> = ({
           px: 2.5,
           pt: 2.5,
           pb: 2,
-          borderBottom: '1px solid #f1f5f9',
+          borderBottom: '1px solid #e0e0e0',
         }}
       >
         {/* Row 1: label + close */}
@@ -151,7 +150,7 @@ const OrderDetailPanel: React.FC<OrderDetailPanelProps> = ({
               color: '#64748b',
               p: 0.5,
               borderRadius: 1.5,
-              '&:hover': { bgcolor: '#f8fafc', color: '#0f172a' },
+              '&:hover': { bgcolor: '#f8fafc', color: '#1C1C1E' },
             }}
           >
             <Close sx={{ fontSize: 18 }} />
@@ -167,7 +166,7 @@ const OrderDetailPanel: React.FC<OrderDetailPanelProps> = ({
               fontFamily: 'monospace',
               fontWeight: 800,
               fontSize: '1.25rem',
-              color: '#0f172a',
+              color: '#1C1C1E',
               mb: 0.75,
             }}
           >
@@ -225,7 +224,7 @@ const OrderDetailPanel: React.FC<OrderDetailPanelProps> = ({
                 bgcolor: '#f8fafc',
                 borderRadius: 2,
                 p: 2,
-                border: '1px solid #f1f5f9',
+                border: '1px solid #e0e0e0',
               }}
             >
               {/* Customer row */}
@@ -261,7 +260,7 @@ const OrderDetailPanel: React.FC<OrderDetailPanelProps> = ({
                     sx={{
                       fontSize: '0.85rem',
                       fontWeight: 600,
-                      color: '#0f172a',
+                      color: '#1C1C1E',
                       lineHeight: 1.3,
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
@@ -273,7 +272,7 @@ const OrderDetailPanel: React.FC<OrderDetailPanelProps> = ({
                 </Box>
               </Box>
 
-              <Divider sx={{ borderColor: '#e2e8f0', my: 1.5 }} />
+              <Divider sx={{ borderColor: '#e0e0e0', my: 1.5 }} />
 
               {/* 3-col flex row */}
               <Box sx={{ display: 'flex', gap: 1 }}>
@@ -293,7 +292,7 @@ const OrderDetailPanel: React.FC<OrderDetailPanelProps> = ({
                       Table
                     </Typography>
                   </Box>
-                  <Typography sx={{ fontSize: '0.82rem', fontWeight: 600, color: '#0f172a' }}>
+                  <Typography sx={{ fontSize: '0.82rem', fontWeight: 600, color: '#1C1C1E' }}>
                     {detail.table_number ? `#${detail.table_number}` : 'N/A'}
                   </Typography>
                 </Box>
@@ -314,7 +313,7 @@ const OrderDetailPanel: React.FC<OrderDetailPanelProps> = ({
                       Time
                     </Typography>
                   </Box>
-                  <Typography sx={{ fontSize: '0.82rem', fontWeight: 600, color: '#0f172a' }}>
+                  <Typography sx={{ fontSize: '0.82rem', fontWeight: 600, color: '#1C1C1E' }}>
                     {new Date(detail.createdAt).toLocaleTimeString('en-IN', {
                       hour: '2-digit',
                       minute: '2-digit',
@@ -417,10 +416,10 @@ const OrderDetailPanel: React.FC<OrderDetailPanelProps> = ({
               </Box>
 
               {/* Items bordered box */}
-              <Box sx={{ border: '1px solid #e2e8f0', borderRadius: 2, overflow: 'hidden' }}>
+              <Box sx={{ border: '1px solid #e0e0e0', borderRadius: 2, overflow: 'hidden' }}>
                 {detail.items.map((item, idx) => (
                   <Box
-                    key={item.item_id}
+                    key={item.item_id ?? idx}
                     sx={{
                       px: 2,
                       py: 1.5,
@@ -435,7 +434,7 @@ const OrderDetailPanel: React.FC<OrderDetailPanelProps> = ({
                         width: 28,
                         height: 28,
                         borderRadius: 1,
-                        bgcolor: '#0f172a',
+                        bgcolor: '#1C1C1E',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -455,7 +454,7 @@ const OrderDetailPanel: React.FC<OrderDetailPanelProps> = ({
                         sx={{
                           fontSize: '0.82rem',
                           fontWeight: 600,
-                          color: '#0f172a',
+                          color: '#1C1C1E',
                           overflow: 'hidden',
                           textOverflow: 'ellipsis',
                           whiteSpace: 'nowrap',
@@ -469,7 +468,7 @@ const OrderDetailPanel: React.FC<OrderDetailPanelProps> = ({
                     </Box>
 
                     {/* Line total */}
-                    <Typography sx={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a', flexShrink: 0 }}>
+                    <Typography sx={{ fontSize: '0.85rem', fontWeight: 700, color: '#1C1C1E', flexShrink: 0 }}>
                       {formatINR(item.total_price)}
                     </Typography>
                   </Box>
@@ -478,7 +477,7 @@ const OrderDetailPanel: React.FC<OrderDetailPanelProps> = ({
             </Box>
 
             {/* D. BILL SUMMARY */}
-            <Box sx={{ border: '1px solid #e2e8f0', borderRadius: 2, overflow: 'hidden' }}>
+            <Box sx={{ border: '1px solid #e0e0e0', borderRadius: 2, overflow: 'hidden' }}>
               {/* Header */}
               <Box
                 sx={{
@@ -506,7 +505,7 @@ const OrderDetailPanel: React.FC<OrderDetailPanelProps> = ({
                 {/* Subtotal */}
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <Typography sx={{ fontSize: '0.82rem', color: '#64748b' }}>Subtotal</Typography>
-                  <Typography sx={{ fontSize: '0.82rem', color: '#0f172a', fontWeight: 500 }}>
+                  <Typography sx={{ fontSize: '0.82rem', color: '#1C1C1E', fontWeight: 500 }}>
                     {formatINR(detail.subtotal)}
                   </Typography>
                 </Box>
@@ -515,7 +514,7 @@ const OrderDetailPanel: React.FC<OrderDetailPanelProps> = ({
                 {detail.tax_amount > 0 && (
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Typography sx={{ fontSize: '0.82rem', color: '#64748b' }}>Tax</Typography>
-                    <Typography sx={{ fontSize: '0.82rem', color: '#0f172a', fontWeight: 500 }}>
+                    <Typography sx={{ fontSize: '0.82rem', color: '#1C1C1E', fontWeight: 500 }}>
                       {formatINR(detail.tax_amount)}
                     </Typography>
                   </Box>
@@ -525,7 +524,7 @@ const OrderDetailPanel: React.FC<OrderDetailPanelProps> = ({
                 {detail.service_charge > 0 && (
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Typography sx={{ fontSize: '0.82rem', color: '#64748b' }}>Service Charge</Typography>
-                    <Typography sx={{ fontSize: '0.82rem', color: '#0f172a', fontWeight: 500 }}>
+                    <Typography sx={{ fontSize: '0.82rem', color: '#1C1C1E', fontWeight: 500 }}>
                       {formatINR(detail.service_charge)}
                     </Typography>
                   </Box>
@@ -552,10 +551,10 @@ const OrderDetailPanel: React.FC<OrderDetailPanelProps> = ({
                     mt: 0.25,
                   }}
                 >
-                  <Typography sx={{ fontSize: '0.9rem', fontWeight: 800, color: '#0f172a' }}>
+                  <Typography sx={{ fontSize: '0.9rem', fontWeight: 800, color: '#1C1C1E' }}>
                     Total
                   </Typography>
-                  <Typography sx={{ fontSize: '1rem', fontWeight: 800, color: '#0f172a' }}>
+                  <Typography sx={{ fontSize: '1rem', fontWeight: 800, color: '#1C1C1E' }}>
                     {formatINR(detail.total)}
                   </Typography>
                 </Box>
@@ -635,7 +634,7 @@ const OrderDetailPanel: React.FC<OrderDetailPanelProps> = ({
                 py: 1.1,
                 borderRadius: 1.5,
                 textTransform: 'none',
-                borderColor: '#e2e8f0',
+                borderColor: '#e0e0e0',
                 color: '#64748b',
                 '&:hover': {
                   borderColor: '#f43f5e',
@@ -643,7 +642,7 @@ const OrderDetailPanel: React.FC<OrderDetailPanelProps> = ({
                   bgcolor: '#fff1f2',
                 },
                 '&.Mui-disabled': {
-                  borderColor: '#e2e8f0',
+                  borderColor: '#e0e0e0',
                   color: '#94a3b8',
                 },
               }}

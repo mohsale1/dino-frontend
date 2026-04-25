@@ -1,7 +1,6 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import {
   Box,
-  Container,
   Grid,
   Checkbox,
   Alert,
@@ -13,12 +12,15 @@ import {
   useTheme,
   Fab,
   Stack,
+  CircularProgress,
 } from '@mui/material';
+// Alert is used in Snackbar below
 import {
   Add,
   Inventory,
   Category as CategoryIcon,
   FilterList,
+  CheckCircleOutline,
 } from '@mui/icons-material';
 import {
   Breadcrumbs,
@@ -41,7 +43,6 @@ import type { CatalogItem, Category, CatalogItemCreate, CatalogItemUpdate, Categ
 import type { ViewMode, SortOption } from '../components/CatalogToolbar';
 import { useCatalog } from '../hooks';
 import { useUserData } from '../../../contexts/application/UserData';
-import { CircularProgress } from '@mui/material';
 
 export const CatalogManagementPage: React.FC = () => {
   const theme = useTheme();
@@ -183,12 +184,18 @@ export const CatalogManagementPage: React.FC = () => {
     filters.dietary.vegan,
     filters.dietary.glutenFree,
     filters.tags.length > 0,
-    filters.priceRange[0] !== 0 || filters.priceRange[1] !== 1000,
+    filters.priceRange[0] !== 0 || filters.priceRange[1] !== 10000,
   ].filter(Boolean).length;
+
+  const availableItemsCount = useMemo(
+    () => catalogItems.filter(i => i.isAvailable).length,
+    [catalogItems],
+  );
 
   // ── Handlers ──────────────────────────────────────────────────────────────────
 
   const handleAddItem = () => { setSelectedItem(null); setAddDialogOpen(true); };
+  const handleAddCategory = () => { setSelectedCategory(null); setAddDialogOpen(true); };
   const handleEditItem = (item: CatalogItem) => { setSelectedItem(item); setAddDialogOpen(true); };
   const handleEditCategory = (category: Category) => { setSelectedCategory(category); setAddDialogOpen(true); };
 
@@ -199,7 +206,7 @@ export const CatalogManagementPage: React.FC = () => {
           await updateItem(selectedItem.id, data as CatalogItemUpdate);
           showToast('Item updated successfully');
         } else {
-          await createItem({ ...data, workspaceId } as CatalogItemCreate);
+          await createItem(data as CatalogItemCreate);
           showToast('Item created successfully');
         }
       } else {
@@ -207,7 +214,7 @@ export const CatalogManagementPage: React.FC = () => {
           await updateCategory(selectedCategory.id, data as CategoryUpdate);
           showToast('Category updated successfully');
         } else {
-          await createCategory({ ...data, workspaceId } as CategoryCreate);
+          await createCategory(data as CategoryCreate);
           showToast('Category created successfully');
         }
       }
@@ -217,7 +224,7 @@ export const CatalogManagementPage: React.FC = () => {
     } catch (err: any) {
       showToast(err.message || 'Failed to save. Please try again.', 'error');
     }
-  }, [activeTab, selectedItem, selectedCategory, workspaceId, createItem, updateItem, createCategory, updateCategory]);
+  }, [activeTab, selectedItem, selectedCategory, createItem, updateItem, createCategory, updateCategory]);
 
   const handleDeleteItem = (item: CatalogItem) => { setSelectedItem(item); setDeleteDialogOpen(true); };
 
@@ -340,9 +347,9 @@ export const CatalogManagementPage: React.FC = () => {
       onClose={() => setFilterDrawerOpen(false)}
       sx={{ '& .MuiDrawer-paper': { width: { xs: '100%', sm: 360 } } }}
     >
-      <Box sx={{ p: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
+      <Box sx={{ p: 2, borderBottom: '1px solid #e0e0e0' }}>
         <Stack direction="row" alignItems="center" justifyContent="space-between">
-          <Typography variant="h6" fontWeight={600}>Filters</Typography>
+          <Typography sx={{ fontWeight: 600, fontSize: 16, color: '#1C1C1E' }}>Filters</Typography>
           <Button size="small" onClick={() => setFilterDrawerOpen(false)}>Close</Button>
         </Stack>
       </Box>
@@ -361,200 +368,367 @@ export const CatalogManagementPage: React.FC = () => {
   // Loading state
   if (loading && catalogItems.length === 0) {
     return (
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', flexDirection: 'column', gap: 2 }}>
-        <CircularProgress />
-        <Typography variant="body2" color="text.secondary">Loading catalog...</Typography>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', bgcolor: '#f8fafc', flexDirection: 'column', gap: 2 }}>
+        <CircularProgress sx={{ color: '#1976D2' }} />
+        <Typography variant="body2" sx={{ color: '#666666' }}>Loading catalog...</Typography>
       </Box>
     );
   }
 
   return (
-    <Box sx={{ minHeight: '100vh', backgroundColor: '#fafafa' }}>
-      {/* Header */}
-      <Box sx={{ backgroundColor: 'white', borderBottom: '1px solid #e0e0e0' }}>
-        <Container maxWidth={false} sx={{ px: { xs: 2, sm: 3, md: 4 } }}>
-          <Box sx={{ py: 2.5 }}>
-            <Breadcrumbs items={breadcrumbItems} />
-            <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mt: 1.5 }}>
-              <Box>
-                <Typography variant="h5" fontWeight={600} color="text.primary">
-                  Catalog Management
-                </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                  {catalogItems.length} items • {categories.length} categories
-                  {catalogError && <Box component="span" sx={{ color: 'error.main', ml: 1 }}>— {catalogError}</Box>}
-                </Typography>
-              </Box>
-              {!isMobile && (
-                <Button
-                  variant="contained"
-                  startIcon={<Add />}
-                  onClick={handleAddItem}
-                  sx={{ textTransform: 'none' }}
-                >
-                  Add {activeTab === 'items' ? 'Item' : 'Category'}
-                </Button>
-              )}
-            </Stack>
-          </Box>
-        </Container>
+    <Box sx={{ minHeight: '100vh', bgcolor: '#f8fafc' }}>
+
+      {/* Page Header */}
+      <Box sx={{
+        bgcolor: '#ffffff',
+        px: { xs: 2, sm: '32px' },
+        pt: '24px',
+        pb: '20px',
+        borderBottom: '1px solid #e0e0e0',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        gap: 2,
+      }}>
+        <Box>
+          <Breadcrumbs items={breadcrumbItems} />
+          <Typography sx={{ fontWeight: 700, color: '#1C1C1E', fontSize: 20, lineHeight: 1.3, mt: 0.5 }}>
+            Catalog Management
+          </Typography>
+          <Typography variant="body2" sx={{ color: '#666666', mt: 0.5 }}>
+            {catalogItems.length} items · {categories.length} categories
+            {catalogError && (
+              <Box component="span" sx={{ color: 'error.main', ml: 1 }}>— {catalogError}</Box>
+            )}
+          </Typography>
+        </Box>
+        {!isMobile && (
+          <Button
+            variant="contained"
+            startIcon={<Add />}
+            onClick={handleAddItem}
+            disableElevation
+            sx={{
+              bgcolor: '#1976D2',
+              color: '#ffffff',
+              fontWeight: 600,
+              textTransform: 'none',
+              borderRadius: '8px',
+              px: 2.5,
+              py: 1,
+              boxShadow: 'none',
+              '&:hover': { bgcolor: '#1565C0', boxShadow: 'none' },
+            }}
+          >
+            Add {activeTab === 'items' ? 'Item' : 'Category'}
+          </Button>
+        )}
       </Box>
 
-      {/* Main Content */}
-      <Container maxWidth={false} sx={{ px: { xs: 2, sm: 3, md: 4 }, py: 3 }}>
-        <Paper elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 1 }}>
-          <Tabs tabs={tabs} value={activeTab} onChange={setActiveTab}>
-            {(value) => (
-              <Box sx={{ p: 3 }}>
-                {value === 'items' && (
-                  <Box>
-                    {/* Toolbar */}
-                    <Box mb={2}>
-                      <CatalogToolbar
-                        searchQuery={searchQuery}
-                        onSearchChange={setSearchQuery}
-                        viewMode={viewMode}
-                        onViewModeChange={setViewMode}
-                        sortBy={sortBy}
-                        onSortChange={setSortBy}
-                        onExport={handleExport}
-                        onImport={handleImport}
-                        onRefresh={handleRefresh}
-                      />
-                    </Box>
+      {/* Content Area */}
+      <Box sx={{ px: { xs: 2, sm: '32px' }, pt: 3, pb: 6 }}>
 
-                    {isMobile && activeFiltersCount > 0 && (
+        {/* Stat Cards */}
+        <Grid container spacing={2} sx={{ mb: 3 }}>
+          {/* Total Items */}
+          <Grid item xs={12} sm={4}>
+            <Box sx={{
+              bgcolor: '#ffffff',
+              border: '1px solid #e0e0e0',
+              borderRadius: '12px',
+              p: '20px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 2,
+              height: '100%',
+            }}>
+              <Box sx={{
+                width: 40,
+                height: 40,
+                borderRadius: '8px',
+                flexShrink: 0,
+                bgcolor: 'rgba(25,118,210,0.08)',
+                border: '1px solid rgba(25,118,210,0.2)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#1976D2',
+                '& svg': { fontSize: 20 },
+              }}>
+                <Inventory />
+              </Box>
+              <Box>
+                <Typography sx={{ fontWeight: 700, fontSize: 24, color: '#1C1C1E', lineHeight: 1, letterSpacing: '-0.02em', fontVariantNumeric: 'tabular-nums' }}>
+                  {catalogItems.length}
+                </Typography>
+                <Typography sx={{ fontSize: 12, color: '#666666', mt: 0.25, fontWeight: 500 }}>
+                  Total Items
+                </Typography>
+              </Box>
+            </Box>
+          </Grid>
+
+          {/* Categories */}
+          <Grid item xs={12} sm={4}>
+            <Box sx={{
+              bgcolor: '#ffffff',
+              border: '1px solid #e0e0e0',
+              borderRadius: '12px',
+              p: '20px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 2,
+              height: '100%',
+            }}>
+              <Box sx={{
+                width: 40,
+                height: 40,
+                borderRadius: '8px',
+                flexShrink: 0,
+                bgcolor: 'rgba(25,118,210,0.08)',
+                border: '1px solid rgba(25,118,210,0.2)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#1976D2',
+                '& svg': { fontSize: 20 },
+              }}>
+                <CategoryIcon />
+              </Box>
+              <Box>
+                <Typography sx={{ fontWeight: 700, fontSize: 24, color: '#1C1C1E', lineHeight: 1, letterSpacing: '-0.02em', fontVariantNumeric: 'tabular-nums' }}>
+                  {categories.length}
+                </Typography>
+                <Typography sx={{ fontSize: 12, color: '#666666', mt: 0.25, fontWeight: 500 }}>
+                  Categories
+                </Typography>
+              </Box>
+            </Box>
+          </Grid>
+
+          {/* Available Items */}
+          <Grid item xs={12} sm={4}>
+            <Box sx={{
+              bgcolor: '#ffffff',
+              border: '1px solid #e0e0e0',
+              borderRadius: '12px',
+              p: '20px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 2,
+              height: '100%',
+            }}>
+              <Box sx={{
+                width: 40,
+                height: 40,
+                borderRadius: '8px',
+                flexShrink: 0,
+                bgcolor: 'rgba(25,118,210,0.08)',
+                border: '1px solid rgba(25,118,210,0.2)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#1976D2',
+                '& svg': { fontSize: 20 },
+              }}>
+                <CheckCircleOutline />
+              </Box>
+              <Box>
+                <Typography sx={{ fontWeight: 700, fontSize: 24, color: '#1C1C1E', lineHeight: 1, letterSpacing: '-0.02em', fontVariantNumeric: 'tabular-nums' }}>
+                  {availableItemsCount}
+                </Typography>
+                <Typography sx={{ fontSize: 12, color: '#666666', mt: 0.25, fontWeight: 500 }}>
+                  Available Items
+                </Typography>
+              </Box>
+            </Box>
+          </Grid>
+        </Grid>
+
+        {/* Tab Bar */}
+        <Paper elevation={0} sx={{
+          bgcolor: '#ffffff',
+          border: '1px solid #e0e0e0',
+          borderRadius: '12px',
+          overflow: 'hidden',
+        }}>
+          {/* Tabs header */}
+          <Box sx={{ borderBottom: '1px solid #e0e0e0' }}>
+            <Tabs
+              tabs={tabs}
+              value={activeTab}
+              onChange={setActiveTab}
+            >
+              {(value) => (
+                <Box sx={{ p: 3 }}>
+                  {value === 'items' && (
+                    <Box>
+                      {/* Toolbar */}
                       <Box mb={2}>
-                        <Button
-                          fullWidth
-                          variant="outlined"
-                          startIcon={<FilterList />}
-                          onClick={() => setFilterDrawerOpen(true)}
-                          sx={{ textTransform: 'none' }}
-                        >
-                          Filters ({activeFiltersCount})
-                        </Button>
+                        <CatalogToolbar
+                          searchQuery={searchQuery}
+                          onSearchChange={setSearchQuery}
+                          viewMode={viewMode}
+                          onViewModeChange={setViewMode}
+                          sortBy={sortBy}
+                          onSortChange={setSortBy}
+                          onExport={handleExport}
+                          onImport={handleImport}
+                          onRefresh={handleRefresh}
+                        />
                       </Box>
-                    )}
 
-                    <Grid container spacing={2}>
-                      {!isMobile && (
-                        <Grid item xs={12} lg={3}>
-                          <CatalogFilters
-                            categories={categories}
-                            filters={filters}
-                            onFilterChange={setFilters}
-                            onReset={handleResetFilters}
-                            availableTags={availableTags}
-                          />
-                        </Grid>
+                      {isMobile && activeFiltersCount > 0 && (
+                        <Box mb={2}>
+                          <Button
+                            fullWidth
+                            variant="outlined"
+                            startIcon={<FilterList />}
+                            onClick={() => setFilterDrawerOpen(true)}
+                            sx={{
+                              textTransform: 'none',
+                              borderRadius: '8px',
+                              borderColor: '#e0e0e0',
+                              color: '#1C1C1E',
+                            }}
+                          >
+                            Filters ({activeFiltersCount})
+                          </Button>
+                        </Box>
                       )}
 
-                      <Grid item xs={12} lg={isMobile ? 12 : 9}>
-                        {filteredAndSortedItems.length > 0 && (
-                          <Paper variant="outlined" sx={{ p: 1.5, mb: 2 }}>
-                            <Stack direction="row" alignItems="center" justifyContent="space-between">
-                              <Stack direction="row" alignItems="center" spacing={1}>
-                                <Checkbox
-                                  checked={selectedItems.size === filteredAndSortedItems.length}
-                                  indeterminate={selectedItems.size > 0 && selectedItems.size < filteredAndSortedItems.length}
-                                  onChange={(e) => handleSelectAll(e.target.checked)}
-                                />
-                                <Typography variant="body2" color="text.secondary">
-                                  {selectedItems.size > 0 
-                                    ? `${selectedItems.size} selected`
-                                    : `${filteredAndSortedItems.length} items`
-                                  }
-                                </Typography>
+                      <Grid container spacing={2}>
+                        {!isMobile && (
+                          <Grid item xs={12} lg={3}>
+                            <CatalogFilters
+                              categories={categories}
+                              filters={filters}
+                              onFilterChange={setFilters}
+                              onReset={handleResetFilters}
+                              availableTags={availableTags}
+                            />
+                          </Grid>
+                        )}
+
+                        <Grid item xs={12} lg={isMobile ? 12 : 9}>
+                          {filteredAndSortedItems.length > 0 && (
+                            <Paper variant="outlined" sx={{ p: 1.5, mb: 2, borderRadius: '8px', borderColor: '#e0e0e0' }}>
+                              <Stack direction="row" alignItems="center" justifyContent="space-between">
+                                <Stack direction="row" alignItems="center" spacing={1}>
+                                  <Checkbox
+                                    checked={selectedItems.size === filteredAndSortedItems.length}
+                                    indeterminate={selectedItems.size > 0 && selectedItems.size < filteredAndSortedItems.length}
+                                    onChange={(e) => handleSelectAll(e.target.checked)}
+                                    sx={{ color: '#1976D2', '&.Mui-checked': { color: '#1976D2' } }}
+                                  />
+                                  <Typography variant="body2" sx={{ color: '#666666' }}>
+                                    {selectedItems.size > 0
+                                      ? `${selectedItems.size} selected`
+                                      : `${filteredAndSortedItems.length} items`
+                                    }
+                                  </Typography>
+                                </Stack>
+                                {selectedItems.size > 0 && (
+                                  <Button
+                                    size="small"
+                                    onClick={() => setSelectedItems(new Set())}
+                                    sx={{ textTransform: 'none', color: '#666666' }}
+                                  >
+                                    Clear
+                                  </Button>
+                                )}
                               </Stack>
-                              {selectedItems.size > 0 && (
-                                <Button size="small" onClick={() => setSelectedItems(new Set())}>
-                                  Clear
-                                </Button>
+                            </Paper>
+                          )}
+
+                          {filteredAndSortedItems.length === 0 ? (
+                            <CatalogEmptyState
+                              icon={<Inventory />}
+                              title="No items found"
+                              description="Try adjusting your filters or add a new item"
+                              actionLabel="Add Item"
+                              onAction={handleAddItem}
+                            />
+                          ) : (
+                            <DataGrid
+                              data={filteredAndSortedItems}
+                              columns={getGridColumns()}
+                              renderItem={(item) => (
+                                <Box position="relative">
+                                  <Checkbox
+                                    checked={selectedItems.has(item.id)}
+                                    onChange={(e) => handleSelectItem(item.id, e.target.checked)}
+                                    sx={{
+                                      position: 'absolute',
+                                      top: 8,
+                                      left: 8,
+                                      zIndex: 2,
+                                      backgroundColor: 'white',
+                                      borderRadius: 0.5,
+                                      '&:hover': { backgroundColor: 'white' },
+                                    }}
+                                  />
+                                  <CatalogItemCardAdmin
+                                    item={item}
+                                    categoryName={categories.find(c => c.id === item.categoryId)?.name}
+                                    onEdit={handleEditItem}
+                                    onDelete={() => handleDeleteItem(item)}
+                                    onToggleAvailability={handleToggleAvailability}
+                                    onImageUpload={handleImageUpload}
+                                  />
+                                </Box>
                               )}
-                            </Stack>
-                          </Paper>
-                        )}
-
-                        {filteredAndSortedItems.length === 0 ? (
-                          <CatalogEmptyState
-                            icon={<Inventory />}
-                            title="No items found"
-                            description="Try adjusting your filters or add a new item"
-                            actionLabel="Add Item"
-                            onAction={handleAddItem}
-                          />
-                        ) : (
-                          <DataGrid
-                            data={filteredAndSortedItems}
-                            columns={getGridColumns()}
-                            renderItem={(item) => (
-                              <Box position="relative">
-                                <Checkbox
-                                  checked={selectedItems.has(item.id)}
-                                  onChange={(e) => handleSelectItem(item.id, e.target.checked)}
-                                  sx={{
-                                    position: 'absolute',
-                                    top: 8,
-                                    left: 8,
-                                    zIndex: 2,
-                                    backgroundColor: 'white',
-                                    borderRadius: 0.5,
-                                    '&:hover': { backgroundColor: 'white' },
-                                  }}
-                                />
-                                <CatalogItemCardAdmin
-                                  item={item}
-                                  categoryName={categories.find(c => c.id === item.categoryId)?.name}
-                                  onEdit={handleEditItem}
-                                  onDelete={() => handleDeleteItem(item)}
-                                  onToggleAvailability={handleToggleAvailability}
-                                  onImageUpload={handleImageUpload}
-                                />
-                              </Box>
-                            )}
-                          />
-                        )}
+                            />
+                          )}
+                        </Grid>
                       </Grid>
-                    </Grid>
-                  </Box>
-                )}
+                    </Box>
+                  )}
 
-                {value === 'categories' && (
-                  <Box>
-                    {categories.length === 0 ? (
-                      <CatalogEmptyState
-                        icon={<CategoryIcon />}
-                        title="No categories yet"
-                        description="Create your first category to organize items"
-                        actionLabel="Add Category"
-                        onAction={handleAddItem}
-                      />
-                    ) : (
-                      <DataGrid
-                        data={categories}
-                        columns={{ xs: 12, sm: 6, md: 4, lg: 3 }}
-                        renderItem={(category) => (
-                          <CategoryCard
-                            category={category}
-                            itemCount={catalogItems.filter(i => i.categoryId === category.id).length}
-                            onClick={() => handleEditCategory(category)}
-                          />
-                        )}
-                      />
-                    )}
-                  </Box>
-                )}
-              </Box>
-            )}
-          </Tabs>
+                  {value === 'categories' && (
+                    <Box>
+                      {categories.length === 0 ? (
+                        <CatalogEmptyState
+                          icon={<CategoryIcon />}
+                          title="No categories yet"
+                          description="Create your first category to organize items"
+                          actionLabel="Add Category"
+                          onAction={handleAddCategory}
+                        />
+                      ) : (
+                        <DataGrid
+                          data={categories}
+                          columns={{ xs: 12, sm: 6, md: 4, lg: 3 }}
+                          renderItem={(category) => (
+                            <CategoryCard
+                              category={category}
+                              itemCount={catalogItems.filter(i => i.categoryId === category.id).length}
+                              onClick={() => handleEditCategory(category)}
+                            />
+                          )}
+                        />
+                      )}
+                    </Box>
+                  )}
+                </Box>
+              )}
+            </Tabs>
+          </Box>
         </Paper>
-      </Container>
+      </Box>
 
+      {/* Mobile FAB */}
       {isMobile && (
         <Fab
-          color="primary"
-          sx={{ position: 'fixed', bottom: 80, right: 16 }}
+          sx={{
+            position: 'fixed',
+            bottom: 80,
+            right: 16,
+            bgcolor: '#1976D2',
+            color: '#ffffff',
+            '&:hover': { bgcolor: '#1565C0' },
+          }}
           onClick={handleAddItem}
         >
           <Add />

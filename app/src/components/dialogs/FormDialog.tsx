@@ -57,29 +57,18 @@ export const FormDialog: React.FC<FormDialogProps> = ({
         },
       }}
     >
-      {/* Dark gradient header */}
+      {/* Clean white header */}
       <Box
         sx={{
-          background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 60%, #312e81 100%)',
+          bgcolor: '#ffffff',
+          borderBottom: '1px solid #e0e0e0',
           px: 3,
           pt: 3,
           pb: 3,
           position: 'relative',
-          overflow: 'hidden',
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: -60,
-            right: -40,
-            width: 180,
-            height: 180,
-            borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(99,102,241,0.25) 0%, transparent 70%)',
-            pointerEvents: 'none',
-          },
         }}
       >
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           {/* Left: icon + title/subtitle */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
             <Box
@@ -89,25 +78,25 @@ export const FormDialog: React.FC<FormDialogProps> = ({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                bgcolor: alpha('#ffffff', 0.12),
-                border: `1px solid ${alpha('#ffffff', 0.20)}`,
+                bgcolor: alpha('#1976D2', 0.08),
+                border: `1px solid ${alpha('#1976D2', 0.20)}`,
                 borderRadius: 2,
                 flexShrink: 0,
               }}
             >
-              <SettingsOutlined sx={{ color: '#ffffff', fontSize: 20 }} />
+              <SettingsOutlined sx={{ color: '#1976D2', fontSize: 20 }} />
             </Box>
             <Box>
               <Typography
                 variant="h6"
-                sx={{ color: '#ffffff', fontWeight: 700, lineHeight: 1.2 }}
+                sx={{ color: '#1C1C1E', fontWeight: 700, lineHeight: 1.2 }}
               >
                 {title}
               </Typography>
               {subtitle && (
                 <Typography
                   variant="caption"
-                  sx={{ color: 'rgba(199,210,254,0.7)', fontSize: '0.75rem', lineHeight: 1.4 }}
+                  sx={{ color: '#64748b', fontSize: '0.75rem', lineHeight: 1.4 }}
                 >
                   {subtitle}
                 </Typography>
@@ -120,8 +109,8 @@ export const FormDialog: React.FC<FormDialogProps> = ({
             onClick={onClose}
             size="small"
             sx={{
-              color: alpha('#ffffff', 0.7),
-              '&:hover': { bgcolor: alpha('#ffffff', 0.10) },
+              color: '#64748b',
+              '&:hover': { bgcolor: 'rgba(0,0,0,0.04)' },
             }}
           >
             <Close fontSize="small" />
@@ -164,8 +153,8 @@ export const FormDialog: React.FC<FormDialogProps> = ({
             fontWeight: 700,
             borderRadius: 2,
             px: 3,
-            bgcolor: '#0f172a',
-            '&:hover': { bgcolor: '#1e293b' },
+            bgcolor: '#1976D2',
+            '&:hover': { bgcolor: '#1565C0' },
             '&.Mui-disabled': { bgcolor: '#e2e8f0' },
           }}
         >

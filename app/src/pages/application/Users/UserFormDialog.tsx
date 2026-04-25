@@ -37,7 +37,7 @@ import {
   Store,
 } from '@mui/icons-material';
 import { applicationUserService } from '../../../services/application/user';
-import { roleService } from '../../../services/auth/role';
+import { apiService } from '../../../utils/api';
 
 // ─── Design tokens ──────────────────────────────────────────────────────────
 const C = {
@@ -167,23 +167,21 @@ const UserFormDialog: React.FC<UserFormDialogProps> = ({
   const loadRoles = async () => {
     try {
       setLoadingRoles(true);
-      const response = await roleService.getRoles({ page: 1, page_size: 100 });
+      // GET /application/roles — returns application roles only (role_type=1)
+      const response = await apiService.get('/application/roles', {
+        params: { page: 1, page_size: 100 },
+      });
+      const raw = (response.data as any);
       let rolesArray: any[] = [];
-      if (response.data) {
-        if (Array.isArray(response.data)) {
-          rolesArray = response.data;
-        } else if (typeof response.data === 'object' && 'items' in response.data && Array.isArray((response.data as any).items)) {
-          rolesArray = (response.data as any).items;
-        }
+      if (Array.isArray(raw)) {
+        rolesArray = raw;
+      } else if (Array.isArray(raw?.data)) {
+        rolesArray = raw.data;
+      } else if (Array.isArray(raw?.items)) {
+        rolesArray = raw.items;
       }
-      // FIX: robust role_type check — numeric 1 only (no string '1' comparison)
-      const applicationRoles = rolesArray.filter((role: any) =>
-        role.role_type === 1 || role.roleType === 1
-      );
-      setRoles(applicationRoles);
-    } catch (error: any) {
-      console.error('Error loading roles:', error);
-      // FIX: surface the error to the user so they know why the dropdown is empty
+      setRoles(rolesArray);
+    } catch {
       setFormError('Failed to load roles. Please close and try again.');
       setRoles([]);
     } finally {
@@ -197,14 +195,13 @@ const UserFormDialog: React.FC<UserFormDialogProps> = ({
       setFormError('');
 
       if (editingUser) {
-        // FIX: include role_id in the update payload so role changes are persisted
         const updateData: any = {
-          firstName: formData.firstName,
-          lastName: formData.lastName,
+          first_name: formData.firstName,
+          last_name: formData.lastName,
           phone: formData.phone,
         };
         if (formData.role_id) {
-          updateData.roleId = formData.role_id;
+          updateData.role_id = Number(formData.role_id);
         }
         await applicationUserService.updateUser(editingUser.id, updateData);
       } else {
@@ -214,15 +211,17 @@ const UserFormDialog: React.FC<UserFormDialogProps> = ({
           return;
         }
 
-        const createData = {
+        const createData: any = {
           email: formData.email,
           password: formData.password,
-          firstName: formData.firstName,
-          lastName: formData.lastName,
+          first_name: formData.firstName,
+          last_name: formData.lastName,
           phone: formData.phone,
-          roleId: formData.role_id,
-          organizationId: formData.venueId || undefined,
+          role_id: Number(formData.role_id),
         };
+        if (formData.venueId) {
+          createData.persona_ids = [Number(formData.venueId)];
+        }
         await applicationUserService.createUser(createData);
       }
 

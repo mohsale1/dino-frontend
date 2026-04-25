@@ -143,7 +143,7 @@ export const OrdersManagementPage: React.FC = () => {
           <Grid item xs={12} sm={6} md={4} key={order.id}>
             <OrderCard
               order={order}
-              onClick={() => console.log('Order clicked:', order.id)}
+              onClick={() => {}}
             />
           </Grid>
         ))}

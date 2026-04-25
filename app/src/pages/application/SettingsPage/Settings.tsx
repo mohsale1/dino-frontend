@@ -2,92 +2,98 @@ import React, { useState } from 'react';
 import {
   Box,
   Typography,
+  Tabs,
+  Tab,
   Paper,
-  Grid,
-  Switch,
-  FormControlLabel,
-  TextField,
-  Button,
-  Divider,
   Snackbar,
   Alert,
 } from '@mui/material';
 import {
-  Settings as SettingsIcon,
-  Save,
-  SecurityOutlined,
-  EmailOutlined,
-  PaymentOutlined,
+  PersonOutlined,
+  BusinessOutlined,
+  LockOutlined,
+  CalendarToday,
 } from '@mui/icons-material';
+import { useAuth } from '../../../contexts/common/Auth';
+import { useUserData } from '../../../contexts/application/UserData';
+import { getUserFirstName } from '../../../utils/data/userUtils';
+import ProfileSection from './components/ProfileSection';
+import SecuritySection from './components/SecuritySection';
+import WorkspaceSection from './components/WorkspaceSection';
 
-const textFieldSx = {
-  '& .MuiOutlinedInput-root.Mui-focused fieldset': { borderColor: '#00A6CA' },
-  '& label.Mui-focused': { color: '#00A6CA' },
+const ROLE_DISPLAY: Record<string, string> = {
+  superadmin: 'Super Admin',
+  admin: 'Admin',
+  operator: 'Operator',
+  customer: 'Customer',
 };
 
-const switchSx = {
-  '& .MuiSwitch-switchBase.Mui-checked': { color: '#00A6CA' },
-  '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { bgcolor: '#00A6CA' },
-};
-
-const sectionIconBoxSx = {
-  width: 36,
-  height: 36,
-  borderRadius: 2,
-  bgcolor: 'rgba(0,166,202,0.10)',
-  border: '1px solid rgba(0,166,202,0.2)',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-};
+const SECTIONS = [
+  { id: 'profile',   label: 'Profile',   icon: <PersonOutlined fontSize="small" />   },
+  { id: 'workspace', label: 'Workspace', icon: <BusinessOutlined fontSize="small" /> },
+  { id: 'security',  label: 'Security',  icon: <LockOutlined fontSize="small" />     },
+];
 
 const Settings: React.FC = () => {
-  // General
-  const [systemName, setSystemName] = useState('Dino Platform');
-  const [supportEmail, setSupportEmail] = useState('support@dino.in');
-  const [adminEmail, setAdminEmail] = useState('admin@dino.in');
-  const [enableRegistration, setEnableRegistration] = useState(true);
-  const [enableEmailNotifications, setEnableEmailNotifications] = useState(true);
-  const [maintenanceMode, setMaintenanceMode] = useState(false);
+  const { user } = useAuth();
+  useUserData(); // keep provider active
 
-  // Security
-  const [sessionTimeout, setSessionTimeout] = useState('30');
-  const [maxLoginAttempts, setMaxLoginAttempts] = useState('5');
-  const [passwordMinLength, setPasswordMinLength] = useState('8');
-  const [requireStrongPasswords, setRequireStrongPasswords] = useState(true);
-  const [enableTwoFactor, setEnableTwoFactor] = useState(true);
-  const [enableJWT, setEnableJWT] = useState(true);
+  const [activeTab, setActiveTab] = useState(0);
+  const [snackbar, setSnackbar] = useState<{
+    open: boolean;
+    message: string;
+    severity: 'success' | 'error' | 'info' | 'warning';
+  }>({ open: false, message: '', severity: 'success' });
 
-  // Email
-  const [smtpHost, setSmtpHost] = useState('smtp.gmail.com');
-  const [smtpPort, setSmtpPort] = useState('587');
-  const [smtpUsername, setSmtpUsername] = useState('noreply@dino.in');
-  const [smtpPassword, setSmtpPassword] = useState('');
-  const [useTLS, setUseTLS] = useState(true);
+  const firstName = user ? getUserFirstName(user) : '';
+  const roleLabel = (() => {
+    const r = user?.role;
+    if (!r) return '';
+    if (typeof r === 'string') return ROLE_DISPLAY[r] ?? r;
+    return (r as any).displayName || (r as any).name || '';
+  })();
 
-  // Billing
-  const [currency, setCurrency] = useState('USD');
-  const [taxRate, setTaxRate] = useState('10');
-  const [trialPeriod, setTrialPeriod] = useState('14');
-  const [enableFreeTrial, setEnableFreeTrial] = useState(true);
-  const [autoCharge, setAutoCharge] = useState(true);
-
-  // Snackbar
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-
-  const handleSave = () => {
-    setSnackbarOpen(true);
+  const handleSave = async (_data: unknown, section: string) => {
+    try {
+      setSnackbar({ open: true, message: `${section} settings saved successfully`, severity: 'success' });
+    } catch {
+      setSnackbar({ open: true, message: `Failed to save ${section} settings`, severity: 'error' });
+    }
   };
+
+  const handleSnackbarClose = () =>
+    setSnackbar((prev) => ({ ...prev, open: false }));
+
+  const renderSection = () => {
+    switch (SECTIONS[activeTab]?.id) {
+      case 'profile':
+        return <ProfileSection />;
+      case 'workspace':
+        return <WorkspaceSection onSave={() => handleSave(null, 'Workspace')} />;
+      case 'security':
+        return <SecuritySection />;
+      default:
+        return null;
+    }
+  };
+
+  const dateLabel = new Date().toLocaleDateString('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
 
   return (
     <Box sx={{ width: '100%', minHeight: '100vh', bgcolor: '#f8fafc' }}>
-      {/* Page Header */}
+
+      {/* ── Page Header ── */}
       <Box
         sx={{
           bgcolor: '#ffffff',
-          px: { xs: 3, sm: 4, md: 5 },
-          pt: 3,
-          pb: 3,
+          px: { xs: 2, sm: '32px' },
+          pt: '24px',
+          pb: '20px',
           borderBottom: '1px solid #e0e0e0',
           display: 'flex',
           alignItems: 'center',
@@ -97,349 +103,97 @@ const Settings: React.FC = () => {
         }}
       >
         <Box>
-          <Typography sx={{ fontSize: '22px', fontWeight: 700, color: '#1C1C1E', letterSpacing: '-0.3px' }}>
-            System Settings
+          <Typography sx={{ fontWeight: 700, color: '#1C1C1E', fontSize: 20, lineHeight: 1.3 }}>
+            Settings
           </Typography>
-          <Typography sx={{ fontSize: '13px', color: '#666666', mt: 0.5 }}>
-            Configure platform-wide settings
+          <Typography variant="body2" sx={{ color: '#666666', mt: 0.5 }}>
+            {[firstName, roleLabel].filter(Boolean).join(' · ') || 'Account settings'}
           </Typography>
         </Box>
 
-        <Button
-          variant="contained"
-          startIcon={<Save />}
-          onClick={handleSave}
+        {/* Date chip */}
+        <Box
           sx={{
-            bgcolor: '#00A6CA',
-            color: '#ffffff',
-            textTransform: 'none',
-            fontWeight: 600,
-            borderRadius: 2,
-            boxShadow: 'none',
-            '&:hover': { bgcolor: '#005F8D', boxShadow: 'none' },
+            display: 'flex',
+            alignItems: 'center',
+            gap: 0.75,
+            bgcolor: '#f4f4f4',
+            borderRadius: '8px',
+            px: 1.5,
+            py: 0.75,
           }}
         >
-          Save Changes
-        </Button>
+          <CalendarToday sx={{ fontSize: 14, color: '#666666' }} />
+          <Typography sx={{ fontSize: 12, color: '#666666', fontWeight: 500 }}>
+            {dateLabel}
+          </Typography>
+        </Box>
       </Box>
 
-      {/* Content */}
-      <Box sx={{ px: { xs: 2, sm: 3, md: 5 }, pt: 3, pb: 6 }}>
-        <Grid container spacing={3}>
-          {/* General Settings */}
-          <Grid item xs={12} md={6}>
-            <Paper
-              elevation={0}
-              sx={{
-                p: 3,
-                border: '1px solid #e0e0e0',
-                borderRadius: 3,
-                bgcolor: '#ffffff',
-                height: '100%',
-              }}
-            >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
-                <Box sx={sectionIconBoxSx}>
-                  <SettingsIcon sx={{ fontSize: 18, color: '#00A6CA' }} />
-                </Box>
-                <Typography variant="h6" sx={{ fontWeight: 700, color: '#1C1C1E', fontSize: '0.9375rem' }}>
-                  General Settings
-                </Typography>
-              </Box>
+      {/* ── Tab Bar ── */}
+      <Paper
+        elevation={0}
+        sx={{
+          borderRadius: 0,
+          border: 'none',
+          borderBottom: '1px solid #e0e0e0',
+          bgcolor: '#ffffff',
+        }}
+      >
+        <Box sx={{ px: { xs: 1, sm: 2, md: '32px' } }}>
+          <Tabs
+            value={activeTab}
+            onChange={(_e, val) => setActiveTab(val)}
+            variant="scrollable"
+            scrollButtons="auto"
+            TabIndicatorProps={{
+              style: { backgroundColor: '#1976D2', height: 3 },
+            }}
+            sx={{
+              minHeight: 52,
+              '& .MuiTab-root': {
+                textTransform: 'none',
+                fontWeight: 600,
+                fontSize: '0.875rem',
+                minHeight: 52,
+                color: '#666666',
+                gap: 0.75,
+                '&.Mui-selected': {
+                  color: '#1C1C1E',
+                },
+              },
+            }}
+          >
+            {SECTIONS.map((section) => (
+              <Tab
+                key={section.id}
+                label={section.label}
+                icon={section.icon}
+                iconPosition="start"
+              />
+            ))}
+          </Tabs>
+        </Box>
+      </Paper>
 
-              <TextField
-                fullWidth
-                label="System Name"
-                value={systemName}
-                onChange={(e) => setSystemName(e.target.value)}
-                sx={{ mb: 2, ...textFieldSx }}
-              />
-              <TextField
-                fullWidth
-                label="Support Email"
-                value={supportEmail}
-                onChange={(e) => setSupportEmail(e.target.value)}
-                sx={{ mb: 2, ...textFieldSx }}
-              />
-              <TextField
-                fullWidth
-                label="Admin Email"
-                value={adminEmail}
-                onChange={(e) => setAdminEmail(e.target.value)}
-                sx={{ mb: 2, ...textFieldSx }}
-              />
-
-              <Divider sx={{ my: 2 }} />
-
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={enableRegistration}
-                    onChange={(e) => setEnableRegistration(e.target.checked)}
-                    sx={switchSx}
-                  />
-                }
-                label="Enable User Registration"
-                sx={{ mb: 1 }}
-              />
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={enableEmailNotifications}
-                    onChange={(e) => setEnableEmailNotifications(e.target.checked)}
-                    sx={switchSx}
-                  />
-                }
-                label="Enable Email Notifications"
-                sx={{ mb: 1 }}
-              />
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={maintenanceMode}
-                    onChange={(e) => setMaintenanceMode(e.target.checked)}
-                    sx={switchSx}
-                  />
-                }
-                label="Maintenance Mode"
-              />
-            </Paper>
-          </Grid>
-
-          {/* Security Settings */}
-          <Grid item xs={12} md={6}>
-            <Paper
-              elevation={0}
-              sx={{
-                p: 3,
-                border: '1px solid #e0e0e0',
-                borderRadius: 3,
-                bgcolor: '#ffffff',
-                height: '100%',
-              }}
-            >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
-                <Box sx={sectionIconBoxSx}>
-                  <SecurityOutlined sx={{ fontSize: 18, color: '#00A6CA' }} />
-                </Box>
-                <Typography variant="h6" sx={{ fontWeight: 700, color: '#1C1C1E', fontSize: '0.9375rem' }}>
-                  Security Settings
-                </Typography>
-              </Box>
-
-              <TextField
-                fullWidth
-                label="Session Timeout (minutes)"
-                type="number"
-                value={sessionTimeout}
-                onChange={(e) => setSessionTimeout(e.target.value)}
-                sx={{ mb: 2, ...textFieldSx }}
-              />
-              <TextField
-                fullWidth
-                label="Max Login Attempts"
-                type="number"
-                value={maxLoginAttempts}
-                onChange={(e) => setMaxLoginAttempts(e.target.value)}
-                sx={{ mb: 2, ...textFieldSx }}
-              />
-              <TextField
-                fullWidth
-                label="Password Min Length"
-                type="number"
-                value={passwordMinLength}
-                onChange={(e) => setPasswordMinLength(e.target.value)}
-                sx={{ mb: 2, ...textFieldSx }}
-              />
-
-              <Divider sx={{ my: 2 }} />
-
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={requireStrongPasswords}
-                    onChange={(e) => setRequireStrongPasswords(e.target.checked)}
-                    sx={switchSx}
-                  />
-                }
-                label="Require Strong Passwords"
-                sx={{ mb: 1 }}
-              />
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={enableTwoFactor}
-                    onChange={(e) => setEnableTwoFactor(e.target.checked)}
-                    sx={switchSx}
-                  />
-                }
-                label="Enable Two-Factor Authentication"
-                sx={{ mb: 1 }}
-              />
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={enableJWT}
-                    onChange={(e) => setEnableJWT(e.target.checked)}
-                    sx={switchSx}
-                  />
-                }
-                label="Enable JWT Authentication"
-              />
-            </Paper>
-          </Grid>
-
-          {/* Email Settings */}
-          <Grid item xs={12} md={6}>
-            <Paper
-              elevation={0}
-              sx={{
-                p: 3,
-                border: '1px solid #e0e0e0',
-                borderRadius: 3,
-                bgcolor: '#ffffff',
-                height: '100%',
-              }}
-            >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
-                <Box sx={sectionIconBoxSx}>
-                  <EmailOutlined sx={{ fontSize: 18, color: '#00A6CA' }} />
-                </Box>
-                <Typography variant="h6" sx={{ fontWeight: 700, color: '#1C1C1E', fontSize: '0.9375rem' }}>
-                  Email Configuration
-                </Typography>
-              </Box>
-
-              <TextField
-                fullWidth
-                label="SMTP Host"
-                value={smtpHost}
-                onChange={(e) => setSmtpHost(e.target.value)}
-                sx={{ mb: 2, ...textFieldSx }}
-              />
-              <TextField
-                fullWidth
-                label="SMTP Port"
-                type="number"
-                value={smtpPort}
-                onChange={(e) => setSmtpPort(e.target.value)}
-                sx={{ mb: 2, ...textFieldSx }}
-              />
-              <TextField
-                fullWidth
-                label="SMTP Username"
-                value={smtpUsername}
-                onChange={(e) => setSmtpUsername(e.target.value)}
-                sx={{ mb: 2, ...textFieldSx }}
-              />
-              <TextField
-                fullWidth
-                label="SMTP Password"
-                type="password"
-                value={smtpPassword}
-                onChange={(e) => setSmtpPassword(e.target.value)}
-                sx={{ mb: 2, ...textFieldSx }}
-              />
-
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={useTLS}
-                    onChange={(e) => setUseTLS(e.target.checked)}
-                    sx={switchSx}
-                  />
-                }
-                label="Use TLS"
-              />
-            </Paper>
-          </Grid>
-
-          {/* Billing Settings */}
-          <Grid item xs={12} md={6}>
-            <Paper
-              elevation={0}
-              sx={{
-                p: 3,
-                border: '1px solid #e0e0e0',
-                borderRadius: 3,
-                bgcolor: '#ffffff',
-                height: '100%',
-              }}
-            >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
-                <Box sx={sectionIconBoxSx}>
-                  <PaymentOutlined sx={{ fontSize: 18, color: '#00A6CA' }} />
-                </Box>
-                <Typography variant="h6" sx={{ fontWeight: 700, color: '#1C1C1E', fontSize: '0.9375rem' }}>
-                  Billing Configuration
-                </Typography>
-              </Box>
-
-              <TextField
-                fullWidth
-                label="Currency"
-                value={currency}
-                onChange={(e) => setCurrency(e.target.value)}
-                sx={{ mb: 2, ...textFieldSx }}
-              />
-              <TextField
-                fullWidth
-                label="Tax Rate (%)"
-                type="number"
-                value={taxRate}
-                onChange={(e) => setTaxRate(e.target.value)}
-                sx={{ mb: 2, ...textFieldSx }}
-              />
-              <TextField
-                fullWidth
-                label="Trial Period (days)"
-                type="number"
-                value={trialPeriod}
-                onChange={(e) => setTrialPeriod(e.target.value)}
-                sx={{ mb: 2, ...textFieldSx }}
-              />
-
-              <Divider sx={{ my: 2 }} />
-
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={enableFreeTrial}
-                    onChange={(e) => setEnableFreeTrial(e.target.checked)}
-                    sx={switchSx}
-                  />
-                }
-                label="Enable Free Trial"
-                sx={{ mb: 1 }}
-              />
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={autoCharge}
-                    onChange={(e) => setAutoCharge(e.target.checked)}
-                    sx={switchSx}
-                  />
-                }
-                label="Auto-charge on Trial End"
-              />
-            </Paper>
-          </Grid>
-        </Grid>
+      {/* ── Content Area ── */}
+      <Box sx={{ px: { xs: 2, sm: '32px' }, pt: 3, pb: 6 }}>
+        {renderSection()}
       </Box>
 
+      {/* ── Snackbar ── */}
       <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={3000}
-        onClose={() => setSnackbarOpen(false)}
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
       >
         <Alert
-          onClose={() => setSnackbarOpen(false)}
-          severity="success"
-          variant="filled"
-          sx={{ fontWeight: 600 }}
+          severity={snackbar.severity}
+          onClose={handleSnackbarClose}
+          sx={{ boxShadow: '0 4px 12px rgba(0,0,0,0.15)', borderRadius: 1 }}
         >
-          Settings saved successfully.
+          {snackbar.message}
         </Alert>
       </Snackbar>
     </Box>

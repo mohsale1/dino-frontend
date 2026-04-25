@@ -1,13 +1,14 @@
 /**
  * User Management Page
  *
- * Hero + glassmorphism stats + full-width table (md+) + mobile card list (xs/sm),
- * role-colored per ROLE_COLORS. Table layout aligned with system UserManagement.
+ * Light system UI pattern: white header bar, stat cards, toolbar, table/mobile cards.
+ * All business logic (data fetching, filtering, pagination, dialogs) unchanged.
  */
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Box,
+  Grid,
   MenuItem,
   Typography,
   Paper,
@@ -30,8 +31,8 @@ import {
   Select,
   FormControl,
 } from '@mui/material';
-import { alpha, useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
+import { useTheme } from '@mui/material/styles';
 import {
   Add as AddIcon,
   Search as SearchIcon,
@@ -41,7 +42,6 @@ import {
   Block as BlockIcon,
   AdminPanelSettings as AdminIcon,
   Edit as EditIcon,
-  CalendarToday as CalendarTodayIcon,
   FilterAltOutlined,
 } from '@mui/icons-material';
 import { useUserData } from '../../contexts/application/UserData';
@@ -49,21 +49,6 @@ import { usePermissions } from '../../hooks/usePermissions';
 import { useAuth } from '../../contexts/common/Auth';
 import { applicationUserService } from '../../services/application/user';
 import UserFormDialog from './Users/UserFormDialog';
-import { ROLE_COLORS } from '../../constants/app';
-
-// ─── Design tokens (mirrors system C object) ─────────────────────────────────
-const C = {
-  dark0:   '#0f172a',
-  dark1:   '#1e293b',
-  slate:   '#64748b',
-  muted:   '#94a3b8',
-  border:  '#e2e8f0',
-  surface: '#ffffff',
-  bg:      '#f1f5f9',
-  emerald: '#10b981',
-  rose:    '#f43f5e',
-  amber:   '#f59e0b',
-};
 
 // ---------------------------------------------------------------------------
 // useCountUp hook
@@ -86,47 +71,40 @@ const useCountUp = (target: number, duration = 900) => {
 };
 
 // ---------------------------------------------------------------------------
-// HeroStat component
+// StatCard component — light system UI version
 // ---------------------------------------------------------------------------
-const HeroStat: React.FC<{
+const StatCard: React.FC<{
   label: string;
   value: number;
   icon: React.ReactElement;
-  roleKey: 'Owner' | 'Manager' | 'User';
-}> = ({ label, value, icon, roleKey }) => {
+}> = ({ label, value, icon }) => {
   const animated = useCountUp(value);
-  const rc = ROLE_COLORS[roleKey];
   return (
     <Box
       sx={{
-        width: '100%',
-        px: 2.5,
-        py: 2,
-        borderRadius: 2.5,
-        bgcolor: alpha('#ffffff', 0.07),
-        border: `1px solid ${alpha('#ffffff', 0.12)}`,
-        backdropFilter: 'blur(8px)',
+        bgcolor: '#ffffff',
+        border: '1px solid #e0e0e0',
+        borderRadius: '12px',
+        p: '20px',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'center',
         gap: 2,
-        transition: 'background-color 0.2s',
-        '&:hover': { bgcolor: alpha('#ffffff', 0.11) },
+        height: '100%',
       }}
     >
       <Box
         sx={{
-          width: 36,
-          height: 36,
-          borderRadius: 1.5,
+          width: 40,
+          height: 40,
+          borderRadius: '8px',
           flexShrink: 0,
-          bgcolor: alpha('#ffffff', 0.1),
-          border: `1px solid ${alpha('#ffffff', 0.15)}`,
+          bgcolor: 'rgba(25,118,210,0.08)',
+          border: '1px solid rgba(25,118,210,0.2)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          color: alpha(rc.chipText, 0.9),
-          '& svg': { fontSize: 18 },
+          color: '#1976D2',
+          '& svg': { fontSize: 20 },
         }}
       >
         {icon}
@@ -135,16 +113,16 @@ const HeroStat: React.FC<{
         <Typography
           sx={{
             fontWeight: 700,
-            color: rc.statValue,
-            fontSize: { xs: '1.35rem', md: '1.6rem' },
+            fontSize: 24,
+            color: '#1C1C1E',
             lineHeight: 1,
-            letterSpacing: '-0.03em',
+            letterSpacing: '-0.02em',
             fontVariantNumeric: 'tabular-nums',
           }}
         >
           {animated}
         </Typography>
-        <Typography variant="caption" sx={{ color: rc.statLabel, fontSize: '0.75rem', fontWeight: 500 }}>
+        <Typography sx={{ fontSize: 12, color: '#666666', mt: 0.25, fontWeight: 500 }}>
           {label}
         </Typography>
       </Box>
@@ -153,7 +131,7 @@ const HeroStat: React.FC<{
 };
 
 // ---------------------------------------------------------------------------
-// getRoleChipStyle — for mobile cards only
+// getRoleChipStyle
 // ---------------------------------------------------------------------------
 const getRoleChipStyle = (roleName: string) => {
   const n = (roleName || '').toLowerCase();
@@ -177,7 +155,7 @@ const UserManagement: React.FC = () => {
   const { canCreateUsers } = usePermissions();
   const { user, userPermissions } = useAuth();
 
-  // Role detection
+  // Role detection (kept for any downstream use)
   const rawRole = (
     userPermissions?.role?.name ||
     (user as any)?.role?.name ||
@@ -190,25 +168,25 @@ const UserManagement: React.FC = () => {
       : rawRole.includes('manager') || rawRole.includes('admin')
       ? 'Manager'
       : 'User';
-  const rc = ROLE_COLORS[roleKey];
+  void roleKey; // suppress unused warning — kept for future use
 
   // State
-  const [users, setUsers]           = useState<any[]>([]);
-  const [loading, setLoading]       = useState(false);
-  const [openDialog, setOpenDialog] = useState(false);
+  const [users, setUsers]             = useState<any[]>([]);
+  const [loading, setLoading]         = useState(false);
+  const [openDialog, setOpenDialog]   = useState(false);
   const [editingUser, setEditingUser] = useState<any | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterRole, setFilterRole] = useState('');
+  const [searchTerm, setSearchTerm]   = useState('');
+  const [filterRole, setFilterRole]   = useState('');
   const [showInactive, setShowInactive] = useState(false);
-  const [page, setPage]             = useState(0);
+  const [page, setPage]               = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [snackbar, setSnackbar]     = useState({
+  const [snackbar, setSnackbar]       = useState({
     open: false, message: '', severity: 'success' as 'success' | 'error',
   });
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Debounce searchTerm into debouncedSearch with 300ms delay
+  // Debounce searchTerm → debouncedSearch (300 ms)
   useEffect(() => {
     if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
     searchTimerRef.current = setTimeout(() => {
@@ -219,14 +197,14 @@ const UserManagement: React.FC = () => {
     };
   }, [searchTerm]);
 
-  // API — guard on workspaceId so we never fire before UserDataContext has resolved
+  // API — guard on workspaceId
   const loadUsers = useCallback(async () => {
     if (!currentWorkspace?.id) return;
     try {
       setLoading(true);
       const filters: any = { workspaceId: currentWorkspace.id };
-      if (currentVenue?.id) filters.organizationId = currentVenue.id;
-      if (debouncedSearch)  filters.search = debouncedSearch;
+      if (currentVenue?.id)   filters.organizationId = currentVenue.id;
+      if (debouncedSearch)    filters.search = debouncedSearch;
       const usersData = await applicationUserService.getUsers(1, 100, filters);
       setUsers(usersData);
     } catch (error: any) {
@@ -254,9 +232,9 @@ const UserManagement: React.FC = () => {
   const handleToggleUserStatus = async (userId: string, currentStatus: boolean) => {
     try {
       if (currentStatus) {
-        await applicationUserService.deactivateUser(userId);
+        await applicationUserService.deactivateUser(Number(userId));
       } else {
-        await applicationUserService.activateUser(userId);
+        await applicationUserService.activateUser(Number(userId));
       }
       setSnackbar({ open: true, message: 'User status updated', severity: 'success' });
       loadUsers();
@@ -265,9 +243,8 @@ const UserManagement: React.FC = () => {
     }
   };
 
-  // Derived — trust API for search; apply only role filter and status filter client-side
+  // Derived — API handles search; client applies role + status filters
   const filteredUsers = users.filter(u => {
-    // FIX: case-insensitive role comparison
     const matchesRole   = !filterRole || u.role?.name?.toLowerCase() === filterRole.toLowerCase();
     const matchesActive = showInactive || u.isActive;
     return matchesRole && matchesActive;
@@ -281,262 +258,240 @@ const UserManagement: React.FC = () => {
   }).length;
 
   const paginatedUsers = filteredUsers.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
-  const today = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-
   const hasFilters = !!(searchTerm || filterRole || showInactive);
 
   // ---------------------------------------------------------------------------
   // Render
   // ---------------------------------------------------------------------------
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100%', bgcolor: C.bg }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', bgcolor: '#f8fafc' }}>
 
-      {/* ── Hero ── */}
+      {/* ── Page Header ── */}
       <Box
         sx={{
-          position: 'relative',
-          background: rc.gradient,
-          px: { xs: 2, sm: 4, md: 6 },
-          pt: { xs: 2.5, md: 4 },
-          pb: { xs: 2.5, md: 4 },
-          '&::before': {
-            content: '""', position: 'absolute', top: -100, right: -60,
-            width: 360, height: 360, borderRadius: '50%',
-            background: `radial-gradient(circle, ${rc.glowA} 0%, transparent 70%)`,
-            pointerEvents: 'none',
-          },
-          '&::after': {
-            content: '""', position: 'absolute', bottom: -80, left: '25%',
-            width: 280, height: 280, borderRadius: '50%',
-            background: `radial-gradient(circle, ${rc.glowB} 0%, transparent 70%)`,
-            pointerEvents: 'none',
-          },
+          bgcolor: '#ffffff',
+          px: { xs: 2, sm: '32px' },
+          pt: '24px',
+          pb: '20px',
+          borderBottom: '1px solid #e0e0e0',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: 2,
         }}
       >
-        {/* Grid overlay */}
-        <Box sx={{
-          position: 'absolute', inset: 0,
-          backgroundImage: `linear-gradient(${alpha('#fff', 0.03)} 1px, transparent 1px), linear-gradient(90deg, ${alpha('#fff', 0.03)} 1px, transparent 1px)`,
-          backgroundSize: '40px 40px', pointerEvents: 'none',
-        }} />
+        <Box>
+          <Typography sx={{ fontWeight: 700, color: '#1C1C1E', fontSize: 20, lineHeight: 1.3 }}>
+            User Management
+          </Typography>
+          <Typography variant="body2" sx={{ color: '#666666', mt: 0.5 }}>
+            Manage workspace users, roles and access
+          </Typography>
+        </Box>
+        {canCreateUsers && (
+          <Button
+            variant="contained"
+            disableElevation
+            startIcon={<AddIcon />}
+            onClick={() => handleOpenDialog(null)}
+            sx={{
+              bgcolor: '#1976D2',
+              color: '#ffffff',
+              fontWeight: 600,
+              textTransform: 'none',
+              borderRadius: '8px',
+              px: 2.5,
+              py: 1,
+              boxShadow: 'none',
+              '&:hover': { bgcolor: '#1565C0', boxShadow: 'none' },
+            }}
+          >
+            Add User
+          </Button>
+        )}
+      </Box>
 
-        {/* Title row */}
-        <Box
+      {/* ── Stat Cards ── */}
+      <Box sx={{ px: { xs: 2, sm: '32px' }, pt: 3, pb: 0 }}>
+        <Grid container spacing={2}>
+          <Grid item xs={12} sm={6} lg={3}>
+            <StatCard label="Total Users"    value={users.length}  icon={<PeopleIcon />} />
+          </Grid>
+          <Grid item xs={12} sm={6} lg={3}>
+            <StatCard label="Active Users"   value={activeCount}   icon={<CheckCircleIcon />} />
+          </Grid>
+          <Grid item xs={12} sm={6} lg={3}>
+            <StatCard label="Inactive Users" value={inactiveCount} icon={<BlockIcon />} />
+          </Grid>
+          <Grid item xs={12} sm={6} lg={3}>
+            <StatCard label="Admins"         value={adminCount}    icon={<AdminIcon />} />
+          </Grid>
+        </Grid>
+      </Box>
+
+      {/* ── Content Area ── */}
+      <Box sx={{ px: { xs: 2, sm: '32px' }, pt: 3, pb: 6 }}>
+
+        {/* Toolbar */}
+        <Paper
+          elevation={0}
           sx={{
-            position: 'relative',
-            display: 'flex',
-            flexDirection: { xs: 'column', sm: 'row' },
-            alignItems: { xs: 'flex-start', sm: 'flex-start' },
-            justifyContent: 'space-between',
-            gap: 2,
-            mb: { xs: 2, md: 4 },
+            borderRadius: 0,
+            border: 'none',
+            borderTop: '1px solid #e0e0e0',
+            borderBottom: '1px solid #e0e0e0',
+            bgcolor: '#ffffff',
+            overflow: 'hidden',
+            mb: 0,
           }}
         >
-          <Box>
-            <Typography variant="overline" sx={{ color: `${rc.chipText}bf`, fontWeight: 700, letterSpacing: 3, fontSize: '0.65rem' }}>
-              APPLICATION CONTROL CENTER
-            </Typography>
-            <Typography variant="h4" sx={{ color: '#fff', fontWeight: 800, mt: 0.5, fontSize: { xs: '1.5rem', md: '2rem' }, letterSpacing: '-0.025em', lineHeight: 1.2 }}>
-              User Management
-            </Typography>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mt: 1 }}>
-              <CalendarTodayIcon sx={{ fontSize: 13, color: `${rc.chipText}99` }} />
-              <Typography variant="caption" sx={{ color: `${rc.chipText}99`, fontWeight: 500, fontSize: '0.75rem' }}>
-                {today}
+          <Box
+            sx={{
+              px: { xs: 2, sm: 2.5 },
+              pt: 2,
+              pb: 1.5,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1.5,
+              flexWrap: 'wrap',
+              borderBottom: '1px solid #e0e0e0',
+            }}
+          >
+            {/* Search */}
+            <Box
+              sx={{
+                flex: '1 1 220px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+                bgcolor: '#f7f9fa',
+                border: '1px solid #e0e0e0',
+                borderRadius: 2,
+                px: 1.5,
+                py: 0.75,
+              }}
+            >
+              <SearchIcon sx={{ fontSize: 17, color: '#999999', flexShrink: 0 }} />
+              <InputBase
+                placeholder="Search by name, email or phone..."
+                value={searchTerm}
+                onChange={e => { setSearchTerm(e.target.value); setPage(0); }}
+                sx={{ flex: 1, fontSize: '0.875rem', color: '#1C1C1E' }}
+              />
+              {searchTerm && (
+                <IconButton
+                  size="small"
+                  onClick={() => { setSearchTerm(''); setPage(0); }}
+                  sx={{ p: 0.25, color: '#999999' }}
+                >
+                  <CloseIcon sx={{ fontSize: 14 }} />
+                </IconButton>
+              )}
+            </Box>
+
+            {/* Role dropdown */}
+            <FormControl size="small" sx={{ minWidth: 130, flexShrink: 0 }}>
+              <Select
+                value={filterRole}
+                onChange={e => { setFilterRole(e.target.value); setPage(0); }}
+                displayEmpty
+                sx={{ borderRadius: 2, fontSize: '0.875rem', bgcolor: '#f7f9fa' }}
+              >
+                <MenuItem value=""><Typography variant="body2" sx={{ color: '#999999' }}>All Roles</Typography></MenuItem>
+                <MenuItem value="admin"><Typography variant="body2">Admin</Typography></MenuItem>
+                <MenuItem value="operator"><Typography variant="body2">Operator</Typography></MenuItem>
+              </Select>
+            </FormControl>
+
+            {/* Status dropdown */}
+            <FormControl size="small" sx={{ minWidth: 120, flexShrink: 0 }}>
+              <Select
+                value={showInactive ? 'all' : 'active'}
+                onChange={e => { setShowInactive(e.target.value === 'all'); setPage(0); }}
+                displayEmpty
+                sx={{ borderRadius: 2, fontSize: '0.875rem', bgcolor: '#f7f9fa' }}
+              >
+                <MenuItem value="active"><Typography variant="body2">Active Only</Typography></MenuItem>
+                <MenuItem value="all"><Typography variant="body2">All Status</Typography></MenuItem>
+              </Select>
+            </FormControl>
+
+            {/* Clear filters */}
+            {hasFilters && (
+              <Button
+                size="small"
+                startIcon={<FilterAltOutlined sx={{ fontSize: 14 }} />}
+                onClick={() => { setSearchTerm(''); setFilterRole(''); setShowInactive(false); setPage(0); }}
+                sx={{
+                  textTransform: 'none',
+                  color: '#666666',
+                  fontWeight: 600,
+                  fontSize: '0.8125rem',
+                  borderRadius: 2,
+                  px: 1.5,
+                  '&:hover': { bgcolor: 'rgba(0,0,0,0.04)' },
+                }}
+              >
+                Clear
+              </Button>
+            )}
+
+            {/* Result count */}
+            <Box sx={{ ml: 'auto', flexShrink: 0, display: { xs: 'none', sm: 'block' } }}>
+              <Typography variant="caption" sx={{ color: '#999999', fontWeight: 500 }}>
+                {filteredUsers.length} of {users.length} users
               </Typography>
             </Box>
           </Box>
-
-          {canCreateUsers && (
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={() => handleOpenDialog(null)}
-              sx={{
-                alignSelf: { xs: 'stretch', sm: 'flex-start' },
-                width: { xs: '100%', sm: 'auto' },
-                bgcolor: alpha('#fff', 0.15),
-                color: '#fff',
-                fontWeight: 600,
-                textTransform: 'none',
-                backdropFilter: 'blur(8px)',
-                border: `1px solid ${alpha('#fff', 0.25)}`,
-                px: 2.5, py: 1,
-                borderRadius: 2,
-                boxShadow: 'none',
-                '&:hover': { bgcolor: alpha('#fff', 0.25), border: `1px solid ${alpha('#fff', 0.4)}`, boxShadow: 'none' },
-              }}
-            >
-              Add User
-            </Button>
-          )}
-        </Box>
-
-        {/* Stats row */}
-        <Box
-          sx={{
-            position: 'relative',
-            display: 'grid',
-            gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' },
-            gap: { xs: 1.5, sm: 2 },
-          }}
-        >
-          <HeroStat label="Total Users"    value={users.length}  icon={<PeopleIcon />}       roleKey={roleKey} />
-          <HeroStat label="Active Users"   value={activeCount}   icon={<CheckCircleIcon />}  roleKey={roleKey} />
-          <HeroStat label="Inactive Users" value={inactiveCount} icon={<BlockIcon />}        roleKey={roleKey} />
-          <HeroStat label="Admins"         value={adminCount}    icon={<AdminIcon />}        roleKey={roleKey} />
-        </Box>
-      </Box>
-
-      {/* ── Body ── */}
-      <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, pb: { md: 6 } }}>
-
-        {/* Toolbar */}
-        <Box sx={{ pt: 0, pb: 0 }}>
-          <Paper
-            elevation={0}
-            sx={{
-              borderRadius: 0,
-              border: 'none',
-              borderTop: `1px solid ${C.border}`,
-              borderBottom: `1px solid ${C.border}`,
-              bgcolor: C.surface,
-              overflow: 'hidden',
-            }}
-          >
-            <Box
-              sx={{
-                px: { xs: 2, sm: 2.5 },
-                pt: 2,
-                pb: 1.5,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1.5,
-                flexWrap: 'wrap',
-                borderBottom: `1px solid ${C.border}`,
-              }}
-            >
-              {/* Search */}
-              <Box
-                sx={{
-                  flex: '1 1 220px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1,
-                  bgcolor: '#f8fafc',
-                  border: `1px solid ${C.border}`,
-                  borderRadius: 2,
-                  px: 1.5,
-                  py: 0.75,
-                }}
-              >
-                <SearchIcon sx={{ fontSize: 17, color: C.muted, flexShrink: 0 }} />
-                <InputBase
-                  placeholder="Search by name, email or phone..."
-                  value={searchTerm}
-                  onChange={e => { setSearchTerm(e.target.value); setPage(0); }}
-                  sx={{ flex: 1, fontSize: '0.875rem', color: C.dark0, '& input::placeholder': { color: C.muted } }}
-                />
-                {searchTerm && (
-                  <IconButton size="small" onClick={() => { setSearchTerm(''); setPage(0); }} sx={{ p: 0.25, color: C.muted }}>
-                    <CloseIcon sx={{ fontSize: 14 }} />
-                  </IconButton>
-                )}
-              </Box>
-
-                {/* Role dropdown — values match actual API role names (case-insensitive compare) */}
-                <FormControl size="small" sx={{ minWidth: 130, flexShrink: 0 }}>
-                  <Select
-                    value={filterRole}
-                    onChange={e => { setFilterRole(e.target.value); setPage(0); }}
-                    displayEmpty
-                    sx={{ borderRadius: 2, fontSize: '0.875rem', bgcolor: '#f8fafc' }}
-                  >
-                    <MenuItem value=""><Typography variant="body2" sx={{ color: C.muted }}>All Roles</Typography></MenuItem>
-                    <MenuItem value="admin"><Typography variant="body2">Admin</Typography></MenuItem>
-                    <MenuItem value="operator"><Typography variant="body2">Operator</Typography></MenuItem>
-                  </Select>
-                </FormControl>
-
-                {/* Status dropdown */}
-                <FormControl size="small" sx={{ minWidth: 120, flexShrink: 0 }}>
-                  <Select
-                    value={showInactive ? 'all' : 'active'}
-                    onChange={e => { setShowInactive(e.target.value === 'all'); setPage(0); }}
-                    displayEmpty
-                    sx={{ borderRadius: 2, fontSize: '0.875rem', bgcolor: '#f8fafc' }}
-                  >
-                    <MenuItem value="active"><Typography variant="body2">Active Only</Typography></MenuItem>
-                    <MenuItem value="all"><Typography variant="body2">All Status</Typography></MenuItem>
-                  </Select>
-                </FormControl>
-
-                {/* Clear filters */}
-                {hasFilters && (
-                  <Button
-                    size="small"
-                    startIcon={<FilterAltOutlined sx={{ fontSize: 14 }} />}
-                    onClick={() => { setSearchTerm(''); setFilterRole(''); setShowInactive(false); setPage(0); }}
-                    sx={{
-                      textTransform: 'none', color: C.slate, fontWeight: 600,
-                      fontSize: '0.8125rem', borderRadius: 2, px: 1.5,
-                      '&:hover': { bgcolor: alpha(C.slate, 0.06) },
-                    }}
-                  >
-                    Clear
-                  </Button>
-                )}
-
-                {/* Result count */}
-                <Box sx={{ ml: 'auto', flexShrink: 0, display: { xs: 'none', sm: 'block' } }}>
-                  <Typography variant="caption" sx={{ color: C.muted, fontWeight: 500 }}>
-                    {filteredUsers.length} of {users.length} users
-                  </Typography>
-                </Box>
-            </Box>
-          </Paper>
-        </Box>
+        </Paper>
 
         {/* ── Desktop Table (md+) ── */}
         {!isMobile && (
-          <Box sx={{ borderBottom: `1px solid ${C.border}` }}>
+          <Box sx={{ border: '1px solid #e0e0e0', borderTop: 'none', borderRadius: '0 0 12px 12px', overflow: 'hidden' }}>
             <TableContainer
               component={Paper}
               elevation={0}
-              sx={{ borderRadius: 0, border: 'none', bgcolor: C.surface, overflowX: 'auto' }}
+              sx={{ borderRadius: 0, border: 'none', bgcolor: '#ffffff', overflowX: 'auto' }}
             >
               {loading ? (
                 <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 10 }}>
-                  <CircularProgress sx={{ color: rc.primary }} />
+                  <CircularProgress sx={{ color: '#1976D2' }} />
                 </Box>
               ) : paginatedUsers.length === 0 ? (
-                <Box sx={{ textAlign: 'center', py: 10, bgcolor: C.surface }}>
-                  <Box sx={{
-                    width: 64, height: 64, borderRadius: '50%',
-                    bgcolor: '#f1f5f9', border: `1px solid ${C.border}`,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    mx: 'auto', mb: 2,
-                  }}>
-                    <PeopleIcon sx={{ fontSize: 30, color: C.muted }} />
+                <Box sx={{ textAlign: 'center', py: 10, bgcolor: '#ffffff' }}>
+                  <Box
+                    sx={{
+                      width: 64, height: 64, borderRadius: '50%',
+                      bgcolor: '#f7f9fa', border: '1px solid #e0e0e0',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      mx: 'auto', mb: 2,
+                    }}
+                  >
+                    <PeopleIcon sx={{ fontSize: 30, color: '#999999' }} />
                   </Box>
-                  <Typography variant="h6" sx={{ fontWeight: 600, color: C.dark1, mb: 0.5 }}>No Users Found</Typography>
-                  <Typography variant="body2" sx={{ color: C.muted }}>
+                  <Typography variant="h6" sx={{ fontWeight: 600, color: '#1C1C1E', mb: 0.5 }}>No Users Found</Typography>
+                  <Typography variant="body2" sx={{ color: '#999999' }}>
                     {hasFilters ? 'Try adjusting your filters' : 'No users in this category yet'}
                   </Typography>
                 </Box>
               ) : (
-                <Table sx={{
-                  tableLayout: 'fixed', width: '100%', minWidth: 700,
-                  '& .MuiTableCell-root': { px: { xs: 1, sm: 2 } },
-                }}>
+                <Table
+                  sx={{
+                    tableLayout: 'fixed',
+                    width: '100%',
+                    minWidth: 700,
+                    '& .MuiTableCell-root': { px: { xs: 1, sm: 2 } },
+                  }}
+                >
                   <TableHead>
-                    <TableRow sx={{ bgcolor: '#f8fafc', borderBottom: `2px solid ${C.border}` }}>
-                      <TableCell sx={{ fontWeight: 600, color: C.slate, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em', py: 1.5, width: '30%' }}>User</TableCell>
-                      <TableCell sx={{ fontWeight: 600, color: C.slate, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em', width: '14%' }}>Phone</TableCell>
-                      <TableCell sx={{ fontWeight: 600, color: C.slate, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em', width: '16%' }}>Role</TableCell>
-                      <TableCell sx={{ fontWeight: 600, color: C.slate, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em', width: '12%' }}>Status</TableCell>
-                      <TableCell sx={{ fontWeight: 600, color: C.slate, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em', width: '14%' }}>Joined</TableCell>
-                      <TableCell align="right" sx={{ fontWeight: 600, color: C.slate, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em', width: '14%' }}>Actions</TableCell>
+                    <TableRow sx={{ bgcolor: '#f7f9fa', borderBottom: '2px solid #e0e0e0' }}>
+                      <TableCell sx={{ fontWeight: 600, color: '#666666', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em', py: 1.5, width: '30%' }}>User</TableCell>
+                      <TableCell sx={{ fontWeight: 600, color: '#666666', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em', width: '14%' }}>Phone</TableCell>
+                      <TableCell sx={{ fontWeight: 600, color: '#666666', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em', width: '16%' }}>Role</TableCell>
+                      <TableCell sx={{ fontWeight: 600, color: '#666666', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em', width: '12%' }}>Status</TableCell>
+                      <TableCell sx={{ fontWeight: 600, color: '#666666', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em', width: '14%' }}>Joined</TableCell>
+                      <TableCell align="right" sx={{ fontWeight: 600, color: '#666666', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em', width: '14%' }}>Actions</TableCell>
                     </TableRow>
                   </TableHead>
 
@@ -548,13 +503,14 @@ const UserManagement: React.FC = () => {
                       const joinedDate = u.createdAt
                         ? new Date(u.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
                         : '—';
+                      const chipStyle = getRoleChipStyle(typeof u.role === 'string' ? u.role : (u.role?.name || ''));
 
                       return (
                         <TableRow
                           key={u.id}
                           sx={{
-                            bgcolor: C.surface,
-                            borderBottom: `1px solid ${C.border}`,
+                            bgcolor: '#ffffff',
+                            borderBottom: '1px solid #e0e0e0',
                             '&:last-child': { borderBottom: 'none' },
                             '&:hover': { bgcolor: '#fafafa' },
                             transition: 'background-color 0.1s',
@@ -566,8 +522,8 @@ const UserManagement: React.FC = () => {
                               <Avatar
                                 sx={{
                                   width: 36, height: 36,
-                                  bgcolor: alpha(C.dark0, 0.08),
-                                  color: C.dark1,
+                                  bgcolor: 'rgba(25,118,210,0.08)',
+                                  color: '#1976D2',
                                   fontWeight: 700,
                                   fontSize: '0.8rem',
                                   flexShrink: 0,
@@ -576,10 +532,10 @@ const UserManagement: React.FC = () => {
                                 {initials}
                               </Avatar>
                               <Box sx={{ minWidth: 0 }}>
-                                <Typography variant="body2" sx={{ fontWeight: 600, color: C.dark0, lineHeight: 1.3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                <Typography variant="body2" sx={{ fontWeight: 600, color: '#1C1C1E', lineHeight: 1.3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                   {u.firstName} {u.lastName}
                                 </Typography>
-                                <Typography variant="caption" sx={{ color: C.muted, fontSize: '0.73rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'block' }}>
+                                <Typography variant="caption" sx={{ color: '#999999', fontSize: '0.73rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'block' }}>
                                   {u.email}
                                 </Typography>
                               </Box>
@@ -588,40 +544,37 @@ const UserManagement: React.FC = () => {
 
                           {/* Phone */}
                           <TableCell>
-                            <Typography variant="body2" sx={{ color: C.slate, fontSize: '0.8125rem' }}>
+                            <Typography variant="body2" sx={{ color: '#666666', fontSize: '0.8125rem' }}>
                               {u.phone || '—'}
                             </Typography>
                           </TableCell>
 
                           {/* Role */}
                           <TableCell>
-                            {(() => {
-                              const chipStyle = getRoleChipStyle(typeof u.role === 'string' ? u.role : (u.role?.name || ''));
-                              return (
-                                <Chip
-                                  label={typeof u.role === 'string' ? u.role : (u.role?.displayName || u.role?.name || 'Unknown')}
-                                  size="small"
-                                  sx={{
-                                    bgcolor: chipStyle.bg,
-                                    color: chipStyle.color,
-                                    border: `1px solid ${chipStyle.border}`,
-                                    fontWeight: 600,
-                                    fontSize: '0.7rem',
-                                    height: 22,
-                                  }}
-                                />
-                              );
-                            })()}
+                            <Chip
+                              label={typeof u.role === 'string' ? u.role : (u.role?.displayName || u.role?.name || 'Unknown')}
+                              size="small"
+                              sx={{
+                                bgcolor: chipStyle.bg,
+                                color: chipStyle.color,
+                                border: `1px solid ${chipStyle.border}`,
+                                fontWeight: 600,
+                                fontSize: '0.7rem',
+                                height: 22,
+                              }}
+                            />
                           </TableCell>
 
                           {/* Status */}
                           <TableCell>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-                              <Box sx={{
-                                width: 6, height: 6, borderRadius: '50%', flexShrink: 0,
-                                bgcolor: u.isActive ? C.emerald : C.muted,
-                              }} />
-                              <Typography variant="body2" sx={{ color: u.isActive ? C.dark1 : C.muted, fontSize: '0.8125rem', fontWeight: u.isActive ? 500 : 400 }}>
+                              <Box
+                                sx={{
+                                  width: 6, height: 6, borderRadius: '50%', flexShrink: 0,
+                                  bgcolor: u.isActive ? '#10b981' : '#999999',
+                                }}
+                              />
+                              <Typography variant="body2" sx={{ color: u.isActive ? '#1C1C1E' : '#999999', fontSize: '0.8125rem', fontWeight: u.isActive ? 500 : 400 }}>
                                 {u.isActive ? 'Active' : 'Inactive'}
                               </Typography>
                             </Box>
@@ -629,7 +582,7 @@ const UserManagement: React.FC = () => {
 
                           {/* Joined */}
                           <TableCell>
-                            <Typography variant="body2" sx={{ color: C.slate, fontSize: '0.8125rem' }}>
+                            <Typography variant="body2" sx={{ color: '#666666', fontSize: '0.8125rem' }}>
                               {joinedDate}
                             </Typography>
                           </TableCell>
@@ -641,7 +594,7 @@ const UserManagement: React.FC = () => {
                                 <IconButton
                                   size="small"
                                   onClick={() => handleOpenDialog(u)}
-                                  sx={{ color: C.muted, borderRadius: 1.5, '&:hover': { color: C.dark0, bgcolor: alpha(C.dark0, 0.06) } }}
+                                  sx={{ color: '#999999', borderRadius: 1.5, '&:hover': { color: '#1C1C1E', bgcolor: 'rgba(0,0,0,0.06)' } }}
                                 >
                                   <EditIcon sx={{ fontSize: 16 }} />
                                 </IconButton>
@@ -650,7 +603,14 @@ const UserManagement: React.FC = () => {
                                 <IconButton
                                   size="small"
                                   onClick={() => handleToggleUserStatus(u.id, u.isActive)}
-                                  sx={{ color: C.muted, borderRadius: 1.5, '&:hover': { color: u.isActive ? C.amber : C.emerald, bgcolor: alpha(u.isActive ? C.amber : C.emerald, 0.08) } }}
+                                  sx={{
+                                    color: '#999999',
+                                    borderRadius: 1.5,
+                                    '&:hover': {
+                                      color: u.isActive ? '#f59e0b' : '#10b981',
+                                      bgcolor: u.isActive ? 'rgba(245,158,11,0.08)' : 'rgba(16,185,129,0.08)',
+                                    },
+                                  }}
                                 >
                                   {u.isActive
                                     ? <BlockIcon sx={{ fontSize: 16 }} />
@@ -678,9 +638,9 @@ const UserManagement: React.FC = () => {
                 onRowsPerPageChange={(e) => { setRowsPerPage(parseInt(e.target.value, 10)); setPage(0); }}
                 rowsPerPageOptions={[5, 10, 25, 50]}
                 sx={{
-                  borderTop: `1px solid ${C.border}`,
-                  bgcolor: C.surface,
-                  '& .MuiTablePagination-toolbar': { color: C.slate },
+                  borderTop: '1px solid #e0e0e0',
+                  bgcolor: '#ffffff',
+                  '& .MuiTablePagination-toolbar': { color: '#666666' },
                   '& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows': { fontSize: '0.8rem' },
                 }}
               />
@@ -688,35 +648,36 @@ const UserManagement: React.FC = () => {
           </Box>
         )}
 
-        {/* Mobile Card List (xs / sm) */}
+        {/* ── Mobile Card List (xs / sm) ── */}
         {isMobile && (
           <>
-            {/* Cards — full width, flush, separated by dividers */}
-            <Box sx={{ bgcolor: C.surface }}>
+            <Box sx={{ bgcolor: '#ffffff', border: '1px solid #e0e0e0', borderTop: 'none', borderRadius: '0 0 12px 12px', overflow: 'hidden' }}>
               {loading ? (
                 <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 10 }}>
-                  <CircularProgress sx={{ color: rc.primary }} />
+                  <CircularProgress sx={{ color: '#1976D2' }} />
                 </Box>
               ) : paginatedUsers.length === 0 ? (
                 <Box sx={{ textAlign: 'center', py: 10 }}>
-                  <Box sx={{
-                    width: 64, height: 64, borderRadius: '50%',
-                    bgcolor: '#f1f5f9', border: `1px solid ${C.border}`,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    mx: 'auto', mb: 2,
-                  }}>
-                    <PeopleIcon sx={{ fontSize: 30, color: C.muted }} />
+                  <Box
+                    sx={{
+                      width: 64, height: 64, borderRadius: '50%',
+                      bgcolor: '#f7f9fa', border: '1px solid #e0e0e0',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      mx: 'auto', mb: 2,
+                    }}
+                  >
+                    <PeopleIcon sx={{ fontSize: 30, color: '#999999' }} />
                   </Box>
-                  <Typography variant="h6" sx={{ fontWeight: 600, color: C.dark1, mb: 0.5 }}>No Users Found</Typography>
-                  <Typography variant="body2" sx={{ color: C.muted }}>
+                  <Typography variant="h6" sx={{ fontWeight: 600, color: '#1C1C1E', mb: 0.5 }}>No Users Found</Typography>
+                  <Typography variant="body2" sx={{ color: '#999999' }}>
                     {hasFilters ? 'Try adjusting your filters' : 'No users in this category yet'}
                   </Typography>
                 </Box>
               ) : (
                 paginatedUsers.map((u) => {
-                  const roleName = typeof u.role === 'string' ? u.role : (u.role?.name || '');
+                  const roleName  = typeof u.role === 'string' ? u.role : (u.role?.name || '');
                   const chipStyle = getRoleChipStyle(roleName);
-                  const initials =
+                  const initials  =
                     `${u.firstName?.charAt(0) || ''}${u.lastName?.charAt(0) || ''}`.toUpperCase() ||
                     u.email?.charAt(0)?.toUpperCase() || 'U';
                   const joinedDate = u.createdAt
@@ -728,8 +689,9 @@ const UserManagement: React.FC = () => {
                       key={u.id}
                       sx={{
                         p: 2,
-                        bgcolor: C.surface,
-                        borderBottom: `1px solid ${C.border}`,
+                        bgcolor: '#ffffff',
+                        borderBottom: '1px solid #e0e0e0',
+                        '&:last-child': { borderBottom: 'none' },
                         transition: 'background-color 0.1s',
                         '&:hover': { bgcolor: '#fafafa' },
                       }}
@@ -738,8 +700,8 @@ const UserManagement: React.FC = () => {
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.25 }}>
                         <Avatar
                           sx={{
-                            bgcolor: alpha(C.dark0, 0.08),
-                            color: C.dark1,
+                            bgcolor: 'rgba(25,118,210,0.08)',
+                            color: '#1976D2',
                             width: 40, height: 40,
                             fontSize: '0.85rem', fontWeight: 700, flexShrink: 0,
                           }}
@@ -747,10 +709,10 @@ const UserManagement: React.FC = () => {
                           {initials}
                         </Avatar>
                         <Box sx={{ flex: 1, minWidth: 0 }}>
-                          <Typography sx={{ fontWeight: 600, color: C.dark0, fontSize: '0.875rem', lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          <Typography sx={{ fontWeight: 600, color: '#1C1C1E', fontSize: '0.875rem', lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                             {u.firstName} {u.lastName}
                           </Typography>
-                          <Typography sx={{ color: C.muted, fontSize: '0.75rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          <Typography sx={{ color: '#999999', fontSize: '0.75rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                             {u.email}
                           </Typography>
                         </Box>
@@ -765,32 +727,45 @@ const UserManagement: React.FC = () => {
                         />
                       </Box>
 
-                      {/* Middle row: status dot + text + phone */}
+                      {/* Middle row: status + phone */}
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.25 }}>
-                        <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: u.isActive ? C.emerald : C.muted, flexShrink: 0 }} />
-                        <Typography variant="body2" sx={{ color: u.isActive ? C.dark1 : C.muted, fontSize: '0.8125rem', fontWeight: u.isActive ? 500 : 400 }}>
+                        <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: u.isActive ? '#10b981' : '#999999', flexShrink: 0 }} />
+                        <Typography variant="body2" sx={{ color: u.isActive ? '#1C1C1E' : '#999999', fontSize: '0.8125rem', fontWeight: u.isActive ? 500 : 400 }}>
                           {u.isActive ? 'Active' : 'Inactive'}
                         </Typography>
-                        <Typography sx={{ color: C.slate, fontSize: '0.8rem', ml: 'auto' }}>
+                        <Typography sx={{ color: '#666666', fontSize: '0.8rem', ml: 'auto' }}>
                           {u.phone || '—'}
                         </Typography>
                       </Box>
 
                       {/* Bottom row: joined date + actions */}
                       <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <Typography sx={{ color: C.muted, fontSize: '0.75rem', flex: 1 }}>
+                        <Typography sx={{ color: '#999999', fontSize: '0.75rem', flex: 1 }}>
                           Joined {joinedDate}
                         </Typography>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25 }}>
                           <Tooltip title="Edit user" arrow>
-                            <IconButton size="small" onClick={() => handleOpenDialog(u)}
-                              sx={{ color: C.muted, borderRadius: 1.5, '&:hover': { color: C.dark0, bgcolor: alpha(C.dark0, 0.06) } }}>
+                            <IconButton
+                              size="small"
+                              onClick={() => handleOpenDialog(u)}
+                              sx={{ color: '#999999', borderRadius: 1.5, '&:hover': { color: '#1C1C1E', bgcolor: 'rgba(0,0,0,0.06)' } }}
+                            >
                               <EditIcon sx={{ fontSize: 16 }} />
                             </IconButton>
                           </Tooltip>
                           <Tooltip title={u.isActive ? 'Deactivate user' : 'Activate user'} arrow>
-                            <IconButton size="small" onClick={() => handleToggleUserStatus(u.id, u.isActive)}
-                              sx={{ color: C.muted, borderRadius: 1.5, '&:hover': { color: u.isActive ? C.amber : C.emerald, bgcolor: alpha(u.isActive ? C.amber : C.emerald, 0.08) } }}>
+                            <IconButton
+                              size="small"
+                              onClick={() => handleToggleUserStatus(u.id, u.isActive)}
+                              sx={{
+                                color: '#999999',
+                                borderRadius: 1.5,
+                                '&:hover': {
+                                  color: u.isActive ? '#f59e0b' : '#10b981',
+                                  bgcolor: u.isActive ? 'rgba(245,158,11,0.08)' : 'rgba(16,185,129,0.08)',
+                                },
+                              }}
+                            >
                               {u.isActive ? <BlockIcon sx={{ fontSize: 16 }} /> : <CheckCircleIcon sx={{ fontSize: 16 }} />}
                             </IconButton>
                           </Tooltip>
@@ -802,15 +777,15 @@ const UserManagement: React.FC = () => {
               )}
             </Box>
 
-            {/* Pagination — sticky at bottom of the scrolling main container */}
+            {/* Mobile pagination */}
             {!loading && (
               <Box
                 sx={{
                   position: 'sticky',
                   bottom: 0,
                   zIndex: 10,
-                  borderTop: `1px solid ${C.border}`,
-                  bgcolor: C.surface,
+                  borderTop: '1px solid #e0e0e0',
+                  bgcolor: '#ffffff',
                 }}
               >
                 <TablePagination
@@ -823,7 +798,7 @@ const UserManagement: React.FC = () => {
                   rowsPerPageOptions={[]}
                   labelRowsPerPage=""
                   sx={{
-                    '& .MuiTablePagination-toolbar': { color: C.slate, minHeight: 48, px: 1 },
+                    '& .MuiTablePagination-toolbar': { color: '#666666', minHeight: 48, px: 1 },
                     '& .MuiTablePagination-displayedRows': { fontSize: '0.8rem', m: 0 },
                     '& .MuiTablePagination-selectLabel': { display: 'none' },
                     '& .MuiInputBase-root': { display: 'none' },

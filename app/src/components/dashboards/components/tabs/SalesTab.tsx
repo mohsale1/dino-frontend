@@ -58,8 +58,8 @@ const capitalize = (str: string): string =>
 // ─── Shared Styles ────────────────────────────────────────────────────────────
 
 const CARD_SX = {
-  bgcolor: '#1e293b',
-  border: '1px solid rgba(255,255,255,0.08)',
+  bgcolor: '#ffffff',
+  border: '1px solid #e0e0e0',
   borderRadius: '12px',
   p: 2.5,
 } as const;
@@ -73,7 +73,7 @@ interface SectionTitleProps {
 
 const SectionTitle: React.FC<SectionTitleProps> = ({ label, accentColor }) => (
   <Box sx={{ borderLeft: `3px solid ${accentColor}`, pl: 1.5, mb: 2 }}>
-    <Typography sx={{ fontSize: '0.875rem', fontWeight: 700, color: '#f1f5f9' }}>
+    <Typography sx={{ fontSize: '0.875rem', fontWeight: 700, color: '#1C1C1E' }}>
       {label}
     </Typography>
   </Box>
@@ -100,7 +100,7 @@ const StatCard: React.FC<StatCardProps> = ({ label, value, subtext, accentColor 
       sx={{
         fontSize: '0.68rem',
         fontWeight: 600,
-        color: '#64748b',
+        color: '#666666',
         textTransform: 'uppercase',
         letterSpacing: '0.08em',
         mb: 0.75,
@@ -112,14 +112,14 @@ const StatCard: React.FC<StatCardProps> = ({ label, value, subtext, accentColor 
       sx={{
         fontSize: '1.75rem',
         fontWeight: 800,
-        color: '#f1f5f9',
+        color: '#1C1C1E',
         lineHeight: 1.1,
         mb: 0.5,
       }}
     >
       {value}
     </Typography>
-    <Typography sx={{ fontSize: '0.75rem', color: '#64748b' }}>
+    <Typography sx={{ fontSize: '0.75rem', color: '#666666' }}>
       {subtext}
     </Typography>
   </Box>
@@ -139,7 +139,7 @@ const SalesTab: React.FC<SalesTabProps> = ({ dashboardData }) => {
   const categoryPerformance = analytics.categoryPerformance ?? [];
 
   return (
-    <Box sx={{ px: { xs: 2, sm: 3, md: 4 }, py: 3, bgcolor: '#0f172a' }}>
+    <Box sx={{ px: { xs: 2, sm: 3, md: 4 }, py: 3, bgcolor: '#f8fafc' }}>
 
       {/* Row 1 — Stat Cards */}
       <Grid container spacing={2.5}>
@@ -185,7 +185,7 @@ const SalesTab: React.FC<SalesTabProps> = ({ dashboardData }) => {
 
             {paymentMethods.length === 0 ? (
               <Typography
-                sx={{ fontSize: '0.8125rem', color: '#94a3b8', textAlign: 'center', py: 4 }}
+                sx={{ fontSize: '0.8125rem', color: '#999999', textAlign: 'center', py: 4 }}
               >
                 No payment data
               </Typography>
@@ -214,7 +214,7 @@ const SalesTab: React.FC<SalesTabProps> = ({ dashboardData }) => {
                             }}
                           />
                           <Typography
-                            sx={{ fontSize: '0.8125rem', fontWeight: 600, color: '#f1f5f9' }}
+                            sx={{ fontSize: '0.8125rem', fontWeight: 600, color: '#1C1C1E' }}
                           >
                             {capitalize(pm.method)}
                           </Typography>
@@ -225,15 +225,15 @@ const SalesTab: React.FC<SalesTabProps> = ({ dashboardData }) => {
                               height: 18,
                               fontSize: '0.65rem',
                               fontWeight: 500,
-                              bgcolor: 'rgba(255,255,255,0.06)',
-                              color: '#94a3b8',
+                              bgcolor: '#f4f4f4',
+                              color: '#999999',
                               borderRadius: '4px',
                               '& .MuiChip-label': { px: 0.75 },
                             }}
                           />
                         </Box>
                         <Typography
-                          sx={{ fontSize: '0.8125rem', fontWeight: 700, color: '#f1f5f9' }}
+                          sx={{ fontSize: '0.8125rem', fontWeight: 700, color: '#1C1C1E' }}
                         >
                           {formatINR(pm.revenue)}
                         </Typography>
@@ -245,7 +245,7 @@ const SalesTab: React.FC<SalesTabProps> = ({ dashboardData }) => {
                           sx={{
                             height: 6,
                             borderRadius: 3,
-                            bgcolor: '#334155',
+                            bgcolor: '#e0e0e0',
                             '& .MuiLinearProgress-bar': {
                               borderRadius: 3,
                               bgcolor: barColor,
@@ -256,7 +256,7 @@ const SalesTab: React.FC<SalesTabProps> = ({ dashboardData }) => {
                       <Typography
                         sx={{
                           fontSize: '0.7rem',
-                          color: '#64748b',
+                          color: '#666666',
                           textAlign: 'right',
                           mt: 0.5,
                         }}
@@ -278,7 +278,7 @@ const SalesTab: React.FC<SalesTabProps> = ({ dashboardData }) => {
 
             {categoryPerformance.length === 0 ? (
               <Typography
-                sx={{ fontSize: '0.8125rem', color: '#94a3b8', textAlign: 'center', py: 4 }}
+                sx={{ fontSize: '0.8125rem', color: '#999999', textAlign: 'center', py: 4 }}
               >
                 No category data
               </Typography>
@@ -307,7 +307,7 @@ const SalesTab: React.FC<SalesTabProps> = ({ dashboardData }) => {
                             }}
                           />
                           <Typography
-                            sx={{ fontSize: '0.8125rem', fontWeight: 600, color: '#f1f5f9' }}
+                            sx={{ fontSize: '0.8125rem', fontWeight: 600, color: '#1C1C1E' }}
                           >
                             {cat.category}
                           </Typography>
@@ -318,15 +318,15 @@ const SalesTab: React.FC<SalesTabProps> = ({ dashboardData }) => {
                               height: 18,
                               fontSize: '0.65rem',
                               fontWeight: 500,
-                              bgcolor: 'rgba(255,255,255,0.06)',
-                              color: '#94a3b8',
+                              bgcolor: '#f4f4f4',
+                              color: '#999999',
                               borderRadius: '4px',
                               '& .MuiChip-label': { px: 0.75 },
                             }}
                           />
                         </Box>
                         <Typography
-                          sx={{ fontSize: '0.8125rem', fontWeight: 700, color: '#f1f5f9' }}
+                          sx={{ fontSize: '0.8125rem', fontWeight: 700, color: '#1C1C1E' }}
                         >
                           {formatINR(cat.revenue)}
                         </Typography>
@@ -337,7 +337,7 @@ const SalesTab: React.FC<SalesTabProps> = ({ dashboardData }) => {
                         sx={{
                           height: 6,
                           borderRadius: 3,
-                          bgcolor: '#334155',
+                          bgcolor: '#e0e0e0',
                           '& .MuiLinearProgress-bar': {
                             borderRadius: 3,
                             bgcolor: barColor,
@@ -347,7 +347,7 @@ const SalesTab: React.FC<SalesTabProps> = ({ dashboardData }) => {
                       <Typography
                         sx={{
                           fontSize: '0.7rem',
-                          color: '#64748b',
+                          color: '#666666',
                           textAlign: 'right',
                           mt: 0.5,
                         }}

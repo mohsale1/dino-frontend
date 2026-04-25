@@ -1,38 +1,27 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback, useRef } from 'react';
 import { Workspace, Venue, PriceRange } from '../../types';
-import { workspaceService } from '../../services/application/workspace.service';
+import { personaService } from '../../services/application/persona.service';
+import { apiService } from '../../utils/api';
 import { useAuth } from '../common/Auth';
 import { useUserData } from './UserData';
 import { StorageManager } from '../../utils/storage';
 
 interface WorkspaceContextType {
-  // Current workspace and venue
   currentWorkspace: Workspace | null;
   currentVenue: Venue | null;
-  
-  // Available workspaces and venues
   workspaces: Workspace[];
   venues: Venue[];
-  
-  // Loading states
   loading: boolean;
   workspacesLoading: boolean;
   venuesLoading: boolean;
-  
-  // Actions
   switchWorkspace: (workspaceId: string) => Promise<void>;
   switchVenue: (venueId: string) => Promise<void>;
   refreshWorkspaces: () => Promise<void>;
   refreshVenues: () => Promise<void>;
-
   initializeVenueFromUser: () => Promise<void>;
-  
-  // Workspace management
   createWorkspace: (workspaceData: any) => Promise<void>;
   updateWorkspace: (workspaceId: string, workspaceData: any) => Promise<void>;
   deleteWorkspace: (workspaceId: string) => Promise<void>;
-  
-  // Venue management
   createVenue: (venueData: any) => Promise<void>;
   updateVenue: (venueId: string, venueData: any) => Promise<void>;
   deleteVenue: (venueId: string) => Promise<void>;
@@ -43,498 +32,248 @@ interface WorkspaceContextType {
 
 const WorkspaceContext = createContext<WorkspaceContextType | undefined>(undefined);
 
-interface WorkspaceProviderProps {
-  children: ReactNode;
+// ── Helper: map a raw persona/venue object to the Venue type ─────────────────
+function mapToVenue(raw: any): Venue {
+  const location = raw.location ?? {
+    address: raw.address || '',
+    city: raw.city || '',
+    state: raw.state || '',
+    country: raw.country || '',
+    postal_code: raw.postal_code || raw.postalCode,
+    landmark: undefined,
+    latitude: undefined,
+    longitude: undefined,
+  };
+  return {
+    id: String(raw.id),
+    name: raw.name || '',
+    description: raw.description || '',
+    location,
+    phone: raw.phone || '',
+    email: raw.email || '',
+    cuisine_types: raw.cuisine_types || [],
+    price_range: (raw.price_range as PriceRange) || 'mid_range',
+    rating: raw.rating,
+    total_reviews: raw.total_reviews,
+    isActive: raw.is_active !== undefined ? Boolean(raw.is_active) : Boolean(raw.isActive ?? true),
+    is_open: raw.is_open !== undefined ? Boolean(raw.is_open) : Boolean(raw.isOpen ?? false),
+    workspaceId: String(raw.workspace_id || raw.workspaceId || ''),
+    owner_id: String(raw.owner_id || raw.ownerId || ''),
+    operating_hours: raw.operating_hours,
+    createdAt: raw.created_at || raw.createdAt || new Date().toISOString(),
+    updatedAt: raw.updated_at || raw.updatedAt,
+    address: location.address,
+    ownerId: String(raw.owner_id || raw.ownerId || ''),
+    isOpen: raw.is_open !== undefined ? Boolean(raw.is_open) : Boolean(raw.isOpen ?? false),
+  } as Venue;
 }
 
-export const WorkspaceProvider: React.FC<WorkspaceProviderProps> = ({ children }) => {
+export const WorkspaceProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { user, isAuthenticated } = useAuth();
-  const { userData } = useUserData(); // Get venue data from UserDataContext
-  
+  const { userData } = useUserData();
+
   const [currentWorkspace, setCurrentWorkspace] = useState<Workspace | null>(null);
-  const [currentVenue, setCurrentVenue] = useState<Venue | null>(null);
-  const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
-  const [venues, setVenues] = useState<Venue[]>([]);
-
-  const [loading, setLoading] = useState(false);
+  const [currentVenue, setCurrentVenue]         = useState<Venue | null>(null);
+  const [workspaces, setWorkspaces]             = useState<Workspace[]>([]);
+  const [venues, setVenues]                     = useState<Venue[]>([]);
+  const [loading, setLoading]                   = useState(false);
   const [workspacesLoading, setWorkspacesLoading] = useState(false);
+  const [venuesLoading, setVenuesLoading]       = useState(false);
 
-  // Load venues directly when needed (no caching)
-  const [venuesLoading, setVenuesLoadingState] = useState(false);
-  const venuesLoadedRef = useRef(false);
+  const venuesLoadedRef        = useRef(false);
+  const currentVenueLoadedRef  = useRef(false);
+  const initializationRef      = useRef(false);
 
-  const loadVenues = useCallback(async (force: boolean = false) => {
-    // Prevent duplicate calls - check loading state and if already loaded
-    if (!user?.workspaceId || !isAuthenticated) {
-      return;
-    }
-    if (venuesLoading) {
-      return;
-    }
-    if (!force && venuesLoadedRef.current) {
-      return;
-    }
-    setVenuesLoadingState(true);
+  // ── Load venues from persona API ──────────────────────────────────────────
+  const loadVenues = useCallback(async (force = false) => {
+    if (!isAuthenticated) return;
+    if (venuesLoading) return;
+    if (!force && venuesLoadedRef.current) return;
+
+    setVenuesLoading(true);
     try {
-      const venueList = await workspaceService.getVenues(user.workspaceId);
-      // Convert API venues to Venue format
-      const mappedVenues: Venue[] = venueList.map((venue: any) => {
-        // Handle location mapping properly
-        const location = venue.location ? venue.location : {
-          address: venue.address || '',
-          city: '',
-          state: '',
-          country: '',
-          postal_code: undefined,
-          landmark: undefined,
-          latitude: undefined,
-          longitude: undefined
-        };
-
-        return {
-          id: venue.id,
-          name: venue.name,
-          description: venue.description || '',
-          location: location,
-          phone: venue.phone || '',
-          email: venue.email || '',
-          cuisine_types: venue.cuisine_types || [],
-          price_range: venue.price_range || 'mid_range',
-          rating: venue.rating,
-          total_reviews: venue.total_reviews,
-          isActive: venue.isActive !== undefined ? venue.isActive : true,
-          is_open: venue.is_open !== undefined ? venue.is_open : venue.isActive,
-          workspaceId: venue.workspaceId || '',
-          owner_id: venue.owner_id || '',
-          operating_hours: venue.operating_hours,
-          createdAt: venue.createdAt,
-          updatedAt: venue.updatedAt,
-          // Legacy compatibility fields
-          address: location.address,
-          ownerId: venue.owner_id || '',
-          isOpen: venue.is_open !== undefined ? venue.is_open : venue.isActive
-        } as Venue;
-      });
-      setVenues(mappedVenues);
+      const res = await personaService.getPersonas({ page_size: 100 });
+      const list: any[] = Array.isArray(res.data) ? res.data : [];
+      const mapped = list.map(mapToVenue);
+      setVenues(mapped);
       venuesLoadedRef.current = true;
-      
-      // Auto-select first active venue if none selected
-      if (!currentVenue && mappedVenues.length > 0) {
-        const activeVenue = mappedVenues.find((venue: any) => venue.isActive) || mappedVenues[0];
-        setCurrentVenue(activeVenue);
+      if (!currentVenue && mapped.length > 0) {
+        setCurrentVenue(mapped.find(v => v.isActive) ?? mapped[0]);
       }
-    } catch (error) {
-      console.error('[WorkspaceContext] loadVenues: Error loading venues:', error);
+    } catch {
       setVenues([]);
       venuesLoadedRef.current = false;
     } finally {
-      setVenuesLoadingState(false);
+      setVenuesLoading(false);
     }
-  }, [user?.workspaceId, isAuthenticated, venuesLoading, currentVenue]);
+  }, [isAuthenticated, venuesLoading, currentVenue]);
 
-  // Load current venue from UserDataContext (NO API CALL)
-  const currentVenueLoadedRef = useRef(false);
-  const loadCurrentVenue = useCallback(async (force: boolean = false) => {
-    if (!isAuthenticated) {
-      return;
-    }
-    if (!force && currentVenueLoadedRef.current) {
-      return;
-    }
-    
-    // Get venue data from UserDataContext instead of making API call
+  // ── Load current venue from UserDataContext (no extra API call) ───────────
+  const loadCurrentVenue = useCallback(async (force = false) => {
+    if (!isAuthenticated) return;
+    if (!force && currentVenueLoadedRef.current) return;
     if (userData?.venue) {
-      const venue = userData.venue;
-      
-      // Handle location mapping properly
-      const location = venue.location ? venue.location : {
-        address: '',
-        city: '',
-        state: '',
-        country: '',
-        postal_code: undefined,
-        landmark: undefined,
-        latitude: undefined,
-        longitude: undefined
-      };
-
-      const venueData: Venue = {
-        id: venue.id,
-        name: venue.name,
-        description: venue.description || '',
-        location: location,
-        phone: venue.phone || '',
-        email: venue.email || '',
-        cuisine_types: [],
-        price_range: 'mid_range' as PriceRange,
-        rating: undefined,
-        total_reviews: undefined,
-        isActive: venue.isActive !== undefined ? venue.isActive : true,
-        is_open: venue.isOpen !== undefined ? venue.isOpen : venue.isActive,
-        workspaceId: venue.workspaceId || '',
-        owner_id: venue.ownerId || '',
-        operating_hours: undefined,
-        createdAt: venue.createdAt,
-        updatedAt: venue.updatedAt,
-        // Legacy compatibility fields
-        address: location.address,
-        ownerId: venue.ownerId || '',
-        isOpen: venue.isOpen !== undefined ? venue.isOpen : venue.isActive
-      };
-      setCurrentVenue(venueData);
+      setCurrentVenue(mapToVenue(userData.venue));
       currentVenueLoadedRef.current = true;
     } else {
       currentVenueLoadedRef.current = false;
     }
   }, [isAuthenticated, userData?.venue]);
 
-  // Load venues for workspace directly (no caching)
-  const loadVenuesForWorkspace = useCallback(async () => {
-    await loadVenues();
-  }, [loadVenues]);
-
-  // Optimized initialization - now uses cached data
-  const initializationRef = useRef(false);
+  // ── Initialize ────────────────────────────────────────────────────────────
   const initializeWorkspaceData = useCallback(async () => {
     if (!isAuthenticated || !user) {
       setLoading(false);
       initializationRef.current = false;
-      venuesLoadedRef.current = false;
-      currentVenueLoadedRef.current = false;
       return;
     }
-
-    // Prevent duplicate initialization
     if (initializationRef.current) return;
     initializationRef.current = true;
-
     setLoading(true);
     try {
-      // Set current workspace from user data (no API call needed)
       if (user?.workspaceId) {
-        const localWorkspace = {
-          id: user.workspaceId,
-          name: 'Default Workspace',
-          description: '',
-          ownerId: user.id,
-          isActive: true,
-          createdAt: new Date(),
-          updatedAt: new Date()
-        };
-        setCurrentWorkspace(localWorkspace as any);
-        setWorkspaces([localWorkspace as any]);
+        const ws: any = { id: user.workspaceId, name: 'Workspace', description: '', ownerId: user.id, isActive: true, createdAt: new Date(), updatedAt: new Date() };
+        setCurrentWorkspace(ws);
+        setWorkspaces([ws]);
       }
-
-      // Load venues and current venue in parallel
-      await Promise.all([
-        user?.workspaceId ? loadVenues(false) : Promise.resolve(),
-        loadCurrentVenue(false)
-      ]);
-    } catch (error) {
-      // Error handled silently
+      await Promise.all([loadVenues(false), loadCurrentVenue(false)]);
+    } catch {
+      // silent
     } finally {
       setLoading(false);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.workspaceId, user?.id, isAuthenticated]);
+  }, [user?.workspaceId, user?.id, isAuthenticated, loadVenues, loadCurrentVenue]);
 
-  // Initialize workspace data when user is authenticated - SINGLE EFFECT ONLY
   useEffect(() => {
     if (isAuthenticated && user) {
       initializeWorkspaceData();
     } else {
-      // Clear data when user logs out
-      setCurrentWorkspace(null);
-      setCurrentVenue(null);
-      setWorkspaces([]);
-      setVenues([]);
+      setCurrentWorkspace(null); setCurrentVenue(null);
+      setWorkspaces([]); setVenues([]);
       initializationRef.current = false;
       venuesLoadedRef.current = false;
       currentVenueLoadedRef.current = false;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAuthenticated, user?.id]); // Only depend on user.id to prevent loops
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated, user?.id]);
+
+  // ── Public actions ────────────────────────────────────────────────────────
 
   const refreshWorkspaces = async () => {
     setWorkspacesLoading(true);
     try {
-      // Create workspace from user data if available
       if (user?.workspaceId) {
-        const localWorkspace = {
-          id: user.workspaceId,
-          name: 'Default Workspace',
-          description: '',
-          ownerId: user.id,
-          isActive: true,
-          createdAt: new Date(),
-          updatedAt: new Date()
-        };
-        
-        setWorkspaces([localWorkspace as any]);
-        setCurrentWorkspace(localWorkspace as any);
-      } else {
-        setWorkspaces([]);
+        const ws: any = { id: user.workspaceId, name: 'Workspace', description: '', ownerId: user.id, isActive: true, createdAt: new Date(), updatedAt: new Date() };
+        setWorkspaces([ws]); setCurrentWorkspace(ws);
       }
-    } catch (error: any) {      setWorkspaces([]);
     } finally {
       setWorkspacesLoading(false);
     }
   };
 
   const refreshVenues = async () => {
-    // Refresh venues directly - force reload
     venuesLoadedRef.current = false;
     await loadVenues(true);
   };
 
   const switchWorkspace = async (workspaceId: string) => {
-    try {
-      const workspace = workspaces.find(w => w.id === workspaceId);
-      if (workspace) {
-        setCurrentWorkspace(workspace);
-        setCurrentVenue(null); // Clear current venue when switching workspace
-        await loadVenuesForWorkspace();
-        
-        // Store in storage for persistence
-        StorageManager.setItem(StorageManager.KEYS.WORKSPACE, workspaceId);
-      }
-    } catch (error) {
-      throw error;
-    }
+    const ws = workspaces.find(w => w.id === workspaceId);
+    if (ws) { setCurrentWorkspace(ws); setCurrentVenue(null); StorageManager.setItem(StorageManager.KEYS.WORKSPACE, workspaceId); }
   };
 
   const switchVenue = async (venueId: string) => {
-    try {
-      const venue = venues.find(v => v.id === venueId);
-      if (venue) {
-        setCurrentVenue(venue);
-        
-        // Store in storage for persistence
-        StorageManager.setItem(StorageManager.KEYS.VENUE, venueId);
-      }
-    } catch (error) {
-      throw error;
-    }
+    const v = venues.find(v => v.id === venueId);
+    if (v) { setCurrentVenue(v); StorageManager.setItem(StorageManager.KEYS.VENUE, venueId); }
   };
 
-  const createWorkspace = async (workspaceData: any) => {
-    try {
-      const response = await workspaceService.createWorkspace(workspaceData);
-      if (response.success && response.data) {
-        await refreshWorkspaces();
-        // Auto-switch to new workspace
-        await switchWorkspace(response.data.id);
-      } else {
-        throw new Error(response.message || 'Failed to create workspace');
-      }
-    } catch (error) {
-      throw error;
-    }
+  // ── Workspace CRUD ────────────────────────────────────────────────────────
+
+  const createWorkspace = async (_data: any) => {
+    throw new Error('Workspace creation is handled during registration.');
   };
 
-  const updateWorkspace = async (workspaceId: string, workspaceData: any) => {
-    try {
-      const response = await workspaceService.updateWorkspace(workspaceId, workspaceData);
-      if (response.success) {
-        await refreshWorkspaces();
-        // Update current workspace if it's the one being updated
-        if (currentWorkspace?.id === workspaceId && response.data) {
-          // Convert API workspace to local format
-          const localWorkspace = {
-            ...response.data,
-            ownerId: response.data.owner_id || '',
-            isActive: response.data.isActive,
-            createdAt: response.data.createdAt,
-            updatedAt: response.data.updatedAt || response.data.createdAt
-          };
-          setCurrentWorkspace(localWorkspace as any);
-        }
-      } else {
-        throw new Error(response.message || 'Failed to update workspace');
-      }
-    } catch (error) {
-      throw error;
-    }
+  const updateWorkspace = async (workspaceId: string, data: any) => {
+    await apiService.put(`/application/workspaces/${workspaceId}`, {
+      name: data.name,
+      description: data.description,
+    });
+    await refreshWorkspaces();
   };
 
-  const deleteWorkspace = async (workspaceId: string) => {
-    try {
-      const response = await workspaceService.deleteWorkspace(workspaceId);
-      if (response.success) {
-        await refreshWorkspaces();
-        // If current workspace was deleted, switch to first available
-        if (currentWorkspace?.id === workspaceId) {
-          const remainingWorkspaces = workspaces.filter(w => w.id !== workspaceId);
-          if (remainingWorkspaces.length > 0) {
-            await switchWorkspace(remainingWorkspaces[0].id);
-          } else {
-            setCurrentWorkspace(null);
-            setCurrentVenue(null);
-            setVenues([]);
-          }
-        }
-      } else {
-        throw new Error(response.message || 'Failed to delete workspace');
-      }
-    } catch (error) {
-      throw error;
-    }
+  const deleteWorkspace = async (_workspaceId: string) => {
+    throw new Error('Workspace deletion is not supported.');
   };
+
+  // ── Venue (Persona) CRUD ──────────────────────────────────────────────────
 
   const createVenue = async (venueData: any) => {
-    try {
-      const response = await workspaceService.createVenue({
-        ...venueData,
-        workspaceId: currentWorkspace?.id || ''
-      });
-      if (response.success && response.data) {
-        // Refresh venues directly
-        await refreshVenues();
-        // Auto-switch to new venue
-        await switchVenue(response.data.id);
-      } else {
-        throw new Error(response.message || 'Failed to create venue');
-      }
-    } catch (error) {
-      throw error;
-    }
+    const persona = await personaService.createPersona({
+      name: venueData.name,
+      description: venueData.description,
+      address: venueData.address,
+      phone: venueData.phone,
+      email: venueData.email,
+    });
+    await refreshVenues();
+    await switchVenue(String(persona.id));
   };
 
   const updateVenue = async (venueId: string, venueData: any) => {
-    try {
-      const response = await workspaceService.updateVenue(venueId, venueData);
-      if (response.success) {
-        // Refresh venues and current venue directly - force reload
-        currentVenueLoadedRef.current = false;
-        await Promise.all([
-          refreshVenues(),
-          loadCurrentVenue(true)
-        ]);
-      } else {
-        throw new Error(response.message || 'Failed to update venue');
-      }
-    } catch (error) {
-      throw error;
-    }
+    await personaService.updatePersona(Number(venueId), {
+      name: venueData.name,
+      description: venueData.description,
+      address: venueData.address,
+      phone: venueData.phone,
+      email: venueData.email,
+    });
+    currentVenueLoadedRef.current = false;
+    await Promise.all([refreshVenues(), loadCurrentVenue(true)]);
   };
 
   const deleteVenue = async (venueId: string) => {
-    try {
-      const response = await workspaceService.deleteVenue(venueId);
-      if (response.success) {
-        // Refresh venues directly
-        await refreshVenues();
-        // If current venue was deleted, switch to first available
-        if (currentVenue?.id === venueId) {
-          const remainingVenues = venues.filter(v => v.id !== venueId);
-          if (remainingVenues.length > 0) {
-            await switchVenue(remainingVenues[0].id);
-          } else {
-            setCurrentVenue(null);
-          }
-        }
-      } else {
-        throw new Error(response.message || 'Failed to delete venue');
-      }
-    } catch (error) {
-      throw error;
+    await personaService.deletePersona(Number(venueId));
+    await refreshVenues();
+    if (currentVenue?.id === venueId) {
+      const remaining = venues.filter(v => v.id !== venueId);
+      remaining.length > 0 ? await switchVenue(remaining[0].id) : setCurrentVenue(null);
     }
   };
 
   const activateVenue = async (venueId: string) => {
-    try {
-      const response = await workspaceService.activateVenue(venueId);
-      if (response.success) {
-        // Refresh venues and current venue directly - force reload
-        currentVenueLoadedRef.current = false;
-        await Promise.all([
-          refreshVenues(),
-          loadCurrentVenue(true)
-        ]);
-      } else {
-        throw new Error(response.message || 'Failed to activate venue');
-      }
-    } catch (error) {
-      throw error;
-    }
+    await personaService.restorePersona(Number(venueId));
+    currentVenueLoadedRef.current = false;
+    await Promise.all([refreshVenues(), loadCurrentVenue(true)]);
   };
 
   const deactivateVenue = async (venueId: string) => {
-    try {
-      const response = await workspaceService.deactivateVenue(venueId);
-      if (response.success) {
-        // Refresh venues and current venue directly - force reload
-        currentVenueLoadedRef.current = false;
-        await Promise.all([
-          refreshVenues(),
-          loadCurrentVenue(true)
-        ]);
-      } else {
-        throw new Error(response.message || 'Failed to deactivate venue');
-      }
-    } catch (error) {
-      throw error;
-    }
+    await personaService.deletePersona(Number(venueId));
+    currentVenueLoadedRef.current = false;
+    await Promise.all([refreshVenues(), loadCurrentVenue(true)]);
   };
 
   const toggleVenueStatus = async (venueId: string, isOpen: boolean) => {
-    try {
-      const response = await workspaceService.toggleVenueStatus(venueId, isOpen);
-      if (response.success) {
-        // Refresh venues and current venue directly - force reload
-        currentVenueLoadedRef.current = false;
-        await Promise.all([
-          refreshVenues(),
-          loadCurrentVenue(true)
-        ]);
-      } else {
-        throw new Error(response.message || 'Failed to toggle venue status');
-      }
-    } catch (error) {
-      throw error;
-    }
+    await personaService.setPersonaOpenStatus(Number(venueId), isOpen);
+    currentVenueLoadedRef.current = false;
+    await Promise.all([refreshVenues(), loadCurrentVenue(true)]);
   };
 
-  const initializeVenueFromUser = async () => {
-    // Simply call loadCurrentVenue which now uses UserDataContext
-    await loadCurrentVenue(true);
-  };
+  const initializeVenueFromUser = async () => { await loadCurrentVenue(true); };
 
   const value: WorkspaceContextType = {
-    currentWorkspace,
-    currentVenue,
-    workspaces,
-    venues,
-    loading,
-    workspacesLoading,
-    venuesLoading: venuesLoading,
-    switchWorkspace,
-    switchVenue,
-    refreshWorkspaces,
-    refreshVenues,
-    createWorkspace,
-    updateWorkspace,
-    deleteWorkspace,
-    createVenue,
-    updateVenue,
-    deleteVenue,
-    activateVenue,
-    deactivateVenue,
-    toggleVenueStatus,
+    currentWorkspace, currentVenue, workspaces, venues,
+    loading, workspacesLoading, venuesLoading,
+    switchWorkspace, switchVenue, refreshWorkspaces, refreshVenues,
+    createWorkspace, updateWorkspace, deleteWorkspace,
+    createVenue, updateVenue, deleteVenue,
+    activateVenue, deactivateVenue, toggleVenueStatus,
     initializeVenueFromUser,
   };
 
-  return (
-    <WorkspaceContext.Provider value={value}>
-      {children}
-    </WorkspaceContext.Provider>
-  );
+  return <WorkspaceContext.Provider value={value}>{children}</WorkspaceContext.Provider>;
 };
 
 export const useWorkspace = (): WorkspaceContextType => {
   const context = useContext(WorkspaceContext);
-  if (context === undefined) {
-    throw new Error('useWorkspace must be used within a WorkspaceProvider');
-  }
+  if (!context) throw new Error('useWorkspace must be used within a WorkspaceProvider');
   return context;
 };

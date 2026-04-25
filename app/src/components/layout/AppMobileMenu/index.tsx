@@ -50,6 +50,7 @@ import { useAuth } from '../../../contexts/common/Auth';
 import PermissionService from '../../../services/auth/permission';
 import { useUserData } from '../../../contexts/application/UserData';
 import { venueService } from '../../../services/application/venue.service';
+import { personaService } from '../../../services/application/persona.service';
 import { usePermissionCheck } from '../../common/PermissionWrapper';
 import { PERMISSIONS } from '../../../types/auth/permissions';
 
@@ -77,8 +78,8 @@ const AppMobileMenu: React.FC<AppMobileMenuProps> = ({
   onNavigate,
   isHomePage,
 }) => {
-  const { userData } = useUserData();
-  const { hasBackendPermission } = useAuth();
+  const { userData, refreshUserData } = useUserData();
+  const { hasBackendPermission }      = useAuth();
   usePermissionCheck();
 
   const [venueStatus, setVenueStatus] = useState<{
@@ -87,7 +88,6 @@ const AppMobileMenu: React.FC<AppMobileMenuProps> = ({
     venueName: string;
   } | null>(null);
   const [statusLoading, setStatusLoading] = useState(false);
-
 
   const canManageVenue = hasBackendPermission(PERMISSIONS.WORKSPACE_UPDATE);
 
@@ -109,10 +109,9 @@ const AppMobileMenu: React.FC<AppMobileMenuProps> = ({
     try {
       setStatusLoading(true);
       const newStatus = !venueStatus.isOpen;
-      await venueService.updateVenue(userData.venue.id, {
-        status: newStatus ? 'active' : 'closed',
-      });
-      setVenueStatus(prev => (prev ? { ...prev, isOpen: newStatus } : null));
+      const personaId = (userData.venue as any).personaId || Number(userData.venue.id);
+      await personaService.setPersonaOpenStatus(personaId, newStatus);
+      await refreshUserData();
     } catch (_) {
       // silent
     } finally {
@@ -196,11 +195,7 @@ const AppMobileMenu: React.FC<AppMobileMenuProps> = ({
   const hasAdminItems = user && adminMenuItems.length > 0;
   const hasHomeNav    = isHomePage && homeNavItems.length > 0;
 
-  // ── Shared colours ────────────────────────────────────────────────────────────
-  const BG        = '#0b1120';
-  const BORDER    = 'rgba(255,255,255,0.07)';
-  const MUTED     = 'rgba(255,255,255,0.45)';
-  const DIM       = 'rgba(255,255,255,0.25)';
+  // ── Design tokens ─────────────────────────────────────────────────────────────
   const BLUE      = '#1976D2';
   const BLUE_LITE = '#42A5F5';
 
@@ -211,7 +206,6 @@ const AppMobileMenu: React.FC<AppMobileMenuProps> = ({
       onClose={onClose}
       PaperProps={{
         sx: {
-          // ── Full-screen dark panel — zero internal scroll ──
           width: { xs: '100vw', sm: '360px' },
           height: '100vh',
           maxHeight: '100vh',
@@ -219,11 +213,9 @@ const AppMobileMenu: React.FC<AppMobileMenuProps> = ({
           position: 'fixed',
           display: 'flex',
           flexDirection: 'column',
-          overflow: 'hidden',          // hard lock — no scroll ever
-          backgroundColor: BG,
-          backgroundImage: `radial-gradient(circle, rgba(255,255,255,0.03) 1px, transparent 1px)`,
-          backgroundSize: '20px 20px',
-          borderLeft: `1px solid ${BORDER}`,
+          overflow: 'hidden',
+          backgroundColor: '#ffffff',
+          borderLeft: '1px solid #e0e0e0',
           boxSizing: 'border-box',
           willChange: 'transform',
         },
@@ -231,19 +223,12 @@ const AppMobileMenu: React.FC<AppMobileMenuProps> = ({
       sx={{
         zIndex: 1300,
         '& .MuiBackdrop-root': {
-          backgroundColor: 'rgba(0,0,0,0.7)',
+          backgroundColor: 'rgba(0,0,0,0.4)',
           backdropFilter: 'blur(4px)',
           WebkitBackdropFilter: 'blur(4px)',
         },
       }}
     >
-      {/* ── Soft blue glow — top right ── */}
-      <Box sx={{
-        position: 'absolute', top: '-60px', right: '-60px',
-        width: 240, height: 240, borderRadius: '50%', pointerEvents: 'none',
-        background: `radial-gradient(circle, ${alpha(BLUE, 0.12)} 0%, transparent 70%)`,
-      }} />
-
       {/* ── Header ─────────────────────────────────────────────────────────────── */}
       <Box
         sx={{
@@ -254,7 +239,7 @@ const AppMobileMenu: React.FC<AppMobileMenuProps> = ({
           alignItems: 'center',
           justifyContent: 'space-between',
           flexShrink: 0,
-          borderBottom: `1px solid ${BORDER}`,
+          borderBottom: '1px solid #e0e0e0',
           position: 'relative',
           zIndex: 1,
         }}
@@ -262,10 +247,10 @@ const AppMobileMenu: React.FC<AppMobileMenuProps> = ({
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
           <DinoLogo size={30} animated={false} />
           <Box>
-            <Typography sx={{ color: '#ffffff', fontWeight: 700, fontSize: '1.05rem', lineHeight: 1.2, letterSpacing: '-0.01em' }}>
+            <Typography sx={{ color: '#1C1C1E', fontWeight: 700, fontSize: '1.05rem', lineHeight: 1.2, letterSpacing: '-0.01em' }}>
               Dino
             </Typography>
-            <Typography sx={{ color: MUTED, fontSize: '0.65rem', lineHeight: 1, display: 'block' }}>
+            <Typography sx={{ color: '#999999', fontSize: '0.65rem', lineHeight: 1, display: 'block' }}>
               Smart Ordering Solutions
             </Typography>
           </Box>
@@ -274,11 +259,11 @@ const AppMobileMenu: React.FC<AppMobileMenuProps> = ({
           onClick={onClose}
           size="small"
           sx={{
-            color: MUTED,
-            border: `1px solid ${BORDER}`,
+            color: '#999999',
+            border: '1px solid #e0e0e0',
             borderRadius: '8px',
             width: 34, height: 34,
-            '&:hover': { color: '#ffffff', backgroundColor: alpha('#ffffff', 0.08), borderColor: alpha('#ffffff', 0.15) },
+            '&:hover': { color: '#1C1C1E', backgroundColor: alpha('#000', 0.06), borderColor: '#bdbdbd' },
             transition: 'all 0.15s ease',
           }}
         >
@@ -292,7 +277,7 @@ const AppMobileMenu: React.FC<AppMobileMenuProps> = ({
           flex: 1,
           display: 'flex',
           flexDirection: 'column',
-          overflowY: 'auto',           // scrollable on short screens
+          overflowY: 'auto',
           position: 'relative',
           zIndex: 1,
           pt: 1.5,
@@ -303,10 +288,10 @@ const AppMobileMenu: React.FC<AppMobileMenuProps> = ({
           <Box sx={{ px: 2, pb: 1.5, flexShrink: 0 }}>
             <Box
               sx={{
-                backgroundColor: alpha(BLUE, 0.08),
+                backgroundColor: alpha(BLUE, 0.06),
                 borderRadius: '12px',
                 p: 1.75,
-                border: `1px solid ${alpha(BLUE, 0.18)}`,
+                border: `1px solid rgba(25,118,210,0.15)`,
               }}
             >
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
@@ -323,7 +308,7 @@ const AppMobileMenu: React.FC<AppMobileMenuProps> = ({
                 <Box sx={{ flex: 1, minWidth: 0 }}>
                   <Typography
                     sx={{
-                      fontWeight: 600, color: '#ffffff', fontSize: '0.875rem',
+                      fontWeight: 600, color: '#1C1C1E', fontSize: '0.875rem',
                       lineHeight: 1.3, whiteSpace: 'nowrap',
                       overflow: 'hidden', textOverflow: 'ellipsis',
                     }}
@@ -335,7 +320,7 @@ const AppMobileMenu: React.FC<AppMobileMenuProps> = ({
                     size="small"
                     sx={{
                       mt: 0.4, height: 18, fontSize: '0.62rem', fontWeight: 600,
-                      backgroundColor: alpha(BLUE, 0.2), color: BLUE_LITE,
+                      backgroundColor: alpha(BLUE, 0.1), color: BLUE,
                       border: 'none', '& .MuiChip-label': { px: 1 },
                     }}
                   />
@@ -346,8 +331,8 @@ const AppMobileMenu: React.FC<AppMobileMenuProps> = ({
                     onClick={() => handleNavigate('/admin/settings')}
                     title="Settings"
                     sx={{
-                      color: MUTED, width: 30, height: 30,
-                      '&:hover': { color: BLUE_LITE, backgroundColor: alpha(BLUE, 0.12) },
+                      color: '#999999', width: 30, height: 30,
+                      '&:hover': { color: BLUE, backgroundColor: alpha(BLUE, 0.08) },
                     }}
                   >
                     <Settings sx={{ fontSize: 16 }} />
@@ -357,8 +342,8 @@ const AppMobileMenu: React.FC<AppMobileMenuProps> = ({
                     onClick={handleLogout}
                     title="Logout"
                     sx={{
-                      color: MUTED, width: 30, height: 30,
-                      '&:hover': { color: '#f87171', backgroundColor: 'rgba(239,68,68,0.1)' },
+                      color: '#999999', width: 30, height: 30,
+                      '&:hover': { color: '#ef4444', backgroundColor: 'rgba(239,68,68,0.08)' },
                     }}
                   >
                     <ExitToApp sx={{ fontSize: 16 }} />
@@ -376,36 +361,36 @@ const AppMobileMenu: React.FC<AppMobileMenuProps> = ({
               sx={{
                 borderRadius: '12px',
                 border: `1px solid`,
-                borderColor: venueStatus?.isOpen ? 'rgba(34,197,94,0.2)' : BORDER,
-                backgroundColor: venueStatus?.isOpen ? 'rgba(34,197,94,0.05)' : alpha('#ffffff', 0.03),
+                borderColor: venueStatus?.isOpen ? 'rgba(22,163,74,0.2)' : '#e0e0e0',
+                backgroundColor: venueStatus?.isOpen ? 'rgba(22,163,74,0.04)' : '#f8fafc',
                 p: 1.5,
                 transition: 'border-color 0.2s, background-color 0.2s',
               }}
             >
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-                  <Store sx={{ fontSize: 13, color: MUTED }} />
-                  <Typography sx={{ fontWeight: 700, color: MUTED, fontSize: '0.62rem', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                  <Store sx={{ fontSize: 13, color: '#999999' }} />
+                  <Typography sx={{ fontWeight: 700, color: '#999999', fontSize: '0.62rem', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
                     Venue Status
                   </Typography>
                 </Box>
                 {venueStatus ? (
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                     {venueStatus.isOpen
-                      ? <CheckCircle sx={{ fontSize: 13, color: '#22c55e' }} />
-                      : <Cancel      sx={{ fontSize: 13, color: '#475569' }} />
+                      ? <CheckCircle sx={{ fontSize: 13, color: '#16a34a' }} />
+                      : <Cancel      sx={{ fontSize: 13, color: '#999999' }} />
                     }
-                    <Typography sx={{ fontWeight: 700, fontSize: '0.62rem', color: venueStatus.isOpen ? '#22c55e' : '#475569', letterSpacing: '0.04em' }}>
+                    <Typography sx={{ fontWeight: 700, fontSize: '0.62rem', color: venueStatus.isOpen ? '#16a34a' : '#999999', letterSpacing: '0.04em' }}>
                       {venueStatus.isOpen ? 'OPEN' : 'CLOSED'}
                     </Typography>
                   </Box>
                 ) : (
-                  <Typography sx={{ color: '#475569', fontSize: '0.62rem' }}>Loading...</Typography>
+                  <Typography sx={{ color: '#999999', fontSize: '0.62rem' }}>Loading...</Typography>
                 )}
               </Box>
               {venueStatus ? (
                 <>
-                  <Typography sx={{ fontWeight: 600, color: '#cbd5e1', fontSize: '0.78rem', mb: 0.75 }}>
+                  <Typography sx={{ fontWeight: 600, color: '#1C1C1E', fontSize: '0.78rem', mb: 0.75 }}>
                     {venueStatus.venueName}
                   </Typography>
                   <FormControlLabel
@@ -420,12 +405,12 @@ const AppMobileMenu: React.FC<AppMobileMenuProps> = ({
                     }
                     label={
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-                        {statusLoading && <CircularProgress size={10} sx={{ color: MUTED }} />}
+                        {statusLoading && <CircularProgress size={10} sx={{ color: '#999999' }} />}
                         <Box>
-                          <Typography sx={{ fontWeight: 500, color: '#cbd5e1', fontSize: '0.72rem', display: 'block' }}>
+                          <Typography sx={{ fontWeight: 500, color: '#1C1C1E', fontSize: '0.72rem', display: 'block' }}>
                             {venueStatus.isOpen ? 'Open for Orders' : 'Closed for Orders'}
                           </Typography>
-                          <Typography sx={{ color: MUTED, fontSize: '0.62rem', display: 'block' }}>
+                          <Typography sx={{ color: '#999999', fontSize: '0.62rem', display: 'block' }}>
                             {venueStatus.isActive
                               ? venueStatus.isOpen ? 'Customers can place orders' : 'Orders are disabled'
                               : 'Venue is inactive'}
@@ -437,7 +422,7 @@ const AppMobileMenu: React.FC<AppMobileMenuProps> = ({
                   />
                 </>
               ) : (
-                <Typography sx={{ fontWeight: 600, color: '#cbd5e1', fontSize: '0.78rem' }}>
+                <Typography sx={{ fontWeight: 600, color: '#1C1C1E', fontSize: '0.78rem' }}>
                   {userData?.venue?.name || 'Current Venue'}
                 </Typography>
               )}
@@ -448,10 +433,10 @@ const AppMobileMenu: React.FC<AppMobileMenuProps> = ({
         {/* ── Home navigation ── */}
         {hasHomeNav && (
           <Box sx={{ px: 2, flexShrink: 0 }}>
-            {user && <Divider sx={{ mb: 1.5, borderColor: BORDER }} />}
+            {user && <Divider sx={{ mb: 1.5, borderColor: '#e0e0e0' }} />}
             <Typography
               sx={{
-                color: DIM, fontWeight: 700, fontSize: '0.6rem',
+                color: '#999999', fontWeight: 700, fontSize: '0.6rem',
                 letterSpacing: '0.12em', textTransform: 'uppercase',
                 mb: 0.5, display: 'block', px: 0.5,
               }}
@@ -470,9 +455,9 @@ const AppMobileMenu: React.FC<AppMobileMenuProps> = ({
                         minHeight: 40,
                         px: 1.5,
                         position: 'relative',
-                        backgroundColor: isActive ? alpha(BLUE, 0.12) : 'transparent',
+                        backgroundColor: isActive ? alpha(BLUE, 0.08) : 'transparent',
                         '&:hover': {
-                          backgroundColor: isActive ? alpha(BLUE, 0.16) : alpha('#ffffff', 0.05),
+                          backgroundColor: isActive ? alpha(BLUE, 0.10) : alpha('#000', 0.04),
                         },
                         '&::before': {
                           content: '""',
@@ -487,14 +472,14 @@ const AppMobileMenu: React.FC<AppMobileMenuProps> = ({
                         },
                       }}
                     >
-                      <ListItemIcon sx={{ color: isActive ? BLUE_LITE : MUTED, minWidth: 34, transition: 'color 0.15s' }}>
+                      <ListItemIcon sx={{ color: isActive ? BLUE : '#999999', minWidth: 34, transition: 'color 0.15s' }}>
                         {getNavigationIcon(item)}
                       </ListItemIcon>
                       <ListItemText
                         primary={item.label}
                         primaryTypographyProps={{
                           fontWeight: isActive ? 600 : 400,
-                          color: isActive ? BLUE_LITE : '#cbd5e1',
+                          color: isActive ? BLUE : '#666666',
                           fontSize: '0.875rem',
                           sx: { transition: 'color 0.15s' },
                         }}
@@ -510,10 +495,10 @@ const AppMobileMenu: React.FC<AppMobileMenuProps> = ({
         {/* ── Admin menu ── */}
         {hasAdminItems && (
           <Box sx={{ px: 2, flexShrink: 0 }}>
-            <Divider sx={{ my: 1.5, borderColor: BORDER }} />
+            <Divider sx={{ my: 1.5, borderColor: '#e0e0e0' }} />
             <Typography
               sx={{
-                color: DIM, fontWeight: 700, fontSize: '0.6rem',
+                color: '#999999', fontWeight: 700, fontSize: '0.6rem',
                 letterSpacing: '0.12em', textTransform: 'uppercase',
                 mb: 0.5, display: 'block', px: 0.5,
               }}
@@ -529,17 +514,17 @@ const AppMobileMenu: React.FC<AppMobileMenuProps> = ({
                       borderRadius: '8px',
                       minHeight: 40,
                       px: 1.5,
-                      '&:hover': { backgroundColor: alpha('#ffffff', 0.05) },
+                      '&:hover': { backgroundColor: alpha('#000', 0.04) },
                     }}
                   >
-                    <ListItemIcon sx={{ color: MUTED, minWidth: 34 }}>
+                    <ListItemIcon sx={{ color: '#999999', minWidth: 34 }}>
                       {item.icon}
                     </ListItemIcon>
                     <ListItemText
                       primary={item.label}
                       primaryTypographyProps={{
                         fontWeight: 400,
-                        color: '#cbd5e1',
+                        color: '#666666',
                         fontSize: '0.875rem',
                       }}
                     />
@@ -560,7 +545,7 @@ const AppMobileMenu: React.FC<AppMobileMenuProps> = ({
               px: 2,
               pt: 1.5,
               pb: 'max(20px, env(safe-area-inset-bottom))',
-              borderTop: `1px solid ${BORDER}`,
+              borderTop: '1px solid #e0e0e0',
               flexShrink: 0,
               display: 'flex',
               flexDirection: 'column',
@@ -575,8 +560,8 @@ const AppMobileMenu: React.FC<AppMobileMenuProps> = ({
               sx={{
                 textTransform: 'none', fontWeight: 600,
                 fontSize: '0.875rem', borderRadius: '8px', height: 42,
-                borderColor: alpha(BLUE, 0.5), color: BLUE_LITE,
-                '&:hover': { borderColor: BLUE_LITE, backgroundColor: alpha(BLUE, 0.1) },
+                borderColor: alpha(BLUE, 0.4), color: BLUE,
+                '&:hover': { borderColor: BLUE, backgroundColor: alpha(BLUE, 0.06) },
               }}
             >
               Sign In

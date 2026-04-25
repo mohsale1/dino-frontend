@@ -9,7 +9,7 @@ import type { ApiResponse } from '../../types';
 export interface Order {
   id: string;
   order_number: string;
-  status: 'pending' | 'confirmed' | 'preparing' | 'ready' | 'served' | 'completed' | 'cancelled';
+  status: 'pending' | 'confirmed' | 'preparing' | 'ready' | 'completed' | 'cancelled';
   customer_name?: string;
   table_number?: string;
   subtotal: number;
@@ -31,7 +31,7 @@ export interface OrderItem {
 export interface OrderDetail {
   id: string;
   order_number: string;
-  status: 'pending' | 'confirmed' | 'preparing' | 'ready' | 'served' | 'completed' | 'cancelled';
+  status: 'pending' | 'confirmed' | 'preparing' | 'ready' | 'completed' | 'cancelled';
   customer_name?: string;
   customer_phone?: string;
   table_number?: string;
@@ -47,9 +47,27 @@ export interface OrderDetail {
   createdAt: string;
 }
 
+/**
+ * Payload shape expected by POST /application/orders
+ * workspace_id is injected from JWT — do NOT include in body
+ * persona_id IS required in body
+ */
+export interface OrderCreate {
+  persona_id: number;
+  order_type?: string;        // default "dine_in"
+  customer_name?: string;
+  table_id?: number;
+  area_id?: number;
+  currency?: string;
+  special_instructions?: string;
+  tax_amount?: number;
+  service_charge?: number;
+  discount_amount?: number;
+  items: Array<{ item_id: number; quantity: number }>;
+}
+
 export interface OrderFilters {
-  workspaceId?: string;
-  organizationId?: string;
+  personaId?: string;   // maps to persona_id query param
   status?: string;
   startDate?: string;
   endDate?: string;
@@ -74,15 +92,13 @@ export interface PaginatedOrders {
 class OrderService {
   /**
    * Get all orders with pagination support.
-   * The backend returns { success, data: Order[], pagination: {...} }.
-   * Returns the full unwrapped paginated payload so callers can access
-   * both the order list and pagination metadata.
+   * Backend scopes by JWT — workspace_id and organization_id are NOT sent.
+   * Use personaId to filter by persona.
    */
   async getOrders(filters?: OrderFilters): Promise<ApiResponse<PaginatedOrders>> {
     try {
       const params: any = {};
-      if (filters?.workspaceId) params.workspace_id = filters.workspaceId;
-      if (filters?.organizationId) params.organization_id = filters.organizationId;
+      if (filters?.personaId) params.persona_id = filters.personaId;
       if (filters?.status) params.status = filters.status;
       if (filters?.startDate) params.start_date = filters.startDate;
       if (filters?.endDate) params.end_date = filters.endDate;
@@ -125,9 +141,7 @@ class OrderService {
   }
 
   /**
-   * Get order by ID.
-   * Backend returns { success, data: OrderDetail }; the axios interceptor
-   * converts snake_case keys to camelCase automatically.
+   * Get order by ID — GET /application/orders/{id}
    */
   async getOrder(orderId: string): Promise<ApiResponse<OrderDetail>> {
     try {
@@ -140,16 +154,17 @@ class OrderService {
     }
   }
 
-
   /**
-   * Create a new order
+   * Create a new order — POST /application/orders
+   * persona_id IS required. workspace_id is injected from JWT.
    */
-  async createOrder(data: Partial<Order>): Promise<ApiResponse<Order>> {
+  async createOrder(data: OrderCreate): Promise<ApiResponse<Order>> {
     try {
-      const response = await apiService.post<Order>('/application/orders', data);
+      const response = await apiService.post<any>('/application/orders', data);
+      const raw = response.data as any;
       return {
         success: true,
-        data: response.data,
+        data: raw?.data ?? raw,
       };
     } catch (error: any) {
       throw new Error(error.message || 'Failed to create order');
@@ -157,14 +172,15 @@ class OrderService {
   }
 
   /**
-   * Update order
+   * Update order — PUT /application/orders/{id}
    */
   async updateOrder(orderId: string, data: Partial<Order>): Promise<ApiResponse<Order>> {
     try {
-      const response = await apiService.put<Order>(`/application/orders/${orderId}`, data);
+      const response = await apiService.put<any>(`/application/orders/${orderId}`, data);
+      const raw = response.data as any;
       return {
         success: true,
-        data: response.data,
+        data: raw?.data ?? raw,
       };
     } catch (error: any) {
       throw new Error(error.message || 'Failed to update order');
@@ -172,23 +188,22 @@ class OrderService {
   }
 
   /**
-   * Update order status.
-   * Sends an empty object body (not null) to satisfy FastAPI's PUT body parser,
-   * while passing new_status as a query parameter.
+   * Update order status — PUT /application/orders/{id}/status
+   * Backend expects { status } in request body, NOT as a query param.
    */
   async updateOrderStatus(
     orderId: string,
     status: Order['status']
   ): Promise<ApiResponse<Order>> {
     try {
-      const response = await apiService.put<Order>(
+      const response = await apiService.put<any>(
         `/application/orders/${orderId}/status`,
-        {},
-        { params: { new_status: status } }
+        { status }
       );
+      const raw = response.data as any;
       return {
         success: true,
-        data: response.data,
+        data: raw?.data ?? raw,
       };
     } catch (error: any) {
       throw new Error(error.message || 'Failed to update order status');
@@ -196,14 +211,15 @@ class OrderService {
   }
 
   /**
-   * Cancel order
+   * Cancel order — PUT /application/orders/{id}/cancel
    */
   async cancelOrder(orderId: string): Promise<ApiResponse<Order>> {
     try {
-      const response = await apiService.put<Order>(`/application/orders/${orderId}/cancel`, {});
+      const response = await apiService.put<any>(`/application/orders/${orderId}/cancel`, {});
+      const raw = response.data as any;
       return {
         success: true,
-        data: response.data,
+        data: raw?.data ?? raw,
       };
     } catch (error: any) {
       throw new Error(error.message || 'Failed to cancel order');
@@ -211,32 +227,35 @@ class OrderService {
   }
 
   /**
-   * Delete order
+   * Delete order — DELETE /application/orders/{id}
    */
   async deleteOrder(orderId: string): Promise<ApiResponse<void>> {
     try {
       await apiService.delete(`/application/orders/${orderId}`);
-      return {
-        success: true,
-      };
+      return { success: true };
     } catch (error: any) {
       throw new Error(error.message || 'Failed to delete order');
     }
   }
 
   /**
-   * Get order statistics
+   * Get order statistics — GET /application/orders/statistics
+   * Backend scopes by JWT — workspace_id is NOT sent.
+   * Use personaId to filter by persona.
    */
-  async getOrderStatistics(workspaceId: string, dateRange?: { startDate: string; endDate: string }, organizationId?: string): Promise<any> {
+  async getOrderStatistics(
+    personaId?: string,
+    dateRange?: { startDate: string; endDate: string }
+  ): Promise<any> {
     try {
-      const params: any = { workspace_id: workspaceId };
+      const params: any = {};
+      if (personaId) params.persona_id = personaId;
       if (dateRange) {
         params.start_date = dateRange.startDate;
         params.end_date = dateRange.endDate;
       }
-      if (organizationId) params.organization_id = organizationId;
 
-      const response = await apiService.get(`/application/orders/statistics`, { params });
+      const response = await apiService.get('/application/orders/statistics', { params });
       return response.data;
     } catch (error: any) {
       console.error('Error fetching order statistics:', error);

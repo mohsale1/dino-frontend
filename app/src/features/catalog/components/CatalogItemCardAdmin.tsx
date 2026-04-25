@@ -45,9 +45,9 @@ export const CatalogItemCardAdmin: React.FC<CatalogItemCardAdminProps> = ({
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
-        backgroundColor: 'white',
+        backgroundColor: '#ffffff',
         border: '1px solid #e0e0e0',
-        borderRadius: 1,
+        borderRadius: '12px',
         opacity: item.isAvailable ? 1 : 0.6,
         transition: 'all 0.2s',
         overflow: 'hidden',
@@ -63,7 +63,7 @@ export const CatalogItemCardAdmin: React.FC<CatalogItemCardAdminProps> = ({
           position: 'relative',
           overflow: 'hidden',
           height: 160,
-          backgroundColor: '#f5f5f5',
+          backgroundColor: '#f8fafc',
         }}
       >
         {item.imageUrls && item.imageUrls.length > 0 ? (

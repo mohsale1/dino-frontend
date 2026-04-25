@@ -14,10 +14,8 @@ import {
 } from '@mui/icons-material';
 import type { CatalogItem, Category, CatalogItemCreate, CatalogItemUpdate } from '../types';
 
-const HEADER_GRADIENT = 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 60%, #312e81 100%)';
-
 const labelSx = {
-  fontWeight: 600, color: '#64748b', mb: 0.75, display: 'block',
+  fontWeight: 600, color: '#666666', mb: 0.75, display: 'block',
   fontSize: '0.75rem', textTransform: 'uppercase' as const, letterSpacing: '0.05em',
 };
 
@@ -48,17 +46,22 @@ export const CatalogItemFormDialog: React.FC<CatalogItemFormDialogProps> = ({
     isVegetarian: false,
     tags: [] as string[],
   });
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [_imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [tagInput, setTagInput] = useState('');
   const [formError, setFormError] = useState('');
 
   useEffect(() => {
+    return () => {
+      if (imagePreview && imagePreview.startsWith('blob:')) {
+        URL.revokeObjectURL(imagePreview);
+      }
+    };
+  }, [imagePreview]);
+
+  useEffect(() => {
     if (open) {
       setFormError('');
       setTagInput('');
-      setImageFile(null);
       if (item) {
         setFormData({
           name: item.name || '',
@@ -88,7 +91,6 @@ export const CatalogItemFormDialog: React.FC<CatalogItemFormDialogProps> = ({
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setImageFile(file);
     setImagePreview(URL.createObjectURL(file));
     e.target.value = '';
   };
@@ -136,16 +138,16 @@ export const CatalogItemFormDialog: React.FC<CatalogItemFormDialogProps> = ({
       PaperProps={{ sx: { borderRadius: fullScreen ? 0 : 3, overflow: 'hidden' } }}
     >
       {/* Header */}
-      <Box sx={{ background: HEADER_GRADIENT, px: 3, py: 2.5, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <Box sx={{ bgcolor: '#ffffff', borderBottom: '1px solid #e0e0e0', px: 3, py: 2.5, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <Box>
-          <Typography sx={{ fontWeight: 700, color: '#fff', fontSize: '1.05rem', letterSpacing: '-0.01em' }}>
+          <Typography sx={{ fontWeight: 700, color: '#1C1C1E', fontSize: '1.05rem', letterSpacing: '-0.01em' }}>
             {isEdit ? 'Edit Item' : 'Add Item'}
           </Typography>
-          <Typography sx={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.78rem', mt: 0.25 }}>
+          <Typography sx={{ color: '#666666', fontSize: '0.78rem', mt: 0.25 }}>
             {isEdit ? 'Update catalog item details' : 'Create a new catalog item'}
           </Typography>
         </Box>
-        <IconButton onClick={onClose} size="small" sx={{ color: 'rgba(255,255,255,0.7)', '&:hover': { color: '#fff', bgcolor: 'rgba(255,255,255,0.1)' } }}>
+        <IconButton onClick={onClose} size="small" sx={{ color: '#666666', '&:hover': { color: '#1C1C1E', bgcolor: 'rgba(0,0,0,0.04)' } }}>
           <CloseIcon sx={{ fontSize: 18 }} />
         </IconButton>
       </Box>
@@ -164,7 +166,7 @@ export const CatalogItemFormDialog: React.FC<CatalogItemFormDialogProps> = ({
             <Box
               onClick={() => fileInputRef.current?.click()}
               sx={{
-                border: '2px dashed #e2e8f0',
+                border: '2px dashed #e0e0e0',
                 borderRadius: 2,
                 height: 140,
                 display: 'flex',
@@ -175,14 +177,14 @@ export const CatalogItemFormDialog: React.FC<CatalogItemFormDialogProps> = ({
                 position: 'relative',
                 bgcolor: '#f8fafc',
                 transition: 'border-color 0.15s, bgcolor 0.15s',
-                '&:hover': { borderColor: '#94a3b8', bgcolor: '#f1f5f9' },
+                '&:hover': { borderColor: '#999999', bgcolor: '#f7f9fa' },
               }}
             >
               {imagePreview ? (
                 <>
                   <Box component="img" src={imagePreview} alt="Preview" sx={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   <Box
-                    onClick={e => { e.stopPropagation(); setImagePreview(null); setImageFile(null); }}
+                    onClick={e => { e.stopPropagation(); setImagePreview(null); }}
                     sx={{
                       position: 'absolute', top: 8, right: 8,
                       width: 28, height: 28, borderRadius: '50%',
@@ -246,7 +248,7 @@ export const CatalogItemFormDialog: React.FC<CatalogItemFormDialogProps> = ({
               onChange={e => setFormData(p => ({ ...p, basePrice: e.target.value }))}
               inputProps={{ min: 0, step: 0.01 }}
               InputProps={{
-                startAdornment: <InputAdornment position="start"><Typography sx={{ fontSize: '0.85rem', color: '#64748b' }}>₹</Typography></InputAdornment>,
+                startAdornment: <InputAdornment position="start"><Typography sx={{ fontSize: '0.85rem', color: '#666666' }}>₹</Typography></InputAdornment>,
               }}
               sx={inputSx}
             />
@@ -313,7 +315,7 @@ export const CatalogItemFormDialog: React.FC<CatalogItemFormDialogProps> = ({
                     label={tag}
                     size="small"
                     onDelete={() => handleRemoveTag(tag)}
-                    sx={{ height: 24, fontSize: '0.75rem', fontWeight: 600, bgcolor: '#f1f5f9', border: '1px solid #e2e8f0', color: '#475569' }}
+                    sx={{ height: 24, fontSize: '0.75rem', fontWeight: 600, bgcolor: '#f8fafc', border: '1px solid #e0e0e0', color: '#666666' }}
                   />
                 ))}
               </Stack>
@@ -333,7 +335,7 @@ export const CatalogItemFormDialog: React.FC<CatalogItemFormDialogProps> = ({
                 onClick={handleAddTag}
                 disabled={!tagInput.trim()}
                 startIcon={<AddIcon sx={{ fontSize: 14 }} />}
-                sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600, fontSize: '0.8rem', borderColor: '#e2e8f0', color: '#475569', '&:hover': { borderColor: '#94a3b8' } }}
+                sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600, fontSize: '0.8rem', borderColor: '#e0e0e0', color: '#666666', '&:hover': { borderColor: '#999999' } }}
               >
                 Add
               </Button>
@@ -342,11 +344,11 @@ export const CatalogItemFormDialog: React.FC<CatalogItemFormDialogProps> = ({
         </Grid>
       </DialogContent>
 
-      <DialogActions sx={{ px: 3, py: 2, borderTop: '1px solid #f1f5f9', gap: 1 }}>
+      <DialogActions sx={{ px: 3, py: 2, borderTop: '1px solid #e0e0e0', gap: 1 }}>
         <Button
           onClick={onClose}
           disabled={loading}
-          sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600, color: '#64748b', '&:hover': { bgcolor: '#f8fafc' } }}
+          sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600, color: '#666666', '&:hover': { bgcolor: '#f8fafc' } }}
         >
           Cancel
         </Button>
@@ -357,7 +359,7 @@ export const CatalogItemFormDialog: React.FC<CatalogItemFormDialogProps> = ({
           startIcon={loading ? <CircularProgress size={14} color="inherit" /> : undefined}
           sx={{
             borderRadius: 2, textTransform: 'none', fontWeight: 700,
-            bgcolor: '#0f172a', '&:hover': { bgcolor: '#1e293b' },
+            bgcolor: '#1976D2', '&:hover': { bgcolor: '#1565C0' },
             boxShadow: 'none', px: 3,
           }}
         >

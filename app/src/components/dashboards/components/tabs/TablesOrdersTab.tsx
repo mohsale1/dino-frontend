@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
@@ -101,14 +101,14 @@ const TABLE_CELL_STYLE: Record<TableStatus, { bg: string; border: string; text: 
   available:   { bg: 'rgba(16,185,129,0.10)',  border: 'rgba(16,185,129,0.30)',  text: '#10b981', dot: '#10b981' },
   occupied:    { bg: 'rgba(244,63,94,0.10)',   border: 'rgba(244,63,94,0.30)',   text: '#f43f5e', dot: '#f43f5e' },
   reserved:    { bg: 'rgba(245,158,11,0.10)',  border: 'rgba(245,158,11,0.30)',  text: '#f59e0b', dot: '#f59e0b' },
-  maintenance: { bg: 'rgba(100,116,139,0.10)', border: 'rgba(100,116,139,0.25)', text: '#64748b', dot: '#94a3b8' },
+  maintenance: { bg: 'rgba(100,116,139,0.10)', border: 'rgba(100,116,139,0.25)', text: '#666666', dot: '#999999' },
 };
 
 // ─── Shared card sx ──────────────────────────────────────────────────────────
 
 const CARD_SX = {
-  bgcolor: '#1e293b',
-  border: '1px solid rgba(255,255,255,0.08)',
+  bgcolor: '#ffffff',
+  border: '1px solid #e0e0e0',
   borderRadius: '12px',
   p: 2.5,
 } as const;
@@ -118,7 +118,7 @@ const CARD_SX = {
 function SectionTitle({ label, accentColor }: { label: string; accentColor: string }) {
   return (
     <Box sx={{ borderLeft: `3px solid ${accentColor}`, pl: 1.5, mb: 2 }}>
-      <Typography sx={{ fontSize: '0.875rem', fontWeight: 700, color: '#f1f5f9', lineHeight: 1.3 }}>
+      <Typography sx={{ fontSize: '0.875rem', fontWeight: 700, color: '#1C1C1E', lineHeight: 1.3 }}>
         {label}
       </Typography>
     </Box>
@@ -149,7 +149,7 @@ function StatCard({ label, value, subtext, accentColor }: StatCardProps) {
         sx={{
           fontSize: '0.68rem',
           fontWeight: 600,
-          color: '#64748b',
+          color: '#666666',
           textTransform: 'uppercase',
           letterSpacing: '0.08em',
           mb: 0.75,
@@ -161,7 +161,7 @@ function StatCard({ label, value, subtext, accentColor }: StatCardProps) {
         sx={{
           fontSize: '1.75rem',
           fontWeight: 800,
-          color: '#f1f5f9',
+          color: '#1C1C1E',
           lineHeight: 1.1,
           mb: 0.5,
         }}
@@ -169,7 +169,7 @@ function StatCard({ label, value, subtext, accentColor }: StatCardProps) {
         {value}
       </Typography>
       {subtext && (
-        <Typography sx={{ fontSize: '0.75rem', color: '#64748b' }}>
+        <Typography sx={{ fontSize: '0.75rem', color: '#666666' }}>
           {subtext}
         </Typography>
       )}
@@ -180,7 +180,10 @@ function StatCard({ label, value, subtext, accentColor }: StatCardProps) {
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function TablesOrdersTab({ dashboardData }: TablesOrdersTabProps) {
-  const { tableStatuses, summary, recentActivity } = dashboardData;
+  // All hooks must be called unconditionally — safe fallbacks used when data is absent
+  const tableStatuses  = dashboardData?.tableStatuses  ?? [];
+  const summary        = dashboardData?.summary        ?? {};
+  const recentActivity = dashboardData?.recentActivity ?? [];
 
   // Stat counts computed from tableStatuses
   const counts = useMemo(() => {
@@ -195,21 +198,6 @@ export default function TablesOrdersTab({ dashboardData }: TablesOrdersTabProps)
     }
     return result;
   }, [tableStatuses]);
-
-  const totalTables     = summary.totalTables    ?? tableStatuses.length;
-  const occupiedTables  = summary.occupiedTables ?? counts.occupied;
-  const availableTables = totalTables - occupiedTables;
-  const occupancyRate   = summary.tableOccupancyRate ?? 0;
-
-  const progressColor =
-    occupancyRate > 70 ? '#f43f5e' : occupancyRate > 40 ? '#f59e0b' : '#10b981';
-
-  const progressBg =
-    occupancyRate > 70
-      ? 'rgba(244,63,94,0.12)'
-      : occupancyRate > 40
-      ? 'rgba(245,158,11,0.12)'
-      : 'rgba(16,185,129,0.12)';
 
   // Group tables by areaId
   const tablesByArea = useMemo(() => {
@@ -228,8 +216,26 @@ export default function TablesOrdersTab({ dashboardData }: TablesOrdersTabProps)
     [recentActivity],
   );
 
+  // Null guard after all hooks
+  if (!dashboardData) return null;
+
+  const totalTables     = summary.totalTables    ?? tableStatuses.length;
+  const occupiedTables  = summary.occupiedTables ?? counts.occupied;
+  const availableTables = totalTables - occupiedTables;
+  const occupancyRate   = summary.tableOccupancyRate ?? 0;
+
+  const progressColor =
+    occupancyRate > 70 ? '#f43f5e' : occupancyRate > 40 ? '#f59e0b' : '#10b981';
+
+  const progressBg =
+    occupancyRate > 70
+      ? 'rgba(244,63,94,0.12)'
+      : occupancyRate > 40
+      ? 'rgba(245,158,11,0.12)'
+      : 'rgba(16,185,129,0.12)';
+
   return (
-    <Box sx={{ px: { xs: 2, sm: 3, md: 4 }, py: 3, bgcolor: '#0f172a' }}>
+    <Box sx={{ px: { xs: 2, sm: 3, md: 4 }, py: 3, bgcolor: '#f8fafc' }}>
 
       {/* Row 1 — Stat Cards */}
       <Grid container spacing={2.5}>
@@ -282,7 +288,7 @@ export default function TablesOrdersTab({ dashboardData }: TablesOrdersTabProps)
             sx={{
               fontSize: '0.68rem',
               fontWeight: 600,
-              color: '#64748b',
+              color: '#666666',
               textTransform: 'uppercase',
               letterSpacing: '0.08em',
               mb: 0.5,
@@ -290,7 +296,7 @@ export default function TablesOrdersTab({ dashboardData }: TablesOrdersTabProps)
           >
             Occupancy Rate
           </Typography>
-          <Typography sx={{ fontSize: '1.5rem', fontWeight: 800, color: '#f1f5f9', lineHeight: 1 }}>
+          <Typography sx={{ fontSize: '1.5rem', fontWeight: 800, color: '#1C1C1E', lineHeight: 1 }}>
             {occupiedTables} / {totalTables}
           </Typography>
         </Box>
@@ -301,7 +307,7 @@ export default function TablesOrdersTab({ dashboardData }: TablesOrdersTabProps)
             sx={{
               height: 8,
               borderRadius: 4,
-              bgcolor: '#334155',
+              bgcolor: '#e0e0e0',
               '& .MuiLinearProgress-bar': { bgcolor: progressColor, borderRadius: 4 },
             }}
           />
@@ -337,7 +343,7 @@ export default function TablesOrdersTab({ dashboardData }: TablesOrdersTabProps)
             <SectionTitle label="Table Status" accentColor="#1976D2" />
 
             {tableStatuses.length === 0 ? (
-              <Typography sx={{ fontSize: '0.8125rem', color: '#94a3b8' }}>
+              <Typography sx={{ fontSize: '0.8125rem', color: '#999999' }}>
                 No tables configured
               </Typography>
             ) : (
@@ -347,7 +353,7 @@ export default function TablesOrdersTab({ dashboardData }: TablesOrdersTabProps)
                     sx={{
                       fontSize: '0.68rem',
                       fontWeight: 700,
-                      color: '#64748b',
+                      color: '#666666',
                       textTransform: 'uppercase',
                       letterSpacing: '0.08em',
                       mb: 1.25,
@@ -431,7 +437,7 @@ export default function TablesOrdersTab({ dashboardData }: TablesOrdersTabProps)
                   py: 6,
                 }}
               >
-                <Typography sx={{ fontSize: '0.8125rem', color: '#94a3b8' }}>
+                <Typography sx={{ fontSize: '0.8125rem', color: '#999999' }}>
                   No active orders
                 </Typography>
               </Box>
@@ -440,8 +446,8 @@ export default function TablesOrdersTab({ dashboardData }: TablesOrdersTabProps)
                 {activeOrders.map((order, idx) => {
                   const statusKey = order.status.toLowerCase();
                   const chipStyle = ORDER_STATUS_COLOR[statusKey] ?? {
-                    bg: 'rgba(255,255,255,0.06)',
-                    color: '#94a3b8',
+                    bg: '#f4f4f4',
+                    color: '#666666',
                   };
                   return (
                     <Box
@@ -450,7 +456,7 @@ export default function TablesOrdersTab({ dashboardData }: TablesOrdersTabProps)
                         py: 1.25,
                         borderBottom:
                           idx < activeOrders.length - 1
-                            ? '1px solid rgba(255,255,255,0.05)'
+                            ? '1px solid #e0e0e0'
                             : 'none',
                         display: 'flex',
                         alignItems: 'center',
@@ -462,7 +468,7 @@ export default function TablesOrdersTab({ dashboardData }: TablesOrdersTabProps)
                       <Box sx={{ minWidth: 0, flex: 1 }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.5 }}>
                           <Typography
-                            sx={{ fontSize: '0.8rem', fontWeight: 700, color: '#f1f5f9' }}
+                            sx={{ fontSize: '0.8rem', fontWeight: 700, color: '#1C1C1E' }}
                           >
                             {order.orderNumber}
                           </Typography>
@@ -482,7 +488,7 @@ export default function TablesOrdersTab({ dashboardData }: TablesOrdersTabProps)
                             />
                           )}
                         </Box>
-                        <Typography sx={{ fontSize: '0.7rem', color: '#64748b' }}>
+                        <Typography sx={{ fontSize: '0.7rem', color: '#666666' }}>
                           {timeAgo(order.createdAt)}
                         </Typography>
                       </Box>
@@ -515,7 +521,7 @@ export default function TablesOrdersTab({ dashboardData }: TablesOrdersTabProps)
                         />
                         {order.totalAmount != null && (
                           <Typography
-                            sx={{ fontSize: '0.8rem', fontWeight: 700, color: '#f1f5f9' }}
+                            sx={{ fontSize: '0.8rem', fontWeight: 700, color: '#1C1C1E' }}
                           >
                             {formatINR(order.totalAmount)}
                           </Typography>

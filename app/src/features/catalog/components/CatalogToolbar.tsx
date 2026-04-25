@@ -53,7 +53,7 @@ export const CatalogToolbar: React.FC<CatalogToolbarProps> = ({
   showActions = true,
 }) => {
   return (
-    <Paper elevation={0} sx={{ p: 2, border: '1px solid #e0e0e0', borderRadius: 1 }}>
+    <Paper elevation={0} sx={{ p: 2, border: '1px solid #e0e0e0', borderRadius: '8px', bgcolor: '#ffffff' }}>
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems={{ xs: 'stretch', sm: 'center' }}>
         {/* Search */}
         <TextField

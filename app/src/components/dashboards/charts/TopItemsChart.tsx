@@ -60,8 +60,8 @@ const TopItemsChart: React.FC<Props> = ({ data, height = 320 }) => {
     tooltip: {
       trigger: 'axis',
       axisPointer: { type: 'shadow' },
-      backgroundColor: '#1e293b',
-      borderColor: 'rgba(255,255,255,0.12)',
+      backgroundColor: '#1C1C1E',
+      borderColor: '#e0e0e0',
       borderWidth: 1,
       borderRadius: 8,
       textStyle: { color: '#f1f5f9', fontSize: 12 },
@@ -94,7 +94,7 @@ const TopItemsChart: React.FC<Props> = ({ data, height = 320 }) => {
         fontSize: 10,
         formatter: formatXAxis,
       },
-      splitLine: { lineStyle: { color: 'rgba(255,255,255,0.06)', type: 'solid' } },
+      splitLine: { lineStyle: { color: '#e0e0e0', type: 'solid' } },
     },
     yAxis: {
       type: 'category',

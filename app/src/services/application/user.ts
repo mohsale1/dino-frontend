@@ -6,51 +6,49 @@
 import { apiService } from '../../utils/api';
 
 export interface ApplicationUser {
-  id: string;
+  id: number;
   email: string;
-  firstName?: string;
-  lastName?: string;
+  first_name?: string;
+  last_name?: string;
   phone?: string;
-  roleId: string;
+  role_id: number;
   role?: {
-    id: string;
+    id: number;
     name: string;
-    roleType: number;
+    role_type: number;
   };
-  workspaceId: string;
-  organizationId?: string;
-  isActive: boolean;
-  isDeleted: boolean;
-  createdAt: string;
-  updatedAt: string;
-  lastLogin?: string;
+  workspace_id: number;
+  persona_ids?: number[];
+  is_active: boolean;
+  is_deleted: boolean;
+  created_at: string;
+  updated_at: string;
+  last_login?: string;
 }
 
 export interface ApplicationUserCreate {
   email: string;
   password: string;
-  firstName?: string;
-  lastName?: string;
+  first_name?: string;
+  last_name?: string;
   phone?: string;
-  roleId: string;
-  organizationId?: string;
+  role_id: number;
+  persona_ids?: number[];
 }
 
 export interface ApplicationUserUpdate {
-  firstName?: string;
-  lastName?: string;
+  email?: string;
+  first_name?: string;
+  last_name?: string;
   phone?: string;
-  roleId?: string;
-  organizationId?: string;
-  isActive?: boolean;
+  role_id?: number;
   password?: string;
 }
 
 export interface UserFilters {
-  workspaceId?: string;
-  organizationId?: string;
-  roleId?: string;
-  isActive?: boolean;
+  persona_id?: number;
+  role_id?: number;
+  is_active?: boolean;
   search?: string;
 }
 
@@ -70,15 +68,12 @@ class ApplicationUserService {
       page,
       page_size: pageSize,
       include_deleted: includeDeleted,
-      order_by: 'created_at',
-      order_direction: 'desc',
     };
 
     if (filters) {
-      if (filters.workspaceId) params.workspace_id = filters.workspaceId;
-      if (filters.organizationId) params.organization_id = filters.organizationId;
-      if (filters.roleId) params.role_id = filters.roleId;
-      if (filters.isActive !== undefined) params.is_active = filters.isActive;
+      if (filters.persona_id !== undefined) params.persona_id = filters.persona_id;
+      if (filters.role_id !== undefined) params.role_id = filters.role_id;
+      if (filters.is_active !== undefined) params.is_active = filters.is_active;
       if (filters.search) params.search = filters.search;
     }
 
@@ -91,7 +86,7 @@ class ApplicationUserService {
   /**
    * Get user by ID
    */
-  async getUser(id: string) {
+  async getUser(id: number) {
     const response = await apiService.get(`${this.baseUrl}/${id}`);
     return response.data as any;
   }
@@ -100,75 +95,72 @@ class ApplicationUserService {
    * Create new application user
    */
   async createUser(data: ApplicationUserCreate) {
-    const response = await apiService.post(this.baseUrl, data);
+    const payload: any = {
+      email: data.email,
+      password: data.password,
+      role_id: data.role_id,
+    };
+
+    if (data.first_name !== undefined) payload.first_name = data.first_name;
+    if (data.last_name !== undefined) payload.last_name = data.last_name;
+    if (data.phone !== undefined) payload.phone = data.phone;
+    if (data.persona_ids !== undefined) payload.persona_ids = data.persona_ids;
+
+    const response = await apiService.post(this.baseUrl, payload);
     return response.data as any;
   }
 
   /**
    * Update application user
    */
-  async updateUser(id: string, data: ApplicationUserUpdate) {
-    const response = await apiService.put(`${this.baseUrl}/${id}`, data);
+  async updateUser(id: number, data: ApplicationUserUpdate) {
+    const payload: any = {};
+    if (data.email !== undefined) payload.email = data.email;
+    if (data.first_name !== undefined) payload.first_name = data.first_name;
+    if (data.last_name !== undefined) payload.last_name = data.last_name;
+    if (data.phone !== undefined) payload.phone = data.phone;
+    if (data.role_id !== undefined) payload.role_id = data.role_id;
+    if (data.password !== undefined) payload.password = data.password;
+
+    const response = await apiService.put(`${this.baseUrl}/${id}`, payload);
     return response.data as any;
   }
 
   /**
    * Delete user (soft delete)
    */
-  async deleteUser(id: string) {
+  async deleteUser(id: number) {
     await apiService.delete(`${this.baseUrl}/${id}`);
   }
 
   /**
-   * Restore soft-deleted user
+   * Restore soft-deleted user (POST, not PUT)
    */
-  async restoreUser(id: string) {
-    await apiService.put(`${this.baseUrl}/${id}/restore`, {});
+  async restoreUser(id: number) {
+    await apiService.post(`${this.baseUrl}/${id}/restore`, {});
   }
 
   /**
-   * Activate user
+   * Activate user — backend has no /activate endpoint.
+   * Uses PUT /users/{id} with { is_active: true }.
    */
-  async activateUser(id: string) {
-    await apiService.put(`${this.baseUrl}/${id}/activate`, {});
+  async activateUser(id: number) {
+    await apiService.put(`${this.baseUrl}/${id}`, { is_active: true });
   }
 
   /**
-   * Deactivate user
+   * Deactivate user — backend has no /deactivate endpoint.
+   * Uses PUT /users/{id} with { is_active: false }.
    */
-  async deactivateUser(id: string) {
-    await apiService.put(`${this.baseUrl}/${id}/deactivate`, {});
+  async deactivateUser(id: number) {
+    await apiService.put(`${this.baseUrl}/${id}`, { is_active: false });
   }
 
   /**
    * Update user role
    */
-  async updateUserRole(id: string, roleId: string) {
-    await apiService.put(`${this.baseUrl}/${id}/role`, { role_id: roleId });
-  }
-
-  /**
-   * Get users by role
-   */
-  async getUsersByRole(roleId: string) {
-    const response = await apiService.get(`${this.baseUrl}/role/${roleId}`);
-    return response.data as any;
-  }
-
-  /**
-   * Get users by workspace
-   */
-  async getUsersByWorkspace(workspaceId: string) {
-    const response = await apiService.get(`${this.baseUrl}/workspace/${workspaceId}`);
-    return response.data as any;
-  }
-
-  /**
-   * Get users by organization
-   */
-  async getUsersByOrganization(organizationId: string) {
-    const response = await apiService.get(`${this.baseUrl}/organization/${organizationId}`);
-    return response.data as any;
+  async updateUserRole(id: number, roleId: number) {
+    await apiService.put(`${this.baseUrl}/${id}`, { role_id: roleId });
   }
 }
 

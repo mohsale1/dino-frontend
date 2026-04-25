@@ -4,7 +4,7 @@ export type Order = _Order;
 export type OrderDetail = _OrderDetail;
 
 // ── Filter types ─────────────────────────────────────────────────────────────
-export type StatusFilter = '' | 'pending' | 'confirmed' | 'preparing' | 'ready' | 'served' | 'completed' | 'cancelled';
+export type StatusFilter = '' | 'pending' | 'confirmed' | 'preparing' | 'ready' | 'completed' | 'cancelled';
 export type DateFilter = '' | 'today' | 'week' | 'month';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -37,7 +37,6 @@ export const STATUS_CONFIG: Record<Order['status'], {
   confirmed: { bg: '#EFF6FF', color: '#1D4ED8', border: '#BFDBFE', dot: '#3B82F6', label: 'Confirmed' },
   preparing: { bg: '#F5F3FF', color: '#6D28D9', border: '#DDD6FE', dot: '#8B5CF6', label: 'Preparing' },
   ready:     { bg: '#F0FDF4', color: '#15803D', border: '#BBF7D0', dot: '#22C55E', label: 'Ready' },
-  served:    { bg: '#F0F9FF', color: '#0369A1', border: '#BAE6FD', dot: '#0EA5E9', label: 'Served' },
   completed: { bg: '#F0FDF4', color: '#166534', border: '#BBF7D0', dot: '#16A34A', label: 'Completed' },
   cancelled: { bg: '#FFF1F2', color: '#BE123C', border: '#FECDD3', dot: '#F43F5E', label: 'Cancelled' },
 };
@@ -52,8 +51,6 @@ export const STATUS_FLOW: Partial<Record<Order['status'], {
   pending:   { next: 'confirmed', label: 'Confirm Order',   color: '#1D4ED8', btnBg: '#2563EB' },
   confirmed: { next: 'preparing', label: 'Start Preparing', color: '#6D28D9', btnBg: '#7C3AED' },
   preparing: { next: 'ready',     label: 'Mark Ready',      color: '#15803D', btnBg: '#16A34A' },
-  ready:     { next: 'served',    label: 'Mark Served',     color: '#0369A1', btnBg: '#0284C7' },
-  served:    { next: 'completed', label: 'Complete Order',  color: '#166534', btnBg: '#15803D' },
 };
 
 // ── Helpers ───────────────────────────────────────────────────────────────────

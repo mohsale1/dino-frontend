@@ -106,14 +106,9 @@ export const API_ENDPOINTS = {
     USERS: {
       BASE: '/application/users',
       BY_ID: (id: string) => `/application/users/${id}`,
-      ACTIVATE: (id: string) => `/application/users/${id}/activate`,
-      DEACTIVATE: (id: string) => `/application/users/${id}/deactivate`,
       RESTORE: (id: string) => `/application/users/${id}/restore`,
       UPDATE_ROLE: (id: string) => `/application/users/${id}/role`,
       BY_ROLE: (roleId: string) => `/application/users/role/${roleId}`,
-      BY_WORKSPACE: (workspaceId: string) => `/application/users/workspace/${workspaceId}`,
-      BY_ORGANIZATION: (orgId: string) => `/application/users/organization/${orgId}`,
-      ME_DATA: '/application/users/me/data',
     },
     
     // Roles
@@ -131,13 +126,27 @@ export const API_ENDPOINTS = {
     DASHBOARD: {
       BASE: '/application/dashboard',
       STATS: '/application/dashboard/stats',
-      ANALYTICS: '/application/dashboard/analytics',
+      REVENUE_TREND: '/application/dashboard/revenue-trend',
+      ORDERS_BY_STATUS: '/application/dashboard/orders-by-status',
+      ORDERS_BY_TYPE: '/application/dashboard/orders-by-type',
+      TOP_ITEMS: '/application/dashboard/top-items',
+      PAYMENT_SUMMARY: '/application/dashboard/payment-summary',
+      HOURLY_ORDERS: '/application/dashboard/hourly-orders',
     },
-    
-    // Organizations (Venues)
+
+    // Personas (Business Locations / Venues)
+    PERSONAS: {
+      BASE: '/application/personas',
+      BY_ID: (id: string | number) => `/application/personas/${id}`,
+      STATUS: (id: string | number) => `/application/personas/${id}/status`,
+      RESTORE: (id: string | number) => `/application/personas/${id}/restore`,
+    },
+
+    // Organizations — alias for PERSONAS (backward compatibility)
     ORGANIZATIONS: {
-      BASE: '/application/organizations',
-      BY_ID: (id: string) => `/application/organizations/${id}`,
+      BASE: '/application/personas',
+      BY_ID: (id: string) => `/application/personas/${id}`,
+      STATUS: (id: string) => `/application/personas/${id}/status`,
     },
     
     // Categories

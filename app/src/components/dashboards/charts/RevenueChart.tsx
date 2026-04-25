@@ -28,7 +28,7 @@ const formatYAxisRevenue = (value: number): string => {
 };
 
 const TOOLTIP_STYLE = {
-  backgroundColor: '#1e293b',
+  backgroundColor: '#1C1C1E',
   borderColor: 'rgba(255,255,255,0.12)',
   borderWidth: 1,
   borderRadius: 8,
@@ -142,7 +142,7 @@ const RevenueChart: React.FC<Props> = ({ data, height = 300 }) => {
         },
         emphasis: {
           focus: 'series',
-          itemStyle: { color: '#42A5F5', borderColor: '#1e293b', borderWidth: 2, symbolSize: 6 },
+          itemStyle: { color: '#42A5F5', borderColor: '#ffffff', borderWidth: 2, symbolSize: 6 },
         },
       },
       {
@@ -157,7 +157,7 @@ const RevenueChart: React.FC<Props> = ({ data, height = 300 }) => {
         itemStyle: { color: '#f59e0b' },
         emphasis: {
           focus: 'series',
-          itemStyle: { color: '#f59e0b', borderColor: '#1e293b', borderWidth: 2, symbolSize: 6 },
+          itemStyle: { color: '#f59e0b', borderColor: '#ffffff', borderWidth: 2, symbolSize: 6 },
         },
       },
     ],

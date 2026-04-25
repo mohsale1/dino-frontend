@@ -40,7 +40,7 @@ const fieldSx = {
   '& .MuiOutlinedInput-root': {
     borderRadius: 2,
     bgcolor: '#ffffff',
-    '& fieldset': { borderColor: '#e2e8f0' },
+    '& fieldset': { borderColor: '#e0e0e0' },
     '&:hover fieldset': { borderColor: BRAND.primaryBorder },
     '&.Mui-focused fieldset': { borderColor: BRAND.primary },
   },
@@ -62,7 +62,7 @@ const SectionHeader: React.FC<{ icon: React.ReactNode; title: string; subtitle?:
       {icon}
     </Box>
     <Box sx={{ minWidth: 0 }}>
-      <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#0f172a', lineHeight: 1.2, fontSize: { xs: '0.9rem', sm: '1rem' } }}>
+      <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#1C1C1E', lineHeight: 1.2, fontSize: { xs: '0.9rem', sm: '1rem' } }}>
         {title}
       </Typography>
       {subtitle && (
@@ -146,6 +146,7 @@ const WorkspaceSection: React.FC<WorkspaceSectionProps> = ({ onSave }) => {
     }
     setDirty(false);
     setError('');
+    setSuccess('');
   };
 
   const handleSave = async () => {
@@ -186,11 +187,11 @@ const WorkspaceSection: React.FC<WorkspaceSectionProps> = ({ onSave }) => {
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 2, sm: 3 } }}>
 
       {/* ── Card 1: Venue Overview ── */}
-      <Card elevation={0} sx={{ borderRadius: 3, border: '1px solid #e2e8f0', overflow: 'hidden' }}>
+      <Card elevation={0} sx={{ borderRadius: 3, border: '1px solid #e0e0e0', overflow: 'hidden' }}>
         {/* Dark band */}
         <Box sx={{
           height: 64,
-          background: 'linear-gradient(135deg, #0d1b2e 0%, #1565C0 100%)',
+          background: 'linear-gradient(135deg, #1976D2 0%, #42A5F5 100%)',
         }} />
 
         {/* Overview content */}
@@ -205,7 +206,7 @@ const WorkspaceSection: React.FC<WorkspaceSectionProps> = ({ onSave }) => {
           </Box>
 
           <Box sx={{ minWidth: 0, flex: 1 }}>
-            <Typography variant="h6" sx={{ fontWeight: 700, color: '#0f172a', lineHeight: 1.2, mb: 0.5 }}>
+            <Typography variant="h6" sx={{ fontWeight: 700, color: '#1C1C1E', lineHeight: 1.2, mb: 0.5 }}>
               {formData.name || venue?.name || 'Venue Name'}
             </Typography>
             {(formData.city || formData.state) && (
@@ -232,7 +233,7 @@ const WorkspaceSection: React.FC<WorkspaceSectionProps> = ({ onSave }) => {
       </Card>
 
       {/* ── Card 2: Venue Details Form ── */}
-      <Card elevation={0} sx={{ borderRadius: 3, border: '1px solid #e2e8f0' }}>
+      <Card elevation={0} sx={{ borderRadius: 3, border: '1px solid #e0e0e0' }}>
         <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
           <SectionHeader
             icon={<BusinessOutlined sx={{ fontSize: 20 }} />}
@@ -359,7 +360,7 @@ const WorkspaceSection: React.FC<WorkspaceSectionProps> = ({ onSave }) => {
               <Box sx={{
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                 px: { xs: 1.5, sm: 2 }, py: { xs: 1.25, sm: 1.5 },
-                borderRadius: 2, bgcolor: '#f8fafc', border: '1px solid #e2e8f0',
+                borderRadius: 2, bgcolor: '#f8fafc', border: '1px solid #e0e0e0',
               }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                   <Box sx={{
@@ -370,7 +371,7 @@ const WorkspaceSection: React.FC<WorkspaceSectionProps> = ({ onSave }) => {
                     <BusinessOutlined sx={{ fontSize: 17 }} />
                   </Box>
                   <Box>
-                    <Typography variant="body2" sx={{ fontWeight: 600, color: '#0f172a' }}>Venue Active</Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 600, color: '#1C1C1E' }}>Venue Active</Typography>
                     <Typography variant="caption" sx={{ color: '#64748b' }}>Enable or disable venue operations</Typography>
                   </Box>
                 </Box>
@@ -384,7 +385,7 @@ const WorkspaceSection: React.FC<WorkspaceSectionProps> = ({ onSave }) => {
           </Grid>
 
           {/* Action buttons */}
-          <Divider sx={{ mt: 3, mb: 2.5, borderColor: '#e2e8f0' }} />
+          <Divider sx={{ mt: 3, mb: 2.5, borderColor: '#e0e0e0' }} />
           <Box sx={{
             display: 'flex',
             flexDirection: { xs: 'column-reverse', sm: 'row' },
@@ -397,7 +398,7 @@ const WorkspaceSection: React.FC<WorkspaceSectionProps> = ({ onSave }) => {
               disabled={saving || !dirty}
               sx={{
                 textTransform: 'none', fontWeight: 600, borderRadius: 2, px: 3,
-                borderColor: '#e2e8f0', color: '#475569',
+                borderColor: '#e0e0e0', color: '#475569',
                 width: { xs: '100%', sm: 'auto' },
                 '&:hover': { borderColor: '#cbd5e1', bgcolor: '#f8fafc' },
               }}

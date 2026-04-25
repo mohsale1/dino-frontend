@@ -5,7 +5,6 @@ import {
 import { Receipt as ReceiptIcon } from '@mui/icons-material';
 
 import { orderService, OrderFilters } from '../../../services/application/order.service';
-import { useAuth } from '../../../contexts/common/Auth';
 import { useUserData } from '../../../contexts/application/UserData';
 import { ConfirmationDialog } from '../../../components/dialogs/ConfirmationDialog';
 
@@ -19,8 +18,8 @@ import OrderDetailPanel from './components/OrderDetailPanel';
 
 // ── Skeleton card ─────────────────────────────────────────────────────────────
 const SkeletonCard: React.FC = () => (
-  <Box sx={{ bgcolor: '#fff', border: '1px solid #e2e8f0', borderRadius: 2.5, overflow: 'hidden' }}>
-    <Box sx={{ px: 2, py: 1.25, display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #f1f5f9' }}>
+  <Box sx={{ bgcolor: '#fff', border: '1px solid #e0e0e0', borderRadius: 2.5, overflow: 'hidden' }}>
+    <Box sx={{ px: 2, py: 1.25, display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #e0e0e0' }}>
       <Skeleton variant="text" width={80} height={18} />
       <Skeleton variant="rounded" width={72} height={22} sx={{ borderRadius: 1 }} />
     </Box>
@@ -32,7 +31,7 @@ const SkeletonCard: React.FC = () => (
         <Skeleton variant="text" width={70} height={22} />
       </Box>
     </Box>
-    <Box sx={{ px: 2, py: 1.25, borderTop: '1px solid #f1f5f9', display: 'flex', gap: 1 }}>
+    <Box sx={{ px: 2, py: 1.25, borderTop: '1px solid #e0e0e0', display: 'flex', gap: 1 }}>
       <Skeleton variant="rounded" height={30} sx={{ flex: 1, borderRadius: 1.5 }} />
       <Skeleton variant="rounded" width={72} height={30} sx={{ borderRadius: 1.5 }} />
     </Box>
@@ -42,22 +41,20 @@ const SkeletonCard: React.FC = () => (
 // ── Empty state ───────────────────────────────────────────────────────────────
 const EmptyState: React.FC = () => (
   <Box sx={{ py: 12, textAlign: 'center' }}>
-    <Box sx={{ width: 64, height: 64, borderRadius: '50%', bgcolor: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', mx: 'auto', mb: 2 }}>
-      <ReceiptIcon sx={{ fontSize: 30, color: '#cbd5e1' }} />
+    <Box sx={{ width: 64, height: 64, borderRadius: '50%', bgcolor: '#f7f9fa', display: 'flex', alignItems: 'center', justifyContent: 'center', mx: 'auto', mb: 2 }}>
+      <ReceiptIcon sx={{ fontSize: 30, color: '#999999' }} />
     </Box>
-    <Typography sx={{ fontWeight: 600, color: '#94a3b8', fontSize: '0.9rem' }}>No orders found</Typography>
-    <Typography sx={{ color: '#cbd5e1', fontSize: '0.8rem', mt: 0.5 }}>Try adjusting your filters or date range</Typography>
+    <Typography sx={{ fontWeight: 600, color: '#666666', fontSize: '0.9rem' }}>No orders found</Typography>
+    <Typography sx={{ color: '#666666', fontSize: '0.8rem', mt: 0.5 }}>Try adjusting your filters or date range</Typography>
   </Box>
 );
 
 // ── Main page ─────────────────────────────────────────────────────────────────
 const OrdersManagementPage: React.FC = () => {
-  const { user } = useAuth();
   const { userData } = useUserData();
 
-  const workspaceId: string =
-    userData?.venue?.workspaceId || (user as any)?.workspaceId || (user as any)?.workspace_id || '';
-  const organizationId: string = userData?.venue?.id || '';
+  const personaId: number | undefined =
+    userData?.venue?.personaId || (userData?.venue?.id ? Number(userData.venue.id) : undefined);
 
   // ── State ─────────────────────────────────────────────────────────────────
   const [orders, setOrders] = useState<Order[]>([]);
@@ -90,12 +87,11 @@ const OrdersManagementPage: React.FC = () => {
 
   // ── Data loading ──────────────────────────────────────────────────────────
   const loadOrders = useCallback(async () => {
-    if (!workspaceId) return;
+    if (!personaId) return;
     setLoading(true);
     const { startDate, endDate } = getDateRange(dateFilter);
     const filters: OrderFilters = {
-      workspaceId,
-      organizationId: organizationId || undefined,
+      personaId: String(personaId),
       status: statusFilter || undefined,
       startDate,
       endDate,
@@ -109,7 +105,7 @@ const OrdersManagementPage: React.FC = () => {
       setTotalOrders(res.data.total);
     } catch { showSnackbar('Failed to load orders', 'error'); }
     finally { setLoading(false); }
-  }, [workspaceId, organizationId, statusFilter, dateFilter, page]);
+  }, [personaId, statusFilter, dateFilter, page]);
 
   useEffect(() => { loadOrders(); }, [loadOrders]);
 
@@ -224,10 +220,10 @@ const OrdersManagementPage: React.FC = () => {
                 sx={{
                   '& .MuiTablePagination-selectLabel': { display: 'none' },
                   '& .MuiTablePagination-select': { display: 'none' },
-                  '& .MuiTablePagination-displayedRows': { fontSize: '0.78rem', color: '#64748b' },
+                  '& .MuiTablePagination-displayedRows': { fontSize: '0.78rem', color: '#666666' },
                   '& .MuiTablePagination-actions button': {
                     borderRadius: 1.5,
-                    border: '1px solid #e2e8f0',
+                    border: '1px solid #e0e0e0',
                     mx: 0.25,
                     '&:hover': { bgcolor: '#f8fafc' },
                     '&.Mui-disabled': { opacity: 0.4 },

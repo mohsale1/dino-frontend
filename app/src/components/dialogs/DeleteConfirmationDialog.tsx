@@ -130,22 +130,11 @@ const DeleteConfirmationDialog: React.FC<DeleteConfirmationDialogProps> = ({
       {/* Header */}
       <Box
         sx={{
-          background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 60%, #312e81 100%)',
+          bgcolor: '#ffffff',
+          borderBottom: '1px solid #e0e0e0',
           px: 3,
           py: 2.5,
           position: 'relative',
-          overflow: 'hidden',
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: -60,
-            right: -40,
-            width: 180,
-            height: 180,
-            borderRadius: '50%',
-            background: glowBg,
-            pointerEvents: 'none',
-          },
         }}
       >
         <Box
@@ -153,8 +142,6 @@ const DeleteConfirmationDialog: React.FC<DeleteConfirmationDialogProps> = ({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            position: 'relative',
-            zIndex: 1,
           }}
         >
           {/* Left: icon + text */}
@@ -167,8 +154,8 @@ const DeleteConfirmationDialog: React.FC<DeleteConfirmationDialogProps> = ({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                bgcolor: alpha('#fff', 0.12),
-                border: `1px solid ${alpha('#fff', 0.20)}`,
+                bgcolor: alpha(accentColor, 0.08),
+                border: `1px solid ${alpha(accentColor, 0.20)}`,
                 borderRadius: 2,
               }}
             >
@@ -182,7 +169,7 @@ const DeleteConfirmationDialog: React.FC<DeleteConfirmationDialogProps> = ({
             <Box sx={{ minWidth: 0 }}>
               <Typography
                 sx={{
-                  color: '#ffffff',
+                  color: '#1C1C1E',
                   fontWeight: 700,
                   fontSize: '1.0625rem',
                   lineHeight: 1.25,
@@ -193,7 +180,7 @@ const DeleteConfirmationDialog: React.FC<DeleteConfirmationDialogProps> = ({
               </Typography>
               <Typography
                 sx={{
-                  color: 'rgba(199,210,254,0.70)',
+                  color: '#64748b',
                   fontSize: '0.75rem',
                   lineHeight: 1.5,
                   mt: 0.25,
@@ -214,10 +201,10 @@ const DeleteConfirmationDialog: React.FC<DeleteConfirmationDialogProps> = ({
             sx={{
               ml: 1,
               flexShrink: 0,
-              color: alpha('#ffffff', 0.70),
+              color: '#64748b',
               transition: 'all 0.2s cubic-bezier(0.25,0.46,0.45,0.94)',
-              '&:hover': { bgcolor: alpha('#ffffff', 0.10), color: '#ffffff' },
-              '&.Mui-disabled': { color: alpha('#ffffff', 0.28) },
+              '&:hover': { bgcolor: 'rgba(0,0,0,0.04)', color: '#1C1C1E' },
+              '&.Mui-disabled': { color: 'rgba(0,0,0,0.26)' },
             }}
           >
             <CloseIcon fontSize="small" />
@@ -230,13 +217,13 @@ const DeleteConfirmationDialog: React.FC<DeleteConfirmationDialogProps> = ({
         {/* Main question */}
         <Typography
           variant="body1"
-          sx={{ color: '#0f172a', lineHeight: 1.7, mb: description ? 1.5 : 2.5 }}
+          sx={{ color: '#1C1C1E', lineHeight: 1.7, mb: description ? 1.5 : 2.5 }}
         >
           Are you sure you want to{' '}
           {isSoftDelete ? 'deactivate' : 'permanently delete'} the {itemType}{' '}
           <Box
             component="span"
-            sx={{ fontWeight: 700, color: '#0f172a' }}
+            sx={{ fontWeight: 700, color: '#1C1C1E' }}
           >
             {itemName}
           </Box>
@@ -262,7 +249,7 @@ const DeleteConfirmationDialog: React.FC<DeleteConfirmationDialogProps> = ({
             borderRadius: 1.5,
             bgcolor: accentBg,
             border: `1px solid ${accentBorder}`,
-            color: '#0f172a',
+            color: '#1C1C1E',
             '& .MuiAlert-icon': {
               alignItems: 'center',
               pt: 0,
@@ -336,7 +323,7 @@ const DeleteConfirmationDialog: React.FC<DeleteConfirmationDialogProps> = ({
           >
             <Typography
               variant="body2"
-              sx={{ color: '#0f172a', lineHeight: 1.65, mb: 1.25 }}
+              sx={{ color: '#1C1C1E', lineHeight: 1.65, mb: 1.25 }}
             >
               To confirm {isSoftDelete ? 'deactivation' : 'deletion'}, type{' '}
               <Box

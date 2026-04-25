@@ -70,21 +70,21 @@ const EmptyState: React.FC<{ icon: React.ReactElement; title: string; subtitle: 
         width: { xs: 56, sm: 64 },
         height: { xs: 56, sm: 64 },
         borderRadius: 2.5,
-        bgcolor: '#f1f5f9',
-        border: '1px solid #e2e8f0',
+        bgcolor: '#f7f9fa',
+        border: '1px solid #e0e0e0',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         mb: 2.5,
-        color: '#94a3b8',
+        color: '#999999',
       }}
     >
       {React.cloneElement(icon, { sx: { fontSize: 30 } })}
     </Box>
-    <Typography sx={{ fontWeight: 700, color: '#0f172a', fontSize: '1rem', mb: 0.75 }}>
+    <Typography sx={{ fontWeight: 700, color: '#1C1C1E', fontSize: '1rem', mb: 0.75 }}>
       {title}
     </Typography>
-    <Typography sx={{ color: '#64748b', fontSize: '0.875rem', maxWidth: 320 }}>
+    <Typography sx={{ color: '#666666', fontSize: '0.875rem', maxWidth: 320 }}>
       {subtitle}
     </Typography>
   </Box>
@@ -101,13 +101,13 @@ const TabLabel: React.FC<{ label: string; count: number }> = ({ label, count }) 
         height: 20,
         px: 0.75,
         borderRadius: 10,
-        bgcolor: '#e2e8f0',
+        bgcolor: '#e0e0e0',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
       }}
     >
-      <Typography sx={{ fontSize: '0.68rem', fontWeight: 700, color: '#475569', lineHeight: 1 }}>
+      <Typography sx={{ fontSize: '0.68rem', fontWeight: 700, color: '#666666', lineHeight: 1 }}>
         {count}
       </Typography>
     </Box>
@@ -166,7 +166,7 @@ const LocationTabs: React.FC<LocationTabsProps> = ({
       {/* ── Tab bar ─────────────────────────────────────────────────────────── */}
       <Box
         sx={{
-          borderBottom: '1px solid #e2e8f0',
+          borderBottom: '1px solid #e0e0e0',
           bgcolor: '#ffffff',
           px: { xs: 2, sm: 3 },
         }}
@@ -179,17 +179,17 @@ const LocationTabs: React.FC<LocationTabsProps> = ({
             '& .MuiTabs-indicator': {
               height: 2,
               borderRadius: '2px 2px 0 0',
-              bgcolor: '#0f172a',
+              bgcolor: '#1C1C1E',
             },
             '& .MuiTab-root': {
               minHeight: { xs: 40, sm: 44 },
               textTransform: 'none',
               fontWeight: 600,
               fontSize: { xs: '0.8125rem', sm: '0.875rem' },
-              color: '#64748b',
+              color: '#666666',
               px: { xs: 1, sm: 1.5 },
               py: 0,
-              '&.Mui-selected': { color: '#0f172a' },
+              '&.Mui-selected': { color: '#1C1C1E' },
             },
           }}
         >
@@ -219,14 +219,14 @@ const LocationTabs: React.FC<LocationTabsProps> = ({
               justifyContent: 'space-between',
               flexWrap: 'wrap',
               gap: 1,
-              borderBottom: '1px solid #f1f5f9',
-              bgcolor: '#fafafa',
+              borderBottom: '1px solid #e0e0e0',
+              bgcolor: '#f7f9fa',
             }}
           >
             <Typography
               sx={{
                 fontSize: '0.75rem',
-                color: '#94a3b8',
+                color: '#999999',
                 fontWeight: 500,
               }}
             >
@@ -246,11 +246,11 @@ const LocationTabs: React.FC<LocationTabsProps> = ({
                   fontWeight: 600,
                   textTransform: 'none',
                   borderRadius: 1.5,
-                  color: '#0f172a',
+                  color: '#1C1C1E',
                   borderColor: '#cbd5e1',
                   bgcolor: '#ffffff',
                   '&:hover': {
-                    borderColor: '#0f172a',
+                    borderColor: '#1976D2',
                     bgcolor: '#f8fafc',
                   },
                 }}

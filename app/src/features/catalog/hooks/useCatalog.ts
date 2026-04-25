@@ -64,7 +64,6 @@ export function useCatalog({ workspaceId, autoLoad = true }: UseCatalogOptions):
       setCategories(data);
     } catch (err: any) {
       setError(err.message || 'Failed to load categories');
-      console.error('Error loading categories:', err);
     } finally {
       setCategoriesLoading(false);
     }
@@ -82,7 +81,6 @@ export function useCatalog({ workspaceId, autoLoad = true }: UseCatalogOptions):
       setItems(data);
     } catch (err: any) {
       setError(err.message || 'Failed to load items');
-      console.error('Error loading items:', err);
     } finally {
       setItemsLoading(false);
     }

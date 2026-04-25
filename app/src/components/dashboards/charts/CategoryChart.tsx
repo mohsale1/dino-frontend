@@ -46,7 +46,7 @@ const CategoryChart: React.FC<Props> = ({ data, height = 260 }) => {
 
   return (
     <Box>
-      <Typography sx={{ fontWeight: 700, fontSize: '0.875rem', color: '#0f172a', mb: 1.5 }}>
+      <Typography sx={{ fontWeight: 700, fontSize: '0.875rem', color: '#1C1C1E', mb: 1.5 }}>
         Revenue by Category
       </Typography>
       <ReactECharts option={option} style={{ height }} notMerge />

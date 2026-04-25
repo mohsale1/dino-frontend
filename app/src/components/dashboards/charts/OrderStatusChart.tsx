@@ -60,8 +60,8 @@ const OrderStatusChart: React.FC<Props> = ({ data, height = 280 }) => {
     textStyle: { fontFamily: 'inherit' },
     tooltip: {
       trigger: 'item',
-      backgroundColor: '#1e293b',
-      borderColor: 'rgba(255,255,255,0.12)',
+      backgroundColor: '#1C1C1E',
+      borderColor: '#e0e0e0',
       borderWidth: 1,
       borderRadius: 8,
       textStyle: { color: '#f1f5f9', fontSize: 12 },
@@ -88,7 +88,7 @@ const OrderStatusChart: React.FC<Props> = ({ data, height = 280 }) => {
           itemStyle: { shadowBlur: 16, shadowColor: 'rgba(0,0,0,0.40)' },
         },
         itemStyle: {
-          borderColor: '#1e293b',
+          borderColor: '#ffffff',
           borderWidth: 2,
           borderRadius: 4,
         },
@@ -107,7 +107,7 @@ const OrderStatusChart: React.FC<Props> = ({ data, height = 280 }) => {
         style: {
           text: String(total),
           textAlign: 'center',
-          fill: '#f1f5f9',
+          fill: '#1C1C1E',
           fontSize: 22,
           fontWeight: '800',
           fontFamily: 'inherit',

@@ -12,6 +12,7 @@ export * from './dashboard.service';
 export * from './menu';
 export * from './table';
 export * from './table.service';
+export * from './persona.service';
 export * from './venue.service';
 export * from './workspace.service';
 export * from './user';

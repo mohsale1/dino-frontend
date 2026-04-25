@@ -12,7 +12,6 @@ import {
   Divider,
   CircularProgress,
   Grid,
-  Switch,
 } from '@mui/material';
 import {
   LockOutlined,
@@ -72,7 +71,7 @@ const SectionHeader: React.FC<{ icon: React.ReactNode; title: string; subtitle?:
       {icon}
     </Box>
     <Box sx={{ minWidth: 0 }}>
-      <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#0f172a', lineHeight: 1.2, fontSize: { xs: '0.9rem', sm: '1rem' } }}>
+      <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#1C1C1E', lineHeight: 1.2, fontSize: { xs: '0.9rem', sm: '1rem' } }}>
         {title}
       </Typography>
       {subtitle && (
@@ -128,14 +127,6 @@ const SecuritySection: React.FC<SecuritySectionProps> = () => {
   const [pwSuccess,   setPwSuccess]   = useState('');
   const [pwError,     setPwError]     = useState('');
 
-  // ── Preferences state (reserved for future use) ──
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [_twoFactor,          _setTwoFactor]          = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [_loginNotifications, _setLoginNotifications] = useState(true);
-  const [, setPrefsDirty]  = useState(false);
-  const [, setPrefsSaving] = useState(false);
-
   // ── Derived ──
   const strength = useMemo(() => getPasswordStrength(newPw), [newPw]);
 
@@ -171,44 +162,6 @@ const SecuritySection: React.FC<SecuritySectionProps> = () => {
       setPwLoading(false);
     }
   };
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _handleSavePrefs = async () => {
-    setPrefsSaving(true);
-    await new Promise((r) => setTimeout(r, 600)); // placeholder
-    setPrefsDirty(false);
-    setPrefsSaving(false);
-  };
-
-  // ── Toggle row helper ──
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _ToggleRow = ({
-    icon, title, subtitle, checked, onChange,
-  }: { icon: React.ReactNode; title: string; subtitle: string; checked: boolean; onChange: (v: boolean) => void }) => (
-    // Fix 1: py responsive, icon size responsive
-    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', py: { xs: 1.5, sm: 2 } }}>
-      <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, flex: 1, minWidth: 0 }}>
-        <Box sx={{
-          width: { xs: 32, sm: 36 }, height: { xs: 32, sm: 36 }, borderRadius: 2,
-          bgcolor: BRAND.primaryBg, border: `1px solid ${BRAND.primaryBorder}`,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          color: BRAND.primary, flexShrink: 0,
-        }}>
-          {icon}
-        </Box>
-        <Box sx={{ minWidth: 0 }}>
-          <Typography variant="body2" sx={{ fontWeight: 600, color: '#0f172a', mb: 0.25 }}>{title}</Typography>
-          <Typography variant="caption" sx={{ color: '#64748b' }}>{subtitle}</Typography>
-        </Box>
-      </Box>
-      <Switch
-        checked={checked}
-        onChange={(e) => { onChange(e.target.checked); setPrefsDirty(true); }}
-        color="primary"
-        sx={{ flexShrink: 0, ml: 2 }}
-      />
-    </Box>
-  );
 
   // ---------------------------------------------------------------------------
   // Render

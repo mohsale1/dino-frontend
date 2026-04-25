@@ -45,7 +45,7 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
               width: 40,
               height: 40,
               borderRadius: 1,
-              backgroundColor: '#f5f5f5',
+              backgroundColor: '#f8fafc',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -89,7 +89,7 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
           </Typography>
         )}
 
-        <Box sx={{ pt: 1.5, borderTop: '1px solid #f0f0f0' }}>
+        <Box sx={{ pt: 1.5, borderTop: '1px solid #e0e0e0' }}>
           <Typography variant="body2" color="text.secondary">
             {itemCount} {itemCount === 1 ? 'item' : 'items'}
           </Typography>

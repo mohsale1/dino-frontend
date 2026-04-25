@@ -60,7 +60,7 @@ const InfoRow: React.FC<InfoRowProps> = ({ icon, label, value }) => (
       py: 1.25,
       borderRadius: 2,
       bgcolor: '#f8fafc',
-      border: '1px solid #e2e8f0',
+      border: '1px solid #e0e0e0',
     }}
   >
     <Box
@@ -85,7 +85,7 @@ const InfoRow: React.FC<InfoRowProps> = ({ icon, label, value }) => (
       </Typography>
       <Typography
         variant="body2"
-        sx={{ fontWeight: 600, color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+        sx={{ fontWeight: 600, color: '#1C1C1E', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
       >
         {value || '\u2014'}
       </Typography>
@@ -201,13 +201,13 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ onSave }) => {
         <Grid item xs={12} md={4}>
           <Card
             elevation={0}
-            sx={{ border: '1px solid #e2e8f0', borderRadius: 3, overflow: 'hidden' }}
+            sx={{ border: '1px solid #e0e0e0', borderRadius: 3, overflow: 'hidden' }}
           >
             {/* Dark band */}
             <Box
               sx={{
                 height: 72,
-                background: 'linear-gradient(135deg, #0d1b2e 0%, #1565C0 100%)',
+                background: 'linear-gradient(135deg, #1976D2 0%, #42A5F5 100%)',
               }}
             />
 
@@ -231,7 +231,7 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ onSave }) => {
 
             {/* Name / email / role */}
             <Box sx={{ px: 2.5, pb: 2.5, pt: 1, textAlign: 'center' }}>
-              <Typography variant="h6" sx={{ fontWeight: 700, color: '#0f172a', mb: 0.25 }}>
+              <Typography variant="h6" sx={{ fontWeight: 700, color: '#1C1C1E', mb: 0.25 }}>
                 {displayName}
               </Typography>
               {/* Fix 2: minWidth: 0 on email Typography to prevent overflow */}
@@ -249,7 +249,7 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ onSave }) => {
                 {userEmail}
               </Typography>
               <Chip
-                label={typeof userRole === 'string' ? userRole : 'User'}
+                label={typeof userRole === 'string' ? userRole : (userRole as any)?.displayName || (userRole as any)?.name || 'User'}
                 size="small"
                 sx={{
                   bgcolor: PRIMARY_BG,
@@ -299,7 +299,7 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ onSave }) => {
             </Alert>
           )}
 
-          <Card elevation={0} sx={{ border: '1px solid #e2e8f0', borderRadius: 3 }}>
+          <Card elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 3 }}>
             {/* Fix 6: CardContent p already responsive — kept as-is */}
             <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
 
@@ -333,7 +333,7 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ onSave }) => {
                     <PersonOutlined sx={{ fontSize: 20 }} />
                   </Box>
                   <Box sx={{ minWidth: 0 }}>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#0f172a' }}>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1C1C1E' }}>
                       Personal Information
                     </Typography>
                     <Typography variant="caption" color="text.secondary">

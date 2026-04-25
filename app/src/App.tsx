@@ -1,4 +1,4 @@
-﻿import React, { useEffect, memo, Suspense } from 'react';
+import React, { useEffect, memo, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider as MuiThemeProvider, createTheme, CssBaseline } from '@mui/material';
 
@@ -9,7 +9,6 @@ import { AppInitializer } from './components/common';
 
 import { AuthProvider } from './contexts/common/Auth';
 import { ToastProvider } from './contexts/common/Toast';
-import { SidebarProvider } from './contexts/common/Sidebar';
 import { NotificationProvider } from './contexts/common/Notification';
 import { WorkspaceProvider } from './contexts/application/Workspace';
 import { UserDataProvider } from './contexts/application/UserData';
@@ -24,6 +23,7 @@ import {
   Users,
   Coupons,
   Settings,
+  PersonaSwitch,
 } from './pages/application';
 
 import { RUNTIME_CONFIG } from './config/runtime';
@@ -45,7 +45,7 @@ const theme = createTheme({
 
 const PublicMenu = React.lazy(() => import('./pages/public/Menu'));
 
-// Inner component â€” has access to both AuthContext and RouterContext
+// Inner component — has access to both AuthContext and RouterContext
 const AppContent = memo(() => {
   return (
     <>
@@ -71,6 +71,7 @@ const AppContent = memo(() => {
             <Route path="/admin/users" element={<ProtectedRoute requiredPermission="application.users.view"><Users /></ProtectedRoute>} />
             <Route path="/admin/coupons" element={<ProtectedRoute requiredPermission="application.coupons.view"><Coupons /></ProtectedRoute>} />
             <Route path="/admin/settings" element={<ProtectedRoute requiredPermission="application.settings.view"><Settings /></ProtectedRoute>} />
+            <Route path="/admin/personas" element={<PersonaSwitch />} />
           </Route>
 
           {/* 404 */}
@@ -87,21 +88,19 @@ const AppProviders = memo(({ children }: { children: React.ReactNode }) => (
     <MuiThemeProvider theme={theme}>
       <CssBaseline />
       <ToastProvider>
-        <SidebarProvider>
-          <AuthProvider>
-            <PermissionSync>
-              <UserDataProvider>
-                <AppInitializer>
-                  <WorkspaceProvider>
-                    <NotificationProvider>
-                      {children}
-                    </NotificationProvider>
-                  </WorkspaceProvider>
-                </AppInitializer>
-              </UserDataProvider>
-            </PermissionSync>
-          </AuthProvider>
-        </SidebarProvider>
+        <AuthProvider>
+          <PermissionSync>
+            <UserDataProvider>
+              <AppInitializer>
+                <WorkspaceProvider>
+                  <NotificationProvider>
+                    {children}
+                  </NotificationProvider>
+                </WorkspaceProvider>
+              </AppInitializer>
+            </UserDataProvider>
+          </PermissionSync>
+        </AuthProvider>
       </ToastProvider>
     </MuiThemeProvider>
   </GlobalErrorBoundary>

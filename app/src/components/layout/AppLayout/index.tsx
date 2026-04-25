@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Box, Fade } from '@mui/material';
+import { Box } from '@mui/material';
 import { useLocation, Outlet } from 'react-router-dom';
 import AppHeader from '../AppHeader';
 import AppFooter from '../AppFooter';
@@ -8,20 +8,22 @@ const AppLayout: React.FC = () => {
   const location = useLocation();
 
   const isAdmin = location.pathname.startsWith('/admin');
-  const isLoginRoute = location.pathname === '/login' || location.pathname === '/register';
   const isCustomerFacing =
     location.pathname.endsWith('/menu') ||
     location.pathname.includes('/checkout/') ||
     location.pathname.includes('/order-tracking/');
-  const isHomePage = location.pathname === '/' || location.pathname === '/home';
+  const isLoginRoute =
+    location.pathname === '/login' || location.pathname === '/register';
+  const isHomePage =
+    location.pathname === '/' || location.pathname === '/home';
+
+  const isPosRoute = location.pathname === '/admin/pos';
 
   useEffect(() => {
     if (isAdmin) document.body.classList.add('admin-layout');
     else document.body.classList.remove('admin-layout');
     return () => document.body.classList.remove('admin-layout');
   }, [isAdmin]);
-
-  const isPosRoute = location.pathname === '/admin/pos';
 
   if (isAdmin) {
     return (
@@ -57,17 +59,17 @@ const AppLayout: React.FC = () => {
     return <Outlet />;
   }
 
+  // Home / public layout — header + optional footer
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <AppHeader />
       <Box component="main" sx={{ flex: 1, pt: { xs: '64px', md: '70px' } }}>
-        <Fade in timeout={300}>
-          <Box><Outlet /></Box>
-        </Fade>
+        <Outlet />
       </Box>
       {isHomePage && <AppFooter />}
     </Box>
   );
 };
+
 
 export default AppLayout;

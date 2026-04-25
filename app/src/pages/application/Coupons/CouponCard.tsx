@@ -12,6 +12,7 @@ import {
   Chip,
   IconButton,
   Tooltip,
+  alpha,
 } from '@mui/material';
 import {
   Edit as EditIcon,
@@ -82,7 +83,11 @@ const CouponCard: React.FC<CouponCardProps> = ({
   };
 
   const handleCopyCode = () => {
-    navigator.clipboard.writeText(coupon.code);
+    try {
+      navigator.clipboard.writeText(coupon.code);
+    } catch {
+      // silently ignore clipboard errors
+    }
   };
 
   const typeColor = getTypeColor();
@@ -93,7 +98,7 @@ const CouponCard: React.FC<CouponCardProps> = ({
       sx={{
         p: { xs: 2, sm: 3 },
         backgroundColor: '#ffffff',
-        border: '1px solid #e2e8f0',
+        border: '1px solid #e0e0e0',
         borderRadius: 2,
         transition: 'all 0.2s',
         '&:hover': {
@@ -142,7 +147,7 @@ const CouponCard: React.FC<CouponCardProps> = ({
                 mb: 1,
               }}
             >
-              <Typography variant="h6" sx={{ fontWeight: 700, color: '#0f172a', fontSize: '1.125rem' }}>
+              <Typography variant="h6" sx={{ fontWeight: 700, color: '#1C1C1E', fontSize: '1.125rem' }}>
                 {coupon.name}
               </Typography>
               <Chip
@@ -194,7 +199,7 @@ const CouponCard: React.FC<CouponCardProps> = ({
                   fontFamily: 'monospace',
                   fontSize: '0.875rem',
                   fontWeight: 600,
-                  color: '#0f172a',
+                  color: '#1C1C1E',
                 }}
               >
                 {coupon.code}
@@ -204,7 +209,7 @@ const CouponCard: React.FC<CouponCardProps> = ({
                   size="small"
                   onClick={handleCopyCode}
                   sx={{
-                    color: '#94a3b8',
+                    color: '#999999',
                     '&:hover': {
                       bgcolor: 'rgba(25,118,210,0.08)',
                       color: '#1976d2',
@@ -218,7 +223,7 @@ const CouponCard: React.FC<CouponCardProps> = ({
 
             {/* Description */}
             {coupon.description && (
-              <Typography variant="body2" sx={{ color: '#64748b', fontSize: '0.875rem', mb: 1 }}>
+              <Typography variant="body2" sx={{ color: '#666666', fontSize: '0.875rem', mb: 1 }}>
                 {coupon.description}
               </Typography>
             )}
@@ -226,19 +231,19 @@ const CouponCard: React.FC<CouponCardProps> = ({
             {/* Usage Stats */}
             <Box sx={{ display: 'flex', gap: { xs: 2, sm: 3 }, mt: { xs: 1.5, sm: 2 } }}>
               <Box>
-                <Typography variant="caption" sx={{ color: '#94a3b8', fontSize: '0.75rem', display: 'block' }}>
+                <Typography variant="caption" sx={{ color: '#999999', fontSize: '0.75rem', display: 'block' }}>
                   Used
                 </Typography>
-                <Typography variant="body2" sx={{ color: '#0f172a', fontWeight: 600, fontSize: '0.875rem' }}>
-                  {coupon.usageCount}{coupon.usageLimit ? ` / ${coupon.usageLimit}` : ''}
+                <Typography variant="body2" sx={{ color: '#1C1C1E', fontWeight: 600, fontSize: '0.875rem' }}>
+                  {coupon.usageCount ?? 0}{coupon.usageLimit ? ` / ${coupon.usageLimit}` : ''}
                 </Typography>
               </Box>
               {coupon.validUntil && (
                 <Box>
-                  <Typography variant="caption" sx={{ color: '#94a3b8', fontSize: '0.75rem', display: 'block' }}>
+                  <Typography variant="caption" sx={{ color: '#999999', fontSize: '0.75rem', display: 'block' }}>
                     Expires
                   </Typography>
-                  <Typography variant="body2" sx={{ color: '#0f172a', fontWeight: 600, fontSize: '0.875rem' }}>
+                  <Typography variant="body2" sx={{ color: '#1C1C1E', fontWeight: 600, fontSize: '0.875rem' }}>
                     {new Date(coupon.validUntil).toLocaleDateString()}
                   </Typography>
                 </Box>
@@ -254,10 +259,10 @@ const CouponCard: React.FC<CouponCardProps> = ({
               size="small"
               onClick={() => onEdit(coupon)}
               sx={{
-                color: '#94a3b8',
+                color: '#999999',
                 '&:hover': {
-                  color: '#0f172a',
-                  bgcolor: 'rgba(15,23,42,0.06)',
+                  color: '#1976D2',
+                  bgcolor: alpha('#1976D2', 0.06),
                 },
               }}
             >
@@ -269,7 +274,7 @@ const CouponCard: React.FC<CouponCardProps> = ({
               size="small"
               onClick={() => onDelete(coupon.id)}
               sx={{
-                color: '#94a3b8',
+                color: '#999999',
                 '&:hover': {
                   color: '#f43f5e',
                   bgcolor: 'rgba(244,63,94,0.08)',

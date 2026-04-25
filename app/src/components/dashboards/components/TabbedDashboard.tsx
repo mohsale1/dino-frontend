@@ -78,28 +78,29 @@ function LoadingSkeleton() {
   return (
     <Box
       sx={{
-        px: { xs: 2, sm: 3, md: 4 },
-        pt: 2.5,
+        px: { xs: 2, sm: '32px' },
+        pt: 3,
+        pb: 6,
         display: 'flex',
         flexDirection: 'column',
         gap: 2,
-        bgcolor: '#0f172a',
+        bgcolor: '#f8fafc',
       }}
     >
       <Skeleton
         variant="rounded"
         height={220}
-        sx={{ borderRadius: '12px', bgcolor: '#1e293b' }}
+        sx={{ borderRadius: '12px', bgcolor: '#e0e0e0' }}
       />
       <Skeleton
         variant="rounded"
         height={320}
-        sx={{ borderRadius: '12px', bgcolor: '#1e293b' }}
+        sx={{ borderRadius: '12px', bgcolor: '#e0e0e0' }}
       />
       <Skeleton
         variant="rounded"
         height={260}
-        sx={{ borderRadius: '12px', bgcolor: '#1e293b' }}
+        sx={{ borderRadius: '12px', bgcolor: '#e0e0e0' }}
       />
     </Box>
   );
@@ -126,16 +127,18 @@ const TabbedDashboard: React.FC<TabbedDashboardProps> = ({
   const summary        = dashboardData?.summary        ?? {};
 
   return (
-    <Box sx={{ bgcolor: '#0f172a' }}>
+    <Box sx={{ bgcolor: '#f8fafc' }}>
 
       {/* Tab navigation bar */}
       <Paper
         elevation={0}
         square
         sx={{
-          bgcolor: '#1e293b',
-          borderBottom: '1px solid rgba(255,255,255,0.08)',
-          px: { xs: 2, md: 4 },
+          bgcolor: '#ffffff',
+          borderBottom: '1px solid #e0e0e0',
+          borderTop: '1px solid #e0e0e0',
+          mt: 3,
+          px: { xs: 2, sm: '32px' },
         }}
       >
         <Tabs
@@ -147,7 +150,7 @@ const TabbedDashboard: React.FC<TabbedDashboardProps> = ({
           sx={{
             minHeight: 48,
             '& .MuiTabs-indicator': {
-              backgroundColor: '#42A5F5',
+              backgroundColor: '#1976D2',
               height: 2,
               borderRadius: '2px 2px 0 0',
             },
@@ -156,7 +159,7 @@ const TabbedDashboard: React.FC<TabbedDashboardProps> = ({
               minHeight: 48,
               fontSize: '0.875rem',
               fontWeight: 500,
-              color: '#64748b',
+              color: '#666666',
               px: 2,
               gap: 0.75,
               transition: 'background-color 0.15s ease, color 0.15s ease',
@@ -164,12 +167,12 @@ const TabbedDashboard: React.FC<TabbedDashboardProps> = ({
                 color: 'inherit',
               },
               '&.Mui-selected': {
-                color: '#f1f5f9',
+                color: '#1C1C1E',
                 fontWeight: 600,
               },
               '&:hover': {
-                bgcolor: 'rgba(255,255,255,0.04)',
-                color: '#f1f5f9',
+                bgcolor: '#f7f9fa',
+                color: '#1C1C1E',
               },
             },
           }}

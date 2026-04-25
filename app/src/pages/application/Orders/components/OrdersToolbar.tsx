@@ -1,25 +1,10 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import {
   Box, InputBase, IconButton, Select, MenuItem,
-  FormControl, Tabs, Tab, Typography,
+  FormControl, Tabs, Tab, Typography, GlobalStyles,
 } from '@mui/material';
 import { Search, Close, Refresh } from '@mui/icons-material';
 import { StatusFilter, DateFilter, STATUS_CONFIG } from '../orders.types';
-
-const PULSE_STYLE_ID = 'orders-toolbar-live-pulse';
-
-function injectPulseKeyframe(): void {
-  if (document.getElementById(PULSE_STYLE_ID)) return;
-  const style = document.createElement('style');
-  style.id = PULSE_STYLE_ID;
-  style.textContent = `
-    @keyframes livePulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50%       { opacity: 0.4; transform: scale(0.72); }
-    }
-  `;
-  document.head.appendChild(style);
-}
 
 interface OrdersToolbarProps {
   searchQuery: string;
@@ -39,7 +24,6 @@ const STATUS_TABS: { value: StatusFilter; label: string }[] = [
   { value: 'confirmed', label: 'Confirmed' },
   { value: 'preparing', label: 'Preparing' },
   { value: 'ready', label: 'Ready' },
-  { value: 'served', label: 'Served' },
   { value: 'completed', label: 'Completed' },
   { value: 'cancelled', label: 'Cancelled' },
 ];
@@ -58,10 +42,14 @@ const OrdersToolbar: React.FC<OrdersToolbarProps> = ({
 }) => {
   const activeColor = getTabColor(statusFilter);
 
-  useEffect(() => { injectPulseKeyframe(); }, []);
-
   return (
-    <Box sx={{ bgcolor: '#ffffff', borderBottom: '1px solid #e2e8f0', flexShrink: 0 }}>
+    <Box sx={{ bgcolor: '#ffffff', borderBottom: '1px solid #e0e0e0', flexShrink: 0 }}>
+      <GlobalStyles styles={{
+        '@keyframes livePulse': {
+          '0%, 100%': { opacity: 1, transform: 'scale(1)' },
+          '50%':      { opacity: 0.4, transform: 'scale(0.72)' },
+        },
+      }} />
 
       {/* Main toolbar row */}
       <Box
@@ -80,7 +68,7 @@ const OrdersToolbar: React.FC<OrdersToolbarProps> = ({
             sx={{
               fontWeight: 700,
               fontSize: '1.1rem',
-              color: '#0f172a',
+              color: '#1C1C1E',
               lineHeight: 1,
             }}
           >
@@ -119,7 +107,7 @@ const OrdersToolbar: React.FC<OrdersToolbarProps> = ({
             alignItems: 'center',
             gap: 0.75,
             bgcolor: '#f8fafc',
-            border: '1px solid #e2e8f0',
+            border: '1px solid #e0e0e0',
             borderRadius: 1.5,
             px: 1.5,
             py: 0.75,
@@ -135,7 +123,7 @@ const OrdersToolbar: React.FC<OrdersToolbarProps> = ({
             sx={{
               flex: 1,
               fontSize: '0.83rem',
-              color: '#0f172a',
+              color: '#1C1C1E',
               '& input': { p: 0 },
               '& input::placeholder': { color: '#94a3b8', opacity: 1 },
             }}
@@ -161,8 +149,8 @@ const OrdersToolbar: React.FC<OrdersToolbarProps> = ({
               borderRadius: 1.5,
               fontSize: '0.83rem',
               bgcolor: '#f8fafc',
-              color: '#0f172a',
-              '& .MuiOutlinedInput-notchedOutline': { borderColor: '#e2e8f0' },
+              color: '#1C1C1E',
+              '& .MuiOutlinedInput-notchedOutline': { borderColor: '#e0e0e0' },
               '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#94a3b8' },
               '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#94a3b8', borderWidth: 1 },
               '& .MuiSelect-select': { py: '6.5px' },
@@ -181,7 +169,7 @@ const OrdersToolbar: React.FC<OrdersToolbarProps> = ({
           sx={{
             width: 36,
             height: 36,
-            border: '1px solid #e2e8f0',
+            border: '1px solid #e0e0e0',
             borderRadius: 1.5,
             color: '#64748b',
             flexShrink: 0,
@@ -246,7 +234,7 @@ const OrdersToolbar: React.FC<OrdersToolbarProps> = ({
             color: '#64748b',
             gap: 0.6,
           },
-          '& .MuiTab-root.Mui-selected': { color: '#0f172a' },
+          '& .MuiTab-root.Mui-selected': { color: '#1C1C1E' },
           '& .MuiTabs-scrollButtons': { width: 28 },
         }}
       >

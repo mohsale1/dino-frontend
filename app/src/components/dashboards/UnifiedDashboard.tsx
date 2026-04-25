@@ -1,6 +1,6 @@
-﻿/**
+/**
  * UnifiedDashboard
- * Top-level dashboard container: hero section with KPI tiles + TabbedDashboard
+ * Top-level dashboard container: page header + stat cards + TabbedDashboard
  */
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
@@ -10,6 +10,8 @@ import {
   IconButton,
   Alert,
   Button,
+  Grid,
+  Skeleton,
 } from '@mui/material';
 import {
   Refresh,
@@ -18,6 +20,7 @@ import {
   TableRestaurant,
   AttachMoney,
   LockOutlined,
+  CalendarToday,
 } from '@mui/icons-material';
 import { useAuth } from '../../contexts/common/Auth';
 import { PERMISSIONS } from '../../types/auth/permissions';
@@ -28,27 +31,10 @@ import VenueAssignmentCheck from '../common/VenueAssignmentCheck';
 import TabbedDashboard from './components/TabbedDashboard';
 import type { DashboardData } from '../../types/dashboard/responses';
 
-// â”€â”€ Design tokens â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-
-const COLORS = {
-  pageBg:      '#0f172a',
-  cardBg:      '#1e293b',
-  cardBorder:  'rgba(255,255,255,0.08)',
-  textPrimary: '#f1f5f9',
-  textSecond:  '#94a3b8',
-  textMuted:   '#64748b',
-  blue:        '#1976D2',
-  lightBlue:   '#42A5F5',
-  emerald:     '#10b981',
-  amber:       '#f59e0b',
-  rose:        '#f43f5e',
-  violet:      '#8b5cf6',
-} as const;
-
-// â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Helpers ───────────────────────────────────────────────────────────────────
 
 const formatINR = (value: number): string =>
-  `â‚¹${value.toLocaleString('en-IN')}`;
+  `₹${value.toLocaleString('en-IN')}`;
 
 const formatDate = (): string =>
   new Date().toLocaleDateString('en-IN', {
@@ -65,7 +51,7 @@ const getGreeting = (): string => {
   return 'Good evening,';
 };
 
-// â”€â”€ useCountUp â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── useCountUp ────────────────────────────────────────────────────────────────
 
 const useCountUp = (target: number, duration = 900): number => {
   const [count, setCount] = useState(0);
@@ -86,27 +72,21 @@ const useCountUp = (target: number, duration = 900): number => {
   return count;
 };
 
-// â”€â”€ KPI Tile definition â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── StatCard ──────────────────────────────────────────────────────────────────
 
-interface KpiTileDef {
+interface StatCardProps {
   label: string;
   rawValue: number;
   displayValue?: string;
   icon: React.ReactElement;
-  color: string;
   animate?: boolean;
 }
 
-// â”€â”€ Hero KPI Tile â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-
-interface HeroKpiTileProps extends KpiTileDef {}
-
-const HeroKpiTile: React.FC<HeroKpiTileProps> = ({
+const StatCard: React.FC<StatCardProps> = ({
   label,
   rawValue,
   displayValue,
   icon,
-  color,
   animate = false,
 }) => {
   const animated = useCountUp(animate ? rawValue : 0);
@@ -115,107 +95,69 @@ const HeroKpiTile: React.FC<HeroKpiTileProps> = ({
   return (
     <Box
       sx={{
-        bgcolor: 'rgba(255,255,255,0.06)',
-        border: '1px solid rgba(255,255,255,0.1)',
+        bgcolor: '#ffffff',
+        border: '1px solid #e0e0e0',
         borderRadius: '12px',
-        backdropFilter: 'blur(8px)',
-        p: 2,
+        p: '20px',
         display: 'flex',
-        flexDirection: 'column',
-        gap: 1.25,
-        transition: 'background 0.2s, border-color 0.2s',
-        '&:hover': {
-          bgcolor: 'rgba(255,255,255,0.09)',
-          borderColor: 'rgba(255,255,255,0.16)',
-        },
+        alignItems: 'center',
+        gap: 2,
+        height: '100%',
       }}
     >
       <Box
         sx={{
           width: 40,
           height: 40,
-          borderRadius: '10px',
-          bgcolor: `${color}1a`,
+          borderRadius: '8px',
+          flexShrink: 0,
+          bgcolor: 'rgba(25,118,210,0.08)',
+          border: '1px solid rgba(25,118,210,0.2)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          color,
-          flexShrink: 0,
+          color: '#1976D2',
+          '& svg': { fontSize: 20 },
         }}
       >
-        {React.cloneElement(icon, { sx: { fontSize: 20 } })}
+        {icon}
       </Box>
-      <Typography
-        sx={{
-          fontWeight: 800,
-          color: '#ffffff',
-          fontSize: { xs: '1.5rem', md: '1.875rem' },
-          letterSpacing: '-0.03em',
-          lineHeight: 1,
-        }}
-      >
-        {shown}
-      </Typography>
-      <Typography
-        sx={{
-          color: 'rgba(255,255,255,0.55)',
-          fontSize: '0.75rem',
-          fontWeight: 500,
-          mt: 0.5,
-        }}
-      >
-        {label}
-      </Typography>
+      <Box>
+        <Typography
+          sx={{
+            fontWeight: 700,
+            fontSize: 24,
+            color: '#1C1C1E',
+            lineHeight: 1,
+            letterSpacing: '-0.02em',
+            fontVariantNumeric: 'tabular-nums',
+          }}
+        >
+          {shown}
+        </Typography>
+        <Typography
+          sx={{
+            fontSize: 12,
+            color: '#666666',
+            mt: 0.25,
+            fontWeight: 500,
+          }}
+        >
+          {label}
+        </Typography>
+      </Box>
     </Box>
   );
 };
 
-// â”€â”€ Hero KPI Skeleton â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-
-const HeroKpiSkeleton: React.FC = () => (
-  <Box
-    sx={{
-      bgcolor: 'rgba(255,255,255,0.06)',
-      border: '1px solid rgba(255,255,255,0.08)',
-      borderRadius: '12px',
-      height: { xs: 130, md: 148 },
-      '@keyframes shimmer': {
-        '0%':   { opacity: 0.5 },
-        '50%':  { opacity: 0.8 },
-        '100%': { opacity: 0.5 },
-      },
-      animation: 'shimmer 1.6s ease-in-out infinite',
-    }}
-  />
-);
-
-// â”€â”€ Content Skeleton â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-
-const ContentSkeleton: React.FC = () => (
-  <Box sx={{ px: { xs: 2.5, sm: 4, md: 5 }, pt: 3, pb: 4 }}>
-    <Box sx={{ display: 'flex', gap: 2, mb: 3, flexWrap: 'wrap' }}>
-      <Box sx={{ bgcolor: COLORS.cardBg, border: `1px solid ${COLORS.cardBorder}`, borderRadius: '12px', flex: '2 1 400px', height: 340 }} />
-      <Box sx={{ bgcolor: COLORS.cardBg, border: `1px solid ${COLORS.cardBorder}`, borderRadius: '12px', flex: '1 1 260px', height: 340 }} />
-    </Box>
-    <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-      <Box sx={{ bgcolor: COLORS.cardBg, border: `1px solid ${COLORS.cardBorder}`, borderRadius: '12px', flex: '1 1 300px', height: 300 }} />
-      <Box sx={{ bgcolor: COLORS.cardBg, border: `1px solid ${COLORS.cardBorder}`, borderRadius: '12px', flex: '1 1 300px', height: 300 }} />
-    </Box>
-  </Box>
-);
-
-// â”€â”€ Main component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Main component ────────────────────────────────────────────────────────────
 
 const UnifiedDashboard: React.FC<{ className?: string }> = ({ className }) => {
   const { user, hasBackendPermission } = useAuth();
   const { userData, loading: userDataLoading } = useUserData();
 
-  const workspaceId: string =
-    userData?.workspace?.id ||
-    (user as any)?.workspaceId ||
-    (user as any)?.workspace_id ||
-    '';
-  const organizationId: string = userData?.venue?.id || '';
+  const personaId: number | undefined =
+    userData?.venue?.personaId || (userData?.venue?.id ? Number(userData.venue.id) : undefined);
   const venueName: string = userData?.venue?.name || 'Your Venue';
   const firstName: string = getUserFirstName(user as any) || 'there';
 
@@ -229,13 +171,12 @@ const UnifiedDashboard: React.FC<{ className?: string }> = ({ className }) => {
 
   const fetchData = useCallback(
     async (isInitial = false) => {
-      if (!workspaceId) return;
+      if (!personaId) return;
       if (isInitial) setLoading(true);
       setError(null);
       try {
         const res = await dashboardService.getDashboard({
-          workspaceId,
-          organizationId: organizationId || undefined,
+          personaId: String(personaId),
         });
         if (!isMountedRef.current) return;
         const payload = (res as any)?.data ?? res;
@@ -248,11 +189,11 @@ const UnifiedDashboard: React.FC<{ className?: string }> = ({ className }) => {
         if (isMountedRef.current && isInitial) setLoading(false);
       }
     },
-    [workspaceId, organizationId],
+    [personaId],
   );
 
   useEffect(() => {
-    if (userDataLoading || !workspaceId) return;
+    if (userDataLoading || !personaId) return;
     isMountedRef.current = true;
     fetchData(true);
     intervalRef.current = setInterval(() => fetchData(false), 60_000);
@@ -260,9 +201,10 @@ const UnifiedDashboard: React.FC<{ className?: string }> = ({ className }) => {
       isMountedRef.current = false;
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, [fetchData, userDataLoading, workspaceId]);
+  }, [fetchData, userDataLoading, personaId]);
 
-  // â”€â”€ Permission gate â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Permission gate ───────────────────────────────────────────────────────
+
   if (!hasBackendPermission(PERMISSIONS.DASHBOARD_READ)) {
     return (
       <Box
@@ -275,7 +217,7 @@ const UnifiedDashboard: React.FC<{ className?: string }> = ({ className }) => {
           gap: 2,
           px: 3,
           textAlign: 'center',
-          bgcolor: COLORS.pageBg,
+          bgcolor: '#f8fafc',
         }}
       >
         <Box
@@ -283,26 +225,28 @@ const UnifiedDashboard: React.FC<{ className?: string }> = ({ className }) => {
             width: 64,
             height: 64,
             borderRadius: '50%',
-            bgcolor: 'rgba(244,63,94,0.12)',
+            bgcolor: 'rgba(25,118,210,0.08)',
+            border: '1px solid rgba(25,118,210,0.2)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             mb: 1,
           }}
         >
-          <LockOutlined sx={{ fontSize: 32, color: COLORS.rose }} />
+          <LockOutlined sx={{ fontSize: 32, color: '#1976D2' }} />
         </Box>
-        <Typography variant="h6" sx={{ fontWeight: 700, color: COLORS.textPrimary }}>
+        <Typography variant="h6" sx={{ fontWeight: 700, color: '#1C1C1E' }}>
           Access Denied
         </Typography>
-        <Typography variant="body2" sx={{ color: COLORS.textSecond, maxWidth: 360 }}>
+        <Typography variant="body2" sx={{ color: '#666666', maxWidth: 360 }}>
           You do not have permission to view the dashboard. Contact your administrator to request access.
         </Typography>
       </Box>
     );
   }
 
-  // â”€â”€ Error state (no data at all) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Error state (no data at all) ──────────────────────────────────────────
+
   if (!loading && error && !rawData) {
     return (
       <Box
@@ -314,7 +258,7 @@ const UnifiedDashboard: React.FC<{ className?: string }> = ({ className }) => {
           minHeight: '60vh',
           gap: 2,
           px: 3,
-          bgcolor: COLORS.pageBg,
+          bgcolor: '#f8fafc',
         }}
       >
         <Alert
@@ -323,10 +267,6 @@ const UnifiedDashboard: React.FC<{ className?: string }> = ({ className }) => {
             maxWidth: 480,
             width: '100%',
             borderRadius: 2,
-            bgcolor: 'rgba(244,63,94,0.1)',
-            border: '1px solid rgba(244,63,94,0.25)',
-            color: COLORS.textPrimary,
-            '& .MuiAlert-icon': { color: COLORS.rose },
           }}
         >
           {error}
@@ -336,14 +276,14 @@ const UnifiedDashboard: React.FC<{ className?: string }> = ({ className }) => {
           startIcon={<Refresh />}
           onClick={() => fetchData(true)}
           sx={{
-            borderColor: COLORS.lightBlue,
-            color: COLORS.lightBlue,
             borderRadius: '8px',
             textTransform: 'none',
             fontWeight: 600,
+            borderColor: '#1976D2',
+            color: '#1976D2',
             '&:hover': {
-              bgcolor: 'rgba(66,165,245,0.08)',
-              borderColor: COLORS.lightBlue,
+              bgcolor: 'rgba(25,118,210,0.06)',
+              borderColor: '#1565C0',
             },
           }}
         >
@@ -354,87 +294,159 @@ const UnifiedDashboard: React.FC<{ className?: string }> = ({ className }) => {
   }
 
   const stats = rawData?.stats;
-  const todaysRevenue  = stats?.todaysRevenue      ?? 0;
-  const todaysOrders   = stats?.todaysOrders        ?? 0;
-  const avgOrderValue  = stats?.avgOrderValue       ?? 0;
-  const tableOccupancy = stats?.tableOccupancyRate  ?? 0;
-
-  const kpiTiles: KpiTileDef[] = [
-    { label: "Today's Revenue", rawValue: todaysRevenue,  displayValue: formatINR(todaysRevenue),  icon: <AttachMoney />, color: COLORS.lightBlue },
-    { label: "Today's Orders",  rawValue: todaysOrders,                                            icon: <ShoppingCart />, color: COLORS.emerald, animate: true },
-    { label: 'Avg Order Value', rawValue: avgOrderValue,  displayValue: formatINR(avgOrderValue),  icon: <TrendingUp />,   color: COLORS.amber },
-    { label: 'Table Occupancy', rawValue: Math.round(tableOccupancy), displayValue: `${Math.round(tableOccupancy)}%`, icon: <TableRestaurant />, color: COLORS.violet, animate: true },
-  ];
+  const todaysRevenue  = stats?.todaysRevenue     ?? 0;
+  const todaysOrders   = stats?.todaysOrders       ?? 0;
+  const avgOrderValue  = stats?.avgOrderValue      ?? 0;
+  const tableOccupancy = stats?.tableOccupancyRate ?? 0;
 
   return (
     <VenueAssignmentCheck showFullPage={false}>
-      <Box className={className} sx={{ bgcolor: COLORS.pageBg, minHeight: '100vh' }}>
+      <Box className={className} sx={{ bgcolor: '#f8fafc', minHeight: '100vh' }}>
 
-        {/* â”€â”€ Hero Section â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        {/* ── Page Header ──────────────────────────────────────────────────── */}
         <Box
           sx={{
-            background: 'linear-gradient(135deg, #0b1120 0%, #0d1f3c 50%, #0a3060 100%)',
-            px: { xs: 2.5, sm: 4, md: 5 },
-            pt: { xs: 3, md: 4 },
-            pb: { xs: 3, md: 4 },
-            position: 'relative',
-            overflow: 'hidden',
-            '&::before': {
-              content: '""',
-              position: 'absolute',
-              inset: 0,
-              backgroundImage: 'radial-gradient(rgba(255,255,255,0.04) 1px, transparent 1px)',
-              backgroundSize: '28px 28px',
-              pointerEvents: 'none',
-              zIndex: 0,
-            },
+            bgcolor: '#ffffff',
+            px: { xs: 2, sm: '32px' },
+            pt: '24px',
+            pb: '20px',
+            borderBottom: '1px solid #e0e0e0',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: 2,
           }}
         >
-          <Box sx={{ position: 'absolute', top: -120, right: -80, width: 400, height: 400, borderRadius: '50%', background: 'radial-gradient(circle, rgba(25,118,210,0.28) 0%, transparent 70%)', pointerEvents: 'none', zIndex: 0 }} />
-          <Box sx={{ position: 'absolute', bottom: -80, left: -60, width: 320, height: 320, borderRadius: '50%', background: 'radial-gradient(circle, rgba(66,165,245,0.18) 0%, transparent 70%)', pointerEvents: 'none', zIndex: 0 }} />
+          <Box>
+            <Typography
+              sx={{
+                fontWeight: 700,
+                color: '#1C1C1E',
+                fontSize: 20,
+                lineHeight: 1.3,
+              }}
+            >
+              Dashboard
+            </Typography>
+            <Typography variant="body2" sx={{ color: '#666666', mt: 0.5 }}>
+              {getGreeting()} {firstName} — {venueName}
+            </Typography>
+          </Box>
 
-          <Box sx={{ position: 'relative', zIndex: 1 }}>
-            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { xs: 'flex-start', sm: 'flex-start' }, justifyContent: 'space-between', gap: { xs: 2, sm: 1 }, mb: { xs: 2.5, md: 3 } }}>
-              <Box>
-                <Typography sx={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.75rem', fontWeight: 500, letterSpacing: '0.02em', lineHeight: 1, mb: 0.5 }}>{getGreeting()}</Typography>
-                <Typography sx={{ fontWeight: 800, color: '#ffffff', fontSize: { xs: '1.75rem', md: '2.25rem' }, letterSpacing: '-0.03em', lineHeight: 1.1 }}>{firstName}</Typography>
-                <Box sx={{ display: 'inline-flex', alignItems: 'center', mt: 1.25, px: 1.25, py: 0.4, borderRadius: '20px', border: '1px solid rgba(66,165,245,0.3)', bgcolor: 'rgba(66,165,245,0.1)' }}>
-                  <Typography sx={{ color: COLORS.lightBlue, fontSize: '0.72rem', fontWeight: 600, letterSpacing: '0.02em' }}>{venueName}</Typography>
-                </Box>
-              </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexShrink: 0, pt: { sm: 0.5 } }}>
-                <Typography sx={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem', fontWeight: 400, display: { xs: 'none', sm: 'block' } }}>{formatDate()}</Typography>
-                <IconButton onClick={() => fetchData(false)} size="small" title="Refresh dashboard" sx={{ color: '#ffffff', border: '1px solid rgba(255,255,255,0.25)', borderRadius: '8px', width: 36, height: 36, '&:hover': { bgcolor: 'rgba(255,255,255,0.1)', borderColor: 'rgba(255,255,255,0.5)' } }}>
-                  <Refresh sx={{ fontSize: 18 }} />
-                </IconButton>
-              </Box>
+          {/* Right: date chip + refresh */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Box
+              sx={{
+                bgcolor: '#f4f4f4',
+                borderRadius: '8px',
+                px: 1.5,
+                py: 0.75,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 0.75,
+              }}
+            >
+              <CalendarToday sx={{ fontSize: 14, color: '#666666' }} />
+              <Typography sx={{ fontSize: '0.8rem', color: '#666666', fontWeight: 500 }}>
+                {formatDate()}
+              </Typography>
             </Box>
-
-            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' }, gap: 1.5 }}>
-              {loading && !rawData ? (
-                <><HeroKpiSkeleton /><HeroKpiSkeleton /><HeroKpiSkeleton /><HeroKpiSkeleton /></>
-              ) : (
-                kpiTiles.map((tile) => <HeroKpiTile key={tile.label} {...tile} />)
-              )}
-            </Box>
+            <IconButton
+              onClick={() => fetchData(false)}
+              size="small"
+              title="Refresh dashboard"
+              sx={{
+                color: '#666666',
+                border: '1px solid #e0e0e0',
+                borderRadius: '8px',
+                width: 36,
+                height: 36,
+                '&:hover': {
+                  bgcolor: '#f7f9fa',
+                  borderColor: '#bdbdbd',
+                },
+              }}
+            >
+              <Refresh sx={{ fontSize: 18 }} />
+            </IconButton>
           </Box>
         </Box>
 
+        {/* ── Stat Cards ───────────────────────────────────────────────────── */}
+        <Box sx={{ px: { xs: 2, sm: '32px' }, pt: 3, pb: 0 }}>
+          <Grid container spacing={2}>
+            {loading && !rawData ? (
+              <>
+                {[0, 1, 2, 3].map((i) => (
+                  <Grid item xs={12} sm={6} lg={3} key={i}>
+                    <Skeleton
+                      variant="rounded"
+                      height={88}
+                      sx={{ borderRadius: '12px' }}
+                    />
+                  </Grid>
+                ))}
+              </>
+            ) : (
+              <>
+                <Grid item xs={12} sm={6} lg={3}>
+                  <StatCard
+                    label="Today's Revenue"
+                    rawValue={todaysRevenue}
+                    displayValue={formatINR(todaysRevenue)}
+                    icon={<AttachMoney />}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6} lg={3}>
+                  <StatCard
+                    label="Today's Orders"
+                    rawValue={todaysOrders}
+                    icon={<ShoppingCart />}
+                    animate
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6} lg={3}>
+                  <StatCard
+                    label="Avg Order Value"
+                    rawValue={avgOrderValue}
+                    displayValue={formatINR(avgOrderValue)}
+                    icon={<TrendingUp />}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6} lg={3}>
+                  <StatCard
+                    label="Table Occupancy"
+                    rawValue={Math.round(tableOccupancy)}
+                    displayValue={`${Math.round(tableOccupancy)}%`}
+                    icon={<TableRestaurant />}
+                    animate
+                  />
+                </Grid>
+              </>
+            )}
+          </Grid>
+        </Box>
+
+        {/* ── Non-fatal error banner ────────────────────────────────────────── */}
         {error && rawData && (
-          <Box sx={{ px: { xs: 2.5, sm: 4, md: 5 }, pt: 2 }}>
-            <Alert severity="warning" onClose={() => setError(null)} sx={{ borderRadius: 2, fontSize: '0.875rem', bgcolor: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.25)', color: COLORS.textPrimary, '& .MuiAlert-icon': { color: COLORS.amber } }}>
-              {error} â€” Showing last known data.
+          <Box sx={{ px: { xs: 2, sm: '32px' }, pt: 2 }}>
+            <Alert
+              severity="warning"
+              onClose={() => setError(null)}
+              sx={{ borderRadius: 2, fontSize: '0.875rem' }}
+            >
+              {error} — Showing last known data.
             </Alert>
           </Box>
         )}
 
-        <Box sx={{ bgcolor: COLORS.pageBg }}>
-          {loading && !rawData ? (
-            <ContentSkeleton />
-          ) : (
-            <TabbedDashboard dashboardData={rawData as any} loading={loading} lastUpdated={lastUpdated} />
-          )}
-        </Box>
+        {/* ── Tabbed content ────────────────────────────────────────────────── */}
+        <TabbedDashboard
+          dashboardData={rawData as any}
+          loading={loading && !rawData}
+          lastUpdated={lastUpdated}
+        />
 
       </Box>
     </VenueAssignmentCheck>

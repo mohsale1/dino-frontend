@@ -65,8 +65,7 @@ export const LocationsManagementPage: React.FC = () => {
     { label: 'Areas', value: 'areas' },
   ];
 
-  const handleSubmitForm = (data: any) => {
-    console.log('Form data:', data);
+  const handleSubmitForm = (_data: any) => {
     setAddDialogOpen(false);
     setSelectedLocation(null);
     setSelectedArea(null);
@@ -83,7 +82,6 @@ export const LocationsManagementPage: React.FC = () => {
   };
 
   const handleConfirmDelete = () => {
-    console.log('Delete confirmed');
     setDeleteDialogOpen(false);
     setSelectedLocation(null);
     setSelectedArea(null);
@@ -151,13 +149,13 @@ export const LocationsManagementPage: React.FC = () => {
                     location={location}
                     areaName="Main Floor"
                     onEdit={handleEditLocation}
-                    onDelete={(id) => {
+                    onDelete={(_id) => {
                       setSelectedLocation(location);
                       setDeleteDialogOpen(true);
                     }}
-                    onToggleStatus={(id) => console.log('Toggle:', id)}
-                    onGenerateQR={(id) => console.log('Generate QR:', id)}
-                    onPrintQR={(id) => console.log('Print QR:', id)}
+                    onToggleStatus={(_id) => {}}
+                    onGenerateQR={(_id) => {}}
+                    onPrintQR={(_id) => {}}
                   />
                 )}
               />

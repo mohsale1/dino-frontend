@@ -69,13 +69,13 @@ function formatINR(value: number): string {
 
 // Dark-themed status colors: vivid text color + 10% opacity background
 const STATUS_CONFIG: Record<string, { color: string; bg: string }> = {
-  pending:   { color: '#FBBF24', bg: 'rgba(251,191,36,0.10)'  },
-  confirmed: { color: '#38BDF8', bg: 'rgba(56,189,248,0.10)'  },
-  preparing: { color: '#A78BFA', bg: 'rgba(167,139,250,0.10)' },
-  ready:     { color: '#34D399', bg: 'rgba(52,211,153,0.10)'  },
-  served:    { color: '#60A5FA', bg: 'rgba(96,165,250,0.10)'  },
-  completed: { color: '#4ADE80', bg: 'rgba(74,222,128,0.10)'  },
-  cancelled: { color: '#F87171', bg: 'rgba(248,113,113,0.10)' },
+  pending:   { color: '#f59e0b', bg: 'rgba(245,158,11,0.10)'  },
+  confirmed: { color: '#0ea5e9', bg: 'rgba(14,165,233,0.10)'  },
+  preparing: { color: '#8b5cf6', bg: 'rgba(139,92,246,0.10)' },
+  ready:     { color: '#10b981', bg: 'rgba(16,185,129,0.10)'  },
+  served:    { color: '#1976D2', bg: 'rgba(25,118,210,0.10)'  },
+  completed: { color: '#16a34a', bg: 'rgba(22,163,74,0.10)'  },
+  cancelled: { color: '#ef4444', bg: 'rgba(239,68,68,0.10)' },
 };
 
 function getStatusColor(status: string): string {
@@ -89,8 +89,8 @@ function getStatusBg(status: string): string {
 // ─── Shared Styles ────────────────────────────────────────────────────────────
 
 const CARD_SX = {
-  bgcolor: '#1e293b',
-  border: '1px solid rgba(255,255,255,0.08)',
+  bgcolor: '#ffffff',
+  border: '1px solid #e0e0e0',
   borderRadius: '12px',
   p: 2.5,
   height: '100%',
@@ -115,7 +115,7 @@ const SectionTitle: React.FC<SectionTitleProps> = ({ label, accentColor }) => (
       sx={{
         fontSize: '0.875rem',
         fontWeight: 700,
-        color: '#f1f5f9',
+        color: '#1C1C1E',
         lineHeight: 1.3,
       }}
     >
@@ -127,10 +127,11 @@ const SectionTitle: React.FC<SectionTitleProps> = ({ label, accentColor }) => (
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 const OverviewTab: React.FC<OverviewTabProps> = ({ dashboardData }) => {
+  if (!dashboardData) return null;
   const { analytics, recentActivity } = dashboardData;
 
   return (
-    <Box px={{ xs: 2, sm: 3, md: 4 }} py={3} bgcolor="#0f172a">
+    <Box px={{ xs: 2, sm: 3, md: 4 }} py={3} bgcolor="#f8fafc">
 
       {/* Row 1 — Revenue + Order Status */}
       <Grid container spacing={2.5}>
@@ -171,7 +172,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ dashboardData }) => {
                   height: 200,
                 }}
               >
-                <Typography sx={{ fontSize: '0.8125rem', color: '#64748b' }}>
+                <Typography sx={{ fontSize: '0.8125rem', color: '#666666' }}>
                   No recent orders
                 </Typography>
               </Box>
@@ -183,7 +184,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ dashboardData }) => {
                   '&::-webkit-scrollbar': { width: 4 },
                   '&::-webkit-scrollbar-track': { bgcolor: 'transparent' },
                   '&::-webkit-scrollbar-thumb': {
-                    bgcolor: 'rgba(255,255,255,0.10)',
+                    bgcolor: 'rgba(0,0,0,0.12)',
                     borderRadius: 2,
                   },
                 }}
@@ -203,7 +204,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ dashboardData }) => {
                         alignItems: 'center',
                         justifyContent: 'space-between',
                         py: 1.25,
-                        borderBottom: isLast ? 'none' : '1px solid rgba(255,255,255,0.06)',
+                        borderBottom: isLast ? 'none' : '1px solid #e0e0e0',
                         gap: 1,
                       }}
                     >
@@ -222,7 +223,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ dashboardData }) => {
                             sx={{
                               fontSize: '0.8rem',
                               fontWeight: 700,
-                              color: '#f1f5f9',
+                              color: '#1C1C1E',
                               lineHeight: 1.3,
                               whiteSpace: 'nowrap',
                             }}
@@ -233,7 +234,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ dashboardData }) => {
                             <Typography
                               sx={{
                                 fontSize: '0.7rem',
-                                color: '#64748b',
+                                color: '#666666',
                                 lineHeight: 1.3,
                                 whiteSpace: 'nowrap',
                               }}
@@ -264,7 +265,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ dashboardData }) => {
                           sx={{
                             fontSize: '0.8rem',
                             fontWeight: 700,
-                            color: '#f1f5f9',
+                            color: '#1C1C1E',
                             lineHeight: 1.3,
                           }}
                         >
@@ -273,7 +274,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ dashboardData }) => {
                         <Typography
                           sx={{
                             fontSize: '0.7rem',
-                            color: '#94a3b8',
+                            color: '#999999',
                             lineHeight: 1.3,
                             mt: 0.25,
                           }}

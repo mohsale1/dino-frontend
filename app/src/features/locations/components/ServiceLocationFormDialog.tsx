@@ -119,35 +119,20 @@ export const ServiceLocationFormDialog: React.FC<ServiceLocationFormDialogProps>
       {/* Header */}
       <Box
         sx={{
-          position: 'relative',
-          background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 60%, #312e81 100%)',
+          bgcolor: '#ffffff',
+          borderBottom: '1px solid #e0e0e0',
           px: 3,
           py: 2.5,
-          overflow: 'hidden',
         }}
       >
-        {/* Glow orb */}
-        <Box
-          sx={{
-            position: 'absolute',
-            top: -60,
-            right: -40,
-            width: 180,
-            height: 180,
-            borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(99,102,241,0.25) 0%, transparent 70%)',
-            pointerEvents: 'none',
-          }}
-        />
-
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, position: 'relative', zIndex: 1 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
           {/* Icon box */}
           <Box
             sx={{
               width: 40,
               height: 40,
-              bgcolor: alpha('#fff', 0.12),
-              border: `1px solid ${alpha('#fff', 0.20)}`,
+              bgcolor: alpha('#1976D2', 0.08),
+              border: `1px solid ${alpha('#1976D2', 0.20)}`,
               borderRadius: 2,
               display: 'flex',
               alignItems: 'center',
@@ -155,20 +140,20 @@ export const ServiceLocationFormDialog: React.FC<ServiceLocationFormDialogProps>
               flexShrink: 0,
             }}
           >
-            <LocationOnIcon sx={{ color: '#fff', fontSize: 20 }} />
+            <LocationOnIcon sx={{ color: '#1976D2', fontSize: 20 }} />
           </Box>
 
           {/* Title + subtitle */}
           <Box sx={{ flex: 1, minWidth: 0 }}>
             <Typography
               variant="subtitle1"
-              sx={{ color: '#fff', fontWeight: 700, lineHeight: 1.2 }}
+              sx={{ color: '#1C1C1E', fontWeight: 700, lineHeight: 1.2 }}
             >
               {isEdit ? 'Edit Location' : 'Add Location'}
             </Typography>
             <Typography
               variant="caption"
-              sx={{ color: alpha('#fff', 0.65), lineHeight: 1.2 }}
+              sx={{ color: '#666666', lineHeight: 1.2 }}
             >
               {isEdit ? 'Update location details' : 'Create a new service location'}
             </Typography>
@@ -179,8 +164,8 @@ export const ServiceLocationFormDialog: React.FC<ServiceLocationFormDialogProps>
             onClick={onClose}
             size="small"
             sx={{
-              color: alpha('#fff', 0.7),
-              '&:hover': { color: '#fff', bgcolor: alpha('#fff', 0.1) },
+              color: '#666666',
+              '&:hover': { color: '#1C1C1E', bgcolor: alpha('#000', 0.06) },
             }}
           >
             <CloseIcon fontSize="small" />
@@ -285,8 +270,8 @@ export const ServiceLocationFormDialog: React.FC<ServiceLocationFormDialogProps>
             textTransform: 'none',
             fontWeight: 700,
             borderRadius: 1.5,
-            bgcolor: '#0f172a',
-            '&:hover': { bgcolor: '#1e293b' },
+            bgcolor: '#1976D2',
+            '&:hover': { bgcolor: '#1565C0' },
           }}
         >
           {isEdit ? 'Update' : 'Save'}

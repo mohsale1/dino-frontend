@@ -1,4 +1,4 @@
- /**
+/**
  * Catalog Service
  * Handles API calls for catalog (menu) operations
  */
@@ -11,17 +11,24 @@ class CatalogService {
   private itemsUrl = '/application/items';
 
   // ==================== Categories ====================
-  
-  async getCategories(workspaceId: string, page: number = 1, pageSize: number = 100): Promise<Category[]> {
-    const response = await apiService.get<Category[]>(this.categoriesUrl, {
-      params: { 
-        workspace_id: workspaceId,
-        page,
-        page_size: pageSize,
-        order_by: 'created_at',
-        order_direction: 'desc'
-      },
-    });
+
+  async getCategories(
+    workspaceId: string,
+    page: number = 1,
+    pageSize: number = 100,
+    personaId?: number
+  ): Promise<Category[]> {
+    const params: any = {
+      workspace_id: workspaceId,
+      page,
+      page_size: pageSize,
+    };
+
+    if (personaId !== undefined) {
+      params.persona_id = personaId;
+    }
+
+    const response = await apiService.get<Category[]>(this.categoriesUrl, { params });
     return (response.data as any) || [];
   }
 
@@ -31,12 +38,17 @@ class CatalogService {
   }
 
   async createCategory(data: CategoryCreate): Promise<Category> {
-    const response = await apiService.post(this.categoriesUrl, {
+    const payload: any = {
       name: data.name,
       description: data.description,
-      workspace_id: data.workspaceId,
       is_available: data.isActive ?? true,
-    });
+    };
+
+    if ((data as any).personaId !== undefined) {
+      payload.persona_id = (data as any).personaId;
+    }
+
+    const response = await apiService.post(this.categoriesUrl, payload);
     return response.data as any;
   }
 
@@ -45,7 +57,7 @@ class CatalogService {
     if (data.name !== undefined) payload.name = data.name;
     if (data.description !== undefined) payload.description = data.description;
     if (data.isActive !== undefined) payload.is_available = data.isActive;
-    
+
     const response = await apiService.put(`${this.categoriesUrl}/${id}`, payload);
     return response.data as any;
   }
@@ -55,24 +67,32 @@ class CatalogService {
   }
 
   async restoreCategory(id: string): Promise<void> {
-    await apiService.put(`${this.categoriesUrl}/${id}/restore`, {});
+    await apiService.post(`${this.categoriesUrl}/${id}/restore`, {});
   }
 
   // ==================== Catalog Items ====================
-  
-  async getCatalogItems(workspaceId: string, categoryId?: string, page: number = 1, pageSize: number = 100): Promise<CatalogItem[]> {
+
+  async getCatalogItems(
+    workspaceId: string,
+    categoryId?: string,
+    page: number = 1,
+    pageSize: number = 100,
+    personaId?: number
+  ): Promise<CatalogItem[]> {
     const params: any = {
       workspace_id: workspaceId,
       page,
       page_size: pageSize,
-      order_by: 'created_at',
-      order_direction: 'desc'
     };
-    
+
     if (categoryId) {
       params.category_id = categoryId;
     }
-    
+
+    if (personaId !== undefined) {
+      params.persona_id = personaId;
+    }
+
     const response = await apiService.get(this.itemsUrl, { params });
     const raw: any[] = (response.data as any) || [];
 
@@ -83,7 +103,6 @@ class CatalogService {
     }));
   }
 
-
   async getCatalogItem(id: string): Promise<CatalogItem> {
     const response = await apiService.get(`${this.itemsUrl}/${id}`);
     const item: any = response.data;
@@ -93,17 +112,21 @@ class CatalogService {
     };
   }
 
-
   async createCatalogItem(data: CatalogItemCreate): Promise<CatalogItem> {
-    const response = await apiService.post(this.itemsUrl, {
+    const payload: any = {
       name: data.name,
       description: data.description,
       category_id: data.categoryId,
-      workspace_id: data.workspaceId,
       price: data.basePrice,
       is_available: data.isAvailable ?? true,
       is_vegetarian: data.isVegetarian,
-    });
+    };
+
+    if ((data as any).personaId !== undefined) {
+      payload.persona_id = (data as any).personaId;
+    }
+
+    const response = await apiService.post(this.itemsUrl, payload);
     return response.data as any;
   }
 
@@ -115,7 +138,7 @@ class CatalogService {
     if (data.basePrice !== undefined) payload.price = data.basePrice;
     if (data.isAvailable !== undefined) payload.is_available = data.isAvailable;
     if (data.isVegetarian !== undefined) payload.is_vegetarian = data.isVegetarian;
-    
+
     const response = await apiService.put(`${this.itemsUrl}/${id}`, payload);
     return response.data as any;
   }
@@ -125,18 +148,17 @@ class CatalogService {
   }
 
   async restoreCatalogItem(id: string): Promise<void> {
-    await apiService.put(`${this.itemsUrl}/${id}/restore`, {});
+    await apiService.post(`${this.itemsUrl}/${id}/restore`, {});
   }
 
   /**
    * Toggle item availability via the dedicated availability endpoint.
-   * Uses PUT /items/{id}/availability with is_available as a query param.
+   * Uses PUT /items/{id}/availability with is_available in the request body.
    */
   async toggleItemAvailability(id: string, isAvailable: boolean): Promise<CatalogItem> {
     const response = await apiService.put(
       `${this.itemsUrl}/${id}/availability`,
-      {},
-      { params: { is_available: isAvailable } }
+      { is_available: isAvailable }
     );
     return response.data as any;
   }
@@ -150,9 +172,9 @@ class CatalogService {
   async uploadItemImage(id: string, file: File): Promise<string> {
     const formData = new FormData();
     formData.append('image', file);
-    
+
     const response = await apiService.post(`${this.itemsUrl}/${id}/image`, formData);
-    
+
     return (response.data as any)?.image_url || (response.data as any)?.imageUrl || '';
   }
 }

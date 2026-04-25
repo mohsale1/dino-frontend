@@ -44,15 +44,15 @@ const formatINR = (value: number): string =>
 
 const RANK_BADGE: Record<number, { bg: string; color: string }> = {
   1: { bg: 'rgba(245,158,11,0.18)', color: '#f59e0b' },
-  2: { bg: 'rgba(148,163,184,0.12)', color: '#94a3b8' },
+  2: { bg: 'rgba(148,163,184,0.12)', color: '#666666' },
   3: { bg: 'rgba(245,158,11,0.10)', color: '#d97706' },
 };
 
 // ─── Shared Styles ────────────────────────────────────────────────────────────
 
 const CARD_SX = {
-  bgcolor: '#1e293b',
-  border: '1px solid rgba(255,255,255,0.08)',
+  bgcolor: '#ffffff',
+  border: '1px solid #e0e0e0',
   borderRadius: '12px',
   p: 2.5,
 } as const;
@@ -66,7 +66,7 @@ interface SectionTitleProps {
 
 const SectionTitle: React.FC<SectionTitleProps> = ({ label, accentColor }) => (
   <Box sx={{ borderLeft: `3px solid ${accentColor}`, pl: 1.5, mb: 2 }}>
-    <Typography sx={{ fontSize: '0.875rem', fontWeight: 700, color: '#f1f5f9' }}>
+    <Typography sx={{ fontSize: '0.875rem', fontWeight: 700, color: '#1C1C1E' }}>
       {label}
     </Typography>
   </Box>
@@ -93,7 +93,7 @@ const StatCard: React.FC<StatCardProps> = ({ label, value, subtext, accentColor 
       sx={{
         fontSize: '0.68rem',
         fontWeight: 600,
-        color: '#64748b',
+        color: '#666666',
         textTransform: 'uppercase',
         letterSpacing: '0.08em',
         mb: 0.75,
@@ -105,14 +105,14 @@ const StatCard: React.FC<StatCardProps> = ({ label, value, subtext, accentColor 
       sx={{
         fontSize: '1.75rem',
         fontWeight: 800,
-        color: '#f1f5f9',
+        color: '#1C1C1E',
         lineHeight: 1.1,
         mb: 0.5,
       }}
     >
       {value}
     </Typography>
-    <Typography sx={{ fontSize: '0.75rem', color: '#64748b' }}>
+    <Typography sx={{ fontSize: '0.75rem', color: '#666666' }}>
       {subtext}
     </Typography>
   </Box>
@@ -135,7 +135,7 @@ const ItemsTab: React.FC<ItemsTabProps> = ({ dashboardData }) => {
     .slice(0, 10);
 
   return (
-    <Box sx={{ px: { xs: 2, sm: 3, md: 4 }, py: 3, bgcolor: '#0f172a' }}>
+    <Box sx={{ px: { xs: 2, sm: 3, md: 4 }, py: 3, bgcolor: '#f8fafc' }}>
 
       {/* Row 1 — Stat Cards */}
       <Grid container spacing={2.5}>
@@ -178,7 +178,7 @@ const ItemsTab: React.FC<ItemsTabProps> = ({ dashboardData }) => {
         {top10.length === 0 ? (
           <Typography
             sx={{
-              color: '#94a3b8',
+              color: '#666666',
               fontSize: '0.875rem',
               textAlign: 'center',
               py: 4,
@@ -193,7 +193,7 @@ const ItemsTab: React.FC<ItemsTabProps> = ({ dashboardData }) => {
               sx={{
                 display: 'grid',
                 gridTemplateColumns: '44px 1fr 1fr 80px 110px',
-                bgcolor: 'rgba(255,255,255,0.04)',
+                bgcolor: '#f7f9fa',
                 borderRadius: '8px',
                 px: 1.5,
                 py: 1,
@@ -206,7 +206,7 @@ const ItemsTab: React.FC<ItemsTabProps> = ({ dashboardData }) => {
                   sx={{
                     fontSize: '0.65rem',
                     fontWeight: 700,
-                    color: '#64748b',
+                    color: '#999999',
                     textTransform: 'uppercase',
                     letterSpacing: '0.06em',
                   }}
@@ -230,10 +230,10 @@ const ItemsTab: React.FC<ItemsTabProps> = ({ dashboardData }) => {
                     alignItems: 'center',
                     py: 1.25,
                     px: 1.5,
-                    borderBottom: '1px solid rgba(255,255,255,0.05)',
+                    borderBottom: '1px solid #e0e0e0',
                     '&:last-child': { borderBottom: 'none' },
                     '&:hover': {
-                      bgcolor: 'rgba(255,255,255,0.04)',
+                      bgcolor: '#f7f9fa',
                       borderRadius: '8px',
                     },
                     transition: 'background-color 0.15s',
@@ -262,7 +262,7 @@ const ItemsTab: React.FC<ItemsTabProps> = ({ dashboardData }) => {
                       <Typography
                         sx={{
                           fontSize: '0.8rem',
-                          color: '#64748b',
+                          color: '#666666',
                           width: 24,
                           textAlign: 'center',
                           fontWeight: 500,
@@ -276,7 +276,7 @@ const ItemsTab: React.FC<ItemsTabProps> = ({ dashboardData }) => {
                   {/* Item name */}
                   <Typography
                     noWrap
-                    sx={{ fontSize: '0.8125rem', fontWeight: 700, color: '#f1f5f9' }}
+                    sx={{ fontSize: '0.8125rem', fontWeight: 700, color: '#1C1C1E' }}
                   >
                     {item.name}
                   </Typography>
@@ -284,7 +284,7 @@ const ItemsTab: React.FC<ItemsTabProps> = ({ dashboardData }) => {
                   {/* Category */}
                   <Typography
                     noWrap
-                    sx={{ fontSize: '0.75rem', color: '#94a3b8' }}
+                    sx={{ fontSize: '0.75rem', color: '#666666' }}
                   >
                     {item.category}
                   </Typography>
@@ -310,7 +310,7 @@ const ItemsTab: React.FC<ItemsTabProps> = ({ dashboardData }) => {
 
                   {/* Revenue */}
                   <Typography
-                    sx={{ fontSize: '0.8125rem', fontWeight: 700, color: '#f1f5f9' }}
+                    sx={{ fontSize: '0.8125rem', fontWeight: 700, color: '#1C1C1E' }}
                   >
                     {formatINR(item.revenue)}
                   </Typography>

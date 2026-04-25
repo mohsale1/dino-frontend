@@ -56,8 +56,8 @@ const PeakHoursChart: React.FC<Props> = ({ data, height = 220 }) => {
     tooltip: {
       trigger: 'axis',
       axisPointer: { type: 'shadow' },
-      backgroundColor: '#1e293b',
-      borderColor: 'rgba(255,255,255,0.12)',
+      backgroundColor: '#1C1C1E',
+      borderColor: '#e0e0e0',
       borderWidth: 1,
       borderRadius: 8,
       textStyle: { color: '#f1f5f9', fontSize: 12 },
@@ -106,7 +106,7 @@ const PeakHoursChart: React.FC<Props> = ({ data, height = 220 }) => {
       axisLine: { show: false },
       axisTick: { show: false },
       axisLabel: { color: '#94a3b8', fontSize: 10 },
-      splitLine: { lineStyle: { color: 'rgba(255,255,255,0.06)', type: 'solid' } },
+      splitLine: { lineStyle: { color: '#e0e0e0', type: 'solid' } },
     },
     series: [
       {

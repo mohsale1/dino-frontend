@@ -114,7 +114,7 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ category, itemCount, onEdit
           <Typography
             sx={{
               fontWeight: 700,
-              color: '#0f172a',
+              color: '#1C1C1E',
               fontSize: '0.95rem',
               lineHeight: 1.3,
               flex: 1,
@@ -186,7 +186,7 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ category, itemCount, onEdit
               sx={{
                 color: '#94a3b8',
                 borderRadius: 1.5,
-                '&:hover': { color: '#0f172a', bgcolor: alpha('#0f172a', 0.06) },
+                '&:hover': { color: '#1976D2', bgcolor: alpha('#1976D2', 0.06) },
               }}
             >
               <EditIcon sx={{ fontSize: 15 }} />

@@ -1,4 +1,4 @@
-﻿import React, { ReactNode } from 'react';
+import React, { ReactNode } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { Box, CircularProgress, Typography, Button } from '@mui/material';
 import { LockOutlined } from '@mui/icons-material';
@@ -56,7 +56,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, redirectTo, r
     );
   }
 
-  // Permission gate â€” show inline denied screen (do not redirect to login)
+  // Permission gate — show inline denied screen (do not redirect to login)
   if (requiredPermission && !hasBackendPermission(requiredPermission)) {
     return (
       <Box
@@ -85,7 +85,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, redirectTo, r
         >
           <LockOutlined sx={{ fontSize: 32, color: '#ef4444' }} />
         </Box>
-        <Typography variant="h6" sx={{ fontWeight: 700, color: '#0f172a' }}>
+        <Typography variant="h6" sx={{ fontWeight: 700, color: '#1C1C1E' }}>
           Access Denied
         </Typography>
         <Typography variant="body2" sx={{ color: '#64748b', maxWidth: 360 }}>

@@ -61,8 +61,8 @@ const AppearanceSection: React.FC<AppearanceSectionProps> = ({
       setSaving(true);
       await onSave(formData);
       setHasChanges(false);
-    } catch (error) {
-      console.error('Failed to save appearance settings:', error);
+    } catch {
+      // silently handle save errors — parent onSave is responsible for error reporting
     } finally {
       setSaving(false);
     }

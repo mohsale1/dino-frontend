@@ -36,7 +36,6 @@ const FLOW_ICONS: Partial<Record<Order['status'], React.ReactElement>> = {
   confirmed: <Whatshot sx={{ fontSize: 14 }} />,
   preparing: <DoneAll sx={{ fontSize: 14 }} />,
   ready:     <DeliveryDining sx={{ fontSize: 14 }} />,
-  served:    <TaskAlt sx={{ fontSize: 14 }} />,
 };
 
 const OrderCard: React.FC<OrderCardProps> = ({
@@ -81,7 +80,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
         '&:hover': {
           boxShadow: isSelected
             ? '0 0 0 3px rgba(37,99,235,0.08)'
-            : '0 4px 16px rgba(15,23,42,0.08)',
+            : '0 2px 8px rgba(0,0,0,0.06)',
           transform: 'translateY(-1px)',
         },
       }}
@@ -94,7 +93,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          borderBottom: '1px solid #f1f5f9',
+          borderBottom: '1px solid #e0e0e0',
         }}
       >
         <Typography
@@ -102,7 +101,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
             fontFamily: 'monospace',
             fontWeight: 700,
             fontSize: '0.875rem',
-            color: '#0f172a',
+            color: '#1C1C1E',
             letterSpacing: 0,
           }}
         >
@@ -181,7 +180,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
             sx={{
               fontWeight: 800,
               fontSize: '1rem',
-              color: '#0f172a',
+              color: '#1C1C1E',
               lineHeight: 1,
             }}
           >
@@ -258,7 +257,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
                   textTransform: 'none',
                   fontWeight: 600,
                   fontSize: '0.78rem',
-                  borderColor: '#e2e8f0',
+                  borderColor: '#e0e0e0',
                   color: '#94a3b8',
                   '&:hover': {
                     borderColor: '#f43f5e',
@@ -266,7 +265,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
                     bgcolor: '#fff1f2',
                   },
                   '&.Mui-disabled': {
-                    borderColor: '#e2e8f0',
+                    borderColor: '#e0e0e0',
                     color: '#94a3b8',
                     opacity: 0.6,
                   },

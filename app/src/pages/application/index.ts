@@ -6,3 +6,4 @@ export { default as Orders } from './Orders';
 export { default as Users } from './Users';
 export { default as Coupons } from './Coupons';
 export { default as Settings } from './SettingsPage/Settings';
+export { PersonaSwitch } from './PersonaSwitch';

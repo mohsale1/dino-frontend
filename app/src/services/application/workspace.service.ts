@@ -1,56 +1,43 @@
 /**
  * Workspace Service (Application Level)
- * Combines workspace and venue operations for the application context
+ * Delegates venue/persona operations to personaService.
+ * workspace_id is injected from JWT — never sent in request body.
  */
 
-import { venueService } from './venue.service';
-import type { ApiResponse } from '../../types';
+import { apiService } from '../../utils/api';
+import { personaService } from './persona.service';
+import type { PersonaCreate, PersonaUpdate } from './persona.service';
 
 class WorkspaceService {
-  // Venue operations (delegated to venueService)
-  async getVenues(workspaceId: string) {
-    const response = await venueService.getVenues(workspaceId);
-    return response.data || [];
+  // ── Venue / Persona operations ────────────────────────────────────────────
+
+  async getVenues(_workspaceId: string) {
+    // _workspaceId kept for call-site compatibility; JWT provides workspace context server-side
+    const personas = await personaService.getPersonas();
+    return personas;
   }
 
-  async createVenue(venueData: any) {
-    return await venueService.createVenue(venueData);
+  async createVenue(venueData: PersonaCreate) {
+    return await personaService.createPersona(venueData);
   }
 
-  async updateVenue(venueId: string, venueData: any) {
-    return await venueService.updateVenue(venueId, venueData);
+  async updateVenue(venueId: string, venueData: PersonaUpdate) {
+    return await personaService.updatePersona(Number(venueId), venueData);
   }
 
   async deleteVenue(venueId: string) {
-    return await venueService.deleteVenue(venueId);
-  }
-
-  async activateVenue(venueId: string) {
-    return await venueService.updateVenue(venueId, { isActive: true });
-  }
-
-  async deactivateVenue(venueId: string) {
-    return await venueService.updateVenue(venueId, { isActive: false });
+    return await personaService.deletePersona(Number(venueId));
   }
 
   async toggleVenueStatus(venueId: string, isOpen: boolean) {
-    return await venueService.updateVenue(venueId, { is_open: isOpen });
+    return await personaService.setPersonaOpenStatus(Number(venueId), isOpen);
   }
 
-  // Workspace operations (placeholder - not implemented in backend yet)
-  async createWorkspace(workspaceData: any): Promise<ApiResponse<any>> {
-    // This would need a backend endpoint
-    throw new Error('Workspace creation not implemented');
-  }
+  // ── Workspace operations ──────────────────────────────────────────────────
 
-  async updateWorkspace(workspaceId: string, workspaceData: any): Promise<ApiResponse<any>> {
-    // This would need a backend endpoint
-    throw new Error('Workspace update not implemented');
-  }
-
-  async deleteWorkspace(workspaceId: string): Promise<ApiResponse<any>> {
-    // This would need a backend endpoint
-    throw new Error('Workspace deletion not implemented');
+  async updateWorkspace(workspaceId: string, data: { name?: string; description?: string }) {
+    const response = await apiService.put(`/application/workspaces/${workspaceId}`, data);
+    return response.data;
   }
 }
 
