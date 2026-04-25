@@ -1,22 +1,24 @@
 export interface RegistrationFormData {
-  referralCode: string;
-  referralCodeValid: boolean;
+  referralEmail: string;
+  referralEmailValid: boolean;
   referredByName: string;
   workspaceName: string;
   workspaceDescription: string;
-  organizationName: string;
-  organizationDescription: string;
-  organizationLocation: {
+  // Persona (formerly "organization")
+  personaName: string;
+  personaDescription: string;
+  personaLocation: {
     address: string;
     city: string;
     state: string;
     postal_code: string;
     country: string;
   };
-  organizationPhone: string;
-  organizationEmail: string;
-  organizationType: number;
+  personaPhone: string;
+  personaEmail: string;
+  personaType: number;
   orderType: number;
+  // Admin account
   adminFirstName: string;
   adminLastName: string;
   adminEmail: string;
@@ -25,25 +27,26 @@ export interface RegistrationFormData {
   confirmPassword: string;
 }
 
+
 export const initialFormData: RegistrationFormData = {
-  referralCode: '',
-  referralCodeValid: false,
+  referralEmail: '',
+  referralEmailValid: false,
   referredByName: '',
   workspaceName: '',
   workspaceDescription: '',
-  organizationName: '',
-  organizationDescription: '',
-  organizationLocation: {
+  personaName: '',
+  personaDescription: '',
+  personaLocation: {
     address: '',
     city: '',
     state: '',
     postal_code: '',
     country: 'India',
   },
-  organizationPhone: '',
-  organizationEmail: '',
-  organizationType: 0, // 0 = FOOD
-  orderType: 0, // 0 = Online
+  personaPhone: '',
+  personaEmail: '',
+  personaType: 0,   // 0 = Food & Beverage
+  orderType: 0,     // 0 = Online
   adminFirstName: '',
   adminLastName: '',
   adminEmail: '',

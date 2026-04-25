@@ -5,7 +5,7 @@ import {
   Typography,
   alpha,
 } from '@mui/material';
-import { CheckCircle } from '@mui/icons-material';
+import { CheckCircle, PersonSearch } from '@mui/icons-material';
 import { RegistrationFormData } from '../types';
 
 interface RegistrationCodeStepProps {
@@ -29,56 +29,74 @@ const RegistrationCodeStep: React.FC<RegistrationCodeStepProps> = ({
 }) => {
   return (
     <Box>
+      {/* Instruction banner */}
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'flex-start',
+          gap: 1.5,
+          p: 2,
+          mb: 3,
+          borderRadius: 2,
+          bgcolor: alpha('#1976D2', 0.06),
+          border: `1px solid ${alpha('#1976D2', 0.18)}`,
+        }}
+      >
+        <PersonSearch sx={{ color: '#1976D2', fontSize: 20, mt: 0.1, flexShrink: 0 }} />
+        <Typography variant="body2" sx={{ color: '#1e3a5f', lineHeight: 1.6 }}>
+          Enter the email address of the agent who referred you. We will verify
+          their account and link your registration to them.
+        </Typography>
+      </Box>
+
       <TextField
         fullWidth
-        label="Referral Code *"
-        value={formData.referralCode}
+        label="Agent Email Address"
+        type="email"
+        value={formData.referralEmail}
         onChange={(e) => {
-          const value = e.target.value.replace(/\D/g, '').slice(0, 4);
-          onInputChange('referralCode', value);
-          if (formData.referralCodeValid) {
-            onInputChange('referralCodeValid', false);
+          const value = e.target.value.trim();
+          onInputChange('referralEmail', value);
+          // Reset validation state whenever the email changes
+          if (formData.referralEmailValid) {
+            onInputChange('referralEmailValid', false);
             onInputChange('referredByName', '');
           }
         }}
-        error={!!errors.referralCode}
-        helperText={errors.referralCode || '4-digit code from your agent'}
+        error={!!errors.referralEmail}
+        helperText={errors.referralEmail || 'Email address provided by your agent'}
         required
-        type="password"
-        placeholder="••••"
-        inputProps={{
-          maxLength: 4,
-          style: {
-            fontSize: '2rem',
-            textAlign: 'center',
-            letterSpacing: '0.5rem',
-            fontWeight: 600,
-          },
-        }}
+        placeholder="agent@example.com"
+        autoComplete="off"
         sx={{ mb: 3, ...fieldSx }}
       />
 
-      {formData.referralCodeValid && formData.referredByName && (
+      {/* Validated agent card */}
+      {formData.referralEmailValid && formData.referredByName && (
         <Box
           sx={{
             p: 2.5,
-            backgroundColor: alpha('#10b981', 0.08),
+            backgroundColor: alpha('#10b981', 0.07),
             borderRadius: 2,
-            border: `1.5px solid ${alpha('#10b981', 0.4)}`,
+            border: `1.5px solid ${alpha('#10b981', 0.35)}`,
             display: 'flex',
             alignItems: 'center',
             gap: 1.5,
           }}
         >
-          <CheckCircle sx={{ color: '#10b981', fontSize: 20 }} />
-          <Typography variant="body2" sx={{ color: '#065f46', fontWeight: 600 }}>
-            Valid Code — Referred by: {formData.referredByName}
-          </Typography>
+          <CheckCircle sx={{ color: '#10b981', fontSize: 22, flexShrink: 0 }} />
+          <Box>
+            <Typography variant="body2" sx={{ color: '#065f46', fontWeight: 700, lineHeight: 1.4 }}>
+              Agent verified
+            </Typography>
+            <Typography variant="caption" sx={{ color: '#047857' }}>
+              Referred by: {formData.referredByName}
+            </Typography>
+          </Box>
         </Box>
       )}
     </Box>
   );
 };
-
 
 export default RegistrationCodeStep;

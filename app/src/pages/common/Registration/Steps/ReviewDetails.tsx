@@ -100,43 +100,45 @@ const ReviewStep: React.FC<ReviewStepProps> = ({ formData }) => {
 
   return (
     <Box>
-      {/* Referral Code */}
-      <Paper
-        elevation={0}
-        sx={{
-          p: 2.5,
-          mb: 2.5,
-          borderRadius: 3,
-          border: `1.5px solid ${alpha('#10b981', 0.3)}`,
-          backgroundColor: alpha('#10b981', 0.06),
-          display: 'flex',
-          alignItems: 'center',
-          gap: 2,
-        }}
-      >
-        <Box
+      {/* Referral */}
+      {formData.referralEmailValid && (
+        <Paper
+          elevation={0}
           sx={{
-            width: 36,
-            height: 36,
-            borderRadius: 1.5,
-            backgroundColor: alpha('#10b981', 0.15),
+            p: 2.5,
+            mb: 2.5,
+            borderRadius: 3,
+            border: `1.5px solid ${alpha('#10b981', 0.3)}`,
+            backgroundColor: alpha('#10b981', 0.06),
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0,
+            gap: 2,
           }}
         >
-          <VpnKey sx={{ color: '#10b981', fontSize: 18 }} />
-        </Box>
-        <Box>
-          <Typography variant="body2" sx={{ color: '#064e3b', fontWeight: 700 }}>
-            Referral Code: ••••
-          </Typography>
-          <Typography variant="caption" sx={{ color: '#065f46' }}>
-            Code verified successfully
-          </Typography>
-        </Box>
-      </Paper>
+          <Box
+            sx={{
+              width: 36,
+              height: 36,
+              borderRadius: 1.5,
+              backgroundColor: alpha('#10b981', 0.15),
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+            }}
+          >
+            <VpnKey sx={{ color: '#10b981', fontSize: 18 }} />
+          </Box>
+          <Box>
+            <Typography variant="body2" sx={{ color: '#064e3b', fontWeight: 700 }}>
+              Referred by: {formData.referredByName}
+            </Typography>
+            <Typography variant="caption" sx={{ color: '#047857' }}>
+              {formData.referralEmail} — agent verified
+            </Typography>
+          </Box>
+        </Paper>
+      )}
 
       {/* Workspace Details */}
       <Paper elevation={0} sx={cardSx}>
@@ -158,24 +160,24 @@ const ReviewStep: React.FC<ReviewStepProps> = ({ formData }) => {
         )}
       </Paper>
 
-      {/* Organization Information */}
+      {/* Persona Information */}
       <Paper elevation={0} sx={cardSx}>
         <SectionHeader
           icon={<Store sx={{ color: '#1976D2', fontSize: 22 }} />}
-          title="Organization"
+          title="Persona"
         />
 
         <InfoRow
           icon={<Store fontSize="small" />}
-          label="Organization Name"
-          value={formData.organizationName}
+          label="Persona Name"
+          value={formData.personaName}
         />
 
-        {formData.organizationDescription && (
+        {formData.personaDescription && (
           <InfoRow
             icon={<Store fontSize="small" />}
             label="Description"
-            value={formData.organizationDescription}
+            value={formData.personaDescription}
           />
         )}
 
@@ -196,7 +198,7 @@ const ReviewStep: React.FC<ReviewStepProps> = ({ formData }) => {
           </Typography>
           <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
             <Chip
-              label={formData.organizationType === 0 ? 'Food & Beverage' : 'Non-Food'}
+              label={formData.personaType === 0 ? 'Food & Beverage' : 'Non-Food'}
               size="small"
               sx={{
                 backgroundColor: alpha('#1976D2', 0.1),
@@ -223,7 +225,7 @@ const ReviewStep: React.FC<ReviewStepProps> = ({ formData }) => {
         <InfoRow
           icon={<LocationOn fontSize="small" />}
           label="Venue Address"
-          value={`${formData.organizationLocation.address}, ${formData.organizationLocation.city}, ${formData.organizationLocation.state} ${formData.organizationLocation.postal_code}`}
+          value={`${formData.personaLocation.address}, ${formData.personaLocation.city}, ${formData.personaLocation.state} ${formData.personaLocation.postal_code}`}
         />
 
         <Grid container spacing={2}>
@@ -231,14 +233,14 @@ const ReviewStep: React.FC<ReviewStepProps> = ({ formData }) => {
             <InfoRow
               icon={<Phone fontSize="small" />}
               label="Phone"
-              value={formData.organizationPhone}
+              value={formData.personaPhone}
             />
           </Grid>
           <Grid item xs={12} sm={6}>
             <InfoRow
               icon={<Email fontSize="small" />}
               label="Email"
-              value={formData.organizationEmail}
+              value={formData.personaEmail}
             />
           </Grid>
         </Grid>

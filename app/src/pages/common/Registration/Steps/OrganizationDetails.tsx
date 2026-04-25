@@ -39,22 +39,22 @@ const OrganizationInformationStep: React.FC<OrganizationInformationStepProps> = 
     <Box>
       <TextField
         fullWidth
-        label="Organization Name"
-        value={formData.organizationName}
-        onChange={(e) => onInputChange('organizationName', e.target.value)}
-        error={!!errors.organizationName}
-        helperText={errors.organizationName || 'The name of your venue/branch'}
+        label="Persona Name"
+        value={formData.personaName}
+        onChange={(e) => onInputChange('personaName', e.target.value)}
+        error={!!errors.personaName}
+        helperText={errors.personaName || 'The name of your venue or branch'}
         required
         sx={{ mb: 3.5, ...fieldSx }}
       />
 
       <TextField
         fullWidth
-        label="Organization Description"
-        value={formData.organizationDescription}
-        onChange={(e) => onInputChange('organizationDescription', e.target.value)}
-        error={!!errors.organizationDescription}
-        helperText={errors.organizationDescription || 'Brief description of your venue'}
+        label="Description"
+        value={formData.personaDescription}
+        onChange={(e) => onInputChange('personaDescription', e.target.value)}
+        error={!!errors.personaDescription}
+        helperText={errors.personaDescription || 'Brief description of your venue'}
         multiline
         rows={3}
         sx={{ mb: 3.5, ...fieldSx }}
@@ -64,12 +64,12 @@ const OrganizationInformationStep: React.FC<OrganizationInformationStepProps> = 
         <Grid item xs={12} sm={6}>
           <FormControl fullWidth>
             <InputLabel sx={{ '&.Mui-focused': { color: '#1976D2' } }}>
-              Organization Type
+              Persona Type
             </InputLabel>
             <Select
-              value={formData.organizationType}
-              onChange={(e) => onInputChange('organizationType', e.target.value)}
-              label="Organization Type"
+              value={formData.personaType}
+              onChange={(e) => onInputChange('personaType', e.target.value)}
+              label="Persona Type"
               sx={selectSx}
             >
               <MenuItem value={0}>Food &amp; Beverage</MenuItem>
@@ -88,7 +88,7 @@ const OrganizationInformationStep: React.FC<OrganizationInformationStepProps> = 
               label="Order Type"
               sx={selectSx}
             >
-              <MenuItem value={0}>Online (Self-Service/QR)</MenuItem>
+              <MenuItem value={0}>Online (Self-Service / QR)</MenuItem>
               <MenuItem value={1}>Manual (Counter-Based)</MenuItem>
             </Select>
           </FormControl>
@@ -102,10 +102,10 @@ const OrganizationInformationStep: React.FC<OrganizationInformationStepProps> = 
       <TextField
         fullWidth
         label="Address"
-        value={formData.organizationLocation.address}
-        onChange={(e) => onInputChange('organizationLocation.address', e.target.value)}
-        error={!!errors['organizationLocation.address']}
-        helperText={errors['organizationLocation.address']}
+        value={formData.personaLocation.address}
+        onChange={(e) => onInputChange('personaLocation.address', e.target.value)}
+        error={!!errors['personaLocation.address']}
+        helperText={errors['personaLocation.address']}
         required
         sx={{ mb: 3.5, ...fieldSx }}
       />
@@ -115,10 +115,10 @@ const OrganizationInformationStep: React.FC<OrganizationInformationStepProps> = 
           <TextField
             fullWidth
             label="City"
-            value={formData.organizationLocation.city}
-            onChange={(e) => onInputChange('organizationLocation.city', e.target.value)}
-            error={!!errors['organizationLocation.city']}
-            helperText={errors['organizationLocation.city']}
+            value={formData.personaLocation.city}
+            onChange={(e) => onInputChange('personaLocation.city', e.target.value)}
+            error={!!errors['personaLocation.city']}
+            helperText={errors['personaLocation.city']}
             required
             sx={fieldSx}
           />
@@ -127,10 +127,10 @@ const OrganizationInformationStep: React.FC<OrganizationInformationStepProps> = 
           <TextField
             fullWidth
             label="State"
-            value={formData.organizationLocation.state}
-            onChange={(e) => onInputChange('organizationLocation.state', e.target.value)}
-            error={!!errors['organizationLocation.state']}
-            helperText={errors['organizationLocation.state']}
+            value={formData.personaLocation.state}
+            onChange={(e) => onInputChange('personaLocation.state', e.target.value)}
+            error={!!errors['personaLocation.state']}
+            helperText={errors['personaLocation.state']}
             required
             sx={fieldSx}
           />
@@ -139,10 +139,10 @@ const OrganizationInformationStep: React.FC<OrganizationInformationStepProps> = 
           <TextField
             fullWidth
             label="Postal Code"
-            value={formData.organizationLocation.postal_code}
-            onChange={(e) => onInputChange('organizationLocation.postal_code', e.target.value)}
-            error={!!errors['organizationLocation.postal_code']}
-            helperText={errors['organizationLocation.postal_code']}
+            value={formData.personaLocation.postal_code}
+            onChange={(e) => onInputChange('personaLocation.postal_code', e.target.value)}
+            error={!!errors['personaLocation.postal_code']}
+            helperText={errors['personaLocation.postal_code']}
             required
             sx={fieldSx}
           />
@@ -154,10 +154,10 @@ const OrganizationInformationStep: React.FC<OrganizationInformationStepProps> = 
           <TextField
             fullWidth
             label="Business Phone"
-            value={formData.organizationPhone}
-            onChange={(e) => onInputChange('organizationPhone', e.target.value)}
-            error={!!errors.organizationPhone}
-            helperText={errors.organizationPhone || 'Contact phone number'}
+            value={formData.personaPhone}
+            onChange={(e) => onInputChange('personaPhone', e.target.value)}
+            error={!!errors.personaPhone}
+            helperText={errors.personaPhone || 'Contact phone number'}
             required
             placeholder="+1234567890"
             sx={fieldSx}
@@ -168,10 +168,10 @@ const OrganizationInformationStep: React.FC<OrganizationInformationStepProps> = 
             fullWidth
             label="Business Email"
             type="email"
-            value={formData.organizationEmail}
-            onChange={(e) => onInputChange('organizationEmail', e.target.value)}
-            error={!!errors.organizationEmail}
-            helperText={errors.organizationEmail || 'Contact email address'}
+            value={formData.personaEmail}
+            onChange={(e) => onInputChange('personaEmail', e.target.value)}
+            error={!!errors.personaEmail}
+            helperText={errors.personaEmail || 'Contact email address'}
             required
             sx={fieldSx}
           />

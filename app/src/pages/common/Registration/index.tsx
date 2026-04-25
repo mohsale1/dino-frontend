@@ -57,7 +57,7 @@ const BRAND = {
 
 // Per-step metadata: icon shown in the header box + title + subtitle
 const STEPS = [
-  { label: 'Code',          icon: <VpnKey />,       stepIcon: <Tag />,          title: 'Referral Code',       subtitle: 'Enter the 4-digit code provided by your agent' },
+  { label: 'Referral',      icon: <VpnKey />,       stepIcon: <Tag />,          title: 'Agent Referral',      subtitle: 'Enter the email address of the agent who referred you' },
   { label: 'Workspace',     icon: <BusinessIcon />, stepIcon: <BusinessIcon />, title: 'Workspace Details',   subtitle: 'Set up your workspace information' },
   { label: 'Persona',       icon: <Store />,        stepIcon: <Store />,        title: 'Persona Details',     subtitle: 'Tell us about your first venue or branch' },
   { label: 'Admin Account', icon: <Person />,       stepIcon: <Person />,       title: 'Admin Account',       subtitle: 'Create your administrator account' },
@@ -112,27 +112,27 @@ const RegisterPage: React.FC = () => {
     const errors: Record<string, string> = {};
     switch (step) {
       case 0:
-        if (!formData.referralCode || formData.referralCode.length !== 4) {
-          errors.referralCode = 'Referral code is required (4 digits)';
-        } else if (!/^\d{4}$/.test(formData.referralCode)) {
-          errors.referralCode = 'Code must contain only numbers';
-        } else if (!formData.referralCodeValid) {
+        if (!formData.referralEmail.trim()) {
+          errors.referralEmail = 'Agent email is required';
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.referralEmail)) {
+          errors.referralEmail = 'Enter a valid email address';
+        } else if (!formData.referralEmailValid) {
           try {
             setLoading(true);
-            const response = await apiService.get(`/application/auth/validate-referral?code=${formData.referralCode}`);
+            const response = await apiService.get(`/application/auth/validate-referral?email=${encodeURIComponent(formData.referralEmail)}`);
             if (response.success && response.data) {
               const data = response.data as any;
               const firstName = data.firstName || data.first_name || '';
               const lastName  = data.lastName  || data.last_name  || '';
-              const referredByName = `${firstName} ${lastName}`.trim() || data.email;
-              handleInputChange('referralCodeValid', true);
+              const referredByName = `${firstName} ${lastName}`.trim() || data.email || '';
+              handleInputChange('referralEmailValid', true);
               handleInputChange('referredByName', referredByName);
-              showToast(`Referral code validated! Referred by: ${referredByName}`, 'success');
+              showToast(`Agent verified! Referred by: ${referredByName}`, 'success');
             } else {
-              errors.referralCode = 'Invalid referral code';
+              errors.referralEmail = 'No active agent found with this email';
             }
           } catch (err: any) {
-            errors.referralCode = err.message || 'Invalid referral code';
+            errors.referralEmail = err.message || 'No active agent found with this email';
           } finally {
             setLoading(false);
           }
@@ -142,17 +142,17 @@ const RegisterPage: React.FC = () => {
         if (!formData.workspaceName.trim()) errors.workspaceName = 'Workspace name is required';
         break;
       case 2:
-        if (!formData.organizationName.trim())  errors.organizationName = 'Organization name is required';
-        if (!formData.organizationPhone.trim())  errors.organizationPhone = 'Phone number is required';
-        if (!formData.organizationEmail.trim()) {
-          errors.organizationEmail = 'Email is required';
-        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.organizationEmail)) {
-          errors.organizationEmail = 'Invalid email format';
+        if (!formData.personaName.trim())  errors.personaName = 'Persona name is required';
+        if (!formData.personaPhone.trim()) errors.personaPhone = 'Phone number is required';
+        if (!formData.personaEmail.trim()) {
+          errors.personaEmail = 'Email is required';
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.personaEmail)) {
+          errors.personaEmail = 'Invalid email format';
         }
-        if (!formData.organizationLocation.address.trim())     errors['organizationLocation.address']     = 'Address is required';
-        if (!formData.organizationLocation.city.trim())        errors['organizationLocation.city']        = 'City is required';
-        if (!formData.organizationLocation.state.trim())       errors['organizationLocation.state']       = 'State is required';
-        if (!formData.organizationLocation.postal_code.trim()) errors['organizationLocation.postal_code'] = 'Postal code is required';
+        if (!formData.personaLocation.address.trim())     errors['personaLocation.address']     = 'Address is required';
+        if (!formData.personaLocation.city.trim())        errors['personaLocation.city']        = 'City is required';
+        if (!formData.personaLocation.state.trim())       errors['personaLocation.state']       = 'State is required';
+        if (!formData.personaLocation.postal_code.trim()) errors['personaLocation.postal_code'] = 'Postal code is required';
         break;
       case 3:
         if (!formData.adminFirstName.trim()) errors.adminFirstName = 'First name is required';
@@ -187,38 +187,36 @@ const RegisterPage: React.FC = () => {
     setError('');
     try {
       await authService.signup({
-        referral_code:         formData.referralCode,
+        // Workspace
         workspace_name:        formData.workspaceName,
-        workspace_description: formData.workspaceDescription,
-        organization: {
-          name:              formData.organizationName,
-          description:       formData.organizationDescription,
-          address:           formData.organizationLocation.address,
-          city:              formData.organizationLocation.city,
-          state:             formData.organizationLocation.state,
-          country:           formData.organizationLocation.country,
-          postal_code:       formData.organizationLocation.postal_code,
-          phone:             formData.organizationPhone,
-          email:             formData.organizationEmail,
-          organization_type: formData.organizationType,
-          order_type:        formData.orderType,
-        },
-        admin_user: {
-          email:      formData.adminEmail,
-          password:   formData.adminPassword,
-          first_name: formData.adminFirstName,
-          last_name:  formData.adminLastName,
-          phone:      formData.adminPhone,
-        },
+        workspace_description: formData.workspaceDescription || undefined,
+        referral_email:        formData.referralEmail || undefined,
+        // Persona
+        persona_name:          formData.personaName,
+        persona_type:          formData.personaType,
+        order_type:            formData.orderType,
+        persona_address:       formData.personaLocation.address || undefined,
+        persona_city:          formData.personaLocation.city || undefined,
+        persona_state:         formData.personaLocation.state || undefined,
+        persona_country:       formData.personaLocation.country || undefined,
+        persona_postal_code:   formData.personaLocation.postal_code || undefined,
+        persona_phone:         formData.personaPhone || undefined,
+        persona_email:         formData.personaEmail || undefined,
+        // Admin user
+        admin_email:           formData.adminEmail,
+        admin_password:        formData.adminPassword,
+        admin_first_name:      formData.adminFirstName,
+        admin_last_name:       formData.adminLastName,
+        admin_phone:           formData.adminPhone || undefined,
       });
       navigate('/login', { replace: true, state: { message: 'Registration successful! Please sign in to continue.', email: formData.adminEmail } });
     } catch (err: any) {
       const msg = err.response?.data?.detail || err.message || 'Registration failed. Please try again.';
       setError(msg);
-      if (msg.toLowerCase().includes('referral') || msg.toLowerCase().includes('code'))         setActiveStep(0);
-      else if (msg.toLowerCase().includes('workspace'))                                          setActiveStep(1);
-      else if (msg.toLowerCase().includes('organization') || msg.toLowerCase().includes('venue')) setActiveStep(2);
-      else if (msg.toLowerCase().includes('admin') || msg.toLowerCase().includes('email'))       setActiveStep(3);
+      if (msg.toLowerCase().includes('referral') || msg.toLowerCase().includes('agent'))                   setActiveStep(0);
+      else if (msg.toLowerCase().includes('workspace'))                                                    setActiveStep(1);
+      else if (msg.toLowerCase().includes('persona') || msg.toLowerCase().includes('venue'))               setActiveStep(2);
+      else if (msg.toLowerCase().includes('admin') || msg.toLowerCase().includes('already exists'))        setActiveStep(3);
     } finally {
       setLoading(false);
     }
@@ -267,11 +265,12 @@ const RegisterPage: React.FC = () => {
             )}
             sx={{
               '& .MuiStepLabel-label': {
-                display: showLabels ? { xs: 'none', sm: 'block' } : 'none',
+                display: showLabels ? 'block' : 'none',
                 color: index <= activeStep ? '#0f172a' : '#94a3b8',
                 fontWeight: index === activeStep ? 700 : 500,
-                fontSize: '0.75rem',
+                fontSize: '0.7rem',
                 mt: 0.5,
+                whiteSpace: 'nowrap',
               },
             }}
           >
@@ -378,7 +377,7 @@ const RegisterPage: React.FC = () => {
 
   // ─── Form content (shared between desktop + mobile) ───────────────────────
   const formContent = (
-    <Box width="100%" maxWidth={380}>
+    <Box width="100%">
       {stepHeader}
       {errorAlert}
       {renderStepContent(activeStep)}
@@ -393,10 +392,11 @@ const RegisterPage: React.FC = () => {
       <Box sx={{
         display: { xs: 'none', md: 'flex' },
         flex: 1,
+        minWidth: 0,
         flexDirection: 'column',
         justifyContent: 'center',
         alignItems: 'center',
-        px: { md: 6, lg: 10 },
+        px: { md: 5, lg: 8 },
         py: 8,
         background: `linear-gradient(160deg, ${BRAND.panelBg} 0%, ${BRAND.panelBg2} 60%, ${BRAND.panelBg} 100%)`,
         borderRight: `1px solid ${BRAND.accentBorder}`,
@@ -434,7 +434,7 @@ const RegisterPage: React.FC = () => {
       <Box sx={{
         display: { xs: 'none', md: 'flex' },
         flexDirection: 'column',
-        width: { md: 480, lg: 520 },
+        width: { md: 580, lg: 660, xl: 720 },
         flexShrink: 0,
         bgcolor: '#ffffff',
         overflowY: 'auto',
@@ -446,17 +446,17 @@ const RegisterPage: React.FC = () => {
         ...scrollbarSx,
       }}>
         {/* Stepper pinned at top */}
-        <Box sx={{ flexShrink: 0, px: { md: 5, lg: 6 }, pt: 3.5, pb: 2, borderBottom: '1px solid #f1f5f9' }}>
+        <Box sx={{ flexShrink: 0, px: { md: 5, lg: 7 }, pt: 3.5, pb: 2.5, borderBottom: '1px solid #f1f5f9' }}>
           {renderStepper(true)}
         </Box>
 
-        {/* Form — centred vertically in remaining space */}
+        {/* Form — scrollable content area */}
         <Box sx={{
           flex: 1,
           display: 'flex',
-          alignItems: 'center',
+          alignItems: 'flex-start',
           justifyContent: 'center',
-          px: { md: 5, lg: 6 },
+          px: { md: 5, lg: 7 },
           py: 4,
         }}>
           {formContent}
@@ -471,7 +471,7 @@ const RegisterPage: React.FC = () => {
         width: '100%',
         bgcolor: '#ffffff',
         overflowY: 'auto',
-        px: 3,
+        px: { xs: 2.5, sm: 4 },
         py: 4,
         animation: 'authPanelIn 0.28s cubic-bezier(0.22,1,0.36,1) both',
         '@keyframes authPanelIn': {
@@ -487,7 +487,7 @@ const RegisterPage: React.FC = () => {
         <Box sx={{ width: '100%', mb: 3 }}>
           {renderStepper(false)}
         </Box>
-        <Box sx={{ width: '100%', maxWidth: 400 }}>
+        <Box sx={{ width: '100%' }}>
           {formContent}
         </Box>
       </Box>
