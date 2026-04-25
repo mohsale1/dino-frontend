@@ -6,6 +6,7 @@ import { GlobalErrorBoundary } from './components/errors';
 import { ProtectedRoute, PermissionSync } from './components/auth';
 import SystemLayout from './components/layout/SystemLayout';
 import { AppInitializer } from './components/common';
+import { AppLoader } from './components/ui/PageTransitionLoader';
 
 import { AuthProvider, useAuth } from './contexts/common/Auth';
 import { ToastProvider } from './contexts/common/Toast';
@@ -46,9 +47,13 @@ const SystemIndexRedirect = () => {
 
 // Inner component — has access to both auth context and router context
 const AppContent = memo(() => {
+  const { loading } = useAuth();
+
+  if (loading) return <AppLoader message="Loading..." />;
+
   return (
     <>
-      <Suspense fallback={null}>
+      <Suspense fallback={<AppLoader message="Loading module..." />}>
         <Routes>
           {/* Root redirects to login */}
           <Route path="/" element={<Navigate to="/login" replace />} />

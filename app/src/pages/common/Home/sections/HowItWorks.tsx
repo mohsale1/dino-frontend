@@ -9,8 +9,9 @@ import {
 } from '@mui/material';
 import { Settings, QrCode2, Dashboard, ArrowForward } from '@mui/icons-material';
 
-const BLUE = '#1976D2';
+const BLUE    = '#1976D2';
 const BLUE_LT = '#42A5F5';
+const DARK_BG = '#0b1120';
 
 const STEPS = [
   {
@@ -55,7 +56,9 @@ const HowItWorksSection: React.FC = () => {
       id="how-it-works"
       sx={{
         py: { xs: 5, sm: 6, md: 8 },
-        background: 'linear-gradient(160deg, #f8fafc 0%, #eff6ff 45%, #f0f9ff 75%, #f8fafc 100%)',
+        backgroundColor: DARK_BG,
+        backgroundImage: 'radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px)',
+        backgroundSize: '32px 32px',
         position: 'relative',
         width: '100%',
         overflow: 'hidden',
@@ -64,41 +67,26 @@ const HowItWorksSection: React.FC = () => {
     >
       {/* Top border accent */}
       <Box sx={{
-        position: 'absolute', top: 0, left: 0, right: 0, height: '3px',
-        background: `linear-gradient(90deg, transparent, ${BLUE} 40%, ${BLUE_LT} 60%, transparent)`,
-        opacity: 0.4,
+        position: 'absolute', top: 0, left: 0, right: 0, height: '1px',
+        background: 'linear-gradient(90deg, transparent, rgba(66,165,245,0.4) 40%, rgba(66,165,245,0.4) 60%, transparent)',
       }} />
 
-      {/* Radial glow — top left */}
+      {/* Blue glow blob — top right */}
       <Box sx={{
-        position: 'absolute', top: '-5%', left: '-5%',
-        width: { xs: '280px', md: '420px' }, height: { xs: '280px', md: '420px' },
+        position: 'absolute', top: '-8%', right: '-6%',
+        width: { xs: '300px', md: '480px' }, height: { xs: '300px', md: '480px' },
         borderRadius: '50%',
-        background: `radial-gradient(circle, ${alpha(BLUE, 0.07)} 0%, transparent 70%)`,
+        background: `radial-gradient(circle, ${alpha(BLUE, 0.18)} 0%, transparent 70%)`,
         pointerEvents: 'none',
       }} />
 
-      {/* Radial glow — bottom right */}
+      {/* Blue glow blob — bottom left */}
       <Box sx={{
-        position: 'absolute', bottom: '-5%', right: '-5%',
-        width: { xs: '240px', md: '360px' }, height: { xs: '240px', md: '360px' },
+        position: 'absolute', bottom: '-8%', left: '-6%',
+        width: { xs: '260px', md: '400px' }, height: { xs: '260px', md: '400px' },
         borderRadius: '50%',
-        background: `radial-gradient(circle, ${alpha(BLUE_LT, 0.06)} 0%, transparent 70%)`,
+        background: `radial-gradient(circle, ${alpha(BLUE_LT, 0.12)} 0%, transparent 70%)`,
         pointerEvents: 'none',
-      }} />
-
-      {/* Dashed ring — top left */}
-      <Box sx={{
-        position: 'absolute', top: '10%', left: '5%',
-        width: { xs: '140px', md: '220px' }, height: { xs: '140px', md: '220px' },
-        borderRadius: '50%', border: `2px dashed ${alpha(BLUE, 0.1)}`, pointerEvents: 'none',
-      }} />
-
-      {/* Dashed ring — bottom right */}
-      <Box sx={{
-        position: 'absolute', bottom: '8%', right: '4%',
-        width: { xs: '100px', md: '160px' }, height: { xs: '100px', md: '160px' },
-        borderRadius: '50%', border: `2px dashed ${alpha(BLUE_LT, 0.1)}`, pointerEvents: 'none',
       }} />
 
       <Container maxWidth="lg" disableGutters sx={{ px: { xs: 2, sm: 3, md: 3 }, position: 'relative', zIndex: 1 }}>
@@ -106,18 +94,6 @@ const HowItWorksSection: React.FC = () => {
         {/* Section Header */}
         <Box sx={{ textAlign: 'center', mb: { xs: 4, md: 6 }, animation: `${fadeInUp} 0.7s ease-out both` }}>
 
-          {/* Pill badge */}
-          <Box sx={{
-            display: 'inline-flex', alignItems: 'center', gap: 1,
-            mb: { xs: 2, md: 2.5 }, px: 2, py: 0.75, borderRadius: '999px',
-            background: `linear-gradient(135deg, ${alpha(BLUE, 0.1)} 0%, ${alpha(BLUE_LT, 0.08)} 100%)`,
-            border: `1px solid ${alpha(BLUE, 0.18)}`,
-          }}>
-            <Box sx={{ width: 6, height: 6, borderRadius: '50%', background: `linear-gradient(135deg, ${BLUE}, ${BLUE_LT})`, flexShrink: 0 }} />
-            <Typography sx={{ fontSize: '0.6875rem', fontWeight: 700, letterSpacing: '0.12em', color: BLUE, textTransform: 'uppercase', lineHeight: 1 }}>
-              Simple Process
-            </Typography>
-          </Box>
 
           {/* Heading */}
           <Box sx={{
@@ -126,7 +102,7 @@ const HowItWorksSection: React.FC = () => {
             '&::after': {
               content: '""', position: 'absolute', bottom: -10, left: '50%',
               transform: 'translateX(-50%)', width: '48px', height: '3px', borderRadius: '2px',
-              background: `linear-gradient(90deg, transparent, ${BLUE}, ${BLUE_LT}, transparent)`,
+              background: `linear-gradient(90deg, transparent, ${BLUE_LT}, transparent)`,
             },
           }}>
             {HEADING_WORDS.map((word, i) => (
@@ -137,7 +113,7 @@ const HowItWorksSection: React.FC = () => {
                   display: 'inline-block',
                   fontSize: { xs: '2rem', sm: '2.75rem', md: '3.5rem' },
                   fontWeight: 800, lineHeight: 1.15, letterSpacing: '-0.03em',
-                  color: word === 'Running' || word === 'Minutes' ? BLUE : '#0f172a',
+                  color: word === 'Running' || word === 'Minutes' ? BLUE_LT : '#ffffff',
                   opacity: 0,
                   animation: `${wordDrop} 0.5s cubic-bezier(0.22, 1, 0.36, 1) ${WORD_DELAYS[i]}s forwards`,
                 }}
@@ -149,7 +125,7 @@ const HowItWorksSection: React.FC = () => {
 
           {/* Subtitle */}
           <Typography sx={{
-            color: '#64748b', maxWidth: 560, mx: 'auto', mt: 2.5,
+            color: 'rgba(255,255,255,0.5)', maxWidth: 560, mx: 'auto', mt: 2.5,
             fontSize: { xs: '0.9375rem', sm: '1rem', md: '1.0625rem' },
             fontWeight: 400, lineHeight: 1.7, px: { xs: 1, sm: 0 },
           }}>
@@ -190,18 +166,18 @@ const HowItWorksSection: React.FC = () => {
                 <Box sx={{ pb: isLast ? 0 : 3.5, pt: 0.75 }}>
                   <Typography sx={{
                     fontSize: '0.625rem', fontWeight: 800, letterSpacing: '0.1em',
-                    color: BLUE, textTransform: 'uppercase', mb: 0.4,
+                    color: BLUE_LT, textTransform: 'uppercase', mb: 0.4,
                   }}>
                     Step {step.number}
                   </Typography>
                   <Typography sx={{
-                    fontWeight: 700, fontSize: '1rem', color: '#0f172a',
+                    fontWeight: 700, fontSize: '1rem', color: '#ffffff',
                     mb: 0.5, lineHeight: 1.3,
                   }}>
                     {step.title}
                   </Typography>
                   <Typography sx={{
-                    color: '#64748b', fontSize: '0.8125rem', lineHeight: 1.65, fontWeight: 400,
+                    color: 'rgba(255,255,255,0.55)', fontSize: '0.8125rem', lineHeight: 1.65, fontWeight: 400,
                   }}>
                     {step.description}
                   </Typography>
@@ -223,22 +199,23 @@ const HowItWorksSection: React.FC = () => {
                 <Box sx={{
                   flex: 1, minWidth: 0, position: 'relative',
                   borderRadius: { sm: '14px', md: '20px' },
-                  background: '#ffffff',
-                  border: `1px solid ${alpha(BLUE, 0.1)}`,
-                  boxShadow: `0 2px 16px ${alpha(BLUE, 0.06)}, 0 1px 4px ${alpha('#0f172a', 0.04)}`,
+                  background: 'rgba(255,255,255,0.04)',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  boxShadow: '0 2px 16px rgba(0,0,0,0.3)',
                   p: { sm: 2.5, md: 3.5 },
                   display: 'flex', flexDirection: 'column', gap: { sm: 1.5, md: 2.5 },
-                  transition: 'transform 0.25s ease, box-shadow 0.25s ease',
+                  transition: 'transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease, border-color 0.25s ease',
                   animation: `${fadeInUp} 0.7s ease-out ${0.15 + index * 0.15}s both`,
                   '&:hover': {
                     transform: 'translateY(-4px)',
-                    boxShadow: `0 8px 32px ${alpha(BLUE, 0.12)}, 0 2px 8px ${alpha('#0f172a', 0.06)}`,
+                    background: 'rgba(255,255,255,0.07)',
+                    borderColor: 'rgba(66,165,245,0.3)',
+                    boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
                   },
                   '&::before': {
                     content: '""', position: 'absolute', top: 0, left: '16px', right: '16px',
                     height: '2px', borderRadius: '0 0 2px 2px',
-                    background: `linear-gradient(90deg, ${alpha(BLUE, 0.6)}, ${alpha(BLUE_LT, 0.4)})`,
-                    opacity: 0.6,
+                    background: 'rgba(66,165,245,0.4)',
                   },
                 }}>
                   <Stack direction="row" alignItems="flex-start" justifyContent="space-between">
@@ -254,23 +231,23 @@ const HowItWorksSection: React.FC = () => {
                     <Box sx={{
                       width: { sm: 44, md: 56 }, height: { sm: 44, md: 56 },
                       borderRadius: { sm: '10px', md: '14px' },
-                      background: `linear-gradient(135deg, ${alpha(BLUE, 0.12)} 0%, ${alpha(BLUE_LT, 0.08)} 100%)`,
-                      border: `1px solid ${alpha(BLUE, 0.15)}`,
+                      background: 'rgba(25,118,210,0.14)',
+                      border: '1px solid rgba(66,165,245,0.22)',
                       display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
                     }}>
-                      <Icon sx={{ fontSize: { sm: 22, md: 28 }, color: BLUE }} />
+                      <Icon sx={{ fontSize: { sm: 22, md: 28 }, color: BLUE_LT }} />
                     </Box>
                   </Stack>
 
                   <Box>
                     <Typography variant="h6" sx={{
                       fontWeight: 700, fontSize: { sm: '0.9375rem', md: '1.125rem' },
-                      color: '#0f172a', mb: 0.75, letterSpacing: '-0.01em', lineHeight: 1.3,
+                      color: '#ffffff', mb: 0.75, letterSpacing: '-0.01em', lineHeight: 1.3,
                     }}>
                       {step.title}
                     </Typography>
                     <Typography sx={{
-                      color: '#64748b', fontSize: { sm: '0.8125rem', md: '0.9375rem' },
+                      color: 'rgba(255,255,255,0.55)', fontSize: { sm: '0.8125rem', md: '0.9375rem' },
                       lineHeight: 1.6, fontWeight: 400,
                     }}>
                       {step.description}

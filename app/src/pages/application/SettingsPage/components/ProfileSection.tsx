@@ -59,7 +59,7 @@ const InfoRow: React.FC<InfoRowProps> = ({ icon, label, value }) => (
       px: 1.5,
       py: 1.25,
       borderRadius: 2,
-      bgcolor: '#f8fafc',
+      bgcolor: '#F7F9FA',
       border: '1px solid #e0e0e0',
     }}
   >
@@ -201,27 +201,26 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ onSave }) => {
         <Grid item xs={12} md={4}>
           <Card
             elevation={0}
-            sx={{ border: '1px solid #e0e0e0', borderRadius: 3, overflow: 'hidden' }}
+            sx={{ border: '1px solid #e0e0e0', borderRadius: '12px' }}
           >
-            {/* Dark band */}
+            {/* Flat header */}
             <Box
               sx={{
-                height: 72,
-                background: 'linear-gradient(135deg, #1976D2 0%, #42A5F5 100%)',
+                px: 2.5,
+                pt: 2.5,
+                pb: 2,
+                borderBottom: '1px solid #e0e0e0',
+                bgcolor: '#F7F9FA',
+                display: 'flex',
+                justifyContent: 'center',
               }}
-            />
-
-            {/* Avatar */}
-            <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+            >
               <Avatar
                 sx={{
-                  mt: '-36px',
-                  width: 72,
-                  height: 72,
-                  bgcolor: PRIMARY,
-                  border: '3px solid #ffffff',
-                  boxShadow: '0 4px 16px rgba(25,118,210,0.25)',
-                  fontSize: '1.5rem',
+                  width: 64,
+                  height: 64,
+                  bgcolor: '#1976D2',
+                  fontSize: '1.25rem',
                   fontWeight: 700,
                 }}
               >
@@ -230,7 +229,7 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ onSave }) => {
             </Box>
 
             {/* Name / email / role */}
-            <Box sx={{ px: 2.5, pb: 2.5, pt: 1, textAlign: 'center' }}>
+            <Box sx={{ px: 2.5, py: 2, textAlign: 'center' }}>
               <Typography variant="h6" sx={{ fontWeight: 700, color: '#1C1C1E', mb: 0.25 }}>
                 {displayName}
               </Typography>
@@ -299,8 +298,7 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ onSave }) => {
             </Alert>
           )}
 
-          <Card elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 3 }}>
-            {/* Fix 6: CardContent p already responsive — kept as-is */}
+          <Card elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: '12px' }}>
             <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
 
               {/* Fix 5: section header row with responsive gap */}

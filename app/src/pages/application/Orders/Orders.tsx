@@ -9,7 +9,7 @@ import { useUserData } from '../../../contexts/application/UserData';
 import { ConfirmationDialog } from '../../../components/dialogs/ConfirmationDialog';
 
 import {
-  Order, StatusFilter, DateFilter, ROWS_PER_PAGE, getDateRange,
+  Order, StatusFilter, DateFilter, ROWS_PER_PAGE, getDateRange, toISODate,
 } from './orders.types';
 
 import OrdersToolbar from './components/OrdersToolbar';
@@ -18,7 +18,7 @@ import OrderDetailPanel from './components/OrderDetailPanel';
 
 // ── Skeleton card ─────────────────────────────────────────────────────────────
 const SkeletonCard: React.FC = () => (
-  <Box sx={{ bgcolor: '#fff', border: '1px solid #e0e0e0', borderRadius: 2.5, overflow: 'hidden' }}>
+  <Box sx={{ bgcolor: '#fff', border: '1px solid #e0e0e0', borderRadius: 3, overflow: 'hidden' }}>
     <Box sx={{ px: 2, py: 1.25, display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #e0e0e0' }}>
       <Skeleton variant="text" width={80} height={18} />
       <Skeleton variant="rounded" width={72} height={22} sx={{ borderRadius: 1 }} />
@@ -41,7 +41,7 @@ const SkeletonCard: React.FC = () => (
 // ── Empty state ───────────────────────────────────────────────────────────────
 const EmptyState: React.FC = () => (
   <Box sx={{ py: 12, textAlign: 'center' }}>
-    <Box sx={{ width: 64, height: 64, borderRadius: '50%', bgcolor: '#f7f9fa', display: 'flex', alignItems: 'center', justifyContent: 'center', mx: 'auto', mb: 2 }}>
+    <Box sx={{ width: 64, height: 64, borderRadius: '12px', bgcolor: '#F7F9FA', border: '1px solid #e0e0e0', display: 'flex', alignItems: 'center', justifyContent: 'center', mx: 'auto', mb: 2 }}>
       <ReceiptIcon sx={{ fontSize: 30, color: '#999999' }} />
     </Box>
     <Typography sx={{ fontWeight: 600, color: '#666666', fontSize: '0.9rem' }}>No orders found</Typography>
@@ -62,6 +62,8 @@ const OrdersManagementPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('');
   const [dateFilter, setDateFilter] = useState<DateFilter>('today');
+  const [customStartDate, setCustomStartDate] = useState<string>('');
+  const [customEndDate, setCustomEndDate] = useState<string>('');
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -88,8 +90,10 @@ const OrdersManagementPage: React.FC = () => {
   // ── Data loading ──────────────────────────────────────────────────────────
   const loadOrders = useCallback(async () => {
     if (!personaId) return;
+    // For custom range, only fetch when both dates are set
+    if (dateFilter === 'custom' && (!customStartDate || !customEndDate)) return;
     setLoading(true);
-    const { startDate, endDate } = getDateRange(dateFilter);
+    const { startDate, endDate } = getDateRange(dateFilter, customStartDate, customEndDate);
     const filters: OrderFilters = {
       personaId: String(personaId),
       status: statusFilter || undefined,
@@ -105,7 +109,7 @@ const OrdersManagementPage: React.FC = () => {
       setTotalOrders(res.data.total);
     } catch { showSnackbar('Failed to load orders', 'error'); }
     finally { setLoading(false); }
-  }, [personaId, statusFilter, dateFilter, page]);
+  }, [personaId, statusFilter, dateFilter, customStartDate, customEndDate, page]);
 
   useEffect(() => { loadOrders(); }, [loadOrders]);
 
@@ -150,7 +154,18 @@ const OrdersManagementPage: React.FC = () => {
   const handleOrderClick = (order: Order) => { setSelectedOrderId(order.id); setDrawerOpen(true); };
   const handleRefresh = () => loadOrders();
   const handleStatusFilterChange = (v: StatusFilter) => { setStatusFilter(v); setPage(0); };
-  const handleDateFilterChange = (d: DateFilter) => { setDateFilter(d); setPage(0); };
+  const handleDateFilterChange = (d: DateFilter) => {
+    setDateFilter(d);
+    setPage(0);
+    // Pre-fill custom range with today when switching to custom for the first time
+    if (d === 'custom' && !customStartDate && !customEndDate) {
+      const today = toISODate(new Date());
+      setCustomStartDate(today);
+      setCustomEndDate(today);
+    }
+  };
+  const handleCustomStartDateChange = (v: string) => { setCustomStartDate(v); setPage(0); };
+  const handleCustomEndDateChange = (v: string) => { setCustomEndDate(v); setPage(0); };
 
   // Client-side search
   const filteredOrders = debouncedSearch
@@ -162,7 +177,7 @@ const OrdersManagementPage: React.FC = () => {
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100%', bgcolor: '#f8fafc' }}>
+    <Box sx={{ maxWidth: '1440px', margin: '0 auto', minHeight: '100%', display: 'flex', flexDirection: 'column' }}>
 
       {/* Toolbar: title + search + filters + status tabs */}
       <OrdersToolbar
@@ -172,13 +187,17 @@ const OrdersManagementPage: React.FC = () => {
         onStatusFilterChange={handleStatusFilterChange}
         dateFilter={dateFilter}
         onDateFilterChange={handleDateFilterChange}
+        customStartDate={customStartDate}
+        customEndDate={customEndDate}
+        onCustomStartDateChange={handleCustomStartDateChange}
+        onCustomEndDateChange={handleCustomEndDateChange}
         filteredCount={filteredOrders.length}
         totalCount={totalOrders}
         onRefresh={handleRefresh}
       />
 
       {/* Card grid */}
-      <Box sx={{ flex: 1, p: { xs: 1.5, sm: 2, md: 2.5 } }}>
+      <Box sx={{ flex: 1, px: { xs: 2, sm: 3 }, py: 3 }}>
         {loading ? (
           <Grid container spacing={2}>
             {Array.from({ length: 12 }).map((_, i) => (
@@ -207,7 +226,7 @@ const OrdersManagementPage: React.FC = () => {
             </Grid>
 
             {/* Pagination */}
-            <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
+            <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-start' }}>
               <TablePagination
                 component="div"
                 count={totalOrders}
@@ -222,8 +241,9 @@ const OrdersManagementPage: React.FC = () => {
                   '& .MuiTablePagination-select': { display: 'none' },
                   '& .MuiTablePagination-displayedRows': { fontSize: '0.78rem', color: '#666666' },
                   '& .MuiTablePagination-actions button': {
-                    borderRadius: 1.5,
+                    borderRadius: '8px',
                     border: '1px solid #e0e0e0',
+                    color: '#666666',
                     mx: 0.25,
                     '&:hover': { bgcolor: '#f8fafc' },
                     '&.Mui-disabled': { opacity: 0.4 },

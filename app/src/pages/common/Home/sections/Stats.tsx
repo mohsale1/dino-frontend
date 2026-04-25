@@ -152,43 +152,7 @@ const StatsSection: React.FC = () => {
             animation: `${fadeInUp} 0.6s ease-out both`,
           }}
         >
-          {/* Pill */}
-          <Box
-            sx={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 1,
-              px: 2,
-              py: 0.625,
-              mb: 2.5,
-              borderRadius: '999px',
-              backgroundColor: alpha(WHITE, 0.06),
-              border: `1px solid ${alpha(BLUE_LT, 0.25)}`,
-            }}
-          >
-            {/* Live dot */}
-            <Box
-              sx={{
-                width: 7,
-                height: 7,
-                borderRadius: '50%',
-                backgroundColor: BLUE_LT,
-                flexShrink: 0,
-                animation: `${livePulse} 2.5s ease-in-out infinite`,
-              }}
-            />
-            <Typography
-              sx={{
-                fontSize: '0.6875rem',
-                fontWeight: 700,
-                letterSpacing: '0.12em',
-                color: BLUE_LT,
-                textTransform: 'uppercase',
-              }}
-            >
-              Platform Metrics
-            </Typography>
-          </Box>
+
 
           {/* Heading */}
           <Typography

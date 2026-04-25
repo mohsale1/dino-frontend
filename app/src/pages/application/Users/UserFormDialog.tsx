@@ -1,7 +1,3 @@
-/**
- * UserFormDialog Component - System-style dark gradient dialog
- */
-
 import React, { useState, useEffect } from 'react';
 import {
   Dialog,
@@ -10,19 +6,18 @@ import {
   Button,
   TextField,
   Grid,
-  MenuItem,
   CircularProgress,
   Box,
   Typography,
   IconButton,
   InputAdornment,
   FormControl,
+  InputLabel,
   Select,
-  Stack,
+  MenuItem,
   Alert,
   useTheme,
   useMediaQuery,
-  alpha,
 } from '@mui/material';
 import {
   Close as CloseIcon,
@@ -40,33 +35,23 @@ import { applicationUserService } from '../../../services/application/user';
 import { apiService } from '../../../utils/api';
 
 // ─── Design tokens ──────────────────────────────────────────────────────────
-const C = {
-  dark0:   '#0f172a',
-  dark1:   '#1e293b',
-  slate:   '#64748b',
-  muted:   '#94a3b8',
-  border:  '#e2e8f0',
-  surface: '#ffffff',
-  bg:      '#f1f5f9',
-  emerald: '#10b981',
-  rose:    '#f43f5e',
-  amber:   '#f59e0b',
+const fieldSx = {
+  '& .MuiOutlinedInput-root': {
+    borderRadius: 2,
+    bgcolor: '#F7F9FA',
+    '& fieldset': { borderColor: '#e0e0e0' },
+    '&:hover fieldset': { borderColor: 'rgba(25,118,210,0.4)' },
+    '&.Mui-focused fieldset': { borderColor: '#1976D2' },
+  },
+  '& .MuiInputLabel-root.Mui-focused': { color: '#1976D2' },
 };
 
-const HEADER_GRADIENT = 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 60%, #312e81 100%)';
-
-const labelSx = {
-  fontWeight: 600,
-  color: C.slate,
-  mb: 0.75,
-  display: 'block',
-  fontSize: '0.75rem',
-  textTransform: 'uppercase' as const,
-  letterSpacing: '0.05em',
-};
-
-const inputSx = {
-  '& .MuiOutlinedInput-root': { borderRadius: 2 },
+const selectSx = {
+  borderRadius: 2,
+  bgcolor: '#F7F9FA',
+  '& fieldset': { borderColor: '#e0e0e0' },
+  '&:hover fieldset': { borderColor: 'rgba(25,118,210,0.4)' },
+  '&.Mui-focused fieldset': { borderColor: '#1976D2' },
 };
 
 // ─── Interfaces ──────────────────────────────────────────────────────────────
@@ -249,65 +234,45 @@ const UserFormDialog: React.FC<UserFormDialogProps> = ({
       fullScreen={fullScreen}
       PaperProps={{
         sx: {
-          borderRadius: { xs: 0, sm: 3 },
+          borderRadius: { xs: 0, sm: '12px' },
           overflow: 'hidden',
         },
       }}
     >
-      {/* ── Dark gradient header ─────────────────────────────────────────────── */}
-      <Box
-        sx={{
-          background: HEADER_GRADIENT,
-          px: 3,
-          pt: 3,
-          pb: 3,
-          position: 'relative',
-          overflow: 'hidden',
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: -60,
-            right: -40,
-            width: 180,
-            height: 180,
-            borderRadius: '50%',
-            background: `radial-gradient(circle, ${alpha('#6366f1', 0.25)} 0%, transparent 70%)`,
-            pointerEvents: 'none',
-          },
-        }}
-      >
-        <Box sx={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      {/* ── Clean white header ───────────────────────────────────────────────── */}
+      <Box sx={{ bgcolor: '#ffffff', borderBottom: '1px solid #e0e0e0', px: 3, pt: 3, pb: 3 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
             <Box
               sx={{
                 width: 40,
                 height: 40,
                 borderRadius: 2,
-                bgcolor: alpha('#fff', 0.12),
-                border: `1px solid ${alpha('#fff', 0.2)}`,
+                bgcolor: 'rgba(25,118,210,0.08)',
+                border: '1px solid rgba(25,118,210,0.2)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
               }}
             >
               {editingUser
-                ? <Edit sx={{ fontSize: 20, color: '#fff' }} />
-                : <PersonAddAltOutlined sx={{ fontSize: 20, color: '#fff' }} />
+                ? <Edit sx={{ fontSize: 20, color: '#1976D2' }} />
+                : <PersonAddAltOutlined sx={{ fontSize: 20, color: '#1976D2' }} />
               }
             </Box>
             <Box>
-              <Typography variant="h6" sx={{ color: '#fff', fontWeight: 700, lineHeight: 1.2 }}>
+              <Typography variant="h6" sx={{ color: '#1C1C1E', fontWeight: 700, lineHeight: 1.2 }}>
                 {editingUser ? 'Edit User' : 'Create New User'}
               </Typography>
-              <Typography variant="caption" sx={{ color: 'rgba(199,210,254,0.7)', fontSize: '0.75rem' }}>
-                {editingUser ? 'Update user information' : 'Add a new user to your venue'}
+              <Typography variant="caption" sx={{ color: '#666666', fontSize: '0.75rem' }}>
+                {editingUser ? 'Update user information' : 'Add a new user to your workspace'}
               </Typography>
             </Box>
           </Box>
           <IconButton
             onClick={onClose}
             size="small"
-            sx={{ color: alpha('#fff', 0.7), '&:hover': { bgcolor: alpha('#fff', 0.1) } }}
+            sx={{ color: '#666666', '&:hover': { bgcolor: 'rgba(0,0,0,0.04)' } }}
           >
             <CloseIcon />
           </IconButton>
@@ -316,7 +281,7 @@ const UserFormDialog: React.FC<UserFormDialogProps> = ({
 
       {/* ── Form content ────────────────────────────────────────────────────── */}
       <DialogContent sx={{ p: 3 }}>
-        <Stack spacing={2.5}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
 
           {/* Inline error alert */}
           {formError && (
@@ -328,236 +293,220 @@ const UserFormDialog: React.FC<UserFormDialogProps> = ({
           {/* First / Last name */}
           <Grid container spacing={2}>
             <Grid item xs={6}>
-              <Typography variant="caption" sx={labelSx}>First Name</Typography>
               <TextField
+                label="First Name"
                 fullWidth
                 size="small"
-                placeholder="John"
                 value={formData.firstName}
                 onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
                 required
-                sx={inputSx}
+                sx={fieldSx}
               />
             </Grid>
             <Grid item xs={6}>
-              <Typography variant="caption" sx={labelSx}>Last Name</Typography>
               <TextField
+                label="Last Name"
                 fullWidth
                 size="small"
-                placeholder="Doe"
                 value={formData.lastName}
                 onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
                 required
-                sx={inputSx}
+                sx={fieldSx}
               />
             </Grid>
           </Grid>
 
           {/* Email — create only */}
           {!editingUser && (
-            <Box>
-              <Typography variant="caption" sx={labelSx}>Email Address</Typography>
-              <TextField
-                fullWidth
-                size="small"
-                type="email"
-                placeholder="user@example.com"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                required
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Email sx={{ fontSize: 18, color: C.muted }} />
-                    </InputAdornment>
-                  ),
-                }}
-                sx={inputSx}
-              />
-            </Box>
+            <TextField
+              label="Email Address"
+              fullWidth
+              size="small"
+              type="email"
+              value={formData.email}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              required
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Email sx={{ fontSize: 18, color: '#999999' }} />
+                  </InputAdornment>
+                ),
+              }}
+              sx={fieldSx}
+            />
           )}
 
           {/* Password fields — create only */}
           {!editingUser && (
             <>
-              <Box>
-                <Typography variant="caption" sx={labelSx}>Password</Typography>
-                <TextField
-                  fullWidth
-                  size="small"
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="Min. 8 characters"
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  required
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <LockResetOutlined sx={{ fontSize: 18, color: C.muted }} />
-                      </InputAdornment>
-                    ),
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton onClick={() => setShowPassword(!showPassword)} edge="end" size="small">
-                          {showPassword ? <VisibilityOff sx={{ fontSize: 18 }} /> : <Visibility sx={{ fontSize: 18 }} />}
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  }}
-                  sx={inputSx}
-                />
-              </Box>
+              <TextField
+                label="Password"
+                fullWidth
+                size="small"
+                type={showPassword ? 'text' : 'password'}
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                required
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <LockResetOutlined sx={{ fontSize: 18, color: '#999999' }} />
+                    </InputAdornment>
+                  ),
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton onClick={() => setShowPassword(!showPassword)} edge="end" size="small">
+                        {showPassword ? <VisibilityOff sx={{ fontSize: 18 }} /> : <Visibility sx={{ fontSize: 18 }} />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+                sx={fieldSx}
+              />
 
-              <Box>
-                <Typography variant="caption" sx={labelSx}>Confirm Password</Typography>
-                <TextField
-                  fullWidth
-                  size="small"
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  placeholder="Re-enter password"
-                  value={formData.confirm_password}
-                  onChange={(e) => setFormData({ ...formData, confirm_password: e.target.value })}
-                  required
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <LockResetOutlined sx={{ fontSize: 18, color: C.muted }} />
-                      </InputAdornment>
-                    ),
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton onClick={() => setShowConfirmPassword(!showConfirmPassword)} edge="end" size="small">
-                          {showConfirmPassword ? <VisibilityOff sx={{ fontSize: 18 }} /> : <Visibility sx={{ fontSize: 18 }} />}
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  }}
-                  sx={inputSx}
-                />
-              </Box>
+              <TextField
+                label="Confirm Password"
+                fullWidth
+                size="small"
+                type={showConfirmPassword ? 'text' : 'password'}
+                value={formData.confirm_password}
+                onChange={(e) => setFormData({ ...formData, confirm_password: e.target.value })}
+                required
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <LockResetOutlined sx={{ fontSize: 18, color: '#999999' }} />
+                    </InputAdornment>
+                  ),
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton onClick={() => setShowConfirmPassword(!showConfirmPassword)} edge="end" size="small">
+                        {showConfirmPassword ? <VisibilityOff sx={{ fontSize: 18 }} /> : <Visibility sx={{ fontSize: 18 }} />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+                sx={fieldSx}
+              />
             </>
           )}
 
           {/* Phone */}
-          <Box>
-            <Typography variant="caption" sx={labelSx}>Phone</Typography>
-            <TextField
-              fullWidth
-              size="small"
-              placeholder="+1 (555) 000-0000"
-              value={formData.phone}
-              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <PhoneOutlined sx={{ fontSize: 18, color: C.muted }} />
-                  </InputAdornment>
-                ),
-              }}
-              sx={inputSx}
-            />
-          </Box>
+          <TextField
+            label="Phone"
+            fullWidth
+            size="small"
+            value={formData.phone}
+            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <PhoneOutlined sx={{ fontSize: 18, color: '#999999' }} />
+                </InputAdornment>
+              ),
+            }}
+            sx={fieldSx}
+          />
 
-          {/* Role — FIX: no longer disabled in edit mode; role_id included in update payload */}
-          <Box>
-            <Typography variant="caption" sx={labelSx}>Role</Typography>
-            <FormControl fullWidth size="small" required>
-              <Select
-                value={formData.role_id}
-                onChange={(e) => {
-                  const selectedRole = roles.find((r) => r.id === e.target.value);
-                  setFormData({
-                    ...formData,
-                    role_id: e.target.value as string,
-                    role_name: selectedRole?.name || '',
-                  });
-                }}
-                displayEmpty
-                disabled={loadingRoles}
-                sx={{ borderRadius: 2 }}
-                renderValue={(value) => {
-                  if (!value) {
-                    return <Typography variant="body2" sx={{ color: C.muted }}>
-                      {loadingRoles ? 'Loading roles...' : 'Select a role...'}
-                    </Typography>;
-                  }
-                  const role = roles.find((r) => r.id === value);
+          {/* Role */}
+          <FormControl fullWidth size="small" required sx={{ '& .MuiInputLabel-root.Mui-focused': { color: '#1976D2' } }}>
+            <InputLabel>Role</InputLabel>
+            <Select
+              label="Role"
+              value={formData.role_id}
+              onChange={(e) => {
+                const selectedRole = roles.find((r) => r.id === e.target.value);
+                setFormData({
+                  ...formData,
+                  role_id: e.target.value as string,
+                  role_name: selectedRole?.name || '',
+                });
+              }}
+              disabled={loadingRoles}
+              sx={selectSx}
+              renderValue={(value) => {
+                if (!value) {
                   return (
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Store sx={{ fontSize: 16, color: C.slate }} />
-                      <Typography variant="body2">{role?.displayName || role?.name || value}</Typography>
-                    </Box>
+                    <Typography variant="body2" sx={{ color: '#999999' }}>
+                      {loadingRoles ? 'Loading roles...' : 'Select a role...'}
+                    </Typography>
                   );
-                }}
-              >
-                <MenuItem value="" disabled>
-                  <Typography variant="body2" sx={{ color: C.muted }}>Select a role...</Typography>
+                }
+                const role = roles.find((r) => r.id === value);
+                return (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Store sx={{ fontSize: 16, color: '#666666' }} />
+                    <Typography variant="body2">{role?.displayName || role?.name || value}</Typography>
+                  </Box>
+                );
+              }}
+            >
+              <MenuItem value="" disabled>
+                <Typography variant="body2" sx={{ color: '#999999' }}>Select a role...</Typography>
+              </MenuItem>
+              {roles.map((role) => (
+                <MenuItem key={role.id} value={role.id}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Store sx={{ fontSize: 16, color: '#666666' }} />
+                    <Typography variant="body2">{role.displayName || role.name}</Typography>
+                  </Box>
                 </MenuItem>
-                {roles.map((role) => (
-                  <MenuItem key={role.id} value={role.id}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Store sx={{ fontSize: 16, color: C.slate }} />
-                      <Typography variant="body2">{role.displayName || role.name}</Typography>
-                    </Box>
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Box>
+              ))}
+            </Select>
+          </FormControl>
 
           {/* Venue */}
-          <Box>
-            <Typography variant="caption" sx={labelSx}>Venue</Typography>
-            <FormControl fullWidth size="small">
-              <Select
-                value={formData.venueId}
-                onChange={(e) => setFormData({ ...formData, venueId: e.target.value as string })}
-                displayEmpty
-                disabled={!!editingUser}
-                sx={{ borderRadius: 2 }}
-                renderValue={(value) => {
-                  if (!value) {
-                    return <Typography variant="body2" sx={{ color: C.muted }}>Select a venue...</Typography>;
-                  }
-                  const venue = venues.find((v) => v.id === value);
-                  return (
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <BusinessOutlined sx={{ fontSize: 16, color: C.slate }} />
-                      <Typography variant="body2">{venue?.name || value}</Typography>
-                    </Box>
-                  );
-                }}
-              >
-                <MenuItem value="" disabled>
-                  <Typography variant="body2" sx={{ color: C.muted }}>Select a venue...</Typography>
+          <FormControl fullWidth size="small" sx={{ '& .MuiInputLabel-root.Mui-focused': { color: '#1976D2' } }}>
+            <InputLabel>Persona</InputLabel>
+            <Select
+              label="Persona"
+              value={formData.venueId}
+              onChange={(e) => setFormData({ ...formData, venueId: e.target.value as string })}
+              disabled={!!editingUser}
+              sx={selectSx}
+              renderValue={(value) => {
+                if (!value) {
+                  return <Typography variant="body2" sx={{ color: '#999999' }}>Select a persona...</Typography>;
+                }
+                const venue = venues.find((v) => v.id === value);
+                return (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <BusinessOutlined sx={{ fontSize: 16, color: '#666666' }} />
+                    <Typography variant="body2">{venue?.name || value}</Typography>
+                  </Box>
+                );
+              }}
+            >
+              <MenuItem value="" disabled>
+                <Typography variant="body2" sx={{ color: '#999999' }}>Select a persona...</Typography>
+              </MenuItem>
+              {venues.map((venue) => (
+                <MenuItem key={venue.id} value={venue.id}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <BusinessOutlined sx={{ fontSize: 16, color: '#666666' }} />
+                    <Typography variant="body2">{venue.name}</Typography>
+                  </Box>
                 </MenuItem>
-                {venues.map((venue) => (
-                  <MenuItem key={venue.id} value={venue.id}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <BusinessOutlined sx={{ fontSize: 16, color: C.slate }} />
-                      <Typography variant="body2">{venue.name}</Typography>
-                    </Box>
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Box>
+              ))}
+            </Select>
+          </FormControl>
 
-        </Stack>
+        </Box>
       </DialogContent>
 
       {/* ── Actions ─────────────────────────────────────────────────────────── */}
-      <DialogActions sx={{ px: 3, py: 2.5, borderTop: `1px solid ${C.border}`, gap: 1 }}>
+      <DialogActions sx={{ px: 3, py: 2.5, borderTop: '1px solid #e0e0e0', gap: 1 }}>
         <Button
           onClick={onClose}
           disabled={loading}
           sx={{
             textTransform: 'none',
             fontWeight: 600,
-            color: C.slate,
+            color: '#666666',
             borderRadius: 2,
             px: 2.5,
-            '&:hover': { bgcolor: alpha(C.slate, 0.06) },
+            '&:hover': { bgcolor: 'rgba(0,0,0,0.04)' },
           }}
         >
           Cancel
@@ -578,9 +527,9 @@ const UserFormDialog: React.FC<UserFormDialogProps> = ({
             fontWeight: 700,
             borderRadius: 2,
             px: 3,
-            bgcolor: C.dark0,
-            '&:hover': { bgcolor: C.dark1 },
-            '&.Mui-disabled': { bgcolor: C.border },
+            bgcolor: '#1976D2',
+            '&:hover': { bgcolor: '#1565C0' },
+            '&.Mui-disabled': { bgcolor: '#e0e0e0' },
           }}
         >
           {editingUser ? 'Update User' : 'Create User'}

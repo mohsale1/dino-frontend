@@ -211,12 +211,21 @@ const RegisterPage: React.FC = () => {
       });
       navigate('/login', { replace: true, state: { message: 'Registration successful! Please sign in to continue.', email: formData.adminEmail } });
     } catch (err: any) {
-      const msg = err.response?.data?.detail || err.message || 'Registration failed. Please try again.';
+      const rawDetail = err.response?.data?.detail;
+      const msg: string = Array.isArray(rawDetail)
+        ? rawDetail.map((e: any) => {
+            const field = Array.isArray(e.loc) ? e.loc.join('.') : 'field';
+            return `${field}: ${e.msg || 'Invalid value'}`;
+          }).join('; ')
+        : (typeof rawDetail === 'string' ? rawDetail : null)
+          ?? err.message
+          ?? 'Registration failed. Please try again.';
       setError(msg);
-      if (msg.toLowerCase().includes('referral') || msg.toLowerCase().includes('agent'))                   setActiveStep(0);
-      else if (msg.toLowerCase().includes('workspace'))                                                    setActiveStep(1);
-      else if (msg.toLowerCase().includes('persona') || msg.toLowerCase().includes('venue'))               setActiveStep(2);
-      else if (msg.toLowerCase().includes('admin') || msg.toLowerCase().includes('already exists'))        setActiveStep(3);
+      const lower = msg.toLowerCase();
+      if (lower.includes('referral') || lower.includes('agent'))              setActiveStep(0);
+      else if (lower.includes('workspace'))                                   setActiveStep(1);
+      else if (lower.includes('persona') || lower.includes('venue'))         setActiveStep(2);
+      else if (lower.includes('admin') || lower.includes('already exists'))  setActiveStep(3);
     } finally {
       setLoading(false);
     }

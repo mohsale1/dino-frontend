@@ -3,10 +3,7 @@ import {
   Box,
   Typography,
   Button,
-  Paper,
-  Container,
   Stack,
-  Alert,
   Collapse,
 } from '@mui/material';
 import {
@@ -103,7 +100,7 @@ class GlobalErrorBoundary extends Component<Props, State> {
       // });
     } catch (reportingError) {
       // Error reporting failed, log to console in development
-      if (process.env.NODE_ENV === 'development') {
+      if ((window as any).__DEV__) {
         console.error('Failed to report error:', reportingError);
       }
     }
@@ -252,178 +249,285 @@ const ErrorBoundaryUI: React.FC<ErrorBoundaryUIProps> = ({
     <Box
       sx={{
         minHeight: '100vh',
-        backgroundColor: '#f5f5f5',
+        bgcolor: '#f8fafc',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         p: 2,
       }}
     >
-      <Container maxWidth="md">
-        <Paper
-          sx={{
-            p: { xs: 2, sm: 3 },
-            textAlign: 'center',
-            borderRadius: 2,
-            boxShadow: 3,
-          }}
-        >
-          {/* Error Icon */}
-          <Box sx={{ mb: 3 }}>
-            <ErrorOutline
-              sx={{
-                fontSize: { xs: 64, sm: 80 },
-                color: 'error.main',
-                mb: 2,
-              }}
-            />
-            <Typography
-              variant="h4"
-              fontWeight="600"
-              gutterBottom
-              color="text.primary"
-            >
-              Oops! Something went wrong
-            </Typography>
+      {/* Center card */}
+      <Box
+        sx={{
+          maxWidth: 520,
+          width: '100%',
+          bgcolor: '#ffffff',
+          border: '1px solid #e0e0e0',
+          borderRadius: 2,
+          overflow: 'hidden',
+        }}
+      >
+        {/* Top accent strip */}
+        <Box sx={{ height: '4px', bgcolor: '#ef4444' }} />
+
+        {/* Card body */}
+        <Box sx={{ px: 3.5, pt: 3, pb: 3 }}>
+          {/* Icon box */}
+          <Box
+            sx={{
+              width: 52,
+              height: 52,
+              borderRadius: 2,
+              bgcolor: 'rgba(239,68,68,0.08)',
+              border: '1px solid rgba(239,68,68,0.2)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              mx: 'auto',
+              mb: 2.5,
+            }}
+          >
+            <ErrorOutline sx={{ fontSize: 26, color: '#ef4444' }} />
           </Box>
 
-          {/* User-friendly message */}
+          {/* Title */}
           <Typography
-            variant="body1"
-            color="text.secondary"
-            sx={{ mb: 3, lineHeight: 1.6, maxWidth: 600, mx: 'auto' }}
+            sx={{
+              fontWeight: 700,
+              fontSize: '1.1rem',
+              color: '#1C1C1E',
+              textAlign: 'center',
+            }}
+          >
+            Something went wrong
+          </Typography>
+
+          {/* User message */}
+          <Typography
+            sx={{
+              fontSize: '0.875rem',
+              color: '#64748b',
+              lineHeight: 1.7,
+              textAlign: 'center',
+              mt: 1,
+              mb: 2.5,
+              maxWidth: 420,
+              mx: 'auto',
+            }}
           >
             {userMessage}
           </Typography>
 
-          {/* Suggestions */}
-          <Box sx={{ mb: 3, textAlign: 'left', maxWidth: 500, mx: 'auto' }}>
-            <Typography variant="subtitle2" fontWeight="600" gutterBottom>
-              What you can try:
+          {/* Suggestions box */}
+          <Box
+            sx={{
+              bgcolor: '#f8fafc',
+              border: '1px solid #e0e0e0',
+              borderRadius: 1.5,
+              p: 2,
+              mb: 2.5,
+            }}
+          >
+            <Typography
+              sx={{
+                fontSize: '0.72rem',
+                fontWeight: 700,
+                textTransform: 'uppercase',
+                letterSpacing: '0.08em',
+                color: '#94a3b8',
+                mb: 1,
+              }}
+            >
+              What you can try
             </Typography>
-            <Box component="ul" sx={{ pl: 2, m: 0 }}>
+            <Stack spacing={0.75}>
               {suggestions.map((suggestion, index) => (
-                <Typography
-                  key={index}
-                  component="li"
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{ mb: 0.5 }}
-                >
-                  {suggestion}
-                </Typography>
+                <Box key={index} sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+                  <Box
+                    sx={{
+                      width: 6,
+                      height: 6,
+                      borderRadius: '50%',
+                      bgcolor: '#1976D2',
+                      flexShrink: 0,
+                      mt: 0.6,
+                    }}
+                  />
+                  <Typography
+                    sx={{
+                      fontSize: '0.83rem',
+                      color: '#475569',
+                      lineHeight: 1.6,
+                    }}
+                  >
+                    {suggestion}
+                  </Typography>
+                </Box>
               ))}
-            </Box>
+            </Stack>
           </Box>
 
-          {/* Action Buttons */}
+          {/* Action buttons */}
           <Stack
-            direction={{ xs: 'column', sm: 'row' }}
-            spacing={2}
+            direction={{ xs: 'column-reverse', sm: 'row' }}
+            gap={1.25}
             justifyContent="center"
-            sx={{ mb: 3 }}
+            sx={{ mb: 2.5 }}
           >
-            <Button
-              variant="contained"
-              startIcon={<Refresh />}
-              onClick={onRetry}
-              size="large"
-              disabled={!canRetry}
-              sx={{ minWidth: { xs: '100%', sm: 160 } }}
-            >
-              {canRetry ? `Try Again (${maxRetries - retryCount} left)` : 'Reload Page'}
-            </Button>
             <Button
               variant="outlined"
               startIcon={<Home />}
               onClick={onGoHome}
-              size="large"
-              sx={{ minWidth: { xs: '100%', sm: 160 } }}
+              sx={{
+                borderColor: '#e0e0e0',
+                color: '#64748b',
+                borderRadius: 1.5,
+                textTransform: 'none',
+                fontWeight: 600,
+                fontSize: '0.875rem',
+                px: 2.5,
+                py: 0.875,
+                boxShadow: 'none',
+                '&:hover': {
+                  borderColor: '#1976D2',
+                  color: '#1976D2',
+                  boxShadow: 'none',
+                },
+              }}
             >
-              Go to Home
+              Go Home
+            </Button>
+            <Button
+              variant="contained"
+              startIcon={<Refresh />}
+              onClick={onRetry}
+              sx={{
+                bgcolor: '#1976D2',
+                borderRadius: 1.5,
+                textTransform: 'none',
+                fontWeight: 700,
+                fontSize: '0.875rem',
+                px: 2.5,
+                py: 0.875,
+                boxShadow: 'none',
+                '&:hover': {
+                  bgcolor: '#1565C0',
+                  boxShadow: 'none',
+                },
+              }}
+            >
+              {canRetry ? `Try Again (${maxRetries - retryCount} left)` : 'Reload Page'}
             </Button>
           </Stack>
 
-          {/* Error Details (Collapsible) */}
-          <Box sx={{ mt: 3 }}>
+          {/* Technical details toggle */}
+          <Box sx={{ display: 'flex', justifyContent: 'center' }}>
             <Button
               variant="text"
-              size="small"
               onClick={onToggleDetails}
               startIcon={showDetails ? <ExpandLess /> : <ExpandMore />}
-              sx={{ color: 'text.secondary' }}
+              sx={{
+                fontSize: '0.78rem',
+                color: '#94a3b8',
+                textTransform: 'none',
+                boxShadow: 'none',
+                '&:hover': {
+                  bgcolor: 'transparent',
+                  color: '#64748b',
+                },
+              }}
             >
-              {showDetails ? 'Hide' : 'Show'} Technical Details
+              {showDetails ? 'Hide technical details' : 'Show technical details'}
             </Button>
-            
-            <Collapse in={showDetails}>
-              <Alert
-                severity="info"
-                sx={{
-                  mt: 2,
-                  textAlign: 'left',
-                  '& .MuiAlert-message': {
-                    width: '100%',
-                  },
-                }}
-              >
-                <Typography variant="subtitle2" fontWeight="600" gutterBottom>
-                  Error ID: {errorId}
-                </Typography>
-                <Typography variant="body2" sx={{ mb: 1 }}>
-                  <strong>Error:</strong> {error.name}: {error.message}
-                </Typography>
-                {error.stack && (
-                  <Box
-                    component="pre"
-                    sx={{
-                      fontSize: '0.75rem',
-                      backgroundColor: 'grey.100',
-                      p: 1,
-                      borderRadius: 1,
-                      overflow: 'auto',
-                      maxHeight: 200,
-                      whiteSpace: 'pre-wrap',
-                      wordBreak: 'break-word',
-                    }}
-                  >
-                    {error.stack}
-                  </Box>
-                )}
-                {errorInfo && (
-                  <Box sx={{ mt: 1 }}>
-                    <Typography variant="body2" sx={{ mb: 1 }}>
-                      <strong>Component Stack:</strong>
-                    </Typography>
-                    <Box
-                      component="pre"
-                      sx={{
-                        fontSize: '0.75rem',
-                        backgroundColor: 'grey.100',
-                        p: 1,
-                        borderRadius: 1,
-                        overflow: 'auto',
-                        maxHeight: 150,
-                        whiteSpace: 'pre-wrap',
-                        wordBreak: 'break-word',
-                      }}
-                    >
-                      {errorInfo.componentStack}
-                    </Box>
-                  </Box>
-                )}
-              </Alert>
-            </Collapse>
           </Box>
 
+          {/* Collapse panel */}
+          <Collapse in={showDetails}>
+            <Box
+              sx={{
+                mt: 1.5,
+                bgcolor: '#f8fafc',
+                border: '1px solid #e0e0e0',
+                borderRadius: 1.5,
+                p: 2,
+              }}
+            >
+              {/* Error ID row */}
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+                <Typography
+                  sx={{
+                    fontSize: '0.72rem',
+                    color: '#94a3b8',
+                    fontWeight: 600,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.06em',
+                  }}
+                >
+                  Error ID:
+                </Typography>
+                <Typography
+                  sx={{
+                    fontSize: '0.72rem',
+                    color: '#475569',
+                    fontFamily: 'monospace',
+                  }}
+                >
+                  {errorId}
+                </Typography>
+              </Box>
+
+              {/* Error name + message */}
+              <Typography
+                sx={{
+                  fontSize: '0.8rem',
+                  color: '#374151',
+                  mt: 1,
+                }}
+              >
+                <strong>{error.name}:</strong> {error.message}
+              </Typography>
+
+              {/* Stack trace */}
+              {error.stack && (
+                <Box
+                  component="pre"
+                  sx={{
+                    fontSize: '0.72rem',
+                    fontFamily: 'monospace',
+                    bgcolor: '#f1f5f9',
+                    border: '1px solid #e0e0e0',
+                    borderRadius: 1,
+                    p: 1.5,
+                    mt: 1,
+                    overflow: 'auto',
+                    maxHeight: 160,
+                    whiteSpace: 'pre-wrap',
+                    wordBreak: 'break-all',
+                    color: '#475569',
+                    m: 0,
+                  }}
+                >
+                  {error.stack}
+                </Box>
+              )}
+            </Box>
+          </Collapse>
+
           {/* Footer */}
-          <Box sx={{ mt: 3, pt: 3, borderTop: '1px solid', borderColor: 'divider' }}>
-            <Typography variant="caption" color="text.secondary">
+          <Box
+            sx={{
+              borderTop: '1px solid #f1f5f9',
+              pt: 2,
+              mt: 0.5,
+              textAlign: 'center',
+            }}
+          >
+            <Typography sx={{ fontSize: '0.75rem', color: '#94a3b8' }}>
               If this problem continues, please contact our support team with the Error ID above.
             </Typography>
           </Box>
-        </Paper>
-      </Container>
+        </Box>
+      </Box>
     </Box>
   );
 };

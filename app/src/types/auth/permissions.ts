@@ -32,91 +32,95 @@ export interface Permission {
 
 export const PERMISSIONS = {
   // ==================== APPLICATION - MODULE VISIBILITY ====================
-  // Controls which sidebar entries are rendered (UI gate only).
-  // Checked via hasBackendPermission() in AppSidebar before rendering each nav item.
+  // Controls which nav entries are rendered (UI gate only).
+  // Checked via hasBackendPermission() — must match backend 'resource:action' codenames exactly.
 
-  // Cross-app system permission — used to detect system-admin users in the application frontend
-  SYSTEM_WORKSPACES_READ: 'system.workspaces.read',
+  SYSTEM_WORKSPACES_READ: 'workspaces:read',
 
-  APPLICATION_DASHBOARD_VIEW: 'application.dashboard.view',
-  APPLICATION_POS_VIEW:       'application.pos.view',       // order_type=1 (POS/manual) only
-  APPLICATION_ORDERS_VIEW:    'application.orders.view',
-  APPLICATION_CATALOG_VIEW:   'application.catalog.view',
-  APPLICATION_LOCATIONS_VIEW: 'application.locations.view', // order_type=0 (online/QR) only
-  APPLICATION_COUPONS_VIEW:   'application.coupons.view',
-  APPLICATION_USERS_VIEW:     'application.users.view',
-  APPLICATION_SETTINGS_VIEW:  'application.settings.view',
-  APPLICATION_PERSONAS_VIEW:  'application.personas.view',
+  APPLICATION_DASHBOARD_VIEW: 'dashboard:view',
+  APPLICATION_POS_VIEW:       'pos:view',        // order_type=1 (POS/manual) only
+  APPLICATION_ORDERS_VIEW:    'orders:view',
+  APPLICATION_CATALOG_VIEW:   'catalog:view',
+  APPLICATION_LOCATIONS_VIEW: 'locations:view',  // order_type=0 (online/QR) only
+  APPLICATION_COUPONS_VIEW:   'coupons:view',
+  APPLICATION_USERS_VIEW:     'users:view',
+  APPLICATION_SETTINGS_VIEW:  'settings:view',
+  APPLICATION_PERSONAS_VIEW:  'personas:read',
 
   // ==================== APPLICATION - DATA PERMISSIONS ====================
 
-  // Workspace permissions (application level)
-  WORKSPACE_READ:   'application.workspace.read',
-  WORKSPACE_UPDATE: 'application.workspace.update',
-  WORKSPACE_MANAGE: 'application.workspace.manage',
+  // Workspace permissions
+  WORKSPACE_READ:   'workspace:read',
+  WORKSPACE_UPDATE: 'workspace:update',
+  WORKSPACE_MANAGE: 'workspace:manage',
 
   // Organization permissions
-  ORGANIZATION_READ:   'application.organization.read',
-  ORGANIZATION_CREATE: 'application.organization.create',
-  ORGANIZATION_UPDATE: 'application.organization.update',
-  ORGANIZATION_DELETE: 'application.organization.delete',
+  ORGANIZATION_READ:   'organization:read',
+  ORGANIZATION_CREATE: 'organization:create',
+  ORGANIZATION_UPDATE: 'organization:update',
+  ORGANIZATION_DELETE: 'organization:delete',
 
   // Item permissions (menu items)
-  ITEMS_READ:   'application.items.read',
-  ITEMS_CREATE: 'application.items.create',
-  ITEMS_UPDATE: 'application.items.update',
-  ITEMS_DELETE: 'application.items.delete',
+  ITEMS_READ:   'items:read',
+  ITEMS_CREATE: 'items:create',
+  ITEMS_UPDATE: 'items:update',
+  ITEMS_DELETE: 'items:delete',
 
   // Category permissions
-  CATEGORIES_READ:   'application.categories.read',
-  CATEGORIES_CREATE: 'application.categories.create',
-  CATEGORIES_UPDATE: 'application.categories.update',
-  CATEGORIES_DELETE: 'application.categories.delete',
+  CATEGORIES_READ:   'categories:read',
+  CATEGORIES_CREATE: 'categories:create',
+  CATEGORIES_UPDATE: 'categories:update',
+  CATEGORIES_DELETE: 'categories:delete',
 
   // Area permissions (service areas)
-  AREAS_READ:   'application.areas.read',
-  AREAS_CREATE: 'application.areas.create',
-  AREAS_UPDATE: 'application.areas.update',
-  AREAS_DELETE: 'application.areas.delete',
+  AREAS_READ:   'areas:read',
+  AREAS_CREATE: 'areas:create',
+  AREAS_UPDATE: 'areas:update',
+  AREAS_DELETE: 'areas:delete',
 
   // Table permissions
-  TABLES_READ:   'application.tables.read',
-  TABLES_CREATE: 'application.tables.create',
-  TABLES_UPDATE: 'application.tables.update',
-  TABLES_DELETE: 'application.tables.delete',
+  TABLES_READ:   'tables:read',
+  TABLES_CREATE: 'tables:create',
+  TABLES_UPDATE: 'tables:update',
+  TABLES_DELETE: 'tables:delete',
 
   // Review permissions
-  REVIEWS_READ:     'application.reviews.read',
-  REVIEWS_CREATE:   'application.reviews.create',
-  REVIEWS_UPDATE:   'application.reviews.update',
-  REVIEWS_DELETE:   'application.reviews.delete',
-  REVIEWS_MODERATE: 'application.reviews.moderate',
+  REVIEWS_READ:     'reviews:read',
+  REVIEWS_CREATE:   'reviews:create',
+  REVIEWS_UPDATE:   'reviews:update',
+  REVIEWS_DELETE:   'reviews:delete',
+  REVIEWS_MODERATE: 'reviews:moderate',
 
   // Order permissions
-  ORDERS_READ:    'application.orders.read',
-  ORDERS_CREATE:  'application.orders.create',
-  ORDERS_UPDATE:  'application.orders.update',
-  ORDERS_DELETE:  'application.orders.delete',
-  ORDERS_STATUS:  'application.orders.status',
-  ORDERS_PAYMENT: 'application.orders.payment',
+  ORDERS_READ:    'orders:read',
+  ORDERS_CREATE:  'orders:create',
+  ORDERS_UPDATE:  'orders:update',
+  ORDERS_DELETE:  'orders:delete',
+  ORDERS_STATUS:  'orders:status',
+  ORDERS_PAYMENT: 'orders:payment',
 
-  // User permissions (application)
-  USERS_READ:   'application.users.read',
-  USERS_CREATE: 'application.users.create',
-  USERS_UPDATE: 'application.users.update',
-  USERS_DELETE: 'application.users.delete',
+  // User permissions
+  USERS_READ:   'users:read',
+  USERS_CREATE: 'users:create',
+  USERS_UPDATE: 'users:update',
+  USERS_DELETE: 'users:delete',
 
   // Dashboard permissions
-  DASHBOARD_READ: 'application.dashboard.read',
+  DASHBOARD_READ: 'dashboard:read',
 
   // Status permissions
-  STATUS_UPDATE: 'application.status.update',
+  STATUS_UPDATE: 'status:update',
 
   // Coupon permissions
-  COUPONS_READ:   'application.coupons.read',
-  COUPONS_CREATE: 'application.coupons.create',
-  COUPONS_UPDATE: 'application.coupons.update',
-  COUPONS_DELETE: 'application.coupons.delete',
+  COUPONS_READ:   'coupons:read',
+  COUPONS_CREATE: 'coupons:create',
+  COUPONS_UPDATE: 'coupons:update',
+  COUPONS_DELETE: 'coupons:delete',
+
+  // Persona permissions
+  PERSONA_CREATE: 'persona:create',
+  PERSONA_UPDATE: 'persona:update',
+  PERSONA_DELETE: 'persona:delete',
 } as const;
 
 export type PermissionName = typeof PERMISSIONS[keyof typeof PERMISSIONS];

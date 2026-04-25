@@ -1,5 +1,6 @@
 import React from 'react';
 import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
 import InputBase from '@mui/material/InputBase';
 import IconButton from '@mui/material/IconButton';
 import ButtonGroup from '@mui/material/ButtonGroup';
@@ -46,7 +47,7 @@ const POSToolbar: React.FC<POSToolbarProps> = ({
     <Box
       sx={{
         backgroundColor: '#ffffff',
-        borderBottom: '1px solid #e2e8f0',
+        borderBottom: '1px solid #e0e0e0',
         flexShrink: 0,
       }}
     >
@@ -60,6 +61,43 @@ const POSToolbar: React.FC<POSToolbarProps> = ({
           py: 1.25,
         }}
       >
+        {/* Title */}
+        <Typography
+          sx={{
+            fontWeight: 700,
+            fontSize: '1.1rem',
+            color: '#1C1C1E',
+            flexShrink: 0,
+            lineHeight: 1,
+          }}
+        >
+          Menu
+        </Typography>
+
+        {/* Item count pill */}
+        <Box
+          sx={{
+            bgcolor: '#f1f5f9',
+            borderRadius: '999px',
+            px: 1,
+            py: 0.25,
+            flexShrink: 0,
+          }}
+        >
+          <Typography
+            sx={{
+              fontSize: '0.75rem',
+              fontWeight: 600,
+              color: '#475569',
+              lineHeight: 1,
+            }}
+          >
+            {filteredCount === totalCount
+              ? totalCount
+              : `${filteredCount} / ${totalCount}`}
+          </Typography>
+        </Box>
+
         {/* Search box */}
         <Box
           sx={{
@@ -67,27 +105,27 @@ const POSToolbar: React.FC<POSToolbarProps> = ({
             display: 'flex',
             alignItems: 'center',
             gap: 1,
-            backgroundColor: '#f8fafc',
-            border: '1px solid #e2e8f0',
-            borderRadius: 1.5,
+            bgcolor: '#f7f9fa',
+            border: '1px solid #e0e0e0',
+            borderRadius: 2,
             px: 1.5,
             py: 0.625,
-            transition: 'border-color 0.15s ease',
+            transition: 'border-color 0.15s ease, background-color 0.15s ease',
             '&:focus-within': {
-              borderColor: '#6366f1',
-              backgroundColor: '#ffffff',
+              borderColor: '#1976D2',
+              bgcolor: '#ffffff',
             },
           }}
         >
-          <Search sx={{ fontSize: 18, color: '#64748b', flexShrink: 0 }} />
+          <Search sx={{ fontSize: 17, color: '#94a3b8', flexShrink: 0 }} />
           <InputBase
             value={searchTerm}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="Search menu items..."
             sx={{
               flex: 1,
-              fontSize: '0.875rem',
-              color: '#0f172a',
+              fontSize: '0.83rem',
+              color: '#1C1C1E',
               '& input': {
                 padding: 0,
                 '&::placeholder': {
@@ -105,13 +143,33 @@ const POSToolbar: React.FC<POSToolbarProps> = ({
                 p: 0.25,
                 color: '#94a3b8',
                 flexShrink: 0,
-                '&:hover': { color: '#64748b', backgroundColor: 'transparent' },
+                '&:hover': { color: '#64748b', bgcolor: 'transparent' },
               }}
             >
-              <Close sx={{ fontSize: 16 }} />
+              <Close sx={{ fontSize: 15 }} />
             </IconButton>
           )}
         </Box>
+
+        {/* Cart summary chip */}
+        {totalItems > 0 && (
+          <Chip
+            label={`${totalItems} item${totalItems !== 1 ? 's' : ''} · ${formatINR(total)}`}
+            size="small"
+            sx={{
+              flexShrink: 0,
+              bgcolor: '#EFF6FF',
+              color: '#1D4ED8',
+              fontWeight: 600,
+              fontSize: '0.75rem',
+              border: '1px solid #BFDBFE',
+              height: 28,
+              textTransform: 'none',
+              boxShadow: 'none',
+              '& .MuiChip-label': { px: 1.25 },
+            }}
+          />
+        )}
 
         {/* Grid / List toggle */}
         <ButtonGroup
@@ -119,42 +177,46 @@ const POSToolbar: React.FC<POSToolbarProps> = ({
           disableElevation
           sx={{
             flexShrink: 0,
-            border: '1px solid #e2e8f0',
-            borderRadius: 1.5,
+            border: '1px solid #e0e0e0',
+            borderRadius: 2,
             overflow: 'hidden',
             '& .MuiButtonGroup-grouped': {
               border: 'none',
               borderRadius: 0,
-              minWidth: 36,
-              px: 1,
-              py: 0.75,
+              minWidth: 34,
+              px: 0.875,
+              py: 0.625,
+              textTransform: 'none',
+              boxShadow: 'none',
             },
           }}
         >
           <Button
             onClick={() => onViewModeChange('grid')}
+            disableRipple={false}
             sx={{
-              backgroundColor: viewMode === 'grid' ? '#0f172a' : '#ffffff',
+              bgcolor: viewMode === 'grid' ? '#1C1C1E' : '#ffffff',
               color: viewMode === 'grid' ? '#ffffff' : '#64748b',
               '&:hover': {
-                backgroundColor: viewMode === 'grid' ? '#1e293b' : '#f8fafc',
+                bgcolor: viewMode === 'grid' ? '#2d2d2f' : '#f7f9fa',
               },
             }}
           >
-            <GridView sx={{ fontSize: 18 }} />
+            <GridView sx={{ fontSize: 17 }} />
           </Button>
           <Button
             onClick={() => onViewModeChange('list')}
+            disableRipple={false}
             sx={{
-              backgroundColor: viewMode === 'list' ? '#0f172a' : '#ffffff',
+              bgcolor: viewMode === 'list' ? '#1C1C1E' : '#ffffff',
               color: viewMode === 'list' ? '#ffffff' : '#64748b',
-              borderLeft: '1px solid #e2e8f0 !important',
+              borderLeft: '1px solid #e0e0e0 !important',
               '&:hover': {
-                backgroundColor: viewMode === 'list' ? '#1e293b' : '#f8fafc',
+                bgcolor: viewMode === 'list' ? '#2d2d2f' : '#f7f9fa',
               },
             }}
           >
-            <ViewList sx={{ fontSize: 18 }} />
+            <ViewList sx={{ fontSize: 17 }} />
           </Button>
         </ButtonGroup>
 
@@ -164,52 +226,20 @@ const POSToolbar: React.FC<POSToolbarProps> = ({
           onClick={onRefresh}
           sx={{
             flexShrink: 0,
-            border: '1px solid #e2e8f0',
-            borderRadius: 1.5,
+            border: '1px solid #e0e0e0',
+            borderRadius: 2,
             p: 0.75,
             color: '#64748b',
-            backgroundColor: '#ffffff',
+            bgcolor: '#ffffff',
             '&:hover': {
-              backgroundColor: '#f8fafc',
-              color: '#0f172a',
-              borderColor: '#cbd5e1',
+              bgcolor: '#f7f9fa',
+              borderColor: '#1976D2',
+              color: '#1976D2',
             },
           }}
         >
-          <Refresh sx={{ fontSize: 18 }} />
+          <Refresh sx={{ fontSize: 17 }} />
         </IconButton>
-
-        {/* Right-side chips */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexShrink: 0 }}>
-          {totalItems > 0 && (
-            <Chip
-              label={`${totalItems} item${totalItems !== 1 ? 's' : ''} · ${formatINR(total)}`}
-              size="small"
-              sx={{
-                backgroundColor: '#eef2ff',
-                color: '#4f46e5',
-                fontWeight: 600,
-                fontSize: '0.75rem',
-                border: '1px solid #c7d2fe',
-                height: 28,
-                '& .MuiChip-label': { px: 1.25 },
-              }}
-            />
-          )}
-          <Chip
-            label={`${filteredCount} / ${totalCount}`}
-            size="small"
-            sx={{
-              backgroundColor: '#f1f5f9',
-              color: '#64748b',
-              fontWeight: 500,
-              fontSize: '0.75rem',
-              border: '1px solid #e2e8f0',
-              height: 28,
-              '& .MuiChip-label': { px: 1.25 },
-            }}
-          />
-        </Box>
       </Box>
 
       {/* Mobile category chips row */}
@@ -217,7 +247,7 @@ const POSToolbar: React.FC<POSToolbarProps> = ({
         sx={{
           display: { xs: 'flex', md: 'none' },
           alignItems: 'center',
-          gap: 1,
+          gap: 0.75,
           px: 2.5,
           pb: 1.25,
           overflowX: 'auto',
@@ -235,16 +265,18 @@ const POSToolbar: React.FC<POSToolbarProps> = ({
               onClick={() => onSelectCategory(cat.id)}
               sx={{
                 flexShrink: 0,
-                height: 28,
+                height: 27,
                 fontSize: '0.75rem',
-                fontWeight: isActive ? 600 : 400,
+                fontWeight: isActive ? 600 : 500,
                 cursor: 'pointer',
-                backgroundColor: isActive ? '#0f172a' : '#f8fafc',
+                textTransform: 'none',
+                boxShadow: 'none',
+                bgcolor: isActive ? '#1C1C1E' : '#f7f9fa',
                 color: isActive ? '#ffffff' : '#64748b',
-                border: `1px solid ${isActive ? '#0f172a' : '#e2e8f0'}`,
+                border: `1px solid ${isActive ? '#1C1C1E' : '#e0e0e0'}`,
                 '& .MuiChip-label': { px: 1.25 },
                 '&:hover': {
-                  backgroundColor: isActive ? '#1e293b' : '#f1f5f9',
+                  bgcolor: isActive ? '#2d2d2f' : '#f1f5f9',
                 },
               }}
             />

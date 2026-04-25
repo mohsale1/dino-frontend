@@ -37,17 +37,17 @@ interface CatalogToolbarProps {
 const selectSx = {
   fontSize: '0.82rem',
   fontWeight: 500,
-  color: '#0f172a',
-  backgroundColor: '#f8fafc',
-  borderRadius: '1.5rem',
+  color: '#1C1C1E',
+  backgroundColor: '#f7f9fa',
+  borderRadius: 2,
   '& .MuiOutlinedInput-notchedOutline': {
-    borderColor: '#e2e8f0',
+    borderColor: '#e0e0e0',
   },
   '&:hover .MuiOutlinedInput-notchedOutline': {
-    borderColor: '#94a3b8',
+    borderColor: '#bdbdbd',
   },
   '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-    borderColor: '#2563EB',
+    borderColor: '#1976D2',
     borderWidth: '1px',
   },
   '& .MuiSelect-select': {
@@ -90,16 +90,17 @@ export default function CatalogToolbar({
   return (
     <Box
       sx={{
-        backgroundColor: '#ffffff',
-        borderBottom: '1px solid #e2e8f0',
+        bgcolor: '#ffffff',
+        borderBottom: '1px solid #e0e0e0',
         flexShrink: 0,
       }}
     >
       {/* Row 1 */}
       <Box
         sx={{
-          px: 2.5,
-          py: 1.25,
+          px: { xs: 2, sm: '32px' },
+          pt: '16px',
+          pb: '12px',
           display: 'flex',
           alignItems: 'center',
           gap: 1.5,
@@ -112,7 +113,7 @@ export default function CatalogToolbar({
             sx={{
               fontWeight: 700,
               fontSize: '1.1rem',
-              color: '#0f172a',
+              color: '#1C1C1E',
               lineHeight: 1,
             }}
           >
@@ -122,14 +123,14 @@ export default function CatalogToolbar({
             sx={{
               width: '1px',
               height: '18px',
-              backgroundColor: '#e2e8f0',
+              bgcolor: '#e0e0e0',
               mx: 0.5,
             }}
           />
           <Typography
             sx={{
               fontSize: '0.78rem',
-              color: '#64748b',
+              color: '#666666',
               fontWeight: 500,
               lineHeight: 1,
             }}
@@ -145,20 +146,20 @@ export default function CatalogToolbar({
             minWidth: '200px',
             display: 'flex',
             alignItems: 'center',
-            backgroundColor: '#f8fafc',
-            border: '1px solid #e2e8f0',
-            borderRadius: '1.5rem',
+            bgcolor: '#f7f9fa',
+            border: '1px solid #e0e0e0',
+            borderRadius: 2,
             px: 1.5,
             py: 0.75,
             gap: 0.75,
             '&:focus-within': {
-              borderColor: '#2563EB',
-              backgroundColor: '#ffffff',
+              borderColor: '#1976D2',
+              bgcolor: '#ffffff',
             },
             transition: 'border-color 0.15s, background-color 0.15s',
           }}
         >
-          <SearchIcon sx={{ fontSize: '1rem', color: '#94a3b8', flexShrink: 0 }} />
+          <SearchIcon sx={{ fontSize: '1rem', color: '#999999', flexShrink: 0 }} />
           <InputBase
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
@@ -166,9 +167,9 @@ export default function CatalogToolbar({
             sx={{
               flex: 1,
               fontSize: '0.82rem',
-              color: '#0f172a',
+              color: '#1C1C1E',
               '& input::placeholder': {
-                color: '#94a3b8',
+                color: '#999999',
                 opacity: 1,
               },
               '& input': {
@@ -182,8 +183,8 @@ export default function CatalogToolbar({
               onClick={() => onSearchChange('')}
               sx={{
                 p: 0.25,
-                color: '#94a3b8',
-                '&:hover': { color: '#64748b' },
+                color: '#999999',
+                '&:hover': { color: '#666666' },
               }}
             >
               <CloseIcon sx={{ fontSize: '0.9rem' }} />
@@ -204,13 +205,13 @@ export default function CatalogToolbar({
                   sx={{ ...selectSx, minWidth: 140 }}
                 >
                   <MenuItem value="">
-                    <Typography sx={{ fontSize: '0.82rem', color: '#64748b' }}>
+                    <Typography sx={{ fontSize: '0.82rem', color: '#666666' }}>
                       All Categories
                     </Typography>
                   </MenuItem>
                   {categories.map((cat) => (
                     <MenuItem key={cat.id} value={cat.id}>
-                      <Typography sx={{ fontSize: '0.82rem' }}>{cat.name}</Typography>
+                      <Typography sx={{ fontSize: '0.82rem', color: '#1C1C1E' }}>{cat.name}</Typography>
                     </MenuItem>
                   ))}
                 </Select>
@@ -225,15 +226,15 @@ export default function CatalogToolbar({
                   sx={{ ...selectSx, minWidth: 120 }}
                 >
                   <MenuItem value="">
-                    <Typography sx={{ fontSize: '0.82rem', color: '#64748b' }}>
+                    <Typography sx={{ fontSize: '0.82rem', color: '#666666' }}>
                       Availability
                     </Typography>
                   </MenuItem>
                   <MenuItem value="available">
-                    <Typography sx={{ fontSize: '0.82rem' }}>Available</Typography>
+                    <Typography sx={{ fontSize: '0.82rem', color: '#1C1C1E' }}>Available</Typography>
                   </MenuItem>
                   <MenuItem value="unavailable">
-                    <Typography sx={{ fontSize: '0.82rem' }}>Unavailable</Typography>
+                    <Typography sx={{ fontSize: '0.82rem', color: '#1C1C1E' }}>Unavailable</Typography>
                   </MenuItem>
                 </Select>
               </FormControl>
@@ -251,7 +252,7 @@ export default function CatalogToolbar({
                 onAvailFilterChange('')
               }}
               sx={{
-                color: '#64748b',
+                color: '#666666',
                 fontSize: '0.78rem',
                 fontWeight: 500,
                 textTransform: 'none',
@@ -259,8 +260,8 @@ export default function CatalogToolbar({
                 py: 0.5,
                 minWidth: 'unset',
                 '&:hover': {
-                  backgroundColor: '#f1f5f9',
-                  color: '#0f172a',
+                  bgcolor: '#f1f5f9',
+                  color: '#1C1C1E',
                 },
               }}
             >
@@ -271,7 +272,7 @@ export default function CatalogToolbar({
           {/* Count Pill */}
           <Box
             sx={{
-              backgroundColor: '#f1f5f9',
+              bgcolor: '#f1f5f9',
               color: '#475569',
               borderRadius: '999px',
               px: 1.25,
@@ -289,25 +290,21 @@ export default function CatalogToolbar({
           {canAdd && (
             <Button
               variant="contained"
+              disableElevation
               startIcon={<AddIcon sx={{ fontSize: '1rem !important' }} />}
               onClick={onAdd}
               sx={{
-                backgroundColor: '#0f172a',
+                bgcolor: '#1976D2',
                 color: '#ffffff',
-                borderRadius: '1.5rem',
+                borderRadius: '8px',
                 textTransform: 'none',
                 fontWeight: 600,
                 fontSize: '0.82rem',
                 px: 2,
                 py: 0.75,
-                boxShadow: 'none',
                 whiteSpace: 'nowrap',
                 '&:hover': {
-                  backgroundColor: '#1e293b',
-                  boxShadow: 'none',
-                },
-                '&:active': {
-                  boxShadow: 'none',
+                  bgcolor: '#1565C0',
                 },
               }}
             >
@@ -327,7 +324,7 @@ export default function CatalogToolbar({
             px: 2,
             '& .MuiTabs-indicator': {
               height: '2px',
-              backgroundColor: '#0f172a',
+              backgroundColor: '#1976D2',
             },
             '& .MuiTabs-flexContainer': {
               gap: 0.5,
@@ -348,8 +345,8 @@ export default function CatalogToolbar({
                     fontSize: '0.7rem',
                     fontWeight: 700,
                     borderRadius: '999px',
-                    backgroundColor: activeTab === 'items' ? '#0f172a' : '#e2e8f0',
-                    color: activeTab === 'items' ? '#ffffff' : '#64748b',
+                    bgcolor: activeTab === 'items' ? '#1976D2' : '#f1f5f9',
+                    color: activeTab === 'items' ? '#ffffff' : '#475569',
                     '& .MuiChip-label': { px: '6px' },
                     transition: 'background-color 0.15s, color 0.15s',
                   }}
@@ -361,11 +358,11 @@ export default function CatalogToolbar({
               fontSize: '0.82rem',
               textTransform: 'none',
               fontWeight: 600,
-              color: '#64748b',
+              color: '#666666',
               px: 1.5,
               py: 0,
               '&.Mui-selected': {
-                color: '#0f172a',
+                color: '#1976D2',
               },
             }}
           />
@@ -383,8 +380,8 @@ export default function CatalogToolbar({
                     fontSize: '0.7rem',
                     fontWeight: 700,
                     borderRadius: '999px',
-                    backgroundColor: activeTab === 'categories' ? '#0f172a' : '#e2e8f0',
-                    color: activeTab === 'categories' ? '#ffffff' : '#64748b',
+                    bgcolor: activeTab === 'categories' ? '#1976D2' : '#f1f5f9',
+                    color: activeTab === 'categories' ? '#ffffff' : '#475569',
                     '& .MuiChip-label': { px: '6px' },
                     transition: 'background-color 0.15s, color 0.15s',
                   }}
@@ -396,11 +393,11 @@ export default function CatalogToolbar({
               fontSize: '0.82rem',
               textTransform: 'none',
               fontWeight: 600,
-              color: '#64748b',
+              color: '#666666',
               px: 1.5,
               py: 0,
               '&.Mui-selected': {
-                color: '#0f172a',
+                color: '#1976D2',
               },
             }}
           />

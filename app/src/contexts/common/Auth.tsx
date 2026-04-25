@@ -41,7 +41,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [userPermissions, setUserPermissions] = useState<any | null>(null);
 
   const derivePermissionsFromUser = async (userData: any, isSystemUser?: boolean): Promise<any> => {
-    const userRole = userData?.role;
+    // Auth/me returns { user, workspace } — unwrap if needed.
+    // After getCurrentUser normalizes, the raw role is preserved on _rawRole.
+    const userRole = userData?._rawRole ?? userData?.role;
     const roleName = typeof userRole === 'string' ? userRole : userRole?.name;
 
     const userType = isSystemUser !== undefined
@@ -51,33 +53,32 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     let permissionsState: any;
 
     if (!userType) {
-      // Application user â€” fetch from dedicated application permissions endpoint
-      // Response shape: { success, data: [{category, resource, action, id, ...}], pagination }
-      try {
-        const response = await apiService.get<any>('/application/permissions');
-        const payload = response.data as any;
-        // The permissions array is at payload.data (not payload.permissions)
-        const permissions: any[] = payload?.data ?? [];
-        permissionsState = {
-          role: { name: roleName },
-          permissions,
-          capabilities: {},
-        };
-      } catch {
-        // Fallback: derive from embedded role permissions if API fails
-        const rolePermissions: any[] = userRole?.permissions || [];
-        const resolved = rolePermissions
-          .filter((p: any) => typeof p === 'object' && p?.category && p?.resource && p?.action)
-          .map((p: any) => ({ id: p.id, category: p.category, resource: p.resource, action: p.action }));
-        permissionsState = {
-          role: { name: roleName },
-          permissions: resolved,
-          capabilities: {},
-        };
-      }
-    } else {
-      // System user â€” resolve permission IDs from /system/permissions (paginated)
+      // Application user — /application/auth/me already returns role.permissions as
+      // codename strings ("resource:action") via the dependency layer (Dependencies.py).
+      // No extra API call needed — parse them directly from the embedded role object.
       const rolePermissions: any[] = userRole?.permissions || [];
+
+      const permissions = rolePermissions
+        .filter((p: any) => typeof p === 'string' && p.includes(':'))
+        .map((p: string) => {
+          const [resource, action] = p.split(':');
+          return { resource, action, name: p };
+        });
+
+      permissionsState = {
+        role: { name: roleName },
+        permissions,
+        capabilities: {},
+      };
+    } else {
+      // System user — /system/auth/me returns role with id+name only (no permissions array).
+      // Strategy:
+      //   1. If role.permissions is already populated (full objects), use them directly.
+      //   2. If role.permissions contains IDs, resolve via /system/permissions.
+      //   3. If role.permissions is empty/missing, fetch the full role via /system/roles/{id}
+      //      which includes the permissions array, then resolve those IDs.
+      const rolePermissions: any[] = userRole?.permissions || [];
+      const roleId = userRole?.id ?? userData?.roleId ?? userData?.role_id;
 
       // Already-resolved objects have category + resource + action fields
       const alreadyResolved = rolePermissions
@@ -85,10 +86,30 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         .map((p: any) => ({ id: p.id, category: p.category, resource: p.resource, action: p.action }));
 
       // Numeric/string IDs that still need to be resolved
-      const ids = rolePermissions.filter((p: any) => typeof p === 'string' || typeof p === 'number');
+      let ids: any[] = rolePermissions.filter((p: any) => typeof p === 'string' || typeof p === 'number');
 
+      // If no permissions at all on the role object, fetch the full role by ID
+      if (alreadyResolved.length === 0 && ids.length === 0 && roleId) {
+        try {
+          const roleResponse = await apiService.get<any>(`/system/roles/${roleId}`);
+          const roleData = roleResponse.data as any;
+          const fullRole = roleData?.data ?? roleData;
+          const rolePerms: any[] = fullRole?.permissions || [];
+          for (const p of rolePerms) {
+            if (typeof p === 'object' && p?.category && p?.resource && p?.action) {
+              alreadyResolved.push({ id: p.id, category: p.category, resource: p.resource, action: p.action });
+            } else if (typeof p === 'string' || typeof p === 'number') {
+              ids.push(p);
+            }
+          }
+        } catch {
+          // Role fetch failed — fall through to resolve via all permissions
+        }
+      }
+
+      // Resolve any remaining IDs by fetching all system permissions
       let resolved: any[] = [];
-      if (ids.length > 0) {
+      if (ids.length > 0 || (alreadyResolved.length === 0 && roleId)) {
         try {
           let allPerms: any[] = [];
           let page = 1;
@@ -102,14 +123,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             hasNext = response.data?.pagination?.hasNext ?? response.data?.pagination?.has_next ?? false;
             page++;
           }
-          const idToName: Record<string, any> = {};
-          allPerms.forEach((p: any) => { if (p.id) idToName[p.id] = p; });
-          resolved = ids.map(id => {
-            const perm = idToName[id];
-            return perm
-              ? { id: perm.id, category: perm.category, resource: perm.resource, action: perm.action }
-              : null;
-          }).filter(Boolean);
+
+          if (ids.length > 0) {
+            const idMap: Record<string, any> = {};
+            allPerms.forEach((p: any) => { if (p.id != null) idMap[String(p.id)] = p; });
+            resolved = ids.map(id => {
+              const perm = idMap[String(id)];
+              return perm
+                ? { id: perm.id, category: perm.category, resource: perm.resource, action: perm.action }
+                : null;
+            }).filter(Boolean);
+          } else if (alreadyResolved.length === 0) {
+            resolved = allPerms.map((p: any) => ({
+              id: p.id, category: p.category, resource: p.resource, action: p.action,
+            }));
+          }
         } catch {
           resolved = [];
         }
@@ -125,6 +153,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     StorageManager.setPermissions(permissionsState);
     return permissionsState;
   };
+
+
 
   const isTokenExpired = (token: string): boolean => {
     try {
@@ -232,7 +262,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const permissions = await derivePermissionsFromUser(response.user, isSystemUser);
         setUserPermissions(permissions);
       } catch (permError: any) {
-        // Permission derivation failed â€” user is still logged in, permissions will be empty
+        // Permission derivation failed — user is still logged in, permissions will be empty
       }
 
       tokenRefreshScheduler.start();
@@ -274,7 +304,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const updateUser = async (userData: Partial<UserProfile>): Promise<void> => {
-    // Send camelCase â€” the apiService interceptor auto-converts to snake_case for the backend
+    // Send camelCase — the apiService interceptor auto-converts to snake_case for the backend
     const payload = {
       firstName: userData.firstName,
       lastName: userData.lastName,
@@ -283,7 +313,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     let response: any;
     try {
-      // Self-update via auth/me endpoint (preferred â€” no ID needed)
+      // Self-update via auth/me endpoint (preferred — no ID needed)
       response = await apiService.put('/application/auth/me', payload);
     } catch {
       // Fall back to users/{id} endpoint
@@ -391,20 +421,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }, []);
 
-  // Reconstruct dot-notation as category.toLowerCase() + '.' + resource + '.' + action
-  // Backend returns category in UPPERCASE ('SYSTEM', 'APPLICATION') â€” no 'name' field exists.
   const getPermissionsList = (): string[] => {
     if (!userPermissions?.permissions) return [];
     return userPermissions.permissions
-      .filter((p: any) => p?.category && p?.resource && p?.action)
-      .map((p: any) => `${p.category.toLowerCase()}.${p.resource}.${p.action}`);
+      .filter((p: any) => p?.resource && p?.action)
+      .map((p: any) => p.name ?? `${p.resource}:${p.action}`);
   };
 
   const hasBackendPermission = (permission: string): boolean => {
     if (!userPermissions?.permissions) return false;
     return userPermissions.permissions.some((p: any) => {
-      if (p?.category && p?.resource && p?.action) {
-        return `${p.category.toLowerCase()}.${p.resource}.${p.action}` === permission;
+      if (p?.resource && p?.action) {
+        return (p.name ?? `${p.resource}:${p.action}`) === permission;
       }
       return false;
     });

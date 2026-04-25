@@ -28,6 +28,9 @@ const CategorySidebar: React.FC<CategorySidebarProps> = ({
   venueName,
   venueIsOpen,
 }) => {
+  const totalCount = Object.values(categoryItemCounts).reduce((sum, n) => sum + n, 0);
+  const isAllActive = selectedCategory === 'all' || selectedCategory === '';
+
   return (
     <Box
       sx={{
@@ -38,22 +41,13 @@ const CategorySidebar: React.FC<CategorySidebarProps> = ({
         maxWidth: 220,
         height: '100%',
         bgcolor: '#0f172a',
-        borderRight: '1px solid',
-        borderColor: 'rgba(226,232,240,0.08)',
+        borderRight: '1px solid rgba(226,232,240,0.08)',
         flexShrink: 0,
       }}
     >
       {/* Header */}
-      <Box
-        sx={{
-          px: 2,
-          pt: 2.5,
-          pb: 1.5,
-          flexShrink: 0,
-        }}
-      >
+      <Box sx={{ px: 2, pt: 2.5, pb: 1.5, flexShrink: 0 }}>
         <Typography
-          variant="caption"
           sx={{
             color: '#64748b',
             fontWeight: 700,
@@ -74,24 +68,17 @@ const CategorySidebar: React.FC<CategorySidebarProps> = ({
             alignItems: 'center',
             bgcolor: 'rgba(255,255,255,0.05)',
             border: '1px solid rgba(226,232,240,0.1)',
-            borderRadius: 1.5,
+            borderRadius: 2,
             px: 1,
             py: 0.25,
-            transition: 'border-color 0.15s ease',
+            transition: 'border-color 0.15s ease, background-color 0.15s ease',
             '&:focus-within': {
-              borderColor: 'rgba(99,102,241,0.5)',
-              bgcolor: 'rgba(99,102,241,0.05)',
+              borderColor: 'rgba(25,118,210,0.4)',
+              bgcolor: 'rgba(25,118,210,0.04)',
             },
           }}
         >
-          <SearchIcon
-            sx={{
-              fontSize: 15,
-              color: '#64748b',
-              mr: 0.75,
-              flexShrink: 0,
-            }}
-          />
+          <SearchIcon sx={{ fontSize: 15, color: '#64748b', mr: 0.75, flexShrink: 0 }} />
           <InputBase
             value={catSearch}
             onChange={(e) => onCatSearchChange(e.target.value)}
@@ -117,7 +104,7 @@ const CategorySidebar: React.FC<CategorySidebarProps> = ({
               sx={{
                 p: 0.25,
                 color: '#64748b',
-                '&:hover': { color: '#f8fafc' },
+                '&:hover': { color: '#f8fafc', bgcolor: 'transparent' },
               }}
             >
               <CloseIcon sx={{ fontSize: 13 }} />
@@ -134,22 +121,86 @@ const CategorySidebar: React.FC<CategorySidebarProps> = ({
           px: 1,
           pb: 1,
           scrollbarWidth: 'thin',
-          scrollbarColor: 'rgba(99,102,241,0.3) transparent',
-          '&::-webkit-scrollbar': {
-            width: 4,
-          },
-          '&::-webkit-scrollbar-track': {
-            background: 'transparent',
-          },
+          scrollbarColor: 'rgba(25,118,210,0.3) transparent',
+          '&::-webkit-scrollbar': { width: 4 },
+          '&::-webkit-scrollbar-track': { background: 'transparent' },
           '&::-webkit-scrollbar-thumb': {
-            background: 'rgba(99,102,241,0.3)',
+            background: 'rgba(25,118,210,0.3)',
             borderRadius: 2,
           },
           '&::-webkit-scrollbar-thumb:hover': {
-            background: 'rgba(99,102,241,0.55)',
+            background: 'rgba(25,118,210,0.55)',
           },
         }}
       >
+        {/* "All" item */}
+        <Box
+          onClick={() => onSelectCategory('all')}
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            px: 1.25,
+            py: 0.875,
+            mb: 0.25,
+            borderRadius: 1.25,
+            cursor: 'pointer',
+            borderLeft: '3px solid',
+            borderColor: isAllActive ? '#1976D2' : 'transparent',
+            bgcolor: isAllActive ? 'rgba(25,118,210,0.12)' : 'transparent',
+            transition: 'background-color 0.15s ease, border-color 0.15s ease',
+            '&:hover': {
+              bgcolor: isAllActive
+                ? 'rgba(25,118,210,0.16)'
+                : 'rgba(255,255,255,0.05)',
+            },
+          }}
+        >
+          <Typography
+            sx={{
+              fontSize: '0.8rem',
+              fontWeight: isAllActive ? 600 : 400,
+              color: isAllActive ? '#f8fafc' : '#94a3b8',
+              lineHeight: 1.3,
+              flex: 1,
+              mr: 1,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              transition: 'color 0.15s ease',
+            }}
+          >
+            All
+          </Typography>
+          <Box
+            sx={{
+              minWidth: 20,
+              height: 18,
+              px: 0.625,
+              borderRadius: 0.75,
+              bgcolor: isAllActive
+                ? 'rgba(25,118,210,0.3)'
+                : 'rgba(255,255,255,0.07)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+            }}
+          >
+            <Typography
+              sx={{
+                fontSize: '0.65rem',
+                fontWeight: 600,
+                color: isAllActive ? '#93c5fd' : '#64748b',
+                lineHeight: 1,
+              }}
+            >
+              {totalCount}
+            </Typography>
+          </Box>
+        </Box>
+
+        {/* Category items */}
         {filteredCategories.length === 0 ? (
           <Typography
             sx={{
@@ -180,16 +231,13 @@ const CategorySidebar: React.FC<CategorySidebarProps> = ({
                   mb: 0.25,
                   borderRadius: 1.25,
                   cursor: 'pointer',
-                  position: 'relative',
                   borderLeft: '3px solid',
-                  borderColor: isActive ? '#6366f1' : 'transparent',
-                  bgcolor: isActive
-                    ? 'rgba(99,102,241,0.12)'
-                    : 'transparent',
+                  borderColor: isActive ? '#1976D2' : 'transparent',
+                  bgcolor: isActive ? 'rgba(25,118,210,0.12)' : 'transparent',
                   transition: 'background-color 0.15s ease, border-color 0.15s ease',
                   '&:hover': {
                     bgcolor: isActive
-                      ? 'rgba(99,102,241,0.16)'
+                      ? 'rgba(25,118,210,0.16)'
                       : 'rgba(255,255,255,0.05)',
                   },
                 }}
@@ -217,7 +265,7 @@ const CategorySidebar: React.FC<CategorySidebarProps> = ({
                     px: 0.625,
                     borderRadius: 0.75,
                     bgcolor: isActive
-                      ? 'rgba(99,102,241,0.35)'
+                      ? 'rgba(25,118,210,0.3)'
                       : 'rgba(255,255,255,0.07)',
                     display: 'flex',
                     alignItems: 'center',
@@ -229,7 +277,7 @@ const CategorySidebar: React.FC<CategorySidebarProps> = ({
                     sx={{
                       fontSize: '0.65rem',
                       fontWeight: 600,
-                      color: isActive ? '#c7d2fe' : '#64748b',
+                      color: isActive ? '#93c5fd' : '#64748b',
                       lineHeight: 1,
                     }}
                   >
@@ -258,7 +306,7 @@ const CategorySidebar: React.FC<CategorySidebarProps> = ({
         <FiberManualRecordIcon
           sx={{
             fontSize: 9,
-            color: venueIsOpen ? '#22c55e' : '#ef4444',
+            color: venueIsOpen ? '#16a34a' : '#ef4444',
             flexShrink: 0,
           }}
         />
@@ -280,7 +328,7 @@ const CategorySidebar: React.FC<CategorySidebarProps> = ({
           sx={{
             fontSize: '0.65rem',
             fontWeight: 600,
-            color: venueIsOpen ? '#22c55e' : '#ef4444',
+            color: venueIsOpen ? '#16a34a' : '#ef4444',
             textTransform: 'uppercase',
             letterSpacing: '0.05em',
             flexShrink: 0,

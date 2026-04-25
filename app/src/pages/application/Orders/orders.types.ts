@@ -5,7 +5,12 @@ export type OrderDetail = _OrderDetail;
 
 // ── Filter types ─────────────────────────────────────────────────────────────
 export type StatusFilter = '' | 'pending' | 'confirmed' | 'preparing' | 'ready' | 'completed' | 'cancelled';
-export type DateFilter = '' | 'today' | 'week' | 'month';
+export type DateFilter = '' | 'today' | 'week' | 'month' | 'custom';
+
+export interface CustomDateRange {
+  startDate: string;
+  endDate: string;
+}
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 export const ROWS_PER_PAGE = 20;
@@ -72,10 +77,15 @@ export function toISODate(d: Date): string {
   return d.toISOString().split('T')[0];
 }
 
-export function getDateRange(filter: DateFilter): { startDate?: string; endDate?: string } {
+export function getDateRange(
+  filter: DateFilter,
+  customStart?: string,
+  customEnd?: string,
+): { startDate?: string; endDate?: string } {
   const now = new Date();
   if (filter === 'today') { const s = toISODate(now); return { startDate: s, endDate: s }; }
   if (filter === 'week') { const s = new Date(now); s.setDate(s.getDate() - 7); return { startDate: toISODate(s), endDate: toISODate(now) }; }
   if (filter === 'month') { const s = new Date(now); s.setDate(s.getDate() - 30); return { startDate: toISODate(s), endDate: toISODate(now) }; }
+  if (filter === 'custom') { return { startDate: customStart || undefined, endDate: customEnd || undefined }; }
   return {};
 }

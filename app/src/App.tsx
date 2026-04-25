@@ -12,6 +12,7 @@ import { ToastProvider } from './contexts/common/Toast';
 import { NotificationProvider } from './contexts/common/Notification';
 import { WorkspaceProvider } from './contexts/application/Workspace';
 import { UserDataProvider } from './contexts/application/UserData';
+import { WorkspaceApprovalProvider } from './contexts/application/WorkspaceApproval';
 
 import { Home, Login, Register, NotFound } from './pages/common';
 import {
@@ -63,14 +64,14 @@ const AppContent = memo(() => {
           {/* Protected application routes */}
           <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
             <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
-            <Route path="/admin/dashboard" element={<ProtectedRoute requiredPermission="application.dashboard.view"><AppDashboard /></ProtectedRoute>} />
-            <Route path="/admin/pos" element={<ProtectedRoute requiredPermission="application.pos.view"><POS /></ProtectedRoute>} />
-            <Route path="/admin/catalog" element={<ProtectedRoute requiredPermission="application.catalog.view"><Catalog /></ProtectedRoute>} />
-            <Route path="/admin/locations" element={<ProtectedRoute requiredPermission="application.locations.view"><Locations /></ProtectedRoute>} />
-            <Route path="/admin/orders" element={<ProtectedRoute requiredPermission="application.orders.view"><Orders /></ProtectedRoute>} />
-            <Route path="/admin/users" element={<ProtectedRoute requiredPermission="application.users.view"><Users /></ProtectedRoute>} />
-            <Route path="/admin/coupons" element={<ProtectedRoute requiredPermission="application.coupons.view"><Coupons /></ProtectedRoute>} />
-            <Route path="/admin/settings" element={<ProtectedRoute requiredPermission="application.settings.view"><Settings /></ProtectedRoute>} />
+            <Route path="/admin/dashboard" element={<ProtectedRoute requiredPermission="dashboard:view"><AppDashboard /></ProtectedRoute>} />
+            <Route path="/admin/pos" element={<ProtectedRoute requiredPermission="pos:view"><POS /></ProtectedRoute>} />
+            <Route path="/admin/catalog" element={<ProtectedRoute requiredPermission="catalog:view"><Catalog /></ProtectedRoute>} />
+            <Route path="/admin/locations" element={<ProtectedRoute requiredPermission="locations:view"><Locations /></ProtectedRoute>} />
+            <Route path="/admin/orders" element={<ProtectedRoute requiredPermission="orders:view"><Orders /></ProtectedRoute>} />
+            <Route path="/admin/users" element={<ProtectedRoute requiredPermission="users:view"><Users /></ProtectedRoute>} />
+            <Route path="/admin/coupons" element={<ProtectedRoute requiredPermission="coupons:view"><Coupons /></ProtectedRoute>} />
+            <Route path="/admin/settings" element={<ProtectedRoute requiredPermission="settings:view"><Settings /></ProtectedRoute>} />
             <Route path="/admin/personas" element={<PersonaSwitch />} />
           </Route>
 
@@ -92,11 +93,13 @@ const AppProviders = memo(({ children }: { children: React.ReactNode }) => (
           <PermissionSync>
             <UserDataProvider>
               <AppInitializer>
-                <WorkspaceProvider>
-                  <NotificationProvider>
-                    {children}
-                  </NotificationProvider>
-                </WorkspaceProvider>
+                <WorkspaceApprovalProvider>
+                  <WorkspaceProvider>
+                    <NotificationProvider>
+                      {children}
+                    </NotificationProvider>
+                  </WorkspaceProvider>
+                </WorkspaceApprovalProvider>
               </AppInitializer>
             </UserDataProvider>
           </PermissionSync>

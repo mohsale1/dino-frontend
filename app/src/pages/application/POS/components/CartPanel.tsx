@@ -4,7 +4,6 @@ import {
   Typography,
   Paper,
   Stack,
-  Divider,
   Avatar,
   Button,
   ButtonGroup,
@@ -12,7 +11,6 @@ import {
   Chip,
   TextField,
   InputAdornment,
-  alpha,
 } from '@mui/material';
 import Add from '@mui/icons-material/Add';
 import Remove from '@mui/icons-material/Remove';
@@ -78,7 +76,7 @@ const CartPanel: React.FC<CartPanelProps> = ({
           px: 2.5,
           py: 2,
           bgcolor: '#ffffff',
-          borderBottom: '1px solid #e2e8f0',
+          borderBottom: '1px solid #e0e0e0',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
@@ -88,7 +86,7 @@ const CartPanel: React.FC<CartPanelProps> = ({
         <Stack direction="row" alignItems="center" spacing={1.5}>
           <Typography
             variant="h6"
-            sx={{ fontWeight: 700, color: '#0f172a', fontSize: '1rem', lineHeight: 1 }}
+            sx={{ fontWeight: 700, color: '#1C1C1E', fontSize: '1rem', lineHeight: 1 }}
           >
             Current Order
           </Typography>
@@ -96,7 +94,7 @@ const CartPanel: React.FC<CartPanelProps> = ({
             label={totalItems}
             size="small"
             sx={{
-              bgcolor: '#6366f1',
+              bgcolor: '#1976D2',
               color: '#ffffff',
               fontWeight: 700,
               fontSize: '0.75rem',
@@ -111,7 +109,10 @@ const CartPanel: React.FC<CartPanelProps> = ({
           <IconButton
             size="small"
             onClick={onClose}
-            sx={{ color: '#64748b', '&:hover': { bgcolor: alpha('#6366f1', 0.08) } }}
+            sx={{
+              color: '#64748b',
+              '&:hover': { bgcolor: '#f8fafc' },
+            }}
           >
             <Close fontSize="small" />
           </IconButton>
@@ -131,7 +132,7 @@ const CartPanel: React.FC<CartPanelProps> = ({
           '&::-webkit-scrollbar': { width: 4 },
           '&::-webkit-scrollbar-track': { bgcolor: 'transparent' },
           '&::-webkit-scrollbar-thumb': {
-            bgcolor: '#e2e8f0',
+            bgcolor: '#e0e0e0',
             borderRadius: 2,
           },
         }}
@@ -154,18 +155,18 @@ const CartPanel: React.FC<CartPanelProps> = ({
                 width: 72,
                 height: 72,
                 borderRadius: '50%',
-                bgcolor: alpha('#6366f1', 0.08),
+                bgcolor: '#f1f5f9',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 mb: 0.5,
               }}
             >
-              <ShoppingCart sx={{ fontSize: 34, color: alpha('#6366f1', 0.5) }} />
+              <ShoppingCart sx={{ fontSize: 34, color: '#94a3b8' }} />
             </Box>
             <Typography
               variant="subtitle1"
-              sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.95rem' }}
+              sx={{ fontWeight: 600, color: '#1C1C1E', fontSize: '0.95rem' }}
             >
               Cart is empty
             </Typography>
@@ -183,7 +184,7 @@ const CartPanel: React.FC<CartPanelProps> = ({
                   variant="outlined"
                   sx={{
                     p: 1.5,
-                    border: '1px solid #e2e8f0',
+                    border: '1px solid #e0e0e0',
                     borderRadius: 2,
                     bgcolor: '#ffffff',
                     transition: 'box-shadow 0.15s',
@@ -191,28 +192,28 @@ const CartPanel: React.FC<CartPanelProps> = ({
                   }}
                 >
                   <Stack direction="row" alignItems="center" spacing={1.5}>
-                    {/* Avatar / Image */}
+                    {/* Avatar */}
                     <Avatar
                       src={item.image}
                       variant="rounded"
                       sx={{
                         width: 44,
                         height: 44,
-                        bgcolor: alpha('#6366f1', 0.1),
+                        bgcolor: '#f1f5f9',
                         borderRadius: 1.5,
                         flexShrink: 0,
                       }}
                     >
-                      <Restaurant sx={{ fontSize: 20, color: '#6366f1' }} />
+                      <Restaurant sx={{ fontSize: 20, color: '#94a3b8' }} />
                     </Avatar>
 
-                    {/* Name + Price */}
+                    {/* Name + Unit Price */}
                     <Box sx={{ flex: 1, minWidth: 0 }}>
                       <Typography
                         variant="body2"
                         sx={{
                           fontWeight: 600,
-                          color: '#0f172a',
+                          color: '#1C1C1E',
                           fontSize: '0.82rem',
                           lineHeight: 1.3,
                           overflow: 'hidden',
@@ -224,7 +225,7 @@ const CartPanel: React.FC<CartPanelProps> = ({
                       </Typography>
                       <Typography
                         variant="caption"
-                        sx={{ color: '#6366f1', fontWeight: 700, fontSize: '0.78rem' }}
+                        sx={{ color: '#1976D2', fontWeight: 700, fontSize: '0.78rem' }}
                       >
                         {formatINR(item.price)}
                       </Typography>
@@ -239,9 +240,15 @@ const CartPanel: React.FC<CartPanelProps> = ({
                           '& .MuiButtonGroup-grouped': {
                             minWidth: 28,
                             px: 0,
-                            borderColor: '#e2e8f0',
-                            color: '#0f172a',
-                            '&:hover': { bgcolor: alpha('#6366f1', 0.06), borderColor: '#6366f1' },
+                            borderColor: '#e0e0e0',
+                            color: '#1C1C1E',
+                            boxShadow: 'none',
+                            textTransform: 'none',
+                            '&:hover': {
+                              borderColor: '#1976D2',
+                              color: '#1976D2',
+                              bgcolor: 'transparent',
+                            },
                           },
                         }}
                       >
@@ -254,9 +261,9 @@ const CartPanel: React.FC<CartPanelProps> = ({
                             cursor: 'default',
                             fontWeight: 700,
                             fontSize: '0.8rem',
-                            color: '#0f172a',
+                            color: '#1C1C1E',
                             minWidth: '32px !important',
-                            '&:hover': { bgcolor: 'transparent', borderColor: '#e2e8f0' },
+                            '&:hover': { bgcolor: 'transparent', borderColor: '#e0e0e0', color: '#1C1C1E' },
                           }}
                         >
                           {item.quantity}
@@ -272,7 +279,7 @@ const CartPanel: React.FC<CartPanelProps> = ({
                         sx={{
                           color: '#ef4444',
                           ml: 0.25,
-                          '&:hover': { bgcolor: alpha('#ef4444', 0.08) },
+                          '&:hover': { bgcolor: 'rgba(239,68,68,0.08)' },
                         }}
                       >
                         <Delete sx={{ fontSize: 16 }} />
@@ -280,7 +287,7 @@ const CartPanel: React.FC<CartPanelProps> = ({
                     </Stack>
                   </Stack>
 
-                  {/* Line total */}
+                  {/* Line Total */}
                   <Box sx={{ mt: 0.75, display: 'flex', justifyContent: 'flex-end' }}>
                     <Typography
                       variant="caption"
@@ -313,20 +320,20 @@ const CartPanel: React.FC<CartPanelProps> = ({
                 '& .MuiOutlinedInput-root': {
                   bgcolor: '#ffffff',
                   borderRadius: 2,
-                  '& fieldset': { borderColor: '#e2e8f0' },
-                  '&:hover fieldset': { borderColor: '#6366f1' },
-                  '&.Mui-focused fieldset': { borderColor: '#6366f1' },
+                  '& fieldset': { borderColor: '#e0e0e0' },
+                  '&:hover fieldset': { borderColor: '#1976D2' },
+                  '&.Mui-focused fieldset': { borderColor: '#1976D2' },
                 },
-                '& .MuiInputLabel-root.Mui-focused': { color: '#6366f1' },
+                '& .MuiInputLabel-root.Mui-focused': { color: '#1976D2' },
               }}
             />
 
-            {/* Summary */}
+            {/* Order Summary */}
             <Paper
               variant="outlined"
               sx={{
                 p: 2,
-                border: '1px solid #e2e8f0',
+                border: '1px solid #e0e0e0',
                 borderRadius: 2,
                 bgcolor: '#ffffff',
               }}
@@ -338,7 +345,7 @@ const CartPanel: React.FC<CartPanelProps> = ({
                   </Typography>
                   <Typography
                     variant="body2"
-                    sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.82rem' }}
+                    sx={{ fontWeight: 500, color: '#1C1C1E', fontSize: '0.82rem' }}
                   >
                     {formatINR(subtotal)}
                   </Typography>
@@ -346,12 +353,12 @@ const CartPanel: React.FC<CartPanelProps> = ({
 
                 {discount > 0 && (
                   <Stack direction="row" justifyContent="space-between" alignItems="center">
-                    <Typography variant="body2" sx={{ color: '#22c55e', fontSize: '0.82rem' }}>
+                    <Typography variant="body2" sx={{ color: '#16a34a', fontSize: '0.82rem' }}>
                       Discount
                     </Typography>
                     <Typography
                       variant="body2"
-                      sx={{ fontWeight: 600, color: '#22c55e', fontSize: '0.82rem' }}
+                      sx={{ fontWeight: 500, color: '#16a34a', fontSize: '0.82rem' }}
                     >
                       -{formatINR(discount)}
                     </Typography>
@@ -364,28 +371,35 @@ const CartPanel: React.FC<CartPanelProps> = ({
                   </Typography>
                   <Typography
                     variant="body2"
-                    sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.82rem' }}
+                    sx={{ fontWeight: 500, color: '#1C1C1E', fontSize: '0.82rem' }}
                   >
                     {formatINR(tax)}
                   </Typography>
                 </Stack>
 
-                <Divider sx={{ borderColor: '#e2e8f0' }} />
-
-                <Stack direction="row" justifyContent="space-between" alignItems="center">
+                <Box
+                  sx={{
+                    borderTop: '2px solid #f1f5f9',
+                    pt: 1,
+                    mt: 0.5,
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                  }}
+                >
                   <Typography
                     variant="subtitle2"
-                    sx={{ fontWeight: 700, color: '#0f172a', fontSize: '0.9rem' }}
+                    sx={{ fontWeight: 700, color: '#1C1C1E', fontSize: '0.9rem' }}
                   >
                     Total
                   </Typography>
                   <Typography
                     variant="subtitle2"
-                    sx={{ fontWeight: 800, color: '#0f172a', fontSize: '1rem' }}
+                    sx={{ fontWeight: 800, color: '#1C1C1E', fontSize: '1rem' }}
                   >
                     {formatINR(total)}
                   </Typography>
-                </Stack>
+                </Box>
               </Stack>
             </Paper>
           </>
@@ -399,7 +413,7 @@ const CartPanel: React.FC<CartPanelProps> = ({
           px: 2,
           py: 2,
           bgcolor: '#ffffff',
-          borderTop: '1px solid #e2e8f0',
+          borderTop: '1px solid #e0e0e0',
           display: 'flex',
           flexDirection: 'column',
           gap: 1,
@@ -413,7 +427,7 @@ const CartPanel: React.FC<CartPanelProps> = ({
           startIcon={<CheckCircle />}
           onClick={onCheckout}
           sx={{
-            bgcolor: '#0f172a',
+            bgcolor: '#1C1C1E',
             color: '#ffffff',
             fontWeight: 700,
             fontSize: '0.9rem',
@@ -422,8 +436,8 @@ const CartPanel: React.FC<CartPanelProps> = ({
             textTransform: 'none',
             boxShadow: 'none',
             '&:hover': {
-              bgcolor: '#1e293b',
-              boxShadow: '0 4px 12px rgba(15,23,42,0.25)',
+              bgcolor: '#374151',
+              boxShadow: 'none',
             },
             '&.Mui-disabled': {
               bgcolor: '#e2e8f0',
@@ -446,7 +460,8 @@ const CartPanel: React.FC<CartPanelProps> = ({
               textTransform: 'none',
               borderRadius: 2,
               py: 0.75,
-              '&:hover': { bgcolor: alpha('#ef4444', 0.06) },
+              boxShadow: 'none',
+              '&:hover': { bgcolor: 'rgba(239,68,68,0.06)' },
             }}
           >
             Clear Cart

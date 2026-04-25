@@ -70,6 +70,15 @@ const PAYMENT_METHODS: Array<{
   { value: 'wallet', label: 'Wallet', icon: <AccountBalanceWallet fontSize="small" /> },
 ];
 
+const fieldSx = {
+  '& .MuiOutlinedInput-root': {
+    borderRadius: 1.5,
+    '&:hover fieldset': { borderColor: '#1976D2' },
+    '&.Mui-focused fieldset': { borderColor: '#1976D2' },
+  },
+  '& label.Mui-focused': { color: '#1976D2' },
+};
+
 const SectionLabel: React.FC<{ icon: React.ReactNode; label: string }> = ({ icon, label }) => (
   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
     <Box
@@ -77,12 +86,12 @@ const SectionLabel: React.FC<{ icon: React.ReactNode; label: string }> = ({ icon
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        color: '#6366f1',
+        color: '#1976D2',
       }}
     >
       {icon}
     </Box>
-    <Typography variant="subtitle2" fontWeight={600} color="#0f172a">
+    <Typography variant="subtitle2" fontWeight={600} color="#1C1C1E">
       {label}
     </Typography>
   </Box>
@@ -96,16 +105,22 @@ const SummaryRow: React.FC<{
 }> = ({ label, value, bold = false, color }) => (
   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
     <Typography
-      variant={bold ? 'subtitle1' : 'body2'}
-      fontWeight={bold ? 700 : 400}
-      color={color ?? (bold ? '#0f172a' : '#64748b')}
+      variant="body2"
+      sx={{
+        fontWeight: bold ? 800 : 400,
+        fontSize: bold ? '0.9rem' : '0.82rem',
+        color: color ?? (bold ? '#1C1C1E' : '#64748b'),
+      }}
     >
       {label}
     </Typography>
     <Typography
-      variant={bold ? 'subtitle1' : 'body2'}
-      fontWeight={bold ? 700 : 500}
-      color={color ?? (bold ? '#0f172a' : '#0f172a')}
+      variant="body2"
+      sx={{
+        fontWeight: bold ? 800 : 500,
+        fontSize: bold ? '1rem' : '0.82rem',
+        color: color ?? '#1C1C1E',
+      }}
     >
       {value}
     </Typography>
@@ -156,7 +171,7 @@ const CheckoutDialog: React.FC<CheckoutDialogProps> = ({
             gap: 2,
             px: 3,
             py: 2,
-            borderBottom: '1px solid #e2e8f0',
+            borderBottom: '1px solid #e0e0e0',
           }}
         >
           {/* Icon Box */}
@@ -168,7 +183,7 @@ const CheckoutDialog: React.FC<CheckoutDialogProps> = ({
               width: 44,
               height: 44,
               borderRadius: 1.5,
-              bgcolor: '#0f172a',
+              bgcolor: '#1C1C1E',
               color: '#fff',
               flexShrink: 0,
             }}
@@ -178,7 +193,7 @@ const CheckoutDialog: React.FC<CheckoutDialogProps> = ({
 
           {/* Title + Subtitle */}
           <Box sx={{ flex: 1, minWidth: 0 }}>
-            <Typography variant="h6" fontWeight={700} color="#0f172a" lineHeight={1.2}>
+            <Typography variant="h6" fontWeight={700} color="#1C1C1E" lineHeight={1.2}>
               Checkout
             </Typography>
             <Typography variant="caption" color="#64748b">
@@ -192,7 +207,7 @@ const CheckoutDialog: React.FC<CheckoutDialogProps> = ({
             size="small"
             sx={{
               color: '#64748b',
-              '&:hover': { bgcolor: '#f1f5f9', color: '#0f172a' },
+              '&:hover': { bgcolor: '#f8fafc', color: '#1C1C1E' },
             }}
           >
             <Close fontSize="small" />
@@ -208,15 +223,15 @@ const CheckoutDialog: React.FC<CheckoutDialogProps> = ({
             elevation={0}
             sx={{
               bgcolor: '#f8fafc',
-              border: '1px solid #e2e8f0',
-              borderRadius: 1.5,
+              border: '1px solid #e0e0e0',
+              borderRadius: 2,
               overflow: 'hidden',
             }}
           >
             <Box sx={{ px: 2, pt: 2, pb: 1 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
-                <Receipt fontSize="small" sx={{ color: '#6366f1' }} />
-                <Typography variant="subtitle2" fontWeight={600} color="#0f172a">
+                <Receipt fontSize="small" sx={{ color: '#1976D2' }} />
+                <Typography variant="subtitle2" fontWeight={600} color="#1C1C1E">
                   Order Summary
                 </Typography>
               </Box>
@@ -236,7 +251,7 @@ const CheckoutDialog: React.FC<CheckoutDialogProps> = ({
                       label={item.quantity}
                       size="small"
                       sx={{
-                        bgcolor: '#0f172a',
+                        bgcolor: '#1C1C1E',
                         color: '#fff',
                         fontWeight: 700,
                         fontSize: '0.7rem',
@@ -248,12 +263,22 @@ const CheckoutDialog: React.FC<CheckoutDialogProps> = ({
                     />
                     <Typography
                       variant="body2"
-                      color="#0f172a"
-                      sx={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                      sx={{
+                        flex: 1,
+                        minWidth: 0,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                        color: '#1C1C1E',
+                        fontSize: '0.82rem',
+                      }}
                     >
                       {item.name}
                     </Typography>
-                    <Typography variant="body2" fontWeight={500} color="#0f172a" sx={{ flexShrink: 0 }}>
+                    <Typography
+                      variant="body2"
+                      sx={{ fontWeight: 500, color: '#1C1C1E', fontSize: '0.82rem', flexShrink: 0 }}
+                    >
                       {formatINR(item.price * item.quantity)}
                     </Typography>
                   </Box>
@@ -261,7 +286,7 @@ const CheckoutDialog: React.FC<CheckoutDialogProps> = ({
               </Stack>
             </Box>
 
-            <Divider sx={{ borderColor: '#e2e8f0' }} />
+            <Divider sx={{ borderColor: '#e0e0e0' }} />
 
             {/* Totals */}
             <Stack spacing={0.75} sx={{ px: 2, py: 1.5 }}>
@@ -269,9 +294,10 @@ const CheckoutDialog: React.FC<CheckoutDialogProps> = ({
               {discount > 0 && (
                 <SummaryRow label="Discount" value={`-${formatINR(discount)}`} color="#16a34a" />
               )}
-              <SummaryRow label="Tax" value={formatINR(tax)} />
-              <Divider sx={{ borderColor: '#e2e8f0', my: 0.5 }} />
-              <SummaryRow label="Total" value={formatINR(total)} bold />
+              <SummaryRow label="Tax (10%)" value={formatINR(tax)} />
+              <Box sx={{ borderTop: '2px solid #f1f5f9', pt: 0.75, mt: 0.25 }}>
+                <SummaryRow label="Total" value={formatINR(total)} bold />
+              </Box>
             </Stack>
           </Paper>
 
@@ -293,14 +319,7 @@ const CheckoutDialog: React.FC<CheckoutDialogProps> = ({
                     </InputAdornment>
                   ),
                 }}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: 1.5,
-                    '&:hover fieldset': { borderColor: '#6366f1' },
-                    '&.Mui-focused fieldset': { borderColor: '#6366f1' },
-                  },
-                  '& label.Mui-focused': { color: '#6366f1' },
-                }}
+                sx={fieldSx}
               />
               <TextField
                 label="Phone Number"
@@ -315,14 +334,7 @@ const CheckoutDialog: React.FC<CheckoutDialogProps> = ({
                     </InputAdornment>
                   ),
                 }}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: 1.5,
-                    '&:hover fieldset': { borderColor: '#6366f1' },
-                    '&.Mui-focused fieldset': { borderColor: '#6366f1' },
-                  },
-                  '& label.Mui-focused': { color: '#6366f1' },
-                }}
+                sx={fieldSx}
               />
             </Stack>
           </Box>
@@ -333,11 +345,7 @@ const CheckoutDialog: React.FC<CheckoutDialogProps> = ({
             <Stack spacing={2}>
               {tables.length > 0 && (
                 <FormControl fullWidth size="small">
-                  <InputLabel
-                    sx={{
-                      '&.Mui-focused': { color: '#6366f1' },
-                    }}
-                  >
+                  <InputLabel sx={{ '&.Mui-focused': { color: '#1976D2' } }}>
                     Table (optional)
                   </InputLabel>
                   <Select
@@ -351,8 +359,8 @@ const CheckoutDialog: React.FC<CheckoutDialogProps> = ({
                     }
                     sx={{
                       borderRadius: 1.5,
-                      '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#6366f1' },
-                      '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#6366f1' },
+                      '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#1976D2' },
+                      '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#1976D2' },
                     }}
                   >
                     <MenuItem value="">
@@ -381,14 +389,7 @@ const CheckoutDialog: React.FC<CheckoutDialogProps> = ({
                     </InputAdornment>
                   ),
                 }}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: 1.5,
-                    '&:hover fieldset': { borderColor: '#6366f1' },
-                    '&.Mui-focused fieldset': { borderColor: '#6366f1' },
-                  },
-                  '& label.Mui-focused': { color: '#6366f1' },
-                }}
+                sx={fieldSx}
               />
             </Stack>
           </Box>
@@ -412,21 +413,23 @@ const CheckoutDialog: React.FC<CheckoutDialogProps> = ({
                       fontWeight: 600,
                       fontSize: '0.875rem',
                       py: 1,
+                      boxShadow: 'none',
                       ...(isActive
                         ? {
-                            bgcolor: '#0f172a',
+                            bgcolor: '#1C1C1E',
                             color: '#fff',
-                            borderColor: '#0f172a',
-                            '&:hover': { bgcolor: '#1e293b', borderColor: '#1e293b' },
+                            borderColor: '#1C1C1E',
+                            '&:hover': { bgcolor: '#374151', borderColor: '#374151', boxShadow: 'none' },
                           }
                         : {
                             bgcolor: '#fff',
                             color: '#64748b',
-                            borderColor: '#e2e8f0',
+                            borderColor: '#e0e0e0',
                             '&:hover': {
-                              borderColor: '#0f172a',
-                              color: '#0f172a',
-                              bgcolor: '#f8fafc',
+                              borderColor: '#1C1C1E',
+                              color: '#1C1C1E',
+                              bgcolor: '#fff',
+                              boxShadow: 'none',
                             },
                           }),
                     }}
@@ -458,7 +461,7 @@ const CheckoutDialog: React.FC<CheckoutDialogProps> = ({
         sx={{
           px: 3,
           py: 2,
-          borderTop: '1px solid #e2e8f0',
+          borderTop: '1px solid #e0e0e0',
           gap: 1.5,
         }}
       >
@@ -470,8 +473,9 @@ const CheckoutDialog: React.FC<CheckoutDialogProps> = ({
             textTransform: 'none',
             fontWeight: 600,
             color: '#64748b',
-            borderColor: '#e2e8f0',
-            '&:hover': { borderColor: '#0f172a', color: '#0f172a', bgcolor: '#f8fafc' },
+            borderColor: '#e0e0e0',
+            boxShadow: 'none',
+            '&:hover': { borderColor: '#1C1C1E', color: '#1C1C1E', bgcolor: '#fff', boxShadow: 'none' },
           }}
         >
           Cancel
@@ -484,10 +488,11 @@ const CheckoutDialog: React.FC<CheckoutDialogProps> = ({
             borderRadius: 1.5,
             textTransform: 'none',
             fontWeight: 600,
-            bgcolor: '#0f172a',
+            bgcolor: '#1C1C1E',
             color: '#fff',
             px: 3,
-            '&:hover': { bgcolor: '#1e293b' },
+            boxShadow: 'none',
+            '&:hover': { bgcolor: '#374151', boxShadow: 'none' },
             '&.Mui-disabled': { bgcolor: '#e2e8f0', color: '#94a3b8' },
           }}
         >

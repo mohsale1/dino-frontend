@@ -41,52 +41,34 @@ class PermissionService {
     return null;
   }
 
-  /**
-   * Check if user has a specific permission (backend-driven)
-   */
   static hasPermission(user: AuthUser | null, permission: PermissionName): boolean {
-    if (!user) {
-      return false;
-    }
+    if (!user) return false;
 
-    // Get backend permissions
     const stored = this.getStoredPermissions();
     const backendPermissions = stored?.permissions || [];
     const backendRole = stored?.role;
-    
-    // If user is Owner, grant all permissions
-    if (backendRole && isOwner(backendRole.name)) {
-      return true;
-    }
 
-    // Check if permission exists in backend permissions
+    // Owner gets everything
+    if (backendRole && isOwner(backendRole.name)) return true;
+
     if (backendPermissions.length > 0) {
-      // Check for exact match (e.g., "menu.create")
-      const hasExactMatch = backendPermissions.some((p: any) => p.name === permission);
-      if (hasExactMatch) {
-        return true;
-      }
+      // Normalise the requested permission to colon format (handle both 'a.b' and 'a:b')
+      const colonPerm = (permission as string).replace('.', ':');
+      const [resource, action] = colonPerm.split(':');
 
-      // Check for manage permission (e.g., "menu.manage" grants all menu permissions)
-      const [resource, action] = permission.split('.');
-      const hasManagePermission = backendPermissions.some((p: any) => 
-        p.resource === resource && p.action === 'manage'
-      );
-      if (hasManagePermission) {
-        return true;
-      }
+      // Exact match on stored name
+      if (backendPermissions.some((p: any) => (p.name ?? `${p.resource}:${p.action}`) === colonPerm)) return true;
 
-      // Check by resource and action
-      const hasResourceAction = backendPermissions.some((p: any) => 
-        p.resource === resource && p.action === action
-      );
-      if (hasResourceAction) {
-        return true;
-      }
+      // resource:manage covers read/create/update/delete
+      if (backendPermissions.some((p: any) => p.resource === resource && p.action === 'manage')) return true;
+
+      // resource:action match
+      if (backendPermissions.some((p: any) => p.resource === resource && p.action === action)) return true;
     }
 
     return false;
   }
+
 
   /**
    * Get backend permissions from localStorage
@@ -153,48 +135,39 @@ class PermissionService {
     return this.getBackendRole();
   }
 
-  /**
-   * Get permissions for current user
-   */
   static getUserPermissions(): Permission[] {
     const backendPermissions = this.getBackendPermissions();
-    
-    // Transform backend permissions to frontend Permission format
     return backendPermissions.map((p: any) => ({
       id: p.id,
-      name: p.name,
+      name: p.name ?? `${p.resource}:${p.action}`,
       resource: p.resource,
       action: p.action,
       description: p.description || `${p.action} ${p.resource}`,
-      category: p.category || (p.name.startsWith('system:') ? 'system' : 'application') as 'system' | 'application'
+      category: p.category || 'application' as 'system' | 'application',
     }));
   }
 
-  /**
-   * Check if user can access a specific route
-   */
+
   static canAccessRoute(user: AuthUser | null, route: string): boolean {
     if (!user) return false;
 
-    // Route-based access control using backend permissions
     const routePermissions: Record<string, string[]> = {
-      '/admin': ['dashboard.read'],
-      '/admin/orders': ['order.read'],
-      '/admin/menu': ['menu.read'],
-      '/admin/tables': ['table.read'],
-      '/admin/settings': ['settings.read'],
-      '/admin/users': ['user.read'],
-      '/admin/workspace': ['workspace.read'],
-      '/admin/coupons': ['coupon.read'],
+      '/admin':           ['dashboard:read', 'dashboard:view'],
+      '/admin/orders':    ['orders:read',    'orders:view'],
+      '/admin/menu':      ['items:read',     'catalog:view'],
+      '/admin/tables':    ['tables:read',    'locations:view'],
+      '/admin/settings':  ['settings:view',  'workspace:read'],
+      '/admin/users':     ['users:read',     'users:view'],
+      '/admin/workspace': ['workspace:read', 'workspace:manage'],
+      '/admin/coupons':   ['coupons:read',   'coupons:view'],
     };
 
-    const requiredPermissions = routePermissions[route];
-    if (!requiredPermissions) {
-      return false;
-    }
+    const required = routePermissions[route];
+    if (!required) return false;
 
-    return requiredPermissions.some(perm => this.hasPermission(user, perm as PermissionName));
+    return required.some(perm => this.hasPermission(user, perm as PermissionName));
   }
+
 
   /**
    * Get allowed routes for user
@@ -216,17 +189,12 @@ class PermissionService {
     return allRoutes.filter(route => this.canAccessRoute(user, route));
   }
 
-  /**
-   * Check if user can perform an action on a resource
-   */
   static canPerformAction(user: AuthUser | null, resource: string, action: string): boolean {
-    if (!user) {
-      return false;
-    }
-
-    const permission = `${resource}.${action}` as PermissionName;
+    if (!user) return false;
+    const permission = `${resource}:${action}` as PermissionName;
     return this.hasPermission(user, permission);
   }
+
 
   /**
    * Get user's permissions for a specific resource
@@ -288,26 +256,20 @@ class PermissionService {
     return permissions.map(p => p.description || p.name);
   }
 
-  /**
-   * Check if user can manage workspace
-   */
   static canManageWorkspace(user: AuthUser | null): boolean {
-    return this.isOwner(user) || this.hasPermission(user, PERMISSIONS.WORKSPACE_UPDATE);
+    return this.isOwner(user) || this.hasPermission(user, 'workspace:update' as PermissionName);
   }
 
-  /**
-   * Check if user can switch cafes
-   */
+
   static canSwitchCafe(user: AuthUser | null): boolean {
-    return this.isOwner(user) || this.hasPermission(user, 'venue.manage' as PermissionName);
+    return this.isOwner(user) || this.hasPermission(user, 'personas:manage' as PermissionName);
   }
 
-  /**
-   * Check if user can activate/deactivate cafe
-   */
+
   static canManageCafeStatus(user: AuthUser | null): boolean {
-    return this.isOwner(user) || this.hasPermission(user, 'venue.update' as PermissionName);
+    return this.isOwner(user) || this.hasPermission(user, 'personas:update' as PermissionName);
   }
+
 
   // =============================================================================
   // USER MANAGEMENT FOR PERMISSIONS
@@ -452,3 +414,4 @@ class PermissionService {
 }
 
 export default PermissionService;
+           

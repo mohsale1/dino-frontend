@@ -2,6 +2,8 @@
  * Locations Management Page
  *
  * Manage service locations (tables) and areas.
+ * Follows the Coupons page pattern: single bordered container, flat rows with
+ * Divider separators, inline tab bar, no card grid.
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -9,7 +11,6 @@ import {
   Box,
   Typography,
   Button,
-  Paper,
   InputBase,
   Select,
   MenuItem,
@@ -21,20 +22,21 @@ import {
   DialogContent,
   DialogActions,
   Radio,
-  Grid,
+  Tabs,
+  Tab,
+  Divider,
 } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import {
   Add as AddIcon,
-  LocationOn as LocationIcon,
-  CheckCircle as CheckCircleIcon,
-  People as OccupiedIcon,
   Search as SearchIcon,
   Close as CloseIcon,
-  Schedule as ReservedIcon,
   Print as PrintIcon,
+  QrCode2 as QrCodeIcon,
+  LocationOn as LocationOnIcon,
 } from '@mui/icons-material';
-import LocationTabs from './Locations/LocationTabs';
+import LocationCard from './Locations/LocationCard';
+import AreaCard from './Locations/AreaCard';
 import QRCodeDialog from './Locations/QRCodeDialog';
 import { ServiceLocationFormDialog, ServiceAreaFormDialog } from '../../features/locations/components';
 import { DeleteConfirmationDialog } from '../../components/dialogs';
@@ -42,62 +44,6 @@ import { locationService } from '../../services/application';
 import { useUserData } from '../../contexts/application/UserData';
 import { usePermissions } from '../../hooks/usePermissions';
 import type { ServiceLocation, ServiceArea } from '../../features/locations/types';
-
-// ─── StatCard ──────────────────────────────────────────────────────────────────
-
-const StatCard: React.FC<{
-  label: string;
-  value: number;
-  icon: React.ReactElement;
-}> = ({ label, value, icon }) => (
-  <Box
-    sx={{
-      bgcolor: '#ffffff',
-      border: '1px solid #e0e0e0',
-      borderRadius: '12px',
-      p: '20px',
-      display: 'flex',
-      alignItems: 'center',
-      gap: 2,
-      height: '100%',
-    }}
-  >
-    <Box
-      sx={{
-        width: 40,
-        height: 40,
-        borderRadius: '8px',
-        flexShrink: 0,
-        bgcolor: 'rgba(25,118,210,0.08)',
-        border: '1px solid rgba(25,118,210,0.2)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        color: '#1976D2',
-        '& svg': { fontSize: 20 },
-      }}
-    >
-      {icon}
-    </Box>
-    <Box>
-      <Typography
-        sx={{
-          fontWeight: 700,
-          fontSize: 24,
-          color: '#1C1C1E',
-          lineHeight: 1,
-          letterSpacing: '-0.02em',
-          fontVariantNumeric: 'tabular-nums',
-        }}
-      >
-        {value}
-      </Typography>
-      <Typography sx={{ fontSize: 12, color: '#666666', mt: 0.25, fontWeight: 500 }}>
-        {label}
-      </Typography>
-    </Box>
-  </Box>
-);
 
 // ─── Bulk Print ────────────────────────────────────────────────────────────────
 
@@ -158,7 +104,8 @@ const buildBulkPrintHtml = (items: BulkQRItem[], style: BulkQRStyle = 'classic')
 </html>`;
 };
 
-// ─── Main Component ────────────────────────────────────────────────────────────
+
+// ─── Page Component ────────────────────────────────────────────────────────────
 
 const LocationsManagementPage: React.FC = () => {
   const { userData } = useUserData();
@@ -167,19 +114,19 @@ const LocationsManagementPage: React.FC = () => {
   const { canCreateTables, canCreateAreas } = usePermissions();
 
   // ── State ──────────────────────────────────────────────────────────────────
-  const [activeTab, setActiveTab]             = useState(0);
-  const [searchQuery, setSearchQuery]         = useState('');
-  const [filterStatus, setFilterStatus]       = useState('all');
+  const [activeTab, setActiveTab]       = useState(0);
+  const [searchQuery, setSearchQuery]   = useState('');
+  const [filterStatus, setFilterStatus] = useState('all');
 
   // Location dialog state
-  const [locationDialogOpen, setLocationDialogOpen]   = useState(false);
-  const [locationDeleteOpen, setLocationDeleteOpen]   = useState(false);
-  const [selectedLocation, setSelectedLocation]       = useState<ServiceLocation | null>(null);
+  const [locationDialogOpen, setLocationDialogOpen] = useState(false);
+  const [locationDeleteOpen, setLocationDeleteOpen] = useState(false);
+  const [selectedLocation, setSelectedLocation]     = useState<ServiceLocation | null>(null);
 
   // Area dialog state
-  const [areaDialogOpen, setAreaDialogOpen]   = useState(false);
-  const [areaDeleteOpen, setAreaDeleteOpen]   = useState(false);
-  const [selectedArea, setSelectedArea]       = useState<ServiceArea | null>(null);
+  const [areaDialogOpen, setAreaDialogOpen] = useState(false);
+  const [areaDeleteOpen, setAreaDeleteOpen] = useState(false);
+  const [selectedArea, setSelectedArea]     = useState<ServiceArea | null>(null);
 
   const [snackbar, setSnackbar] = useState<{
     open: boolean;
@@ -226,36 +173,45 @@ const LocationsManagementPage: React.FC = () => {
     load();
   }, [workspaceId, fetchLocations, fetchAreas]);
 
-  // ── Stats ──────────────────────────────────────────────────────────────────
+  // ── Filtered data (inline) ─────────────────────────────────────────────────
 
-  const stats = {
-    total:     locations.length,
-    available: locations.filter((l) => l.status === 'available').length,
-    occupied:  locations.filter((l) => l.status === 'occupied').length,
-    reserved:  locations.filter((l) => l.status === 'reserved').length,
-  };
+  const filteredLocations = locations.filter((l) => {
+    const q = searchQuery.toLowerCase();
+    const matchSearch =
+      !q ||
+      (l.name ?? '').toLowerCase().includes(q) ||
+      l.identifier.toLowerCase().includes(q) ||
+      (l.description ?? '').toLowerCase().includes(q);
+    const matchStatus = filterStatus === 'all' || l.status === filterStatus;
+    return matchSearch && matchStatus;
+  });
 
-  // ── Filtered locations (for bulk print) ───────────────────────────────────
+  const filteredAreas = areas.filter((a) => {
+    const q = searchQuery.toLowerCase();
+    const matchSearch =
+      !q ||
+      a.name.toLowerCase().includes(q) ||
+      (a.description ?? '').toLowerCase().includes(q);
+    const matchStatus =
+      filterStatus === 'all' ||
+      (filterStatus === 'available' && a.isActive) ||
+      (filterStatus === 'maintenance' && !a.isActive);
+    return matchSearch && matchStatus;
+  });
 
-  const getFilteredLocations = useCallback(
-    (): ServiceLocation[] =>
-      locations.filter((l) => {
-        const q = searchQuery.toLowerCase();
-        const matchSearch =
-          !q ||
-          (l.name ?? '').toLowerCase().includes(q) ||
-          l.identifier.toLowerCase().includes(q) ||
-          (l.description ?? '').toLowerCase().includes(q);
-        const matchStatus = filterStatus === 'all' || l.status === filterStatus;
-        return matchSearch && matchStatus;
-      }),
-    [locations, searchQuery, filterStatus],
-  );
+  const locationCountByArea = (areaId: string): number =>
+    locations.filter((l) => l.areaId === areaId).length;
 
   // ── Shared helpers ─────────────────────────────────────────────────────────
 
   const showSnack = (message: string, severity: 'success' | 'error' | 'info') =>
     setSnackbar({ open: true, message, severity });
+
+  const handleTabChange = (tab: number) => {
+    setActiveTab(tab);
+    setSearchQuery('');
+    setFilterStatus('all');
+  };
 
   // ── Location handlers ──────────────────────────────────────────────────────
 
@@ -382,8 +338,7 @@ const LocationsManagementPage: React.FC = () => {
   // ── Bulk Print QR ──────────────────────────────────────────────────────────
 
   const handleBulkPrintQR = () => {
-    const visibleLocations = getFilteredLocations();
-    if (visibleLocations.length === 0) {
+    if (filteredLocations.length === 0) {
       showSnack('No locations to print', 'error');
       return;
     }
@@ -392,11 +347,10 @@ const LocationsManagementPage: React.FC = () => {
 
   const handleBulkPrintConfirm = async () => {
     setBulkStyleOpen(false);
-    const visibleLocations = getFilteredLocations();
-    showSnack(`Generating QR codes for ${visibleLocations.length} location(s)...`, 'info');
+    showSnack(`Generating QR codes for ${filteredLocations.length} location(s)...`, 'info');
     try {
       const items = await Promise.all(
-        visibleLocations.map(async (loc): Promise<BulkQRItem> => {
+        filteredLocations.map(async (loc): Promise<BulkQRItem> => {
           const qrUrl = await locationService.generateQRCode(loc.id, workspaceId);
           const area = loc.areaId ? areas.find((a) => a.id === loc.areaId) : undefined;
           return { qrUrl, name: loc.name ?? loc.identifier, areaName: area?.name ?? '', menuUrl: qrUrl };
@@ -418,7 +372,7 @@ const LocationsManagementPage: React.FC = () => {
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', bgcolor: '#f8fafc' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
         <CircularProgress color="primary" />
       </Box>
     );
@@ -426,7 +380,7 @@ const LocationsManagementPage: React.FC = () => {
 
   if (error) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', bgcolor: '#f8fafc', p: 3 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh', p: 3 }}>
         <Alert severity="error" sx={{ maxWidth: 480 }}>{error}</Alert>
       </Box>
     );
@@ -438,167 +392,289 @@ const LocationsManagementPage: React.FC = () => {
   const addLabel = activeTab === 0 ? 'Add Location' : 'Add Area';
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', bgcolor: '#f8fafc' }}>
+    <Box sx={{ maxWidth: '1440px', margin: '0 auto', px: { xs: 2, sm: 3 }, pt: 3, pb: 6 }}>
 
-      {/* ── Page Header ───────────────────────────────────────────────────────── */}
-      <Box
-        sx={{
-          bgcolor: '#ffffff',
-          px: { xs: 2, sm: '32px' },
-          pt: '24px',
-          pb: '20px',
-          borderBottom: '1px solid #e0e0e0',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: 2,
-        }}
-      >
+      {/* ── Page Header ────────────────────────────────────────────────────────── */}
+      <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 2, mb: 4 }}>
         <Box>
-          <Typography sx={{ fontWeight: 700, color: '#1C1C1E', fontSize: 20, lineHeight: 1.3 }}>
+          <Typography sx={{ fontWeight: 700, fontSize: '1.5rem', color: '#1C1C1E', lineHeight: 1.2 }}>
             Locations
           </Typography>
-          <Typography variant="body2" sx={{ color: '#666666', mt: 0.5 }}>
+          <Typography sx={{ fontSize: '0.875rem', color: '#666666', mt: 0.5 }}>
             {locations.length} location{locations.length !== 1 ? 's' : ''} &middot; {areas.length} area{areas.length !== 1 ? 's' : ''}
           </Typography>
         </Box>
         {canAdd && (
-          <Button
-            variant="contained"
-            disableElevation
-            startIcon={<AddIcon />}
-            onClick={handleAddNew}
-            sx={{
-              bgcolor: '#1976D2',
-              color: '#ffffff',
-              fontWeight: 600,
-              textTransform: 'none',
-              borderRadius: '8px',
-              px: 2.5,
-              py: 1,
-              boxShadow: 'none',
-              '&:hover': { bgcolor: '#1565C0', boxShadow: 'none' },
-            }}
-          >
-            {addLabel}
-          </Button>
+          <Box sx={{ display: 'flex', gap: 1, pt: 0.5 }}>
+            <Button
+              variant="contained"
+              disableElevation
+              startIcon={<AddIcon />}
+              onClick={handleAddNew}
+              sx={{
+                bgcolor: '#1976D2',
+                color: '#ffffff',
+                fontWeight: 600,
+                textTransform: 'none',
+                borderRadius: '8px',
+                px: 2.5,
+                py: 1,
+                '&:hover': { bgcolor: '#1565C0' },
+              }}
+            >
+              {addLabel}
+            </Button>
+          </Box>
         )}
       </Box>
 
-      {/* ── Stat Cards ────────────────────────────────────────────────────────── */}
-      <Box sx={{ px: { xs: 2, sm: '32px' }, pt: 3, pb: 0 }}>
-        <Grid container spacing={2}>
-          <Grid item xs={12} sm={6} lg={3}>
-            <StatCard label="Total Locations" value={stats.total}     icon={<LocationIcon />} />
-          </Grid>
-          <Grid item xs={12} sm={6} lg={3}>
-            <StatCard label="Available"        value={stats.available} icon={<CheckCircleIcon />} />
-          </Grid>
-          <Grid item xs={12} sm={6} lg={3}>
-            <StatCard label="Occupied"         value={stats.occupied}  icon={<OccupiedIcon />} />
-          </Grid>
-          <Grid item xs={12} sm={6} lg={3}>
-            <StatCard label="Reserved"         value={stats.reserved}  icon={<ReservedIcon />} />
-          </Grid>
-        </Grid>
-      </Box>
-
-      {/* ── Toolbar ───────────────────────────────────────────────────────────── */}
-      <Box sx={{ px: { xs: 2, sm: '32px' }, pt: 3 }}>
-        <Paper
-          elevation={0}
+      {/* ── Search / Filter Row ─────────────────────────────────────────────────── */}
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3, flexWrap: 'wrap' }}>
+        {/* Search */}
+        <Box
           sx={{
-            borderRadius: 0,
-            border: 'none',
-            borderTop: '1px solid #e0e0e0',
-            borderBottom: '1px solid #e0e0e0',
-            bgcolor: '#ffffff',
-            overflow: 'hidden',
+            flex: '1 1 220px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+            bgcolor: '#f7f9fa',
+            border: '1px solid #e0e0e0',
+            borderRadius: 2,
+            px: 1.5,
+            py: 0.75,
           }}
         >
-          <Box
-            sx={{
-              px: { xs: 2, sm: 2.5 },
-              pt: 2,
-              pb: 1.5,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 1.5,
-              flexWrap: 'wrap',
-              borderBottom: '1px solid #e0e0e0',
-            }}
-          >
-            {/* Search */}
-            <Box
-              sx={{
-                flex: '1 1 220px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1,
-                bgcolor: '#f7f9fa',
-                border: '1px solid #e0e0e0',
-                borderRadius: 2,
-                px: 1.5,
-                py: 0.75,
-              }}
+          <SearchIcon sx={{ fontSize: 17, color: '#999999', flexShrink: 0 }} />
+          <InputBase
+            placeholder={activeTab === 0 ? 'Search locations...' : 'Search areas...'}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            sx={{ flex: 1, fontSize: '0.875rem', color: '#1C1C1E' }}
+          />
+          {searchQuery && (
+            <IconButton
+              size="small"
+              onClick={() => setSearchQuery('')}
+              sx={{ p: 0.25, color: '#999999' }}
             >
-              <SearchIcon sx={{ fontSize: 17, color: '#999999', flexShrink: 0 }} />
-              <InputBase
-                placeholder={activeTab === 0 ? 'Search locations...' : 'Search areas...'}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                sx={{ flex: 1, fontSize: '0.875rem', color: '#1C1C1E' }}
-              />
-              {searchQuery && (
-                <IconButton
-                  size="small"
-                  onClick={() => setSearchQuery('')}
-                  sx={{ p: 0.25, color: '#999999' }}
-                >
-                  <CloseIcon sx={{ fontSize: 14 }} />
-                </IconButton>
-              )}
-            </Box>
+              <CloseIcon sx={{ fontSize: 14 }} />
+            </IconButton>
+          )}
+        </Box>
 
-            {/* Status filter */}
-            <FormControl size="small" sx={{ minWidth: 130 }}>
-              <Select
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
-                displayEmpty
-                sx={{ borderRadius: 2, fontSize: '0.875rem', bgcolor: '#f7f9fa' }}
-              >
-                <MenuItem value="all">
-                  <Typography variant="body2" sx={{ color: '#999999' }}>All Status</Typography>
-                </MenuItem>
-                <MenuItem value="available">Available</MenuItem>
-                <MenuItem value="occupied">Occupied</MenuItem>
-                <MenuItem value="reserved">Reserved</MenuItem>
-                <MenuItem value="maintenance">Maintenance</MenuItem>
-              </Select>
-            </FormControl>
-          </Box>
-        </Paper>
+        {/* Status filter */}
+        <FormControl size="small" sx={{ minWidth: 130 }}>
+          <Select
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value)}
+            displayEmpty
+            sx={{ borderRadius: 2, fontSize: '0.875rem', bgcolor: '#f7f9fa' }}
+          >
+            <MenuItem value="all">
+              <Typography variant="body2" sx={{ color: '#999999' }}>All Status</Typography>
+            </MenuItem>
+            <MenuItem value="available">Available</MenuItem>
+            <MenuItem value="occupied">Occupied</MenuItem>
+            <MenuItem value="reserved">Reserved</MenuItem>
+            <MenuItem value="maintenance">Maintenance</MenuItem>
+          </Select>
+        </FormControl>
+
+        {/* Result count */}
+        <Typography sx={{ fontSize: '0.875rem', color: '#999999', whiteSpace: 'nowrap' }}>
+          {activeTab === 0
+            ? `${filteredLocations.length} result${filteredLocations.length !== 1 ? 's' : ''}`
+            : `${filteredAreas.length} result${filteredAreas.length !== 1 ? 's' : ''}`}
+        </Typography>
       </Box>
 
-      {/* ── Content ───────────────────────────────────────────────────────────── */}
-      <Box sx={{ px: { xs: 2, sm: '32px' }, pt: 3, pb: 6 }}>
-        <LocationTabs
-          locations={locations}
-          searchQuery={searchQuery}
-          filterStatus={filterStatus}
-          onEditLocation={handleEditLocation}
-          onDeleteLocation={handleDeleteLocation}
-          onToggleStatus={handleToggleStatus}
-          onViewQR={handleViewQR}
-          onBulkPrintQR={handleBulkPrintQR}
-          areas={areas}
-          onEditArea={handleEditArea}
-          onDeleteArea={handleDeleteArea}
-          activeTab={activeTab}
-          onTabChange={(tab) => { setActiveTab(tab); setSearchQuery(''); setFilterStatus('all'); }}
-        />
+      {/* ── Single Bordered Container ───────────────────────────────────────────── */}
+      <Box sx={{ border: '1px solid #e0e0e0', borderRadius: '12px', overflow: 'hidden', bgcolor: '#ffffff' }}>
+
+        {/* Tab bar */}
+        <Box sx={{ borderBottom: '1px solid #e0e0e0', bgcolor: '#ffffff', px: { xs: 2, sm: 3 } }}>
+          <Tabs
+            value={activeTab}
+            onChange={(_e, v) => handleTabChange(v as number)}
+            sx={{
+              minHeight: 44,
+              '& .MuiTabs-indicator': {
+                height: 2,
+                borderRadius: '2px 2px 0 0',
+                bgcolor: '#1976D2',
+              },
+              '& .MuiTab-root': {
+                minHeight: 44,
+                textTransform: 'none',
+                fontWeight: 600,
+                fontSize: '0.875rem',
+                color: '#666666',
+                px: { xs: 1, sm: 1.5 },
+                py: 0,
+                '&.Mui-selected': { color: '#1C1C1E' },
+              },
+            }}
+          >
+            <Tab label="Locations" />
+            <Tab label="Areas" />
+          </Tabs>
+        </Box>
+
+        {/* ── Locations tab ─────────────────────────────────────────────────────── */}
+        {activeTab === 0 && (
+          <>
+            {/* Sub-toolbar: only when items exist */}
+            {filteredLocations.length > 0 && (
+              <Box
+                sx={{
+                  px: { xs: 2, sm: 3 },
+                  py: 1.25,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  borderBottom: '1px solid #f1f5f9',
+                  bgcolor: '#FCFCFD',
+                }}
+              >
+                <Typography sx={{ fontSize: '0.75rem', color: '#999999', fontWeight: 500 }}>
+                  {filteredLocations.length} location{filteredLocations.length !== 1 ? 's' : ''}
+                </Typography>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  startIcon={<PrintIcon sx={{ fontSize: 15 }} />}
+                  onClick={handleBulkPrintQR}
+                  sx={{
+                    height: 30,
+                    px: 1.5,
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    textTransform: 'none',
+                    borderRadius: '8px',
+                    color: '#1C1C1E',
+                    borderColor: '#e0e0e0',
+                    '&:hover': { borderColor: '#1976D2', bgcolor: '#f8fafc' },
+                  }}
+                >
+                  Print All QRs
+                </Button>
+              </Box>
+            )}
+
+            {/* Empty state or flat list */}
+            {filteredLocations.length === 0 ? (
+              <Box sx={{ py: 10, px: 3, textAlign: 'center', bgcolor: '#FCFCFD' }}>
+                <Box
+                  sx={{
+                    width: 64,
+                    height: 64,
+                    borderRadius: '12px',
+                    bgcolor: '#F7F9FA',
+                    border: '1px solid #e0e0e0',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    mx: 'auto',
+                    mb: 2.5,
+                    color: '#999999',
+                  }}
+                >
+                  <QrCodeIcon sx={{ fontSize: 30 }} />
+                </Box>
+                <Typography sx={{ fontWeight: 700, color: '#1C1C1E', fontSize: '1rem', mb: 0.75 }}>
+                  {locations.length === 0 ? 'No locations yet' : 'No results found'}
+                </Typography>
+                <Typography sx={{ color: '#666666', fontSize: '0.875rem', maxWidth: 320, mx: 'auto' }}>
+                  {locations.length === 0
+                    ? 'Add your first location to start generating QR codes for your tables.'
+                    : 'Try adjusting your search or filter to find what you are looking for.'}
+                </Typography>
+              </Box>
+            ) : (
+              <Box>
+                {filteredLocations.map((location, idx) => (
+                  <React.Fragment key={location.id}>
+                    <Box
+                      sx={{
+                        px: { xs: 2, sm: 3 },
+                        py: { xs: 2, sm: 2.5 },
+                        '&:hover': { bgcolor: 'rgba(0,166,202,0.04)' },
+                      }}
+                    >
+                      <LocationCard
+                        location={location}
+                        onEdit={handleEditLocation}
+                        onDelete={handleDeleteLocation}
+                        onToggleStatus={handleToggleStatus}
+                        onViewQR={handleViewQR}
+                      />
+                    </Box>
+                    {idx < filteredLocations.length - 1 && (
+                      <Divider sx={{ borderColor: '#f1f5f9' }} />
+                    )}
+                  </React.Fragment>
+                ))}
+              </Box>
+            )}
+          </>
+        )}
+
+        {/* ── Areas tab ─────────────────────────────────────────────────────────── */}
+        {activeTab === 1 && (
+          filteredAreas.length === 0 ? (
+            <Box sx={{ py: 10, px: 3, textAlign: 'center', bgcolor: '#FCFCFD' }}>
+              <Box
+                sx={{
+                  width: 64,
+                  height: 64,
+                  borderRadius: '12px',
+                  bgcolor: '#F7F9FA',
+                  border: '1px solid #e0e0e0',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  mx: 'auto',
+                  mb: 2.5,
+                  color: '#999999',
+                }}
+              >
+                <LocationOnIcon sx={{ fontSize: 30 }} />
+              </Box>
+              <Typography sx={{ fontWeight: 700, color: '#1C1C1E', fontSize: '1rem', mb: 0.75 }}>
+                {areas.length === 0 ? 'No areas yet' : 'No results found'}
+              </Typography>
+              <Typography sx={{ color: '#666666', fontSize: '0.875rem', maxWidth: 320, mx: 'auto' }}>
+                {areas.length === 0
+                  ? 'Create your first area to organise locations into zones.'
+                  : 'Try adjusting your search or filter to find what you are looking for.'}
+              </Typography>
+            </Box>
+          ) : (
+            <Box>
+              {filteredAreas.map((area, idx) => (
+                <React.Fragment key={area.id}>
+                  <Box
+                    sx={{
+                      px: { xs: 2, sm: 3 },
+                      py: { xs: 2, sm: 2.5 },
+                      '&:hover': { bgcolor: 'rgba(0,166,202,0.04)' },
+                    }}
+                  >
+                    <AreaCard
+                      area={area}
+                      locationCount={locationCountByArea(area.id)}
+                      onEdit={handleEditArea}
+                      onDelete={handleDeleteArea}
+                    />
+                  </Box>
+                  {idx < filteredAreas.length - 1 && (
+                    <Divider sx={{ borderColor: '#f1f5f9' }} />
+                  )}
+                </React.Fragment>
+              ))}
+            </Box>
+          )
+        )}
       </Box>
 
       {/* ── Dialogs ────────────────────────────────────────────────────────────── */}
@@ -643,7 +719,7 @@ const LocationsManagementPage: React.FC = () => {
         requireTyping={false}
       />
 
-      {/* ── Bulk Print Style Picker ── */}
+      {/* ── Bulk Print Style Picker ─────────────────────────────────────────────── */}
       <Dialog
         open={bulkStyleOpen}
         onClose={() => setBulkStyleOpen(false)}
@@ -665,7 +741,7 @@ const LocationsManagementPage: React.FC = () => {
           <Box>
             <Typography sx={{ color: '#1C1C1E', fontWeight: 700, fontSize: '1rem' }}>Print All QRs</Typography>
             <Typography sx={{ color: '#666666', fontSize: '0.75rem', mt: 0.25 }}>
-              Choose a card style for all {getFilteredLocations().length} QR codes
+              Choose a card style for all {filteredLocations.length} QR codes
             </Typography>
           </Box>
           <IconButton

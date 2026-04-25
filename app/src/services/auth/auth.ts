@@ -139,11 +139,18 @@ class AuthService {
       // Determine the correct endpoint based on user type
       const endpoint = isSystemUser ? '/system/auth/me' : '/application/auth/me';
       
-      const response = await apiService.get<UserProfile>(endpoint);
+      const response = await apiService.get<any>(endpoint);
       
       if (response.success && response.data) {
-        // Normalize before storing so camelCase fields are always consistent
-        const normalized = normalizeUserData(response.data) as unknown as UserProfile;
+        // /application/auth/me returns { user: {...}, workspace: {...} }
+        // /system/auth/me returns the user object directly
+        const payload = response.data as any;
+        const rawUser = payload?.user ?? payload;
+
+        // Attach the raw role object so Auth context can read role.permissions
+        const normalized = normalizeUserData(rawUser) as unknown as UserProfile;
+        (normalized as any)._rawRole = rawUser.role;
+
         StorageManager.setUserData(normalized);
         return normalized;
       }

@@ -85,25 +85,37 @@
 }
 
 /* ========================================
-   HIDE SCROLLBARS GLOBALLY — ALL BROWSERS
-   Scrolling still works; bars are invisible
+   SCROLLBAR STYLING — THIN & SUBTLE
    ======================================== */
 
 /* WebKit / Blink — Chrome, Safari, Edge */
 *::-webkit-scrollbar {
-  display: none;
-  width: 0;
-  height: 0;
+  width: 6px;
+  height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 3px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.25);
 }
 
 /* Firefox */
 * {
-  scrollbar-width: none;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.15) transparent;
 }
 
 /* IE / old Edge */
 * {
-  -ms-overflow-style: none;
+  -ms-overflow-style: -ms-autohiding-scrollbar;
 }
 
 /* HTML and Body base styles */
@@ -525,7 +537,6 @@ input[type=number],
 
 .MuiCard-root {
   position: relative;
-  overflow: hidden;
 }
 
 /* Form controls */

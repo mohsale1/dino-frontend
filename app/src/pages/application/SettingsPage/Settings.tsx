@@ -2,9 +2,6 @@ import React, { useState } from 'react';
 import {
   Box,
   Typography,
-  Tabs,
-  Tab,
-  Paper,
   Snackbar,
   Alert,
 } from '@mui/material';
@@ -13,6 +10,7 @@ import {
   BusinessOutlined,
   LockOutlined,
   CalendarToday,
+  RateReviewOutlined,
 } from '@mui/icons-material';
 import { useAuth } from '../../../contexts/common/Auth';
 import { useUserData } from '../../../contexts/application/UserData';
@@ -20,6 +18,7 @@ import { getUserFirstName } from '../../../utils/data/userUtils';
 import ProfileSection from './components/ProfileSection';
 import SecuritySection from './components/SecuritySection';
 import WorkspaceSection from './components/WorkspaceSection';
+import ReviewSection from './components/ReviewSection';
 
 const ROLE_DISPLAY: Record<string, string> = {
   superadmin: 'Super Admin',
@@ -29,16 +28,17 @@ const ROLE_DISPLAY: Record<string, string> = {
 };
 
 const SECTIONS = [
-  { id: 'profile',   label: 'Profile',   icon: <PersonOutlined fontSize="small" />   },
-  { id: 'workspace', label: 'Workspace', icon: <BusinessOutlined fontSize="small" /> },
-  { id: 'security',  label: 'Security',  icon: <LockOutlined fontSize="small" />     },
+  { id: 'profile',   label: 'Profile',   icon: PersonOutlined,     description: 'Personal info & avatar'   },
+  { id: 'workspace', label: 'Workspace', icon: BusinessOutlined,   description: 'Venue details & location' },
+  { id: 'security',  label: 'Security',  icon: LockOutlined,       description: 'Password & access'        },
+  { id: 'review',    label: 'Review',    icon: RateReviewOutlined, description: 'Share your feedback'      },
 ];
 
 const Settings: React.FC = () => {
   const { user } = useAuth();
-  useUserData(); // keep provider active
+  useUserData();
 
-  const [activeTab, setActiveTab] = useState(0);
+  const [activeSection, setActiveSection] = useState('profile');
   const [snackbar, setSnackbar] = useState<{
     open: boolean;
     message: string;
@@ -61,66 +61,44 @@ const Settings: React.FC = () => {
     }
   };
 
-  const handleSnackbarClose = () =>
-    setSnackbar((prev) => ({ ...prev, open: false }));
-
   const renderSection = () => {
-    switch (SECTIONS[activeTab]?.id) {
-      case 'profile':
-        return <ProfileSection />;
-      case 'workspace':
-        return <WorkspaceSection onSave={() => handleSave(null, 'Workspace')} />;
-      case 'security':
-        return <SecuritySection />;
-      default:
-        return null;
+    switch (activeSection) {
+      case 'profile':   return <ProfileSection />;
+      case 'workspace': return <WorkspaceSection onSave={() => handleSave(null, 'Workspace')} />;
+      case 'security':  return <SecuritySection />;
+      case 'review':    return <ReviewSection />;
+      default:          return null;
     }
   };
 
   const dateLabel = new Date().toLocaleDateString('en-US', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
   });
 
   return (
-    <Box sx={{ width: '100%', minHeight: '100vh', bgcolor: '#f8fafc' }}>
+    <Box sx={{ maxWidth: '1440px', margin: '0 auto', px: { xs: 2, sm: 3 }, pt: 3, pb: 6 }}>
 
       {/* ── Page Header ── */}
-      <Box
-        sx={{
-          bgcolor: '#ffffff',
-          px: { xs: 2, sm: '32px' },
-          pt: '24px',
-          pb: '20px',
-          borderBottom: '1px solid #e0e0e0',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: 2,
-        }}
-      >
+      <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 2, mb: 4 }}>
         <Box>
-          <Typography sx={{ fontWeight: 700, color: '#1C1C1E', fontSize: 20, lineHeight: 1.3 }}>
+          <Typography sx={{ fontWeight: 700, fontSize: '1.5rem', color: '#1C1C1E', lineHeight: 1.2 }}>
             Settings
           </Typography>
-          <Typography variant="body2" sx={{ color: '#666666', mt: 0.5 }}>
+          <Typography sx={{ fontSize: '0.875rem', color: '#666666', mt: 0.5 }}>
             {[firstName, roleLabel].filter(Boolean).join(' · ') || 'Account settings'}
           </Typography>
         </Box>
-
-        {/* Date chip */}
         <Box
           sx={{
-            display: 'flex',
+            display: { xs: 'none', sm: 'flex' },
             alignItems: 'center',
             gap: 0.75,
-            bgcolor: '#f4f4f4',
+            bgcolor: '#F7F9FA',
+            border: '1px solid #e0e0e0',
             borderRadius: '8px',
             px: 1.5,
             py: 0.75,
+            flexShrink: 0,
           }}
         >
           <CalendarToday sx={{ fontSize: 14, color: '#666666' }} />
@@ -130,67 +108,163 @@ const Settings: React.FC = () => {
         </Box>
       </Box>
 
-      {/* ── Tab Bar ── */}
-      <Paper
-        elevation={0}
-        sx={{
-          borderRadius: 0,
-          border: 'none',
-          borderBottom: '1px solid #e0e0e0',
-          bgcolor: '#ffffff',
-        }}
-      >
-        <Box sx={{ px: { xs: 1, sm: 2, md: '32px' } }}>
-          <Tabs
-            value={activeTab}
-            onChange={(_e, val) => setActiveTab(val)}
-            variant="scrollable"
-            scrollButtons="auto"
-            TabIndicatorProps={{
-              style: { backgroundColor: '#1976D2', height: 3 },
-            }}
-            sx={{
-              minHeight: 52,
-              '& .MuiTab-root': {
-                textTransform: 'none',
-                fontWeight: 600,
-                fontSize: '0.875rem',
-                minHeight: 52,
-                color: '#666666',
+      {/* ── Mobile: horizontal pill nav ── */}
+      <Box sx={{ display: { xs: 'flex', md: 'none' }, gap: 1, mb: 2, flexWrap: 'wrap' }}>
+        {SECTIONS.map((section) => {
+          const Icon = section.icon;
+          const isActive = activeSection === section.id;
+          return (
+            <Box
+              key={section.id}
+              onClick={() => setActiveSection(section.id)}
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
                 gap: 0.75,
-                '&.Mui-selected': {
-                  color: '#1C1C1E',
-                },
-              },
-            }}
-          >
-            {SECTIONS.map((section) => (
-              <Tab
-                key={section.id}
-                label={section.label}
-                icon={section.icon}
-                iconPosition="start"
-              />
-            ))}
-          </Tabs>
-        </Box>
-      </Paper>
+                px: 1.5,
+                py: 0.875,
+                borderRadius: '8px',
+                cursor: 'pointer',
+                border: `1px solid ${isActive ? '#1976D2' : '#e0e0e0'}`,
+                bgcolor: isActive ? 'rgba(25,118,210,0.08)' : '#ffffff',
+                transition: 'all 0.15s',
+              }}
+            >
+              <Icon sx={{ fontSize: 16, color: isActive ? '#1976D2' : '#666666' }} />
+              <Typography sx={{ fontSize: '0.875rem', fontWeight: isActive ? 700 : 500, color: isActive ? '#1976D2' : '#1C1C1E' }}>
+                {section.label}
+              </Typography>
+            </Box>
+          );
+        })}
+      </Box>
 
-      {/* ── Content Area ── */}
-      <Box sx={{ px: { xs: 2, sm: '32px' }, pt: 3, pb: 6 }}>
-        {renderSection()}
+      {/* ── Two-column layout ── */}
+      <Box sx={{ display: 'flex', gap: 3, alignItems: 'flex-start' }}>
+
+        {/* ── Left: Nav sidebar ── */}
+        <Box
+          sx={{
+            width: 220,
+            flexShrink: 0,
+            display: { xs: 'none', md: 'flex' },
+            flexDirection: 'column',
+            border: '1px solid #e0e0e0',
+            borderRadius: '12px',
+            overflow: 'hidden',
+            bgcolor: '#ffffff',
+          }}
+        >
+          <Box sx={{ px: 2, py: 1.75, borderBottom: '1px solid #e0e0e0', bgcolor: '#F7F9FA' }}>
+            <Typography sx={{ fontSize: '0.72rem', fontWeight: 700, color: '#999999', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+              Account
+            </Typography>
+          </Box>
+
+          <Box sx={{ py: 1 }}>
+            {SECTIONS.map((section) => {
+              const Icon = section.icon;
+              const isActive = activeSection === section.id;
+              return (
+                <Box
+                  key={section.id}
+                  onClick={() => setActiveSection(section.id)}
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1.5,
+                    px: 2,
+                    py: 1.25,
+                    mx: 1,
+                    my: 0.25,
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    bgcolor: isActive ? 'rgba(25,118,210,0.08)' : 'transparent',
+                    transition: 'background-color 0.15s',
+                    '&:hover': {
+                      bgcolor: isActive ? 'rgba(25,118,210,0.08)' : 'rgba(0,0,0,0.04)',
+                    },
+                  }}
+                >
+                  <Box
+                    sx={{
+                      width: 32,
+                      height: 32,
+                      borderRadius: '8px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0,
+                      bgcolor: isActive ? 'rgba(25,118,210,0.12)' : '#F7F9FA',
+                      border: `1px solid ${isActive ? 'rgba(25,118,210,0.25)' : '#e0e0e0'}`,
+                      color: isActive ? '#1976D2' : '#666666',
+                      transition: 'all 0.15s',
+                    }}
+                  >
+                    <Icon sx={{ fontSize: 17 }} />
+                  </Box>
+
+                  <Box sx={{ minWidth: 0 }}>
+                    <Typography
+                      sx={{
+                        fontSize: '0.875rem',
+                        fontWeight: isActive ? 700 : 500,
+                        color: isActive ? '#1976D2' : '#1C1C1E',
+                        lineHeight: 1.3,
+                        transition: 'color 0.15s',
+                      }}
+                    >
+                      {section.label}
+                    </Typography>
+                    <Typography
+                      sx={{
+                        fontSize: '0.72rem',
+                        color: '#999999',
+                        lineHeight: 1.3,
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                      }}
+                    >
+                      {section.description}
+                    </Typography>
+                  </Box>
+
+                  {isActive && (
+                    <Box
+                      sx={{
+                        width: 3,
+                        height: 20,
+                        borderRadius: '2px',
+                        bgcolor: '#1976D2',
+                        flexShrink: 0,
+                        ml: 'auto',
+                      }}
+                    />
+                  )}
+                </Box>
+              );
+            })}
+          </Box>
+        </Box>
+
+        {/* ── Right: Section content ── */}
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          {renderSection()}
+        </Box>
+
       </Box>
 
       {/* ── Snackbar ── */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={6000}
-        onClose={handleSnackbarClose}
+        onClose={() => setSnackbar((p) => ({ ...p, open: false }))}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
       >
         <Alert
           severity={snackbar.severity}
-          onClose={handleSnackbarClose}
+          onClose={() => setSnackbar((p) => ({ ...p, open: false }))}
           sx={{ boxShadow: '0 4px 12px rgba(0,0,0,0.15)', borderRadius: 1 }}
         >
           {snackbar.message}

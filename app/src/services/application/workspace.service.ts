@@ -7,6 +7,19 @@
 import { apiService } from '../../utils/api';
 import { personaService } from './persona.service';
 import type { PersonaCreate, PersonaUpdate } from './persona.service';
+import { API_ENDPOINTS } from '../../config/apiEndpoints';
+
+// ── Approval status types ─────────────────────────────────────────────────────
+export type ApprovalStatus = 'pending' | 'approved' | 'rejected' | null;
+
+export interface WorkspaceApprovalData {
+  workspace_id: number;
+  request_exists: boolean;
+  approved: boolean;
+  status: ApprovalStatus;
+  reviewed_at: string | null;
+  rejection_reason: string | null;
+}
 
 class WorkspaceService {
   // ── Venue / Persona operations ────────────────────────────────────────────
@@ -38,6 +51,14 @@ class WorkspaceService {
   async updateWorkspace(workspaceId: string, data: { name?: string; description?: string }) {
     const response = await apiService.put(`/application/workspaces/${workspaceId}`, data);
     return response.data;
+  }
+
+  async getApprovalStatus(workspaceId: string | number): Promise<WorkspaceApprovalData> {
+    const url = API_ENDPOINTS.APPLICATION.WORKSPACE_APPROVAL.STATUS(workspaceId);
+    const response = await apiService.get<WorkspaceApprovalData>(url);
+    // Unwrap — apiService wraps in { success, data }
+    const raw = (response as any)?.data ?? response;
+    return raw as WorkspaceApprovalData;
   }
 }
 

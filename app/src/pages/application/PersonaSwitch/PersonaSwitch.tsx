@@ -9,7 +9,6 @@ import {
   IconButton,
   Chip,
   Dialog,
-  DialogTitle,
   DialogContent,
   DialogActions,
   TextField,
@@ -31,6 +30,7 @@ import {
   Add,
   Edit,
   Delete,
+  Close,
   CheckCircle,
   Store,
   LocationOn,
@@ -367,107 +367,89 @@ const PersonaSwitch: React.FC = () => {
   // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: '#f8fafc' }}>
-      {/* Page Header */}
-      <Box
-        sx={{
-          bgcolor: '#ffffff',
-          borderBottom: '1px solid #e0e0e0',
-          px: { xs: 2, sm: 3, md: 4 },
-          py: 2.5,
-        }}
-      >
-        <Box
-          sx={{
-            maxWidth: 1200,
-            mx: 'auto',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: 2,
-            flexWrap: 'wrap',
-          }}
-        >
-          <Box>
-            <Typography variant="h5" sx={{ fontWeight: 700, color: '#1C1C1E', lineHeight: 1.2 }}>
-              Personas
-            </Typography>
-            <Typography variant="body2" sx={{ color: '#666666', mt: 0.5 }}>
-              Switch between your business locations
-            </Typography>
-          </Box>
+    <Box sx={{ maxWidth: '1440px', margin: '0 auto', px: { xs: 2, sm: 3 }, pt: 3, pb: 6 }}>
 
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <Tooltip title="Refresh">
-              <IconButton
-                onClick={loadPersonas}
-                disabled={loading}
-                sx={{ border: '1px solid #e0e0e0', borderRadius: '8px', color: '#666666' }}
-              >
-                <Refresh fontSize="small" />
-              </IconButton>
-            </Tooltip>
-
-            {canCreate && (
-              <Button
-                variant="contained"
-                startIcon={<Add />}
-                onClick={openCreateDialog}
-                sx={{
-                  bgcolor: '#1976D2',
-                  borderRadius: '8px',
-                  textTransform: 'none',
-                  fontWeight: 600,
-                  px: 2,
-                  '&:hover': { bgcolor: '#1565C0' },
-                }}
-              >
-                Add Persona
-              </Button>
-            )}
-          </Box>
+      {/* ── Inline Page Header ── */}
+      <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 2, mb: 4 }}>
+        <Box>
+          <Typography sx={{ fontWeight: 700, fontSize: '1.5rem', color: '#1C1C1E', lineHeight: 1.2 }}>
+            Personas
+          </Typography>
+          <Typography sx={{ fontSize: '0.875rem', color: '#666666', mt: 0.5 }}>
+            {personas.length} persona{personas.length !== 1 ? 's' : ''} &middot; Switch between your business locations
+          </Typography>
+        </Box>
+        <Box sx={{ display: 'flex', gap: 1, pt: 0.5 }}>
+          <Tooltip title="Refresh">
+            <IconButton
+              onClick={loadPersonas}
+              disabled={loading}
+              sx={{ border: '1px solid #e0e0e0', borderRadius: '8px', color: '#666666', width: 40, height: 40 }}
+            >
+              <Refresh fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          {canCreate && (
+            <Button
+              variant="contained"
+              disableElevation
+              startIcon={<Add />}
+              onClick={openCreateDialog}
+              sx={{
+                bgcolor: '#1976D2',
+                borderRadius: '8px',
+                textTransform: 'none',
+                fontWeight: 600,
+                px: 2.5,
+                py: 1,
+                '&:hover': { bgcolor: '#1565C0' },
+              }}
+            >
+              Add Persona
+            </Button>
+          )}
         </Box>
       </Box>
 
-      {/* Content */}
-      <Box sx={{ maxWidth: 1200, mx: 'auto', px: { xs: 2, sm: 3, md: 4 }, py: 3 }}>
+      {/* ── Content ── */}
+      <Box sx={{ border: '1px solid #e0e0e0', borderRadius: '12px', overflow: 'hidden', bgcolor: '#ffffff' }}>
         {loading ? (
-          <Grid container spacing={2.5}>
-            {[1, 2, 3].map(n => (
-              <Grid item xs={12} sm={6} lg={4} key={n}>
-                <PersonaCardSkeleton />
-              </Grid>
-            ))}
-          </Grid>
+          <Box sx={{ p: { xs: 2, sm: 2.5 } }}>
+            <Grid container spacing={2}>
+              {[1, 2, 3].map(n => (
+                <Grid item xs={12} sm={6} lg={4} key={n}>
+                  <PersonaCardSkeleton />
+                </Grid>
+              ))}
+            </Grid>
+          </Box>
         ) : personas.length === 0 ? (
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              py: 10,
-              gap: 2,
-            }}
-          >
-            <Store sx={{ fontSize: 56, color: '#e0e0e0' }} />
-            <Typography variant="h6" sx={{ color: '#1C1C1E', fontWeight: 600 }}>
+          <Box sx={{ py: 10, px: 3, textAlign: 'center', bgcolor: '#FCFCFD' }}>
+            <Box
+              sx={{
+                width: 64, height: 64, borderRadius: '12px',
+                bgcolor: '#F7F9FA', border: '1px solid #e0e0e0',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                mx: 'auto', mb: 2.5, color: '#999999',
+              }}
+            >
+              <Store sx={{ fontSize: 30 }} />
+            </Box>
+            <Typography sx={{ fontWeight: 700, color: '#1C1C1E', fontSize: '1rem', mb: 0.75 }}>
               No personas yet
             </Typography>
-            <Typography variant="body2" sx={{ color: '#666666' }}>
+            <Typography sx={{ color: '#666666', fontSize: '0.875rem', mb: 3 }}>
               Create your first persona to get started
             </Typography>
             {canCreate && (
               <Button
                 variant="contained"
+                disableElevation
                 startIcon={<Add />}
                 onClick={openCreateDialog}
                 sx={{
-                  mt: 1,
-                  bgcolor: '#1976D2',
-                  borderRadius: '8px',
-                  textTransform: 'none',
-                  fontWeight: 600,
+                  bgcolor: '#1976D2', borderRadius: '8px',
+                  textTransform: 'none', fontWeight: 600, px: 2.5, py: 1,
                   '&:hover': { bgcolor: '#1565C0' },
                 }}
               >
@@ -476,219 +458,148 @@ const PersonaSwitch: React.FC = () => {
             )}
           </Box>
         ) : (
-          <Grid container spacing={2.5}>
-            {personas.map(persona => {
-              const isActive = persona.id === activePersonaId;
-              const isSwitching = switching === persona.id;
+          <Box sx={{ p: { xs: 2, sm: 2.5 }, bgcolor: '#FCFCFD' }}>
+            <Grid container spacing={2}>
+              {personas.map(persona => {
+                const isActive = persona.id === activePersonaId;
+                const isSwitching = switching === persona.id;
 
-              return (
-                <Grid item xs={12} sm={6} lg={4} key={persona.id}>
-                  <Card
-                    sx={{
-                      border: isActive ? '2px solid #1976D2' : '1px solid #e0e0e0',
-                      borderRadius: '12px',
-                      boxShadow: isActive
-                        ? `0 0 0 3px ${alpha('#1976D2', 0.08)}`
-                        : 'none',
-                      transition: 'border-color 0.2s, box-shadow 0.2s',
-                      height: '100%',
-                      display: 'flex',
-                      flexDirection: 'column',
-                    }}
-                  >
-                    <CardContent
+                return (
+                  <Grid item xs={12} sm={6} lg={4} key={persona.id}>
+                    <Card
+                      elevation={0}
                       sx={{
-                        p: 2.5,
-                        '&:last-child': { pb: 2.5 },
+                        border: isActive ? '2px solid #1976D2' : '1px solid #e0e0e0',
+                        borderRadius: '12px',
+                        boxShadow: isActive ? `0 0 0 3px ${alpha('#1976D2', 0.08)}` : 'none',
+                        transition: 'border-color 0.2s, box-shadow 0.2s',
+                        height: '100%',
                         display: 'flex',
                         flexDirection: 'column',
-                        height: '100%',
+                        bgcolor: '#ffffff',
                       }}
                     >
-                      {/* Top row: name + active chip + status dot */}
-                      <Box
+                      <CardContent
                         sx={{
+                          p: 2.5,
+                          '&:last-child': { pb: 2.5 },
                           display: 'flex',
-                          alignItems: 'flex-start',
-                          justifyContent: 'space-between',
-                          gap: 1,
-                          mb: 1,
+                          flexDirection: 'column',
+                          height: '100%',
                         }}
                       >
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap', flex: 1 }}>
-                          <Typography
-                            variant="subtitle1"
-                            sx={{ fontWeight: 700, color: '#1C1C1E', lineHeight: 1.3 }}
-                          >
-                            {persona.name}
-                          </Typography>
-                          {isActive && (
-                            <Chip
-                              icon={<CheckCircle sx={{ fontSize: '14px !important' }} />}
-                              label="Active"
-                              size="small"
+                        {/* Top row: name + active chip + status dot */}
+                        <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 1, mb: 1 }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap', flex: 1 }}>
+                            <Typography sx={{ fontWeight: 700, fontSize: '0.9375rem', color: '#1C1C1E', lineHeight: 1.3 }}>
+                              {persona.name}
+                            </Typography>
+                            {isActive && (
+                              <Chip
+                                icon={<CheckCircle sx={{ fontSize: '14px !important' }} />}
+                                label="Active"
+                                size="small"
+                                sx={{
+                                  bgcolor: alpha('#1976D2', 0.1), color: '#1976D2',
+                                  fontWeight: 600, fontSize: '0.7rem', height: 22,
+                                  '& .MuiChip-icon': { color: '#1976D2' },
+                                }}
+                              />
+                            )}
+                          </Box>
+                          <Tooltip title={persona.is_open ? 'Open' : 'Closed'}>
+                            <Box
                               sx={{
-                                bgcolor: alpha('#1976D2', 0.1),
-                                color: '#1976D2',
-                                fontWeight: 600,
-                                fontSize: '0.7rem',
-                                height: 22,
-                                '& .MuiChip-icon': { color: '#1976D2' },
+                                width: 10, height: 10, borderRadius: '50%',
+                                bgcolor: persona.is_open ? '#4CAF50' : '#9E9E9E',
+                                flexShrink: 0, mt: 0.5,
                               }}
                             />
-                          )}
+                          </Tooltip>
                         </Box>
 
-                        {/* Open/Closed status dot */}
-                        <Tooltip title={persona.is_open ? 'Open' : 'Closed'}>
-                          <Box
-                            sx={{
-                              width: 10,
-                              height: 10,
-                              borderRadius: '50%',
-                              bgcolor: persona.is_open ? '#4CAF50' : '#9E9E9E',
-                              flexShrink: 0,
-                              mt: 0.5,
-                            }}
+                        {/* Type badges */}
+                        <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap', mb: 1.5 }}>
+                          <Chip
+                            label={PERSONA_TYPE_LABELS[persona.persona_type] ?? 'Unknown'}
+                            size="small"
+                            sx={{ bgcolor: 'rgba(25,118,210,0.08)', color: '#1976D2', fontWeight: 500, fontSize: '0.7rem', height: 22 }}
                           />
-                        </Tooltip>
-                      </Box>
+                          <Chip
+                            label={ORDER_TYPE_LABELS[persona.order_type] ?? 'Unknown'}
+                            size="small"
+                            sx={{ bgcolor: 'rgba(16,185,129,0.08)', color: '#059669', fontWeight: 500, fontSize: '0.7rem', height: 22 }}
+                          />
+                        </Box>
 
-                      {/* Type badges */}
-                      <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap', mb: 1.5 }}>
-                        <Chip
-                          label={PERSONA_TYPE_LABELS[persona.persona_type] ?? 'Unknown'}
-                          size="small"
-                          sx={{
-                            bgcolor: '#f0f4ff',
-                            color: '#3f51b5',
-                            fontWeight: 500,
-                            fontSize: '0.7rem',
-                            height: 22,
-                          }}
-                        />
-                        <Chip
-                          label={ORDER_TYPE_LABELS[persona.order_type] ?? 'Unknown'}
-                          size="small"
-                          sx={{
-                            bgcolor: '#f3f9f3',
-                            color: '#388e3c',
-                            fontWeight: 500,
-                            fontSize: '0.7rem',
-                            height: 22,
-                          }}
-                        />
-                      </Box>
+                        {/* Info rows */}
+                        <Box sx={{ flex: 1 }}>
+                          {(persona.address || persona.city) && (
+                            <InfoRow
+                              icon={<LocationOn sx={{ fontSize: 15 }} />}
+                              text={[persona.address, persona.city, persona.state, persona.country].filter(Boolean).join(', ')}
+                            />
+                          )}
+                          {persona.phone && <InfoRow icon={<Phone sx={{ fontSize: 15 }} />} text={persona.phone} />}
+                          {persona.email && <InfoRow icon={<Email sx={{ fontSize: 15 }} />} text={persona.email} />}
+                        </Box>
 
-                      {/* Info rows */}
-                      <Box sx={{ flex: 1 }}>
-                        {(persona.address || persona.city) && (
-                          <InfoRow
-                            icon={<LocationOn sx={{ fontSize: 15 }} />}
-                            text={[persona.address, persona.city, persona.state, persona.country]
-                              .filter(Boolean)
-                              .join(', ')}
-                          />
-                        )}
-                        {persona.phone && (
-                          <InfoRow
-                            icon={<Phone sx={{ fontSize: 15 }} />}
-                            text={persona.phone}
-                          />
-                        )}
-                        {persona.email && (
-                          <InfoRow
-                            icon={<Email sx={{ fontSize: 15 }} />}
-                            text={persona.email}
-                          />
-                        )}
-                      </Box>
-
-                      {/* Bottom action row */}
-                      <Box
-                        sx={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          mt: 2,
-                          pt: 2,
-                          borderTop: '1px solid #f0f0f0',
-                        }}
-                      >
-                        <Button
-                          variant={isActive ? 'outlined' : 'contained'}
-                          size="small"
-                          startIcon={
-                            isSwitching ? (
-                              <CircularProgress size={14} color="inherit" />
-                            ) : (
-                              <SwapHoriz fontSize="small" />
-                            )
-                          }
-                          onClick={() => handleSwitch(persona)}
-                          disabled={isActive || isSwitching || switching !== null}
+                        {/* Bottom action row */}
+                        <Box
                           sx={{
-                            borderRadius: '8px',
-                            textTransform: 'none',
-                            fontWeight: 600,
-                            fontSize: '0.8rem',
-                            px: 1.5,
-                            ...(isActive
-                              ? {
-                                  borderColor: '#1976D2',
-                                  color: '#1976D2',
-                                  '&.Mui-disabled': {
-                                    borderColor: alpha('#1976D2', 0.4),
-                                    color: alpha('#1976D2', 0.6),
-                                  },
-                                }
-                              : {
-                                  bgcolor: '#1976D2',
-                                  '&:hover': { bgcolor: '#1565C0' },
-                                  '&.Mui-disabled': { bgcolor: alpha('#1976D2', 0.3) },
-                                }),
+                            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                            mt: 2, pt: 2, borderTop: '1px solid #f1f5f9',
                           }}
                         >
-                          {isActive ? 'Active' : 'Switch'}
-                        </Button>
+                          <Button
+                            variant={isActive ? 'outlined' : 'contained'}
+                            size="small"
+                            disableElevation
+                            startIcon={isSwitching ? <CircularProgress size={14} color="inherit" /> : <SwapHoriz fontSize="small" />}
+                            onClick={() => handleSwitch(persona)}
+                            disabled={isActive || isSwitching || switching !== null}
+                            sx={{
+                              borderRadius: '8px', textTransform: 'none', fontWeight: 600, fontSize: '0.8rem', px: 1.5,
+                              ...(isActive
+                                ? { borderColor: '#1976D2', color: '#1976D2', '&.Mui-disabled': { borderColor: alpha('#1976D2', 0.4), color: alpha('#1976D2', 0.6) } }
+                                : { bgcolor: '#1976D2', '&:hover': { bgcolor: '#1565C0' }, '&.Mui-disabled': { bgcolor: alpha('#1976D2', 0.3) } }),
+                            }}
+                          >
+                            {isActive ? 'Active' : 'Switch'}
+                          </Button>
 
-                        <Box sx={{ display: 'flex', gap: 0.5 }}>
-                          {canEdit && (
-                            <Tooltip title="Edit">
-                              <IconButton
-                                size="small"
-                                onClick={() => openEditDialog(persona)}
-                                sx={{
-                                  color: '#666666',
-                                  '&:hover': { color: '#1976D2', bgcolor: alpha('#1976D2', 0.08) },
-                                }}
-                              >
-                                <Edit fontSize="small" />
-                              </IconButton>
-                            </Tooltip>
-                          )}
-                          {canDelete && (
-                            <Tooltip title="Delete">
-                              <IconButton
-                                size="small"
-                                onClick={() => openDeleteDialog(persona)}
-                                sx={{
-                                  color: '#666666',
-                                  '&:hover': { color: '#d32f2f', bgcolor: alpha('#d32f2f', 0.08) },
-                                }}
-                              >
-                                <Delete fontSize="small" />
-                              </IconButton>
-                            </Tooltip>
-                          )}
+                          <Box sx={{ display: 'flex', gap: 0.5 }}>
+                            {canEdit && (
+                              <Tooltip title="Edit">
+                                <IconButton
+                                  size="small"
+                                  onClick={() => openEditDialog(persona)}
+                                  sx={{ color: '#999999', borderRadius: '8px', '&:hover': { color: '#1976D2', bgcolor: alpha('#1976D2', 0.08) } }}
+                                >
+                                  <Edit sx={{ fontSize: 16 }} />
+                                </IconButton>
+                              </Tooltip>
+                            )}
+                            {canDelete && (
+                              <Tooltip title="Delete">
+                                <IconButton
+                                  size="small"
+                                  onClick={() => openDeleteDialog(persona)}
+                                  sx={{ color: '#999999', borderRadius: '8px', '&:hover': { color: '#d32f2f', bgcolor: alpha('#d32f2f', 0.08) } }}
+                                >
+                                  <Delete sx={{ fontSize: 16 }} />
+                                </IconButton>
+                              </Tooltip>
+                            )}
+                          </Box>
                         </Box>
-                      </Box>
-                    </CardContent>
-                  </Card>
-                </Grid>
-              );
-            })}
-          </Grid>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                );
+              })}
+            </Grid>
+          </Box>
         )}
       </Box>
 
@@ -698,18 +609,29 @@ const PersonaSwitch: React.FC = () => {
         onClose={closeDialog}
         maxWidth="sm"
         fullWidth
-        PaperProps={{ sx: { borderRadius: '12px' } }}
+        PaperProps={{ sx: { borderRadius: '12px', overflow: 'hidden' } }}
       >
-        <DialogTitle
-          sx={{
-            fontWeight: 700,
-            color: '#1C1C1E',
-            pb: 1,
-            borderBottom: '1px solid #e0e0e0',
-          }}
-        >
-          {editingPersona ? 'Edit Persona' : 'Add Persona'}
-        </DialogTitle>
+        {/* Clean white dialog header */}
+        <Box sx={{ bgcolor: '#ffffff', borderBottom: '1px solid #e0e0e0', px: 3, pt: 3, pb: 2.5 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              <Box sx={{ width: 40, height: 40, borderRadius: '8px', bgcolor: 'rgba(25,118,210,0.08)', border: '1px solid rgba(25,118,210,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Store sx={{ fontSize: 20, color: '#1976D2' }} />
+              </Box>
+              <Box>
+                <Typography sx={{ fontWeight: 700, fontSize: '1rem', color: '#1C1C1E', lineHeight: 1.2 }}>
+                  {editingPersona ? 'Edit Persona' : 'Add Persona'}
+                </Typography>
+                <Typography sx={{ fontSize: '0.75rem', color: '#666666' }}>
+                  {editingPersona ? 'Update persona information' : 'Create a new business persona'}
+                </Typography>
+              </Box>
+            </Box>
+            <IconButton size="small" onClick={closeDialog} disabled={formSubmitting} sx={{ color: '#666666', '&:hover': { bgcolor: 'rgba(0,0,0,0.04)' } }}>
+              <Close sx={{ fontSize: 18 }} />
+            </IconButton>
+          </Box>
+        </Box>
 
         <DialogContent sx={{ pt: 2.5, pb: 1 }}>
           <Grid container spacing={2}>
@@ -908,39 +830,44 @@ const PersonaSwitch: React.FC = () => {
         onClose={closeDeleteDialog}
         maxWidth="xs"
         fullWidth
-        PaperProps={{ sx: { borderRadius: '12px' } }}
+        PaperProps={{ sx: { borderRadius: '12px', overflow: 'hidden' } }}
       >
-        <DialogTitle sx={{ fontWeight: 700, color: '#1C1C1E', pb: 1 }}>
-          Delete Persona
-        </DialogTitle>
-        <DialogContent>
-          <Typography variant="body2" sx={{ color: '#666666' }}>
+        <Box sx={{ bgcolor: '#ffffff', borderBottom: '1px solid #e0e0e0', px: 3, pt: 3, pb: 2.5 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <Box sx={{ width: 40, height: 40, borderRadius: '8px', bgcolor: 'rgba(211,47,47,0.08)', border: '1px solid rgba(211,47,47,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Delete sx={{ fontSize: 20, color: '#d32f2f' }} />
+            </Box>
+            <Box>
+              <Typography sx={{ fontWeight: 700, fontSize: '1rem', color: '#1C1C1E', lineHeight: 1.2 }}>
+                Delete Persona
+              </Typography>
+              <Typography sx={{ fontSize: '0.75rem', color: '#666666' }}>
+                This action cannot be undone
+              </Typography>
+            </Box>
+          </Box>
+        </Box>
+        <DialogContent sx={{ pt: 2.5, pb: 1 }}>
+          <Typography sx={{ color: '#666666', fontSize: '0.875rem' }}>
             Are you sure you want to delete{' '}
-            <strong style={{ color: '#1C1C1E' }}>{deletingPersona?.name}</strong>? This action
-            cannot be undone.
+            <strong style={{ color: '#1C1C1E' }}>{deletingPersona?.name}</strong>?
           </Typography>
         </DialogContent>
-        <DialogActions sx={{ px: 3, py: 2, gap: 1 }}>
+        <DialogActions sx={{ px: 3, py: 2.5, borderTop: '1px solid #e0e0e0', gap: 1 }}>
           <Button
             onClick={closeDeleteDialog}
             disabled={deleteSubmitting}
-            sx={{ textTransform: 'none', color: '#666666' }}
+            sx={{ textTransform: 'none', fontWeight: 600, color: '#666666', borderRadius: '8px', px: 2.5, '&:hover': { bgcolor: '#f8fafc' } }}
           >
             Cancel
           </Button>
           <Button
             variant="contained"
+            disableElevation
             onClick={handleDelete}
             disabled={deleteSubmitting}
             startIcon={deleteSubmitting ? <CircularProgress size={16} color="inherit" /> : undefined}
-            sx={{
-              bgcolor: '#d32f2f',
-              borderRadius: '8px',
-              textTransform: 'none',
-              fontWeight: 600,
-              px: 2.5,
-              '&:hover': { bgcolor: '#b71c1c' },
-            }}
+            sx={{ bgcolor: '#d32f2f', borderRadius: '8px', textTransform: 'none', fontWeight: 600, px: 2.5, '&:hover': { bgcolor: '#b71c1c' } }}
           >
             Delete
           </Button>
@@ -952,13 +879,12 @@ const PersonaSwitch: React.FC = () => {
         open={snackbar.open}
         autoHideDuration={4000}
         onClose={closeSnackbar}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
       >
         <Alert
           onClose={closeSnackbar}
           severity={snackbar.severity}
-          variant="filled"
-          sx={{ borderRadius: '8px', fontWeight: 500 }}
+          sx={{ borderRadius: '8px', fontWeight: 500, boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}
         >
           {snackbar.message}
         </Alert>

@@ -1,6 +1,5 @@
-
 import React, { useEffect, useRef } from 'react';
-import { Box, Typography, Button, Stack, alpha } from '@mui/material';
+import { Box, Typography, Button, Stack } from '@mui/material';
 import { Home, ArrowBack } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../contexts/common/Auth';
@@ -169,7 +168,7 @@ const NotFoundPage: React.FC = () => {
         </Box>
       </Box>
 
-      {/* ── BOTTOM: light content ── */}
+      {/* ── BOTTOM: content ── */}
       <Box
         sx={{
           flex: 1,
@@ -185,47 +184,52 @@ const NotFoundPage: React.FC = () => {
             content: '""',
             position: 'absolute',
             top: 0, left: 0, right: 0,
-            height: 1,
-            background: 'linear-gradient(90deg, transparent, rgba(59,130,246,0.2), transparent)',
+            height: '1px',
+            background: 'linear-gradient(90deg, transparent, rgba(25,118,210,0.18), transparent)',
           },
         }}
       >
         <Typography
-          variant="h5"
-          fontWeight={800}
-          color="#0f172a"
-          letterSpacing="-0.4px"
-          sx={{ fontSize: { xs: '1.4rem', md: '1.75rem' } }}
+          sx={{
+            fontWeight: 800,
+            fontSize: { xs: '1.35rem', md: '1.6rem' },
+            color: '#1C1C1E',
+            letterSpacing: '-0.02em',
+            lineHeight: 1.2,
+          }}
         >
           Lost in space
         </Typography>
 
         <Typography
-          variant="body2"
-          color="#64748b"
-          mt={1}
-          maxWidth={380}
-          lineHeight={1.7}
+          sx={{
+            fontSize: '0.875rem',
+            color: '#64748b',
+            mt: 1,
+            maxWidth: 380,
+            lineHeight: 1.7,
+          }}
         >
           This page drifted off into the void. The URL may be wrong or the page no longer exists.
         </Typography>
 
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} mt={3}>
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.25} mt={3}>
           <Button
             variant="contained"
-            startIcon={<Home />}
+            startIcon={<Home sx={{ fontSize: 17 }} />}
             onClick={handleHome}
+            disableElevation
             sx={{
-              minWidth: 148,
+              minWidth: 140,
               fontWeight: 700,
               textTransform: 'none',
-              borderRadius: 2,
-              py: 1.25,
-              fontSize: '0.9rem',
+              borderRadius: 1.5,
+              py: 0.875,
+              px: 2.5,
+              fontSize: '0.875rem',
               bgcolor: '#1976D2',
-              boxShadow: '0 4px 14px rgba(25,118,210,0.28)',
-              '&:hover': { bgcolor: '#1565C0', transform: 'translateY(-1px)', boxShadow: '0 6px 18px rgba(25,118,210,0.38)' },
-              transition: 'all 0.2s ease',
+              boxShadow: 'none',
+              '&:hover': { bgcolor: '#1565C0', boxShadow: 'none' },
             }}
           >
             {isAuthenticated ? 'Dashboard' : 'Go Home'}
@@ -233,20 +237,20 @@ const NotFoundPage: React.FC = () => {
 
           <Button
             variant="outlined"
-            startIcon={<ArrowBack />}
+            startIcon={<ArrowBack sx={{ fontSize: 17 }} />}
             onClick={handleBack}
             sx={{
-              minWidth: 148,
+              minWidth: 140,
               fontWeight: 600,
               textTransform: 'none',
-              borderRadius: 2,
-              py: 1.25,
-              fontSize: '0.9rem',
-              borderWidth: 1.5,
-              borderColor: alpha('#0f172a', 0.18),
-              color: '#0f172a',
-              '&:hover': { borderWidth: 1.5, borderColor: '#0f172a', bgcolor: alpha('#0f172a', 0.04), transform: 'translateY(-1px)' },
-              transition: 'all 0.2s ease',
+              borderRadius: 1.5,
+              py: 0.875,
+              px: 2.5,
+              fontSize: '0.875rem',
+              borderColor: '#e0e0e0',
+              color: '#64748b',
+              boxShadow: 'none',
+              '&:hover': { borderColor: '#1976D2', color: '#1976D2', bgcolor: 'transparent', boxShadow: 'none' },
             }}
           >
             Go Back
@@ -254,8 +258,20 @@ const NotFoundPage: React.FC = () => {
         </Stack>
 
         {/* Quick links */}
-        <Box mt={3} pt={3} sx={{ borderTop: `1px solid ${alpha('#0f172a', 0.07)}`, width: '100%', maxWidth: 420 }}>
-          <Typography variant="caption" color="#94a3b8" letterSpacing="0.08em" textTransform="uppercase" fontWeight={600}>
+        <Box
+          mt={3}
+          pt={2.5}
+          sx={{ borderTop: '1px solid #f1f5f9', width: '100%', maxWidth: 400 }}
+        >
+          <Typography
+            sx={{
+              fontSize: '0.68rem',
+              fontWeight: 700,
+              color: '#94a3b8',
+              letterSpacing: '0.1em',
+              textTransform: 'uppercase',
+            }}
+          >
             Quick links
           </Typography>
           <Stack direction="row" spacing={0.5} justifyContent="center" flexWrap="wrap" mt={1} useFlexGap>
@@ -271,9 +287,8 @@ const NotFoundPage: React.FC = () => {
                   color: '#64748b',
                   borderRadius: 1.5,
                   px: 1.25,
-                  py: 0.5,
-                  '&:hover': { color: '#1976D2', bgcolor: alpha('#1976D2', 0.06) },
-                  transition: 'all 0.15s ease',
+                  py: 0.4,
+                  '&:hover': { color: '#1976D2', bgcolor: 'rgba(25,118,210,0.06)' },
                 }}
               >
                 {label}
@@ -282,7 +297,7 @@ const NotFoundPage: React.FC = () => {
           </Stack>
         </Box>
 
-        <Typography variant="caption" color="#e2e8f0" mt={2.5}>
+        <Typography sx={{ fontSize: '0.72rem', color: '#cbd5e1', mt: 2.5 }}>
           Dino &copy; {new Date().getFullYear()}
         </Typography>
       </Box>

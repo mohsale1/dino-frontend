@@ -119,7 +119,7 @@ export const API_ENDPOINTS = {
 
     // Permissions
     PERMISSIONS: {
-      MY_PERMISSIONS: '/application/permissions',
+      MY_PERMISSIONS: '/application/auth/me',
     },
     
     // Dashboard
@@ -218,6 +218,11 @@ export const API_ENDPOINTS = {
     REVIEWS: {
       BASE: '/application/reviews',
       BY_ID: (id: string) => `/application/reviews/${id}`,
+    },
+
+    // Workspace approval
+    WORKSPACE_APPROVAL: {
+      STATUS: (workspaceId: string | number) => `/application/workspaces/${workspaceId}/approval-status`,
     },
   },
   
