@@ -14,7 +14,6 @@ import {
   Avatar,
   IconButton,
   alpha,
-  CircularProgress,
   Alert,
   Snackbar,
   Tabs,
@@ -434,6 +433,7 @@ const UserManagement: React.FC = () => {
     );
   };
 
+  // ── Loading / error ───────────────────────────────────────────────────────────
 
   if (error) {
     return (

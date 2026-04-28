@@ -10,4 +10,5 @@ export { default as WorkspaceSection } from './WorkspaceSection';
 export { default as NotificationsSection } from './NotificationsSection';
 export { default as SecuritySection } from './SecuritySection';
 export { default as AppearanceSection } from './AppearanceSection';
+export { default as BillingSection } from './BillingSection';
 export { default as ReviewSection } from './ReviewSection';

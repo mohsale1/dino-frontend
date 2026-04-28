@@ -44,6 +44,7 @@ import {
   Check as CheckIcon,
 } from '@mui/icons-material';
 import { locationService } from '../../../features/locations/services/locationService';
+import { APP_CONFIG } from '../../../constants/app';
 import type { ServiceLocation, LocationStatus } from '../../../features/locations/types';
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
@@ -117,11 +118,11 @@ const QR_STYLES: QRStyleDef[] = [
   {
     value: 'branded',
     label: 'Branded',
-    desc: 'With Dino header',
+    desc: `With ${APP_CONFIG.NAME} header`,
     previewWrap: { background: '#fff', borderRadius: 14, border: '1px solid #e2e8f0', overflow: 'hidden', boxShadow: '0 4px 20px rgba(0,0,0,0.08)' },
     previewImg:  { borderRadius: 0 },
     printCss: `.qr-wrap { background:#fff; border:1px solid #e2e8f0; border-radius:14px; overflow:hidden; display:inline-block; box-shadow:0 4px 16px rgba(0,0,0,0.08); } .qr-brand { background:linear-gradient(135deg,#0f172a,#312e81); padding:8px 16px; text-align:center; } .qr-brand span { color:#fff; font-size:11px; font-weight:700; letter-spacing:2px; text-transform:uppercase; } .qr-wrap img { display:block; padding:12px; }`,
-    printWrap: (u) => `<div class="qr-wrap"><div class="qr-brand"><span>Dino</span></div><img src="${u}" /></div>`,
+    printWrap: (u) => `<div class="qr-wrap"><div class="qr-brand"><span>${APP_CONFIG.NAME}</span></div><img src="${u}" /></div>`,
   },
   {
     value: 'minimal',
@@ -283,7 +284,7 @@ const buildPosterHtml = (qrUrl: string, name: string, area: string, menuUrl: str
   <p class="scan">Point your camera at the QR code</p>
   <p class="url">${menuUrl}</p>
 </div>
-<p class="footer">Powered by Dino</p>
+<p class="footer">${APP_CONFIG.POWERED_BY}</p>
 <script>window.onload=()=>{window.print();}</script>
 </body></html>`;
 
@@ -406,7 +407,8 @@ const QRCodeDialog: React.FC<QRCodeDialogProps> = ({
     setError(null);
     setQrUrl(null);
     try {
-      const url = await locationService.generateQRCode(location.id, _organizationId || '');
+      const response = await locationService.getQRCode(location.id);
+      const url = response.qr_code_url ?? response.qr_code;
       setQrUrl(url);
       setMenuUrl(url);
     } catch {
@@ -437,10 +439,22 @@ const QRCodeDialog: React.FC<QRCodeDialogProps> = ({
   };
 
   const handleDownloadPdf = async () => {
-    if (!location) return;
+    if (!qrUrl || !location) return;
     setPdfLoading(true);
     try {
-      await locationService.printQRCode(location.id);
+      const safeName = (location.name ?? location.id).toLowerCase().replace(/\s+/g, '-');
+      const name = location.name ?? location.identifier;
+      const area = areaName ?? '';
+      const html = buildSingleHtml(qrUrl, name, area, menuUrl, selectedStyleDef);
+      const win = window.open('', '_blank');
+      if (!win) { setError('Pop-up blocked. Please allow pop-ups and try again.'); return; }
+      win.document.open();
+      win.document.write(html.replace('<script>window.onload=()=>{window.print();}</script>', ''));
+      win.document.close();
+      // Trigger browser print-to-PDF
+      win.focus();
+      win.print();
+      void safeName; // suppress unused warning
     } catch {
       setError('Failed to download PDF. Please try again.');
     } finally {

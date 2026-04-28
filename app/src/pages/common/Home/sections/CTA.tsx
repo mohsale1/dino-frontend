@@ -18,13 +18,14 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../../contexts/common/Auth';
 import { homePageService } from '../../../../services/api/homePage';
+import { APP_CONFIG } from '../../../../constants/app';
 
 // Default company info (fallback)
 const DEFAULT_COMPANY_INFO = {
-  name: 'Dino',
-  email: 'contact@dino-order.com',
-  phone: '+1 (555) 123-4567',
-  address: '123 Business St, Suite 100, City, State 12345',
+  name: APP_CONFIG.NAME,
+  email: APP_CONFIG.CONTACT_EMAIL,
+  phone: APP_CONFIG.SUPPORT_PHONE,
+  address: '',
 };
 
 const CTASection: React.FC = () => {
@@ -40,7 +41,7 @@ const CTASection: React.FC = () => {
         const data = await homePageService.getContactInfo();
         setContactInfo(data);
       } catch (error) {
-        console.error('Error fetching contact info:', error);
+        
         setContactInfo(null);
       } finally {
         setLoading(false);
@@ -254,7 +255,7 @@ const CTASection: React.FC = () => {
                 mb: 4,
               }}
             >
-              Join businesses already using Dino to streamline operations and
+              Join businesses already using {APP_CONFIG.NAME} to streamline operations and
               delight customers
             </Typography>
 

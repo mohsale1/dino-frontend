@@ -1,9 +1,9 @@
 /**
  * System Billing Service
- * Handles API calls for billing management
+ *
+ * NOTE: The /system/billing/* endpoints are not yet implemented in the backend.
+ * All methods return empty/null stubs until the backend provides these routes.
  */
-
-import { apiService } from '../../utils/api';
 
 export interface BillingInfo {
   workspaceId: string;
@@ -16,41 +16,21 @@ export interface BillingInfo {
 }
 
 class SystemBillingService {
-  private baseUrl = '/system/billing';
-
-  async getAllBilling(page: number = 1, pageSize: number = 100) {
-    const response = await apiService.get(`${this.baseUrl}/workspaces`, {
-      params: {
-        page,
-        page_size: pageSize,
-        order_by: 'created_at',
-        order_direction: 'desc',
-      },
-    });
-    return response.data as any || [];
+  async getAllBilling(_page: number = 1, _pageSize: number = 100): Promise<any[]> {
+    return [];
   }
 
-  async getWorkspaceBilling(workspaceId: string) {
-    const response = await apiService.get(`${this.baseUrl}/workspaces/${workspaceId}`);
-    return response.data as any;
+  async getWorkspaceBilling(_workspaceId: string): Promise<BillingInfo | null> {
+    return null;
   }
 
-  async updateSubscription(workspaceId: string, plan: string, status: string) {
-    const response = await apiService.put(`${this.baseUrl}/workspaces/${workspaceId}/subscription`, {
-      plan,
-      status,
-    });
-    return response.data as any;
+  async updateSubscription(_workspaceId: string, _plan: string, _status: string): Promise<null> {
+    return null;
   }
 
-  async updateBillingInfo(workspaceId: string, billingInfo: any) {
-    const response = await apiService.put(`${this.baseUrl}/workspaces/${workspaceId}/billing-info`, billingInfo);
-    return response.data as any;
-  }
 
-  async getStats() {
-    const response = await apiService.get(`${this.baseUrl}/stats`);
-    return response.data as any;
+  async getStats(): Promise<null> {
+    return null;
   }
 }
 

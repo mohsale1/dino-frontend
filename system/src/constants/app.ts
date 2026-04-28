@@ -6,8 +6,17 @@ export const APP_CONFIG = {
   NAME: 'Dino',
   VERSION: '1.0.0',
   DESCRIPTION: 'Revolutionizing restaurant ordering',
-  COPYRIGHT: 'Â© 2025 Dino. All rights reserved.',
+  copyright: (year = new Date().getFullYear()) => `© ${year} Dino. All rights reserved.`,
   COMPANY: 'Dino',
+  TAGLINE: 'Smart Ordering Solutions',
+  SYSTEM_NAME: 'Dino System',
+  SUPPORT_EMAIL: 'support@dino.in',
+  CONTACT_EMAIL: 'contact@dino.in',
+  ADMIN_EMAIL: 'admin@dino.in',
+  NOREPLY_EMAIL: 'noreply@dino.in',
+  SUPPORT_PHONE: '+91 98765 43210',
+  WEBSITE: 'https://dino.in',
+  POWERED_BY: 'Powered by Dino',
 } as const;
 
 // Storage keys moved to config/storage.ts
@@ -49,6 +58,15 @@ export const DEFAULTS = {
   ITEMS_PER_PAGE: 10,
   MAX_CART_ITEMS: 50,
   SESSION_TIMEOUT: 30 * 60 * 1000, // 30 minutes
+  DEFAULT_COUNTRY: 'USA',
+  DEFAULT_LOCALE: 'en-US',
+  DEFAULT_CURRENCY_CODE: 'INR',
+  DEFAULT_VENUE_NAME: 'Restaurant',
+  DEFAULT_TABLE_CAPACITY: 4,
+  DEFAULT_PAGE_SIZE: 20,
+  LARGE_PAGE_SIZE: 100,
+  USER_TYPE_SYSTEM: 'system',
+  USER_TYPE_APPLICATION: 'application',
 } as const;
 
 // Feature Flags
@@ -69,7 +87,7 @@ export const BUSINESS_RULES = {
   SERVICE_CHARGE_RATE: 0.10, // 10%
   MAX_DISCOUNT_PERCENTAGE: 50,
   ORDER_CANCELLATION_TIME: 5 * 60 * 1000, // 5 minutes
-  CURRENCY_SYMBOL: 'â‚¹',
+  CURRENCY_SYMBOL: '₹',
   CURRENCY_CODE: 'INR',
   PHONE_COUNTRY_CODE: '+91',
 } as const;
@@ -86,7 +104,7 @@ export const TIME_FORMATS = {
 export const VALIDATION = {
   EMAIL_REGEX: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
   PHONE_REGEX: /^(\+91|91)?[6-9]\d{9}$/, // Indian mobile number format
-  PASSWORD_MIN_LENGTH: 6,
+  PASSWORD_MIN_LENGTH: 8,
   NAME_MIN_LENGTH: 2,
   NAME_MAX_LENGTH: 50,
   DESCRIPTION_MAX_LENGTH: 500,
@@ -410,3 +428,42 @@ export const PERMISSIONS = {
   MANAGE_VENUE: 'manage_venue',
   SYSTEM_ADMIN: 'system_admin',
 } as const;
+
+// ===================================================================
+// SERVICE TIMEOUTS & THRESHOLDS
+// ===================================================================
+
+export const SERVICE_TIMEOUTS = {
+  TOKEN_REFRESH_COOLDOWN_MS: 30000,
+  TOKEN_REFRESH_MIN_MS: 60 * 1000,
+  TOKEN_REFRESH_MAX_MS: 5 * 60 * 1000,
+  USER_DATA_DEBOUNCE_MS: 2000,
+  RECENT_LOGIN_WINDOW_MS: 24 * 60 * 60 * 1000,
+  PERMISSIONS_PAGE_SIZE: 100,
+} as const;
+
+// ===================================================================
+// ROLE DISPLAY & STYLING
+// ===================================================================
+
+export const ROLE_DISPLAY_NAMES: Record<string, string> = {
+  superadmin: 'Super Admin',
+  admin: 'Admin',
+  operator: 'Operator',
+  customer: 'Customer',
+};
+
+export const ROLE_COLORS_HEX: Record<string, string> = {
+  superadmin: '#7c3aed',
+  admin: '#dc2626',
+  operator: '#2563eb',
+  customer: '#059669',
+  default: '#6b7280',
+};
+
+export const USER_STATUS_COLORS: Record<string, string> = {
+  active: '#10b981',
+  inactive: '#6b7280',
+};
+
+export const NEW_USER_THRESHOLD_DAYS = 7;

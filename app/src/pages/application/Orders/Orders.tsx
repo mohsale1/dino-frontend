@@ -95,10 +95,8 @@ const OrdersManagementPage: React.FC = () => {
     setLoading(true);
     const { startDate, endDate } = getDateRange(dateFilter, customStartDate, customEndDate);
     const filters: OrderFilters = {
-      personaId: String(personaId),
+      venue_id: String(personaId),
       status: statusFilter || undefined,
-      startDate,
-      endDate,
       page: page + 1,
       page_size: ROWS_PER_PAGE,
     };

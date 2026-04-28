@@ -124,7 +124,7 @@ const UserManagement: React.FC = () => {
       if (currentVenue?.id)   filters.organizationId = currentVenue.id;
       if (debouncedSearch)    filters.search = debouncedSearch;
       const usersData = await applicationUserService.getUsers(1, 100, filters);
-      setUsers(usersData);
+      setUsers(usersData.data ?? []);
     } catch (error: any) {
       setSnackbar({ open: true, message: error?.message || 'Failed to load users', severity: 'error' });
     } finally {

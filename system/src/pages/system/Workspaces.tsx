@@ -161,7 +161,6 @@ const Workspaces: React.FC = () => {
     setWorkspaceDetails(null);
   };
 
-
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <Box sx={{ width: '100%', minHeight: '100vh', bgcolor: C.bg }}>

@@ -16,7 +16,7 @@ import {
   Add as AddIcon,
   DeleteOutline as DeleteIcon,
 } from '@mui/icons-material';
-import { publicMenuService, PublicMenuData, PublicOrder } from '../../../../services/application/publicMenuService';
+import { publicMenuService, PublicOrder, type PublicMenuWithValidation } from '../../../../services/application/publicMenuService';
 import { CartItem } from '../hooks/useCart';
 import OrderSuccessAnimation from './OrderSuccessAnimation';
 
@@ -25,7 +25,7 @@ interface CheckoutPageProps {
   customerInfo: { name: string; phone: string };
   organizationId: string;
   tableId: string;
-  menuData: PublicMenuData;
+  menuData: PublicMenuWithValidation;
   onBack: () => void;
   onOrderPlaced: (order: PublicOrder) => void;
   onUpdateQuantity: (itemId: string, quantity: number) => void;
@@ -59,15 +59,14 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
     setPlacing(true);
     setError(null);
     try {
-      const order = await publicMenuService.placeOrder(organizationId, tableId, {
+      const order = await publicMenuService.createOrder({
+        venue_id: organizationId,
+        table_id: tableId,
         customer_name: customerInfo.name,
         customer_phone: customerInfo.phone,
         items: cart.map((i) => ({
           item_id: i.item_id,
-          item_name: i.item_name,
           quantity: i.quantity,
-          unit_price: i.unit_price,
-          total_price: i.total_price,
         })),
         special_instructions: specialInstructions.trim() || undefined,
       });
@@ -123,7 +122,7 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
         <Box sx={{ flex: 1 }}>
           <Typography sx={{ fontSize: '1rem', fontWeight: 800, color: '#0f172a' }}>Review Order</Typography>
           <Typography sx={{ fontSize: '0.72rem', color: '#94a3b8' }}>
-            {menuData.organization.name} · Table {menuData.table.table_number}
+            {menuData.venue.name} · Table {menuData.table?.table_number}
           </Typography>
         </Box>
         <Typography sx={{ fontSize: '0.78rem', fontWeight: 700, color: '#f97316' }}>

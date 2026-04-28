@@ -1,4 +1,4 @@
-﻿import React, { createContext, useContext, useState, useEffect, ReactNode, useMemo, useCallback, useRef } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useMemo, useCallback, useRef } from 'react';
 import { UserProfile, UserRegistration } from '../../types';
 import { AuthUser, ROLES, PermissionName, RoleName } from '../../types/auth';
 import { normalizeRole } from '../../types/auth/roles';

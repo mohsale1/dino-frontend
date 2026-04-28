@@ -11,6 +11,7 @@
 // ===================================================================
 
 export * from './app';
+import { STATUS_COLORS } from './app';
 
 // ===================================================================
 // USER-FACING CONTENT
@@ -61,31 +62,31 @@ export const getPaymentStatusDisplayName = (status: string): string => {
 export const getStatusColor = (status: string, type: 'order' | 'payment' | 'table' = 'order'): string => {
   const colorMaps = {
     order: {
-      pending: '#FF9800',
-      confirmed: '#2196F3',
+      pending: STATUS_COLORS.RESERVED,
+      confirmed: STATUS_COLORS.ACTIVE,
       preparing: '#FF5722',
-      ready: '#4CAF50',
-      served: '#4CAF50',
-      completed: '#4CAF50',
-      cancelled: '#F44336',
-      refunded: '#9E9E9E',
+      ready: STATUS_COLORS.AVAILABLE,
+      served: STATUS_COLORS.AVAILABLE,
+      completed: STATUS_COLORS.AVAILABLE,
+      cancelled: STATUS_COLORS.OCCUPIED,
+      refunded: STATUS_COLORS.MAINTENANCE,
     },
     payment: {
-      pending: '#FF9800',
-      processing: '#2196F3',
-      completed: '#4CAF50',
-      failed: '#F44336',
-      cancelled: '#F44336',
-      refunded: '#9E9E9E',
+      pending: STATUS_COLORS.RESERVED,
+      processing: STATUS_COLORS.ACTIVE,
+      completed: STATUS_COLORS.AVAILABLE,
+      failed: STATUS_COLORS.OCCUPIED,
+      cancelled: STATUS_COLORS.OCCUPIED,
+      refunded: STATUS_COLORS.MAINTENANCE,
     },
     table: {
-      available: '#4CAF50',
-      occupied: '#F44336',
-      reserved: '#FF9800',
-      maintenance: '#9E9E9E',
-      cleaning: '#2196F3',
+      available: STATUS_COLORS.AVAILABLE,
+      occupied: STATUS_COLORS.OCCUPIED,
+      reserved: STATUS_COLORS.RESERVED,
+      maintenance: STATUS_COLORS.MAINTENANCE,
+      cleaning: STATUS_COLORS.ACTIVE,
     },
   };
-  
-  return (colorMaps[type] as Record<string, string>)?.[status] || '#9E9E9E';
+
+  return (colorMaps[type] as Record<string, string>)?.[status] || STATUS_COLORS.MAINTENANCE;
 };

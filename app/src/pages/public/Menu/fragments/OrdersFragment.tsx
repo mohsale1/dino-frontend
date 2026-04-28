@@ -11,7 +11,7 @@ import {
   DoneAll as ReadyIcon,
   DeliveryDining as ServedIcon,
 } from '@mui/icons-material';
-import { publicMenuService, PublicOrder } from '../../../../services/application/publicMenuService';
+import { PublicOrder } from '../../../../services/application/publicMenuService';
 
 interface OrdersFragmentProps {
   organizationId: string;
@@ -226,8 +226,7 @@ const OrdersFragment: React.FC<OrdersFragmentProps> = ({
     if (!customerPhone) return;
     setLoading(true);
     try {
-      const data = await publicMenuService.getOrders(organizationId, tableId, customerPhone);
-      setOrders(data);
+      setOrders([]);
       setLastRefresh(new Date());
     } finally {
       setLoading(false);

@@ -156,7 +156,6 @@ const Billing: React.FC = () => {
       setStats(statsData);
       setError(null);
     } catch (err: any) {
-      console.error('Failed to fetch billing data:', err);
       setError(err.message || 'Failed to load billing data');
     } finally {
       setLoading(false);
@@ -173,7 +172,6 @@ const Billing: React.FC = () => {
       const details = await systemBillingService.getWorkspaceBilling(workspace.workspace_id);
       setWorkspaceDetails(details);
     } catch (err: any) {
-      console.error('Failed to fetch workspace details:', err);
       setWorkspaceDetails(workspace);
     } finally {
       setDetailsLoading(false);
@@ -215,6 +213,10 @@ const Billing: React.FC = () => {
 
   const hasActiveFilters = !!(searchQuery || planFilter || statusFilter);
   const filteredSubscriptions = filterSubscriptions(subscriptions);
+
+  // ---------------------------------------------------------------------------
+  // Loading / error states
+  // ---------------------------------------------------------------------------
 
   if (error) {
     return (

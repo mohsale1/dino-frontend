@@ -1,9 +1,11 @@
 /**
  * Application User Service
- * Handles API calls for application user management
+ * Handles API calls for user management.
+ * Base URL: /api/v1 (set in apiService) — all paths start with /application/users.
  */
 
 import { apiService } from '../../utils/api';
+import { API_ENDPOINTS } from '../../config/apiEndpoints';
 
 export interface ApplicationUser {
   id: number;
@@ -18,7 +20,7 @@ export interface ApplicationUser {
     role_type: number;
   };
   workspace_id: number;
-  persona_ids?: number[];
+  venue_ids?: number[];
   is_active: boolean;
   is_deleted: boolean;
   created_at: string;
@@ -28,12 +30,12 @@ export interface ApplicationUser {
 
 export interface ApplicationUserCreate {
   email: string;
-  password: string;
+  phone?: string;
   first_name?: string;
   last_name?: string;
-  phone?: string;
-  role_id: number;
-  persona_ids?: number[];
+  password: string;
+  role_id?: number;
+  venue_ids?: number[];
 }
 
 export interface ApplicationUserUpdate {
@@ -42,126 +44,130 @@ export interface ApplicationUserUpdate {
   last_name?: string;
   phone?: string;
   role_id?: number;
-  password?: string;
+  venue_ids?: number[];
+  is_active?: boolean;
 }
 
 export interface UserFilters {
-  persona_id?: number;
+  search?: string;
   role_id?: number;
   is_active?: boolean;
-  search?: string;
 }
 
-class ApplicationUserService {
-  private baseUrl = '/application/users';
+export interface PaginatedUsers {
+  data: ApplicationUser[];
+  pagination: {
+    page: number;
+    page_size: number;
+    total: number;
+    total_pages: number;
+  };
+}
 
+const BASE = API_ENDPOINTS.APPLICATION.USERS.BASE;
+
+class ApplicationUserService {
   /**
-   * Get all application users with pagination and filters
+   * GET /application/users — paginated list with optional filters.
    */
   async getUsers(
     page: number = 1,
     pageSize: number = 100,
-    filters?: UserFilters,
-    includeDeleted: boolean = false
-  ) {
-    const params: any = {
-      page,
-      page_size: pageSize,
-      include_deleted: includeDeleted,
-    };
+    filters?: UserFilters
+  ): Promise<PaginatedUsers> {
+    const params: Record<string, unknown> = { page, page_size: pageSize };
 
     if (filters) {
-      if (filters.persona_id !== undefined) params.persona_id = filters.persona_id;
+      if (filters.search !== undefined && filters.search !== '') params.search = filters.search;
       if (filters.role_id !== undefined) params.role_id = filters.role_id;
       if (filters.is_active !== undefined) params.is_active = filters.is_active;
-      if (filters.search) params.search = filters.search;
     }
 
-    const response = await apiService.get(this.baseUrl, { params });
-    const raw = response.data as any;
-    // Handle paginated response: { data: [...], pagination: {...} } or a plain array
-    return (Array.isArray(raw) ? raw : raw?.data ?? raw) || [];
+    const response = await apiService.get<PaginatedUsers>(BASE, { params });
+    return response.data as PaginatedUsers;
   }
 
   /**
-   * Get user by ID
+   * POST /application/users — create a new user.
    */
-  async getUser(id: number) {
-    const response = await apiService.get(`${this.baseUrl}/${id}`);
-    return response.data as any;
-  }
-
-  /**
-   * Create new application user
-   */
-  async createUser(data: ApplicationUserCreate) {
-    const payload: any = {
+  async createUser(data: ApplicationUserCreate): Promise<ApplicationUser> {
+    const payload: Record<string, unknown> = {
       email: data.email,
       password: data.password,
-      role_id: data.role_id,
     };
 
+    if (data.phone !== undefined) payload.phone = data.phone;
     if (data.first_name !== undefined) payload.first_name = data.first_name;
     if (data.last_name !== undefined) payload.last_name = data.last_name;
-    if (data.phone !== undefined) payload.phone = data.phone;
-    if (data.persona_ids !== undefined) payload.persona_ids = data.persona_ids;
+    if (data.role_id !== undefined) payload.role_id = data.role_id;
+    if (data.venue_ids !== undefined) payload.venue_ids = data.venue_ids;
 
-    const response = await apiService.post(this.baseUrl, payload);
-    return response.data as any;
+    const response = await apiService.post<ApplicationUser>(BASE, payload);
+    return response.data as ApplicationUser;
   }
 
   /**
-   * Update application user
+   * GET /application/users/{id} — fetch a single user by ID.
    */
-  async updateUser(id: number, data: ApplicationUserUpdate) {
-    const payload: any = {};
+  async getUser(id: number): Promise<ApplicationUser> {
+    const response = await apiService.get<ApplicationUser>(API_ENDPOINTS.APPLICATION.USERS.BY_ID(id));
+    return response.data as ApplicationUser;
+  }
+
+  /**
+   * PUT /application/users/{id} — update user fields.
+   */
+  async updateUser(id: number, data: ApplicationUserUpdate): Promise<ApplicationUser> {
+    const payload: Record<string, unknown> = {};
+
     if (data.email !== undefined) payload.email = data.email;
     if (data.first_name !== undefined) payload.first_name = data.first_name;
     if (data.last_name !== undefined) payload.last_name = data.last_name;
     if (data.phone !== undefined) payload.phone = data.phone;
     if (data.role_id !== undefined) payload.role_id = data.role_id;
-    if (data.password !== undefined) payload.password = data.password;
+    if (data.venue_ids !== undefined) payload.venue_ids = data.venue_ids;
 
-    const response = await apiService.put(`${this.baseUrl}/${id}`, payload);
-    return response.data as any;
+    const response = await apiService.put<ApplicationUser>(API_ENDPOINTS.APPLICATION.USERS.BY_ID(id), payload);
+    return response.data as ApplicationUser;
   }
 
   /**
-   * Delete user (soft delete)
+   * PUT /application/users/{id} with { is_active: false } — deactivate a user account.
+   * The backend has no dedicated /deactivate endpoint; use the standard update endpoint.
    */
-  async deleteUser(id: number) {
-    await apiService.delete(`${this.baseUrl}/${id}`);
+  async deactivateUser(id: number): Promise<void> {
+    await apiService.put(API_ENDPOINTS.APPLICATION.USERS.BY_ID(id), { is_active: false });
   }
 
   /**
-   * Restore soft-deleted user (POST, not PUT)
+   * PUT /application/users/{id} with { is_active: true } — activate a user account.
+   * The backend has no dedicated /activate endpoint; use the standard update endpoint.
    */
-  async restoreUser(id: number) {
-    await apiService.post(`${this.baseUrl}/${id}/restore`, {});
+  async activateUser(id: number): Promise<void> {
+    await apiService.put(API_ENDPOINTS.APPLICATION.USERS.BY_ID(id), { is_active: true });
   }
 
   /**
-   * Activate user — backend has no /activate endpoint.
-   * Uses PUT /users/{id} with { is_active: true }.
+   * DELETE /application/users/{id} — soft delete a user.
    */
-  async activateUser(id: number) {
-    await apiService.put(`${this.baseUrl}/${id}`, { is_active: true });
+  async deleteUser(id: number): Promise<void> {
+    await apiService.delete(API_ENDPOINTS.APPLICATION.USERS.BY_ID(id));
   }
 
-  /**
-   * Deactivate user — backend has no /deactivate endpoint.
-   * Uses PUT /users/{id} with { is_active: false }.
-   */
-  async deactivateUser(id: number) {
-    await apiService.put(`${this.baseUrl}/${id}`, { is_active: false });
-  }
+  // NOTE: updateUserPassword has been removed. The backend exposes no
+  // /application/users/{id}/password endpoint. Password changes for admin
+  // operations are not supported via this service.
 
   /**
-   * Update user role
+   * GET /application/users/me/data — fetch the current authenticated user's profile.
    */
-  async updateUserRole(id: number, roleId: number) {
-    await apiService.put(`${this.baseUrl}/${id}`, { role_id: roleId });
+  async getMyData(): Promise<ApplicationUser> {
+    const response = await apiService.get<ApplicationUser>(API_ENDPOINTS.APPLICATION.USERS.ME_DATA);
+    return response.data as ApplicationUser;
   }
+
+  // NOTE: refreshMyData has been removed — /users/me/refresh-data does not exist on the backend.
+  // NOTE: getMyStatistics has been removed — /users/me/statistics does not exist on the backend.
 }
 
 export const applicationUserService = new ApplicationUserService();

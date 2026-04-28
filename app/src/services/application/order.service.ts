@@ -1,10 +1,12 @@
 /**
  * Order Service
- * Handles order-related API operations
+ * Handles order-related API operations against /api/v1/application/orders
  */
 
 import { apiService } from '../../utils/api';
 import type { ApiResponse } from '../../types';
+import { API_ENDPOINTS } from '../../config/apiEndpoints';
+import { DEFAULTS } from '../../constants/app';
 
 export interface Order {
   id: string;
@@ -17,7 +19,7 @@ export interface Order {
   discount_amount: number;
   total: number;
   items_count: number;
-  createdAt: string; // mapped from created_at by axios camelCase interceptor
+  createdAt: string;
 }
 
 export interface OrderItem {
@@ -47,32 +49,52 @@ export interface OrderDetail {
   createdAt: string;
 }
 
-/**
- * Payload shape expected by POST /application/orders
- * workspace_id is injected from JWT — do NOT include in body
- * persona_id IS required in body
- */
-export interface OrderCreate {
-  persona_id: number;
-  order_type?: string;        // default "dine_in"
-  customer_name?: string;
-  table_id?: number;
-  area_id?: number;
-  currency?: string;
+export interface OrderTransaction {
+  id: string;
+  order_id: string;
+  amount: number;
+  payment_method: string;
+  status: string;
+  createdAt: string;
+}
+
+export interface OrderStatistics {
+  total_orders: number;
+  total_revenue: number;
+  average_order_value: number;
+  orders_by_status: Record<string, number>;
+  orders_by_type: Record<string, number>;
+}
+
+export interface OrderCreateItem {
+  menu_item_id: number;
+  quantity: number;
+  variant_id?: number;
   special_instructions?: string;
-  tax_amount?: number;
-  service_charge?: number;
+}
+
+export interface OrderCreate {
+  venue_id: string;
+  table_id?: string;
+  items: OrderCreateItem[];
+  order_type: string;
   discount_amount?: number;
-  items: Array<{ item_id: number; quantity: number }>;
+  special_instructions?: string;
 }
 
 export interface OrderFilters {
-  personaId?: string;   // maps to persona_id query param
-  status?: string;
-  startDate?: string;
-  endDate?: string;
   page?: number;
   page_size?: number;
+  venue_id?: string;
+  status?: string;
+  payment_status?: string;
+  order_type?: string;
+}
+
+export interface StatisticsFilters {
+  venue_id?: string;
+  start_date?: string;
+  end_date?: string;
 }
 
 export interface OrderPagination {
@@ -91,28 +113,25 @@ export interface PaginatedOrders {
 
 class OrderService {
   /**
-   * Get all orders with pagination support.
-   * Backend scopes by JWT — workspace_id and organization_id are NOT sent.
-   * Use personaId to filter by persona.
+   * List orders with optional filters — GET /application/orders
    */
   async getOrders(filters?: OrderFilters): Promise<ApiResponse<PaginatedOrders>> {
     try {
-      const params: any = {};
-      if (filters?.personaId) params.persona_id = filters.personaId;
+      const params: Record<string, unknown> = {};
+      if (filters?.page !== undefined) params.page = filters.page;
+      if (filters?.page_size !== undefined) params.page_size = filters.page_size;
+      if (filters?.venue_id) params.venue_id = filters.venue_id;
       if (filters?.status) params.status = filters.status;
-      if (filters?.startDate) params.start_date = filters.startDate;
-      if (filters?.endDate) params.end_date = filters.endDate;
-      if (filters?.page) params.page = filters.page;
-      if (filters?.page_size) params.page_size = filters.page_size;
+      if (filters?.payment_status) params.payment_status = filters.payment_status;
+      if (filters?.order_type) params.order_type = filters.order_type;
 
-      const response = await apiService.get<any>('/application/orders', { params });
+      const response = await apiService.get<any>(API_ENDPOINTS.APPLICATION.ORDERS.BASE, { params });
 
-      // Backend returns { success, data: Order[], pagination: { page, page_size, total, total_pages } }
       const raw = response.data as any;
       const items: Order[] = Array.isArray(raw?.data) ? raw.data : Array.isArray(raw) ? raw : [];
       const pagination: OrderPagination = raw?.pagination ?? {
         page: filters?.page ?? 1,
-        page_size: filters?.page_size ?? 20,
+        page_size: filters?.page_size ?? DEFAULTS.DEFAULT_PAGE_SIZE,
         total: items.length,
         total_pages: 1,
       };
@@ -133,7 +152,7 @@ class OrderService {
           items: [],
           total: 0,
           totalPages: 0,
-          pagination: { page: 1, page_size: 20, total: 0, total_pages: 0 },
+          pagination: { page: 1, page_size: DEFAULTS.DEFAULT_PAGE_SIZE, total: 0, total_pages: 0 },
         },
         error: error.message || 'Failed to fetch orders',
       };
@@ -145,10 +164,9 @@ class OrderService {
    */
   async getOrder(orderId: string): Promise<ApiResponse<OrderDetail>> {
     try {
-      const response = await apiService.get<any>(`/application/orders/${orderId}`);
+      const response = await apiService.get<any>(API_ENDPOINTS.APPLICATION.ORDERS.BY_ID(orderId));
       const raw = response.data as any;
-      const detail: OrderDetail = raw?.data ?? raw;
-      return { success: true, data: detail };
+      return { success: true, data: raw?.data ?? raw };
     } catch (error: any) {
       throw new Error(error.message || 'Failed to fetch order');
     }
@@ -156,16 +174,12 @@ class OrderService {
 
   /**
    * Create a new order — POST /application/orders
-   * persona_id IS required. workspace_id is injected from JWT.
    */
   async createOrder(data: OrderCreate): Promise<ApiResponse<Order>> {
     try {
-      const response = await apiService.post<any>('/application/orders', data);
+      const response = await apiService.post<any>(API_ENDPOINTS.APPLICATION.ORDERS.BASE, data);
       const raw = response.data as any;
-      return {
-        success: true,
-        data: raw?.data ?? raw,
-      };
+      return { success: true, data: raw?.data ?? raw };
     } catch (error: any) {
       throw new Error(error.message || 'Failed to create order');
     }
@@ -176,12 +190,9 @@ class OrderService {
    */
   async updateOrder(orderId: string, data: Partial<Order>): Promise<ApiResponse<Order>> {
     try {
-      const response = await apiService.put<any>(`/application/orders/${orderId}`, data);
+      const response = await apiService.put<any>(API_ENDPOINTS.APPLICATION.ORDERS.BY_ID(orderId), data);
       const raw = response.data as any;
-      return {
-        success: true,
-        data: raw?.data ?? raw,
-      };
+      return { success: true, data: raw?.data ?? raw };
     } catch (error: any) {
       throw new Error(error.message || 'Failed to update order');
     }
@@ -189,22 +200,19 @@ class OrderService {
 
   /**
    * Update order status — PUT /application/orders/{id}/status
-   * Backend expects { status } in request body, NOT as a query param.
    */
   async updateOrderStatus(
     orderId: string,
-    status: Order['status']
+    newStatus: Order['status']
   ): Promise<ApiResponse<Order>> {
     try {
       const response = await apiService.put<any>(
-        `/application/orders/${orderId}/status`,
-        { status }
+        API_ENDPOINTS.APPLICATION.ORDERS.STATUS(orderId),
+        null,
+        { params: { new_status: newStatus } }
       );
       const raw = response.data as any;
-      return {
-        success: true,
-        data: raw?.data ?? raw,
-      };
+      return { success: true, data: raw?.data ?? raw };
     } catch (error: any) {
       throw new Error(error.message || 'Failed to update order status');
     }
@@ -213,53 +221,68 @@ class OrderService {
   /**
    * Cancel order — PUT /application/orders/{id}/cancel
    */
-  async cancelOrder(orderId: string): Promise<ApiResponse<Order>> {
+  async cancelOrder(orderId: string, reason?: string): Promise<ApiResponse<Order>> {
     try {
-      const response = await apiService.put<any>(`/application/orders/${orderId}/cancel`, {});
+      const params: Record<string, unknown> = {};
+      if (reason) params.reason = reason;
+
+      const response = await apiService.put<any>(
+        API_ENDPOINTS.APPLICATION.ORDERS.CANCEL(orderId),
+        null,
+        { params }
+      );
       const raw = response.data as any;
-      return {
-        success: true,
-        data: raw?.data ?? raw,
-      };
+      return { success: true, data: raw?.data ?? raw };
     } catch (error: any) {
       throw new Error(error.message || 'Failed to cancel order');
     }
   }
 
   /**
-   * Delete order — DELETE /application/orders/{id}
+   * Get items for an order — GET /application/orders/{id}/items
    */
-  async deleteOrder(orderId: string): Promise<ApiResponse<void>> {
+  async getOrderItems(orderId: string): Promise<ApiResponse<OrderItem[]>> {
     try {
-      await apiService.delete(`/application/orders/${orderId}`);
-      return { success: true };
+      const response = await apiService.get<any>(API_ENDPOINTS.APPLICATION.ORDERS.ITEMS(orderId));
+      const raw = response.data as any;
+      const items: OrderItem[] = Array.isArray(raw?.data) ? raw.data : Array.isArray(raw) ? raw : [];
+      return { success: true, data: items };
     } catch (error: any) {
-      throw new Error(error.message || 'Failed to delete order');
+      throw new Error(error.message || 'Failed to fetch order items');
+    }
+  }
+
+  /**
+   * Get transaction for an order — GET /application/orders/{id}/transaction
+   */
+  async getOrderTransaction(orderId: string): Promise<ApiResponse<OrderTransaction>> {
+    try {
+      const response = await apiService.get<any>(API_ENDPOINTS.APPLICATION.ORDERS.TRANSACTION(orderId));
+      const raw = response.data as any;
+      return { success: true, data: raw?.data ?? raw };
+    } catch (error: any) {
+      throw new Error(error.message || 'Failed to fetch order transaction');
     }
   }
 
   /**
    * Get order statistics — GET /application/orders/statistics
-   * Backend scopes by JWT — workspace_id is NOT sent.
-   * Use personaId to filter by persona.
    */
-  async getOrderStatistics(
-    personaId?: string,
-    dateRange?: { startDate: string; endDate: string }
-  ): Promise<any> {
+  async getStatistics(params?: StatisticsFilters): Promise<ApiResponse<OrderStatistics>> {
     try {
-      const params: any = {};
-      if (personaId) params.persona_id = personaId;
-      if (dateRange) {
-        params.start_date = dateRange.startDate;
-        params.end_date = dateRange.endDate;
-      }
+      const queryParams: Record<string, unknown> = {};
+      if (params?.venue_id) queryParams.venue_id = params.venue_id;
+      if (params?.start_date) queryParams.start_date = params.start_date;
+      if (params?.end_date) queryParams.end_date = params.end_date;
 
-      const response = await apiService.get('/application/orders/statistics', { params });
-      return response.data;
+      const response = await apiService.get<any>(
+        API_ENDPOINTS.APPLICATION.ORDERS.STATISTICS,
+        { params: queryParams }
+      );
+      const raw = response.data as any;
+      return { success: true, data: raw?.data ?? raw };
     } catch (error: any) {
-      console.error('Error fetching order statistics:', error);
-      return null;
+      throw new Error(error.message || 'Failed to fetch order statistics');
     }
   }
 }

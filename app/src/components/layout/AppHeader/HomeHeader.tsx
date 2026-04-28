@@ -15,13 +15,11 @@ import {
 import { Menu as MenuIcon } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../../contexts/common/Auth';
+import { APP_CONFIG } from '../../../constants/app';
 import DinoLogo from '../../ui/DinoLogo';
 import AppMobileMenu from '../AppMobileMenu';
 
 // ── Constants ──────────────────────────────────────────────────────────────────
-const COMPANY_NAME = 'Dino';
-const COMPANY_TAGLINE = 'Smart Ordering Solutions';
-
 const HOME_NAV = [
   { id: 'features',     label: 'Features'     },
   { id: 'how-it-works', label: 'How It Works'  },
@@ -286,7 +284,7 @@ const HomeHeader: React.FC = () => {
                     transition: 'color 0.3s ease',
                   }}
                 >
-                  {COMPANY_NAME}
+                  {APP_CONFIG.NAME}
                 </Typography>
                 {!isMobile && (
                   <Typography
@@ -299,7 +297,7 @@ const HomeHeader: React.FC = () => {
                       transition: 'color 0.3s ease',
                     }}
                   >
-                    {COMPANY_TAGLINE}
+                    {APP_CONFIG.TAGLINE}
                   </Typography>
                 )}
               </Box>

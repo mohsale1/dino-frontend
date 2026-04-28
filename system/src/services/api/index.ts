@@ -6,4 +6,4 @@
 export { homePageService } from './homePage';
 
 // Export types for components
-export type { HomePageStat, Testimonial, ContactInfo, CompanyInfo, HomePageData } from './homePage';
+export type { Testimonial, CompanyInfo } from './homePage';

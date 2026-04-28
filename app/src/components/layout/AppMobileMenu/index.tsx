@@ -49,9 +49,9 @@ import { getUserFirstName } from '../../../utils/data/userUtils';
 import { useAuth } from '../../../contexts/common/Auth';
 import PermissionService from '../../../services/auth/permission';
 import { useUserData } from '../../../contexts/application/UserData';
-import { venueService } from '../../../services/application/venue.service';
 import { personaService } from '../../../services/application/persona.service';
 import { usePermissionCheck } from '../../common/PermissionWrapper';
+import { APP_CONFIG } from '../../../constants/app';
 import { PERMISSIONS } from '../../../types/auth/permissions';
 
 interface AppMobileMenuProps {
@@ -248,10 +248,10 @@ const AppMobileMenu: React.FC<AppMobileMenuProps> = ({
           <DinoLogo size={30} animated={false} />
           <Box>
             <Typography sx={{ color: '#1C1C1E', fontWeight: 700, fontSize: '1.05rem', lineHeight: 1.2, letterSpacing: '-0.01em' }}>
-              Dino
+              {APP_CONFIG.NAME}
             </Typography>
             <Typography sx={{ color: '#999999', fontSize: '0.65rem', lineHeight: 1, display: 'block' }}>
-              Smart Ordering Solutions
+              {APP_CONFIG.TAGLINE}
             </Typography>
           </Box>
         </Box>

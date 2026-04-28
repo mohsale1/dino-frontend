@@ -60,7 +60,7 @@ export function useCatalog({ workspaceId, autoLoad = true }: UseCatalogOptions):
     setError(null);
     
     try {
-      const data = await catalogService.getCategories(workspaceId);
+      const data = await catalogService.getCategories({ venue_id: workspaceId });
       setCategories(data);
     } catch (err: any) {
       setError(err.message || 'Failed to load categories');
@@ -77,7 +77,7 @@ export function useCatalog({ workspaceId, autoLoad = true }: UseCatalogOptions):
     setError(null);
     
     try {
-      const data = await catalogService.getCatalogItems(workspaceId, categoryId);
+      const data = await catalogService.getItems({ venue_id: workspaceId, category_id: categoryId });
       setItems(data);
     } catch (err: any) {
       setError(err.message || 'Failed to load items');
@@ -91,7 +91,7 @@ export function useCatalog({ workspaceId, autoLoad = true }: UseCatalogOptions):
     setError(null);
     
     try {
-      await catalogService.createCatalogItem(data);
+      await catalogService.createItem(data);
       await loadItems();
     } catch (err: any) {
       setError(err.message || 'Failed to create item');
@@ -104,7 +104,7 @@ export function useCatalog({ workspaceId, autoLoad = true }: UseCatalogOptions):
     setError(null);
     
     try {
-      await catalogService.updateCatalogItem(id, data);
+      await catalogService.updateItem(id, data);
       await loadItems();
     } catch (err: any) {
       setError(err.message || 'Failed to update item');
@@ -117,7 +117,7 @@ export function useCatalog({ workspaceId, autoLoad = true }: UseCatalogOptions):
     setError(null);
     
     try {
-      await catalogService.deleteCatalogItem(id);
+      await catalogService.deleteItem(id);
       await loadItems();
     } catch (err: any) {
       setError(err.message || 'Failed to delete item');
@@ -130,7 +130,7 @@ export function useCatalog({ workspaceId, autoLoad = true }: UseCatalogOptions):
     setError(null);
     
     try {
-      await catalogService.toggleItemAvailability(id, isAvailable);
+      await catalogService.bulkUpdateItemAvailability([id], isAvailable);
       await loadItems();
     } catch (err: any) {
       setError(err.message || 'Failed to toggle availability');

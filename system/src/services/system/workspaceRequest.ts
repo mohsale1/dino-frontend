@@ -1,4 +1,4 @@
-﻿/**
+/**
  * System Workspace Request Service
  * Handles all API calls for workspace access request management (Approvals page).
  *
@@ -28,6 +28,8 @@ export interface WorkspaceRequest {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  user?: { first_name?: string; last_name?: string; email?: string };
+  workspace?: { name?: string; id?: number };
 }
 
 export interface WorkspaceRequestPagination {

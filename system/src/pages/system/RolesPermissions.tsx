@@ -138,7 +138,7 @@ const RolesPermissions: React.FC = () => {
       const [sysRoles, appRoles, rawPerms] = await Promise.all([
         systemRoleService.getSystemRoles(),
         systemRoleService.getApplicationRoles(),
-        systemPermissionService.getPermissions(1, 100),
+        systemPermissionService.getPermissions(1, 200),
       ]);
       setSystemRoles(sysRoles);
       setApplicationRoles(appRoles);
@@ -337,6 +337,7 @@ const RolesPermissions: React.FC = () => {
     );
   };
 
+  // ── Loading / error ───────────────────────────────────────────────────────
 
   if (error) {
     return (

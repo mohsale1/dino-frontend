@@ -176,7 +176,7 @@ const UnifiedDashboard: React.FC<{ className?: string }> = ({ className }) => {
       setError(null);
       try {
         const res = await dashboardService.getDashboard({
-          personaId: String(personaId),
+          venueId: String(personaId),
         });
         if (!isMountedRef.current) return;
         const payload = (res as any)?.data ?? res;

@@ -55,7 +55,7 @@ const TestimonialsSection: React.FC = () => {
           setTestimonials([]);
         }
       } catch (error) {
-        console.error('Error fetching testimonials:', error);
+        
         setTestimonials([]);
       } finally {
         setLoading(false);
@@ -210,6 +210,43 @@ const TestimonialsSection: React.FC = () => {
             animation: `${fadeInUp} 0.8s ease-out`,
           }}
         >
+          {/* Badge Pill */}
+          <Box
+            sx={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 1,
+              px: 2,
+              py: 0.75,
+              mb: 3,
+              borderRadius: '999px',
+              background: `linear-gradient(135deg, ${alpha('#1976D2', 0.1)} 0%, ${alpha('#10b981', 0.08)} 100%)`,
+              border: `1px solid ${alpha('#1976D2', 0.18)}`,
+              backdropFilter: 'blur(8px)',
+            }}
+          >
+            <Box
+              sx={{
+                width: 6,
+                height: 6,
+                borderRadius: '50%',
+                background: 'linear-gradient(135deg, #1976D2, #10b981)',
+                flexShrink: 0,
+              }}
+            />
+            <Typography
+              sx={{
+                fontSize: '0.6875rem',
+                fontWeight: 700,
+                letterSpacing: '0.12em',
+                color: '#1976D2',
+                textTransform: 'uppercase',
+              }}
+            >
+              Customer Stories
+            </Typography>
+          </Box>
+
           <Typography
             variant="h2"
             sx={{

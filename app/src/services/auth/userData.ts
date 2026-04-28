@@ -1,7 +1,9 @@
 import { apiService } from '../../utils/api';
 import { ROLES } from '../../types/auth';
-import { isOwner, isManager, isUser, normalizeRole } from '../../types/auth/roles';
+import { isUser, normalizeRole } from '../../types/auth/roles';
 import StorageManager from '../../utils/storage';
+import { API_ENDPOINTS } from '../../config/apiEndpoints';
+import { SERVICE_TIMEOUTS } from '../../constants/app';
 
 export interface UserData {
   user: {
@@ -54,25 +56,10 @@ export interface UserData {
   } | null;
 }
 
-export interface VenueData {
-  venue: any;
-  statistics: {
-    totalOrders: number;
-    totalRevenue: number;
-    activeTables: number;
-    totalTables: number;
-    totalMenuItems: number;
-    totalUsers: number;
-  };
-  menuItems: any[];
-  tables: any[];
-  recentOrders: any[];
-  users: any[];
-}
 
 class UserDataService {
   private lastCallTime: number = 0;
-  private debounceDelay: number = 2000;
+  private debounceDelay: number = SERVICE_TIMEOUTS.USER_DATA_DEBOUNCE_MS;
   private currentRequest: Promise<UserData | null> | null = null;
 
   async getUserData(): Promise<UserData | null> {
@@ -144,8 +131,8 @@ class UserDataService {
         : venueAny.orderType !== undefined
           ? Number(venueAny.orderType)
           : undefined,
-      theme: venueAny.theme || 'pet',
-      menuTemplate: venueAny.menu_template || venueAny.menuTemplate || 'classic',
+      theme: venueAny.theme || 'default',
+      menuTemplate: venueAny.menu_template || venueAny.menuTemplate || 'default',
       menuTemplateConfig: venueAny.menu_template_config || venueAny.menuTemplateConfig,
       createdAt: venueAny.created_at || venueAny.createdAt || new Date().toISOString(),
       updatedAt: venueAny.updated_at || venueAny.updatedAt || venueAny.createdAt,
@@ -161,7 +148,8 @@ class UserDataService {
 
   private async _fetchUserData(): Promise<UserData | null> {
     try {
-      const response = await apiService.get<{ data: UserData; timestamp: string }>('/application/users/me/data');
+      // NOTE: ME_DATA resolves to '/application/users/me/data' — matches the backend route GET /application/users/me/data
+      const response = await apiService.get<{ data: UserData; timestamp: string }>(API_ENDPOINTS.APPLICATION.USERS.ME_DATA);
 
       if (response.success && response.data) {
         const userData: UserData = (response.data as any).data || response.data;
@@ -178,7 +166,7 @@ class UserDataService {
             firstName: userAny.first_name || userAny.firstName || '',
             lastName: userAny.last_name || userAny.lastName || '',
             phone: userAny.phone || '',
-            role: userAny.role || 'operator',
+            role: userAny.role || '',
             venueIds: (userAny.venue_ids || userAny.venueIds || []).map(String),
             isActive: userAny.is_active !== undefined ? Boolean(userAny.is_active) : Boolean(userAny.isActive),
             createdAt: userAny.created_at || userAny.createdAt || new Date().toISOString(),
@@ -220,28 +208,6 @@ class UserDataService {
     }
   }
 
-  async getVenueData(venueId: string): Promise<VenueData | null> {
-    try {
-      const response = await apiService.get<VenueData>(`/venues/${venueId}/data`);
-
-      if (response.success && response.data) {
-        return response.data;
-      }
-
-      return null;
-    } catch (error: any) {
-      if (error.response?.status === 403) {
-        throw new Error('Only superadmin can switch venues.');
-      }
-
-      if (error.response?.status === 404) {
-        throw new Error('Venue not found.');
-      }
-
-      throw new Error(error.response?.data?.detail || error.message || 'Failed to fetch venue data');
-    }
-  }
-
   async refreshUserData(): Promise<UserData | null> {
     // Reset all debounce / in-flight state so the next call goes straight to the API
     this.lastCallTime = 0;
@@ -254,11 +220,6 @@ class UserDataService {
     apiService.clearRequestQueue();
 
     return this._fetchUserData();
-  }
-
-  clearPendingRequests(): void {
-    this.currentRequest = null;
-    this.lastCallTime = 0;
   }
 
   hasPermission(userData: UserData | null, permission: string): boolean {
@@ -292,49 +253,8 @@ class UserDataService {
     return normalized || ROLES.USER;
   }
 
-  isOwner(userData: UserData | null): boolean {
-    return isOwner(this.getUserRole(userData));
-  }
-
-  isManager(userData: UserData | null): boolean {
-    return isManager(this.getUserRole(userData));
-  }
-
   isUser(userData: UserData | null): boolean {
     return isUser(this.getUserRole(userData));
-  }
-
-  // Legacy compatibility methods
-  isSuperAdmin(userData: UserData | null): boolean {
-    return this.isOwner(userData);
-  }
-
-  isAdmin(userData: UserData | null): boolean {
-    return this.isManager(userData) || this.isOwner(userData);
-  }
-
-  isOperator(userData: UserData | null): boolean {
-    return this.isUser(userData);
-  }
-
-  formatCurrency(amount: number, currency: string = 'INR'): string {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: currency,
-      minimumFractionDigits: 0,
-    }).format(amount);
-  }
-
-  formatDate(dateString: string): string {
-    return new Date(dateString).toLocaleDateString('en-IN');
-  }
-
-  formatDateTime(dateString: string): string {
-    return new Date(dateString).toLocaleString('en-IN');
-  }
-
-  getVenueDisplayName(userData: UserData | null): string {
-    return userData?.venue?.name || 'No Venue Assigned';
   }
 
   getWorkspaceDisplayName(userData: UserData | null): string {

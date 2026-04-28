@@ -1,9 +1,12 @@
 /**
  * System User Service
- * Handles API calls for system user management
+ * Handles API calls for system user management.
+ * Backend routes are under /system/users/* (apiService baseURL is /api/v1).
  */
 
 import { apiService } from '../../utils/api';
+import { API_ENDPOINTS } from '../../config/apiEndpoints';
+import { DEFAULTS } from '../../constants/app';
 
 export interface SystemUser {
   id: string;
@@ -28,17 +31,7 @@ export interface SystemUser {
   workspaceIds?: string[];
 }
 
-export interface SystemUserCreate {
-  email: string;
-  password: string;
-  firstName?: string;
-  lastName?: string;
-  phone?: string;
-  roleId: string;
-  organizationId?: string;
-}
-
-export interface SystemUserUpdate {
+export interface UserUpdateDTO {
   firstName?: string;
   lastName?: string;
   phone?: string;
@@ -48,55 +41,86 @@ export interface SystemUserUpdate {
   password?: string;
 }
 
+export interface GetUsersParams {
+  workspace_id?: string;
+  organization_id?: string;
+  skip?: number;
+  limit?: number;
+}
+
 class SystemUserService {
-  private baseUrl = '/system/users';
-
-  async getUsers(page: number = 1, pageSize: number = 100, includeDeleted: boolean = false) {
-    const response = await apiService.get(this.baseUrl, {
-      params: {
-        page,
-        page_size: pageSize,
-        include_deleted: includeDeleted,
-        order_by: 'created_at',
-        order_direction: 'desc',
-      },
-    });
-    return response.data as any || [];
+  async getUsers(pageOrParams?: number | GetUsersParams, limit?: number): Promise<SystemUser[]> {
+    let params: GetUsersParams = {};
+    if (typeof pageOrParams === 'number') {
+      const skip = ((pageOrParams ?? 1) - 1) * (limit ?? DEFAULTS.LARGE_PAGE_SIZE);
+      params = { skip, limit: limit ?? DEFAULTS.LARGE_PAGE_SIZE };
+    } else if (pageOrParams !== undefined) {
+      params = pageOrParams;
+    }
+    const response = await apiService.get(API_ENDPOINTS.SYSTEM.USERS.BASE, { params });
+    return (response.data as SystemUser[]) ?? [];
   }
 
-  async getUser(id: string) {
-    const response = await apiService.get(`${this.baseUrl}/${id}`);
-    return response.data as any;
+  async getUser(id: string): Promise<SystemUser> {
+    const response = await apiService.get(API_ENDPOINTS.SYSTEM.USERS.BY_ID(id));
+    return response.data as SystemUser;
   }
 
-  async createUser(data: SystemUserCreate) {
-    const response = await apiService.post(this.baseUrl, data);
-    return response.data as any;
+  async createUser(data: {
+    email: string;
+    firstName?: string;
+    lastName?: string;
+    phone?: string;
+    password: string;
+    roleId?: string | number;
+    isActive?: boolean;
+  }): Promise<SystemUser> {
+    const payload = {
+      ...data,
+      role_id: data.roleId ? Number(data.roleId) : undefined,
+    };
+    const response = await apiService.post(API_ENDPOINTS.SYSTEM.USERS.BASE, payload);
+    return response.data as SystemUser;
   }
 
-  async updateUser(id: string, data: SystemUserUpdate) {
-    const response = await apiService.put(`${this.baseUrl}/${id}`, data);
-    return response.data as any;
+  async updateUser(id: string, data: UserUpdateDTO): Promise<SystemUser> {
+    const response = await apiService.put(API_ENDPOINTS.SYSTEM.USERS.BY_ID(id), data);
+    return response.data as SystemUser;
   }
 
-  async deleteUser(id: string) {
-    await apiService.delete(`${this.baseUrl}/${id}`);
+  async activateUser(id: string): Promise<SystemUser> {
+    const response = await apiService.put(API_ENDPOINTS.SYSTEM.USERS.BY_ID(id), { is_active: true });
+    return response.data as SystemUser;
   }
 
-  async restoreUser(id: string) {
-    await apiService.put(`${this.baseUrl}/${id}/restore`, {});
+  async deactivateUser(id: string): Promise<SystemUser> {
+    const response = await apiService.put(API_ENDPOINTS.SYSTEM.USERS.BY_ID(id), { is_active: false });
+    return response.data as SystemUser;
   }
 
-  async activateUser(id: string) {
-    await apiService.put(`${this.baseUrl}/${id}/activate`, {});
+  async deleteUser(id: string): Promise<void> {
+    await apiService.delete(API_ENDPOINTS.SYSTEM.USERS.BY_ID(id));
   }
 
-  async deactivateUser(id: string) {
-    await apiService.put(`${this.baseUrl}/${id}/deactivate`, {});
+  formatUserName(user: Pick<SystemUser, 'firstName' | 'lastName' | 'email'>): string {
+    const first = user.firstName?.trim() ?? '';
+    const last = user.lastName?.trim() ?? '';
+    if (first || last) {
+      return `${first} ${last}`.trim();
+    }
+    return user.email;
   }
 
-  async updateUserRole(id: string, roleId: string) {
-    await apiService.put(`${this.baseUrl}/${id}/role`, { role_id: roleId });
+  getUserInitials(user: Pick<SystemUser, 'firstName' | 'lastName' | 'email'>): string {
+    const first = user.firstName?.trim();
+    const last = user.lastName?.trim();
+    if (first && last) {
+      return `${first[0]}${last[0]}`.toUpperCase();
+    }
+    if (first) {
+      return first[0].toUpperCase();
+    }
+    return user.email[0].toUpperCase();
   }
 }
 

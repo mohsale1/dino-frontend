@@ -54,3 +54,4 @@ export const initialFormData: RegistrationFormData = {
   adminPassword: '',
   confirmPassword: '',
 };
+

@@ -26,7 +26,7 @@ interface CouponCardProps {
 const CouponCard: React.FC<CouponCardProps> = ({ coupon, onEdit, onDelete, onToggleStatus }) => {
 
   const getTypeIcon = () => {
-    switch (coupon.discountType) {
+    switch (coupon.discount_type) {
       case 'fixed':      return <AttachMoney sx={{ fontSize: 20 }} />;
       case 'percentage':
       default:           return <Percent sx={{ fontSize: 20 }} />;
@@ -34,14 +34,14 @@ const CouponCard: React.FC<CouponCardProps> = ({ coupon, onEdit, onDelete, onTog
   };
 
   const getTypeLabel = () => {
-    switch (coupon.discountType) {
-      case 'fixed':      return `$${coupon.discountValue} Off`;
+    switch (coupon.discount_type) {
+      case 'fixed':      return `$${coupon.discount_value} Off`;
       case 'percentage':
-      default:           return `${coupon.discountValue}% Off`;
+      default:           return `${coupon.discount_value}% Off`;
     }
   };
 
-  const typeColor = coupon.discountType === 'fixed'
+  const typeColor = coupon.discount_type === 'fixed'
     ? { bg: 'rgba(16,185,129,0.08)',  color: '#059669', border: 'rgba(16,185,129,0.2)'  }
     : { bg: 'rgba(25,118,210,0.08)',  color: '#1976D2', border: 'rgba(25,118,210,0.2)'  };
 
@@ -95,7 +95,7 @@ const CouponCard: React.FC<CouponCardProps> = ({ coupon, onEdit, onDelete, onTog
             {/* Name + badges row */}
             <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 1, mb: 0.75 }}>
               <Typography sx={{ fontWeight: 700, color: '#1C1C1E', fontSize: '0.9375rem', lineHeight: 1.3 }}>
-                {coupon.name}
+                {coupon.code}
               </Typography>
               <Chip
                 label={getTypeLabel()}
@@ -110,19 +110,19 @@ const CouponCard: React.FC<CouponCardProps> = ({ coupon, onEdit, onDelete, onTog
                 }}
               />
               <Chip
-                label={coupon.isAvailable ? 'Active' : 'Inactive'}
+                label={coupon.is_active ? 'Active' : 'Inactive'}
                 size="small"
-                onClick={() => onToggleStatus(coupon.id, coupon.isAvailable)}
+                onClick={() => onToggleStatus(coupon.id, coupon.is_active)}
                 sx={{
-                  bgcolor: coupon.isAvailable ? 'rgba(16,185,129,0.08)' : 'rgba(239,68,68,0.08)',
-                  color:   coupon.isAvailable ? '#059669'               : '#dc2626',
-                  border:  coupon.isAvailable ? '1px solid rgba(16,185,129,0.2)' : '1px solid rgba(239,68,68,0.2)',
+                  bgcolor: coupon.is_active ? 'rgba(16,185,129,0.08)' : 'rgba(239,68,68,0.08)',
+                  color:   coupon.is_active ? '#059669'               : '#dc2626',
+                  border:  coupon.is_active ? '1px solid rgba(16,185,129,0.2)' : '1px solid rgba(239,68,68,0.2)',
                   fontWeight: 600,
                   fontSize: '0.72rem',
                   height: 22,
                   cursor: 'pointer',
                   '&:hover': {
-                    bgcolor: coupon.isAvailable ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.15)',
+                    bgcolor: coupon.is_active ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.15)',
                   },
                 }}
               />
@@ -176,26 +176,26 @@ const CouponCard: React.FC<CouponCardProps> = ({ coupon, onEdit, onDelete, onTog
                   Used
                 </Typography>
                 <Typography sx={{ color: '#1C1C1E', fontWeight: 600, fontSize: '0.8125rem' }}>
-                  {coupon.usageCount ?? 0}{coupon.usageLimit ? ` / ${coupon.usageLimit}` : ''}
+                  {coupon.usage_count ?? 0}{coupon.usage_limit ? ` / ${coupon.usage_limit}` : ''}
                 </Typography>
               </Box>
-              {coupon.validUntil && (
+              {coupon.expiry_date && (
                 <Box>
                   <Typography sx={{ color: '#999999', fontSize: '0.72rem', fontWeight: 500, display: 'block', mb: 0.25 }}>
                     Expires
                   </Typography>
                   <Typography sx={{ color: '#1C1C1E', fontWeight: 600, fontSize: '0.8125rem' }}>
-                    {new Date(coupon.validUntil).toLocaleDateString()}
+                    {new Date(coupon.expiry_date).toLocaleDateString()}
                   </Typography>
                 </Box>
               )}
-              {coupon.minOrderAmount != null && (
+              {coupon.min_order_amount != null && (
                 <Box>
                   <Typography sx={{ color: '#999999', fontSize: '0.72rem', fontWeight: 500, display: 'block', mb: 0.25 }}>
                     Min Order
                   </Typography>
                   <Typography sx={{ color: '#1C1C1E', fontWeight: 600, fontSize: '0.8125rem' }}>
-                    ${coupon.minOrderAmount}
+                    ${coupon.min_order_amount}
                   </Typography>
                 </Box>
               )}

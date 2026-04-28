@@ -2,16 +2,24 @@
  * Public Menu Service
  * Handles API calls for the public-facing QR menu page.
  *
- * All endpoints below are truly public — no authentication token required.
+ * All endpoints are unauthenticated — no token required.
  *
- * Public endpoint pattern (backend /application/menu router):
- *   GET /application/menu/public/{orgId}/{tableId}/menu
- *   GET /application/menu/public/{orgId}/{tableId}/categories
- *   GET /application/menu/public/{orgId}/{tableId}/items
+ * Base URL: API_CONFIG.BASE_URL  (resolves to /api/v1)
  *
- * Order endpoints (/application/orders router):
- *   POST /application/orders/public/{orgId}/{tableId}/create
- *   GET  /application/orders/public/{orgId}/{tableId}/orders
+ * Menu routes:
+ *   GET /menu/public/validate-qr-access                          ?qr_code
+ *   GET /menu/public/venues/{venue_id}/menu-with-validation      ?table_id
+ *   GET /menu/public/venues/{venue_id}/categories                ?table_id
+ *   GET /menu/public/venues/{venue_id}/items                     ?category_id, table_id
+ *
+ * Order routes:
+ *   GET  /orders/public/qr/{qr_code}
+ *   GET  /orders/public/venue/{venue_id}/status
+ *   POST /orders/public/validate-order
+ *   POST /orders/public/create-order
+ *   GET  /orders/public/{order_id}/status
+ *   GET  /orders/public/{order_id}/receipt
+ *   POST /orders/public/{order_id}/feedback                      ?rating, feedback
  */
 
 import axios from 'axios';
@@ -19,7 +27,6 @@ import { API_CONFIG } from '../../config/api';
 
 // ─── Axios instance ───────────────────────────────────────────────────────────
 
-// Unauthenticated instance — all public endpoints, no token needed
 const publicAxios = axios.create({
   baseURL: API_CONFIG.BASE_URL,
   timeout: API_CONFIG.TIMEOUT,
@@ -40,6 +47,13 @@ publicAxios.interceptors.request.use((config) => {
 });
 
 // ─── Types ────────────────────────────────────────────────────────────────────
+
+export interface QrAccessValidation {
+  valid: boolean;
+  venue_id?: string;
+  table_id?: string;
+  message?: string;
+}
 
 export interface PublicCategory {
   id: string;
@@ -64,6 +78,12 @@ export interface PublicMenuItem {
   preparation_time_minutes?: number;
 }
 
+export interface PublicVenueInfo {
+  id: string;
+  name: string;
+  description?: string;
+}
+
 export interface PublicTableInfo {
   id: string;
   table_number: string;
@@ -72,17 +92,38 @@ export interface PublicTableInfo {
   status?: string;
 }
 
-export interface PublicOrganizationInfo {
-  id: string;
-  name: string;
-  description?: string;
-}
-
-export interface PublicMenuData {
-  organization: PublicOrganizationInfo;
-  table: PublicTableInfo;
+export interface PublicMenuWithValidation {
+  venue: PublicVenueInfo;
+  table?: PublicTableInfo;
   categories: PublicCategory[];
   items: PublicMenuItem[];
+}
+
+export interface OrderItemPayload {
+  item_id: string;
+  quantity: number;
+}
+
+export interface ValidateOrderPayload {
+  venue_id: string;
+  items: OrderItemPayload[];
+  table_id?: string;
+}
+
+export interface ValidateOrderResult {
+  valid: boolean;
+  errors?: string[];
+  total_amount?: number;
+}
+
+export interface CreateOrderPayload {
+  venue_id: string;
+  items: OrderItemPayload[];
+  table_id?: string;
+  customer_name: string;
+  customer_phone: string;
+  customer_email?: string;
+  special_instructions?: string;
 }
 
 export interface PublicOrderItem {
@@ -96,10 +137,11 @@ export interface PublicOrderItem {
 export interface PublicOrder {
   id: string;
   order_number: string;
-  organization_id: string;
-  table_id: string;
+  venue_id: string;
+  table_id?: string;
   customer_name: string;
   customer_phone: string;
+  customer_email?: string;
   items: PublicOrderItem[];
   subtotal: number;
   tax_amount: number;
@@ -112,14 +154,44 @@ export interface PublicOrder {
   updated_at: string;
 }
 
-export interface PlaceOrderPayload {
-  customer_name: string;
-  customer_phone: string;
-  items: { item_id: string; item_name: string; quantity: number; unit_price: number; total_price: number }[];
-  special_instructions?: string;
+export interface PublicOrderStatus {
+  order_id: string;
+  status: string;
+  payment_status: string;
+  updated_at: string;
+}
+
+export interface PublicOrderReceipt {
+  order: PublicOrder;
+  receipt_url?: string;
+}
+
+export interface VenueOrderStatus {
+  venue_id: string;
+  is_accepting_orders: boolean;
+  message?: string;
+}
+
+export interface QrOrderInfo {
+  qr_code: string;
+  venue_id: string;
+  table_id?: string;
+  venue_name?: string;
 }
 
 // ─── Normalizers ──────────────────────────────────────────────────────────────
+
+function unwrap(res: any): any {
+  return res?.data?.data ?? res?.data;
+}
+
+function normalizeVenue(raw: any): PublicVenueInfo {
+  return {
+    id:          raw?.id          ?? '',
+    name:        raw?.name        ?? 'Restaurant',
+    description: raw?.description,
+  };
+}
 
 function normalizeTable(raw: any): PublicTableInfo {
   return {
@@ -131,16 +203,8 @@ function normalizeTable(raw: any): PublicTableInfo {
   };
 }
 
-function normalizeOrg(raw: any): PublicOrganizationInfo {
-  return {
-    id:          raw?.id          ?? '',
-    name:        raw?.name        ?? 'Restaurant',
-    description: raw?.description,
-  };
-}
-
 function normalizeCategories(raw: any): PublicCategory[] {
-  const arr = Array.isArray(raw) ? raw : (raw?.items ?? raw?.results ?? []);
+  const arr: any[] = Array.isArray(raw) ? raw : (raw?.items ?? raw?.results ?? []);
   return arr.map((c: any) => ({
     id:            c.id            ?? '',
     name:          c.name          ?? '',
@@ -152,7 +216,7 @@ function normalizeCategories(raw: any): PublicCategory[] {
 }
 
 function normalizeItems(raw: any): PublicMenuItem[] {
-  const arr = Array.isArray(raw) ? raw : (raw?.items ?? raw?.results ?? []);
+  const arr: any[] = Array.isArray(raw) ? raw : (raw?.items ?? raw?.results ?? []);
   return arr.map((i: any) => ({
     id:                       i.id                       ?? '',
     name:                     i.name                     ?? '',
@@ -173,68 +237,136 @@ function normalizeItems(raw: any): PublicMenuItem[] {
 class PublicMenuService {
 
   /**
-   * Fetch all menu data for a given organization and table in a single request.
+   * Validate a QR code and retrieve the associated venue/table context.
    *
-   * Calls: GET /application/menu/public/{organizationId}/{tableId}/menu
-   * Response shape: { success, data: { organization, table, area, categories, items, items_by_category } }
+   * GET /menu/public/validate-qr-access?qr_code={qr_code}
    */
-  async getMenuData(organizationId: string, tableId: string): Promise<PublicMenuData> {
-    const res = await publicAxios.get(
-      `/application/menu/public/${organizationId}/${tableId}/menu`,
-    );
+  async validateQrAccess(qrCode: string): Promise<QrAccessValidation> {
+    const res = await publicAxios.get('/menu/public/validate-qr-access', {
+      params: { qr_code: qrCode },
+    });
+    return unwrap(res);
+  }
 
-    // Unwrap envelope: response.data.data
-    const payload = res.data?.data ?? res.data;
+  /**
+   * Fetch the full menu for a venue, with optional table-level validation.
+   *
+   * GET /menu/public/venues/{venue_id}/menu-with-validation?table_id={table_id}
+   */
+  async getMenuWithValidation(venueId: string, tableId?: string): Promise<PublicMenuWithValidation> {
+    const params: Record<string, string> = {};
+    if (tableId) params.table_id = tableId;
+
+    const res = await publicAxios.get(`/menu/public/venues/${venueId}/menu-with-validation`, { params });
+    const payload = unwrap(res);
 
     return {
-      organization: normalizeOrg(payload.organization),
-      table:        normalizeTable(payload.table),
-      categories:   normalizeCategories(payload.categories ?? []),
-      items:        normalizeItems(payload.items ?? []),
+      venue:      normalizeVenue(payload?.venue ?? payload?.organization),
+      table:      payload?.table ? normalizeTable(payload.table) : undefined,
+      categories: normalizeCategories(payload?.categories ?? []),
+      items:      normalizeItems(payload?.items ?? []),
     };
   }
 
   /**
-   * Fetch orders for a specific table, optionally filtered by customer phone.
+   * Fetch categories for a venue.
    *
-   * Calls: GET /application/orders/public/{organizationId}/{tableId}/orders
+   * GET /menu/public/venues/{venue_id}/categories?table_id={table_id}
    */
-  async getOrders(
-    organizationId: string,
-    tableId: string,
-    customerPhone?: string,
-  ): Promise<PublicOrder[]> {
-    const params: Record<string, any> = {};
-    if (customerPhone) params.customer_phone = customerPhone;
+  async getCategories(venueId: string, tableId?: string): Promise<PublicCategory[]> {
+    const params: Record<string, string> = {};
+    if (tableId) params.table_id = tableId;
 
-    try {
-      const res = await publicAxios.get(
-        `/application/orders/public/${organizationId}/${tableId}/orders`,
-        { params },
-      );
-      const payload = res.data?.data ?? res.data;
-      return Array.isArray(payload) ? payload : [];
-    } catch {
-      return [];
-    }
+    const res = await publicAxios.get(`/menu/public/venues/${venueId}/categories`, { params });
+    return normalizeCategories(unwrap(res));
   }
 
   /**
-   * Place a new order for a specific table.
+   * Fetch menu items for a venue, optionally filtered by category.
    *
-   * Calls: POST /application/orders/public/{organizationId}/{tableId}/create
+   * GET /menu/public/venues/{venue_id}/items?category_id={category_id}&table_id={table_id}
    */
-  async placeOrder(
-    organizationId: string,
-    tableId: string,
-    payload: PlaceOrderPayload,
-  ): Promise<PublicOrder> {
-    const res = await publicAxios.post(
-      `/application/orders/public/${organizationId}/${tableId}/create`,
-      payload,
-    );
-    return res.data?.data ?? res.data;
+  async getItems(venueId: string, categoryId?: string, tableId?: string): Promise<PublicMenuItem[]> {
+    const params: Record<string, string> = {};
+    if (categoryId) params.category_id = categoryId;
+    if (tableId)    params.table_id    = tableId;
+
+    const res = await publicAxios.get(`/menu/public/venues/${venueId}/items`, { params });
+    return normalizeItems(unwrap(res));
   }
+
+  /**
+   * Retrieve venue and table context from a QR code string.
+   *
+   * GET /orders/public/qr/{qr_code}
+   */
+  async getQrInfo(qrCode: string): Promise<QrOrderInfo> {
+    const res = await publicAxios.get(`/orders/public/qr/${qrCode}`);
+    return unwrap(res);
+  }
+
+  /**
+   * Check whether a venue is currently accepting orders.
+   *
+   * GET /orders/public/venue/{venue_id}/status
+   */
+  async getVenueOrderStatus(venueId: string): Promise<VenueOrderStatus> {
+    const res = await publicAxios.get(`/orders/public/venue/${venueId}/status`);
+    return unwrap(res);
+  }
+
+  /**
+   * Validate a prospective order (items, availability, totals) without placing it.
+   *
+   * POST /orders/public/validate-order
+   */
+  async validateOrder(payload: ValidateOrderPayload): Promise<ValidateOrderResult> {
+    const res = await publicAxios.post('/orders/public/validate-order', payload);
+    return unwrap(res);
+  }
+
+  /**
+   * Place a new order.
+   *
+   * POST /orders/public/create-order
+   */
+  async createOrder(payload: CreateOrderPayload): Promise<PublicOrder> {
+    const res = await publicAxios.post('/orders/public/create-order', payload);
+    return unwrap(res);
+  }
+
+  /**
+   * Poll the status of an existing order.
+   *
+   * GET /orders/public/{order_id}/status
+   */
+  async getOrderStatus(orderId: string): Promise<PublicOrderStatus> {
+    const res = await publicAxios.get(`/orders/public/${orderId}/status`);
+    return unwrap(res);
+  }
+
+  /**
+   * Retrieve the receipt for a completed order.
+   *
+   * GET /orders/public/{order_id}/receipt
+   */
+  async getOrderReceipt(orderId: string): Promise<PublicOrderReceipt> {
+    const res = await publicAxios.get(`/orders/public/${orderId}/receipt`);
+    return unwrap(res);
+  }
+
+  /**
+   * Submit customer feedback for a completed order.
+   *
+   * POST /orders/public/{order_id}/feedback?rating={rating}&feedback={feedback}
+   */
+  async submitFeedback(orderId: string, rating: number, feedback?: string): Promise<void> {
+    const params: Record<string, string | number> = { rating };
+    if (feedback) params.feedback = feedback;
+
+    await publicAxios.post(`/orders/public/${orderId}/feedback`, null, { params });
+  }
+
 }
 
 export const publicMenuService = new PublicMenuService();

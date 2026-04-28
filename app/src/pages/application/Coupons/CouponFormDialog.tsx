@@ -86,24 +86,24 @@ const CouponFormDialog: React.FC<CouponFormDialogProps> = ({
         setFormData({
           // code is editable and must be included in the update payload
           code: editingCoupon.code || '',
-          name: editingCoupon.name || '',
+          name: editingCoupon.description || editingCoupon.code || '',
           description: editingCoupon.description || '',
-          discountType: editingCoupon.discountType || 'percentage',
-          discountValue: editingCoupon.discountValue || 0,
+          discountType: editingCoupon.discount_type || 'percentage',
+          discountValue: editingCoupon.discount_value || 0,
           // Use undefined (not '') for optional numeric fields so the service
           // omits them from the PATCH payload when they are not set.
-          maxDiscountAmount: editingCoupon.maxDiscountAmount != null
-            ? editingCoupon.maxDiscountAmount
+          maxDiscountAmount: editingCoupon.max_discount_amount != null
+            ? editingCoupon.max_discount_amount
             : undefined,
-          minOrderAmount: editingCoupon.minOrderAmount != null
-            ? editingCoupon.minOrderAmount
+          minOrderAmount: editingCoupon.min_order_amount != null
+            ? editingCoupon.min_order_amount
             : undefined,
-          usageLimit: editingCoupon.usageLimit != null
-            ? editingCoupon.usageLimit
+          usageLimit: editingCoupon.usage_limit != null
+            ? editingCoupon.usage_limit
             : undefined,
-          validFrom: editingCoupon.validFrom || '',
-          validUntil: editingCoupon.validUntil || '',
-          isAvailable: editingCoupon.isAvailable ?? true,
+          validFrom: '',
+          validUntil: editingCoupon.expiry_date || '',
+          isAvailable: editingCoupon.is_active ?? true,
         });
       } else {
         setFormData(defaultFormData);

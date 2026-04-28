@@ -168,13 +168,13 @@ const ProfilePage: React.FC = () => {
 
       {/* ── Profile identity strip ── */}
       <Box sx={{ bgcolor: '#ffffff', borderBottom: '1px solid #e0e0e0', px: { xs: 2, sm: 3, md: 5 }, pb: 0 }}>
-        <Box sx={{ display: 'flex', alignItems: 'flex-end', gap: { xs: 2, sm: 3 }, mt: { xs: '-40px', sm: '-52px', md: '-56px' }, mb: 2, flexWrap: 'wrap' }}>
+        <Box sx={{ display: 'flex', alignItems: 'flex-end', gap: { xs: 2, sm: 3 }, mt: { xs: '-36px', sm: '-42px', md: '-46px' }, mb: 2, flexWrap: 'wrap' }}>
 
           {/* Avatar */}
           <Avatar
             sx={{
-              width:  { xs: 80, sm: 100, md: 112 },
-              height: { xs: 80, sm: 100, md: 112 },
+              width:  { xs: 72, sm: 84, md: 92 },
+              height: { xs: 72, sm: 84, md: 92 },
               bgcolor: P,
               fontSize: { xs: '2rem', sm: '2.5rem', md: '2.75rem' },
               fontWeight: 700,

@@ -6,6 +6,8 @@
  */
 
 import { apiService } from '../../utils/api';
+import { API_ENDPOINTS } from '../../config/apiEndpoints';
+import { DEFAULTS } from '../../constants/app';
 
 export type PersonaType = 0 | 1; // 0=Food, 1=NonFood
 export type OrderType   = 0 | 1; // 0=Online/QR, 1=Manual/POS
@@ -83,13 +85,13 @@ export interface PersonaListResponse {
 }
 
 class PersonaService {
-  private baseUrl = '/application/personas';
+  private readonly baseUrl = API_ENDPOINTS.APPLICATION.PERSONAS.BASE;
 
   async getPersonas(params: PersonaListParams = {}): Promise<PersonaListResponse> {
     const response = await apiService.get(this.baseUrl, {
       params: {
         page: params.page ?? 1,
-        page_size: params.page_size ?? 100,
+        page_size: params.page_size ?? DEFAULTS.LARGE_PAGE_SIZE,
         ...(params.workspace_id !== undefined && { workspace_id: params.workspace_id }),
         ...(params.include_deleted !== undefined && { include_deleted: params.include_deleted }),
       },

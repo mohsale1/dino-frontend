@@ -415,6 +415,7 @@ const Appearance: React.FC = () => {
     ? (testimonials.reduce((s, t) => s + t.rating, 0) / totalCount).toFixed(1)
     : '—';
 
+
   return (
     <Box sx={{ width: '100%', minHeight: '100vh', bgcolor: '#f8fafc' }}>
 
@@ -608,7 +609,6 @@ const Appearance: React.FC = () => {
           </Grid>
         )}
       </Box>
-
 
       {/* ── Edit / Add Dialog ── */}
       <EditDialog

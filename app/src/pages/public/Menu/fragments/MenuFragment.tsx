@@ -6,11 +6,11 @@ import {
   Add as AddIcon,
   Remove as RemoveIcon,
 } from '@mui/icons-material';
-import { PublicMenuData, PublicMenuItem } from '../../../../services/application/publicMenuService';
+import { PublicMenuWithValidation, PublicMenuItem } from '../../../../services/application/publicMenuService';
 import { CartItem } from '../hooks/useCart';
 
 interface MenuFragmentProps {
-  menuData: PublicMenuData;
+  menuData: PublicMenuWithValidation;
   cart: CartItem[];
   onAddToCart: (item: CartItem) => void;
   onUpdateQuantity: (itemId: string, quantity: number) => void;

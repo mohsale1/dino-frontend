@@ -26,6 +26,7 @@ export class StorageManager {
     MENU_CACHE: 'dino_menu_cache',
     SETTINGS: 'dino_user_settings',
     THEME: 'dino_theme',
+    USER_TYPE: 'dino_user_type',
   } as const;
 
   // Cache TTL configurations (in milliseconds)

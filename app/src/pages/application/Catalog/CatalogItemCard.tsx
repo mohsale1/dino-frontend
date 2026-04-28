@@ -1,207 +1,189 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import {
-  Box, Typography, Chip, IconButton, Tooltip,
+  Box,
+  Typography,
+  Chip,
+  IconButton,
+  Tooltip,
 } from '@mui/material';
-import { alpha } from '@mui/material/styles';
 import {
   Edit as EditIcon,
   Delete as DeleteIcon,
-  Image as ImageIcon,
-  AccessTime as AccessTimeIcon,
-  CameraAlt as CameraAltIcon,
+  Visibility as VisibilityIcon,
+  VisibilityOff as VisibilityOffIcon,
+  Schedule as ScheduleIcon,
+  RestaurantMenu as RestaurantMenuIcon,
 } from '@mui/icons-material';
 import type { CatalogItem } from '../../../features/catalog/types';
+import { formatCurrency } from '../../../utils/helpers/formatters';
+
+const T = {
+  primary: '#00A6CA',
+  primaryBg: 'rgba(0,166,202,0.08)',
+  primaryBorder: 'rgba(0,166,202,0.2)',
+  textPri: '#1C1C1E',
+  textSec: '#666666',
+  textMuted: '#999999',
+  border: '#e0e0e0',
+  surface: '#ffffff',
+  bg: '#f8fafc',
+  success: '#008A00',
+  error: '#EB0000',
+};
 
 interface CatalogItemCardProps {
   item: CatalogItem;
   categoryName?: string;
-  onEdit: (item: CatalogItem) => void;
-  onDelete: (item: CatalogItem) => void;
-  onToggleAvailability: (itemId: string) => void;
-  onImageUpload: (itemId: string, file: File) => void;
+  onEdit?: (item: CatalogItem) => void;
+  onDelete?: (item: CatalogItem) => void;
+  onToggleAvailability?: (itemId: string) => void;
+  onImageUpload?: (itemId: string, file: File) => void;
 }
 
 const CatalogItemCard: React.FC<CatalogItemCardProps> = ({
-  item, categoryName, onEdit, onDelete, onToggleAvailability, onImageUpload,
+  item,
+  categoryName,
+  onEdit,
+  onDelete,
+  onToggleAvailability,
+  onImageUpload: _onImageUpload,
 }) => {
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const imageUrl = item.imageUrls?.[0];
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) onImageUpload(item.id, file);
-    e.target.value = '';
-  };
-
-  const formatPrice = (price: number) =>
-    new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(price);
 
   return (
     <Box
       sx={{
-        bgcolor: '#fff',
-        border: '1px solid #e2e8f0',
-        borderRadius: 2.5,
+        bgcolor: T.surface,
+        border: `1px solid ${T.border}`,
+        borderRadius: 2,
         overflow: 'hidden',
         display: 'flex',
         flexDirection: 'column',
-        transition: 'all 0.15s',
+        height: '100%',
+        transition: 'box-shadow 0.15s, border-color 0.15s',
         '&:hover': {
-          boxShadow: '0 4px 20px rgba(15,23,42,0.08)',
-          transform: 'translateY(-1px)',
+          boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+          borderColor: '#bdbdbd',
         },
       }}
     >
-      {/* Image area */}
+      {/* Image Section */}
       <Box
-        onClick={() => fileInputRef.current?.click()}
         sx={{
+          height: 160,
+          bgcolor: T.bg,
           position: 'relative',
-          height: 150,
-          bgcolor: '#f8fafc',
-          cursor: 'pointer',
           overflow: 'hidden',
+          flexShrink: 0,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          '&:hover .img-overlay': { opacity: 1 },
         }}
       >
         {imageUrl ? (
-          <Box
-            component="img"
+          <img
             src={imageUrl}
             alt={item.name}
-            sx={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
           />
         ) : (
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.75 }}>
-            <ImageIcon sx={{ fontSize: 40, color: '#cbd5e1' }} />
-            <Typography sx={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 500 }}>
-              Click to add image
-            </Typography>
-          </Box>
+          <RestaurantMenuIcon sx={{ fontSize: 40, color: '#d1d5db' }} />
         )}
 
-        {/* Hover overlay */}
-        <Box
-          className="img-overlay"
-          sx={{
-            position: 'absolute',
-            inset: 0,
-            bgcolor: 'rgba(15,23,42,0.52)',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 0.75,
-            opacity: 0,
-            transition: 'opacity 0.15s',
-          }}
-        >
-          <CameraAltIcon sx={{ fontSize: 22, color: '#fff' }} />
-          <Typography sx={{ fontSize: '0.7rem', color: '#fff', fontWeight: 600, letterSpacing: '0.02em' }}>
-            Change Image
-          </Typography>
-        </Box>
-
-        {/* Veg indicator — top left */}
-        {item.isVegetarian && (
-          <Box
+        {/* Availability badge — top-left */}
+        {!item.isAvailable && (
+          <Chip
+            label="Unavailable"
+            size="small"
             sx={{
               position: 'absolute',
               top: 8,
               left: 8,
-              width: 20,
               height: 20,
-              borderRadius: 0.5,
-              bgcolor: '#fff',
-              border: '1.5px solid #16a34a',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: '#16a34a' }} />
-          </Box>
-        )}
-
-        {/* Availability toggle pill — top right */}
-        <Box
-          onClick={(e) => { e.stopPropagation(); onToggleAvailability(item.id); }}
-          sx={{
-            position: 'absolute',
-            top: 8,
-            right: 8,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 0.4,
-            px: 1,
-            py: 0.3,
-            borderRadius: 999,
-            bgcolor: item.isAvailable ? '#dcfce7' : '#fee2e2',
-            cursor: 'pointer',
-            transition: 'opacity 0.15s',
-            '&:hover': { opacity: 0.85 },
-          }}
-        >
-          <Box
-            sx={{
-              width: 6,
-              height: 6,
-              borderRadius: '50%',
-              bgcolor: item.isAvailable ? '#15803d' : '#dc2626',
-              flexShrink: 0,
-            }}
-          />
-          <Typography
-            sx={{
-              fontSize: '0.65rem',
-              fontWeight: 700,
-              color: item.isAvailable ? '#15803d' : '#dc2626',
-              lineHeight: 1,
-            }}
-          >
-            {item.isAvailable ? 'Available' : 'Unavailable'}
-          </Typography>
-        </Box>
-
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          style={{ display: 'none' }}
-          onChange={handleFileChange}
-        />
-      </Box>
-
-      {/* Content */}
-      <Box sx={{ p: 2, flex: 1, display: 'flex', flexDirection: 'column', gap: 0.75 }}>
-        {/* Category chip */}
-        {categoryName && (
-          <Chip
-            label={categoryName}
-            size="small"
-            sx={{
-              alignSelf: 'flex-start',
-              height: 18,
-              fontSize: '0.65rem',
+              fontSize: '0.68rem',
               fontWeight: 600,
-              bgcolor: '#f1f5f9',
-              color: '#64748b',
-              border: '1px solid #e2e8f0',
+              bgcolor: 'rgba(235,0,0,0.85)',
+              color: '#ffffff',
+              border: 'none',
               '& .MuiChip-label': { px: 0.75 },
             }}
           />
         )}
 
+        {/* Prep time badge — bottom-left */}
+        {item.preparationTime != null && (
+          <Box
+            sx={{
+              position: 'absolute',
+              bottom: 8,
+              left: 8,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 0.4,
+              bgcolor: 'rgba(0,0,0,0.65)',
+              color: '#ffffff',
+              px: 1,
+              py: 0.25,
+              borderRadius: 1,
+              fontSize: '0.68rem',
+              lineHeight: 1,
+            }}
+          >
+            <ScheduleIcon sx={{ fontSize: 12, color: '#ffffff' }} />
+            <Typography
+              component="span"
+              sx={{ fontSize: '0.68rem', color: '#ffffff', lineHeight: 1, fontWeight: 500 }}
+            >
+              {item.preparationTime} min
+            </Typography>
+          </Box>
+        )}
+
+        {/* Veg / non-veg indicator — top-right */}
+        {item.isVegetarian != null && (
+          <Box
+            sx={{
+              position: 'absolute',
+              top: 8,
+              right: 8,
+              width: 14,
+              height: 14,
+              border: `1.5px solid ${item.isVegetarian ? T.success : T.error}`,
+              borderRadius: 0.5,
+              bgcolor: T.surface,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Box
+              sx={{
+                width: 7,
+                height: 7,
+                borderRadius: '50%',
+                bgcolor: item.isVegetarian ? T.success : T.error,
+              }}
+            />
+          </Box>
+        )}
+      </Box>
+
+      {/* Content Section */}
+      <Box
+        sx={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          p: 2,
+        }}
+      >
         {/* Item name */}
         <Typography
           sx={{
-            fontWeight: 700,
-            color: '#0f172a',
-            fontSize: '0.9rem',
-            lineHeight: 1.35,
+            fontWeight: 600,
+            fontSize: '0.9375rem',
+            color: T.textPri,
+            lineHeight: 1.3,
             display: '-webkit-box',
             WebkitLineClamp: 2,
             WebkitBoxOrient: 'vertical',
@@ -211,84 +193,152 @@ const CatalogItemCard: React.FC<CatalogItemCardProps> = ({
           {item.name}
         </Typography>
 
+        {/* Price */}
+        <Typography
+          sx={{
+            fontWeight: 700,
+            fontSize: '1rem',
+            color: T.primary,
+            mt: 0.5,
+          }}
+        >
+          {formatCurrency(item.basePrice)}
+        </Typography>
+
+        {/* Category chip */}
+        {categoryName && (
+          <Box sx={{ mt: 0.75 }}>
+            <Chip
+              label={categoryName}
+              size="small"
+              sx={{
+                height: 18,
+                fontSize: '0.68rem',
+                fontWeight: 500,
+                bgcolor: T.primaryBg,
+                color: T.primary,
+                border: `1px solid ${T.primaryBorder}`,
+                '& .MuiChip-label': { px: 0.75 },
+              }}
+            />
+          </Box>
+        )}
+
         {/* Description */}
         {item.description && (
           <Typography
             sx={{
-              fontSize: '0.75rem',
-              color: '#94a3b8',
-              lineHeight: 1.45,
+              fontSize: '0.8rem',
+              color: T.textSec,
+              lineHeight: 1.5,
               display: '-webkit-box',
               WebkitLineClamp: 2,
               WebkitBoxOrient: 'vertical',
               overflow: 'hidden',
+              mt: 0.75,
+              flex: 1,
             }}
           >
             {item.description}
           </Typography>
         )}
 
-        {/* Prep time */}
-        {item.preparationTime && (
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-            <AccessTimeIcon sx={{ fontSize: 12, color: '#94a3b8' }} />
-            <Typography sx={{ fontSize: '0.72rem', color: '#94a3b8', fontWeight: 500 }}>
-              {item.preparationTime} min
-            </Typography>
+        {/* Tags */}
+        {item.tags && item.tags.length > 0 && (
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 1 }}>
+            {item.tags.map((tag) => (
+              <Chip
+                key={tag}
+                label={tag}
+                size="small"
+                sx={{
+                  height: 18,
+                  fontSize: '0.68rem',
+                  fontWeight: 400,
+                  bgcolor: T.bg,
+                  color: T.textMuted,
+                  border: `1px solid ${T.border}`,
+                  '& .MuiChip-label': { px: 0.75 },
+                }}
+              />
+            ))}
           </Box>
         )}
+      </Box>
 
-        {/* Bottom row: price + actions */}
-        <Box
-          sx={{
-            mt: 'auto',
-            pt: 0.75,
-            borderTop: '1px solid #f1f5f9',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-          }}
+      {/* Actions Section */}
+      <Box
+        sx={{
+          borderTop: `1px solid ${T.border}`,
+          px: 2,
+          py: 1.25,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 0.5,
+        }}
+      >
+        {/* Toggle availability */}
+        <Tooltip
+          title={item.isAvailable ? 'Mark as unavailable' : 'Mark as available'}
+          arrow
         >
-          <Typography
+          <IconButton
+            size="small"
+            onClick={() => onToggleAvailability?.(item.id)}
             sx={{
-              fontWeight: 800,
-              color: '#0f172a',
-              fontSize: '1rem',
-              letterSpacing: '-0.02em',
+              borderRadius: 1.5,
+              color: T.textMuted,
+              '&:hover': {
+                color: item.isAvailable ? T.error : T.success,
+                bgcolor: item.isAvailable
+                  ? 'rgba(235,0,0,0.06)'
+                  : 'rgba(0,138,0,0.06)',
+              },
             }}
           >
-            {formatPrice(item.basePrice)}
-          </Typography>
+            {item.isAvailable ? (
+              <VisibilityOffIcon sx={{ fontSize: 16 }} />
+            ) : (
+              <VisibilityIcon sx={{ fontSize: 16 }} />
+            )}
+          </IconButton>
+        </Tooltip>
 
-          <Box sx={{ display: 'flex', gap: 0.25 }}>
-            <Tooltip title="Edit item" arrow>
-              <IconButton
-                size="small"
-                onClick={() => onEdit(item)}
-                sx={{
-                  color: '#94a3b8',
-                  borderRadius: 1.5,
-                  '&:hover': { color: '#0f172a', bgcolor: alpha('#0f172a', 0.06) },
-                }}
-              >
-                <EditIcon sx={{ fontSize: 15 }} />
-              </IconButton>
-            </Tooltip>
-            <Tooltip title="Delete item" arrow>
-              <IconButton
-                size="small"
-                onClick={() => onDelete(item)}
-                sx={{
-                  color: '#94a3b8',
-                  borderRadius: 1.5,
-                  '&:hover': { color: '#ef4444', bgcolor: alpha('#ef4444', 0.08) },
-                }}
-              >
-                <DeleteIcon sx={{ fontSize: 15 }} />
-              </IconButton>
-            </Tooltip>
-          </Box>
-        </Box>
+        {/* Edit */}
+        <Tooltip title="Edit item" arrow>
+          <IconButton
+            size="small"
+            onClick={() => onEdit?.(item)}
+            sx={{
+              borderRadius: 1.5,
+              color: T.textMuted,
+              '&:hover': {
+                color: T.textPri,
+                bgcolor: 'rgba(28,28,30,0.06)',
+              },
+            }}
+          >
+            <EditIcon sx={{ fontSize: 16 }} />
+          </IconButton>
+        </Tooltip>
+
+        {/* Delete */}
+        <Tooltip title="Delete item" arrow>
+          <IconButton
+            size="small"
+            onClick={() => onDelete?.(item)}
+            sx={{
+              borderRadius: 1.5,
+              color: T.textMuted,
+              '&:hover': {
+                color: T.error,
+                bgcolor: 'rgba(235,0,0,0.06)',
+              },
+            }}
+          >
+            <DeleteIcon sx={{ fontSize: 16 }} />
+          </IconButton>
+        </Tooltip>
       </Box>
     </Box>
   );

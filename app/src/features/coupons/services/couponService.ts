@@ -1,128 +1,149 @@
 /**
  * Coupon Service
- * Handles API calls for coupon operations
+ * Handles API calls for coupon operations against /api/v1/application/coupons
  */
 
 import { apiService } from '../../../utils/api';
-import type { Coupon, CouponCreate, CouponUpdate, CouponValidationRequest, CouponValidationResponse } from '../types';
+import { API_ENDPOINTS } from '../../../config/apiEndpoints';
+import type { Coupon, CouponValidationResponse } from '../types';
 
-/**
- * Convert a 'YYYY-MM-DD' date string to a full ISO 8601 datetime string.
- * If the value is already a full datetime string (contains 'T'), it is returned as-is.
- */
-function toISODateTime(date: string): string {
-  if (!date) return date;
-  return date.includes('T') ? date : `${date}T00:00:00.000Z`;
+// ── Backend request DTOs (snake_case, matching FastAPI models) ────────────────
+
+export interface CouponCreateDTO {
+  code: string;
+  venue_id: string;
+  discount_type: 'percentage' | 'fixed';
+  discount_value: number;
+  expiry_date: string;
+  max_discount_amount?: number;
+  min_order_amount?: number;
+  is_active?: boolean;
+  usage_limit?: number;
+  per_user_limit?: number;
+  description?: string;
+  terms_and_conditions?: string;
 }
 
+export interface CouponUpdateDTO {
+  code?: string;
+  discount_type?: 'percentage' | 'fixed';
+  discount_value?: number;
+  expiry_date?: string;
+  max_discount_amount?: number;
+  min_order_amount?: number;
+  is_active?: boolean;
+  usage_limit?: number;
+  per_user_limit?: number;
+  description?: string;
+  terms_and_conditions?: string;
+}
+
+export interface ApplyCouponRequest {
+  coupon_code: string;
+  venue_id: string;
+  order_amount: number;
+  user_id?: string;
+}
+
+export interface GetVenueCouponsParams {
+  include_inactive?: boolean;
+  include_expired?: boolean;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 class CouponService {
-  private baseUrl = '/application/coupons';
+  private readonly baseUrl = API_ENDPOINTS.APPLICATION.COUPONS.BASE;
 
-  // ==================== Coupons ====================
-  
   /**
-   * Get coupons list.
-   * The backend may return a paginated envelope { data: Coupon[], pagination: {...} }
-   * or a plain array. Both shapes are handled.
+   * GET /application/coupons/venue/{venue_id}
+   * Returns all coupons for a venue. Optionally includes inactive/expired ones.
    */
-  async getCoupons(workspaceId: string, page: number = 1, pageSize: number = 100, isAvailable?: boolean): Promise<Coupon[]> {
-    const params: any = {
-      workspace_id: workspaceId,
-      page,
-      page_size: pageSize,
-      order_by: 'created_at',
-      order_direction: 'desc'
-    };
-    
-    if (isAvailable !== undefined) {
-      params.is_available = isAvailable;
-    }
-    
-    const response = await apiService.get(this.baseUrl, { params });
+  async getCouponsByVenue(venueId: string, params?: GetVenueCouponsParams): Promise<Coupon[]> {
+    const response = await apiService.get(API_ENDPOINTS.APPLICATION.COUPONS.BY_VENUE(venueId), { params });
     const raw = response.data as any;
-
-    // Unwrap paginated envelope if present
-    if (raw && Array.isArray(raw.data)) {
-      return raw.data;
-    }
-
+    if (raw && Array.isArray(raw.data)) return raw.data;
     return Array.isArray(raw) ? raw : [];
   }
 
-  async getCoupon(id: string): Promise<Coupon> {
-    const response = await apiService.get(`${this.baseUrl}/${id}`);
-    return response.data as any;
-  }
-
-  async getCouponByCode(code: string, workspaceId: string): Promise<Coupon> {
-    const response = await apiService.get(`${this.baseUrl}/code/${code}`, {
-      params: { workspace_id: workspaceId }
-    });
-    return response.data as any;
-  }
-
-  async createCoupon(data: CouponCreate): Promise<Coupon> {
-    const response = await apiService.post(this.baseUrl, {
-      code: data.code,
-      name: data.name,
-      description: data.description,
-      workspace_id: data.workspaceId,
-      discount_type: data.discountType,
-      discount_value: data.discountValue,
-      max_discount_amount: data.maxDiscountAmount,
-      min_order_amount: data.minOrderAmount,
-      usage_limit: data.usageLimit,
-      usage_limit_per_user: data.usageLimitPerUser,
-      valid_from: data.validFrom ? toISODateTime(data.validFrom) : undefined,
-      valid_until: data.validUntil ? toISODateTime(data.validUntil) : undefined,
-      is_available: data.isAvailable ?? true,
-    });
-    return response.data as any;
+  /**
+   * GET /application/coupons/venue/{venue_id}/active
+   * Returns only active, non-expired coupons for a venue.
+   */
+  async getActiveCouponsByVenue(venueId: string): Promise<Coupon[]> {
+    const response = await apiService.get(API_ENDPOINTS.APPLICATION.COUPONS.ACTIVE_BY_VENUE(venueId));
+    const raw = response.data as any;
+    if (raw && Array.isArray(raw.data)) return raw.data;
+    return Array.isArray(raw) ? raw : [];
   }
 
   /**
-   * Update a coupon.
-   * - Includes 'code' in the payload when provided.
-   * - Converts validFrom/validUntil from 'YYYY-MM-DD' to ISO 8601 datetime.
+   * GET /application/coupons/{id}
    */
-  async updateCoupon(id: string, data: CouponUpdate): Promise<Coupon> {
-    const payload: any = {};
+  async getCoupon(id: string): Promise<Coupon> {
+    const response = await apiService.get(API_ENDPOINTS.APPLICATION.COUPONS.BY_ID(id));
+    return response.data as Coupon;
+  }
+
+  /**
+   * POST /application/coupons
+   */
+  async createCoupon(data: CouponCreateDTO): Promise<Coupon> {
+    const response = await apiService.post(API_ENDPOINTS.APPLICATION.COUPONS.BASE, data);
+    return response.data as Coupon;
+  }
+
+  /**
+   * PUT /application/coupons/{id}
+   * Accepts a partial CouponUpdateDTO; only provided fields are sent.
+   */
+  async updateCoupon(id: string, data: CouponUpdateDTO): Promise<Coupon> {
+    const payload: CouponUpdateDTO = {};
+
     if (data.code !== undefined) payload.code = data.code;
-    if (data.name !== undefined) payload.name = data.name;
+    if (data.discount_type !== undefined) payload.discount_type = data.discount_type;
+    if (data.discount_value !== undefined) payload.discount_value = data.discount_value;
+    if (data.expiry_date !== undefined) payload.expiry_date = data.expiry_date;
+    if (data.max_discount_amount !== undefined) payload.max_discount_amount = data.max_discount_amount;
+    if (data.min_order_amount !== undefined) payload.min_order_amount = data.min_order_amount;
+    if (data.is_active !== undefined) payload.is_active = data.is_active;
+    if (data.usage_limit !== undefined) payload.usage_limit = data.usage_limit;
+    if (data.per_user_limit !== undefined) payload.per_user_limit = data.per_user_limit;
     if (data.description !== undefined) payload.description = data.description;
-    if (data.discountType !== undefined) payload.discount_type = data.discountType;
-    if (data.discountValue !== undefined) payload.discount_value = data.discountValue;
-    if (data.maxDiscountAmount !== undefined) payload.max_discount_amount = data.maxDiscountAmount;
-    if (data.minOrderAmount !== undefined) payload.min_order_amount = data.minOrderAmount;
-    if (data.usageLimit !== undefined) payload.usage_limit = data.usageLimit;
-    if (data.usageLimitPerUser !== undefined) payload.usage_limit_per_user = data.usageLimitPerUser;
-    if (data.validFrom !== undefined) payload.valid_from = toISODateTime(data.validFrom);
-    if (data.validUntil !== undefined) payload.valid_until = toISODateTime(data.validUntil);
-    if (data.isAvailable !== undefined) payload.is_available = data.isAvailable;
-    
-    const response = await apiService.put(`${this.baseUrl}/${id}`, payload);
-    return response.data as any;
+    if (data.terms_and_conditions !== undefined) payload.terms_and_conditions = data.terms_and_conditions;
+
+    const response = await apiService.put(API_ENDPOINTS.APPLICATION.COUPONS.BY_ID(id), payload);
+    return response.data as Coupon;
   }
 
-  async deleteCoupon(id: string): Promise<void> {
-    await apiService.delete(`${this.baseUrl}/${id}`);
-  }
-
-  async restoreCoupon(id: string): Promise<void> {
-    await apiService.put(`${this.baseUrl}/${id}/restore`, {});
-  }
-
-  async validateCoupon(request: CouponValidationRequest): Promise<CouponValidationResponse> {
-    const response = await apiService.post(`${this.baseUrl}/validate`, {
-      code: request.code,
-      workspace_id: request.workspaceId,
-      order_amount: request.orderAmount,
+  /**
+   * DELETE /application/coupons/{id}
+   * Pass hardDelete=true to permanently remove the record.
+   */
+  async deleteCoupon(id: string, hardDelete?: boolean): Promise<void> {
+    await apiService.delete(API_ENDPOINTS.APPLICATION.COUPONS.BY_ID(id), {
+      params: hardDelete !== undefined ? { hard_delete: hardDelete } : undefined,
     });
-    return response.data as any;
   }
 
-  async applyCoupon(id: string): Promise<void> {
-    await apiService.post(`${this.baseUrl}/${id}/apply`, {});
+  /**
+   * POST /application/coupons/apply
+   * Applies a coupon to an order and returns the discount result.
+   */
+  async applyCoupon(request: ApplyCouponRequest): Promise<CouponValidationResponse> {
+    const response = await apiService.post(API_ENDPOINTS.APPLICATION.COUPONS.APPLY, request);
+    return response.data as CouponValidationResponse;
+  }
+
+  /**
+   * POST /application/coupons/validate
+   * Validates a coupon code for a venue without consuming usage.
+   */
+  async validateCoupon(couponCode: string, venueId: string): Promise<CouponValidationResponse> {
+    const response = await apiService.post(API_ENDPOINTS.APPLICATION.COUPONS.VALIDATE, null, {
+      params: { coupon_code: couponCode, venue_id: venueId },
+    });
+    return response.data as CouponValidationResponse;
   }
 }
 

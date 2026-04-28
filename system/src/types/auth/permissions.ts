@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Permission Types and Helpers
  *
  * Permissions are driven entirely by the backend response.

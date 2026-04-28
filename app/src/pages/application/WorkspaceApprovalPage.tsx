@@ -18,6 +18,7 @@ import { useAuth } from '../../contexts/common/Auth';
 import { useWorkspaceApproval } from '../../contexts/application/WorkspaceApproval';
 import { useNavigate } from 'react-router-dom';
 import DinoLogo from '../../components/ui/DinoLogo';
+import { APP_CONFIG } from '../../constants/app';
 
 // ── Animations ─────────────────────────────────────────────────────────────────
 const pulse = keyframes`
@@ -145,7 +146,7 @@ const WorkspaceApprovalPage: React.FC = () => {
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3.5 }}>
             <DinoLogo size={26} animated={false} />
             <Typography sx={{ fontWeight: 800, fontSize: '1rem', color: '#1C1C1E', letterSpacing: '-0.02em' }}>
-              Dino
+              {APP_CONFIG.NAME}
             </Typography>
           </Box>
 
@@ -296,7 +297,7 @@ const WorkspaceApprovalPage: React.FC = () => {
               <Button
                 variant="outlined"
                 component="a"
-                href="mailto:support@dino-order.com"
+                href={`mailto:${APP_CONFIG.SUPPORT_EMAIL}`}
                 fullWidth
                 sx={{
                   borderColor: '#e0e0e0',
@@ -338,7 +339,7 @@ const WorkspaceApprovalPage: React.FC = () => {
 
       {/* Footer */}
       <Typography sx={{ mt: 3, fontSize: '0.72rem', color: '#cbd5e1' }}>
-        Dino &copy; {new Date().getFullYear()}
+        {APP_CONFIG.copyright()}
       </Typography>
     </Box>
   );

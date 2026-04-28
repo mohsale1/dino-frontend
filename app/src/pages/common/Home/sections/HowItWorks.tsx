@@ -94,6 +94,18 @@ const HowItWorksSection: React.FC = () => {
         {/* Section Header */}
         <Box sx={{ textAlign: 'center', mb: { xs: 4, md: 6 }, animation: `${fadeInUp} 0.7s ease-out both` }}>
 
+          {/* Pill badge */}
+          <Box sx={{
+            display: 'inline-flex', alignItems: 'center', gap: 1,
+            mb: { xs: 2, md: 2.5 }, px: 2, py: 0.75, borderRadius: '999px',
+            background: 'rgba(25,118,210,0.1)',
+            border: '1px solid rgba(66,165,245,0.28)',
+          }}>
+            <Box sx={{ width: 6, height: 6, borderRadius: '50%', background: `linear-gradient(135deg, ${BLUE}, ${BLUE_LT})`, flexShrink: 0 }} />
+            <Typography sx={{ fontSize: '0.6875rem', fontWeight: 700, letterSpacing: '0.12em', color: BLUE_LT, textTransform: 'uppercase', lineHeight: 1 }}>
+              Simple Process
+            </Typography>
+          </Box>
 
           {/* Heading */}
           <Box sx={{

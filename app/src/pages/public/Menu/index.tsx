@@ -349,7 +349,7 @@ const PublicMenu: React.FC = () => {
       setError(null);
       setOrgUnavailable(false);
       setMenuNotFound(false);
-      const data = await publicMenuService.getMenuData(organizationId, tableId);
+      const data = await publicMenuService.getMenuWithValidation(organizationId, tableId);
       setMenuData(data);
     } catch (err: any) {
       const status = err?.response?.status;
@@ -424,7 +424,7 @@ const PublicMenu: React.FC = () => {
 
   // ── Org unavailable ──────────────────────────────────────────────────────────
   if (orgUnavailable) {
-    return <UnavailableView orgName={menuData?.organization?.name} />;
+    return <UnavailableView orgName={menuData?.venue?.name} />;
   }
 
   // ── Error ────────────────────────────────────────────────────────────────────
@@ -470,7 +470,7 @@ const PublicMenu: React.FC = () => {
             <Typography
               sx={{ fontSize: '1rem', fontWeight: 800, color: C.textPrimary, lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
             >
-              {menuData.organization.name}
+              {menuData.venue.name}
             </Typography>
             <Chip
               label={`Table ${menuData.table.table_number}`}

@@ -1,4 +1,4 @@
-﻿/**
+/**
  * usePermissions Hook
  * Delegates all permission checks to the Auth context via hasBackendPermission.
  * No role-based logic. No hardcoded booleans.

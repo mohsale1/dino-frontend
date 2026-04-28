@@ -43,6 +43,7 @@ import { DeleteConfirmationDialog } from '../../components/dialogs';
 import { locationService } from '../../services/application';
 import { useUserData } from '../../contexts/application/UserData';
 import { usePermissions } from '../../hooks/usePermissions';
+import { APP_CONFIG } from '../../constants/app';
 import type { ServiceLocation, ServiceArea } from '../../features/locations/types';
 
 // ─── Bulk Print ────────────────────────────────────────────────────────────────
@@ -68,7 +69,7 @@ const BULK_STYLE_CSS: Record<BulkQRStyle, { wrap: string; imgCss: string; bg: st
 const buildBulkPrintHtml = (items: BulkQRItem[], style: BulkQRStyle = 'classic'): string => {
   const sc = BULK_STYLE_CSS[style];
   const brandedHeader = style === 'branded'
-    ? `<div style="background:linear-gradient(135deg,#0f172a,#312e81);padding:5px 10px;text-align:center;"><span style="color:#fff;font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;">Dino</span></div>`
+    ? `<div style="background:linear-gradient(135deg,#0f172a,#312e81);padding:5px 10px;text-align:center;"><span style="color:#fff;font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;">${APP_CONFIG.NAME}</span></div>`
     : '';
 
   const cards = items.map((item) => `
@@ -147,13 +148,13 @@ const LocationsManagementPage: React.FC = () => {
 
   const fetchLocations = useCallback(async () => {
     if (!workspaceId) return;
-    const data = await locationService.getLocations(workspaceId);
+    const data = await locationService.getVenueTables(workspaceId);
     setLocations(data);
   }, [workspaceId]);
 
   const fetchAreas = useCallback(async () => {
     if (!workspaceId) return;
-    const data = await locationService.getAreas(workspaceId);
+    const data = await locationService.getVenueAreas(workspaceId);
     setAreas(data);
   }, [workspaceId]);
 
@@ -238,10 +239,10 @@ const LocationsManagementPage: React.FC = () => {
   const handleSaveLocation = async (data: any) => {
     try {
       if (selectedLocation) {
-        await locationService.updateLocation(selectedLocation.id, data);
+        await locationService.updateTable(selectedLocation.id, data);
         showSnack('Location updated successfully', 'success');
       } else {
-        await locationService.createLocation(data);
+        await locationService.createTable(data);
         showSnack('Location created successfully', 'success');
       }
       setLocationDialogOpen(false);
@@ -255,7 +256,7 @@ const LocationsManagementPage: React.FC = () => {
   const handleConfirmDeleteLocation = async () => {
     try {
       if (selectedLocation) {
-        await locationService.deleteLocation(selectedLocation.id);
+        await locationService.deleteTable(selectedLocation.id);
         showSnack('Location deleted successfully', 'success');
         await fetchLocations();
       }
@@ -275,7 +276,7 @@ const LocationsManagementPage: React.FC = () => {
     }
     try {
       const newStatus = location.status === 'available' ? 'out_of_service' : 'available';
-      await locationService.updateLocationStatus(id, newStatus);
+      await locationService.updateTableStatus(id, newStatus);
       showSnack('Status updated successfully', 'success');
       await fetchLocations();
     } catch (err: any) {
@@ -285,7 +286,7 @@ const LocationsManagementPage: React.FC = () => {
 
   const handleViewQR = async (location: ServiceLocation) => {
     try {
-      const fresh = await locationService.getLocation(location.id);
+      const fresh = await locationService.getTable(location.id);
       setQrDialogLocation(fresh);
     } catch {
       setQrDialogLocation(location);
@@ -351,7 +352,8 @@ const LocationsManagementPage: React.FC = () => {
     try {
       const items = await Promise.all(
         filteredLocations.map(async (loc): Promise<BulkQRItem> => {
-          const qrUrl = await locationService.generateQRCode(loc.id, workspaceId);
+          const qrResponse = await locationService.getQRCode(loc.id);
+          const qrUrl = qrResponse.qr_code_url ?? qrResponse.qr_code;
           const area = loc.areaId ? areas.find((a) => a.id === loc.areaId) : undefined;
           return { qrUrl, name: loc.name ?? loc.identifier, areaName: area?.name ?? '', menuUrl: qrUrl };
         }),

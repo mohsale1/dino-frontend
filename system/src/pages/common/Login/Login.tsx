@@ -9,6 +9,7 @@ import {
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../contexts/common/Auth';
+import { APP_CONFIG } from '../../../constants/app';
 import { getFirstAccessibleRoute } from '../../../utils/auth';
 import DinoLogo from '../../../components/ui/DinoLogo';
 import { PageTransitionLoader } from '../../../components/ui/PageTransitionLoader';
@@ -202,7 +203,7 @@ const SystemLoginPage: React.FC = () => {
               ))}
             </Box>
             <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.22)', mt: 6, textAlign: 'center', display: 'block' }}>
-              Dino System &copy; {new Date().getFullYear()}
+              {APP_CONFIG.copyright()}
             </Typography>
           </Box>
         </Box>

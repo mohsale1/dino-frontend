@@ -61,6 +61,9 @@ export interface CatalogItemCreate {
   workspaceId: string;
   isAvailable?: boolean;
   isVegetarian?: boolean;
+  isVegan?: boolean;
+  isGlutenFree?: boolean;
+  spiceLevel?: 'mild' | 'medium' | 'hot' | 'extra_hot';
   preparationTime?: number;
   tags?: string[];
   metadata?: Record<string, any>;
@@ -73,6 +76,9 @@ export interface CatalogItemUpdate {
   categoryId?: string;
   isAvailable?: boolean;
   isVegetarian?: boolean;
+  isVegan?: boolean;
+  isGlutenFree?: boolean;
+  spiceLevel?: 'mild' | 'medium' | 'hot' | 'extra_hot';
   preparationTime?: number;
   tags?: string[];
   metadata?: Record<string, any>;

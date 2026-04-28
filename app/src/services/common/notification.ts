@@ -102,7 +102,6 @@ class NotificationService {
    */
   async requestNotificationPermission(): Promise<NotificationPermission> {
     if (!('Notification' in window)) {
-      console.warn('This browser does not support notifications');
       return 'denied';
     }
 

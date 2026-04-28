@@ -1,180 +1,160 @@
 /**
  * System Role Service
- * Handles API calls for role management
  *
- * Backend contract (verified from seed-roles.sh):
- *   GET  /system/roles                      → { data: Role[], pagination: {...} }
- *   GET  /system/roles?role_type=0           → { data: Role[], pagination: {...} }  (system roles)
- *   GET  /system/roles?role_type=1           → { data: Role[], pagination: {...} }  (application roles)
- *   GET  /system/roles/{id}                 → Role
- *   POST /system/roles                      → Role   body: { name, description, role_type }
- *   PUT  /system/roles/{id}                 → Role   body: { name?, description?, isActive? }
+ * Backend routes (apiService baseURL = /api/v1):
+ *
+ * Roles:
+ *   GET    /system/roles                          → Role[]
+ *   POST   /system/roles                          → Role         body: SystemRoleCreateDTO | ApplicationRoleCreateDTO
  *   DELETE /system/roles/{id}
- *   POST /system/roles/{id}/permissions     → body: ["permId1", "permId2", ...]  (integer IDs as strings)
- *   DELETE /system/roles/{id}/permissions   → body: ["permId1", "permId2", ...]
- *
- * IMPORTANT: role IDs and permission IDs are integers on the backend.
- * Always coerce to Number before building path segments or payloads.
+ *   GET    /system/roles/{id}/permissions         → number[]
+ *   POST   /system/roles/{id}/permissions         body: { permission_ids: number[] }
+ *   DELETE /system/roles/{id}/permissions         body: { permission_ids: number[] }
+ *   GET    /system/roles/{id}/users               → User[]
  */
 
 import { apiService } from '../../utils/api';
+import { API_ENDPOINTS } from '../../config/apiEndpoints';
+
+// ---------------------------------------------------------------------------
+// DTOs — Role
+// ---------------------------------------------------------------------------
+
+export interface SystemRoleCreateDTO {
+  name: string;
+  description?: string;
+}
+
+export interface ApplicationRoleCreateDTO {
+  name: string;
+  description?: string;
+  workspace_id?: string;
+  organization_id?: string;
+}
+
+// ---------------------------------------------------------------------------
+// DTOs — Role Assignment (kept for type compatibility)
+// ---------------------------------------------------------------------------
+
+export interface SystemRoleAssignmentDTO {
+  user_id: string;
+  role_name: string;
+}
+
+export interface ApplicationRoleAssignmentDTO {
+  user_id: string;
+  role_name: string;
+  workspace_id?: string;
+  organization_id?: string;
+}
+
+export interface BulkRoleAssignmentDTO {
+  assignments: Array<SystemRoleAssignmentDTO | ApplicationRoleAssignmentDTO>;
+}
+
+// ---------------------------------------------------------------------------
+// Response shapes
+// ---------------------------------------------------------------------------
 
 export interface SystemRole {
   id: string;
   name: string;
   description?: string;
-  roleType: number; // 0 = System, 1 = Application
-  permissions: string[]; // permission IDs (as strings) or names — normalised by extractRoles()
-  isSystem: boolean;
-  isActive: boolean;
-  isDeleted: boolean;
-  createdAt: string;
-  updatedAt: string;
+  role_type?: number;
+  roleType?: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
-export interface SystemRoleCreate {
+export interface ApplicationRole {
+  id: string;
   name: string;
   description?: string;
-  roleType: number;
-  permissions?: string[];
+  workspace_id?: string;
+  organization_id?: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
-export interface SystemRoleUpdate {
-  name?: string;
-  description?: string;
-  permissions?: string[];
-  isActive?: boolean;
+export interface RoleAssignment {
+  id: string;
+  user_id: string;
+  role_name: string;
+  workspace_id?: string;
+  organization_id?: string;
+  created_at: string;
 }
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
-/** Extract the roles array from any response shape the backend may return. */
-function extractRoles(data: any): any[] {
+function extractArray(data: unknown): unknown[] {
   if (!data) return [];
   if (Array.isArray(data)) return data;
-  if (Array.isArray(data.data)) return data.data;
-  if (Array.isArray(data.roles)) return data.roles;
+  if (Array.isArray((data as any).data)) return (data as any).data;
   return [];
 }
 
-/** Coerce a role/permission id to a safe integer string for URL path segments. */
-function toIntId(id: any): string {
-  const n = Number(id);
-  if (!Number.isFinite(n) || n <= 0) {
-    throw new Error(`Invalid ID: "${id}" is not a valid positive integer`);
-  }
-  return String(Math.round(n));
-}
+// ---------------------------------------------------------------------------
+// Role Service
+// ---------------------------------------------------------------------------
 
 class SystemRoleService {
-  private baseUrl = '/system/roles';
+  // ---- Roles ----------------------------------------------------------------
 
-  async getRoles(page: number = 1, pageSize: number = 100, roleType?: number): Promise<any[]> {
-    const params: any = {
-      page,
-      page_size: pageSize,
-      order_by: 'created_at',
-      order_direction: 'desc',
-    };
-    if (roleType !== undefined) params.role_type = roleType;
-
-    const response = await apiService.get(this.baseUrl, { params });
-    return extractRoles(response.data);
+  async getSystemRoles(): Promise<SystemRole[]> {
+    const response = await apiService.get(API_ENDPOINTS.SYSTEM.ROLES.BASE);
+    return extractArray(response.data) as SystemRole[];
   }
 
-  async getSystemRoles(): Promise<any[]> {
-    const response = await apiService.get(this.baseUrl, { params: { role_type: 0, page: 1, page_size: 100 } });
-    return extractRoles(response.data);
+  async getApplicationRoles(params?: {
+    workspace_id?: string;
+    organization_id?: string;
+  }): Promise<ApplicationRole[]> {
+    const response = await apiService.get(API_ENDPOINTS.SYSTEM.ROLES.BASE, { params });
+    return extractArray(response.data) as ApplicationRole[];
   }
 
-  async getApplicationRoles(): Promise<any[]> {
-    const response = await apiService.get(this.baseUrl, { params: { role_type: 1, page: 1, page_size: 100 } });
-    return extractRoles(response.data);
+  async createSystemRole(data: SystemRoleCreateDTO): Promise<SystemRole> {
+    const response = await apiService.post(API_ENDPOINTS.SYSTEM.ROLES.BASE, data);
+    return response.data as SystemRole;
   }
 
-  async getRole(id: string): Promise<any> {
-    const safeId = toIntId(id);
-    const response = await apiService.get(`${this.baseUrl}/${safeId}`);
-    return response.data;
-  }
-
-  async createRole(data: SystemRoleCreate): Promise<any> {
-    const response = await apiService.post(this.baseUrl, data);
-    return response.data;
-  }
-
-  async updateRole(id: string, data: SystemRoleUpdate): Promise<any> {
-    const safeId = toIntId(id);
-    const response = await apiService.put(`${this.baseUrl}/${safeId}`, data);
-    return response.data;
+  async createApplicationRole(data: ApplicationRoleCreateDTO): Promise<ApplicationRole> {
+    const response = await apiService.post(API_ENDPOINTS.SYSTEM.ROLES.BASE, data);
+    return response.data as ApplicationRole;
   }
 
   async deleteRole(id: string): Promise<void> {
-    const safeId = toIntId(id);
-    await apiService.delete(`${this.baseUrl}/${safeId}`);
+    await apiService.delete(API_ENDPOINTS.SYSTEM.ROLES.BY_ID(id));
   }
 
-  async restoreRole(id: string): Promise<void> {
-    const safeId = toIntId(id);
-    await apiService.put(`${this.baseUrl}/${safeId}/restore`, {});
+  async getRoles(page?: number, limit?: number): Promise<SystemRole[]> {
+    const roles = await this.getSystemRoles();
+    return roles.map((role) => ({
+      ...role,
+      roleType: role.role_type ?? role.roleType ?? 0,
+    }));
   }
 
-  /**
-   * Assign permissions to a role.
-   * Backend expects a plain JSON array of integer permission IDs.
-   * @param id          Role ID (integer)
-   * @param permissionIds  Array of permission IDs (integers or integer strings)
-   */
-  async addPermissions(id: string, permissionIds: (string | number)[]): Promise<void> {
-    const safeId = toIntId(id);
-    // Coerce each permission ID to an integer
-    const ids = permissionIds.map(p => {
-      const n = Number(p);
-      if (!Number.isFinite(n) || n <= 0) {
-        throw new Error(`Invalid permission ID: "${p}"`);
-      }
-      return Math.round(n);
+  async getRolePermissions(roleId: string | number): Promise<number[]> {
+    const response = await apiService.get(API_ENDPOINTS.SYSTEM.ROLES.PERMISSIONS(roleId));
+    return extractArray(response.data) as number[];
+  }
+
+  async addPermissions(roleId: string | number, permissionIds: string[]): Promise<void> {
+    await apiService.post(API_ENDPOINTS.SYSTEM.ROLES.PERMISSIONS(roleId), {
+      permission_ids: permissionIds.map(Number),
     });
-    await apiService.post(`${this.baseUrl}/${safeId}/permissions`, ids);
   }
 
-  /**
-   * Remove permissions from a role.
-   * Backend expects a plain JSON array of integer permission IDs.
-   */
-  async removePermissions(id: string, permissionIds: (string | number)[]): Promise<void> {
-    const safeId = toIntId(id);
-    const ids = permissionIds.map(p => {
-      const n = Number(p);
-      if (!Number.isFinite(n) || n <= 0) {
-        throw new Error(`Invalid permission ID: "${p}"`);
-      }
-      return Math.round(n);
+  async removePermissions(roleId: string | number, permissionIds: string[]): Promise<void> {
+    await apiService.delete(API_ENDPOINTS.SYSTEM.ROLES.PERMISSIONS(roleId), {
+      data: { permission_ids: permissionIds.map(Number) },
     });
-    await apiService.delete(`${this.baseUrl}/${safeId}/permissions`, { data: ids });
-  }
-
-  /**
-   * Get permission IDs assigned to a role.
-   * Returns a flat array of integer IDs: [1, 5, 12, ...]
-   * Endpoint: GET /system/roles/{id}/permissions
-   */
-  async getRolePermissions(id: any): Promise<number[]> {
-    const safeId = toIntId(id);
-    const response = await apiService.get(`${this.baseUrl}/${safeId}/permissions`);
-    // Response: { success, data: [1, 5, 12] }
-    const raw: any = response.data;
-    if (Array.isArray(raw)) return (raw as any[]).map(Number);
-    if (Array.isArray(raw?.data)) return (raw.data as any[]).map(Number);
-    return [];
-  }
-
-  async getRoleUsers(id: string): Promise<any> {
-    const safeId = toIntId(id);
-    const response = await apiService.get(`${this.baseUrl}/${safeId}/users`);
-    return response.data;
   }
 }
 

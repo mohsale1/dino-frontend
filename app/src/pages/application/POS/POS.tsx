@@ -7,10 +7,12 @@ import { ShoppingCart } from '@mui/icons-material';
 import { useUserData } from '../../../contexts/application/UserData';
 import { catalogService } from '../../../features/catalog/services';
 import { orderService } from '../../../services/application/order.service';
-import { tableService, Table } from '../../../services/application/table.service';
+import { locationService } from '../../../features/locations/services/locationService';
+import type { Table } from '../../../types/location/table';
 import type { Category } from '../../../features/catalog/types';
 
 import { CartItem, PosMenuItem, TAX_RATE, formatINR } from './pos.types';
+import { APP_CONFIG } from '../../../constants/app';
 import CategorySidebar from './components/CategorySidebar';
 import POSToolbar from './components/POSToolbar';
 import ItemsGrid from './components/ItemsGrid';
@@ -72,8 +74,8 @@ const POS: React.FC = () => {
       setLoading(true);
       setDataError('');
       const [rawItems, rawCategories] = await Promise.all([
-        catalogService.getCatalogItems(currentWorkspace.id),
-        catalogService.getCategories(currentWorkspace.id),
+        catalogService.getItems({ venue_id: currentWorkspace.id }),
+        catalogService.getCategories({ venue_id: currentWorkspace.id }),
       ]);
       const categoryMap = new Map<string, string>((rawCategories || []).map(c => [c.id, c.name]));
       const mapped: PosMenuItem[] = (rawItems || [])
@@ -100,8 +102,8 @@ const POS: React.FC = () => {
   const loadTables = useCallback(async () => {
     if (!currentVenue?.id) return;
     try {
-      const res = await tableService.getTables({ venueId: currentVenue.id, isActive: true });
-      if (res.success && res.data) setTables((res.data as any) || []);
+      const tables = await locationService.getTables({ venue_id: currentVenue.id, is_active: true });
+      setTables((tables as any) || []);
     } catch { /* non-critical */ }
   }, [currentVenue?.id]);
 
@@ -254,7 +256,7 @@ body{font-family:'Courier New',monospace;padding:8mm 4mm;max-width:80mm;margin:0
 .ty-sub{font-size:7px;margin-top:2px}
 .powered{font-size:7px;color:#999;margin-top:6px;padding-top:6px;border-top:1px solid #ddd}
 </style></head><body>
-<div class="logo-box"><div class="logo">DINO</div><div class="tagline">POINT OF SALE</div></div>
+<div class="logo-box"><div class="logo">${APP_CONFIG.NAME.toUpperCase()}</div><div class="tagline">POINT OF SALE</div></div>
 <div class="header">
   <div class="venue-name">${currentVenue?.name || 'Venue'}</div>
   <div class="venue-info">${(currentVenue as any)?.location?.address || ''}<br>Tel: ${(currentVenue as any)?.phone || 'N/A'}</div>
@@ -290,7 +292,7 @@ ${completedOrder.items.map((item: CartItem, i: number) => `
 ${completedOrder.notes ? `<div class="customer-box"><div class="row"><span>Notes:</span><span>${completedOrder.notes}</span></div></div>` : ''}
 <div class="footer">
   <div class="ty-box"><div class="ty">THANK YOU!</div><div class="ty-sub">PLEASE COME AGAIN</div></div>
-  <div class="powered">Powered by Dino POS</div>
+  <div class="powered">${APP_CONFIG.POWERED_BY_POS}</div>
 </div>
 <script>window.onload=function(){setTimeout(function(){window.print()},250)};window.onafterprint=function(){setTimeout(function(){window.close()},100)}</script>
 </body></html>`);

@@ -29,6 +29,7 @@ import Tooltip from '@mui/material/Tooltip';
 import Switch from '@mui/material/Switch';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../../contexts/common/Auth';
+import { APP_CONFIG } from '../../../constants/app';
 import { useUserData } from '../../../contexts/application/UserData';
 import DinoLogo from '../../ui/DinoLogo';
 import AppMobileMenu from '../AppMobileMenu';
@@ -490,7 +491,7 @@ const AppHeader: React.FC = () => {
                 lineHeight: 1,
               }}
             >
-              Dino
+              {APP_CONFIG.NAME}
             </Typography>
           </Box>
 

@@ -3,6 +3,7 @@ import { Box, Typography, Button, Stack, alpha } from '@mui/material';
 import { Home, ArrowBack } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../contexts/common/Auth';
+import { APP_CONFIG } from '../../../constants/app';
 
 // ─── Star field canvas ────────────────────────────────────────────────────────
 const StarField: React.FC = () => {
@@ -282,7 +283,7 @@ const NotFoundPage: React.FC = () => {
         </Box>
 
         <Typography variant="caption" color="#e2e8f0" mt={2.5}>
-          Dino &copy; {new Date().getFullYear()}
+          {APP_CONFIG.copyright()}
         </Typography>
       </Box>
     </Box>

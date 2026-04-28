@@ -15,9 +15,10 @@ import {
 } from '@mui/icons-material';
 import DinoLogo from '../../ui/DinoLogo';
 import { homePageService } from '../../../services/api/homePage';
+import { APP_CONFIG } from '../../../constants/app';
 
 const DEFAULT_COMPANY_INFO = {
-  name: 'Dino',
+  name: APP_CONFIG.NAME,
   description:
     'Streamline your restaurant operations with digital catalogs, smart menus, and intelligent order management built for modern businesses.',
 };
@@ -272,7 +273,7 @@ const AppFooter: React.FC<AppFooterProps> = ({ variant = 'default' }) => {
         {/* Bottom bar */}
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
           <Typography variant="body2" sx={{ color: '#475569', fontSize: '0.8125rem' }}>
-            © {currentYear} Dino. All rights reserved.
+            {APP_CONFIG.copyright(currentYear)}
           </Typography>
         </Box>
       </Container>

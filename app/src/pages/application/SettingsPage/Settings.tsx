@@ -11,6 +11,7 @@ import {
   LockOutlined,
   CalendarToday,
   RateReviewOutlined,
+  CreditCardOutlined,
 } from '@mui/icons-material';
 import { useAuth } from '../../../contexts/common/Auth';
 import { useUserData } from '../../../contexts/application/UserData';
@@ -19,6 +20,7 @@ import ProfileSection from './components/ProfileSection';
 import SecuritySection from './components/SecuritySection';
 import WorkspaceSection from './components/WorkspaceSection';
 import ReviewSection from './components/ReviewSection';
+import BillingSection from './components/BillingSection';
 
 const ROLE_DISPLAY: Record<string, string> = {
   superadmin: 'Super Admin',
@@ -31,6 +33,7 @@ const SECTIONS = [
   { id: 'profile',   label: 'Profile',   icon: PersonOutlined,     description: 'Personal info & avatar'   },
   { id: 'workspace', label: 'Workspace', icon: BusinessOutlined,   description: 'Venue details & location' },
   { id: 'security',  label: 'Security',  icon: LockOutlined,       description: 'Password & access'        },
+  { id: 'billing',   label: 'Billing',   icon: CreditCardOutlined, description: 'Plan & billing details'   },
   { id: 'review',    label: 'Review',    icon: RateReviewOutlined, description: 'Share your feedback'      },
 ];
 
@@ -66,6 +69,7 @@ const Settings: React.FC = () => {
       case 'profile':   return <ProfileSection />;
       case 'workspace': return <WorkspaceSection onSave={() => handleSave(null, 'Workspace')} />;
       case 'security':  return <SecuritySection />;
+      case 'billing':   return <BillingSection />;
       case 'review':    return <ReviewSection />;
       default:          return null;
     }
@@ -140,7 +144,7 @@ const Settings: React.FC = () => {
       </Box>
 
       {/* ── Two-column layout ── */}
-      <Box sx={{ display: 'flex', gap: 3, alignItems: 'flex-start' }}>
+      <Box sx={{ display: 'flex', gap: 3, alignItems: 'stretch' }}>
 
         {/* ── Left: Nav sidebar ── */}
         <Box
@@ -153,6 +157,9 @@ const Settings: React.FC = () => {
             borderRadius: '12px',
             overflow: 'hidden',
             bgcolor: '#ffffff',
+            alignSelf: 'flex-start',
+            position: 'sticky',
+            top: 80,
           }}
         >
           <Box sx={{ px: 2, py: 1.75, borderBottom: '1px solid #e0e0e0', bgcolor: '#F7F9FA' }}>

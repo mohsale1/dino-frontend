@@ -6,10 +6,10 @@ import {
   ChevronLeft as ChevronLeftIcon,
   ChevronRight as ChevronRightIcon,
 } from '@mui/icons-material';
-import { PublicMenuData } from '../../../../services/application/publicMenuService';
+import type { PublicMenuWithValidation } from '../../../../services/application/publicMenuService';
 
 interface HomeFragmentProps {
-  menuData: PublicMenuData;
+  menuData: PublicMenuWithValidation;
   onViewMenu: () => void;
 }
 
@@ -86,7 +86,7 @@ const VegDot: React.FC<{ isVeg: boolean }> = ({ isVeg }) => (
 
 // ── Component ──────────────────────────────────────────────────────────────────
 const HomeFragment: React.FC<HomeFragmentProps> = ({ menuData, onViewMenu }) => {
-  const { organization, table, categories, items } = menuData;
+  const { venue, table, categories, items } = menuData;
 
   // Banner auto-slide
   const [slide, setSlide] = useState(0);
@@ -164,7 +164,7 @@ const HomeFragment: React.FC<HomeFragmentProps> = ({ menuData, onViewMenu }) => 
           >
             <Box sx={{ width: 5, height: 5, borderRadius: '50%', bgcolor: P.inkLight, flexShrink: 0 }} />
             <Typography sx={{ fontSize: '0.68rem', fontWeight: 700, color: P.inkLight, letterSpacing: '0.07em', textTransform: 'uppercase' }}>
-              Table {table.table_number}
+              Table {table?.table_number}
             </Typography>
           </Box>
 
@@ -180,7 +180,7 @@ const HomeFragment: React.FC<HomeFragmentProps> = ({ menuData, onViewMenu }) => 
               mb: 0.75,
             }}
           >
-            {organization.name}
+            {venue.name}
           </Typography>
 
           {/* Tagline */}
@@ -194,7 +194,7 @@ const HomeFragment: React.FC<HomeFragmentProps> = ({ menuData, onViewMenu }) => 
               maxWidth: 280,
             }}
           >
-            {organization.description || 'Scan. Browse. Order. Enjoy.'}
+            {venue.description || 'Scan. Browse. Order. Enjoy.'}
           </Typography>
 
           {/* Quick stats */}
@@ -208,7 +208,7 @@ const HomeFragment: React.FC<HomeFragmentProps> = ({ menuData, onViewMenu }) => 
             </Typography>
             <Box sx={{ width: 3, height: 3, borderRadius: '50%', bgcolor: P.textFaint }} />
             <Typography sx={{ fontSize: '0.75rem', fontWeight: 600, color: P.textSub }}>
-              {table.capacity} seats
+              {table?.capacity} seats
             </Typography>
           </Box>
 

@@ -1,5 +1,3 @@
-
-
 import React, { useState, useEffect } from 'react';
 import {
   Box,
@@ -165,57 +163,119 @@ const StarRatingInput: React.FC<{ value: number; onChange: (v: number) => void }
   );
 };
 
-// ---------------------------------------------------------------------------
-// ThankYouCard
-// ---------------------------------------------------------------------------
+const RATING_LABELS = ['', 'Poor', 'Fair', 'Good', 'Very Good', 'Excellent'];
 
 const ThankYouCard: React.FC<{ review: ReviewData }> = ({ review }) => (
-  <Box
-    sx={{
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      textAlign: 'center',
-      gap: 2,
-      py: { xs: 2, sm: 3 },
-    }}
-  >
-    <CheckCircle sx={{ fontSize: 52, color: '#10b981' }} />
+  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
 
-    <Box>
-      <Typography variant="h6" sx={{ fontWeight: 700, color: '#1C1C1E', mb: 0.5 }}>
-        Thank you for your review!
-      </Typography>
-      <Typography variant="body2" color="text.secondary">
-        Submitted on {formatDate(review.created_at)}
-      </Typography>
-    </Box>
-
-    <ReadOnlyStars rating={review.rating} />
-
+    {/* Success banner */}
     <Box
       sx={{
-        width: '100%',
-        maxWidth: 480,
-        bgcolor: BRAND.primaryBg,
-        border: `1px solid ${BRAND.primaryBorder}`,
-        borderLeft: `4px solid ${BRAND.primary}`,
-        borderRadius: '0 8px 8px 0',
-        px: 2.5,
-        py: 1.75,
-        textAlign: 'left',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 1.5,
+        px: 2,
+        py: 1.5,
+        borderRadius: 2,
+        bgcolor: 'rgba(16,185,129,0.07)',
+        border: '1px solid rgba(16,185,129,0.2)',
       }}
     >
-      <Typography variant="body2" sx={{ color: '#374151', fontStyle: 'italic', lineHeight: 1.7 }}>
-        {review.comment}
+      <CheckCircle sx={{ fontSize: 22, color: '#10b981', flexShrink: 0 }} />
+      <Box sx={{ minWidth: 0 }}>
+        <Typography sx={{ fontWeight: 700, fontSize: '0.875rem', color: '#065f46', lineHeight: 1.3 }}>
+          Review submitted
+        </Typography>
+        <Typography sx={{ fontSize: '0.75rem', color: '#6b7280', lineHeight: 1.3 }}>
+          Submitted on {formatDate(review.created_at)}
+        </Typography>
+      </Box>
+    </Box>
+
+    {/* Rating row */}
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        px: 2,
+        py: 1.5,
+        borderRadius: 2,
+        bgcolor: '#F7F9FA',
+        border: '1px solid #e0e0e0',
+      }}
+    >
+      <Box>
+        <Typography sx={{ fontSize: '0.7rem', fontWeight: 600, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.06em', mb: 0.5 }}>
+          Your Rating
+        </Typography>
+        <ReadOnlyStars rating={review.rating} />
+      </Box>
+      <Box sx={{ textAlign: 'right' }}>
+        <Typography sx={{ fontSize: '1.75rem', fontWeight: 800, color: '#1C1C1E', lineHeight: 1 }}>
+          {review.rating}
+          <Typography component="span" sx={{ fontSize: '0.875rem', fontWeight: 500, color: '#9ca3af' }}>
+            /5
+          </Typography>
+        </Typography>
+        <Typography sx={{ fontSize: '0.75rem', color: '#6b7280', fontWeight: 500 }}>
+          {RATING_LABELS[review.rating]}
+        </Typography>
+      </Box>
+    </Box>
+
+    {/* Comment */}
+    <Box
+      sx={{
+        position: 'relative',
+        px: 2.5,
+        py: 2,
+        borderRadius: 2,
+        bgcolor: '#ffffff',
+        border: '1px solid #e0e0e0',
+        borderLeft: `3px solid ${BRAND.primary}`,
+      }}
+    >
+      <Typography
+        sx={{
+          fontSize: '0.7rem',
+          fontWeight: 600,
+          color: '#9ca3af',
+          textTransform: 'uppercase',
+          letterSpacing: '0.06em',
+          mb: 1,
+        }}
+      >
+        Your Feedback
+      </Typography>
+      <Typography
+        sx={{
+          fontSize: '0.875rem',
+          color: '#374151',
+          lineHeight: 1.7,
+          fontStyle: 'italic',
+        }}
+      >
+        "{review.comment}"
       </Typography>
     </Box>
 
-    <Typography variant="caption" sx={{ color: '#9ca3af', mt: 0.5, maxWidth: 380, lineHeight: 1.5 }}>
+    {/* Footer note */}
+    <Typography
+      variant="caption"
+      sx={{
+        color: '#9ca3af',
+        textAlign: 'center',
+        lineHeight: 1.5,
+        pb: 0.5,
+      }}
+    >
       Reviews can only be submitted once and cannot be edited.
     </Typography>
   </Box>
 );
+
+
 
 // ---------------------------------------------------------------------------
 // ReviewSkeleton

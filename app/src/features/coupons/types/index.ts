@@ -1,68 +1,30 @@
 /**
  * Coupon Types
+ * Aligned with the FastAPI backend response shapes (/api/v1/coupons)
  */
 
 export interface Coupon {
   id: string;
   code: string;
-  name: string;
+  venue_id: string;
+  discount_type: 'percentage' | 'fixed';
+  discount_value: number;
+  expiry_date: string;
+  max_discount_amount?: number;
+  min_order_amount?: number;
+  is_active: boolean;
+  usage_limit?: number;
+  usage_count: number;
+  per_user_limit?: number;
   description?: string;
-  workspaceId: string;
-  discountType: 'percentage' | 'fixed';
-  discountValue: number;
-  maxDiscountAmount?: number;
-  minOrderAmount?: number;
-  usageLimit?: number;
-  usageCount: number;
-  usageLimitPerUser?: number;
-  validFrom?: string;
-  validUntil?: string;
-  isAvailable: boolean;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface CouponCreate {
-  code: string;
-  name: string;
-  description?: string;
-  workspaceId: string;
-  discountType: 'percentage' | 'fixed';
-  discountValue: number;
-  maxDiscountAmount?: number;
-  minOrderAmount?: number;
-  usageLimit?: number;
-  usageLimitPerUser?: number;
-  validFrom?: string;
-  validUntil?: string;
-  isAvailable?: boolean;
-}
-
-export interface CouponUpdate {
-  code?: string;
-  name?: string;
-  description?: string;
-  discountType?: 'percentage' | 'fixed';
-  discountValue?: number;
-  maxDiscountAmount?: number;
-  minOrderAmount?: number;
-  usageLimit?: number;
-  usageLimitPerUser?: number;
-  validFrom?: string;
-  validUntil?: string;
-  isAvailable?: boolean;
-}
-
-export interface CouponValidationRequest {
-  code: string;
-  workspaceId: string;
-  orderAmount: number;
+  terms_and_conditions?: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface CouponValidationResponse {
   valid: boolean;
   message: string;
-  discountAmount: number;
+  discount_amount: number;
   coupon?: Coupon;
 }

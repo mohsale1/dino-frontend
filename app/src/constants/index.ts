@@ -11,6 +11,7 @@
 // ===================================================================
 
 export * from './app';
+import { STATUS_COLORS } from './app';
 
 // ===================================================================
 // USER-FACING CONTENT
@@ -61,31 +62,31 @@ export const getPaymentStatusDisplayName = (status: string): string => {
 export const getStatusColor = (status: string, type: 'order' | 'payment' | 'table' = 'order'): string => {
   const colorMaps = {
     order: {
-      pending: '#FF9800',
-      confirmed: '#2196F3',
-      preparing: '#FF5722',
-      ready: '#4CAF50',
-      served: '#4CAF50',
-      completed: '#4CAF50',
-      cancelled: '#F44336',
-      refunded: '#9E9E9E',
+      pending: STATUS_COLORS.RESERVED,      // #FF9800
+      confirmed: '#2196F3',                 // status-specific, not in STATUS_COLORS
+      preparing: '#FF5722',                 // status-specific, not in STATUS_COLORS
+      ready: STATUS_COLORS.AVAILABLE,       // #4CAF50
+      served: STATUS_COLORS.AVAILABLE,      // #4CAF50
+      completed: STATUS_COLORS.AVAILABLE,   // #4CAF50
+      cancelled: STATUS_COLORS.OCCUPIED,    // #F44336
+      refunded: STATUS_COLORS.MAINTENANCE,  // #9E9E9E
     },
     payment: {
-      pending: '#FF9800',
-      processing: '#2196F3',
-      completed: '#4CAF50',
-      failed: '#F44336',
-      cancelled: '#F44336',
-      refunded: '#9E9E9E',
+      pending: STATUS_COLORS.RESERVED,      // #FF9800
+      processing: '#2196F3',                // status-specific, not in STATUS_COLORS
+      completed: STATUS_COLORS.AVAILABLE,   // #4CAF50
+      failed: STATUS_COLORS.OCCUPIED,       // #F44336
+      cancelled: STATUS_COLORS.OCCUPIED,    // #F44336
+      refunded: STATUS_COLORS.MAINTENANCE,  // #9E9E9E
     },
     table: {
-      available: '#4CAF50',
-      occupied: '#F44336',
-      reserved: '#FF9800',
-      maintenance: '#9E9E9E',
-      cleaning: '#2196F3',
+      available: STATUS_COLORS.AVAILABLE,   // #4CAF50
+      occupied: STATUS_COLORS.OCCUPIED,     // #F44336
+      reserved: STATUS_COLORS.RESERVED,     // #FF9800
+      maintenance: STATUS_COLORS.MAINTENANCE, // #9E9E9E
+      cleaning: '#2196F3',                  // status-specific, not in STATUS_COLORS
     },
   };
-  
-  return (colorMaps[type] as Record<string, string>)?.[status] || '#9E9E9E';
+
+  return (colorMaps[type] as Record<string, string>)?.[status] || STATUS_COLORS.MAINTENANCE;
 };

@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Typography,
@@ -217,7 +217,7 @@ const Approvals: React.FC = () => {
   }, [fetchRequests, currentPage, statusFilter]);
 
   // -------------------------------------------------------------------------
-  // Derived stats (totals come from pagination.total)
+  // Derived stats (from current page — totals come from pagination.total)
   // -------------------------------------------------------------------------
   const stats = {
     total:    pagination.total,
@@ -399,6 +399,9 @@ const Approvals: React.FC = () => {
     setCurrentPage(newPage);
   };
 
+  // -------------------------------------------------------------------------
+  // Loading / error states
+  // -------------------------------------------------------------------------
 
   if (error && requests.length === 0) {
     return (
@@ -530,7 +533,7 @@ const Approvals: React.FC = () => {
               )}
             </Box>
 
-            {/* Status filter â€” server-side */}
+            {/* Status filter — server-side */}
             <FormControl size="small" sx={{ minWidth: { xs: 120, sm: 140 } }}>
               <Select
                 value={statusFilter}

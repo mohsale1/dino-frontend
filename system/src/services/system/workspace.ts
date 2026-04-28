@@ -1,9 +1,12 @@
 /**
  * System Workspace Service
- * Handles API calls for workspace management
+ * Handles API calls for workspace management.
+ * Backend routes are under /system/workspaces/* (apiService baseURL is /api/v1).
  */
 
 import { apiService } from '../../utils/api';
+import { API_ENDPOINTS } from '../../config/apiEndpoints';
+import { DEFAULTS } from '../../constants/app';
 
 export interface Workspace {
   id: string;
@@ -18,58 +21,43 @@ export interface Workspace {
   updatedAt: string;
 }
 
-export interface WorkspaceCreate {
+export interface WorkspaceCreateDTO {
   name: string;
   description?: string;
   ownerId?: string;
 }
 
-export interface WorkspaceUpdate {
+export interface WorkspaceUpdateDTO {
   name?: string;
   description?: string;
   isActive?: boolean;
 }
 
 class SystemWorkspaceService {
-  private baseUrl = '/system/workspaces';
-
-  async getWorkspaces(page: number = 1, pageSize: number = 100, includeDeleted: boolean = false) {
-    const response = await apiService.get(this.baseUrl, {
-      params: {
-        page,
-        page_size: pageSize,
-        include_deleted: includeDeleted,
-        order_by: 'created_at',
-        order_direction: 'desc',
-      },
+  async getWorkspaces(skip: number = 0, limit: number = DEFAULTS.LARGE_PAGE_SIZE): Promise<Workspace[]> {
+    const response = await apiService.get(API_ENDPOINTS.SYSTEM.WORKSPACES.BASE, {
+      params: { skip, limit },
     });
-    // Backend returns { success, message, data: [...workspaces...], pagination }
-    // apiService already transforms to camelCase
-    return (response.data as any) || [];
+    return (response.data as Workspace[]) ?? [];
   }
 
-  async getWorkspace(id: string) {
-    const response = await apiService.get(`${this.baseUrl}/${id}`);
-    return (response.data as any) || null;
+  async getWorkspace(id: string): Promise<Workspace | null> {
+    const response = await apiService.get(API_ENDPOINTS.SYSTEM.WORKSPACES.BY_ID(id));
+    return (response.data as Workspace) ?? null;
   }
 
-  async createWorkspace(data: WorkspaceCreate) {
-    const response = await apiService.post(this.baseUrl, data);
-    return (response.data as any) || null;
+  async createWorkspace(data: WorkspaceCreateDTO): Promise<Workspace | null> {
+    const response = await apiService.post(API_ENDPOINTS.SYSTEM.WORKSPACES.BASE, data);
+    return (response.data as Workspace) ?? null;
   }
 
-  async updateWorkspace(id: string, data: WorkspaceUpdate) {
-    const response = await apiService.put(`${this.baseUrl}/${id}`, data);
-    return (response.data as any) || null;
+  async updateWorkspace(id: string, data: WorkspaceUpdateDTO): Promise<Workspace | null> {
+    const response = await apiService.put(API_ENDPOINTS.SYSTEM.WORKSPACES.BY_ID(id), data);
+    return (response.data as Workspace) ?? null;
   }
 
-  async deleteWorkspace(id: string) {
-    const response = await apiService.delete(`${this.baseUrl}/${id}`);
-    return response.success;
-  }
-
-  async restoreWorkspace(id: string) {
-    const response = await apiService.put(`${this.baseUrl}/${id}/restore`, {});
+  async deleteWorkspace(id: string): Promise<boolean> {
+    const response = await apiService.delete(API_ENDPOINTS.SYSTEM.WORKSPACES.BY_ID(id));
     return response.success;
   }
 }

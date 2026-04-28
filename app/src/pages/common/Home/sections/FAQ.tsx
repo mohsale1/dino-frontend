@@ -11,6 +11,7 @@ import {
   keyframes,
 } from '@mui/material';
 import { ExpandMore, HelpOutline, ChatBubbleOutline } from '@mui/icons-material';
+import { APP_CONFIG } from '../../../../constants/app';
 
 const FAQS = [
   {
@@ -29,6 +30,11 @@ const FAQS = [
       'Dino is perfect for restaurants, cafes, cloud kitchens, retail stores, salons, and any business that wants to digitize their catalog and streamline order management. Our platform is flexible and adapts to various business models.',
   },
   {
+    question: 'Can we customize the design and branding?',
+    answer:
+      'Absolutely. You can fully customize your digital catalog with your logo, brand colors, fonts, and layout. Make it truly yours and maintain consistent branding across all customer touchpoints.',
+  },
+  {
     question: 'How does the pricing work?',
     answer:
       'We offer flexible pricing plans based on your business size and needs. Contact our sales team for a customized quote. We also provide a free trial so you can experience Dino before committing.',
@@ -42,6 +48,11 @@ const FAQS = [
     question: 'What kind of support do you provide?',
     answer:
       'We provide 24/7 customer support via phone, email, and chat. Our dedicated support team is always ready to help you with any questions or issues. We also offer comprehensive documentation and video tutorials.',
+  },
+  {
+    question: 'Can we integrate Dino with our existing systems?',
+    answer:
+      'Yes. Dino offers API integrations and can connect with popular POS systems, payment gateways, and accounting software. Our technical team will assist you with the integration process.',
   },
 ];
 
@@ -188,6 +199,44 @@ const FAQSection: React.FC = () => {
             animation: `${fadeInUp} 0.8s ease-out`,
           }}
         >
+          {/* Badge pill — matches Testimonials */}
+          <Box
+            sx={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 1,
+              px: 2,
+              py: 0.75,
+              mb: 3,
+              borderRadius: '999px',
+              background: `linear-gradient(135deg, ${alpha('#1976D2', 0.1)} 0%, ${alpha('#42A5F5', 0.08)} 100%)`,
+              border: `1px solid ${alpha('#1976D2', 0.18)}`,
+              backdropFilter: 'blur(8px)',
+            }}
+          >
+            <Box
+              sx={{
+                width: 6,
+                height: 6,
+                borderRadius: '50%',
+                background: 'linear-gradient(135deg, #1976D2, #42A5F5)',
+                flexShrink: 0,
+              }}
+            />
+            <Typography
+              sx={{
+                fontSize: '0.6875rem',
+                fontWeight: 700,
+                letterSpacing: '0.12em',
+                color: '#1976D2',
+                textTransform: 'uppercase',
+              }}
+            >
+              Frequently Asked
+            </Typography>
+          </Box>
+
+          {/* Heading — matches Testimonials */}
           <Typography
             variant="h2"
             sx={{
@@ -228,7 +277,7 @@ const FAQSection: React.FC = () => {
               mt: 3,
             }}
           >
-            Everything you need to know about Dino
+            Everything you need to know about {APP_CONFIG.NAME}
           </Typography>
         </Box>
 
@@ -415,7 +464,7 @@ const FAQSection: React.FC = () => {
             {/* CTA button */}
             <Button
               variant="contained"
-              href="mailto:support@dinomenu.com"
+              href={`mailto:${APP_CONFIG.SUPPORT_EMAIL}`}
               sx={{
                 px: { xs: 4, sm: 5 },
                 py: 1.5,

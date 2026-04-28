@@ -33,7 +33,6 @@ export interface UseLocationsResult {
   toggleLocationStatus: (id: string, isActive: boolean) => Promise<void>;
   updateLocationStatus: (id: string, status: 'available' | 'occupied' | 'reserved' | 'out_of_service') => Promise<void>;
   generateQRCode: (id: string) => Promise<string>;
-  printQRCode: (id: string) => Promise<void>;
   
   // Area operations
   loadAreas: () => Promise<void>;
@@ -62,7 +61,7 @@ export function useLocations({ workspaceId, autoLoad = true }: UseLocationsOptio
     setError(null);
     
     try {
-      const data = await locationService.getAreas(workspaceId);
+      const data = await locationService.getVenueAreas(workspaceId);
       setAreas(data);
     } catch (err: any) {
       setError(err.message || 'Failed to load areas');
@@ -72,14 +71,14 @@ export function useLocations({ workspaceId, autoLoad = true }: UseLocationsOptio
   }, [workspaceId]);
 
   // Load locations
-  const loadLocations = useCallback(async (areaId?: string) => {
+  const loadLocations = useCallback(async (_areaId?: string) => {
     if (!workspaceId) return;
     
     setLocationsLoading(true);
     setError(null);
     
     try {
-      const data = await locationService.getLocations(workspaceId, areaId);
+      const data = await locationService.getVenueTables(workspaceId);
       setLocations(data);
     } catch (err: any) {
       setError(err.message || 'Failed to load locations');
@@ -93,7 +92,7 @@ export function useLocations({ workspaceId, autoLoad = true }: UseLocationsOptio
     setError(null);
     
     try {
-      await locationService.createLocation(data);
+      await locationService.createTable(data);
       await loadLocations();
     } catch (err: any) {
       setError(err.message || 'Failed to create location');
@@ -106,7 +105,7 @@ export function useLocations({ workspaceId, autoLoad = true }: UseLocationsOptio
     setError(null);
     
     try {
-      await locationService.updateLocation(id, data);
+      await locationService.updateTable(id, data);
       await loadLocations();
     } catch (err: any) {
       setError(err.message || 'Failed to update location');
@@ -119,7 +118,7 @@ export function useLocations({ workspaceId, autoLoad = true }: UseLocationsOptio
     setError(null);
     
     try {
-      await locationService.deleteLocation(id);
+      await locationService.deleteTable(id);
       await loadLocations();
     } catch (err: any) {
       setError(err.message || 'Failed to delete location');
@@ -127,13 +126,13 @@ export function useLocations({ workspaceId, autoLoad = true }: UseLocationsOptio
     }
   }, [loadLocations]);
 
-  // Toggle location status (delegates to updateLocationStatus)
+  // Toggle location status (delegates to updateTableStatus)
   const toggleLocationStatus = useCallback(async (id: string, isActive: boolean) => {
     setError(null);
     
     try {
       const newStatus = isActive ? 'available' : 'out_of_service';
-      await locationService.updateLocationStatus(id, newStatus);
+      await locationService.updateTableStatus(id, newStatus);
       await loadLocations();
     } catch (err: any) {
       setError(err.message || 'Failed to toggle status');
@@ -146,7 +145,7 @@ export function useLocations({ workspaceId, autoLoad = true }: UseLocationsOptio
     setError(null);
     
     try {
-      await locationService.updateLocationStatus(id, status);
+      await locationService.updateTableStatus(id, status);
       await loadLocations();
     } catch (err: any) {
       setError(err.message || 'Failed to update status');
@@ -159,21 +158,10 @@ export function useLocations({ workspaceId, autoLoad = true }: UseLocationsOptio
     setError(null);
     
     try {
-      return await locationService.generateQRCode(id, workspaceId);
+      const response = await locationService.getQRCode(id);
+      return response.qr_code_url ?? response.qr_code;
     } catch (err: any) {
       setError(err.message || 'Failed to generate QR code');
-      throw err;
-    }
-  }, []);
-
-  // Print QR code
-  const printQRCode = useCallback(async (id: string) => {
-    setError(null);
-    
-    try {
-      await locationService.printQRCode(id);
-    } catch (err: any) {
-      setError(err.message || 'Failed to print QR code');
       throw err;
     }
   }, []);
@@ -259,7 +247,6 @@ export function useLocations({ workspaceId, autoLoad = true }: UseLocationsOptio
     toggleLocationStatus,
     updateLocationStatus,
     generateQRCode,
-    printQRCode,
     
     // Area operations
     loadAreas,

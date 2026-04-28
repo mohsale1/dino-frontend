@@ -6,8 +6,37 @@
  */
 
 import { UserProfile } from '../../types';
-import { UserData } from '../../services/auth/userData';
 import { isOwner } from '../../types/auth/roles';
+
+export interface UserData {
+  user: {
+    id: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    phone: string;
+    role: string;
+    venueIds: string[];
+    isActive: boolean;
+    createdAt: string;
+    updatedAt?: string;
+  };
+  venue: {
+    id: string;
+    name: string;
+    isActive: boolean;
+    isOpen: boolean;
+    createdAt: string;
+    [key: string]: any;
+  } | null;
+  workspace: {
+    id: string;
+    name: string;
+    displayName?: string;
+    isActive: boolean;
+    createdAt: string;
+  } | null;
+}
 
 export interface VenueValidationResult {
   hasVenue: boolean;

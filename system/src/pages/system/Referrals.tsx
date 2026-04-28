@@ -36,7 +36,6 @@ import {
   systemReferralService,
   type WorkspaceRequest,
   type WorkspaceRequestStatus,
-  type ReferralDashboardStats,
 } from '../../services/system/registration';
 import { DeleteConfirmationDialog } from '../../components/dialogs';
 
@@ -261,9 +260,8 @@ const Referrals: React.FC = () => {
   const [activeTab, setActiveTab]   = useState<TabId>('requests');
   const [filter, setFilter]         = useState<FilterStatus>('all');
   const [requests, setRequests]     = useState<WorkspaceRequest[]>([]);
-  const [stats, setStats]           = useState<ReferralDashboardStats | null>(null);
+  const stats = { total: 0, pending: 0, approved: 0, rejected: 0 };
   const [loading, setLoading]       = useState(true);
-  const [statsLoading, setStatsLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [error, setError]           = useState<string | null>(null);
   const [page, setPage]             = useState(0);
@@ -302,25 +300,9 @@ const Referrals: React.FC = () => {
     }
   }, [filter, page, rowsPerPage]);
 
-  const fetchStats = useCallback(async () => {
-    try {
-      setStatsLoading(true);
-      const data = await systemReferralService.getReferralStats();
-      setStats(data);
-    } catch {
-      // Stats are non-critical; fail silently
-    } finally {
-      setStatsLoading(false);
-    }
-  }, []);
-
   useEffect(() => {
     fetchRequests();
   }, [fetchRequests]);
-
-  useEffect(() => {
-    fetchStats();
-  }, [fetchStats]);
 
   // Reset to page 0 when filter changes
   useEffect(() => {
@@ -338,7 +320,7 @@ const Referrals: React.FC = () => {
       setActionLoading(true);
       await systemReferralService.approveRequest(request.id);
       showSnackbar('Request approved successfully', 'success');
-      await Promise.all([fetchRequests(), fetchStats()]);
+      await fetchRequests();
     } catch (err: any) {
       showSnackbar(err.message || 'Failed to approve request', 'error');
     } finally {
@@ -359,7 +341,7 @@ const Referrals: React.FC = () => {
       showSnackbar('Request rejected', 'success');
       setRejectDialogOpen(false);
       setSelectedRequest(null);
-      await Promise.all([fetchRequests(), fetchStats()]);
+      await fetchRequests();
     } catch (err: any) {
       showSnackbar(err.message || 'Failed to reject request', 'error');
     } finally {
@@ -379,7 +361,7 @@ const Referrals: React.FC = () => {
       showSnackbar('Request deleted', 'success');
       setDeleteDialogOpen(false);
       setSelectedRequest(null);
-      await Promise.all([fetchRequests(), fetchStats()]);
+      await fetchRequests();
     } catch (err: any) {
       showSnackbar(err.message || 'Failed to delete request', 'error');
     }
@@ -462,19 +444,10 @@ const Referrals: React.FC = () => {
           borderBottom: '1px solid #e0e0e0',
         }}
       >
-        {statsLoading ? (
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, py: 0.5 }}>
-            <CircularProgress size={16} sx={{ color: ACCENT }} />
-            <Typography sx={{ fontSize: '0.8125rem', color: '#94a3b8' }}>Loading stats...</Typography>
-          </Box>
-        ) : stats ? (
-          <>
-            <StatCard icon={<GroupOutlined />}  value={stats.total}    label="Total Requests" />
-            <StatCard icon={<HourglassEmpty />} value={stats.pending}  label="Pending"  color="#f59e0b" />
-            <StatCard icon={<TaskAlt />}        value={stats.approved} label="Approved" color="#10b981" />
-            <StatCard icon={<BlockOutlined />}  value={stats.rejected} label="Rejected" color="#f43f5e" />
-          </>
-        ) : null}
+        <StatCard icon={<GroupOutlined />}  value={stats.total}    label="Total Requests" />
+        <StatCard icon={<HourglassEmpty />} value={stats.pending}  label="Pending"  color="#f59e0b" />
+        <StatCard icon={<TaskAlt />}        value={stats.approved} label="Approved" color="#10b981" />
+        <StatCard icon={<BlockOutlined />}  value={stats.rejected} label="Rejected" color="#f43f5e" />
       </Box>
 
       {/* ── Content ── */}
@@ -768,26 +741,6 @@ const Referrals: React.FC = () => {
             TAB: OVERVIEW
         ════════════════════════════════════════════════════════════════════ */}
         {activeTab === 'overview' && (
-          statsLoading ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}>
-              <CircularProgress sx={{ color: ACCENT }} />
-            </Box>
-          ) : !stats ? (
-            <Paper
-              elevation={0}
-              sx={{
-                p: 6,
-                textAlign: 'center',
-                border: '1px solid #e0e0e0',
-                borderRadius: 3,
-                bgcolor: '#ffffff',
-              }}
-            >
-              <Typography variant="body2" sx={{ color: '#666666' }}>
-                Unable to load overview statistics.
-              </Typography>
-            </Paper>
-          ) : (
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
 
               {/* Breakdown panel */}
@@ -916,7 +869,6 @@ const Referrals: React.FC = () => {
                 </Paper>
               )}
             </Box>
-          )
         )}
       </Box>
 

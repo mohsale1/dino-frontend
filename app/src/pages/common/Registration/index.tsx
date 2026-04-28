@@ -13,6 +13,7 @@ import {
   Divider,
   Link,
 } from '@mui/material';
+import { APP_CONFIG } from '../../../constants/app';
 import {
   ArrowBack,
   ArrowForward,
@@ -420,7 +421,7 @@ const RegisterPage: React.FC = () => {
         }} />
         <DinoLogo size={72} animated />
         <Typography variant="h4" fontWeight={700} color="white" mt={3} textAlign="center" sx={{ letterSpacing: '-0.5px' }}>
-          Join Dino Today
+          Join {APP_CONFIG.NAME} Today
         </Typography>
         <Typography variant="body1" color="rgba(255,255,255,0.55)" mt={1.5} textAlign="center" maxWidth={300} lineHeight={1.6}>
           Start your digital transformation journey
@@ -435,7 +436,7 @@ const RegisterPage: React.FC = () => {
           ))}
         </Box>
         <Typography variant="caption" color="rgba(255,255,255,0.25)" mt={6} textAlign="center">
-          Dino &copy; {new Date().getFullYear()}
+          {APP_CONFIG.copyright()}
         </Typography>
       </Box>
 

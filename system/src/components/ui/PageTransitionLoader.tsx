@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { APP_CONFIG } from '../../constants/app';
 import { Box, Typography } from '@mui/material';
 import { useLocation } from 'react-router-dom';
 import DinoLogo from './DinoLogo';
@@ -280,7 +281,7 @@ export const PageTransitionLoader: React.FC<PageTransitionLoaderProps> = ({
             textTransform: 'uppercase',
           }}
         >
-          Dino System
+          {APP_CONFIG.SYSTEM_NAME}
         </Typography>
         <Box sx={{ width: 4, height: 4, borderRadius: '50%', bgcolor: ACCENT }} />
       </Box>

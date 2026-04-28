@@ -1,18 +1,20 @@
 import React, { useState, useCallback } from 'react';
 import {
   Box, TextField, Button, Typography, Alert,
-  InputAdornment, IconButton, CircularProgress, Divider, Link,
+  InputAdornment, IconButton, CircularProgress, Chip,
 } from '@mui/material';
 import {
   Visibility, VisibilityOff,
   QrCode2, Dashboard, Store, CheckCircleOutline, LockOutlined,
 } from '@mui/icons-material';
-import { useNavigate, Link as RouterLink } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../contexts/common/Auth';
 import { normalizeRole, ROLES } from '../../../types/auth/roles';
 import DinoLogo from '../../../components/ui/DinoLogo';
 import { PageTransitionLoader } from '../../../components/ui/PageTransitionLoader';
+import { APP_CONFIG } from '../../../constants/app';
 
+// ── Design tokens ─────────────────────────────────────────────────────────────
 const BRAND = {
   primary:      '#1976D2',
   primaryHover: '#1565C0',
@@ -21,6 +23,8 @@ const BRAND = {
   panelBg2:     '#112240',
   accent:       'rgba(66,165,245,0.15)',
   accentBorder: 'rgba(66,165,245,0.25)',
+  textPrimary:  '#1C1C1E',
+  textMuted:    '#666666',
 };
 
 const APP_FEATURES = [
@@ -32,8 +36,10 @@ const APP_FEATURES = [
 
 const fieldSx = {
   '& .MuiOutlinedInput-root': {
-    borderRadius: 2,
-    '&.Mui-focused fieldset': { borderColor: BRAND.primary },
+    borderRadius: '8px',
+    '& fieldset': { borderColor: '#e0e0e0' },
+    '&:hover fieldset': { borderColor: '#cccccc' },
+    '&.Mui-focused fieldset': { borderColor: BRAND.primary, borderWidth: 1 },
   },
   '& label.Mui-focused': { color: BRAND.primary },
 };
@@ -80,10 +86,11 @@ const LoginPage: React.FC = () => {
     }
   }, [email, password, login, navigate]);
 
+  // ── Shared form ────────────────────────────────────────────────────────────
   const form = (
     <Box component="form" onSubmit={handleSubmit} display="flex" flexDirection="column" gap={2.5}>
       {error && (
-        <Alert severity="error" sx={{ borderRadius: 2 }} onClose={() => setError(null)}>
+        <Alert severity="error" sx={{ borderRadius: '8px', fontSize: '0.875rem' }} onClose={() => setError(null)}>
           {error}
         </Alert>
       )}
@@ -92,10 +99,7 @@ const LoginPage: React.FC = () => {
         type="email"
         value={email}
         onChange={e => setEmail(e.target.value)}
-        fullWidth
-        required
-        autoComplete="email"
-        autoFocus
+        fullWidth required autoComplete="email" autoFocus
         disabled={loading}
         sx={fieldSx}
       />
@@ -104,9 +108,7 @@ const LoginPage: React.FC = () => {
         type={showPassword ? 'text' : 'password'}
         value={password}
         onChange={e => setPassword(e.target.value)}
-        fullWidth
-        required
-        autoComplete="current-password"
+        fullWidth required autoComplete="current-password"
         disabled={loading}
         sx={fieldSx}
         InputProps={{
@@ -116,9 +118,10 @@ const LoginPage: React.FC = () => {
                 onClick={() => setShowPassword(p => !p)}
                 edge="end"
                 disabled={loading}
-                sx={{ color: BRAND.primary }}
+                size="small"
+                sx={{ color: BRAND.textMuted, '&:hover': { color: BRAND.textPrimary } }}
               >
-                {showPassword ? <VisibilityOff /> : <Visibility />}
+                {showPassword ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
               </IconButton>
             </InputAdornment>
           ),
@@ -130,17 +133,19 @@ const LoginPage: React.FC = () => {
         fullWidth
         size="large"
         disabled={loading}
+        disableElevation
         sx={{
           mt: 0.5,
           py: 1.5,
           bgcolor: BRAND.primary,
           fontWeight: 600,
-          fontSize: '0.95rem',
-          borderRadius: 2,
+          fontSize: '0.9375rem',
+          borderRadius: '8px',
           textTransform: 'none',
+          letterSpacing: 'normal',
           boxShadow: '0 4px 14px rgba(25,118,210,0.35)',
-          '&:hover': { bgcolor: BRAND.primaryHover },
-          '&.Mui-disabled': { bgcolor: 'rgba(25,118,210,0.4)', color: 'rgba(255,255,255,0.7)' },
+          '&:hover:not(:disabled)': { bgcolor: BRAND.primaryHover },
+          '&:disabled': { bgcolor: 'rgba(25,118,210,0.35)', color: 'rgba(255,255,255,0.7)' },
         }}
       >
         {loading ? <CircularProgress size={22} color="inherit" /> : 'Sign In'}
@@ -150,142 +155,174 @@ const LoginPage: React.FC = () => {
 
   return (
     <>
-    <PageTransitionLoader visible={navigating} message="Signing in..." />
-    <Box sx={{ display: 'flex', height: '100vh', overflow: 'hidden', bgcolor: BRAND.panelBg }}>
+      <PageTransitionLoader visible={navigating} message="Signing in..." />
 
-      {/* LEFT BRANDING PANEL (desktop) */}
-      <Box sx={{
-        display: { xs: 'none', md: 'flex' },
-        flex: 1,
-        flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: 'center',
-        px: { md: 6, lg: 10 },
-        py: 8,
-        background: `linear-gradient(160deg, ${BRAND.panelBg} 0%, ${BRAND.panelBg2} 60%, ${BRAND.panelBg} 100%)`,
-        borderRight: `1px solid ${BRAND.accentBorder}`,
-        position: 'relative',
-        overflow: 'hidden',
-      }}>
+      <Box sx={{ display: 'flex', height: '100vh', overflow: 'hidden', bgcolor: BRAND.panelBg }}>
+
+        {/* ── LEFT BRANDING PANEL — desktop only (md+) ── */}
         <Box sx={{
-          position: 'absolute',
-          top: '20%',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          width: 320,
-          height: 320,
-          borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(25,118,210,0.08) 0%, transparent 70%)',
-          pointerEvents: 'none',
-        }} />
-        <DinoLogo size={72} animated />
-        <Typography variant="h4" fontWeight={700} color="white" mt={3} textAlign="center" sx={{ letterSpacing: '-0.5px' }}>
-          Welcome to Dino
-        </Typography>
-        <Typography variant="body1" color="rgba(255,255,255,0.55)" mt={1.5} textAlign="center" maxWidth={300} lineHeight={1.6}>
-          Digital solutions for modern businesses
-        </Typography>
-        <Divider sx={{ width: 48, borderColor: BRAND.accentBorder, my: 4 }} />
-        <Box display="flex" flexDirection="column" gap={2} width="100%" maxWidth={300}>
-          {APP_FEATURES.map(({ icon: Icon, text }, i) => (
-            <Box key={i} display="flex" alignItems="center" gap={2} sx={{ px: 2, py: 1.25, borderRadius: 2, bgcolor: BRAND.accent, border: `1px solid ${BRAND.accentBorder}` }}>
-              <Icon sx={{ fontSize: 20, color: BRAND.primaryLight, flexShrink: 0 }} />
-              <Typography variant="body2" color="rgba(255,255,255,0.8)" fontWeight={500}>{text}</Typography>
-            </Box>
-          ))}
-        </Box>
-        <Typography variant="caption" color="rgba(255,255,255,0.25)" mt={6} textAlign="center">
-          Dino &copy; {new Date().getFullYear()}
-        </Typography>
-      </Box>
+          display: { xs: 'none', md: 'flex' },
+          flex: 1,
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+          px: { md: 6, lg: 10 },
+          py: 8,
+          background: `linear-gradient(160deg, ${BRAND.panelBg} 0%, ${BRAND.panelBg2} 55%, ${BRAND.panelBg} 100%)`,
+          borderRight: `1px solid ${BRAND.accentBorder}`,
+          position: 'relative',
+          overflow: 'hidden',
+        }}>
+          {/* Radial glow */}
+          <Box sx={{
+            position: 'absolute', top: '18%', left: '50%', transform: 'translateX(-50%)',
+            width: 340, height: 340, borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(25,118,210,0.10) 0%, transparent 70%)',
+            pointerEvents: 'none',
+          }} />
+          {/* Subtle grid */}
+          <Box sx={{
+            position: 'absolute', inset: 0,
+            backgroundImage: 'linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px)',
+            backgroundSize: '40px 40px',
+            pointerEvents: 'none',
+          }} />
 
-      {/* RIGHT FORM PANEL (desktop) */}
-      <Box sx={{
-        display: { xs: 'none', md: 'flex' },
-        flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: 'center',
-        width: { md: 480, lg: 520 },
-        flexShrink: 0,
-        px: { md: 6, lg: 7 },
-        bgcolor: '#ffffff',
-        overflow: 'hidden',
-        animation: 'authPanelIn 0.28s cubic-bezier(0.22,1,0.36,1) both',
-        '@keyframes authPanelIn': {
-          from: { opacity: 0, transform: 'translateX(18px)' },
-          to:   { opacity: 1, transform: 'translateX(0)' },
-        },
-      }}>
-        <Box width="100%" maxWidth={380}>
-          <Box display="flex" flexDirection="column" mb={4}>
-            <Box sx={{ width: 44, height: 44, borderRadius: 2, bgcolor: 'rgba(25,118,210,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 2 }}>
-              <LockOutlined sx={{ color: BRAND.primary, fontSize: 22 }} />
+          <Box sx={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', maxWidth: 320 }}>
+            <DinoLogo size={68} animated />
+            <Typography variant="h4" fontWeight={700} color="white" mt={3} textAlign="center" sx={{ letterSpacing: '-0.5px', lineHeight: 1.2 }}>
+              Welcome to {APP_CONFIG.NAME}
+            </Typography>
+            <Typography variant="body2" mt={1.5} textAlign="center" lineHeight={1.7}
+              sx={{ color: 'rgba(255,255,255,0.55)', maxWidth: 280 }}>
+              Digital solutions for modern businesses
+            </Typography>
+            <Box sx={{ width: 40, height: 2, bgcolor: BRAND.accentBorder, borderRadius: 1, my: 4 }} />
+            <Box display="flex" flexDirection="column" gap={1.5} width="100%">
+              {APP_FEATURES.map(({ icon: Icon, text }, i) => (
+                <Box key={i} display="flex" alignItems="center" gap={1.75} sx={{ px: 2, py: 1.25, borderRadius: '8px', bgcolor: BRAND.accent, border: `1px solid ${BRAND.accentBorder}` }}>
+                  <Icon sx={{ fontSize: 18, color: BRAND.primaryLight, flexShrink: 0 }} />
+                  <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.82)', fontWeight: 500, fontSize: '0.875rem' }}>
+                    {text}
+                  </Typography>
+                </Box>
+              ))}
             </Box>
-            <Typography variant="h5" fontWeight={700} color="#0f172a" letterSpacing="-0.3px">Welcome back</Typography>
-            <Typography variant="body2" color="text.secondary" mt={0.5}>Sign in to your business account</Typography>
+            <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.22)', mt: 6, textAlign: 'center', display: 'block' }}>
+              {APP_CONFIG.copyright()}
+            </Typography>
           </Box>
-          {form}
-          <Typography variant="body2" textAlign="center" color="text.secondary" mt={3}>
-            Don't have an account?{' '}
-            <Link component={RouterLink} to="/register" fontWeight={600} sx={{ color: BRAND.primary }}>
-              Create Business Account
-            </Link>
-          </Typography>
-          <Typography variant="body2" textAlign="center" mt={1.5}>
-            <Link component={RouterLink} to="/" sx={{ color: 'text.disabled', fontSize: '0.8125rem' }}>
-              Back to Home
-            </Link>
-          </Typography>
         </Box>
-      </Box>
 
-      {/* MOBILE LAYOUT */}
-      <Box sx={{
-        display: { xs: 'flex', md: 'none' },
-        flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: 'center',
-        minHeight: '100vh',
-        width: '100%',
-        bgcolor: '#ffffff',
-        overflowY: 'auto',
-        px: 3,
-        py: 5,
-        animation: 'authPanelIn 0.28s cubic-bezier(0.22,1,0.36,1) both',
-        '@keyframes authPanelIn': {
-          from: { opacity: 0, transform: 'translateX(18px)' },
-          to:   { opacity: 1, transform: 'translateX(0)' },
-        },
-      }}>
-        <Box sx={{ width: '100%', maxWidth: 360, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <DinoLogo size={40} />
-          <Box sx={{ width: 44, height: 44, borderRadius: 2, bgcolor: 'rgba(25,118,210,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', mt: 4, mb: 1.5 }}>
-            <LockOutlined sx={{ color: BRAND.primary, fontSize: 22 }} />
-          </Box>
-          <Typography variant="h5" fontWeight={700} color="#0f172a" letterSpacing="-0.3px" textAlign="center">
-            Sign In
-          </Typography>
-          <Typography variant="body2" color="text.secondary" mt={0.5} mb={3.5} textAlign="center">
-            Sign in to your business account
-          </Typography>
-          <Box sx={{ width: '100%' }}>
+        {/* ── RIGHT FORM PANEL — desktop (md+) ── */}
+        <Box sx={{
+          display: { xs: 'none', md: 'flex' },
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+          width: { md: 460, lg: 500 },
+          px: { md: 6, lg: 7 },
+          bgcolor: '#ffffff',
+          overflow: 'hidden',
+        }}>
+          <Box width="100%" maxWidth={380}>
+            <Box display="flex" flexDirection="column" mb={4}>
+              <Box sx={{ width: 44, height: 44, borderRadius: '10px', bgcolor: 'rgba(25,118,210,0.08)', border: '1px solid rgba(25,118,210,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 2.5 }}>
+                <LockOutlined sx={{ color: BRAND.primary, fontSize: 22 }} />
+              </Box>
+              <Typography variant="h5" fontWeight={700} color={BRAND.textPrimary} sx={{ letterSpacing: '-0.3px', lineHeight: 1.2 }}>
+                Welcome back
+              </Typography>
+              <Typography variant="body2" sx={{ color: BRAND.textMuted, mt: 0.75, fontSize: '0.875rem' }}>
+                Sign in to your business account
+              </Typography>
+            </Box>
             {form}
+            <Typography variant="caption" sx={{ color: '#cccccc', display: 'block', textAlign: 'center', mt: 4, fontSize: '0.75rem' }}>
+              Authorised users only. Access attempts are monitored.
+            </Typography>
           </Box>
-          <Typography variant="body2" textAlign="center" color="text.secondary" mt={3}>
-            Don't have an account?{' '}
-            <Link component={RouterLink} to="/register" fontWeight={600} sx={{ color: BRAND.primary }}>
-              Create Business Account
-            </Link>
-          </Typography>
-          <Typography variant="body2" textAlign="center" mt={1.5}>
-            <Link component={RouterLink} to="/" sx={{ color: 'text.disabled', fontSize: '0.8125rem' }}>
-              Back to Home
-            </Link>
-          </Typography>
         </Box>
-      </Box>
 
-    </Box>
+        {/* ── MOBILE LAYOUT ── */}
+        <Box sx={{ display: { xs: 'flex', md: 'none' }, flexDirection: 'column', height: '100vh', overflow: 'hidden', width: '100%', bgcolor: BRAND.panelBg }}>
+          {/* Dark top section */}
+          <Box sx={{
+            flexShrink: 0, position: 'relative', overflow: 'hidden',
+            px: 3, pt: 4, pb: 3, display: 'flex', flexDirection: 'column', alignItems: 'center',
+            background: `linear-gradient(160deg, ${BRAND.panelBg} 0%, ${BRAND.panelBg2} 100%)`,
+            '&::before': {
+              content: '""', position: 'absolute', top: -60, right: -40,
+              width: 220, height: 220, borderRadius: '50%',
+              background: 'radial-gradient(circle, rgba(25,118,210,0.12) 0%, transparent 70%)',
+              pointerEvents: 'none',
+            },
+          }}>
+            <Box sx={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px)', backgroundSize: '32px 32px', pointerEvents: 'none' }} />
+            <Box sx={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <DinoLogo size={48} animated />
+              <Typography variant="h6" fontWeight={700} color="white" mt={1.5} textAlign="center" sx={{ letterSpacing: '-0.3px' }}>
+                Welcome to {APP_CONFIG.NAME}
+              </Typography>
+              <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.5)', mt: 0.5, textAlign: 'center', maxWidth: 260, lineHeight: 1.5, display: 'block' }}>
+                Digital solutions for modern businesses
+              </Typography>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75, mt: 2, justifyContent: 'center' }}>
+                {APP_FEATURES.map(({ icon: Icon, text }, i) => (
+                  <Chip
+                    key={i}
+                    icon={<Icon sx={{ fontSize: '13px !important', color: `${BRAND.primaryLight} !important` }} />}
+                    label={text}
+                    size="small"
+                    sx={{
+                      bgcolor: BRAND.accent,
+                      border: `1px solid ${BRAND.accentBorder}`,
+                      color: 'rgba(255,255,255,0.82)',
+                      fontSize: '0.7rem',
+                      fontWeight: 500,
+                      height: 26,
+                      '& .MuiChip-icon': { ml: 0.5 },
+                    }}
+                  />
+                ))}
+              </Box>
+            </Box>
+          </Box>
+
+          {/* White bottom sheet */}
+          <Box sx={{
+            flex: 1,
+            bgcolor: '#ffffff',
+            borderRadius: '20px 20px 0 0',
+            px: { xs: 3, sm: 5 },
+            pt: 3.5,
+            pb: 3,
+            mt: -2,
+            position: 'relative',
+            zIndex: 1,
+            boxShadow: '0 -4px 24px rgba(0,0,0,0.15)',
+            overflowY: 'auto',
+            '&::-webkit-scrollbar': { width: 4 },
+            '&::-webkit-scrollbar-track': { background: 'transparent' },
+            '&::-webkit-scrollbar-thumb': { background: 'rgba(0,0,0,0.12)', borderRadius: 2 },
+          }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
+              <Box sx={{ width: 36, height: 36, borderRadius: '8px', bgcolor: 'rgba(25,118,210,0.08)', border: '1px solid rgba(25,118,210,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <LockOutlined sx={{ color: BRAND.primary, fontSize: 18 }} />
+              </Box>
+              <Box>
+                <Typography variant="h6" fontWeight={700} color={BRAND.textPrimary} lineHeight={1.2}>Sign In</Typography>
+                <Typography variant="caption" sx={{ color: BRAND.textMuted }}>Business account access</Typography>
+              </Box>
+            </Box>
+            {form}
+            <Typography variant="caption" sx={{ color: '#cccccc', display: 'block', textAlign: 'center', mt: 3, fontSize: '0.75rem' }}>
+              Authorised users only. Access attempts are monitored.
+            </Typography>
+          </Box>
+        </Box>
+
+      </Box>
     </>
   );
 };

@@ -45,20 +45,23 @@ const Coupons: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError]     = useState<string | null>(null);
 
+  const venueId = userData?.venue?.id || '';
+
   const fetchCoupons = useCallback(async () => {
-    if (!workspaceId) return;
+    if (!venueId) return;
     setError(null);
     try {
-      const data = await couponService.getCoupons(workspaceId);
-      setCoupons(Array.isArray(data) ? data : []);
+      const result = await couponService.getCouponsByVenue(venueId);
+      const raw = (result as any)?.data ?? result;
+      setCoupons(Array.isArray(raw) ? raw : []);
     } catch (err: any) {
       setError(err.message || 'Failed to load coupons');
     }
-  }, [workspaceId]);
+  }, [venueId]);
 
   useEffect(() => {
     const loadData = async () => {
-      if (!workspaceId) { setLoading(false); return; }
+      if (!venueId) { setLoading(false); return; }
       setLoading(true);
       setError(null);
       try {
@@ -88,7 +91,7 @@ const Coupons: React.FC = () => {
         await couponService.updateCoupon(editingCoupon.id, sanitized);
         setSnackbar({ open: true, message: 'Coupon updated successfully', severity: 'success' });
       } else {
-        await couponService.createCoupon({ ...sanitized, workspaceId });
+        await couponService.createCoupon({ ...sanitized, venue_id: venueId });
         setSnackbar({ open: true, message: 'Coupon created successfully', severity: 'success' });
       }
       handleCloseDialog();
@@ -118,7 +121,7 @@ const Coupons: React.FC = () => {
 
   const handleToggleStatus = async (couponId: string, currentStatus: boolean) => {
     try {
-      await couponService.updateCoupon(couponId, { isAvailable: !currentStatus });
+      await couponService.updateCoupon(couponId, { is_active: !currentStatus });
       setSnackbar({ open: true, message: 'Coupon status updated successfully', severity: 'success' });
       await fetchCoupons();
     } catch (err: any) {
@@ -145,14 +148,14 @@ const Coupons: React.FC = () => {
   const filteredCoupons = coupons.filter((c) => {
     const matchSearch =
       !searchQuery ||
-      c.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      c.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       c.code?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchStatus =
       filterStatus === 'all' ||
-      (filterStatus === 'active' ? c.isAvailable : !c.isAvailable);
+      (filterStatus === 'active' ? c.is_active : !c.is_active);
     const matchType =
       filterType === 'all' ||
-      c.discountType === filterType;
+      c.discount_type === filterType;
     return matchSearch && matchStatus && matchType;
   });
 
@@ -380,7 +383,7 @@ const Coupons: React.FC = () => {
         onClose={() => { setDeleteDialogOpen(false); setDeletingCoupon(null); }}
         onConfirm={handleConfirmDelete}
         title="Delete Coupon"
-        itemName={deletingCoupon?.name || ''}
+        itemName={deletingCoupon?.code || ''}
         itemType="coupon"
         description="This will remove this coupon from the system. This action can be undone later."
         requireTyping={false}
