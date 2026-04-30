@@ -1,7 +1,5 @@
 import React, { useState, useMemo } from 'react';
 import {
-  AppBar,
-  Toolbar,
   Box,
   Drawer,
   List,
@@ -14,11 +12,7 @@ import {
   Chip,
   Typography,
   Tooltip,
-  Divider,
   alpha,
-  useScrollTrigger,
-  useTheme,
-  useMediaQuery,
 } from '@mui/material';
 import {
   Dashboard as DashboardIcon,
@@ -28,12 +22,12 @@ import {
   Payment,
   Settings,
   Palette,
+  Logout,
   Menu as MenuIcon,
+  ChevronLeft,
+  ChevronRight,
   QrCode2,
   HourglassEmpty,
-  KeyboardArrowDown,
-  PowerSettingsNew,
-  Close,
 } from '@mui/icons-material';
 import { useNavigate, useLocation, Outlet } from 'react-router-dom';
 import DinoLogo from '../../ui/DinoLogo';
@@ -41,16 +35,16 @@ import { useAuth } from '../../../contexts/common/Auth';
 import { ConfirmationDialog } from '../../dialogs/ConfirmationDialog';
 import { ModuleTransitionLoader, usePageTransition } from '../../ui/PageTransitionLoader';
 
-// ── Design tokens ─────────────────────────────────────────────────────────────
-const NAV_BG       = '#0b1120';
-const BLUE         = '#1976D2';
-const BLUE_LT      = '#42A5F5';
-const WHITE        = '#ffffff';
-const BORDER_COLOR = 'rgba(255,255,255,0.08)';
-const MUTED        = 'rgba(255,255,255,0.45)';
-const TEXT_DIM     = 'rgba(255,255,255,0.7)';
+const DRAWER_WIDTH    = 240;
+const COLLAPSED_WIDTH = 64;
 
-// ── Types ─────────────────────────────────────────────────────────────────────
+// Vanguard palette constants
+const SIDEBAR_BG        = '#1e1e1e';
+const ACCENT            = '#00A6CA';
+const ACCENT_BLUE       = 'rgba(55,148,255,0.20)';
+const ACCENT_BLUE_HOVER = 'rgba(55,148,255,0.12)';
+const NAV_TEXT_DEFAULT  = 'rgba(255,255,255,0.85)';
+const SECTION_LABEL_CLR = 'rgba(255,255,255,0.5)';
 
 interface MenuItem {
   title: string;
@@ -64,64 +58,58 @@ interface NavSection {
   items: MenuItem[];
 }
 
-// ── SystemLayout ──────────────────────────────────────────────────────────────
-
 const SystemLayout: React.FC = () => {
   const navigate  = useNavigate();
   const location  = useLocation();
-  const theme     = useTheme();
-  const isMobile  = useMediaQuery(theme.breakpoints.down('md'));
-  const isLg      = useMediaQuery(theme.breakpoints.up('lg'));
-
   const { user, logout, userPermissions } = useAuth();
 
-  const [mobileOpen,  setMobileOpen]  = useState(false);
-  const [showLogout,  setShowLogout]  = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [collapsed, setCollapsed]   = useState(false);
+  const [showLogout, setShowLogout] = useState(false);
 
   const { transitioning } = usePageTransition();
 
-  const scrollTrigger = useScrollTrigger({ disableHysteresis: true, threshold: 20 });
-
-  // ── Role name ───────────────────────────────────────────────────────────────
+  const drawerWidth = collapsed ? COLLAPSED_WIDTH : DRAWER_WIDTH;
 
   const roleName = useMemo(() => {
     const name =
       userPermissions?.role?.name ||
-      (user as any)?.role?.name  ||
-      (user as any)?.role        ||
+      (user as any)?.role?.name ||
+      (user as any)?.role ||
       '';
     return typeof name === 'string' ? name : '';
   }, [userPermissions, user]);
 
-  // ── Viewable resources ──────────────────────────────────────────────────────
-
+  // Build a Set of resources the user can view, derived purely from the
+  // backend permission objects: { resource, action: 'view' }.
   const viewableResources = useMemo<Set<string>>(() => {
     const perms: any[] = userPermissions?.permissions ?? [];
-    console.log('[SystemLayout] userPermissions:', userPermissions);
-    console.log('[SystemLayout] all perms:', perms);
+    console.log('[Sidebar] userPermissions:', userPermissions);
+    console.log('[Sidebar] all perms:', perms);
     const viewable = new Set(
       perms
         .filter((p: any) => p?.action === 'view' && p?.resource)
-        .map((p: any) => p.resource as string),
+        .map((p: any) => p.resource as string)
     );
-    console.log('[SystemLayout] viewableResources:', [...viewable]);
+    console.log('[Sidebar] viewableResources:', [...viewable]);
     return viewable;
   }, [userPermissions]);
 
-  // ── Nav catalogue ───────────────────────────────────────────────────────────
-
+  // Static nav catalogue — only UI concerns (title, icon, path, resource).
+  // `resource` must match the backend permission resource name exactly.
   const allMenuItems = useMemo<MenuItem[]>(() => [
-    { title: 'Dashboard',           icon: <DashboardIcon />,      resource: 'dashboard',  path: '/system/dashboard'         },
-    { title: 'Workspaces',          icon: <Business />,           resource: 'workspaces', path: '/system/workspaces'        },
-    { title: 'Approvals',           icon: <HourglassEmpty />,     resource: 'approvals',  path: '/system/approvals'         },
-    { title: 'Users',               icon: <People />,             resource: 'users',      path: '/system/users'             },
-    { title: 'Billing',             icon: <Payment />,            resource: 'billing',    path: '/system/billing'           },
-    { title: 'Referrals',           icon: <QrCode2 />,            resource: 'referrals',  path: '/system/referrals'         },
-    { title: 'Roles & Permissions', icon: <AdminPanelSettings />, resource: 'roles',      path: '/system/roles-permissions' },
-    { title: 'Appearance',          icon: <Palette />,            resource: 'appearance', path: '/system/appearance'        },
-    { title: 'Settings',            icon: <Settings />,           resource: 'settings',   path: '/system/settings'          },
+    { title: 'Dashboard',           icon: <DashboardIcon />,      resource: 'dashboard',   path: '/system/dashboard' },
+    { title: 'Workspaces',          icon: <Business />,           resource: 'workspaces',  path: '/system/workspaces' },
+    { title: 'Approvals',           icon: <HourglassEmpty />,     resource: 'approvals',   path: '/system/approvals' },
+    { title: 'Users',               icon: <People />,             resource: 'users',       path: '/system/users' },
+    { title: 'Billing',             icon: <Payment />,            resource: 'billing',     path: '/system/billing' },
+    { title: 'Referrals',           icon: <QrCode2 />,            resource: 'referrals',   path: '/system/referrals' },
+    { title: 'Roles & Permissions', icon: <AdminPanelSettings />, resource: 'roles',       path: '/system/roles-permissions' },
+    { title: 'Appearance',          icon: <Palette />,            resource: 'appearance',  path: '/system/appearance' },
+    { title: 'Settings',            icon: <Settings />,           resource: 'settings',    path: '/system/settings' },
   ], []);
 
+  // Show an item only when the backend granted resource:view for it.
   const availableItems = useMemo(
     () => allMenuItems.filter(item => viewableResources.has(item.resource)),
     [allMenuItems, viewableResources],
@@ -129,8 +117,7 @@ const SystemLayout: React.FC = () => {
 
   const hasNoModuleAccess = availableItems.length === 0;
 
-  // ── Sections (used for mobile drawer grouping) ──────────────────────────────
-
+  // Group into sections — sections collapse automatically when empty.
   const sections = useMemo<NavSection[]>(() => {
     const find = (title: string) => availableItems.find(i => i.title === title);
 
@@ -145,532 +132,475 @@ const SystemLayout: React.FC = () => {
     return result;
   }, [availableItems]);
 
-  // ── Helpers ─────────────────────────────────────────────────────────────────
-
   const handleNav = (path: string) => {
     navigate(path);
     if (mobileOpen) setMobileOpen(false);
   };
 
-  const userInitial = user?.email?.charAt(0).toUpperCase() ?? 'S';
-  const userName    = user?.email?.split('@')[0] ?? '';
+  // ── Nav item button ──────────────────────────────────────────────────────────
+  const NavItem: React.FC<{ item: MenuItem; isCollapsedMode: boolean }> = ({ item, isCollapsedMode }) => {
+    const isActive = location.pathname === item.path;
 
-  // ── Desktop nav items ───────────────────────────────────────────────────────
-
-  const renderDesktopNav = () => (
-    <Box sx={{ display: 'flex', alignItems: 'center', height: 64 }}>
-      {availableItems.map((item) => {
-        const active = location.pathname === item.path || location.pathname.startsWith(item.path + '/');
-        return (
+    const btn = (
+      <ListItemButton
+        selected={isActive}
+        onClick={() => handleNav(item.path)}
+        sx={{
+          position: 'relative',
+          height: 40,
+          borderRadius: '8px',
+          mx: '8px',
+          my: '2px',
+          px: isCollapsedMode ? 0 : '12px',
+          gap: isCollapsedMode ? 0 : '12px',
+          justifyContent: isCollapsedMode ? 'center' : 'flex-start',
+          bgcolor: isActive ? ACCENT_BLUE : 'transparent',
+          '&.Mui-selected': {
+            bgcolor: ACCENT_BLUE,
+            '&:hover': { bgcolor: ACCENT_BLUE },
+          },
+          '&:hover': {
+            bgcolor: isActive ? ACCENT_BLUE : ACCENT_BLUE_HOVER,
+          },
+          '&.Mui-selected::before': { display: 'none' },
+        }}
+      >
+        {isActive && (
           <Box
-            key={item.path}
-            onClick={() => navigate(item.path)}
             sx={{
-              position: 'relative',
-              height: '100%',
-              display: 'flex',
-              alignItems: 'center',
-              px: 1.5,
-              cursor: 'pointer',
-              color: active ? WHITE : TEXT_DIM,
-              fontWeight: active ? 600 : 400,
-              fontSize: '0.875rem',
-              letterSpacing: '0.01em',
-              userSelect: 'none',
-              transition: 'color 0.18s ease',
-              '&:hover': { color: WHITE },
-              // White underline bar pinned to bottom of toolbar
-              '&::after': active ? {
-                content: '""',
-                position: 'absolute',
-                bottom: 0,
-                left: '50%',
-                transform: 'translateX(-50%)',
-                width: 'calc(100% - 12px)',
-                height: '2px',
-                borderRadius: '2px 2px 0 0',
-                bgcolor: WHITE,
-              } : {},
+              position: 'absolute',
+              left: 0,
+              top: '8px',
+              bottom: '8px',
+              width: '3px',
+              borderRadius: '0 6px 6px 0',
+              bgcolor: ACCENT,
             }}
-          >
-            {item.title}
-          </Box>
-        );
-      })}
-    </Box>
-  );
+          />
+        )}
 
-  // ── Mobile drawer ───────────────────────────────────────────────────────────
+        <ListItemIcon
+          sx={{
+            minWidth: 'auto',
+            color: isActive ? ACCENT : NAV_TEXT_DEFAULT,
+            '& svg': { fontSize: 20 },
+          }}
+        >
+          {item.icon}
+        </ListItemIcon>
 
-  const DRAWER_BORDER = 'rgba(255,255,255,0.07)';
-  const DRAWER_DIM    = 'rgba(255,255,255,0.25)';
+        {!isCollapsedMode && (
+          <ListItemText
+            primary={item.title}
+            primaryTypographyProps={{
+              sx: {
+                color: isActive ? '#ffffff' : NAV_TEXT_DEFAULT,
+                fontSize: '14px',
+                fontWeight: 500,
+                lineHeight: 1,
+              },
+            }}
+          />
+        )}
+      </ListItemButton>
+    );
 
-  const renderMobileDrawer = () => (
-    <Drawer
-      anchor="right"
-      open={mobileOpen}
-      onClose={() => setMobileOpen(false)}
-      PaperProps={{
-        sx: {
-          width: { xs: '100vw', sm: '320px' },
-          height: '100vh',
-          maxHeight: '100vh',
-          top: 0,
-          position: 'fixed',
-          display: 'flex',
-          flexDirection: 'column',
-          overflow: 'hidden',
-          backgroundColor: NAV_BG,
-          backgroundImage: `radial-gradient(circle, rgba(255,255,255,0.03) 1px, transparent 1px)`,
-          backgroundSize: '20px 20px',
-          borderLeft: `1px solid ${DRAWER_BORDER}`,
-          boxSizing: 'border-box',
-          willChange: 'transform',
-        },
-      }}
+    return isCollapsedMode ? (
+      <Tooltip title={item.title} placement="right" arrow>
+        <span>{btn}</span>
+      </Tooltip>
+    ) : btn;
+  };
+
+  // ── Section label ────────────────────────────────────────────────────────────
+  const SectionLabel: React.FC<{ label: string }> = ({ label }) => (
+    <Typography
       sx={{
-        zIndex: 1300,
-        '& .MuiBackdrop-root': {
-          backgroundColor: 'rgba(0,0,0,0.7)',
-          backdropFilter: 'blur(4px)',
-          WebkitBackdropFilter: 'blur(4px)',
-        },
+        fontSize: '11px',
+        fontWeight: 600,
+        textTransform: 'uppercase',
+        letterSpacing: '0.05em',
+        color: SECTION_LABEL_CLR,
+        px: '16px',
+        pt: '12px',
+        pb: '8px',
+        display: 'block',
       }}
     >
-      {/* Soft blue glow */}
-      <Box sx={{
-        position: 'absolute', top: '-60px', right: '-60px',
-        width: 240, height: 240, borderRadius: '50%', pointerEvents: 'none',
-        background: `radial-gradient(circle, ${alpha(BLUE, 0.12)} 0%, transparent 70%)`,
-      }} />
-
-      {/* ── Drawer header ── */}
-      <Box
-        sx={{
-          px: 2.5,
-          pt: 'max(18px, env(safe-area-inset-top))',
-          pb: 2,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexShrink: 0,
-          borderBottom: `1px solid ${DRAWER_BORDER}`,
-          position: 'relative',
-          zIndex: 1,
-        }}
-      >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <DinoLogo size={30} animated={false} />
-          <Box>
-            <Typography sx={{ color: WHITE, fontWeight: 700, fontSize: '1.05rem', lineHeight: 1.2, letterSpacing: '-0.01em' }}>
-              System Admin
-            </Typography>
-            <Typography sx={{ color: MUTED, fontSize: '0.65rem', lineHeight: 1, display: 'block' }}>
-              Administration Portal
-            </Typography>
-          </Box>
-        </Box>
-        <IconButton
-          onClick={() => setMobileOpen(false)}
-          size="small"
-          sx={{
-            color: MUTED,
-            border: `1px solid ${DRAWER_BORDER}`,
-            borderRadius: '8px',
-            width: 34, height: 34,
-            '&:hover': { color: WHITE, backgroundColor: alpha(WHITE, 0.08), borderColor: alpha(WHITE, 0.15) },
-            transition: 'all 0.15s ease',
-          }}
-        >
-          <Close sx={{ fontSize: 18 }} />
-        </IconButton>
-      </Box>
-
-      {/* ── Drawer scrollable content ── */}
-      <Box
-        sx={{
-          flex: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          overflowY: 'auto',
-          position: 'relative',
-          zIndex: 1,
-          pt: 1.5,
-          '&::-webkit-scrollbar': { width: 4 },
-          '&::-webkit-scrollbar-thumb': { bgcolor: 'rgba(255,255,255,0.15)', borderRadius: 2 },
-        }}
-      >
-        {/* User card */}
-        {user && (
-          <Box sx={{ px: 2, pb: 1.5, flexShrink: 0 }}>
-            <Box
-              sx={{
-                backgroundColor: alpha(BLUE, 0.08),
-                borderRadius: '12px',
-                p: 1.75,
-                border: `1px solid ${alpha(BLUE, 0.18)}`,
-              }}
-            >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                <Avatar
-                  sx={{
-                    width: 40, height: 40,
-                    background: `linear-gradient(135deg, ${BLUE} 0%, ${BLUE_LT} 100%)`,
-                    fontSize: '0.9375rem', fontWeight: 700,
-                    color: WHITE, flexShrink: 0,
-                  }}
-                >
-                  {userInitial}
-                </Avatar>
-                <Box sx={{ flex: 1, minWidth: 0 }}>
-                  <Typography
-                    sx={{
-                      fontWeight: 600, color: WHITE, fontSize: '0.875rem',
-                      lineHeight: 1.3, whiteSpace: 'nowrap',
-                      overflow: 'hidden', textOverflow: 'ellipsis',
-                    }}
-                  >
-                    {userName || user?.email}
-                  </Typography>
-                  <Chip
-                    label={roleName || 'System User'}
-                    size="small"
-                    sx={{
-                      mt: 0.4, height: 18, fontSize: '0.62rem', fontWeight: 600,
-                      backgroundColor: alpha(BLUE, 0.2), color: BLUE_LT,
-                      border: 'none', '& .MuiChip-label': { px: 1 },
-                    }}
-                  />
-                </Box>
-              </Box>
-            </Box>
-          </Box>
-        )}
-
-        {/* No access notice */}
-        {hasNoModuleAccess && (
-          <Box sx={{ mx: 2, mb: 1.5, px: 1.5, py: 1.5, borderRadius: 1.5, bgcolor: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', flexShrink: 0 }}>
-            <Typography variant="caption" sx={{ color: MUTED, fontSize: '0.72rem', lineHeight: 1.5, display: 'block' }}>
-              No modules are assigned to your role. Contact a system administrator to request access.
-            </Typography>
-          </Box>
-        )}
-
-        {/* Nav sections */}
-        {sections.map((section) => (
-          <Box key={section.label} sx={{ px: 2, flexShrink: 0 }}>
-            <Divider sx={{ my: 1, borderColor: DRAWER_BORDER }} />
-            <Typography
-              sx={{
-                color: DRAWER_DIM, fontWeight: 700, fontSize: '0.6rem',
-                letterSpacing: '0.12em', textTransform: 'uppercase',
-                mb: 0.5, display: 'block', px: 0.5,
-              }}
-            >
-              {section.label}
-            </Typography>
-            <List disablePadding>
-              {section.items.map((item) => {
-                const active = location.pathname === item.path || location.pathname.startsWith(item.path + '/');
-                return (
-                  <ListItemButton
-                    key={item.path}
-                    onClick={() => handleNav(item.path)}
-                    sx={{
-                      borderRadius: '8px',
-                      minHeight: 40,
-                      px: 1.5,
-                      mb: 0.25,
-                      position: 'relative',
-                      backgroundColor: active ? alpha(BLUE, 0.12) : 'transparent',
-                      '&:hover': {
-                        backgroundColor: active ? alpha(BLUE, 0.16) : alpha(WHITE, 0.05),
-                      },
-                      '&::before': {
-                        content: '""',
-                        position: 'absolute',
-                        left: 0, top: '50%',
-                        transform: 'translateY(-50%)',
-                        width: '3px',
-                        height: active ? '60%' : '0%',
-                        backgroundColor: BLUE_LT,
-                        borderRadius: '0 3px 3px 0',
-                        transition: 'height 0.2s ease',
-                      },
-                    }}
-                  >
-                    <ListItemIcon sx={{ color: active ? BLUE_LT : MUTED, minWidth: 34, transition: 'color 0.15s', '& svg': { fontSize: 20 } }}>
-                      {item.icon}
-                    </ListItemIcon>
-                    <ListItemText
-                      primary={item.title}
-                      primaryTypographyProps={{
-                        fontWeight: active ? 600 : 400,
-                        color: active ? BLUE_LT : '#cbd5e1',
-                        fontSize: '0.875rem',
-                        sx: { transition: 'color 0.15s' },
-                      }}
-                    />
-                  </ListItemButton>
-                );
-              })}
-            </List>
-          </Box>
-        ))}
-
-        {/* Spacer */}
-        <Box sx={{ flex: 1 }} />
-
-        {/* Logout button pinned at bottom */}
-        <Box
-          sx={{
-            px: 2,
-            pt: 1.5,
-            pb: 'max(20px, env(safe-area-inset-bottom))',
-            borderTop: `1px solid ${DRAWER_BORDER}`,
-            flexShrink: 0,
-          }}
-        >
-          <Button
-            fullWidth
-            variant="outlined"
-            startIcon={<PowerSettingsNew sx={{ fontSize: 16 }} />}
-            onClick={() => { setMobileOpen(false); setShowLogout(true); }}
-            sx={{
-              textTransform: 'none', fontWeight: 600,
-              fontSize: '0.875rem', borderRadius: '8px', height: 42,
-              borderColor: alpha('#f87171', 0.4), color: '#f87171',
-              '&:hover': { borderColor: '#f87171', backgroundColor: alpha('#f87171', 0.08) },
-            }}
-          >
-            Logout
-          </Button>
-        </Box>
-      </Box>
-    </Drawer>
+      {label}
+    </Typography>
   );
 
-  // ── Render ──────────────────────────────────────────────────────────────────
+  // ── Nav list (sections) ──────────────────────────────────────────────────────
+  const navList = (isCollapsedMode: boolean) => (
+    <List
+      disablePadding
+      sx={{
+        flexGrow: 1,
+        overflowY: 'auto',
+        overflowX: 'hidden',
+        py: 1,
+        '&::-webkit-scrollbar': { width: 4 },
+        '&::-webkit-scrollbar-thumb': { bgcolor: 'rgba(255,255,255,0.15)', borderRadius: 2 },
+      }}
+    >
+      {hasNoModuleAccess && !isCollapsedMode && (
+        <Box sx={{ mx: '16px', my: 1, px: 1.5, py: 1.5, borderRadius: 1.5, bgcolor: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}>
+          <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.72rem', lineHeight: 1.5, display: 'block' }}>
+            No modules are assigned to your role. Contact a system administrator to request access.
+          </Typography>
+        </Box>
+      )}
 
-  return (
-    <>
-      <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100dvh' }}>
+      {sections.map((section) => (
+        <Box key={section.label}>
+          {!isCollapsedMode && <SectionLabel label={section.label} />}
+          {isCollapsedMode && (
+            <Box sx={{ mx: '8px', my: '6px', height: '1px', bgcolor: 'rgba(255,255,255,0.08)' }} />
+          )}
+          {section.items.map((item) => (
+            <NavItem key={item.path} item={item} isCollapsedMode={isCollapsedMode} />
+          ))}
+        </Box>
+      ))}
+    </List>
+  );
 
-        {/* ── AppBar ── */}
-        <AppBar
-          position="fixed"
-          elevation={0}
-          sx={{
-            backgroundColor: NAV_BG,
-            backgroundImage: `
-              radial-gradient(ellipse 60% 80% at 80% -20%, ${alpha(BLUE, 0.18)} 0%, transparent 60%),
-              radial-gradient(ellipse 40% 60% at 10% 110%, ${alpha(BLUE, 0.1)} 0%, transparent 60%)
-            `,
-            borderBottom: `1px solid ${BORDER_COLOR}`,
-            boxShadow: scrollTrigger
-              ? `0 4px 24px ${alpha('#000', 0.4)}, 0 1px 0 ${BORDER_COLOR}`
-              : 'none',
-            transition: 'box-shadow 0.25s ease',
-            zIndex: 1200,
-          }}
-        >
-          <Toolbar
-            sx={{
-              minHeight: '64px !important',
-              height: 64,
-              px: { xs: 1.5, sm: 2, md: 3 },
-            }}
-          >
-            {/* ── Logo ── */}
-            <Box
-              onClick={() => navigate('/system/dashboard')}
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1,
-                cursor: 'pointer',
-                flexShrink: 0,
-                mr: { md: '20px' },
-                opacity: 1,
-                '&:hover': { opacity: 0.85 },
-                transition: 'opacity 0.2s ease',
-              }}
-            >
-              <DinoLogo size={30} animated={false} />
+  // ── Sidebar content ──────────────────────────────────────────────────────────
+  const sidebarContent = (isCollapsedMode: boolean, isMobile = false) => (
+    <Box
+      sx={{
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        background: `linear-gradient(180deg, rgba(55,148,255,0.10) 0%, rgba(55,148,255,0.03) 100%), ${SIDEBAR_BG}`,
+        borderRight: '1px solid rgba(212,212,212,0.12)',
+      }}
+    >
+      {/* ── Brand header ── */}
+      <Box
+        sx={{
+          px: isCollapsedMode ? 1 : 2,
+          py: 2,
+          borderBottom: '1px solid rgba(255,255,255,0.08)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: isCollapsedMode ? 'center' : 'space-between',
+          minHeight: 64,
+          flexShrink: 0,
+        }}
+      >
+        {!isCollapsedMode && (
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, minWidth: 0 }}>
+            <DinoLogo size={28} animated={false} />
+            <Box sx={{ minWidth: 0 }}>
               <Typography
                 sx={{
-                  fontWeight: 800,
-                  fontSize: '1.0625rem',
-                  color: WHITE,
-                  letterSpacing: '-0.02em',
-                  lineHeight: 1,
+                  color: '#ffffff',
+                  fontSize: '18px',
+                  fontWeight: 700,
+                  letterSpacing: '-0.5px',
+                  lineHeight: 1.2,
                 }}
               >
                 System Admin
               </Typography>
+              <Chip
+                label={roleName || 'System User'}
+                size="small"
+                sx={{
+                  mt: 0.5,
+                  bgcolor: 'rgba(255,255,255,0.15)',
+                  color: '#ffffff',
+                  fontWeight: 600,
+                  fontSize: '0.68rem',
+                  height: 18,
+                  textTransform: 'capitalize',
+                }}
+              />
+            </Box>
+          </Box>
+        )}
+
+        {isCollapsedMode && <DinoLogo size={28} animated={false} />}
+
+        {isMobile && (
+          <IconButton
+            onClick={() => setMobileOpen(false)}
+            size="small"
+            sx={{ color: alpha('#ffffff', 0.6), flexShrink: 0, '&:hover': { bgcolor: alpha('#ffffff', 0.1), color: '#ffffff' } }}
+          >
+            <ChevronLeft fontSize="small" />
+          </IconButton>
+        )}
+
+        {!isMobile && !isCollapsedMode && (
+          <IconButton
+            onClick={() => setCollapsed(true)}
+            size="small"
+            sx={{ color: alpha('#ffffff', 0.6), flexShrink: 0, '&:hover': { bgcolor: alpha('#ffffff', 0.1), color: '#ffffff' } }}
+          >
+            <ChevronLeft fontSize="small" />
+          </IconButton>
+        )}
+      </Box>
+
+      {isCollapsedMode && (
+        <Box sx={{ px: '8px', pt: 1, flexShrink: 0 }}>
+          <Tooltip title="Expand sidebar" placement="right" arrow>
+            <IconButton
+              onClick={() => setCollapsed(false)}
+              sx={{
+                width: '100%',
+                borderRadius: '8px',
+                color: alpha('#ffffff', 0.6),
+                '&:hover': { bgcolor: ACCENT_BLUE_HOVER, color: '#ffffff' },
+              }}
+            >
+              <ChevronRight fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        </Box>
+      )}
+
+      {navList(isCollapsedMode)}
+
+      {/* ── Footer ── */}
+      <Box
+        sx={{
+          borderTop: '1px solid rgba(255,255,255,0.08)',
+          p: isCollapsedMode ? '8px' : '12px 16px',
+          flexShrink: 0,
+        }}
+      >
+        {!isCollapsedMode ? (
+          <>
+            <Box
+              onClick={() => handleNav('/system/profile')}
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1.5,
+                mb: 1,
+                px: 1,
+                py: 0.75,
+                borderRadius: '8px',
+                cursor: 'pointer',
+                transition: 'background-color 0.15s',
+                '&:hover': { bgcolor: ACCENT_BLUE_HOVER },
+              }}
+            >
+              <Avatar
+                sx={{
+                  width: 32,
+                  height: 32,
+                  bgcolor: alpha(ACCENT, 0.35),
+                  fontSize: '0.875rem',
+                  flexShrink: 0,
+                  color: '#ffffff',
+                }}
+              >
+                {user?.email?.charAt(0).toUpperCase()}
+              </Avatar>
+              <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+                <Typography
+                  sx={{
+                    color: '#ffffff',
+                    fontWeight: 600,
+                    fontSize: '0.8125rem',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {user?.email?.split('@')[0]}
+                </Typography>
+                <Typography
+                  sx={{
+                    color: alpha('#ffffff', 0.5),
+                    fontSize: '0.6875rem',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    display: 'block',
+                  }}
+                >
+                  {user?.email}
+                </Typography>
+              </Box>
             </Box>
 
-            {/* ── Desktop nav items ── */}
-            {!isMobile && (
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                {renderDesktopNav()}
-              </Box>
-            )}
-
-            {/* ── Spacer ── */}
-            <Box sx={{ flex: 1 }} />
-
-            {/* ── Right actions (desktop) ── */}
-            {!isMobile && (
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexShrink: 0 }}>
-
-                {/* Avatar + name */}
-                {user && (
-                  <Box
-                    onClick={() => navigate('/system/profile')}
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 0.875,
-                      cursor: 'pointer',
-                      px: 1,
-                      py: 0.5,
-                      borderRadius: '8px',
-                      border: '1px solid transparent',
-                      transition: 'all 0.18s ease',
-                      '&:hover': {
-                        bgcolor: alpha(WHITE, 0.07),
-                        borderColor: BORDER_COLOR,
-                      },
-                    }}
-                  >
-                    <Avatar
-                      sx={{
-                        width: 32,
-                        height: 32,
-                        fontSize: '0.75rem',
-                        fontWeight: 700,
-                        background: `linear-gradient(135deg, ${BLUE} 0%, ${BLUE_LT} 100%)`,
-                        color: WHITE,
-                        flexShrink: 0,
-                        boxShadow: `0 0 0 2px ${alpha(BLUE_LT, 0.25)}`,
-                      }}
-                    >
-                      {userInitial}
-                    </Avatar>
-
-                    {isLg && (
-                      <Box sx={{ minWidth: 0 }}>
-                        <Typography
-                          sx={{
-                            fontWeight: 600,
-                            fontSize: '0.8125rem',
-                            color: WHITE,
-                            lineHeight: 1.2,
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            maxWidth: 120,
-                          }}
-                        >
-                          {userName}
-                        </Typography>
-                        <Typography
-                          sx={{
-                            fontSize: '0.6875rem',
-                            color: MUTED,
-                            lineHeight: 1,
-                            whiteSpace: 'nowrap',
-                          }}
-                        >
-                          System
-                        </Typography>
-                      </Box>
-                    )}
-
-                    {isLg && (
-                      <KeyboardArrowDown sx={{ fontSize: 16, color: MUTED, flexShrink: 0 }} />
-                    )}
-                  </Box>
-                )}
-
-                {/* Divider */}
-                <Divider
-                  orientation="vertical"
-                  flexItem
-                  sx={{ borderColor: BORDER_COLOR, mx: 0.5, my: 1.5 }}
-                />
-
-                {/* Logout */}
-                <Tooltip title="Sign out" placement="bottom" arrow>
-                  <IconButton
-                    size="small"
-                    onClick={() => setShowLogout(true)}
-                    sx={{
-                      width: 34,
-                      height: 34,
-                      borderRadius: '8px',
-                      color: MUTED,
-                      border: `1px solid ${BORDER_COLOR}`,
-                      bgcolor: 'transparent',
-                      flexShrink: 0,
-                      '&:hover': {
-                        color: '#f87171',
-                        borderColor: alpha('#f87171', 0.4),
-                        bgcolor: alpha('#f87171', 0.08),
-                      },
-                      transition: 'all 0.18s ease',
-                    }}
-                  >
-                    <PowerSettingsNew sx={{ fontSize: 17 }} />
-                  </IconButton>
-                </Tooltip>
-              </Box>
-            )}
-
-            {/* ── Mobile: hamburger ── */}
-            {isMobile && (
-              <IconButton
-                size="small"
-                onClick={() => setMobileOpen(true)}
+            <Button
+              fullWidth
+              variant="outlined"
+              startIcon={<Logout fontSize="small" />}
+              onClick={() => setShowLogout(true)}
+              sx={{
+                borderColor: 'rgba(255,255,255,0.2)',
+                color: NAV_TEXT_DEFAULT,
+                fontWeight: 500,
+                textTransform: 'none',
+                fontSize: '0.8125rem',
+                py: 0.75,
+                borderRadius: '8px',
+                '&:hover': { borderColor: 'rgba(255,255,255,0.4)', bgcolor: ACCENT_BLUE_HOVER, color: '#ffffff' },
+              }}
+            >
+              Logout
+            </Button>
+          </>
+        ) : (
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+            <Tooltip title="My Profile" placement="right" arrow>
+              <Avatar
+                onClick={() => handleNav('/system/profile')}
                 sx={{
-                  color: TEXT_DIM,
-                  border: `1px solid ${BORDER_COLOR}`,
-                  borderRadius: '8px',
-                  width: 36,
-                  height: 36,
-                  '&:hover': { bgcolor: alpha(WHITE, 0.08), color: WHITE },
+                  width: 34,
+                  height: 34,
+                  bgcolor: alpha(ACCENT, 0.35),
+                  fontSize: '0.875rem',
+                  cursor: 'pointer',
+                  color: '#ffffff',
+                  transition: 'background-color 0.15s',
+                  '&:hover': { bgcolor: alpha(ACCENT, 0.55) },
                 }}
-                aria-label="Open navigation menu"
               >
-                <MenuIcon sx={{ fontSize: 20 }} />
+                {user?.email?.charAt(0).toUpperCase()}
+              </Avatar>
+            </Tooltip>
+            <Tooltip title="Logout" placement="right" arrow>
+              <IconButton
+                onClick={() => setShowLogout(true)}
+                sx={{ color: alpha('#ffffff', 0.6), borderRadius: '8px', width: '100%', '&:hover': { bgcolor: ACCENT_BLUE_HOVER, color: '#ffffff' } }}
+              >
+                <Logout fontSize="small" />
               </IconButton>
-            )}
-          </Toolbar>
-        </AppBar>
+            </Tooltip>
+          </Box>
+        )}
+      </Box>
+    </Box>
+  );
+
+  return (
+    <>
+      <Box sx={{ display: 'flex', minHeight: '100dvh', width: '100%' }}>
 
         {/* ── Mobile drawer ── */}
-        {renderMobileDrawer()}
-
-        {/* ── Main content ── */}
-        <Box
-          component="main"
+        <Drawer
+          variant="temporary"
+          open={mobileOpen}
+          onClose={() => setMobileOpen(false)}
+          ModalProps={{ keepMounted: true }}
           sx={{
-            flex: 1,
-            pt: '64px',
-            bgcolor: '#f8fafc',
-            overflowY: 'auto',
-            overflowX: 'hidden',
-            minHeight: '100dvh',
-            position: 'relative',
+            display: { xs: 'block', md: 'none' },
+            '& .MuiDrawer-paper': {
+              width: DRAWER_WIDTH,
+              border: 'none',
+              boxSizing: 'border-box',
+            },
           }}
         >
-          <Outlet />
-          <ModuleTransitionLoader visible={transitioning} />
+          {sidebarContent(false, true)}
+        </Drawer>
+
+        {/* ── Desktop drawer ── */}
+        <Drawer
+          variant="permanent"
+          sx={{
+            display: { xs: 'none', md: 'block' },
+            flexShrink: 0,
+            '& .MuiDrawer-paper': {
+              width: drawerWidth,
+              border: 'none',
+              boxSizing: 'border-box',
+              transition: 'width 0.25s ease',
+              overflowX: 'hidden',
+              overflowY: 'hidden',
+              position: 'fixed',
+              height: '100vh',
+              top: 0,
+              left: 0,
+            },
+          }}
+          open
+        >
+          {sidebarContent(collapsed)}
+        </Drawer>
+
+        {/* ── Main content column ── */}
+        <Box
+          sx={{
+            flexGrow: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            minHeight: '100dvh',
+            width: { xs: '100%', md: `calc(100% - ${drawerWidth}px)` },
+            marginLeft: { xs: 0, md: `${drawerWidth}px` },
+            transition: 'margin-left 0.25s ease, width 0.25s ease',
+          }}
+        >
+          {/* ── Mobile top navbar ── */}
+          <Box
+            sx={{
+              display: { xs: 'flex', md: 'none' },
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              height: 56,
+              bgcolor: SIDEBAR_BG,
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              px: 2,
+              zIndex: 1200,
+              boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+            }}
+          >
+            <IconButton onClick={() => setMobileOpen(true)} sx={{ color: '#ffffff', p: 1 }}>
+              <MenuIcon />
+            </IconButton>
+            <Typography sx={{ color: '#ffffff', fontWeight: 700, fontSize: '0.9375rem' }}>
+              System Admin
+            </Typography>
+            <Avatar
+              onClick={() => navigate('/system/profile')}
+              sx={{
+                width: 32,
+                height: 32,
+                bgcolor: alpha(ACCENT, 0.35),
+                fontSize: '0.875rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                color: '#ffffff',
+                border: `1.5px solid ${alpha(ACCENT, 0.5)}`,
+                transition: 'background-color 0.15s',
+                '&:hover': { bgcolor: alpha(ACCENT, 0.55) },
+              }}
+            >
+              {user?.email?.charAt(0).toUpperCase() || 'S'}
+            </Avatar>
+          </Box>
+
+          {/* ── Page content ── */}
+          <Box
+            component="main"
+            sx={{
+              flexGrow: 1,
+              bgcolor: '#f8fafc',
+              overflowY: 'auto',
+              overflowX: 'hidden',
+              pt: { xs: '56px', md: 0 },
+              minHeight: { xs: '100dvh', md: '100vh' },
+              position: 'relative',
+            }}
+          >
+            <Outlet />
+            <ModuleTransitionLoader visible={transitioning} />
+          </Box>
         </Box>
       </Box>
 
-      {/* ── Logout confirmation ── */}
       <ConfirmationDialog
         open={showLogout}
         onClose={() => setShowLogout(false)}
@@ -684,5 +614,6 @@ const SystemLayout: React.FC = () => {
     </>
   );
 };
+
 
 export default SystemLayout;

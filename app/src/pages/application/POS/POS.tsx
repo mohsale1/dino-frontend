@@ -69,13 +69,14 @@ const POS: React.FC = () => {
 
   // ── Data loading ─────────────────────────────────────────────────────────────
   const loadMenuData = useCallback(async () => {
-    if (!currentWorkspace?.id) return;
+    const personaId = userData?.venue?.personaId;
+    if (!currentWorkspace?.id || !personaId) return;
     try {
       setLoading(true);
       setDataError('');
       const [rawItems, rawCategories] = await Promise.all([
-        catalogService.getItems({ venue_id: currentWorkspace.id }),
-        catalogService.getCategories({ venue_id: currentWorkspace.id }),
+        catalogService.getItems({ persona_id: personaId }),
+        catalogService.getCategories({ persona_id: personaId }),
       ]);
       const categoryMap = new Map<string, string>((rawCategories || []).map(c => [c.id, c.name]));
       const mapped: PosMenuItem[] = (rawItems || [])
@@ -88,7 +89,7 @@ const POS: React.FC = () => {
           categoryId: item.categoryId,
           categoryName: categoryMap.get(item.categoryId) || 'Uncategorized',
           isAvailable: item.isAvailable,
-          image: item.imageUrls?.[0],
+          image: item.imageUrl,
         }));
       setMenuItems(mapped);
       setCategories(rawCategories || []);
@@ -97,15 +98,16 @@ const POS: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [currentWorkspace?.id]);
+  }, [currentWorkspace?.id, userData?.venue?.personaId]);
 
   const loadTables = useCallback(async () => {
-    if (!currentVenue?.id) return;
+    const personaId = userData?.venue?.personaId;
+    if (!personaId) return;
     try {
-      const tables = await locationService.getTables({ venue_id: currentVenue.id, is_active: true });
+      const tables = await locationService.getTables(personaId);
       setTables((tables as any) || []);
     } catch { /* non-critical */ }
-  }, [currentVenue?.id]);
+  }, [userData?.venue?.personaId]);
 
   useEffect(() => {
     loadMenuData();

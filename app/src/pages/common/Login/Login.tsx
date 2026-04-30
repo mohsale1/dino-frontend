@@ -1,13 +1,13 @@
 import React, { useState, useCallback } from 'react';
 import {
   Box, TextField, Button, Typography, Alert,
-  InputAdornment, IconButton, CircularProgress, Chip,
+  InputAdornment, IconButton, CircularProgress, Link,
 } from '@mui/material';
 import {
   Visibility, VisibilityOff,
   QrCode2, Dashboard, Store, CheckCircleOutline, LockOutlined,
 } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import { useAuth } from '../../../contexts/common/Auth';
 import { normalizeRole, ROLES } from '../../../types/auth/roles';
 import DinoLogo from '../../../components/ui/DinoLogo';
@@ -52,6 +52,16 @@ const getDestination = (user: any): string => {
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const { login, isAuthenticated, user: authUser } = useAuth();
+
+  // Lock body scroll — this page manages its own scroll internally
+  React.useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    document.body.style.height = '100vh';
+    return () => {
+      document.body.style.overflow = '';
+      document.body.style.height = '';
+    };
+  }, []);
 
   const [email,        setEmail]        = useState('');
   const [password,     setPassword]     = useState('');
@@ -221,6 +231,7 @@ const LoginPage: React.FC = () => {
           justifyContent: 'center',
           alignItems: 'center',
           width: { md: 460, lg: 500 },
+          height: '100%',
           px: { md: 6, lg: 7 },
           bgcolor: '#ffffff',
           overflow: 'hidden',
@@ -238,85 +249,107 @@ const LoginPage: React.FC = () => {
               </Typography>
             </Box>
             {form}
-            <Typography variant="caption" sx={{ color: '#cccccc', display: 'block', textAlign: 'center', mt: 4, fontSize: '0.75rem' }}>
+            <Typography variant="body2" textAlign="center" color="text.secondary" mt={3}>
+              Don't have an account?{' '}
+              <Link component={RouterLink} to="/register" fontWeight={600} sx={{ color: BRAND.primary }}>
+                Sign Up
+              </Link>
+            </Typography>
+            <Typography variant="body2" textAlign="center" mt={1.5}>
+              <Link component={RouterLink} to="/" sx={{ color: 'text.disabled', fontSize: '0.8125rem' }}>
+                Back to Home
+              </Link>
+            </Typography>
+            <Typography variant="caption" sx={{ color: '#cccccc', display: 'block', textAlign: 'center', mt: 3, fontSize: '0.75rem' }}>
               Authorised users only. Access attempts are monitored.
             </Typography>
           </Box>
         </Box>
 
         {/* ── MOBILE LAYOUT ── */}
-        <Box sx={{ display: { xs: 'flex', md: 'none' }, flexDirection: 'column', height: '100vh', overflow: 'hidden', width: '100%', bgcolor: BRAND.panelBg }}>
-          {/* Dark top section */}
+        <Box sx={{
+          display: { xs: 'flex', md: 'none' },
+          flexDirection: 'column',
+          width: '100%',
+          height: '100%',
+          overflow: 'hidden',
+          bgcolor: BRAND.panelBg,
+        }}>
+          {/* Dark branded header */}
           <Box sx={{
-            flexShrink: 0, position: 'relative', overflow: 'hidden',
-            px: 3, pt: 4, pb: 3, display: 'flex', flexDirection: 'column', alignItems: 'center',
+            flexShrink: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            px: 3,
+            pt: 5,
+            pb: 4,
+            position: 'relative',
+            overflow: 'hidden',
             background: `linear-gradient(160deg, ${BRAND.panelBg} 0%, ${BRAND.panelBg2} 100%)`,
-            '&::before': {
-              content: '""', position: 'absolute', top: -60, right: -40,
-              width: 220, height: 220, borderRadius: '50%',
-              background: 'radial-gradient(circle, rgba(25,118,210,0.12) 0%, transparent 70%)',
-              pointerEvents: 'none',
-            },
           }}>
-            <Box sx={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px)', backgroundSize: '32px 32px', pointerEvents: 'none' }} />
+            {/* Radial glow */}
+            <Box sx={{
+              position: 'absolute', top: -40, right: -40,
+              width: 200, height: 200, borderRadius: '50%',
+              background: 'radial-gradient(circle, rgba(25,118,210,0.18) 0%, transparent 70%)',
+              pointerEvents: 'none',
+            }} />
+            {/* Dot grid */}
+            <Box sx={{
+              position: 'absolute', inset: 0,
+              backgroundImage: 'linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)',
+              backgroundSize: '28px 28px',
+              pointerEvents: 'none',
+            }} />
             <Box sx={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               <DinoLogo size={48} animated />
-              <Typography variant="h6" fontWeight={700} color="white" mt={1.5} textAlign="center" sx={{ letterSpacing: '-0.3px' }}>
-                Welcome to {APP_CONFIG.NAME}
+              <Typography variant="h6" fontWeight={700} color="white" mt={1.5} textAlign="center" sx={{ letterSpacing: '-0.3px', lineHeight: 1.2 }}>
+                Welcome back
               </Typography>
-              <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.5)', mt: 0.5, textAlign: 'center', maxWidth: 260, lineHeight: 1.5, display: 'block' }}>
-                Digital solutions for modern businesses
+              <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.5)', mt: 0.5, textAlign: 'center', display: 'block' }}>
+                Sign in to your {APP_CONFIG.NAME} account
               </Typography>
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75, mt: 2, justifyContent: 'center' }}>
-                {APP_FEATURES.map(({ icon: Icon, text }, i) => (
-                  <Chip
-                    key={i}
-                    icon={<Icon sx={{ fontSize: '13px !important', color: `${BRAND.primaryLight} !important` }} />}
-                    label={text}
-                    size="small"
-                    sx={{
-                      bgcolor: BRAND.accent,
-                      border: `1px solid ${BRAND.accentBorder}`,
-                      color: 'rgba(255,255,255,0.82)',
-                      fontSize: '0.7rem',
-                      fontWeight: 500,
-                      height: 26,
-                      '& .MuiChip-icon': { ml: 0.5 },
-                    }}
-                  />
-                ))}
-              </Box>
             </Box>
           </Box>
 
-          {/* White bottom sheet */}
+          {/* White form card */}
           <Box sx={{
             flex: 1,
             bgcolor: '#ffffff',
             borderRadius: '20px 20px 0 0',
-            px: { xs: 3, sm: 5 },
-            pt: 3.5,
+            mt: -1.5,
+            px: { xs: 2.5, sm: 4 },
+            pt: 3,
             pb: 3,
-            mt: -2,
-            position: 'relative',
-            zIndex: 1,
-            boxShadow: '0 -4px 24px rgba(0,0,0,0.15)',
             overflowY: 'auto',
-            '&::-webkit-scrollbar': { width: 4 },
-            '&::-webkit-scrollbar-track': { background: 'transparent' },
-            '&::-webkit-scrollbar-thumb': { background: 'rgba(0,0,0,0.12)', borderRadius: 2 },
+            overflowX: 'hidden',
+            boxSizing: 'border-box',
+            boxShadow: '0 -4px 20px rgba(0,0,0,0.12)',
           }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
-              <Box sx={{ width: 36, height: 36, borderRadius: '8px', bgcolor: 'rgba(25,118,210,0.08)', border: '1px solid rgba(25,118,210,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2.5 }}>
+              <Box sx={{ width: 36, height: 36, borderRadius: '8px', bgcolor: 'rgba(25,118,210,0.08)', border: '1px solid rgba(25,118,210,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <LockOutlined sx={{ color: BRAND.primary, fontSize: 18 }} />
               </Box>
               <Box>
-                <Typography variant="h6" fontWeight={700} color={BRAND.textPrimary} lineHeight={1.2}>Sign In</Typography>
-                <Typography variant="caption" sx={{ color: BRAND.textMuted }}>Business account access</Typography>
+                <Typography variant="subtitle1" fontWeight={700} color={BRAND.textPrimary} lineHeight={1.2}>Sign In</Typography>
+                <Typography variant="caption" sx={{ color: BRAND.textMuted }}>Enter your credentials below</Typography>
               </Box>
             </Box>
             {form}
-            <Typography variant="caption" sx={{ color: '#cccccc', display: 'block', textAlign: 'center', mt: 3, fontSize: '0.75rem' }}>
+            <Typography variant="body2" textAlign="center" color="text.secondary" mt={2.5}>
+              Don't have an account?{' '}
+              <Link component={RouterLink} to="/register" fontWeight={600} sx={{ color: BRAND.primary }}>
+                Sign Up
+              </Link>
+            </Typography>
+            <Typography variant="body2" textAlign="center" mt={1}>
+              <Link component={RouterLink} to="/" sx={{ color: 'text.disabled', fontSize: '0.8125rem' }}>
+                Back to Home
+              </Link>
+            </Typography>
+            <Typography variant="caption" sx={{ color: '#cccccc', display: 'block', textAlign: 'center', mt: 2, fontSize: '0.75rem' }}>
               Authorised users only. Access attempts are monitored.
             </Typography>
           </Box>

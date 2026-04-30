@@ -36,7 +36,6 @@ import AppMobileMenu from '../AppMobileMenu';
 import { ConfirmationDialog } from '../../dialogs';
 import { NotificationCenter } from '../../common';
 import { getUserFirstName, getUserInitials } from '../../../utils/data/userUtils';
-import { PERMISSIONS } from '../../../types/auth/permissions';
 import { personaService, Persona } from '../../../services/application/persona.service';
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
@@ -54,20 +53,20 @@ const ACTIVE_PERSONA_KEY = 'active_persona_id';
 interface AdminNavItem {
   label: string;
   path: string;
-  permission: string;
+  resource: string;
+  action: string;
   orderTypeRestriction?: number;
 }
 
 const ALL_ADMIN_NAV: AdminNavItem[] = [
-  { label: 'Dashboard', path: '/admin/dashboard', permission: PERMISSIONS.APPLICATION_DASHBOARD_VIEW },
-  { label: 'POS',       path: '/admin/pos',       permission: PERMISSIONS.APPLICATION_POS_VIEW,      orderTypeRestriction: 1 },
-  { label: 'Orders',    path: '/admin/orders',    permission: PERMISSIONS.APPLICATION_ORDERS_VIEW    },
-  { label: 'Catalog',   path: '/admin/catalog',   permission: PERMISSIONS.APPLICATION_CATALOG_VIEW   },
-  { label: 'Locations', path: '/admin/locations', permission: PERMISSIONS.APPLICATION_LOCATIONS_VIEW, orderTypeRestriction: 0 },
-  { label: 'Coupons',   path: '/admin/coupons',   permission: PERMISSIONS.APPLICATION_COUPONS_VIEW   },
-  { label: 'Users',     path: '/admin/users',     permission: PERMISSIONS.APPLICATION_USERS_VIEW     },
-  { label: 'Personas',  path: '/admin/personas',  permission: PERMISSIONS.APPLICATION_PERSONAS_VIEW  },
-  { label: 'Settings',  path: '/admin/settings',  permission: PERMISSIONS.APPLICATION_SETTINGS_VIEW  },
+  { label: 'Dashboard', path: '/admin/dashboard', resource: 'dashboard', action: 'view'      },
+  { label: 'POS',       path: '/admin/pos',       resource: 'pos',       action: 'view', orderTypeRestriction: 1 },
+  { label: 'Orders',    path: '/admin/orders',    resource: 'orders',    action: 'view'      },
+  { label: 'Catalog',   path: '/admin/catalog',   resource: 'catalog',   action: 'view'      },
+  { label: 'Locations', path: '/admin/locations', resource: 'locations', action: 'view', orderTypeRestriction: 0 },
+  { label: 'Coupons',   path: '/admin/coupons',   resource: 'coupons',   action: 'view'      },
+  { label: 'Users',     path: '/admin/users',     resource: 'users',     action: 'view'      },
+  { label: 'Settings',  path: '/admin/settings',  resource: 'settings',  action: 'view'      },
 ];
 
 // ── AppHeader ─────────────────────────────────────────────────────────────────
@@ -79,8 +78,8 @@ const AppHeader: React.FC = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const isLg     = useMediaQuery(theme.breakpoints.up('lg'));
 
-  const { user, logout, hasBackendPermission } = useAuth();
-  const { userData, refreshUserData }          = useUserData();
+  const { user, logout, hasPerm } = useAuth();
+  const { userData, refreshUserData, switchPersona } = useUserData();
 
   const [mobileMenuOpen,  setMobileMenuOpen]  = useState(false);
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
@@ -96,8 +95,7 @@ const AppHeader: React.FC = () => {
   const scrollTrigger = useScrollTrigger({ disableHysteresis: true, threshold: 20 });
 
   // ── Permissions ──────────────────────────────────────────────────────────────
-  const canToggle = hasBackendPermission(PERMISSIONS.APPLICATION_SETTINGS_VIEW) ||
-                    hasBackendPermission(PERMISSIONS.STATUS_UPDATE);
+  const canToggle = hasPerm('settings', 'view') || hasPerm('status', 'update');
 
   // ── Derived venue order type (for nav filtering) ─────────────────────────────
   const venueOrderType = userData?.venue?.orderType;
@@ -105,13 +103,13 @@ const AppHeader: React.FC = () => {
   // ── Filtered admin nav items ─────────────────────────────────────────────────
   const navItems = useMemo<AdminNavItem[]>(() => {
     return ALL_ADMIN_NAV.filter((item) => {
-      if (!hasBackendPermission(item.permission)) return false;
+      if (!hasPerm(item.resource, item.action)) return false;
       if (item.orderTypeRestriction !== undefined && venueOrderType !== undefined) {
         return venueOrderType === item.orderTypeRestriction;
       }
       return true;
     });
-  }, [hasBackendPermission, venueOrderType]);
+  }, [hasPerm, venueOrderType]);
 
   // ── Load personas ────────────────────────────────────────────────────────────
   const loadPersonas = useCallback(async () => {
@@ -173,9 +171,11 @@ const AppHeader: React.FC = () => {
     if (persona.id === activePersonaId) return;
     setSwitchLoading(true);
     try {
-      localStorage.setItem(ACTIVE_PERSONA_KEY, String(persona.id));
+      // Optimistic local update
       setActivePersonaId(persona.id);
-      await refreshUserData();
+      setPersonas(prev => prev.map(p => p.id === persona.id ? { ...p } : p));
+      // Delegate to context — sets localStorage, updates userData.venue instantly, then refreshes
+      await switchPersona(persona.id);
     } catch {
       // silent
     } finally {

@@ -83,7 +83,7 @@ const FAQSection: React.FC = () => {
     <Box
       id="faq"
       sx={{
-        py: { xs: 6, sm: 8, md: 10 },
+        py: { xs: 4, sm: 5, md: 7 },
         background: `linear-gradient(160deg, #f8fafc 0%, #eef2ff 40%, #f0fdf4 70%, #f8fafc 100%)`,
         position: 'relative',
         overflow: 'hidden',
@@ -195,52 +195,16 @@ const FAQSection: React.FC = () => {
         <Box
           sx={{
             textAlign: 'center',
-            mb: { xs: 4, md: 6 },
+            mb: { xs: 3, md: 4 },
             animation: `${fadeInUp} 0.8s ease-out`,
           }}
         >
-          {/* Badge pill — matches Testimonials */}
-          <Box
-            sx={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 1,
-              px: 2,
-              py: 0.75,
-              mb: 3,
-              borderRadius: '999px',
-              background: `linear-gradient(135deg, ${alpha('#1976D2', 0.1)} 0%, ${alpha('#42A5F5', 0.08)} 100%)`,
-              border: `1px solid ${alpha('#1976D2', 0.18)}`,
-              backdropFilter: 'blur(8px)',
-            }}
-          >
-            <Box
-              sx={{
-                width: 6,
-                height: 6,
-                borderRadius: '50%',
-                background: 'linear-gradient(135deg, #1976D2, #42A5F5)',
-                flexShrink: 0,
-              }}
-            />
-            <Typography
-              sx={{
-                fontSize: '0.6875rem',
-                fontWeight: 700,
-                letterSpacing: '0.12em',
-                color: '#1976D2',
-                textTransform: 'uppercase',
-              }}
-            >
-              Frequently Asked
-            </Typography>
-          </Box>
 
           {/* Heading — matches Testimonials */}
           <Typography
             variant="h2"
             sx={{
-              fontSize: { xs: '2rem', sm: '2.75rem', md: '3.25rem' },
+              fontSize: { xs: '1.625rem', sm: '2.125rem', md: '2.625rem' },
               fontWeight: 800,
               mb: 2.5,
               color: '#0f172a',
@@ -270,11 +234,11 @@ const FAQSection: React.FC = () => {
               color: '#64748b',
               maxWidth: 700,
               mx: 'auto',
-              fontSize: { xs: '1rem', sm: '1.0625rem', md: '1.125rem' },
+              fontSize: { xs: '0.9375rem', sm: '1rem', md: '1.0625rem' },
               fontWeight: 400,
               lineHeight: 1.7,
               px: { xs: 2, sm: 0 },
-              mt: 3,
+              mt: 1.5,
             }}
           >
             Everything you need to know about {APP_CONFIG.NAME}
@@ -292,7 +256,7 @@ const FAQSection: React.FC = () => {
                 onChange={handleChange(`panel${index}`)}
                 elevation={0}
                 sx={{
-                  mb: 2,
+                  mb: 1.5,
                   border: '1px solid',
                   borderColor: isExpanded
                     ? alpha('#1976D2', 0.4)
@@ -342,19 +306,19 @@ const FAQSection: React.FC = () => {
                     </Box>
                   }
                   sx={{
-                    py: { xs: 2, md: 2.5 },
+                    py: { xs: 1.5, md: 2 },
                     px: { xs: 2.5, md: 3.5 },
                     '& .MuiAccordionSummary-content': {
                       my: { xs: 1, md: 1.5 },
                     },
-                    minHeight: { xs: 68, md: 76 },
+                    minHeight: { xs: 56, md: 64 },
                   }}
                 >
                   <Typography
                     variant="h6"
                     sx={{
                       fontWeight: 700,
-                      fontSize: { xs: '1rem', sm: '1.0625rem', md: '1.125rem' },
+                      fontSize: { xs: '0.9375rem', sm: '1rem', md: '1.0625rem' },
                       color: isExpanded ? '#1976D2' : '#334155',
                       transition: 'color 0.3s ease',
                       lineHeight: 1.4,
@@ -368,7 +332,7 @@ const FAQSection: React.FC = () => {
                 <AccordionDetails
                   sx={{
                     px: { xs: 2.5, md: 3.5 },
-                    pb: { xs: 3, md: 3.5 },
+                    pb: { xs: 2, md: 2.5 },
                     pt: 0,
                   }}
                 >
@@ -399,7 +363,7 @@ const FAQSection: React.FC = () => {
         {/* ── Still have questions CTA ── */}
         <Box
           sx={{
-            mt: { xs: 6, md: 8 },
+            mt: { xs: 4, md: 5 },
             textAlign: 'center',
             animation: `${fadeInUp} 0.8s ease-out 0.8s both`,
           }}
@@ -410,8 +374,8 @@ const FAQSection: React.FC = () => {
               flexDirection: 'column',
               alignItems: 'center',
               gap: 2.5,
-              px: { xs: 4, sm: 6, md: 8 },
-              py: { xs: 4, md: 5 },
+              px: { xs: 3, sm: 4, md: 5 },
+              py: { xs: 3, md: 4 },
               borderRadius: 4,
               background: `linear-gradient(135deg, ${alpha('#1976D2', 0.07)} 0%, ${alpha('#42A5F5', 0.05)} 100%)`,
               border: `1px solid ${alpha('#1976D2', 0.15)}`,

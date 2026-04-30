@@ -42,8 +42,8 @@ const GRID_SX = {
 };
 
 const ItemSkeleton: React.FC = () => (
-  <Box sx={{ borderRadius: 2, overflow: 'hidden', bgcolor: '#fff', border: '1px solid #e2e8f0' }}>
-    <Skeleton variant="rectangular" height={160} sx={{ bgcolor: '#f1f5f9' }} />
+  <Box sx={{ borderRadius: 2, overflow: 'hidden', bgcolor: '#fff', border: '1px solid #e0e0e0' }}>
+    <Skeleton variant="rectangular" height={160} sx={{ bgcolor: '#f8fafc' }} />
     <Box sx={{ p: 2 }}>
       <Skeleton variant="text" width="60%" height={20} sx={{ mb: 0.5 }} />
       <Skeleton variant="text" width="40%" height={16} sx={{ mb: 1 }} />
@@ -61,8 +61,8 @@ const ItemSkeleton: React.FC = () => (
 );
 
 const CatSkeleton: React.FC = () => (
-  <Box sx={{ borderRadius: 2, overflow: 'hidden', bgcolor: '#fff', border: '1px solid #e2e8f0' }}>
-    <Skeleton variant="rectangular" height={80} sx={{ bgcolor: '#f1f5f9' }} />
+  <Box sx={{ borderRadius: 2, overflow: 'hidden', bgcolor: '#fff', border: '1px solid #e0e0e0' }}>
+    <Skeleton variant="rectangular" height={80} sx={{ bgcolor: '#f8fafc' }} />
     <Box sx={{ p: 2 }}>
       <Skeleton variant="text" width="50%" height={20} sx={{ mb: 0.5 }} />
       <Skeleton variant="text" width="70%" height={14} />
@@ -121,8 +121,8 @@ const CatalogTabs: React.FC<CatalogTabsProps> = ({
           sx={{
             borderRadius: 0,
             border: 'none',
-            borderTop: '1px solid #e2e8f0',
-            borderBottom: '1px solid #f1f5f9',
+            borderTop: '1px solid #e0e0e0',
+            borderBottom: '1px solid #f8fafc',
             bgcolor: '#fff',
           }}
         >
@@ -145,21 +145,21 @@ const CatalogTabs: React.FC<CatalogTabsProps> = ({
                 alignItems: 'center',
                 gap: 1,
                 bgcolor: '#f8fafc',
-                border: '1px solid #e2e8f0',
+                border: '1px solid #e0e0e0',
                 borderRadius: 2,
                 px: 1.5,
                 py: 0.75,
               }}
             >
-              <SearchIcon sx={{ fontSize: 17, color: '#94a3b8', flexShrink: 0 }} />
+              <SearchIcon sx={{ fontSize: 17, color: '#999999', flexShrink: 0 }} />
               <InputBase
                 placeholder="Search items..."
                 value={localSearch}
                 onChange={e => setLocalSearch(e.target.value)}
-                sx={{ flex: 1, fontSize: '0.875rem', color: '#0f172a' }}
+                sx={{ flex: 1, fontSize: '0.875rem', color: '#00A6CA' }}
               />
               {localSearch && (
-                <IconButton size="small" onClick={() => setLocalSearch('')} sx={{ p: 0.25, color: '#94a3b8' }}>
+                <IconButton size="small" onClick={() => setLocalSearch('')} sx={{ p: 0.25, color: '#999999' }}>
                   <CloseIcon sx={{ fontSize: 14 }} />
                 </IconButton>
               )}
@@ -174,7 +174,7 @@ const CatalogTabs: React.FC<CatalogTabsProps> = ({
                 sx={{ borderRadius: 2, fontSize: '0.875rem', bgcolor: '#f8fafc' }}
               >
                 <MenuItem value="all">
-                  <Typography variant="body2" sx={{ color: '#94a3b8' }}>All Categories</Typography>
+                  <Typography variant="body2" sx={{ color: '#999999' }}>All Categories</Typography>
                 </MenuItem>
                 {categories.map(cat => (
                   <MenuItem key={cat.id} value={cat.id}>
@@ -193,7 +193,7 @@ const CatalogTabs: React.FC<CatalogTabsProps> = ({
                 sx={{ borderRadius: 2, fontSize: '0.875rem', bgcolor: '#f8fafc' }}
               >
                 <MenuItem value="all">
-                  <Typography variant="body2" sx={{ color: '#94a3b8' }}>All Status</Typography>
+                  <Typography variant="body2" sx={{ color: '#999999' }}>All Status</Typography>
                 </MenuItem>
                 <MenuItem value="available">
                   <Typography variant="body2">Available</Typography>
@@ -211,9 +211,9 @@ const CatalogTabs: React.FC<CatalogTabsProps> = ({
                 startIcon={<FilterAltOutlined sx={{ fontSize: 14 }} />}
                 onClick={handleClearFilters}
                 sx={{
-                  textTransform: 'none', color: '#64748b', fontWeight: 600,
+                  textTransform: 'none', color: '#666666', fontWeight: 600,
                   fontSize: '0.8125rem', borderRadius: 2, px: 1.5,
-                  '&:hover': { bgcolor: 'rgba(100,116,139,0.06)' },
+                  '&:hover': { bgcolor: 'rgba(0,0,0,0.06)' },
                 }}
               >
                 Clear
@@ -222,7 +222,7 @@ const CatalogTabs: React.FC<CatalogTabsProps> = ({
 
             {/* Result count */}
             <Box sx={{ ml: 'auto', flexShrink: 0, display: { xs: 'none', sm: 'block' } }}>
-              <Typography variant="caption" sx={{ color: '#94a3b8', fontWeight: 500 }}>
+              <Typography variant="caption" sx={{ color: '#999999', fontWeight: 500 }}>
                 {filteredItems.length} of {items.length}
               </Typography>
             </Box>
@@ -231,7 +231,7 @@ const CatalogTabs: React.FC<CatalogTabsProps> = ({
       )}
 
       {/* ── Row 2: Items / Categories full-width tabs ── */}
-      <Box sx={{ bgcolor: '#fff', borderTop: activeTab === 'items' ? 'none' : '1px solid #e2e8f0', borderBottom: '1px solid #e2e8f0' }}>
+      <Box sx={{ bgcolor: '#fff', borderTop: activeTab === 'items' ? 'none' : '1px solid #e0e0e0', borderBottom: '1px solid #e0e0e0' }}>
         <Tabs
           value={activeTab}
           onChange={handleTabChange}
@@ -245,7 +245,7 @@ const CatalogTabs: React.FC<CatalogTabsProps> = ({
               fontWeight: 600,
               py: 0,
             },
-            '& .MuiTabs-indicator': { height: 2, bgcolor: '#0f172a' },
+            '& .MuiTabs-indicator': { height: 2, bgcolor: '#00A6CA' },
           }}
         >
           <Tab
@@ -259,8 +259,8 @@ const CatalogTabs: React.FC<CatalogTabsProps> = ({
                   size="small"
                   sx={{
                     height: 18, fontSize: '0.68rem', fontWeight: 700,
-                    bgcolor: activeTab === 'items' ? '#0f172a' : '#f1f5f9',
-                    color: activeTab === 'items' ? '#fff' : '#64748b',
+                    bgcolor: activeTab === 'items' ? '#00A6CA' : '#f8fafc',
+                    color: activeTab === 'items' ? '#fff' : '#666666',
                     '& .MuiChip-label': { px: 0.75 },
                   }}
                 />
@@ -278,8 +278,8 @@ const CatalogTabs: React.FC<CatalogTabsProps> = ({
                   size="small"
                   sx={{
                     height: 18, fontSize: '0.68rem', fontWeight: 700,
-                    bgcolor: activeTab === 'categories' ? '#0f172a' : '#f1f5f9',
-                    color: activeTab === 'categories' ? '#fff' : '#64748b',
+                    bgcolor: activeTab === 'categories' ? '#00A6CA' : '#f8fafc',
+                    color: activeTab === 'categories' ? '#fff' : '#666666',
                     '& .MuiChip-label': { px: 0.75 },
                   }}
                 />
@@ -298,9 +298,9 @@ const CatalogTabs: React.FC<CatalogTabsProps> = ({
             </Box>
           ) : filteredItems.length === 0 ? (
             <Box sx={{ textAlign: 'center', py: 10 }}>
-              <InventoryIcon sx={{ fontSize: 48, color: '#cbd5e1', mb: 1.5 }} />
-              <Typography variant="h6" sx={{ fontWeight: 600, color: '#64748b', mb: 0.5 }}>No items found</Typography>
-              <Typography variant="body2" sx={{ color: '#94a3b8' }}>Try adjusting your search or filters</Typography>
+              <InventoryIcon sx={{ fontSize: 48, color: '#999999', mb: 1.5 }} />
+              <Typography variant="h6" sx={{ fontWeight: 600, color: '#666666', mb: 0.5 }}>No items found</Typography>
+              <Typography variant="body2" sx={{ color: '#999999' }}>Try adjusting your search or filters</Typography>
             </Box>
           ) : (
             <Box sx={GRID_SX}>
@@ -324,9 +324,9 @@ const CatalogTabs: React.FC<CatalogTabsProps> = ({
             </Box>
           ) : filteredCategories.length === 0 ? (
             <Box sx={{ textAlign: 'center', py: 10 }}>
-              <CategoryIcon sx={{ fontSize: 48, color: '#cbd5e1', mb: 1.5 }} />
-              <Typography variant="h6" sx={{ fontWeight: 600, color: '#64748b', mb: 0.5 }}>No categories found</Typography>
-              <Typography variant="body2" sx={{ color: '#94a3b8' }}>Try adjusting your search</Typography>
+              <CategoryIcon sx={{ fontSize: 48, color: '#999999', mb: 1.5 }} />
+              <Typography variant="h6" sx={{ fontWeight: 600, color: '#666666', mb: 0.5 }}>No categories found</Typography>
+              <Typography variant="body2" sx={{ color: '#999999' }}>Try adjusting your search</Typography>
             </Box>
           ) : (
             <Box sx={GRID_SX}>

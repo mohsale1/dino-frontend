@@ -55,7 +55,7 @@ const HowItWorksSection: React.FC = () => {
     <Box
       id="how-it-works"
       sx={{
-        py: { xs: 5, sm: 6, md: 8 },
+        py: { xs: 4, sm: 5, md: 6 },
         backgroundColor: DARK_BG,
         backgroundImage: 'radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px)',
         backgroundSize: '32px 32px',
@@ -92,20 +92,8 @@ const HowItWorksSection: React.FC = () => {
       <Container maxWidth="lg" disableGutters sx={{ px: { xs: 2, sm: 3, md: 3 }, position: 'relative', zIndex: 1 }}>
 
         {/* Section Header */}
-        <Box sx={{ textAlign: 'center', mb: { xs: 4, md: 6 }, animation: `${fadeInUp} 0.7s ease-out both` }}>
+        <Box sx={{ textAlign: 'center', mb: { xs: 3, md: 4 }, animation: `${fadeInUp} 0.7s ease-out both` }}>
 
-          {/* Pill badge */}
-          <Box sx={{
-            display: 'inline-flex', alignItems: 'center', gap: 1,
-            mb: { xs: 2, md: 2.5 }, px: 2, py: 0.75, borderRadius: '999px',
-            background: 'rgba(25,118,210,0.1)',
-            border: '1px solid rgba(66,165,245,0.28)',
-          }}>
-            <Box sx={{ width: 6, height: 6, borderRadius: '50%', background: `linear-gradient(135deg, ${BLUE}, ${BLUE_LT})`, flexShrink: 0 }} />
-            <Typography sx={{ fontSize: '0.6875rem', fontWeight: 700, letterSpacing: '0.12em', color: BLUE_LT, textTransform: 'uppercase', lineHeight: 1 }}>
-              Simple Process
-            </Typography>
-          </Box>
 
           {/* Heading */}
           <Box sx={{
@@ -123,7 +111,7 @@ const HowItWorksSection: React.FC = () => {
                 component="span"
                 sx={{
                   display: 'inline-block',
-                  fontSize: { xs: '2rem', sm: '2.75rem', md: '3.5rem' },
+                  fontSize: { xs: '1.75rem', sm: '2.25rem', md: '2.875rem' },
                   fontWeight: 800, lineHeight: 1.15, letterSpacing: '-0.03em',
                   color: word === 'Running' || word === 'Minutes' ? BLUE_LT : '#ffffff',
                   opacity: 0,
@@ -137,7 +125,7 @@ const HowItWorksSection: React.FC = () => {
 
           {/* Subtitle */}
           <Typography sx={{
-            color: 'rgba(255,255,255,0.5)', maxWidth: 560, mx: 'auto', mt: 2.5,
+            color: 'rgba(255,255,255,0.5)', maxWidth: 560, mx: 'auto', mt: 1.5,
             fontSize: { xs: '0.9375rem', sm: '1rem', md: '1.0625rem' },
             fontWeight: 400, lineHeight: 1.7, px: { xs: 1, sm: 0 },
           }}>
@@ -214,7 +202,7 @@ const HowItWorksSection: React.FC = () => {
                   background: 'rgba(255,255,255,0.04)',
                   border: '1px solid rgba(255,255,255,0.08)',
                   boxShadow: '0 2px 16px rgba(0,0,0,0.3)',
-                  p: { sm: 2.5, md: 3.5 },
+                  p: { sm: 2, md: 2.5 },
                   display: 'flex', flexDirection: 'column', gap: { sm: 1.5, md: 2.5 },
                   transition: 'transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease, border-color 0.25s ease',
                   animation: `${fadeInUp} 0.7s ease-out ${0.15 + index * 0.15}s both`,

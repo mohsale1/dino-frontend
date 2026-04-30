@@ -56,7 +56,7 @@ const UserTable: React.FC<UserTableProps> = ({
       case 'operator':
         return { bg: '#dcfce7', color: '#166534', border: '#bbf7d0' };
       default:
-        return { bg: 'rgba(25,118,210,0.08)', color: '#1976d2', border: 'rgba(25,118,210,0.2)' };
+        return { bg: 'rgba(0,166,202,0.08)', color: '#00A6CA', border: 'rgba(0,166,202,0.2)' };
     }
   };
 
@@ -68,24 +68,24 @@ const UserTable: React.FC<UserTableProps> = ({
         <Table>
           <TableHead>
             <TableRow sx={{ backgroundColor: '#f8fafc' }}>
-              <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.875rem', borderBottom: '1px solid #e2e8f0' }}>
+              <TableCell sx={{ fontWeight: 600, color: '#666666', fontSize: '0.875rem', borderBottom: '1px solid #e0e0e0' }}>
                 User
               </TableCell>
-              <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.875rem', borderBottom: '1px solid #e2e8f0', display: { xs: 'none', sm: 'table-cell' } }}>
+              <TableCell sx={{ fontWeight: 600, color: '#666666', fontSize: '0.875rem', borderBottom: '1px solid #e0e0e0', display: { xs: 'none', sm: 'table-cell' } }}>
                 Email
               </TableCell>
-              <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.875rem', borderBottom: '1px solid #e2e8f0', display: { xs: 'none', sm: 'table-cell' } }}>
+              <TableCell sx={{ fontWeight: 600, color: '#666666', fontSize: '0.875rem', borderBottom: '1px solid #e0e0e0', display: { xs: 'none', sm: 'table-cell' } }}>
                 Phone
               </TableCell>
-              <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.875rem', borderBottom: '1px solid #e2e8f0' }}>
+              <TableCell sx={{ fontWeight: 600, color: '#666666', fontSize: '0.875rem', borderBottom: '1px solid #e0e0e0' }}>
                 Role
               </TableCell>
-              <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.875rem', borderBottom: '1px solid #e2e8f0' }}>
+              <TableCell sx={{ fontWeight: 600, color: '#666666', fontSize: '0.875rem', borderBottom: '1px solid #e0e0e0' }}>
                 Status
               </TableCell>
               <TableCell
                 align="right"
-                sx={{ fontWeight: 600, color: '#475569', fontSize: '0.875rem', borderBottom: '1px solid #e2e8f0' }}
+                sx={{ fontWeight: 600, color: '#666666', fontSize: '0.875rem', borderBottom: '1px solid #e0e0e0' }}
               >
                 Actions
               </TableCell>
@@ -103,10 +103,10 @@ const UserTable: React.FC<UserTableProps> = ({
                       gap: 1,
                     }}
                   >
-                    <Typography variant="h6" sx={{ color: '#64748b', fontWeight: 600 }}>
+                    <Typography variant="h6" sx={{ color: '#666666', fontWeight: 600 }}>
                       No users found
                     </Typography>
-                    <Typography variant="body2" sx={{ color: '#94a3b8' }}>
+                    <Typography variant="body2" sx={{ color: '#999999' }}>
                       Try adjusting your filters or search criteria
                     </Typography>
                   </Box>
@@ -125,11 +125,11 @@ const UserTable: React.FC<UserTableProps> = ({
                       transition: 'background-color 0.2s',
                     }}
                   >
-                    <TableCell sx={{ borderBottom: '1px solid #f1f5f9' }}>
+                    <TableCell sx={{ borderBottom: '1px solid #f8fafc' }}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                         <Avatar
                           sx={{
-                            bgcolor: '#1976d2',
+                            bgcolor: '#00A6CA',
                             width: 40,
                             height: 40,
                             fontSize: '0.875rem',
@@ -143,7 +143,7 @@ const UserTable: React.FC<UserTableProps> = ({
                             variant="subtitle2"
                             sx={{
                               fontWeight: 600,
-                              color: '#1a1a1a',
+                              color: '#1C1C1E',
                               fontSize: '0.9375rem',
                             }}
                           >
@@ -152,17 +152,17 @@ const UserTable: React.FC<UserTableProps> = ({
                         </Box>
                       </Box>
                     </TableCell>
-                    <TableCell sx={{ borderBottom: '1px solid #f1f5f9', display: { xs: 'none', sm: 'table-cell' } }}>
-                      <Typography variant="body2" sx={{ color: '#6b7280', fontSize: '0.875rem' }}>
+                    <TableCell sx={{ borderBottom: '1px solid #f8fafc', display: { xs: 'none', sm: 'table-cell' } }}>
+                      <Typography variant="body2" sx={{ color: '#666666', fontSize: '0.875rem' }}>
                         {user.email}
                       </Typography>
                     </TableCell>
-                    <TableCell sx={{ borderBottom: '1px solid #f1f5f9', display: { xs: 'none', sm: 'table-cell' } }}>
-                      <Typography variant="body2" sx={{ color: '#6b7280', fontSize: '0.875rem' }}>
+                    <TableCell sx={{ borderBottom: '1px solid #f8fafc', display: { xs: 'none', sm: 'table-cell' } }}>
+                      <Typography variant="body2" sx={{ color: '#666666', fontSize: '0.875rem' }}>
                         {user.phone || '-'}
                       </Typography>
                     </TableCell>
-                    <TableCell sx={{ borderBottom: '1px solid #f1f5f9' }}>
+                    <TableCell sx={{ borderBottom: '1px solid #f8fafc' }}>
                       <Chip
                         label={user.role?.displayName || user.role?.name || 'Unknown'}
                         size="small"
@@ -176,7 +176,7 @@ const UserTable: React.FC<UserTableProps> = ({
                         }}
                       />
                     </TableCell>
-                    <TableCell sx={{ borderBottom: '1px solid #f1f5f9' }}>
+                    <TableCell sx={{ borderBottom: '1px solid #f8fafc' }}>
                       <Chip
                         label={user.isActive ? 'Active' : 'Inactive'}
                         size="small"
@@ -195,16 +195,16 @@ const UserTable: React.FC<UserTableProps> = ({
                         }}
                       />
                     </TableCell>
-                    <TableCell align="right" sx={{ borderBottom: '1px solid #f1f5f9' }}>
+                    <TableCell align="right" sx={{ borderBottom: '1px solid #f8fafc' }}>
                       <Tooltip title="Edit user">
                         <IconButton
                           size="small"
                           onClick={() => onEdit(user)}
                           sx={{
-                            color: '#6b7280',
+                            color: '#666666',
                             '&:hover': {
-                              backgroundColor: 'rgba(25,118,210,0.08)',
-                              color: '#1976d2',
+                              backgroundColor: 'rgba(0,166,202,0.08)',
+                              color: '#00A6CA',
                             },
                           }}
                         >
@@ -216,7 +216,7 @@ const UserTable: React.FC<UserTableProps> = ({
                           size="small"
                           onClick={() => onDelete(user.id)}
                           sx={{
-                            color: '#6b7280',
+                            color: '#666666',
                             '&:hover': {
                               backgroundColor: 'rgba(239,68,68,0.08)',
                               color: '#dc2626',
@@ -243,9 +243,9 @@ const UserTable: React.FC<UserTableProps> = ({
         onRowsPerPageChange={onRowsPerPageChange}
         rowsPerPageOptions={[5, 10, 25, 50]}
         sx={{
-          borderTop: '1px solid #e2e8f0',
+          borderTop: '1px solid #e0e0e0',
           '& .MuiTablePagination-toolbar': {
-            color: '#6b7280',
+            color: '#666666',
             flexWrap: 'wrap',
             px: { xs: 1, sm: 2 },
           },

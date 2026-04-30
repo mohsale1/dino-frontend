@@ -24,7 +24,6 @@ import {
   Users,
   Coupons,
   Settings,
-  PersonaSwitch,
 } from './pages/application';
 
 import { RUNTIME_CONFIG } from './config/runtime';
@@ -72,7 +71,6 @@ const AppContent = memo(() => {
             <Route path="/admin/users" element={<ProtectedRoute requiredPermission="users:view"><Users /></ProtectedRoute>} />
             <Route path="/admin/coupons" element={<ProtectedRoute requiredPermission="coupons:view"><Coupons /></ProtectedRoute>} />
             <Route path="/admin/settings" element={<ProtectedRoute requiredPermission="settings:view"><Settings /></ProtectedRoute>} />
-            <Route path="/admin/personas" element={<PersonaSwitch />} />
           </Route>
 
           {/* 404 */}

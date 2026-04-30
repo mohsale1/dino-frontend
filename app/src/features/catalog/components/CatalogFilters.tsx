@@ -25,8 +25,6 @@ export interface CatalogFiltersProps {
     availability?: 'all' | 'available' | 'unavailable';
     dietary: {
       vegetarian: boolean;
-      vegan: boolean;
-      glutenFree: boolean;
     };
     tags: string[];
   };
@@ -64,8 +62,6 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
     filters.categoryId,
     !!filters.availability && filters.availability !== 'all',
     filters.dietary.vegetarian,
-    filters.dietary.vegan,
-    filters.dietary.glutenFree,
     filters.tags.length > 0,
   ].filter(Boolean).length;
 
@@ -181,26 +177,6 @@ export const CatalogFilters: React.FC<CatalogFiltersProps> = ({
                 />
               }
               label={<Typography variant="body2">Vegetarian</Typography>}
-            />
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={filters.dietary.vegan}
-                  onChange={(e) => handleDietaryChange('vegan', e.target.checked)}
-                  size="small"
-                />
-              }
-              label={<Typography variant="body2">Vegan</Typography>}
-            />
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={filters.dietary.glutenFree}
-                  onChange={(e) => handleDietaryChange('glutenFree', e.target.checked)}
-                  size="small"
-                />
-              }
-              label={<Typography variant="body2">Gluten Free</Typography>}
             />
           </FormGroup>
         </Box>

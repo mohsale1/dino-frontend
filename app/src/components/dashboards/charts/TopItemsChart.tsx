@@ -44,7 +44,7 @@ const TopItemsChart: React.FC<Props> = ({ data, height = 320 }) => {
   if (!data || data.length === 0) {
     return (
       <Box sx={{ height, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <Typography sx={{ color: '#94a3b8', fontSize: '0.875rem' }}>
+        <Typography sx={{ color: '#999999', fontSize: '0.875rem' }}>
           No items data available
         </Typography>
       </Box>
@@ -73,7 +73,7 @@ const TopItemsChart: React.FC<Props> = ({ data, height = 320 }) => {
         return `
           <div style="font-weight:700;font-size:12px;color:#f1f5f9;margin-bottom:4px">${item.name}</div>
           <div style="font-size:11px;color:#64748b;margin-bottom:6px">${item.category}</div>
-          <div style="font-size:11px;color:#42A5F5;margin-bottom:3px">Revenue: ${formatINR(item.revenue)}</div>
+          <div style="font-size:11px;color:#00A6CA;margin-bottom:3px">Revenue: ${formatINR(item.revenue)}</div>
           <div style="font-size:11px;color:#f59e0b">Orders: ${item.orders}</div>
         `;
       },
@@ -90,7 +90,7 @@ const TopItemsChart: React.FC<Props> = ({ data, height = 320 }) => {
       axisLine: { show: false },
       axisTick: { show: false },
       axisLabel: {
-        color: '#94a3b8',
+        color: '#999999',
         fontSize: 10,
         formatter: formatXAxis,
       },
@@ -102,7 +102,7 @@ const TopItemsChart: React.FC<Props> = ({ data, height = 320 }) => {
       axisLine: { show: false },
       axisTick: { show: false },
       axisLabel: {
-        color: '#94a3b8',
+        color: '#999999',
         fontSize: 11,
         width: 130,
         overflow: 'truncate',
@@ -121,8 +121,8 @@ const TopItemsChart: React.FC<Props> = ({ data, height = 320 }) => {
             type: 'linear',
             x: 0, y: 0, x2: 1, y2: 0,
             colorStops: [
-              { offset: 0, color: '#1976D2' },
-              { offset: 1, color: '#42A5F5' },
+              { offset: 0, color: '#00A6CA' },
+              { offset: 1, color: 'rgba(0,166,202,0.6)' },
             ],
           },
         },
@@ -132,8 +132,8 @@ const TopItemsChart: React.FC<Props> = ({ data, height = 320 }) => {
               type: 'linear',
               x: 0, y: 0, x2: 1, y2: 0,
               colorStops: [
-                { offset: 0, color: '#1565C0' },
-                { offset: 1, color: '#1976D2' },
+                { offset: 0, color: '#005F8D' },
+                { offset: 1, color: '#00A6CA' },
               ],
             },
           },

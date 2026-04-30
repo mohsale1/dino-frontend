@@ -67,15 +67,12 @@ export interface HourlyOrdersResponse {
   data: PeakHourPoint[];
 }
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
-
 function buildParams(filters: DashboardFilters): Record<string, string> {
   const params: Record<string, string> = {};
-  if (filters.venueId) params.venue_id = filters.venueId;
-  if (filters.startDate) params.start_date = filters.startDate;
-  if (filters.endDate) params.end_date = filters.endDate;
+  if (filters.venueId) params.persona_id = filters.venueId;
   return params;
 }
+
 
 // ── Service ───────────────────────────────────────────────────────────────────
 

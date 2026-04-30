@@ -52,7 +52,6 @@ import { useUserData } from '../../../contexts/application/UserData';
 import { personaService } from '../../../services/application/persona.service';
 import { usePermissionCheck } from '../../common/PermissionWrapper';
 import { APP_CONFIG } from '../../../constants/app';
-import { PERMISSIONS } from '../../../types/auth/permissions';
 
 interface AppMobileMenuProps {
   open: boolean;
@@ -79,7 +78,7 @@ const AppMobileMenu: React.FC<AppMobileMenuProps> = ({
   isHomePage,
 }) => {
   const { userData, refreshUserData } = useUserData();
-  const { hasBackendPermission }      = useAuth();
+  const { hasPerm }                   = useAuth();
   usePermissionCheck();
 
   const [venueStatus, setVenueStatus] = useState<{
@@ -89,7 +88,7 @@ const AppMobileMenu: React.FC<AppMobileMenuProps> = ({
   } | null>(null);
   const [statusLoading, setStatusLoading] = useState(false);
 
-  const canManageVenue = hasBackendPermission(PERMISSIONS.WORKSPACE_UPDATE);
+  const canManageVenue = hasPerm('workspace', 'update');
 
   useEffect(() => {
     if (!user || !canManageVenue) { setVenueStatus(null); return; }
@@ -124,18 +123,19 @@ const AppMobileMenu: React.FC<AppMobileMenuProps> = ({
   const handleLogout      = ()                    => { onLogout(); };
 
   const allAdminMenuItems = [
-    { label: 'Dashboard', path: '/admin',           icon: <Dashboard />,    permission: PERMISSIONS.APPLICATION_DASHBOARD_VIEW },
-    { label: 'Menu',      path: '/admin/menu',      icon: <MenuBook />,     permission: PERMISSIONS.APPLICATION_POS_VIEW },
-    { label: 'Location',  path: '/admin/locations', icon: <Store />,        permission: PERMISSIONS.APPLICATION_LOCATIONS_VIEW },
-    { label: 'Orders',    path: '/admin/orders',    icon: <ShoppingCart />, permission: PERMISSIONS.APPLICATION_ORDERS_VIEW },
-    { label: 'Catalog',   path: '/admin/catalog',   icon: <Star />,         permission: PERMISSIONS.APPLICATION_CATALOG_VIEW },
-    { label: 'Coupons',   path: '/admin/coupons',   icon: <LocalOffer />,   permission: PERMISSIONS.APPLICATION_COUPONS_VIEW },
-    { label: 'Users',     path: '/admin/users',     icon: <People />,       permission: PERMISSIONS.APPLICATION_USERS_VIEW },
-    { label: 'Settings',  path: '/admin/settings',  icon: <Settings />,     permission: PERMISSIONS.APPLICATION_SETTINGS_VIEW },
+    { label: 'Dashboard', path: '/admin',           icon: <Dashboard />,    resource: 'dashboard', action: 'view' },
+    { label: 'POS',       path: '/admin/pos',       icon: <MenuBook />,     resource: 'pos',       action: 'view' },
+    { label: 'Location',  path: '/admin/locations', icon: <Store />,        resource: 'locations', action: 'view' },
+    { label: 'Orders',    path: '/admin/orders',    icon: <ShoppingCart />, resource: 'orders',    action: 'view' },
+    { label: 'Catalog',   path: '/admin/catalog',   icon: <Star />,         resource: 'catalog',   action: 'view' },
+    { label: 'Coupons',   path: '/admin/coupons',   icon: <LocalOffer />,   resource: 'coupons',   action: 'view' },
+    { label: 'Users',     path: '/admin/users',     icon: <People />,       resource: 'users',     action: 'view' },
+    { label: 'Settings',  path: '/admin/settings',  icon: <Settings />,     resource: 'settings',  action: 'view' },
   ];
+  // Note: Personas are accessed via the header dropdown, not the mobile menu nav
 
   const adminMenuItems = allAdminMenuItems.filter(item =>
-    hasBackendPermission(item.permission)
+    hasPerm(item.resource, item.action)
   );
 
   const getNavigationIcon = (item: { label: string; id: string }) => {
@@ -271,13 +271,12 @@ const AppMobileMenu: React.FC<AppMobileMenuProps> = ({
         </IconButton>
       </Box>
 
-      {/* ── Content — flex column, fills remaining height, scrollable ─────────── */}
+      {/* ── Scrollable content ───────────────────────────────────────────────── */}
       <Box
         sx={{
           flex: 1,
-          display: 'flex',
-          flexDirection: 'column',
           overflowY: 'auto',
+          overflowX: 'hidden',
           position: 'relative',
           zIndex: 1,
           pt: 1.5,
@@ -535,54 +534,55 @@ const AppMobileMenu: React.FC<AppMobileMenuProps> = ({
           </Box>
         )}
 
-        {/* ── Flex spacer ── */}
-        <Box sx={{ flex: 1 }} />
+        {/* bottom padding so last nav item isn't flush against the footer */}
+        <Box sx={{ pb: 2 }} />
+      </Box>
 
-        {/* ── Guest actions — pinned at bottom inside the flex column ── */}
-        {!user && (
-          <Box
+      {/* ── Guest actions — fixed footer, always visible, never scrolls ───────── */}
+      {!user && (
+        <Box
+          sx={{
+            px: 2,
+            pt: 1.5,
+            pb: 'max(20px, env(safe-area-inset-bottom))',
+            borderTop: '1px solid #e0e0e0',
+            flexShrink: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 1,
+            backgroundColor: '#ffffff',
+          }}
+        >
+          <Button
+            fullWidth
+            variant="outlined"
+            startIcon={<Login />}
+            onClick={() => handleNavigate('/login')}
             sx={{
-              px: 2,
-              pt: 1.5,
-              pb: 'max(20px, env(safe-area-inset-bottom))',
-              borderTop: '1px solid #e0e0e0',
-              flexShrink: 0,
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 1,
+              textTransform: 'none', fontWeight: 600,
+              fontSize: '0.875rem', borderRadius: '8px', height: 42,
+              borderColor: alpha(BLUE, 0.4), color: BLUE,
+              '&:hover': { borderColor: BLUE, backgroundColor: alpha(BLUE, 0.06) },
             }}
           >
-            <Button
-              fullWidth
-              variant="outlined"
-              startIcon={<Login />}
-              onClick={() => handleNavigate('/login')}
-              sx={{
-                textTransform: 'none', fontWeight: 600,
-                fontSize: '0.875rem', borderRadius: '8px', height: 42,
-                borderColor: alpha(BLUE, 0.4), color: BLUE,
-                '&:hover': { borderColor: BLUE, backgroundColor: alpha(BLUE, 0.06) },
-              }}
-            >
-              Sign In
-            </Button>
-            <Button
-              fullWidth
-              variant="contained"
-              startIcon={<PersonAdd />}
-              onClick={() => handleNavigate('/register')}
-              sx={{
-                textTransform: 'none', fontWeight: 600,
-                fontSize: '0.875rem', borderRadius: '8px', height: 42,
-                backgroundColor: BLUE, color: '#ffffff', boxShadow: 'none',
-                '&:hover': { backgroundColor: '#1565C0', boxShadow: 'none' },
-              }}
-            >
-              Get Started
-            </Button>
-          </Box>
-        )}
-      </Box>
+            Sign In
+          </Button>
+          <Button
+            fullWidth
+            variant="contained"
+            startIcon={<PersonAdd />}
+            onClick={() => handleNavigate('/register')}
+            sx={{
+              textTransform: 'none', fontWeight: 600,
+              fontSize: '0.875rem', borderRadius: '8px', height: 42,
+              backgroundColor: BLUE, color: '#ffffff', boxShadow: 'none',
+              '&:hover': { backgroundColor: '#1565C0', boxShadow: 'none' },
+            }}
+          >
+            Get Started
+          </Button>
+        </Box>
+      )}
     </Drawer>
   );
 };

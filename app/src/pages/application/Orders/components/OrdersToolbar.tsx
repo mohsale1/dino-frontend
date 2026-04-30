@@ -33,8 +33,8 @@ const STATUS_TABS: { value: StatusFilter; label: string }[] = [
 ];
 
 function getTabColor(value: StatusFilter): string {
-  if (!value) return '#1976D2';
-  return STATUS_CONFIG[value as keyof typeof STATUS_CONFIG]?.dot ?? '#1976D2';
+  if (!value) return '#00A6CA';
+  return STATUS_CONFIG[value as keyof typeof STATUS_CONFIG]?.dot ?? '#00A6CA';
 }
 
 const DATE_INPUT_SX = {
@@ -44,12 +44,12 @@ const DATE_INPUT_SX = {
   borderRadius: '8px',
   px: 1.25,
   py: '5px',
-  bgcolor: '#f7f9fa',
+  bgcolor: '#f8fafc',
   outline: 'none',
   fontFamily: 'inherit',
   cursor: 'pointer',
   transition: 'border-color 0.15s',
-  '&:focus': { borderColor: '#1976D2' },
+  '&:focus': { borderColor: '#00A6CA' },
   '&::-webkit-calendar-picker-indicator': { cursor: 'pointer', opacity: 0.6 },
 } as const;
 
@@ -89,7 +89,7 @@ const OrdersToolbar: React.FC<OrdersToolbarProps> = ({
       {/* Main toolbar row */}
       <Box
         sx={{
-          px: 2.5,
+          px: 2,
           py: 1.25,
           display: 'flex',
           alignItems: 'center',
@@ -99,7 +99,7 @@ const OrdersToolbar: React.FC<OrdersToolbarProps> = ({
       >
         {/* 1. Page title + live indicator */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, flexShrink: 0 }}>
-          <Typography sx={{ fontWeight: 700, fontSize: '1.1rem', color: '#1C1C1E', lineHeight: 1 }}>
+          <Typography sx={{ fontWeight: 700, fontSize: '22px', letterSpacing: '-0.3px', color: '#1C1C1E', lineHeight: 1 }}>
             Orders
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, ml: 0.25 }}>
@@ -126,13 +126,13 @@ const OrdersToolbar: React.FC<OrdersToolbarProps> = ({
             display: 'flex',
             alignItems: 'center',
             gap: 0.75,
-            bgcolor: '#f7f9fa',
+            bgcolor: '#f8fafc',
             border: '1px solid #e0e0e0',
             borderRadius: 2,
             px: 1.5,
             py: 0.75,
             transition: 'border-color 0.15s',
-            '&:focus-within': { borderColor: '#1976D2' },
+            '&:focus-within': { borderColor: '#00A6CA' },
           }}
         >
           <Search sx={{ fontSize: 16, color: '#999999', flexShrink: 0 }} />
@@ -169,7 +169,7 @@ const OrdersToolbar: React.FC<OrdersToolbarProps> = ({
               if (val === 'custom') {
                 return (
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-                    <DateRangeIcon sx={{ fontSize: 15, color: '#1976D2' }} />
+                    <DateRangeIcon sx={{ fontSize: 15, color: '#00A6CA' }} />
                     <span>Custom Range</span>
                   </Box>
                 );
@@ -182,13 +182,13 @@ const OrdersToolbar: React.FC<OrdersToolbarProps> = ({
             sx={{
               borderRadius: 2,
               fontSize: '0.83rem',
-              bgcolor: dateFilter === 'custom' ? '#EFF6FF' : '#f7f9fa',
+              bgcolor: dateFilter === 'custom' ? 'rgba(0,166,202,0.08)' : '#f8fafc',
               color: '#1C1C1E',
               '& .MuiOutlinedInput-notchedOutline': {
-                borderColor: dateFilter === 'custom' ? '#BFDBFE' : '#e0e0e0',
+                borderColor: dateFilter === 'custom' ? 'rgba(0,166,202,0.2)' : '#e0e0e0',
               },
-              '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#1976D2' },
-              '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#1976D2', borderWidth: 1 },
+              '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#00A6CA' },
+              '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#00A6CA', borderWidth: 1 },
               '& .MuiSelect-select': { py: '6.5px' },
             }}
           >
@@ -200,7 +200,7 @@ const OrdersToolbar: React.FC<OrdersToolbarProps> = ({
               value="custom"
               sx={{
                 fontSize: '0.83rem',
-                color: '#1976D2',
+                color: '#00A6CA',
                 fontWeight: 600,
                 display: 'flex',
                 alignItems: 'center',
@@ -223,7 +223,7 @@ const OrdersToolbar: React.FC<OrdersToolbarProps> = ({
             borderRadius: 2,
             color: '#666666',
             flexShrink: 0,
-            '&:hover': { bgcolor: '#f7f9fa', borderColor: '#1976D2', color: '#1976D2' },
+            '&:hover': { bgcolor: '#f8fafc', borderColor: '#00A6CA', color: '#00A6CA' },
           }}
         >
           <Refresh sx={{ fontSize: 18 }} />
@@ -234,14 +234,15 @@ const OrdersToolbar: React.FC<OrdersToolbarProps> = ({
           sx={{
             display: 'flex',
             alignItems: 'center',
-            bgcolor: '#f1f5f9',
+            bgcolor: '#f8fafc',
+            border: '1px solid #e0e0e0',
             borderRadius: '999px',
             px: 1.25,
             py: 0.4,
             flexShrink: 0,
           }}
         >
-          <Typography sx={{ fontSize: '0.75rem', fontWeight: 600, color: '#475569', lineHeight: 1, whiteSpace: 'nowrap' }}>
+          <Typography sx={{ fontSize: '0.75rem', fontWeight: 600, color: '#666666', lineHeight: 1, whiteSpace: 'nowrap' }}>
             {filteredCount === totalCount
               ? `${totalCount} orders`
               : `${filteredCount} of ${totalCount}`}
@@ -253,25 +254,25 @@ const OrdersToolbar: React.FC<OrdersToolbarProps> = ({
       <Collapse in={customRowVisible} timeout={200}>
         <Box
           sx={{
-            px: 2.5,
+            px: 2,
             py: 1.25,
             display: 'flex',
             alignItems: 'center',
             gap: 1.5,
             flexWrap: 'wrap',
-            bgcolor: '#F8FAFF',
-            borderTop: '1px solid #e8f0fe',
+            bgcolor: '#f8fafc',
+            borderTop: '1px solid #e0e0e0',
           }}
         >
-          <DateRangeIcon sx={{ fontSize: 16, color: '#1976D2', flexShrink: 0 }} />
-          <Typography sx={{ fontSize: '0.78rem', fontWeight: 600, color: '#475569', flexShrink: 0 }}>
+          <DateRangeIcon sx={{ fontSize: 16, color: '#00A6CA', flexShrink: 0 }} />
+          <Typography sx={{ fontSize: '0.78rem', fontWeight: 600, color: '#666666', flexShrink: 0 }}>
             Date Range
           </Typography>
 
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
             {/* Start date */}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-              <Typography sx={{ fontSize: '0.75rem', color: '#64748b', flexShrink: 0 }}>From</Typography>
+              <Typography sx={{ fontSize: '0.75rem', color: '#666666', flexShrink: 0 }}>From</Typography>
               <Box
                 component="input"
                 type="date"
@@ -282,11 +283,11 @@ const OrdersToolbar: React.FC<OrdersToolbarProps> = ({
               />
             </Box>
 
-            <Typography sx={{ fontSize: '0.75rem', color: '#94a3b8' }}>—</Typography>
+            <Typography sx={{ fontSize: '0.75rem', color: '#999999' }}>—</Typography>
 
             {/* End date */}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-              <Typography sx={{ fontSize: '0.75rem', color: '#64748b', flexShrink: 0 }}>To</Typography>
+              <Typography sx={{ fontSize: '0.75rem', color: '#666666', flexShrink: 0 }}>To</Typography>
               <Box
                 component="input"
                 type="date"
@@ -306,15 +307,15 @@ const OrdersToolbar: React.FC<OrdersToolbarProps> = ({
                 display: 'flex',
                 alignItems: 'center',
                 gap: 0.5,
-                bgcolor: '#DBEAFE',
-                border: '1px solid #BFDBFE',
+                bgcolor: 'rgba(0,166,202,0.08)',
+                border: '1px solid rgba(0,166,202,0.2)',
                 borderRadius: '999px',
                 px: 1.25,
                 py: 0.35,
               }}
             >
-              <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: '#1976D2', flexShrink: 0 }} />
-              <Typography sx={{ fontSize: '0.72rem', fontWeight: 600, color: '#1D4ED8', lineHeight: 1 }}>
+              <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: '#00A6CA', flexShrink: 0 }} />
+              <Typography sx={{ fontSize: '0.72rem', fontWeight: 600, color: '#00A6CA', lineHeight: 1 }}>
                 {customStartDate === customEndDate
                   ? customStartDate
                   : `${customStartDate} to ${customEndDate}`}
@@ -329,7 +330,7 @@ const OrdersToolbar: React.FC<OrdersToolbarProps> = ({
             sx={{
               ml: 'auto',
               p: 0.4,
-              color: '#94a3b8',
+              color: '#999999',
               '&:hover': { color: '#ef4444', bgcolor: '#FEF2F2' },
             }}
             title="Clear custom range"
@@ -346,7 +347,7 @@ const OrdersToolbar: React.FC<OrdersToolbarProps> = ({
         variant="scrollable"
         scrollButtons="auto"
         TabIndicatorProps={{
-          style: { backgroundColor: '#1976D2', height: 2, borderRadius: '2px 2px 0 0' },
+          style: { backgroundColor: '#00A6CA', height: 2, borderRadius: '2px 2px 0 0' },
         }}
         sx={{
           minHeight: 40,
@@ -381,7 +382,7 @@ const OrdersToolbar: React.FC<OrdersToolbarProps> = ({
                         width: 6,
                         height: 6,
                         borderRadius: '50%',
-                        bgcolor: isActive ? dotColor : '#cbd5e1',
+                        bgcolor: isActive ? dotColor : '#e0e0e0',
                         flexShrink: 0,
                         transition: 'background-color 0.15s',
                       }}

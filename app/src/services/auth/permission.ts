@@ -32,8 +32,19 @@ class PermissionService {
     if (backendRole && isOwner(backendRole.name)) return true;
 
     if (backendPermissions.length > 0) {
-      // Normalise the requested permission to colon format (handle both 'a.b' and 'a:b')
-      const colonPerm = (permission as string).replace('.', ':');
+      // Normalise to colon format — handle both 'resource:action' and 'scope.module.action' dot notation.
+      // For dot notation, the last segment is the action and the second-to-last is the resource.
+      const permStr = permission as string;
+      let colonPerm: string;
+      if (permStr.includes(':')) {
+        colonPerm = permStr;
+      } else {
+        const parts = permStr.split('.');
+        // e.g. 'application.dashboard.view' -> 'dashboard:view'
+        colonPerm = parts.length >= 2
+          ? `${parts[parts.length - 2]}:${parts[parts.length - 1]}`
+          : permStr;
+      }
       const [resource, action] = colonPerm.split(':');
 
       // Exact match on stored name
@@ -48,6 +59,7 @@ class PermissionService {
 
     return false;
   }
+
 
 
   /**

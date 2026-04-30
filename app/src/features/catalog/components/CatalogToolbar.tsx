@@ -148,5 +148,3 @@ export const CatalogToolbar: React.FC<CatalogToolbarProps> = ({
     </Paper>
   );
 };
-
-export default CatalogToolbar;

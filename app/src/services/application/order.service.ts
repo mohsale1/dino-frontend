@@ -67,32 +67,36 @@ export interface OrderStatistics {
 }
 
 export interface OrderCreateItem {
-  menu_item_id: number;
+  item_id: number;
   quantity: number;
-  variant_id?: number;
-  special_instructions?: string;
 }
 
 export interface OrderCreate {
-  venue_id: string;
-  table_id?: string;
+  persona_id: number;
+  table_id?: number;
+  area_id?: number;
   items: OrderCreateItem[];
-  order_type: string;
+  customer_name?: string;
   discount_amount?: number;
   special_instructions?: string;
+  currency?: string;
+  tax_amount?: number;
+  service_charge?: number;
 }
 
 export interface OrderFilters {
   page?: number;
   page_size?: number;
-  venue_id?: string;
+  persona_id?: number;
   status?: string;
   payment_status?: string;
   order_type?: string;
+  start_date?: string;
+  end_date?: string;
 }
 
 export interface StatisticsFilters {
-  venue_id?: string;
+  persona_id?: number;
   start_date?: string;
   end_date?: string;
 }
@@ -120,10 +124,12 @@ class OrderService {
       const params: Record<string, unknown> = {};
       if (filters?.page !== undefined) params.page = filters.page;
       if (filters?.page_size !== undefined) params.page_size = filters.page_size;
-      if (filters?.venue_id) params.venue_id = filters.venue_id;
+      if (filters?.persona_id !== undefined) params.persona_id = filters.persona_id;
       if (filters?.status) params.status = filters.status;
       if (filters?.payment_status) params.payment_status = filters.payment_status;
       if (filters?.order_type) params.order_type = filters.order_type;
+      if (filters?.start_date) params.start_date = filters.start_date;
+      if (filters?.end_date) params.end_date = filters.end_date;
 
       const response = await apiService.get<any>(API_ENDPOINTS.APPLICATION.ORDERS.BASE, { params });
 
@@ -162,9 +168,12 @@ class OrderService {
   /**
    * Get order by ID — GET /application/orders/{id}
    */
-  async getOrder(orderId: string): Promise<ApiResponse<OrderDetail>> {
+  async getOrder(orderId: string, personaId: number): Promise<ApiResponse<OrderDetail>> {
     try {
-      const response = await apiService.get<any>(API_ENDPOINTS.APPLICATION.ORDERS.BY_ID(orderId));
+      const response = await apiService.get<any>(
+        API_ENDPOINTS.APPLICATION.ORDERS.BY_ID(orderId),
+        { params: { persona_id: personaId } }
+      );
       const raw = response.data as any;
       return { success: true, data: raw?.data ?? raw };
     } catch (error: any) {
@@ -203,13 +212,14 @@ class OrderService {
    */
   async updateOrderStatus(
     orderId: string,
-    newStatus: Order['status']
+    newStatus: Order['status'],
+    personaId: number
   ): Promise<ApiResponse<Order>> {
     try {
       const response = await apiService.put<any>(
         API_ENDPOINTS.APPLICATION.ORDERS.STATUS(orderId),
-        null,
-        { params: { new_status: newStatus } }
+        { status: newStatus },
+        { params: { persona_id: personaId } }
       );
       const raw = response.data as any;
       return { success: true, data: raw?.data ?? raw };
@@ -221,9 +231,9 @@ class OrderService {
   /**
    * Cancel order — PUT /application/orders/{id}/cancel
    */
-  async cancelOrder(orderId: string, reason?: string): Promise<ApiResponse<Order>> {
+  async cancelOrder(orderId: string, personaId: number, reason?: string): Promise<ApiResponse<Order>> {
     try {
-      const params: Record<string, unknown> = {};
+      const params: Record<string, unknown> = { persona_id: personaId };
       if (reason) params.reason = reason;
 
       const response = await apiService.put<any>(
@@ -241,9 +251,12 @@ class OrderService {
   /**
    * Get items for an order — GET /application/orders/{id}/items
    */
-  async getOrderItems(orderId: string): Promise<ApiResponse<OrderItem[]>> {
+  async getOrderItems(orderId: string, personaId: number): Promise<ApiResponse<OrderItem[]>> {
     try {
-      const response = await apiService.get<any>(API_ENDPOINTS.APPLICATION.ORDERS.ITEMS(orderId));
+      const response = await apiService.get<any>(
+        API_ENDPOINTS.APPLICATION.ORDERS.ITEMS(orderId),
+        { params: { persona_id: personaId } }
+      );
       const raw = response.data as any;
       const items: OrderItem[] = Array.isArray(raw?.data) ? raw.data : Array.isArray(raw) ? raw : [];
       return { success: true, data: items };
@@ -255,9 +268,12 @@ class OrderService {
   /**
    * Get transaction for an order — GET /application/orders/{id}/transaction
    */
-  async getOrderTransaction(orderId: string): Promise<ApiResponse<OrderTransaction>> {
+  async getOrderTransaction(orderId: string, personaId: number): Promise<ApiResponse<OrderTransaction>> {
     try {
-      const response = await apiService.get<any>(API_ENDPOINTS.APPLICATION.ORDERS.TRANSACTION(orderId));
+      const response = await apiService.get<any>(
+        API_ENDPOINTS.APPLICATION.ORDERS.TRANSACTION(orderId),
+        { params: { persona_id: personaId } }
+      );
       const raw = response.data as any;
       return { success: true, data: raw?.data ?? raw };
     } catch (error: any) {
@@ -271,7 +287,7 @@ class OrderService {
   async getStatistics(params?: StatisticsFilters): Promise<ApiResponse<OrderStatistics>> {
     try {
       const queryParams: Record<string, unknown> = {};
-      if (params?.venue_id) queryParams.venue_id = params.venue_id;
+      if (params?.persona_id !== undefined) queryParams.persona_id = params.persona_id;
       if (params?.start_date) queryParams.start_date = params.start_date;
       if (params?.end_date) queryParams.end_date = params.end_date;
 

@@ -167,7 +167,7 @@ const ItemsTab: React.FC<ItemsTabProps> = ({ dashboardData }) => {
 
       {/* Row 2 — Top Items Chart */}
       <Box sx={{ ...CARD_SX, mt: 2.5 }}>
-        <SectionTitle label="Top Items by Revenue" accentColor="#1976D2" />
+        <SectionTitle label="Top Items by Revenue" accentColor="#00A6CA" />
         <TopItemsChart data={popularItems} height={300} />
       </Box>
 
@@ -193,7 +193,7 @@ const ItemsTab: React.FC<ItemsTabProps> = ({ dashboardData }) => {
               sx={{
                 display: 'grid',
                 gridTemplateColumns: '44px 1fr 1fr 80px 110px',
-                bgcolor: '#f7f9fa',
+                bgcolor: '#f8fafc',
                 borderRadius: '8px',
                 px: 1.5,
                 py: 1,
@@ -233,7 +233,7 @@ const ItemsTab: React.FC<ItemsTabProps> = ({ dashboardData }) => {
                     borderBottom: '1px solid #e0e0e0',
                     '&:last-child': { borderBottom: 'none' },
                     '&:hover': {
-                      bgcolor: '#f7f9fa',
+                      bgcolor: '#f8fafc',
                       borderRadius: '8px',
                     },
                     transition: 'background-color 0.15s',
@@ -295,8 +295,8 @@ const ItemsTab: React.FC<ItemsTabProps> = ({ dashboardData }) => {
                       sx={{
                         display: 'inline-flex',
                         alignItems: 'center',
-                        bgcolor: 'rgba(25,118,210,0.15)',
-                        color: '#42A5F5',
+                        bgcolor: 'rgba(0,166,202,0.15)',
+                        color: '#00A6CA',
                         fontSize: '0.7rem',
                         height: 20,
                         fontWeight: 600,

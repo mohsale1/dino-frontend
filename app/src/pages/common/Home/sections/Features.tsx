@@ -65,7 +65,7 @@ const FeaturesSection: React.FC = () => {
     <Box
       id="features"
       sx={{
-        py: { xs: 5, sm: 6, md: 8 },
+        py: { xs: 4, sm: 5, md: 6 },
         background: 'linear-gradient(160deg, #f8fafc 0%, #eff6ff 45%, #f0f9ff 75%, #f8fafc 100%)',
         position: 'relative',
         width: '100%',
@@ -156,7 +156,7 @@ const FeaturesSection: React.FC = () => {
         <Box
           sx={{
             textAlign: 'center',
-            mb: { xs: 4, md: 5 },
+            mb: { xs: 3, md: 4 },
             animation: `${fadeInUp} 0.7s ease-out both`,
           }}
         >
@@ -165,9 +165,9 @@ const FeaturesSection: React.FC = () => {
           <Typography
             variant="h2"
             sx={{
-              fontSize: { xs: '1.875rem', sm: '2.5rem', md: '3rem' },
+              fontSize: { xs: '1.625rem', sm: '2rem', md: '2.5rem' },
               fontWeight: 800,
-              mb: 1.5,
+              mb: 1,
               color: '#0f172a',
               letterSpacing: '-0.02em',
               lineHeight: 1.15,
@@ -198,7 +198,7 @@ const FeaturesSection: React.FC = () => {
               fontSize: { xs: '0.9375rem', sm: '1rem', md: '1.0625rem' },
               fontWeight: 400,
               lineHeight: 1.7,
-              px: { xs: 1, sm: 0 },
+              px: { xs: 0.5, sm: 0 },
             }}
           >
             Comprehensive tools designed for modern businesses to streamline operations and delight customers.
@@ -208,7 +208,7 @@ const FeaturesSection: React.FC = () => {
         {/* Feature Cards Grid */}
         <Grid
           container
-          spacing={{ xs: 2, sm: 2.5, md: 2.5 }}
+          spacing={{ xs: 1.5, sm: 2, md: 2 }}
           alignItems="stretch"
         >
           {CORE_FEATURES.map((feature, index) => (

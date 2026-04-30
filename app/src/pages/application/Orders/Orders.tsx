@@ -95,10 +95,12 @@ const OrdersManagementPage: React.FC = () => {
     setLoading(true);
     const { startDate, endDate } = getDateRange(dateFilter, customStartDate, customEndDate);
     const filters: OrderFilters = {
-      venue_id: String(personaId),
+      persona_id: personaId,
       status: statusFilter || undefined,
       page: page + 1,
       page_size: ROWS_PER_PAGE,
+      start_date: startDate,
+      end_date: endDate,
     };
     try {
       const res = await orderService.getOrders(filters);
@@ -121,9 +123,10 @@ const OrdersManagementPage: React.FC = () => {
 
   // ── Handlers ──────────────────────────────────────────────────────────────
   const handleStatusUpdate = async (orderId: string, newStatus: Order['status']) => {
+    if (!personaId) return;
     setActionLoading(orderId);
     try {
-      await orderService.updateOrderStatus(orderId, newStatus);
+      await orderService.updateOrderStatus(orderId, newStatus, personaId);
       showSnackbar(`Order marked as ${newStatus}`, 'success');
       await loadOrders();
     } catch { showSnackbar('Failed to update order status', 'error'); }
@@ -137,11 +140,11 @@ const OrdersManagementPage: React.FC = () => {
   };
 
   const handleConfirmCancel = async () => {
-    if (!orderToCancel) return;
+    if (!orderToCancel || !personaId) return;
     setCancelDialogOpen(false);
     setActionLoading(orderToCancel.id);
     try {
-      await orderService.cancelOrder(orderToCancel.id);
+      await orderService.cancelOrder(orderToCancel.id, personaId);
       showSnackbar('Order cancelled', 'success');
       if (drawerOpen && selectedOrderId === orderToCancel.id) setDrawerOpen(false);
       await loadOrders();
@@ -175,7 +178,7 @@ const OrdersManagementPage: React.FC = () => {
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
-    <Box sx={{ maxWidth: '1440px', margin: '0 auto', minHeight: '100%', display: 'flex', flexDirection: 'column' }}>
+    <Box sx={{ minHeight: '100%', bgcolor: '#f8fafc', display: 'flex', flexDirection: 'column' }}>
 
       {/* Toolbar: title + search + filters + status tabs */}
       <OrdersToolbar
@@ -195,7 +198,7 @@ const OrdersManagementPage: React.FC = () => {
       />
 
       {/* Card grid */}
-      <Box sx={{ flex: 1, px: { xs: 2, sm: 3 }, py: 3 }}>
+      <Box sx={{ flex: 1, px: { xs: 2, sm: 3, md: 4 }, pt: 3, pb: 6 }}>
         {loading ? (
           <Grid container spacing={2}>
             {Array.from({ length: 12 }).map((_, i) => (
@@ -258,6 +261,7 @@ const OrdersManagementPage: React.FC = () => {
         orderId={selectedOrderId}
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
+        personaId={personaId}
         actionLoading={actionLoading}
         onStatusUpdate={handleStatusUpdate}
         onCancel={handleCancelById}

@@ -26,7 +26,7 @@ interface SalesTabProps {
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const CATEGORY_COLORS = [
-  '#1976D2',
+  '#00A6CA',
   '#8b5cf6',
   '#10b981',
   '#f59e0b',
@@ -35,7 +35,7 @@ const CATEGORY_COLORS = [
 ];
 
 const PAYMENT_COLORS = [
-  '#1976D2',
+  '#00A6CA',
   '#10b981',
   '#f59e0b',
   '#8b5cf6',
@@ -148,7 +148,7 @@ const SalesTab: React.FC<SalesTabProps> = ({ dashboardData }) => {
             label="Total Revenue"
             value={formatINR(summary.totalRevenue ?? 0)}
             subtext="All time"
-            accentColor="#1976D2"
+            accentColor="#00A6CA"
           />
         </Grid>
         <Grid item xs={12} sm={4}>
@@ -171,7 +171,7 @@ const SalesTab: React.FC<SalesTabProps> = ({ dashboardData }) => {
 
       {/* Row 2 — Revenue Trend */}
       <Box sx={{ ...CARD_SX, mt: 2.5 }}>
-        <SectionTitle label="Revenue Trend" accentColor="#1976D2" />
+        <SectionTitle label="Revenue Trend" accentColor="#00A6CA" />
         <RevenueChart data={analytics.revenueTrend ?? []} height={280} />
       </Box>
 

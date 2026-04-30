@@ -6,7 +6,6 @@ import {
   Typography,
   Box,
   Chip,
-  Stack,
 } from '@mui/material';
 import { CatalogItem } from '../types';
 import { formatCurrency } from '../../../utils/data';
@@ -40,11 +39,11 @@ export const CatalogItemCard: React.FC<CatalogItemCardProps> = ({
       }}
       onClick={onClick}
     >
-      {item.imageUrls && item.imageUrls.length > 0 && (
+      {!!item.imageUrl && (
         <CardMedia
           component="img"
           height="160"
-          image={item.imageUrls[0]}
+          image={item.imageUrl}
           alt={item.name}
           sx={{ objectFit: 'cover' }}
         />
@@ -84,14 +83,11 @@ export const CatalogItemCard: React.FC<CatalogItemCardProps> = ({
           </Typography>
         )}
 
-        <Stack direction="row" spacing={1} mt={2} flexWrap="wrap">
-          {!item.isAvailable && (
+        {!item.isAvailable && (
+          <Box mt={2}>
             <Chip label="Unavailable" size="small" color="default" />
-          )}
-          {item.tags?.map((tag) => (
-            <Chip key={tag} label={tag} size="small" variant="outlined" />
-          ))}
-        </Stack>
+          </Box>
+        )}
       </CardContent>
     </Card>
   );

@@ -28,12 +28,12 @@ const HOME_NAV = [
   { id: 'faq',          label: 'FAQ'           },
 ];
 
-// ── HomeHeader ─────────────────────────────────────────────────────────────────
 const HomeHeader: React.FC = () => {
   const navigate  = useNavigate();
   const location  = useLocation();
   const theme     = useTheme();
   const isMobile  = useMediaQuery(theme.breakpoints.down('md'));
+  const isLg      = useMediaQuery(theme.breakpoints.up('lg'));
 
   const { user, logout } = useAuth();
 
@@ -88,7 +88,7 @@ const HomeHeader: React.FC = () => {
 
   // ── Desktop nav ───────────────────────────────────────────────────────────────
   const renderDesktopNav = () => (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: { md: 0, lg: 0.5 } }}>
       {HOME_NAV.map((item) => {
         const isActive = activeSection === item.id;
         return (
@@ -101,10 +101,11 @@ const HomeHeader: React.FC = () => {
                 : (isActive ? '#0f172a' : '#64748b'),
               fontWeight: isActive ? 600 : 500,
               textTransform: 'none',
-              px: 2,
-              py: 1,
+              px: { md: 1.25, lg: 2 },
+              py: { md: 0.75, lg: 1 },
               borderRadius: 2,
-              fontSize: '0.9375rem',
+              fontSize: { md: '0.8125rem', lg: '0.9375rem' },
+              minWidth: 0,
               backgroundColor: isActive && !isTransparent
                 ? alpha('#0f172a', 0.06)
                 : 'transparent',
@@ -129,17 +130,17 @@ const HomeHeader: React.FC = () => {
   const renderUserActions = () => {
     if (user) {
       return (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: { md: 1, lg: 1.5 } }}>
           <Button
             variant="outlined"
             onClick={() => navigate('/admin/dashboard')}
             sx={{
               textTransform: 'none',
               fontWeight: 600,
-              px: 2.5,
-              py: 0.875,
+              px: { md: 1.75, lg: 2.5 },
+              py: { md: 0.625, lg: 0.875 },
               borderRadius: 2,
-              fontSize: '0.875rem',
+              fontSize: { md: '0.8125rem', lg: '0.875rem' },
               borderColor: isTransparent ? alpha('#ffffff', 0.45) : '#e0e0e0',
               color: isTransparent ? '#ffffff' : '#475569',
               '&:hover': {
@@ -158,10 +159,10 @@ const HomeHeader: React.FC = () => {
             sx={{
               textTransform: 'none',
               fontWeight: 500,
-              px: 2,
-              py: 0.875,
+              px: { md: 1.5, lg: 2 },
+              py: { md: 0.625, lg: 0.875 },
               borderRadius: 2,
-              fontSize: '0.875rem',
+              fontSize: { md: '0.8125rem', lg: '0.875rem' },
               borderColor: isTransparent ? alpha('#ffffff', 0.3) : '#e0e0e0',
               color: isTransparent ? alpha('#ffffff', 0.75) : '#64748b',
               '&:hover': {
@@ -179,18 +180,19 @@ const HomeHeader: React.FC = () => {
     }
 
     return (
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-        {/* Sign In */}
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: { md: 1, lg: 1.5 } }}>
+        {/* Sign In — hidden on md to save space, shown lg+ */}
         <Button
           variant="text"
           onClick={() => navigate('/login')}
           sx={{
+            display: { md: isLg ? 'inline-flex' : 'none', lg: 'inline-flex' },
             textTransform: 'none',
             fontWeight: 500,
-            px: 2.5,
-            py: 1,
+            px: { md: 1.75, lg: 2.5 },
+            py: { md: 0.625, lg: 1 },
             borderRadius: 2,
-            fontSize: '0.9375rem',
+            fontSize: { md: '0.8125rem', lg: '0.9375rem' },
             color: isTransparent ? alpha('#ffffff', 0.85) : '#64748b',
             '&:hover': {
               backgroundColor: isTransparent ? alpha('#ffffff', 0.1) : alpha('#0f172a', 0.06),
@@ -210,10 +212,10 @@ const HomeHeader: React.FC = () => {
           sx={{
             textTransform: 'none',
             fontWeight: 600,
-            px: 3,
-            py: 1,
+            px: { md: 2, lg: 3 },
+            py: { md: 0.625, lg: 1 },
             borderRadius: 2,
-            fontSize: '0.9375rem',
+            fontSize: { md: '0.8125rem', lg: '0.9375rem' },
             backgroundColor: isTransparent ? '#ffffff' : '#1976D2',
             color: isTransparent ? '#0b1120' : '#ffffff',
             boxShadow: isTransparent
@@ -305,7 +307,7 @@ const HomeHeader: React.FC = () => {
 
             {/* ── Desktop nav + actions ── */}
             {!isMobile && (
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: { md: 1, lg: 2 } }}>
                 {renderDesktopNav()}
                 {renderUserActions()}
               </Box>
@@ -350,5 +352,6 @@ const HomeHeader: React.FC = () => {
     </>
   );
 };
+
 
 export default HomeHeader;

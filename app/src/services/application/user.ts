@@ -67,13 +67,10 @@ export interface PaginatedUsers {
 const BASE = API_ENDPOINTS.APPLICATION.USERS.BASE;
 
 class ApplicationUserService {
-  /**
-   * GET /application/users — paginated list with optional filters.
-   */
   async getUsers(
     page: number = 1,
     pageSize: number = 100,
-    filters?: UserFilters
+    filters?: UserFilters & Record<string, any>
   ): Promise<PaginatedUsers> {
     const params: Record<string, unknown> = { page, page_size: pageSize };
 
@@ -81,11 +78,28 @@ class ApplicationUserService {
       if (filters.search !== undefined && filters.search !== '') params.search = filters.search;
       if (filters.role_id !== undefined) params.role_id = filters.role_id;
       if (filters.is_active !== undefined) params.is_active = filters.is_active;
+      // Pass through any extra filters (workspaceId, organizationId, etc.)
+      const { search, role_id, is_active, ...extra } = filters;
+      Object.assign(params, extra);
     }
 
-    const response = await apiService.get<PaginatedUsers>(BASE, { params });
-    return response.data as PaginatedUsers;
+    const response = await apiService.get<any>(BASE, { params });
+    const raw = response.data as any;
+
+    // Handle flat array response: { success, message, data: [...] }
+    if (Array.isArray(raw)) {
+      return { data: raw, pagination: { page, page_size: pageSize, total: raw.length, total_pages: 1 } };
+    }
+
+    // Handle paginated response: { data: [...], pagination: {...} }
+    if (raw && Array.isArray(raw.data)) {
+      return raw as PaginatedUsers;
+    }
+
+    // Fallback — empty result
+    return { data: [], pagination: { page, page_size: pageSize, total: 0, total_pages: 0 } };
   }
+
 
   /**
    * POST /application/users — create a new user.

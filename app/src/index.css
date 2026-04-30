@@ -164,6 +164,16 @@ body.admin-layout #root {
   overflow: hidden;
 }
 
+/* Home page: hide the scrollbar visually, scroll still works */
+body.home-page::-webkit-scrollbar {
+  display: none;
+}
+
+body.home-page {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
 /* Code blocks */
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;

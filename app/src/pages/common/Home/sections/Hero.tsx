@@ -82,9 +82,9 @@ const slideInNotif = keyframes`
 
 // ─── Static data ──────────────────────────────────────────────────────────────
 const TRUST_PILLS = [
-  { Icon: TrendingUp, label: '3x Faster Orders'    },
   { Icon: Speed,      label: 'Real-time Analytics' },
   { Icon: QrCode2,    label: 'No App Needed'       },
+  { Icon: Security,   label: 'Secure & Reliable'   },
 ];
 
 // Bar chart heights (% of max, 0–100)
@@ -115,7 +115,8 @@ const HeroSection: React.FC = () => {
       id="hero"
       sx={{
         position: 'relative',
-        minHeight: '100vh',
+        height: '100vh',
+        minHeight: 560,
         width: '100%',
         display: 'flex',
         alignItems: 'center',
@@ -188,66 +189,29 @@ const HeroSection: React.FC = () => {
         sx={{
           position: 'relative',
           zIndex: 2,
-          py: { xs: 5, sm: 6, md: 4 },
+          py: { xs: 3, sm: 4, md: 2 },
           px: { xs: 2.5, sm: 3, md: 3 },
           width: '100%',
         }}
       >
-        <Grid container spacing={{ xs: 4, sm: 5, md: 6 }} alignItems="center">
+        <Grid container spacing={{ xs: 3, sm: 4, md: 5 }} alignItems="center">
 
           {/* ── LEFT COLUMN ── */}
           <Grid item xs={12} md={6}>
             <Stack
-              spacing={{ xs: 2.5, sm: 3, md: 3.5 }}
+              spacing={{ xs: 2, sm: 2.5, md: 2.5 }}
               sx={{
                 alignItems: { xs: 'center', md: 'flex-start' },
                 textAlign: { xs: 'center', md: 'left' },
               }}
             >
-              {/* Badge pill */}
-              <Box sx={{ animation: `${fadeUp} 0.55s ease-out 0.1s both`, display: 'inline-flex' }}>
-                <Box
-                  sx={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: 1,
-                    px: 2, py: 0.75,
-                    borderRadius: '100px',
-                    background: `linear-gradient(135deg, ${alpha(BLUE, 0.18)} 0%, ${alpha(BLUE_LT, 0.12)} 100%)`,
-                    border: `1px solid ${alpha(BLUE_LT, 0.35)}`,
-                    backdropFilter: 'blur(8px)',
-                  }}
-                >
-                  <Box
-                    sx={{
-                      width: 7, height: 7,
-                      borderRadius: '50%',
-                      backgroundColor: BLUE_LT,
-                      animation: `${dotPulse} 2s ease-in-out infinite`,
-                    }}
-                  />
-                  <Typography
-                    sx={{
-                      fontSize: '0.8125rem',
-                      fontWeight: 600,
-                      letterSpacing: '0.04em',
-                      textTransform: 'uppercase',
-                      background: `linear-gradient(90deg, ${BLUE_LT} 0%, ${WHITE} 100%)`,
-                      WebkitBackgroundClip: 'text',
-                      WebkitTextFillColor: 'transparent',
-                    }}
-                  >
-                    Smart Business Platform
-                  </Typography>
-                </Box>
-              </Box>
 
               {/* Headline */}
               <Box sx={{ animation: `${fadeUp} 0.6s ease-out 0.22s both` }}>
                 <Typography
                   variant="h1"
                   sx={{
-                    fontSize: { xs: '2rem', sm: '2.875rem', md: '3.5rem', lg: '4rem' },
+                    fontSize: { xs: '1.875rem', sm: '2.5rem', md: '3rem', lg: '3.5rem' },
                     fontWeight: 800,
                     lineHeight: 1.1,
                     letterSpacing: '-0.03em',
@@ -275,10 +239,10 @@ const HeroSection: React.FC = () => {
               {/* Body copy */}
               <Typography
                 sx={{
-                  fontSize: { xs: '0.9375rem', sm: '1rem', md: '1.125rem' },
+                  fontSize: { xs: '0.875rem', sm: '0.9375rem', md: '1rem' },
                   fontWeight: 400,
                   color: alpha(WHITE, 0.6),
-                  lineHeight: 1.8,
+                  lineHeight: 1.65,
                   maxWidth: 500,
                   animation: `${fadeUp} 0.6s ease-out 0.34s both`,
                 }}
@@ -325,25 +289,28 @@ const HeroSection: React.FC = () => {
 
               {/* CTA buttons */}
               <Stack
-                direction={{ xs: 'column', sm: 'row' }}
-                spacing={1.5}
+                direction="row"
+                spacing={{ xs: 1, sm: 1.5 }}
                 sx={{
-                  width: '100%',
-                  alignItems: { xs: 'stretch', sm: 'center' },
+                  alignItems: 'center',
                   justifyContent: { xs: 'center', md: 'flex-start' },
                   animation: `${fadeUp} 0.6s ease-out 0.58s both`,
+                  flexWrap: 'nowrap',
                 }}
               >
                 {user ? (
                   <Button
                     variant="contained"
-                    size="large"
-                    endIcon={<ArrowForward sx={{ fontSize: 18 }} />}
+                    endIcon={<ArrowForward sx={{ fontSize: { xs: 15, sm: 18 } }} />}
                     onClick={() => navigate('/admin/dashboard')}
                     sx={{
-                      px: { xs: 4, sm: 4.5 }, py: { xs: 1.25, sm: 1.5 },
-                      fontSize: '1rem', fontWeight: 600,
-                      borderRadius: '10px', textTransform: 'none',
+                      px: { xs: 2.5, sm: 3.5 },
+                      py: { xs: 1, sm: 1.25 },
+                      fontSize: { xs: '0.8125rem', sm: '0.9375rem' },
+                      fontWeight: 600,
+                      borderRadius: '10px',
+                      textTransform: 'none',
+                      whiteSpace: 'nowrap',
                       background: `linear-gradient(135deg, ${BLUE} 0%, #1565C0 100%)`,
                       color: WHITE,
                       boxShadow: `0 4px 20px ${alpha(BLUE, 0.45)}`,
@@ -361,13 +328,16 @@ const HeroSection: React.FC = () => {
                   <>
                     <Button
                       variant="contained"
-                      size="large"
-                      endIcon={<ArrowForward sx={{ fontSize: 18 }} />}
+                      endIcon={<ArrowForward sx={{ fontSize: { xs: 15, sm: 18 } }} />}
                       onClick={() => navigate('/register')}
                       sx={{
-                        px: { xs: 4, sm: 4.5 }, py: { xs: 1.25, sm: 1.5 },
-                        fontSize: '1rem', fontWeight: 600,
-                        borderRadius: '10px', textTransform: 'none',
+                        px: { xs: 2.5, sm: 3.5 },
+                        py: { xs: 1, sm: 1.25 },
+                        fontSize: { xs: '0.8125rem', sm: '0.9375rem' },
+                        fontWeight: 600,
+                        borderRadius: '10px',
+                        textTransform: 'none',
+                        whiteSpace: 'nowrap',
                         background: `linear-gradient(135deg, ${BLUE} 0%, #1565C0 100%)`,
                         color: WHITE,
                         boxShadow: `0 4px 20px ${alpha(BLUE, 0.45)}`,
@@ -379,17 +349,20 @@ const HeroSection: React.FC = () => {
                         transition: 'all 0.22s ease',
                       }}
                     >
-                      Get Started Free
+                      Get Started
                     </Button>
                     <Button
                       variant="text"
-                      size="large"
-                      startIcon={<PlayArrow sx={{ fontSize: 18 }} />}
+                      startIcon={<PlayArrow sx={{ fontSize: { xs: 15, sm: 18 } }} />}
                       onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })}
                       sx={{
-                        px: { xs: 4, sm: 4.5 }, py: { xs: 1.25, sm: 1.5 },
-                        fontSize: '1rem', fontWeight: 500,
-                        borderRadius: '10px', textTransform: 'none',
+                        px: { xs: 2, sm: 3 },
+                        py: { xs: 1, sm: 1.25 },
+                        fontSize: { xs: '0.8125rem', sm: '0.9375rem' },
+                        fontWeight: 500,
+                        borderRadius: '10px',
+                        textTransform: 'none',
+                        whiteSpace: 'nowrap',
                         color: alpha(WHITE, 0.7),
                         border: `1px solid ${alpha(WHITE, 0.12)}`,
                         '&:hover': {
@@ -400,7 +373,7 @@ const HeroSection: React.FC = () => {
                         transition: 'all 0.2s ease',
                       }}
                     >
-                      See How It Works
+                      How It Works
                     </Button>
                   </>
                 )}
@@ -496,7 +469,7 @@ const HeroSection: React.FC = () => {
                 </Box>
 
                 {/* App body */}
-                <Box sx={{ display: 'flex', height: 340 }}>
+                <Box sx={{ display: 'flex', height: 280 }}>
 
                   {/* ── SIDEBAR ── */}
                   <Box

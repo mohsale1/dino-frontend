@@ -73,7 +73,7 @@ const UseCasesSection: React.FC = () => {
     <Box
       id="use-cases"
       sx={{
-        py: { xs: 8, sm: 10, md: 12 },
+        py: { xs: 4, sm: 5, md: 7 },
         backgroundColor: BG,
         position: 'relative',
         overflow: 'hidden',
@@ -142,18 +142,16 @@ const UseCasesSection: React.FC = () => {
         <Box
           sx={{
             textAlign: 'center',
-            mb: { xs: 5, md: 7 },
+            mb: { xs: 3, md: 5 },
             animation: `${fadeInUp} 0.6s ease-out both`,
           }}
         >
-
-
 
           {/* Heading */}
           <Typography
             variant="h2"
             sx={{
-              fontSize: { xs: '1.875rem', sm: '2.375rem', md: '2.875rem' },
+              fontSize: { xs: '1.5rem', sm: '1.875rem', md: '2.25rem' },
               fontWeight: 800,
               color: WHITE,
               letterSpacing: '-0.02em',
@@ -184,7 +182,7 @@ const UseCasesSection: React.FC = () => {
               color: alpha(WHITE, 0.5),
               fontWeight: 400,
               lineHeight: 1.75,
-              mt: 2.5,
+              mt: 1.5,
               maxWidth: '520px',
               mx: 'auto',
             }}
@@ -194,7 +192,7 @@ const UseCasesSection: React.FC = () => {
         </Box>
 
         {/* Cards grid */}
-        <Grid container spacing={{ xs: 2.5, sm: 3, md: 3.5 }}>
+        <Grid container spacing={{ xs: 2, sm: 2.5, md: 3 }}>
           {USE_CASES.map((useCase, index) => {
             const Icon = useCase.icon;
             return (
@@ -202,7 +200,7 @@ const UseCasesSection: React.FC = () => {
                 <Box
                   sx={{
                     height: '100%',
-                    p: { xs: 3, sm: 3.5, md: 4 },
+                    p: { xs: 2.5, sm: 3, md: 3.5 },
                     borderRadius: '16px',
                     backgroundColor: alpha(WHITE, 0.04),
                     border: `1px solid ${alpha(WHITE, 0.08)}`,

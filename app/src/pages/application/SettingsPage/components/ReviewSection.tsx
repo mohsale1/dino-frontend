@@ -17,6 +17,7 @@ import {
   CheckCircle,
 } from '@mui/icons-material';
 import { apiService } from '../../../../utils/api';
+import { useUserData } from '../../../../contexts/application/UserData';
 
 // ---------------------------------------------------------------------------
 // Brand
@@ -305,11 +306,10 @@ const fieldSx = {
   '& .MuiInputLabel-root.Mui-focused': { color: BRAND.primary },
 };
 
-// ---------------------------------------------------------------------------
-// ReviewSection
-// ---------------------------------------------------------------------------
-
 const ReviewSection: React.FC = () => {
+  const { userData } = useUserData();
+  const personaId = userData?.venue?.personaId ?? null;
+
   const [loadingFetch, setLoadingFetch] = useState(true);
   const [existingReview, setExistingReview] = useState<ReviewData | null>(null);
 
@@ -320,14 +320,22 @@ const ReviewSection: React.FC = () => {
   const [validationError, setValidationError] = useState('');
 
   useEffect(() => {
+    if (!personaId) {
+      setLoadingFetch(false);
+      return;
+    }
+
     let cancelled = false;
 
     const fetchReviews = async () => {
       try {
-        const res = await apiService.get('/application/reviews');
+        const res = await apiService.get('/application/reviews', {
+          params: { persona_id: personaId, page: 1, page_size: 1 },
+        });
         if (cancelled) return;
-        if (res.success && Array.isArray(res.data) && res.data.length > 0) {
-          setExistingReview(res.data[0] as ReviewData);
+        const items = Array.isArray(res.data) ? res.data : [];
+        if (items.length > 0) {
+          setExistingReview(items[0] as ReviewData);
         }
       } catch {
         // Silently fail — treat as no review yet
@@ -338,13 +346,17 @@ const ReviewSection: React.FC = () => {
 
     fetchReviews();
     return () => { cancelled = true; };
-  }, []);
+  }, [personaId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setValidationError('');
     setSubmitError('');
 
+    if (!personaId) {
+      setSubmitError('No active venue selected. Please select a venue first.');
+      return;
+    }
     if (rating === 0) {
       setValidationError('Please select a star rating before submitting.');
       return;
@@ -357,6 +369,7 @@ const ReviewSection: React.FC = () => {
     setSubmitting(true);
     try {
       const res = await apiService.post('/application/reviews', {
+        persona_id: personaId,
         rating,
         comment: comment.trim(),
       });
@@ -388,13 +401,20 @@ const ReviewSection: React.FC = () => {
           subtitle="Your review helps us improve"
         />
 
-        {loadingFetch && <ReviewSkeleton />}
+        {/* No persona selected */}
+        {!personaId && !loadingFetch && (
+          <Alert severity="info" sx={{ borderRadius: 2 }}>
+            No active venue selected. Please select a venue to submit a review.
+          </Alert>
+        )}
 
-        {!loadingFetch && existingReview && (
+        {loadingFetch && personaId && <ReviewSkeleton />}
+
+        {!loadingFetch && personaId && existingReview && (
           <ThankYouCard review={existingReview} />
         )}
 
-        {!loadingFetch && !existingReview && (
+        {!loadingFetch && personaId && !existingReview && (
           <Box
             component="form"
             onSubmit={handleSubmit}
@@ -485,5 +505,6 @@ const ReviewSection: React.FC = () => {
     </Card>
   );
 };
+
 
 export default ReviewSection;

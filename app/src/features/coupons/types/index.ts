@@ -28,3 +28,17 @@ export interface CouponValidationResponse {
   discount_amount: number;
   coupon?: Coupon;
 }
+
+export interface CouponUpdate {
+  code?: string;
+  discount_type?: 'percentage' | 'fixed';
+  discount_value?: number;
+  expiry_date?: string;
+  max_discount_amount?: number;
+  min_order_amount?: number;
+  is_active?: boolean;
+  usage_limit?: number;
+  per_user_limit?: number;
+  description?: string;
+  terms_and_conditions?: string;
+}

@@ -199,7 +199,7 @@ export const LocationsManagementPage: React.FC = () => {
             setSelectedLocation(null);
           }}
           onSave={handleSubmitForm}
-          location={selectedLocation}
+          table={selectedLocation}
         />
       )}
 

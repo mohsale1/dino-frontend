@@ -68,7 +68,7 @@ const RevenueChart: React.FC<Props> = ({ data, height = 300 }) => {
         const ord = params.find((p: any) => p.seriesName === 'Orders');
         return `
           <div style="font-weight:700;font-size:12px;color:#f1f5f9;margin-bottom:6px">${label}</div>
-          ${rev ? `<div style="font-size:11px;color:#42A5F5;margin-bottom:3px">Revenue: ${formatINR(rev.value ?? 0)}</div>` : ''}
+          ${rev ? `<div style="font-size:11px;color:#00A6CA;margin-bottom:3px">Revenue: ${formatINR(rev.value ?? 0)}</div>` : ''}
           ${ord ? `<div style="font-size:11px;color:#f59e0b">Orders: ${ord.value ?? 0}</div>` : ''}
         `;
       },
@@ -79,7 +79,7 @@ const RevenueChart: React.FC<Props> = ({ data, height = 300 }) => {
       itemWidth: 14,
       itemHeight: 8,
       itemGap: 20,
-      textStyle: { color: '#94a3b8', fontSize: 12 },
+      textStyle: { color: '#999999', fontSize: 12 },
       data: ['Revenue', 'Orders'],
     },
     grid: {
@@ -94,7 +94,7 @@ const RevenueChart: React.FC<Props> = ({ data, height = 300 }) => {
       data: labels,
       axisLine: { show: false },
       axisTick: { show: false },
-      axisLabel: { color: '#94a3b8', fontSize: 11 },
+      axisLabel: { color: '#999999', fontSize: 11 },
       splitLine: { show: false },
     },
     yAxis: [
@@ -104,7 +104,7 @@ const RevenueChart: React.FC<Props> = ({ data, height = 300 }) => {
         axisLine: { show: false },
         axisTick: { show: false },
         axisLabel: {
-          color: '#94a3b8',
+          color: '#999999',
           fontSize: 10,
           formatter: formatYAxisRevenue,
         },
@@ -115,7 +115,7 @@ const RevenueChart: React.FC<Props> = ({ data, height = 300 }) => {
         name: '',
         axisLine: { show: false },
         axisTick: { show: false },
-        axisLabel: { color: '#94a3b8', fontSize: 10 },
+        axisLabel: { color: '#999999', fontSize: 10 },
         splitLine: { show: false },
       },
     ],
@@ -128,21 +128,21 @@ const RevenueChart: React.FC<Props> = ({ data, height = 300 }) => {
         smooth: true,
         symbol: 'circle',
         symbolSize: 0,
-        lineStyle: { color: '#1976D2', width: 2.5 },
-        itemStyle: { color: '#1976D2' },
+        lineStyle: { color: '#00A6CA', width: 2.5 },
+        itemStyle: { color: '#00A6CA' },
         areaStyle: {
           color: {
             type: 'linear',
             x: 0, y: 0, x2: 0, y2: 1,
             colorStops: [
-              { offset: 0, color: 'rgba(25,118,210,0.30)' },
-              { offset: 1, color: 'rgba(25,118,210,0.00)' },
+              { offset: 0, color: 'rgba(0,166,202,0.15)' },
+              { offset: 1, color: 'rgba(0,166,202,0.00)' },
             ],
           },
         },
         emphasis: {
           focus: 'series',
-          itemStyle: { color: '#42A5F5', borderColor: '#ffffff', borderWidth: 2, symbolSize: 6 },
+          itemStyle: { color: '#00A6CA', borderColor: '#ffffff', borderWidth: 2, symbolSize: 6 },
         },
       },
       {

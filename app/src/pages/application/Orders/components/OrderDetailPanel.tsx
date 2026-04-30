@@ -18,7 +18,7 @@ import {
   TableRestaurant,
   AccessTime,
   CheckCircle,
-  DoneAll,
+
   DeliveryDining,
   TaskAlt,
   Cancel,
@@ -40,6 +40,7 @@ interface OrderDetailPanelProps {
   orderId: string | null;
   open: boolean;
   onClose: () => void;
+  personaId: number | undefined;
   actionLoading: string | null;
   onStatusUpdate: (orderId: string, status: Order['status']) => void;
   onCancel: (orderId: string, orderNumber: string) => void;
@@ -56,6 +57,7 @@ const OrderDetailPanel: React.FC<OrderDetailPanelProps> = ({
   orderId,
   open,
   onClose,
+  personaId,
   actionLoading,
   onStatusUpdate,
   onCancel,
@@ -67,7 +69,7 @@ const OrderDetailPanel: React.FC<OrderDetailPanelProps> = ({
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!open || !orderId) {
+    if (!open || !orderId || !personaId) {
       setDetail(null);
       return;
     }
@@ -77,7 +79,7 @@ const OrderDetailPanel: React.FC<OrderDetailPanelProps> = ({
     setDetail(null);
 
     orderService
-      .getOrder(orderId)
+      .getOrder(orderId, personaId)
       .then((res) => {
         if (!cancelled) setDetail(res.data ?? null);
       })
@@ -91,7 +93,7 @@ const OrderDetailPanel: React.FC<OrderDetailPanelProps> = ({
     return () => {
       cancelled = true;
     };
-  }, [orderId, open]);
+  }, [orderId, open, personaId]);
 
   const flow = detail ? STATUS_FLOW[detail.status] ?? null : null;
   const nextStatus = flow?.next ?? null;

@@ -14,7 +14,6 @@ import {
   Delete,
   Visibility,
   VisibilityOff,
-  Schedule,
   Inventory,
 } from '@mui/icons-material';
 import { formatCurrency } from '../../../utils/data';
@@ -24,11 +23,9 @@ export interface CatalogItemCardAdminProps {
   item: CatalogItem;
   categoryName?: string;
   onToggleAvailability?: (itemId: string) => void;
-  onImageUpload?: (itemId: string, file: File) => void;
   onEdit?: (item: CatalogItem) => void;
   onDelete?: (itemId: string) => void;
   showActions?: boolean;
-  showImageUpload?: boolean;
 }
 
 export const CatalogItemCardAdmin: React.FC<CatalogItemCardAdminProps> = ({
@@ -66,10 +63,10 @@ export const CatalogItemCardAdmin: React.FC<CatalogItemCardAdminProps> = ({
           backgroundColor: '#f8fafc',
         }}
       >
-        {item.imageUrls && item.imageUrls.length > 0 ? (
+        {!!item.imageUrl ? (
           <CardMedia
             component="img"
-            image={item.imageUrls[0]}
+            image={item.imageUrl}
             alt={item.name}
             sx={{
               height: '100%',
@@ -102,28 +99,6 @@ export const CatalogItemCardAdmin: React.FC<CatalogItemCardAdminProps> = ({
           </Box>
         )}
 
-        {item.preparationTime && (
-          <Box
-            sx={{
-              position: 'absolute',
-              bottom: 8,
-              left: 8,
-              backgroundColor: 'rgba(0,0,0,0.7)',
-              color: 'white',
-              px: 1,
-              py: 0.5,
-              borderRadius: 0.5,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 0.5,
-            }}
-          >
-            <Schedule sx={{ fontSize: 12 }} />
-            <Typography variant="caption" sx={{ fontSize: '0.7rem' }}>
-              {item.preparationTime} min
-            </Typography>
-          </Box>
-        )}
       </Box>
 
       {/* Content Section */}

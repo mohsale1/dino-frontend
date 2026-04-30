@@ -52,10 +52,13 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
               color: 'text.secondary',
             }}
           >
-            {category.icon ? (
-              <Box component="span" sx={{ fontSize: 20 }}>
-                {category.icon}
-              </Box>
+            {category.imageUrl ? (
+              <Box
+                component="img"
+                src={category.imageUrl}
+                alt={category.name}
+                sx={{ width: 24, height: 24, objectFit: 'cover', borderRadius: '4px' }}
+              />
             ) : (
               <CategoryIcon fontSize="small" />
             )}

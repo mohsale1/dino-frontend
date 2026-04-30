@@ -44,8 +44,8 @@ const RegistrationCodeStep: React.FC<RegistrationCodeStepProps> = ({
       >
         <PersonSearch sx={{ color: '#1976D2', fontSize: 20, mt: 0.1, flexShrink: 0 }} />
         <Typography variant="body2" sx={{ color: '#1e3a5f', lineHeight: 1.6 }}>
-          Enter the email address of the agent who referred you. We will verify
-          their account and link your registration to them.
+          If you were referred by an agent, enter their email address below — we will verify
+          their account and link your registration to them. This step is optional.
         </Typography>
       </Box>
 
@@ -64,8 +64,7 @@ const RegistrationCodeStep: React.FC<RegistrationCodeStepProps> = ({
           }
         }}
         error={!!errors.referralEmail}
-        helperText={errors.referralEmail || 'Email address provided by your agent'}
-        required
+        helperText={errors.referralEmail || 'Optional — enter if you were referred by an agent'}
         placeholder="agent@example.com"
         autoComplete="off"
         sx={{ mb: 3, ...fieldSx }}

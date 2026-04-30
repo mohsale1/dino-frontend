@@ -38,20 +38,20 @@ import { apiService } from '../../../utils/api';
 const fieldSx = {
   '& .MuiOutlinedInput-root': {
     borderRadius: 2,
-    bgcolor: '#F7F9FA',
+    bgcolor: '#f8fafc',
     '& fieldset': { borderColor: '#e0e0e0' },
-    '&:hover fieldset': { borderColor: 'rgba(25,118,210,0.4)' },
-    '&.Mui-focused fieldset': { borderColor: '#1976D2' },
+    '&:hover fieldset': { borderColor: 'rgba(0,166,202,0.4)' },
+    '&.Mui-focused fieldset': { borderColor: '#00A6CA' },
   },
-  '& .MuiInputLabel-root.Mui-focused': { color: '#1976D2' },
+  '& .MuiInputLabel-root.Mui-focused': { color: '#00A6CA' },
 };
 
 const selectSx = {
   borderRadius: 2,
-  bgcolor: '#F7F9FA',
+  bgcolor: '#f8fafc',
   '& fieldset': { borderColor: '#e0e0e0' },
-  '&:hover fieldset': { borderColor: 'rgba(25,118,210,0.4)' },
-  '&.Mui-focused fieldset': { borderColor: '#1976D2' },
+  '&:hover fieldset': { borderColor: 'rgba(0,166,202,0.4)' },
+  '&.Mui-focused fieldset': { borderColor: '#00A6CA' },
 };
 
 // ─── Interfaces ──────────────────────────────────────────────────────────────
@@ -248,16 +248,16 @@ const UserFormDialog: React.FC<UserFormDialogProps> = ({
                 width: 40,
                 height: 40,
                 borderRadius: 2,
-                bgcolor: 'rgba(25,118,210,0.08)',
-                border: '1px solid rgba(25,118,210,0.2)',
+                bgcolor: 'rgba(0,166,202,0.08)',
+                border: '1px solid rgba(0,166,202,0.2)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
               }}
             >
               {editingUser
-                ? <Edit sx={{ fontSize: 20, color: '#1976D2' }} />
-                : <PersonAddAltOutlined sx={{ fontSize: 20, color: '#1976D2' }} />
+                ? <Edit sx={{ fontSize: 20, color: '#00A6CA' }} />
+                : <PersonAddAltOutlined sx={{ fontSize: 20, color: '#00A6CA' }} />
               }
             </Box>
             <Box>
@@ -410,7 +410,7 @@ const UserFormDialog: React.FC<UserFormDialogProps> = ({
           />
 
           {/* Role */}
-          <FormControl fullWidth size="small" required sx={{ '& .MuiInputLabel-root.Mui-focused': { color: '#1976D2' } }}>
+          <FormControl fullWidth size="small" required sx={{ '& .MuiInputLabel-root.Mui-focused': { color: '#00A6CA' } }}>
             <InputLabel>Role</InputLabel>
             <Select
               label="Role"
@@ -457,7 +457,7 @@ const UserFormDialog: React.FC<UserFormDialogProps> = ({
           </FormControl>
 
           {/* Venue */}
-          <FormControl fullWidth size="small" sx={{ '& .MuiInputLabel-root.Mui-focused': { color: '#1976D2' } }}>
+          <FormControl fullWidth size="small" sx={{ '& .MuiInputLabel-root.Mui-focused': { color: '#00A6CA' } }}>
             <InputLabel>Persona</InputLabel>
             <Select
               label="Persona"
@@ -527,8 +527,8 @@ const UserFormDialog: React.FC<UserFormDialogProps> = ({
             fontWeight: 700,
             borderRadius: 2,
             px: 3,
-            bgcolor: '#1976D2',
-            '&:hover': { bgcolor: '#1565C0' },
+            bgcolor: '#00A6CA',
+            '&:hover': { bgcolor: '#005F8D' },
             '&.Mui-disabled': { bgcolor: '#e0e0e0' },
           }}
         >

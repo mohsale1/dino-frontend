@@ -54,6 +54,9 @@ export const UserDataProvider: React.FC<UserDataProviderProps> = ({ children }) 
   const [initialized, setInitialized] = useState(false);
   const loadingRef = useRef(false);
 
+  // Raw personas list cached so switchPersona can update venue instantly without a network call
+  const rawPersonasRef = useRef<any[]>([]);
+
   const [activePersonaId, setActivePersonaId] = useState<number | null>(() => {
     const stored = localStorage.getItem('active_persona_id');
     return stored ? Number(stored) : null;
@@ -95,6 +98,8 @@ export const UserDataProvider: React.FC<UserDataProviderProps> = ({ children }) 
     setLoading(true);
     try {
       const data = await userDataService.getUserData();
+      // Cache raw personas for instant switching
+      if (data) rawPersonasRef.current = (data as any)._rawPersonas ?? [];
       setUserData(data);
       setInitialized(true);
     } catch (error: any) {
@@ -123,6 +128,7 @@ export const UserDataProvider: React.FC<UserDataProviderProps> = ({ children }) 
     setLoading(true);
     try {
       const data = await userDataService.refreshUserData();
+      if (data) rawPersonasRef.current = (data as any)._rawPersonas ?? rawPersonasRef.current;
       setUserData(data);
     } catch {
       // silently ignore — stale data stays in place
@@ -143,16 +149,23 @@ export const UserDataProvider: React.FC<UserDataProviderProps> = ({ children }) 
     }
   }, [userData, activePersonaId]);
 
-  // Persona switching — persists selection and refreshes user data
+  // Persona switching — instant UI update + background refresh
   const switchPersona = async (personaId: number): Promise<void> => {
     localStorage.setItem('active_persona_id', String(personaId));
     setActivePersonaId(personaId);
+
+    // Instant update: pick the matching persona from the cached raw list
+    // and update userData.venue without waiting for a network call
+    const rawPersonas = rawPersonasRef.current;
+    const match = rawPersonas.find((p: any) => Number(p.id) === personaId);
+    if (match && userData) {
+      const normalizedVenue = userDataService.normalizeVenuePublic(match);
+      setUserData({ ...userData, venue: normalizedVenue });
+    }
+
+    // Background refresh to sync any server-side changes
     await refreshUserData();
   };
-
-  // SECURITY FIX: Venue switching functionality removed
-  // Reason: It allowed superadmin to access all venue data, violating security principles
-  // Users should only access their assigned venue
 
   // Convenience methods
   const hasPermission = (permission: string): boolean => {
@@ -162,9 +175,6 @@ export const UserDataProvider: React.FC<UserDataProviderProps> = ({ children }) 
   const getUserRole = (): string => {
     return userDataService.getUserRole(userData);
   };
-
-  // NOTE: isOwner() and isManager() have been intentionally removed from this context.
-  // Role-based access checks must use hasBackendPermission() from the Auth context instead.
 
   const isUser = (): boolean => {
     return userDataService.isUser(userData);
@@ -195,12 +205,12 @@ export const UserDataProvider: React.FC<UserDataProviderProps> = ({ children }) 
   const getUser = () => userData?.user || null;
   const getVenue = () => userData?.venue || null;
   const getWorkspace = () => userData?.workspace || null;
-  const getStatistics = () => null; // Simplified - no statistics in new structure
-  const getMenuItems = () => []; // Simplified - no menu items in new structure
-  const getTables = () => []; // Simplified - no tables in new structure
-  const getRecentOrders = () => []; // Simplified - no recent orders in new structure
-  const getUsers = () => []; // Simplified - no users in new structure
-  const getPermissions = () => null; // Simplified - no permissions in new structure
+  const getStatistics = () => null;
+  const getMenuItems = () => [];
+  const getTables = () => [];
+  const getRecentOrders = () => [];
+  const getUsers = () => [];
+  const getPermissions = () => null;
 
   const value: UserDataContextType = {
     userData,
@@ -233,6 +243,7 @@ export const UserDataProvider: React.FC<UserDataProviderProps> = ({ children }) 
     </UserDataContext.Provider>
   );
 };
+
 
 export const useUserData = (): UserDataContextType => {
   const context = useContext(UserDataContext);

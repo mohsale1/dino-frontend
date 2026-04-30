@@ -78,7 +78,7 @@ function LoadingSkeleton() {
   return (
     <Box
       sx={{
-        px: { xs: 2, sm: '32px' },
+        px: { xs: 3, sm: 4, md: 5 },
         pt: 3,
         pb: 6,
         display: 'flex',
@@ -136,9 +136,7 @@ const TabbedDashboard: React.FC<TabbedDashboardProps> = ({
         sx={{
           bgcolor: '#ffffff',
           borderBottom: '1px solid #e0e0e0',
-          borderTop: '1px solid #e0e0e0',
-          mt: 3,
-          px: { xs: 2, sm: '32px' },
+          px: { xs: 3, sm: 4, md: 5 },
         }}
       >
         <Tabs
@@ -150,7 +148,7 @@ const TabbedDashboard: React.FC<TabbedDashboardProps> = ({
           sx={{
             minHeight: 48,
             '& .MuiTabs-indicator': {
-              backgroundColor: '#1976D2',
+              backgroundColor: '#00A6CA',
               height: 2,
               borderRadius: '2px 2px 0 0',
             },
@@ -171,7 +169,7 @@ const TabbedDashboard: React.FC<TabbedDashboardProps> = ({
                 fontWeight: 600,
               },
               '&:hover': {
-                bgcolor: '#f7f9fa',
+                bgcolor: '#f8fafc',
                 color: '#1C1C1E',
               },
             },

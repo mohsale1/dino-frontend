@@ -44,6 +44,7 @@ import {
   Check as CheckIcon,
 } from '@mui/icons-material';
 import { locationService } from '../../../features/locations/services/locationService';
+import { useUserData } from '../../../contexts/application/UserData';
 import { APP_CONFIG } from '../../../constants/app';
 import type { ServiceLocation, LocationStatus } from '../../../features/locations/types';
 
@@ -387,6 +388,8 @@ const QRCodeDialog: React.FC<QRCodeDialogProps> = ({
 }) => {
   const theme      = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
+  const { userData } = useUserData();
+  const personaId = userData?.venue?.personaId;
 
   const [qrUrl,      setQrUrl]      = useState<string | null>(null);
   const [menuUrl,    setMenuUrl]    = useState<string>('');
@@ -402,12 +405,12 @@ const QRCodeDialog: React.FC<QRCodeDialogProps> = ({
   // ── Fetch QR ──────────────────────────────────────────────────────────────────
 
   const fetchQRCode = useCallback(async () => {
-    if (!location) return;
+    if (!location || !personaId) return;
     setLoading(true);
     setError(null);
     setQrUrl(null);
     try {
-      const response = await locationService.getQRCode(location.id);
+      const response = await locationService.getQRCode(location.id, personaId);
       const url = response.qr_code_url ?? response.qr_code;
       setQrUrl(url);
       setMenuUrl(url);
@@ -416,7 +419,7 @@ const QRCodeDialog: React.FC<QRCodeDialogProps> = ({
     } finally {
       setLoading(false);
     }
-  }, [location]);
+  }, [location, personaId]);
 
   useEffect(() => {
     if (open && location) {

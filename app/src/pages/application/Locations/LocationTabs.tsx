@@ -70,7 +70,7 @@ const EmptyState: React.FC<{ icon: React.ReactElement; title: string; subtitle: 
         width: { xs: 56, sm: 64 },
         height: { xs: 56, sm: 64 },
         borderRadius: 2.5,
-        bgcolor: '#f7f9fa',
+        bgcolor: '#f8fafc',
         border: '1px solid #e0e0e0',
         display: 'flex',
         alignItems: 'center',
@@ -168,7 +168,7 @@ const LocationTabs: React.FC<LocationTabsProps> = ({
         sx={{
           borderBottom: '1px solid #e0e0e0',
           bgcolor: '#ffffff',
-          px: { xs: 2, sm: 3 },
+          px: 0,
         }}
       >
         <Tabs
@@ -179,7 +179,7 @@ const LocationTabs: React.FC<LocationTabsProps> = ({
             '& .MuiTabs-indicator': {
               height: 2,
               borderRadius: '2px 2px 0 0',
-              bgcolor: '#1976D2',
+              bgcolor: '#00A6CA',
             },
             '& .MuiTab-root': {
               minHeight: { xs: 40, sm: 44 },
@@ -212,7 +212,7 @@ const LocationTabs: React.FC<LocationTabsProps> = ({
           {/* Toolbar */}
           <Box
             sx={{
-              px: { xs: 2, sm: 3 },
+              px: 2,
               py: 1.5,
               display: 'flex',
               alignItems: 'center',
@@ -220,7 +220,7 @@ const LocationTabs: React.FC<LocationTabsProps> = ({
               flexWrap: 'wrap',
               gap: 1,
               borderBottom: '1px solid #e0e0e0',
-              bgcolor: '#FCFCFD',
+              bgcolor: '#f8fafc',
             }}
           >
             <Typography
@@ -247,10 +247,10 @@ const LocationTabs: React.FC<LocationTabsProps> = ({
                   textTransform: 'none',
                   borderRadius: 1.5,
                   color: '#1C1C1E',
-                  borderColor: '#cbd5e1',
+                  borderColor: '#e0e0e0',
                   bgcolor: '#ffffff',
                   '&:hover': {
-                    borderColor: '#1976D2',
+                    borderColor: '#00A6CA',
                     bgcolor: '#f8fafc',
                   },
                 }}
@@ -261,7 +261,7 @@ const LocationTabs: React.FC<LocationTabsProps> = ({
           </Box>
 
           {/* Grid */}
-          <Box sx={{ p: { xs: 1.5, sm: 2.5 }, bgcolor: '#FCFCFD' }}>
+          <Box sx={{ p: 2, bgcolor: '#f8fafc' }}>
             {filteredLocations.length === 0 ? (
               <EmptyState
                 icon={<QrCodeIcon />}
@@ -293,7 +293,7 @@ const LocationTabs: React.FC<LocationTabsProps> = ({
 
       {/* ── Areas tab ───────────────────────────────────────────────────────── */}
       {activeTab === 1 && (
-        <Box sx={{ p: { xs: 1.5, sm: 2.5 }, bgcolor: '#FCFCFD' }}>
+        <Box sx={{ p: 2, bgcolor: '#f8fafc' }}>
           {filteredAreas.length === 0 ? (
             <EmptyState
               icon={<LocationOnIcon />}

@@ -72,7 +72,7 @@ const TestimonialsSection: React.FC = () => {
       <Box
         id="testimonials"
         sx={{
-          py: { xs: 6, sm: 8, md: 10 },
+          py: { xs: 4, sm: 5, md: 7 },
           background: `linear-gradient(160deg, #f8fafc 0%, #eef2ff 40%, #f0fdf4 70%, #f8fafc 100%)`,
           display: 'flex',
           justifyContent: 'center',
@@ -94,7 +94,7 @@ const TestimonialsSection: React.FC = () => {
     <Box
       id="testimonials"
       sx={{
-        py: { xs: 6, sm: 8, md: 10 },
+        py: { xs: 4, sm: 5, md: 7 },
         background: `linear-gradient(160deg, #f8fafc 0%, #eef2ff 40%, #f0fdf4 70%, #f8fafc 100%)`,
         position: 'relative',
         width: '100%',
@@ -206,7 +206,7 @@ const TestimonialsSection: React.FC = () => {
         <Box
           sx={{
             textAlign: 'center',
-            mb: { xs: 4, md: 6 },
+            mb: { xs: 3, md: 4 },
             animation: `${fadeInUp} 0.8s ease-out`,
           }}
         >
@@ -218,7 +218,7 @@ const TestimonialsSection: React.FC = () => {
               gap: 1,
               px: 2,
               py: 0.75,
-              mb: 3,
+              mb: 2,
               borderRadius: '999px',
               background: `linear-gradient(135deg, ${alpha('#1976D2', 0.1)} 0%, ${alpha('#10b981', 0.08)} 100%)`,
               border: `1px solid ${alpha('#1976D2', 0.18)}`,
@@ -250,7 +250,7 @@ const TestimonialsSection: React.FC = () => {
           <Typography
             variant="h2"
             sx={{
-              fontSize: { xs: '2rem', sm: '2.75rem', md: '3.25rem' },
+              fontSize: { xs: '1.625rem', sm: '2.125rem', md: '2.625rem' },
               fontWeight: 800,
               mb: 2.5,
               color: '#0f172a',
@@ -279,11 +279,11 @@ const TestimonialsSection: React.FC = () => {
               color: '#64748b',
               maxWidth: 700,
               mx: 'auto',
-              fontSize: { xs: '1rem', sm: '1.0625rem', md: '1.125rem' },
+              fontSize: { xs: '0.9375rem', sm: '1rem', md: '1.0625rem' },
               fontWeight: 400,
               lineHeight: 1.7,
               px: { xs: 2, sm: 0 },
-              mt: 3,
+              mt: 1.5,
             }}
           >
             See what our customers have to say about their experience with Dino
@@ -291,7 +291,7 @@ const TestimonialsSection: React.FC = () => {
         </Box>
 
         {/* Testimonial Cards */}
-        <Grid container spacing={{ xs: 3, sm: 3, md: 4 }}>
+        <Grid container spacing={{ xs: 2, sm: 2.5, md: 3 }}>
           {testimonials.slice(0, 3).map((testimonial, index) => (
             <Grid
               item

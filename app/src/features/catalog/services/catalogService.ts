@@ -17,96 +17,94 @@ import type {
 
 // ── DTOs sent to the backend ──────────────────────────────────────────────────
 
-interface MenuCategoryCreateDTO {
+interface CategoryCreateDTO {
   name: string;
   description?: string;
-  venue_id?: string;
-  is_active?: boolean;
-  display_order?: number;
-  icon?: string;
-  color?: string;
+  persona_id: number;
+  image_url?: string;
+  is_available?: boolean;
 }
 
-interface MenuCategoryUpdateDTO {
+interface CategoryUpdateDTO {
   name?: string;
   description?: string;
-  is_active?: boolean;
-  display_order?: number;
-  icon?: string;
-  color?: string;
+  image_url?: string;
+  is_available?: boolean;
 }
 
 interface MenuItemCreateDTO {
+  persona_id: number;
   name: string;
   description?: string;
   price: number;
-  category_id: string;
-  venue_id?: string;
+  category_id: number;
+  image_url?: string;
   is_available?: boolean;
   is_vegetarian?: boolean;
-  is_vegan?: boolean;
-  is_gluten_free?: boolean;
-  spice_level?: string;
-  preparation_time?: number;
-  tags?: string[];
-  metadata?: Record<string, unknown>;
 }
 
 interface MenuItemUpdateDTO {
   name?: string;
   description?: string;
   price?: number;
-  category_id?: string;
+  category_id?: number;
+  image_url?: string;
   is_available?: boolean;
   is_vegetarian?: boolean;
-  is_vegan?: boolean;
-  is_gluten_free?: boolean;
-  spice_level?: string;
-  preparation_time?: number;
-  tags?: string[];
-  metadata?: Record<string, unknown>;
 }
 
 // ── Query param shapes ────────────────────────────────────────────────────────
 
 interface CategoryQueryParams {
-  venue_id?: string;
-  is_active?: boolean;
+  persona_id: number;
+  is_available?: boolean;
+  page?: number;
+  page_size?: number;
 }
 
 interface ItemQueryParams {
-  venue_id?: string;
-  category_id?: string;
+  persona_id: number;
+  category_id?: number;
   is_available?: boolean;
-  is_vegetarian?: boolean;
-  spice_level?: string;
+  search?: string;
+  page?: number;
+  page_size?: number;
 }
-
-// ── Normalizers ───────────────────────────────────────────────────────────────
 
 function normalizeCategory(raw: Record<string, unknown>): Category {
   return {
-    ...(raw as unknown as Category),
-    isActive: (raw.is_active ?? raw.isActive ?? true) as boolean,
-    workspaceId: (raw.venue_id ?? raw.workspaceId ?? '') as string,
-    displayOrder: (raw.display_order ?? raw.displayOrder) as number | undefined,
+    id: String(raw.id),
+    name: raw.name as string,
+    description: raw.description as string | undefined,
+    imageUrl: (raw.imageUrl ?? raw.image_url) as string | undefined,
+    isAvailable: ((raw.isAvailable ?? raw.is_available) ?? true) as boolean,
+    isActive: ((raw.isActive ?? raw.is_active) ?? true) as boolean,
+    workspaceId: (raw.workspaceId ?? raw.workspace_id) as number,
+    personaId: (raw.personaId ?? raw.persona_id) as number,
+    createdAt: (raw.createdAt ?? raw.created_at) as string | undefined,
+    updatedAt: (raw.updatedAt ?? raw.updated_at) as string | undefined,
   };
 }
 
+
 function normalizeItem(raw: Record<string, unknown>): CatalogItem {
   return {
-    ...(raw as unknown as CatalogItem),
-    basePrice: Number(raw.price ?? raw.base_price ?? raw.basePrice ?? 0),
-    categoryId: (raw.category_id ?? raw.categoryId ?? '') as string,
-    workspaceId: (raw.venue_id ?? raw.workspaceId ?? '') as string,
-    isAvailable: (raw.is_available ?? raw.isAvailable ?? true) as boolean,
-    isVegetarian: (raw.is_vegetarian ?? raw.isVegetarian) as boolean | undefined,
-    isVegan: (raw.is_vegan ?? raw.isVegan) as boolean | undefined,
-    isGlutenFree: (raw.is_gluten_free ?? raw.isGlutenFree) as boolean | undefined,
-    spiceLevel: (raw.spice_level ?? raw.spiceLevel) as CatalogItem['spiceLevel'],
-    preparationTime: (raw.preparation_time ?? raw.preparationTime) as number | undefined,
+    id: String(raw.id),
+    name: raw.name as string,
+    description: raw.description as string | undefined,
+    basePrice: (raw.price ?? raw.basePrice) as number,
+    categoryId: String(raw.categoryId ?? raw.category_id),
+    workspaceId: (raw.workspaceId ?? raw.workspace_id) as number,
+    personaId: (raw.personaId ?? raw.persona_id) as number,
+    imageUrl: (raw.imageUrl ?? raw.image_url) as string | undefined,
+    isAvailable: ((raw.isAvailable ?? raw.is_available) ?? true) as boolean,
+    isVegetarian: (raw.isVegetarian ?? raw.is_vegetarian) as boolean | undefined,
+    isActive: ((raw.isActive ?? raw.is_active) ?? true) as boolean,
+    createdAt: (raw.createdAt ?? raw.created_at) as string | undefined,
+    updatedAt: (raw.updatedAt ?? raw.updated_at) as string | undefined,
   };
 }
+
 
 // ── Service ───────────────────────────────────────────────────────────────────
 
@@ -116,171 +114,141 @@ class CatalogService {
 
   // ── Categories ──────────────────────────────────────────────────────────────
 
-  async getCategories(params?: CategoryQueryParams): Promise<Category[]> {
-    const response = await apiService.get<unknown[]>(this.categoriesBase, { params });
-    const raw: unknown[] = (response.data as unknown[]) ?? [];
+  async getCategories(params: CategoryQueryParams): Promise<Category[]> {
+    const response = await apiService.get<unknown>(this.categoriesBase, { params });
+    const body = response as unknown as { data: unknown[] };
+    const raw: unknown[] = Array.isArray(body.data) ? body.data : [];
     return raw.map((r) => normalizeCategory(r as Record<string, unknown>));
   }
 
-  async getCategory(id: string): Promise<Category> {
-    const response = await apiService.get<unknown>(API_ENDPOINTS.APPLICATION.CATEGORIES.BY_ID(id));
-    return normalizeCategory(response.data as Record<string, unknown>);
+  async getCategory(id: string, personaId: number): Promise<Category> {
+    const response = await apiService.get<unknown>(
+      API_ENDPOINTS.APPLICATION.CATEGORIES.BY_ID(id),
+      { params: { persona_id: personaId } }
+    );
+    const body = response as unknown as { data: Record<string, unknown> };
+    return normalizeCategory(body.data);
   }
 
   async createCategory(data: CategoryCreate): Promise<Category> {
-    const payload: MenuCategoryCreateDTO = {
+    const payload: CategoryCreateDTO = {
       name: data.name,
       description: data.description,
-      venue_id: data.workspaceId,
-      is_active: data.isActive ?? true,
-      display_order: data.displayOrder,
-      icon: data.icon,
-      color: data.color,
+      persona_id: data.personaId,
+      image_url: data.imageUrl,
+      is_available: data.isAvailable ?? true,
     };
     const response = await apiService.post<unknown>(this.categoriesBase, payload);
-    return normalizeCategory(response.data as Record<string, unknown>);
+    const body = response as unknown as { data: Record<string, unknown> };
+    return normalizeCategory(body.data);
   }
 
-  async updateCategory(id: string, data: CategoryUpdate): Promise<Category> {
-    const payload: MenuCategoryUpdateDTO = {};
+  async updateCategory(id: string, personaId: number, data: CategoryUpdate): Promise<void> {
+    const payload: CategoryUpdateDTO = {};
     if (data.name !== undefined) payload.name = data.name;
     if (data.description !== undefined) payload.description = data.description;
-    if (data.isActive !== undefined) payload.is_active = data.isActive;
-    if (data.displayOrder !== undefined) payload.display_order = data.displayOrder;
-    if (data.icon !== undefined) payload.icon = data.icon;
-    if (data.color !== undefined) payload.color = data.color;
+    if (data.imageUrl !== undefined) payload.image_url = data.imageUrl;
+    if (data.isAvailable !== undefined) payload.is_available = data.isAvailable;
 
-    const response = await apiService.put<unknown>(API_ENDPOINTS.APPLICATION.CATEGORIES.BY_ID(id), payload);
-    return normalizeCategory(response.data as Record<string, unknown>);
+    await apiService.put<unknown>(
+      API_ENDPOINTS.APPLICATION.CATEGORIES.BY_ID(id),
+      payload,
+      { params: { persona_id: personaId } }
+    );
   }
 
-  async deleteCategory(id: string, force: boolean = false): Promise<void> {
+  async deleteCategory(id: string, personaId: number): Promise<void> {
     await apiService.delete(API_ENDPOINTS.APPLICATION.CATEGORIES.BY_ID(id), {
-      params: force ? { force: true } : undefined,
+      params: { persona_id: personaId },
     });
   }
 
-  async restoreCategory(id: string): Promise<Category> {
-    const response = await apiService.post<unknown>(API_ENDPOINTS.APPLICATION.CATEGORIES.RESTORE(id), null);
-    return normalizeCategory(response.data as Record<string, unknown>);
-  }
-
-  async uploadCategoryImage(id: string, file: File): Promise<string> {
-    const formData = new FormData();
-    formData.append('image', file);
-    const response = await apiService.post<unknown>(
-      `${API_ENDPOINTS.APPLICATION.CATEGORIES.BY_ID(id)}/image`,
-      formData
-    );
-    const data = response.data as Record<string, unknown>;
-    return (data?.image_url ?? data?.imageUrl ?? '') as string;
-  }
-
-  async toggleCategoryItemsAvailability(categoryId: string, isAvailable: boolean): Promise<void> {
-    await apiService.put(
-      API_ENDPOINTS.APPLICATION.CATEGORIES.AVAILABILITY(categoryId),
+  async restoreCategory(id: string, personaId: number): Promise<void> {
+    await apiService.post<unknown>(
+      API_ENDPOINTS.APPLICATION.CATEGORIES.RESTORE(id),
       null,
-      { params: { is_available: isAvailable } }
+      { params: { persona_id: personaId } }
     );
   }
 
   // ── Items ───────────────────────────────────────────────────────────────────
 
-  async getItems(params?: ItemQueryParams): Promise<CatalogItem[]> {
-    const response = await apiService.get<unknown[]>(this.itemsBase, { params });
-    const raw: unknown[] = (response.data as unknown[]) ?? [];
+  async getItems(params: ItemQueryParams): Promise<CatalogItem[]> {
+    const response = await apiService.get<unknown>(this.itemsBase, { params });
+    const body = response as unknown as { data: unknown[] };
+    const raw: unknown[] = Array.isArray(body.data) ? body.data : [];
     return raw.map((r) => normalizeItem(r as Record<string, unknown>));
   }
 
-  async getItem(id: string): Promise<CatalogItem> {
-    const response = await apiService.get<unknown>(API_ENDPOINTS.APPLICATION.ITEMS.BY_ID(id));
-    return normalizeItem(response.data as Record<string, unknown>);
+  async getItem(id: string, personaId: number): Promise<CatalogItem> {
+    const response = await apiService.get<unknown>(
+      API_ENDPOINTS.APPLICATION.ITEMS.BY_ID(id),
+      { params: { persona_id: personaId } }
+    );
+    const body = response as unknown as { data: Record<string, unknown> };
+    return normalizeItem(body.data);
   }
 
   async createItem(data: CatalogItemCreate): Promise<CatalogItem> {
     const payload: MenuItemCreateDTO = {
+      persona_id: data.personaId,
       name: data.name,
-      description: data.description,
       price: data.basePrice,
-      category_id: data.categoryId,
-      venue_id: data.workspaceId,
-      is_available: data.isAvailable ?? true,
-      is_vegetarian: data.isVegetarian,
-      is_vegan: data.isVegan,
-      is_gluten_free: data.isGlutenFree,
-      spice_level: data.spiceLevel,
-      preparation_time: data.preparationTime,
-      tags: data.tags,
-      metadata: data.metadata,
+      category_id: Number(data.categoryId),
     };
+    if (data.description !== undefined) payload.description = data.description;
+    if (data.imageUrl !== undefined) payload.image_url = data.imageUrl;
+    if (data.isAvailable !== undefined) payload.is_available = data.isAvailable;
+    if (data.isVegetarian !== undefined) payload.is_vegetarian = data.isVegetarian;
+
     const response = await apiService.post<unknown>(this.itemsBase, payload);
-    return normalizeItem(response.data as Record<string, unknown>);
+    const body = response as unknown as { data: Record<string, unknown> };
+    return normalizeItem(body.data);
   }
 
-  async updateItem(id: string, data: CatalogItemUpdate): Promise<CatalogItem> {
+  async updateItem(id: string, personaId: number, data: CatalogItemUpdate): Promise<CatalogItem> {
     const payload: MenuItemUpdateDTO = {};
     if (data.name !== undefined) payload.name = data.name;
     if (data.description !== undefined) payload.description = data.description;
     if (data.basePrice !== undefined) payload.price = data.basePrice;
-    if (data.categoryId !== undefined) payload.category_id = data.categoryId;
+    if (data.categoryId !== undefined) payload.category_id = Number(data.categoryId);
+    if (data.imageUrl !== undefined) payload.image_url = data.imageUrl;
     if (data.isAvailable !== undefined) payload.is_available = data.isAvailable;
     if (data.isVegetarian !== undefined) payload.is_vegetarian = data.isVegetarian;
-    if (data.isVegan !== undefined) payload.is_vegan = data.isVegan;
-    if (data.isGlutenFree !== undefined) payload.is_gluten_free = data.isGlutenFree;
-    if (data.spiceLevel !== undefined) payload.spice_level = data.spiceLevel;
-    if (data.preparationTime !== undefined) payload.preparation_time = data.preparationTime;
-    if (data.tags !== undefined) payload.tags = data.tags;
-    if (data.metadata !== undefined) payload.metadata = data.metadata;
 
-    const response = await apiService.put<unknown>(API_ENDPOINTS.APPLICATION.ITEMS.BY_ID(id), payload);
-    return normalizeItem(response.data as Record<string, unknown>);
-  }
-
-  async deleteItem(id: string): Promise<void> {
-    await apiService.delete(API_ENDPOINTS.APPLICATION.ITEMS.BY_ID(id));
-  }
-
-  async restoreItem(id: string): Promise<CatalogItem> {
-    const response = await apiService.post<unknown>(API_ENDPOINTS.APPLICATION.ITEMS.RESTORE(id), null);
-    return normalizeItem(response.data as Record<string, unknown>);
-  }
-
-  async uploadItemImage(id: string, file: File): Promise<string> {
-    const formData = new FormData();
-    formData.append('image', file);
-    const response = await apiService.post<unknown>(
-      `${API_ENDPOINTS.APPLICATION.ITEMS.BY_ID(id)}/image`,
-      formData
+    const response = await apiService.put<unknown>(
+      API_ENDPOINTS.APPLICATION.ITEMS.BY_ID(id),
+      payload,
+      { params: { persona_id: personaId } }
     );
-    const data = response.data as Record<string, unknown>;
-    return (data?.image_url ?? data?.imageUrl ?? '') as string;
+    const body = response as unknown as { data: Record<string, unknown> };
+    return normalizeItem(body.data);
   }
 
-  async updateItemAvailability(id: string, isAvailable: boolean): Promise<CatalogItem> {
+  async updateItemAvailability(id: string, personaId: number, isAvailable: boolean): Promise<CatalogItem> {
     const response = await apiService.put<unknown>(
       API_ENDPOINTS.APPLICATION.ITEMS.AVAILABILITY(id),
+      { is_available: isAvailable },
+      { params: { persona_id: personaId } }
+    );
+    const body = response as unknown as { data: Record<string, unknown> };
+    return normalizeItem(body.data);
+  }
+
+  async deleteItem(id: string, personaId: number): Promise<void> {
+    await apiService.delete(API_ENDPOINTS.APPLICATION.ITEMS.BY_ID(id), {
+      params: { persona_id: personaId },
+    });
+  }
+
+  async restoreItem(id: string, personaId: number): Promise<CatalogItem> {
+    const response = await apiService.post<unknown>(
+      API_ENDPOINTS.APPLICATION.ITEMS.RESTORE(id),
       null,
-      { params: { is_available: isAvailable } }
+      { params: { persona_id: personaId } }
     );
-    return normalizeItem(response.data as Record<string, unknown>);
-  }
-
-  async bulkUpdateItemAvailability(itemIds: string[], isAvailable: boolean): Promise<void> {
-    await apiService.post(
-      API_ENDPOINTS.APPLICATION.ITEMS.BULK_AVAILABILITY,
-      itemIds,
-      { params: { is_available: isAvailable } }
-    );
-  }
-
-  // ── Venue-scoped helpers (delegate to base endpoints with venue_id filter) ───
-
-  async getVenueCategories(venueId: string): Promise<Category[]> {
-    return this.getCategories({ venue_id: venueId });
-  }
-
-  async getVenueItems(venueId: string, categoryId?: string): Promise<CatalogItem[]> {
-    return this.getItems({ venue_id: venueId, category_id: categoryId });
+    const body = response as unknown as { data: Record<string, unknown> };
+    return normalizeItem(body.data);
   }
 }
 

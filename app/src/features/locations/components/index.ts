@@ -5,4 +5,4 @@ export type { ServiceLocationCardAdminProps } from './ServiceLocationCardAdmin';
 export { ServiceAreaFormDialog } from './ServiceAreaFormDialog';
 export type { ServiceAreaFormDialogProps } from './ServiceAreaFormDialog';
 export { ServiceLocationFormDialog } from './ServiceLocationFormDialog';
-export type { ServiceLocationFormDialogProps } from './ServiceLocationFormDialog';
+export type { TableFormDialogProps } from './ServiceLocationFormDialog';

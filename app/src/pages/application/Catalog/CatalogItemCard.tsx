@@ -11,7 +11,6 @@ import {
   Delete as DeleteIcon,
   Visibility as VisibilityIcon,
   VisibilityOff as VisibilityOffIcon,
-  Schedule as ScheduleIcon,
   RestaurantMenu as RestaurantMenuIcon,
 } from '@mui/icons-material';
 import type { CatalogItem } from '../../../features/catalog/types';
@@ -48,7 +47,7 @@ const CatalogItemCard: React.FC<CatalogItemCardProps> = ({
   onToggleAvailability,
   onImageUpload: _onImageUpload,
 }) => {
-  const imageUrl = item.imageUrls?.[0];
+  const imageUrl = item.imageUrl;
 
   return (
     <Box
@@ -108,35 +107,6 @@ const CatalogItemCard: React.FC<CatalogItemCardProps> = ({
               '& .MuiChip-label': { px: 0.75 },
             }}
           />
-        )}
-
-        {/* Prep time badge — bottom-left */}
-        {item.preparationTime != null && (
-          <Box
-            sx={{
-              position: 'absolute',
-              bottom: 8,
-              left: 8,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 0.4,
-              bgcolor: 'rgba(0,0,0,0.65)',
-              color: '#ffffff',
-              px: 1,
-              py: 0.25,
-              borderRadius: 1,
-              fontSize: '0.68rem',
-              lineHeight: 1,
-            }}
-          >
-            <ScheduleIcon sx={{ fontSize: 12, color: '#ffffff' }} />
-            <Typography
-              component="span"
-              sx={{ fontSize: '0.68rem', color: '#ffffff', lineHeight: 1, fontWeight: 500 }}
-            >
-              {item.preparationTime} min
-            </Typography>
-          </Box>
         )}
 
         {/* Veg / non-veg indicator — top-right */}
@@ -243,27 +213,6 @@ const CatalogItemCard: React.FC<CatalogItemCardProps> = ({
           </Typography>
         )}
 
-        {/* Tags */}
-        {item.tags && item.tags.length > 0 && (
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 1 }}>
-            {item.tags.map((tag) => (
-              <Chip
-                key={tag}
-                label={tag}
-                size="small"
-                sx={{
-                  height: 18,
-                  fontSize: '0.68rem',
-                  fontWeight: 400,
-                  bgcolor: T.bg,
-                  color: T.textMuted,
-                  border: `1px solid ${T.border}`,
-                  '& .MuiChip-label': { px: 0.75 },
-                }}
-              />
-            ))}
-          </Box>
-        )}
       </Box>
 
       {/* Actions Section */}

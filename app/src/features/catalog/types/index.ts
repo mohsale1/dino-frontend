@@ -3,93 +3,82 @@
  * Generic product/item catalog (previously menu)
  */
 
-import { BaseEntity, Location } from '../../../types/common';
+import { BaseEntity } from '../../../types/common';
 
 export interface Category extends BaseEntity {
   name: string;
   description?: string;
-  workspaceId: string;
+  imageUrl?: string;
+  isAvailable: boolean;
+  workspaceId: number;
+  personaId: number;
   isActive: boolean;
-  displayOrder?: number;
-  icon?: string;
-  color?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
+
 
 export interface CatalogItem extends BaseEntity {
   name: string;
   description?: string;
   basePrice: number;
   categoryId: string;
-  workspaceId: string;
-  imageUrls?: string[];
+  workspaceId: number;
+  personaId: number;
+  imageUrl?: string;
   isAvailable: boolean;
-  preparationTime?: number;
-  tags?: string[];
-  metadata?: Record<string, any>;
-  // Food-specific (optional)
   isVegetarian?: boolean;
-  isVegan?: boolean;
-  isGlutenFree?: boolean;
-  spiceLevel?: 'mild' | 'medium' | 'hot' | 'extra_hot';
-  nutritionalInfo?: Record<string, any>;
+  isActive: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }
+
 
 export interface CategoryCreate {
   name: string;
   description?: string;
-  workspaceId: string;
-  isActive?: boolean;
-  displayOrder?: number;
-  icon?: string;
-  color?: string;
+  personaId: number;
+  imageUrl?: string;
+  isAvailable?: boolean;
 }
+
 
 export interface CategoryUpdate {
   name?: string;
   description?: string;
-  isActive?: boolean;
-  displayOrder?: number;
-  icon?: string;
-  color?: string;
+  imageUrl?: string;
+  isAvailable?: boolean;
 }
 
+
 export interface CatalogItemCreate {
+  personaId: number;
   name: string;
   description?: string;
   basePrice: number;
-  categoryId: string;
-  workspaceId: string;
+  categoryId: string | number;
+  imageUrl?: string;
   isAvailable?: boolean;
   isVegetarian?: boolean;
-  isVegan?: boolean;
-  isGlutenFree?: boolean;
-  spiceLevel?: 'mild' | 'medium' | 'hot' | 'extra_hot';
-  preparationTime?: number;
-  tags?: string[];
-  metadata?: Record<string, any>;
 }
+
 
 export interface CatalogItemUpdate {
   name?: string;
   description?: string;
   basePrice?: number;
-  categoryId?: string;
+  categoryId?: string | number;
+  imageUrl?: string;
   isAvailable?: boolean;
   isVegetarian?: boolean;
-  isVegan?: boolean;
-  isGlutenFree?: boolean;
-  spiceLevel?: 'mild' | 'medium' | 'hot' | 'extra_hot';
-  preparationTime?: number;
-  tags?: string[];
-  metadata?: Record<string, any>;
 }
 
+
 export interface CatalogFilterParams {
-  workspaceId?: string;
+  personaId?: number;
   categoryId?: string;
   isAvailable?: boolean;
-  searchQuery?: string;
-  tags?: string[];
+  search?: string;
   page?: number;
   pageSize?: number;
 }

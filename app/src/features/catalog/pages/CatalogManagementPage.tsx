@@ -48,7 +48,8 @@ export const CatalogManagementPage: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const { userData } = useUserData();
-  const workspaceId = userData?.workspace?.id || '';
+  const workspaceId = String(userData?.workspace?.id || '');
+  const personaId = userData?.venue?.personaId as number | undefined;
 
   // Real data via useCatalog hook
   const {
@@ -60,12 +61,11 @@ export const CatalogManagementPage: React.FC = () => {
     updateItem,
     deleteItem,
     toggleItemAvailability,
-    uploadItemImage,
     createCategory,
     updateCategory,
     deleteCategory,
     refresh,
-  } = useCatalog({ workspaceId, autoLoad: true });
+  } = useCatalog({ workspaceId, personaId, autoLoad: true });
 
   // Tab state
   const [activeTab, setActiveTab] = useState('items');
@@ -90,7 +90,7 @@ export const CatalogManagementPage: React.FC = () => {
     categoryId: undefined as string | undefined,
     priceRange: [0, 10000] as [number, number],
     availability: 'all' as 'all' | 'available' | 'unavailable',
-    dietary: { vegetarian: false, vegan: false, glutenFree: false },
+    dietary: { vegetarian: false },
     tags: [] as string[],
   });
 
@@ -107,7 +107,7 @@ export const CatalogManagementPage: React.FC = () => {
   // Derive available tags from real items
   const availableTags = useMemo(() => {
     const tagSet = new Set<string>();
-    catalogItems.forEach(item => item.tags?.forEach(t => tagSet.add(t)));
+    catalogItems.forEach(item => (item as any).tags?.forEach((t: string) => tagSet.add(t)));
     return Array.from(tagSet);
   }, [catalogItems]);
 
@@ -143,13 +143,7 @@ export const CatalogManagementPage: React.FC = () => {
       if (filters.dietary.vegetarian && !item.isVegetarian) {
         return false;
       }
-      if (filters.dietary.vegan && !item.isVegan) {
-        return false;
-      }
-      if (filters.dietary.glutenFree && !item.isGlutenFree) {
-        return false;
-      }
-      if (filters.tags.length > 0 && !filters.tags.some(tag => item.tags?.includes(tag))) {
+      if (filters.tags.length > 0 && !filters.tags.some(tag => (item as any).tags?.includes(tag))) {
         return false;
       }
       return true;
@@ -181,8 +175,6 @@ export const CatalogManagementPage: React.FC = () => {
     filters.categoryId,
     filters.availability !== 'all',
     filters.dietary.vegetarian,
-    filters.dietary.vegan,
-    filters.dietary.glutenFree,
     filters.tags.length > 0,
     filters.priceRange[0] !== 0 || filters.priceRange[1] !== 10000,
   ].filter(Boolean).length;
@@ -202,19 +194,27 @@ export const CatalogManagementPage: React.FC = () => {
   const handleSubmitForm = useCallback(async (data: any) => {
     try {
       if (activeTab === 'items') {
+        if (!personaId) {
+          showToast('No active persona selected. Cannot save item.', 'error');
+          return;
+        }
         if (selectedItem) {
           await updateItem(selectedItem.id, data as CatalogItemUpdate);
           showToast('Item updated successfully');
         } else {
-          await createItem(data as CatalogItemCreate);
+          await createItem({ ...(data as CatalogItemCreate), personaId });
           showToast('Item created successfully');
         }
       } else {
+        if (!personaId) {
+          showToast('No active persona selected. Cannot save category.', 'error');
+          return;
+        }
         if (selectedCategory) {
           await updateCategory(selectedCategory.id, data as CategoryUpdate);
           showToast('Category updated successfully');
         } else {
-          await createCategory(data as CategoryCreate);
+          await createCategory({ ...(data as CategoryCreate), personaId });
           showToast('Category created successfully');
         }
       }
@@ -224,7 +224,7 @@ export const CatalogManagementPage: React.FC = () => {
     } catch (err: any) {
       showToast(err.message || 'Failed to save. Please try again.', 'error');
     }
-  }, [activeTab, selectedItem, selectedCategory, createItem, updateItem, createCategory, updateCategory]);
+  }, [activeTab, selectedItem, selectedCategory, personaId, createItem, updateItem, createCategory, updateCategory]);
 
   const handleDeleteItem = (item: CatalogItem) => { setSelectedItem(item); setDeleteDialogOpen(true); };
 
@@ -256,15 +256,6 @@ export const CatalogManagementPage: React.FC = () => {
       showToast(err.message || 'Failed to update availability.', 'error');
     }
   }, [catalogItems, toggleItemAvailability]);
-
-  const handleImageUpload = useCallback(async (itemId: string, file: File) => {
-    try {
-      await uploadItemImage(itemId, file);
-      showToast('Image uploaded successfully');
-    } catch (err: any) {
-      showToast(err.message || 'Failed to upload image.', 'error');
-    }
-  }, [uploadItemImage]);
 
   const handleSelectItem = (itemId: string, checked: boolean) => {
     const newSelection = new Set(selectedItems);
@@ -317,7 +308,7 @@ export const CatalogManagementPage: React.FC = () => {
       categoryId: undefined,
       priceRange: [0, 10000],
       availability: 'all',
-      dietary: { vegetarian: false, vegan: false, glutenFree: false },
+      dietary: { vegetarian: false },
       tags: [],
     });
     setSearchQuery('');
@@ -675,7 +666,6 @@ export const CatalogManagementPage: React.FC = () => {
                                     onEdit={handleEditItem}
                                     onDelete={() => handleDeleteItem(item)}
                                     onToggleAvailability={handleToggleAvailability}
-                                    onImageUpload={handleImageUpload}
                                   />
                                 </Box>
                               )}
@@ -688,7 +678,17 @@ export const CatalogManagementPage: React.FC = () => {
 
                   {value === 'categories' && (
                     <Box>
-                      {categories.length === 0 ? (
+                      {!personaId ? (
+                        <Box sx={{ py: 8, textAlign: 'center' }}>
+                          <CategoryIcon sx={{ fontSize: 48, color: '#bdbdbd', mb: 2 }} />
+                          <Typography sx={{ fontWeight: 600, color: '#1C1C1E', mb: 0.5 }}>
+                            No persona selected
+                          </Typography>
+                          <Typography variant="body2" sx={{ color: '#666666' }}>
+                            Select an active persona to view and manage categories.
+                          </Typography>
+                        </Box>
+                      ) : categories.length === 0 ? (
                         <CatalogEmptyState
                           icon={<CategoryIcon />}
                           title="No categories yet"

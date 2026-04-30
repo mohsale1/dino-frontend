@@ -10,8 +10,8 @@ import {
   IconButton,
   Alert,
   Button,
-  Grid,
   Skeleton,
+  GlobalStyles,
 } from '@mui/material';
 import {
   Refresh,
@@ -97,8 +97,9 @@ const StatCard: React.FC<StatCardProps> = ({
       sx={{
         bgcolor: '#ffffff',
         border: '1px solid #e0e0e0',
-        borderRadius: '12px',
-        p: '20px',
+        borderRadius: 2,
+        px: 2.5,
+        py: 2,
         display: 'flex',
         alignItems: 'center',
         gap: 2,
@@ -107,16 +108,16 @@ const StatCard: React.FC<StatCardProps> = ({
     >
       <Box
         sx={{
-          width: 40,
-          height: 40,
-          borderRadius: '8px',
+          width: 36,
+          height: 36,
+          borderRadius: 1.5,
           flexShrink: 0,
-          bgcolor: 'rgba(25,118,210,0.08)',
-          border: '1px solid rgba(25,118,210,0.2)',
+          bgcolor: 'rgba(0,166,202,0.08)',
+          border: '1px solid rgba(0,166,202,0.2)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          color: '#1976D2',
+          color: '#00A6CA',
           '& svg': { fontSize: 20 },
         }}
       >
@@ -126,7 +127,7 @@ const StatCard: React.FC<StatCardProps> = ({
         <Typography
           sx={{
             fontWeight: 700,
-            fontSize: 24,
+            fontSize: '1.4rem',
             color: '#1C1C1E',
             lineHeight: 1,
             letterSpacing: '-0.02em',
@@ -225,15 +226,15 @@ const UnifiedDashboard: React.FC<{ className?: string }> = ({ className }) => {
             width: 64,
             height: 64,
             borderRadius: '50%',
-            bgcolor: 'rgba(25,118,210,0.08)',
-            border: '1px solid rgba(25,118,210,0.2)',
+            bgcolor: 'rgba(0,166,202,0.08)',
+            border: '1px solid rgba(0,166,202,0.2)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             mb: 1,
           }}
         >
-          <LockOutlined sx={{ fontSize: 32, color: '#1976D2' }} />
+          <LockOutlined sx={{ fontSize: 32, color: '#00A6CA' }} />
         </Box>
         <Typography variant="h6" sx={{ fontWeight: 700, color: '#1C1C1E' }}>
           Access Denied
@@ -279,11 +280,11 @@ const UnifiedDashboard: React.FC<{ className?: string }> = ({ className }) => {
             borderRadius: '8px',
             textTransform: 'none',
             fontWeight: 600,
-            borderColor: '#1976D2',
-            color: '#1976D2',
+            borderColor: '#00A6CA',
+            color: '#00A6CA',
             '&:hover': {
-              bgcolor: 'rgba(25,118,210,0.06)',
-              borderColor: '#1565C0',
+              bgcolor: 'rgba(0,166,202,0.06)',
+              borderColor: '#005F8D',
             },
           }}
         >
@@ -301,15 +302,23 @@ const UnifiedDashboard: React.FC<{ className?: string }> = ({ className }) => {
 
   return (
     <VenueAssignmentCheck showFullPage={false}>
-      <Box className={className} sx={{ bgcolor: '#f8fafc', minHeight: '100vh' }}>
+      <GlobalStyles
+        styles={{
+          '@keyframes livePulse': {
+            '0%, 100%': { opacity: 1, transform: 'scale(1)' },
+            '50%': { opacity: 0.4, transform: 'scale(0.75)' },
+          },
+        }}
+      />
+      <Box className={className} sx={{ bgcolor: '#f8fafc', minHeight: '100%' }}>
 
         {/* ── Page Header ──────────────────────────────────────────────────── */}
         <Box
           sx={{
             bgcolor: '#ffffff',
-            px: { xs: 2, sm: '32px' },
-            pt: '24px',
-            pb: '20px',
+            px: { xs: 3, sm: 4, md: 5 },
+            pt: 3,
+            pb: 3,
             borderBottom: '1px solid #e0e0e0',
             display: 'flex',
             alignItems: 'center',
@@ -319,18 +328,41 @@ const UnifiedDashboard: React.FC<{ className?: string }> = ({ className }) => {
           }}
         >
           <Box>
-            <Typography
-              sx={{
-                fontWeight: 700,
-                color: '#1C1C1E',
-                fontSize: 20,
-                lineHeight: 1.3,
-              }}
-            >
-              Dashboard
-            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography
+                sx={{
+                  fontWeight: 700,
+                  color: '#1C1C1E',
+                  fontSize: '22px',
+                  lineHeight: 1.3,
+                  letterSpacing: '-0.3px',
+                }}
+              >
+                Dashboard
+              </Typography>
+              <Box
+                sx={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: '50%',
+                  bgcolor: '#16a34a',
+                  animation: 'livePulse 1.8s ease-in-out infinite',
+                  flexShrink: 0,
+                }}
+              />
+              <Typography
+                sx={{
+                  fontSize: '0.75rem',
+                  fontWeight: 600,
+                  color: '#16a34a',
+                  letterSpacing: '0.02em',
+                }}
+              >
+                Live
+              </Typography>
+            </Box>
             <Typography variant="body2" sx={{ color: '#666666', mt: 0.5 }}>
-              {getGreeting()} {firstName} — {venueName}
+              {getGreeting()} {firstName} &mdash; {venueName}
             </Typography>
           </Box>
 
@@ -338,7 +370,8 @@ const UnifiedDashboard: React.FC<{ className?: string }> = ({ className }) => {
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Box
               sx={{
-                bgcolor: '#f4f4f4',
+                bgcolor: '#f8fafc',
+                border: '1px solid #e0e0e0',
                 borderRadius: '8px',
                 px: 1.5,
                 py: 0.75,
@@ -374,63 +407,70 @@ const UnifiedDashboard: React.FC<{ className?: string }> = ({ className }) => {
         </Box>
 
         {/* ── Stat Cards ───────────────────────────────────────────────────── */}
-        <Box sx={{ px: { xs: 2, sm: '32px' }, pt: 3, pb: 0 }}>
-          <Grid container spacing={2}>
-            {loading && !rawData ? (
-              <>
-                {[0, 1, 2, 3].map((i) => (
-                  <Grid item xs={12} sm={6} lg={3} key={i}>
-                    <Skeleton
-                      variant="rounded"
-                      height={88}
-                      sx={{ borderRadius: '12px' }}
-                    />
-                  </Grid>
-                ))}
-              </>
-            ) : (
-              <>
-                <Grid item xs={12} sm={6} lg={3}>
-                  <StatCard
-                    label="Today's Revenue"
-                    rawValue={todaysRevenue}
-                    displayValue={formatINR(todaysRevenue)}
-                    icon={<AttachMoney />}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6} lg={3}>
-                  <StatCard
-                    label="Today's Orders"
-                    rawValue={todaysOrders}
-                    icon={<ShoppingCart />}
-                    animate
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6} lg={3}>
-                  <StatCard
-                    label="Avg Order Value"
-                    rawValue={avgOrderValue}
-                    displayValue={formatINR(avgOrderValue)}
-                    icon={<TrendingUp />}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6} lg={3}>
-                  <StatCard
-                    label="Table Occupancy"
-                    rawValue={Math.round(tableOccupancy)}
-                    displayValue={`${Math.round(tableOccupancy)}%`}
-                    icon={<TableRestaurant />}
-                    animate
-                  />
-                </Grid>
-              </>
-            )}
-          </Grid>
+        <Box
+          sx={{
+            px: { xs: 3, sm: 4, md: 5 },
+            py: 2.5,
+            borderBottom: '1px solid #e0e0e0',
+            bgcolor: '#ffffff',
+            display: 'flex',
+            gap: 2,
+            flexWrap: 'wrap',
+          }}
+        >
+          {loading && !rawData ? (
+            <>
+              {[0, 1, 2, 3].map((i) => (
+                <Skeleton
+                  key={i}
+                  variant="rounded"
+                  height={80}
+                  sx={{ borderRadius: 2, flex: '1 1 160px' }}
+                />
+              ))}
+            </>
+          ) : (
+            <>
+              <Box sx={{ flex: '1 1 160px' }}>
+                <StatCard
+                  label="Today's Revenue"
+                  rawValue={todaysRevenue}
+                  displayValue={formatINR(todaysRevenue)}
+                  icon={<AttachMoney />}
+                />
+              </Box>
+              <Box sx={{ flex: '1 1 160px' }}>
+                <StatCard
+                  label="Today's Orders"
+                  rawValue={todaysOrders}
+                  icon={<ShoppingCart />}
+                  animate
+                />
+              </Box>
+              <Box sx={{ flex: '1 1 160px' }}>
+                <StatCard
+                  label="Avg Order Value"
+                  rawValue={avgOrderValue}
+                  displayValue={formatINR(avgOrderValue)}
+                  icon={<TrendingUp />}
+                />
+              </Box>
+              <Box sx={{ flex: '1 1 160px' }}>
+                <StatCard
+                  label="Table Occupancy"
+                  rawValue={Math.round(tableOccupancy)}
+                  displayValue={`${Math.round(tableOccupancy)}%`}
+                  icon={<TableRestaurant />}
+                  animate
+                />
+              </Box>
+            </>
+          )}
         </Box>
 
         {/* ── Non-fatal error banner ────────────────────────────────────────── */}
         {error && rawData && (
-          <Box sx={{ px: { xs: 2, sm: '32px' }, pt: 2 }}>
+          <Box sx={{ px: { xs: 3, sm: 4, md: 5 }, pt: 2 }}>
             <Alert
               severity="warning"
               onClose={() => setError(null)}

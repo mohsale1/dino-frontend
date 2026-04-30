@@ -2,7 +2,6 @@ import React from 'react';
 import {
   Box,
   Typography,
-  Chip,
   Button,
   IconButton,
   CircularProgress,
@@ -14,13 +13,12 @@ import {
   CheckCircle,
   DoneAll,
   DeliveryDining,
-  TaskAlt,
   Cancel,
   ChevronRight,
   Whatshot,
+  ShoppingBag,
 } from '@mui/icons-material';
-import { Order, STATUS_FLOW, CANCELLABLE, timeAgo, formatINR } from '../orders.types';
-import StatusBadge from './StatusBadge';
+import { Order, STATUS_FLOW, STATUS_CONFIG, CANCELLABLE, timeAgo, formatINR } from '../orders.types';
 
 interface OrderCardProps {
   order: Order;
@@ -46,9 +44,10 @@ const OrderCard: React.FC<OrderCardProps> = ({
   onStatusUpdate,
   onCancelOrder,
 }) => {
-  const flow = STATUS_FLOW[order.status];
+  const flow     = STATUS_FLOW[order.status];
+  const config   = STATUS_CONFIG[order.status];
   const canCancel = CANCELLABLE.includes(order.status);
-  const isActing = actionLoading === order.id;
+  const isActing  = actionLoading === order.id;
   const hasActions = !!(flow || canCancel);
 
   const handlePrimaryAction = (e: React.MouseEvent) => {
@@ -71,29 +70,29 @@ const OrderCard: React.FC<OrderCardProps> = ({
       onClick={() => onOrderClick(order)}
       sx={{
         bgcolor: '#ffffff',
-        border: isSelected ? '2px solid #2563EB' : '1px solid #e2e8f0',
-        borderRadius: 2.5,
+        border: isSelected ? `2px solid ${config.dot}` : '1px solid #e0e0e0',
+        borderLeft: `4px solid ${config.dot}`,
+        borderRadius: 2,
         overflow: 'hidden',
         cursor: 'pointer',
-        boxShadow: isSelected ? '0 0 0 3px rgba(37,99,235,0.08)' : 'none',
-        transition: 'all 0.15s ease',
+        boxShadow: isSelected ? `0 0 0 3px ${config.bg}` : 'none',
+        transition: 'box-shadow 0.15s ease, border-color 0.15s ease',
         '&:hover': {
           boxShadow: isSelected
-            ? '0 0 0 3px rgba(37,99,235,0.08)'
-            : '0 2px 8px rgba(0,0,0,0.06)',
-          transform: 'translateY(-1px)',
+            ? `0 0 0 3px ${config.bg}`
+            : '0 2px 8px rgba(0,0,0,0.07)',
         },
       }}
     >
-      {/* TOP BAR */}
+      {/* ── Header: order number + time ── */}
       <Box
         sx={{
           px: 2,
-          py: 1.25,
+          pt: 1.5,
+          pb: 1,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          borderBottom: '1px solid #e0e0e0',
         }}
       >
         <Typography
@@ -107,28 +106,32 @@ const OrderCard: React.FC<OrderCardProps> = ({
         >
           #{order.order_number}
         </Typography>
-        <StatusBadge status={order.status} size="sm" />
+
+        {/* Status label — text only, no chip */}
+        <Typography
+          sx={{
+            fontSize: '0.72rem',
+            fontWeight: 700,
+            color: config.color,
+            textTransform: 'uppercase',
+            letterSpacing: '0.04em',
+          }}
+        >
+          {config.label}
+        </Typography>
       </Box>
 
-      {/* BODY */}
-      <Box
-        sx={{
-          px: 2,
-          py: 1.5,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 1,
-        }}
-      >
-        {/* Customer row */}
+      {/* ── Body ── */}
+      <Box sx={{ px: 2, pb: 1.5, display: 'flex', flexDirection: 'column', gap: 0.75 }}>
+
+        {/* Customer */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-          <Person sx={{ fontSize: 14, color: '#94a3b8', flexShrink: 0 }} />
+          <Person sx={{ fontSize: 14, color: '#999999', flexShrink: 0 }} />
           <Typography
             sx={{
-              fontSize: '0.82rem',
-              color: '#374151',
+              fontSize: '0.8125rem',
+              color: '#1C1C1E',
               fontWeight: 500,
-              lineHeight: 1.3,
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap',
@@ -138,63 +141,39 @@ const OrderCard: React.FC<OrderCardProps> = ({
           </Typography>
         </Box>
 
-        {/* Table + time row */}
+        {/* Table + time */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-          <TableRestaurant sx={{ fontSize: 14, color: '#94a3b8', flexShrink: 0 }} />
-          <Typography sx={{ fontSize: '0.82rem', color: '#374151', lineHeight: 1.3 }}>
-            {order.table_number ? `Table ${order.table_number}` : '\u2014'}
+          <TableRestaurant sx={{ fontSize: 14, color: '#999999', flexShrink: 0 }} />
+          <Typography sx={{ fontSize: '0.8125rem', color: '#666666' }}>
+            {order.table_number ? `Table ${order.table_number}` : 'No table'}
           </Typography>
-          <Box
-            sx={{
-              width: 3,
-              height: 3,
-              borderRadius: '50%',
-              bgcolor: '#cbd5e1',
-              flexShrink: 0,
-              mx: 0.25,
-            }}
-          />
-          <AccessTime sx={{ fontSize: 13, color: '#94a3b8', flexShrink: 0 }} />
-          <Typography sx={{ fontSize: '0.75rem', color: '#94a3b8', lineHeight: 1.3 }}>
+          <Box sx={{ width: 3, height: 3, borderRadius: '50%', bgcolor: '#e0e0e0', flexShrink: 0, mx: 0.25 }} />
+          <AccessTime sx={{ fontSize: 13, color: '#999999', flexShrink: 0 }} />
+          <Typography sx={{ fontSize: '0.75rem', color: '#999999' }}>
             {timeAgo(order.createdAt)}
           </Typography>
         </Box>
 
-        {/* Items + amount row */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Chip
-            label={`${order.items_count ?? 0} item${(order.items_count ?? 0) !== 1 ? 's' : ''}`}
-            size="small"
-            sx={{
-              bgcolor: '#f1f5f9',
-              color: '#475569',
-              fontSize: '0.7rem',
-              fontWeight: 600,
-              height: 20,
-              borderRadius: 1,
-              '& .MuiChip-label': { px: 1 },
-            }}
-          />
+        {/* Items count + total */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mt: 0.25 }}>
+          <ShoppingBag sx={{ fontSize: 14, color: '#999999', flexShrink: 0 }} />
+          <Typography sx={{ fontSize: '0.8125rem', color: '#666666' }}>
+            {order.items_count ?? 0} item{(order.items_count ?? 0) !== 1 ? 's' : ''}
+          </Typography>
           <Box sx={{ flex: 1 }} />
-          <Typography
-            sx={{
-              fontWeight: 800,
-              fontSize: '1rem',
-              color: '#1C1C1E',
-              lineHeight: 1,
-            }}
-          >
+          <Typography sx={{ fontWeight: 700, fontSize: '0.9375rem', color: '#1C1C1E', lineHeight: 1 }}>
             {formatINR(order.total)}
           </Typography>
         </Box>
       </Box>
 
-      {/* ACTION FOOTER */}
+      {/* ── Action footer ── */}
       <Box
         sx={{
           px: 2,
           py: 1.25,
-          borderTop: '1px solid #f1f5f9',
+          borderTop: '1px solid #f8fafc',
+          bgcolor: '#fafafa',
           display: 'flex',
           gap: 1,
           alignItems: 'center',
@@ -209,11 +188,9 @@ const OrderCard: React.FC<OrderCardProps> = ({
                 disabled={isActing}
                 onClick={handlePrimaryAction}
                 startIcon={
-                  isActing ? (
-                    <CircularProgress size={14} sx={{ color: 'inherit' }} />
-                  ) : (
-                    FLOW_ICONS[order.status]
-                  )
+                  isActing
+                    ? <CircularProgress size={13} sx={{ color: 'inherit' }} />
+                    : FLOW_ICONS[order.status]
                 }
                 sx={{
                   flex: 1,
@@ -223,16 +200,8 @@ const OrderCard: React.FC<OrderCardProps> = ({
                   fontSize: '0.78rem',
                   bgcolor: flow.btnBg,
                   boxShadow: 'none',
-                  '&:hover': {
-                    bgcolor: flow.btnBg,
-                    boxShadow: 'none',
-                    filter: 'brightness(0.92)',
-                  },
-                  '&.Mui-disabled': {
-                    bgcolor: flow.btnBg,
-                    color: '#ffffff',
-                    opacity: 0.7,
-                  },
+                  '&:hover': { bgcolor: flow.btnBg, filter: 'brightness(0.92)', boxShadow: 'none' },
+                  '&.Mui-disabled': { bgcolor: flow.btnBg, color: '#ffffff', opacity: 0.65 },
                 }}
               >
                 {!isActing && flow.label}
@@ -246,11 +215,9 @@ const OrderCard: React.FC<OrderCardProps> = ({
                 disabled={isActing}
                 onClick={handleCancel}
                 startIcon={
-                  isActing && !flow ? (
-                    <CircularProgress size={14} sx={{ color: 'inherit' }} />
-                  ) : (
-                    <Cancel sx={{ fontSize: 14 }} />
-                  )
+                  isActing && !flow
+                    ? <CircularProgress size={13} sx={{ color: 'inherit' }} />
+                    : <Cancel sx={{ fontSize: 14 }} />
                 }
                 sx={{
                   borderRadius: 1.5,
@@ -258,17 +225,9 @@ const OrderCard: React.FC<OrderCardProps> = ({
                   fontWeight: 600,
                   fontSize: '0.78rem',
                   borderColor: '#e0e0e0',
-                  color: '#94a3b8',
-                  '&:hover': {
-                    borderColor: '#f43f5e',
-                    color: '#f43f5e',
-                    bgcolor: '#fff1f2',
-                  },
-                  '&.Mui-disabled': {
-                    borderColor: '#e0e0e0',
-                    color: '#94a3b8',
-                    opacity: 0.6,
-                  },
+                  color: '#999999',
+                  '&:hover': { borderColor: '#f43f5e', color: '#f43f5e', bgcolor: '#fff1f2' },
+                  '&.Mui-disabled': { borderColor: '#e0e0e0', color: '#999999', opacity: 0.6 },
                 }}
               >
                 Cancel
@@ -276,16 +235,11 @@ const OrderCard: React.FC<OrderCardProps> = ({
             )}
           </>
         ) : (
-          <Typography
-            sx={{
-              fontSize: '0.72rem',
-              color: '#94a3b8',
-              flex: 1,
-              lineHeight: 1.3,
-            }}
-          >
-            {order.status === 'completed' || order.status === 'cancelled'
-              ? `${order.status === 'completed' ? 'Completed' : 'Cancelled'} ${timeAgo(order.createdAt)}`
+          <Typography sx={{ fontSize: '0.72rem', color: '#999999', flex: 1, lineHeight: 1.3 }}>
+            {order.status === 'completed'
+              ? `Completed ${timeAgo(order.createdAt)}`
+              : order.status === 'cancelled'
+              ? `Cancelled ${timeAgo(order.createdAt)}`
               : null}
           </Typography>
         )}
@@ -294,10 +248,10 @@ const OrderCard: React.FC<OrderCardProps> = ({
           size="small"
           onClick={handleViewDetails}
           sx={{
-            color: '#94a3b8',
+            color: '#999999',
             p: 0.5,
             ml: hasActions ? 0 : 'auto',
-            '&:hover': { color: '#64748b', bgcolor: '#f8fafc' },
+            '&:hover': { color: '#666666', bgcolor: '#f8fafc' },
           }}
         >
           <ChevronRight sx={{ fontSize: 18 }} />

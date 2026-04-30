@@ -239,6 +239,7 @@ const StatCard: React.FC<StatCardProps> = ({ icon, value, label }) => (
 const CatalogManagementPage: React.FC = () => {
   const { userData } = useUserData();
   const workspaceId = userData?.venue?.workspaceId || '';
+  const personaId = userData?.venue?.personaId;
   const { canCreateCatalogItems, canCreateCategories } = usePermissions();
 
   const {
@@ -249,11 +250,10 @@ const CatalogManagementPage: React.FC = () => {
     updateItem,
     deleteItem,
     toggleItemAvailability,
-    uploadItemImage,
     createCategory,
     updateCategory,
     deleteCategory,
-  } = useCatalog({ workspaceId, autoLoad: true });
+  } = useCatalog({ workspaceId, personaId, autoLoad: true });
 
   // ── UI state ─────────────────────────────────────────────────────────────────
   const [activeTab, setActiveTab] = useState<'items' | 'categories'>('items');
@@ -345,7 +345,7 @@ const CatalogManagementPage: React.FC = () => {
         await updateItem(selectedItem.id, data);
         showSnack('Item updated successfully', 'success');
       } else {
-        await createItem({ ...data, workspaceId });
+        await createItem({ ...data, personaId });
         showSnack('Item created successfully', 'success');
       }
       setItemDialogOpen(false);
@@ -365,15 +365,6 @@ const CatalogManagementPage: React.FC = () => {
       showSnack('Availability updated', 'success');
     } catch (err: any) {
       showSnack(err?.message || 'Failed to update availability', 'error');
-    }
-  };
-
-  const handleImageUpload = async (itemId: string, file: File) => {
-    try {
-      await uploadItemImage(itemId, file);
-      showSnack('Image uploaded successfully', 'success');
-    } catch (err: any) {
-      showSnack(err?.message || 'Failed to upload image', 'error');
     }
   };
 
@@ -401,7 +392,7 @@ const CatalogManagementPage: React.FC = () => {
         await updateCategory(selectedCategory.id, data);
         showSnack('Category updated successfully', 'success');
       } else {
-        await createCategory({ ...data, workspaceId });
+        await createCategory({ ...data, personaId });
         showSnack('Category created successfully', 'success');
       }
       setCategoryDialogOpen(false);
@@ -784,7 +775,6 @@ const CatalogManagementPage: React.FC = () => {
                       if (found) handleDeleteItem(found);
                     }}
                     onToggleAvailability={handleToggleAvailability}
-                    onImageUpload={handleImageUpload}
                     showActions
                   />
                 </Grid>

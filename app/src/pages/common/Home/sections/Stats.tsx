@@ -79,7 +79,7 @@ const StatsSection: React.FC = () => {
   return (
     <Box
       sx={{
-        py: { xs: 6, sm: 8, md: 10 },
+        py: { xs: 4, sm: 5, md: 7 },
         backgroundColor: BG,
         position: 'relative',
         overflow: 'hidden',
@@ -148,53 +148,16 @@ const StatsSection: React.FC = () => {
         <Box
           sx={{
             textAlign: 'center',
-            mb: { xs: 4, md: 6 },
+            mb: { xs: 3, md: 4 },
             animation: `${fadeInUp} 0.6s ease-out both`,
           }}
         >
-          {/* Pill */}
-          <Box
-            sx={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 1,
-              px: 2,
-              py: 0.625,
-              mb: 2.5,
-              borderRadius: '999px',
-              backgroundColor: alpha(WHITE, 0.06),
-              border: `1px solid ${alpha(BLUE_LT, 0.25)}`,
-            }}
-          >
-            {/* Live dot */}
-            <Box
-              sx={{
-                width: 7,
-                height: 7,
-                borderRadius: '50%',
-                backgroundColor: BLUE_LT,
-                flexShrink: 0,
-                animation: `${livePulse} 2.5s ease-in-out infinite`,
-              }}
-            />
-            <Typography
-              sx={{
-                fontSize: '0.6875rem',
-                fontWeight: 700,
-                letterSpacing: '0.12em',
-                color: BLUE_LT,
-                textTransform: 'uppercase',
-              }}
-            >
-              Platform Metrics
-            </Typography>
-          </Box>
 
           {/* Heading */}
           <Typography
             variant="h2"
             sx={{
-              fontSize: { xs: '1.75rem', sm: '2.25rem', md: '2.75rem' },
+              fontSize: { xs: '1.5rem', sm: '1.875rem', md: '2.25rem' },
               fontWeight: 800,
               color: WHITE,
               letterSpacing: '-0.02em',
@@ -225,7 +188,7 @@ const StatsSection: React.FC = () => {
               color: alpha(WHITE, 0.5),
               fontWeight: 400,
               lineHeight: 1.7,
-              mt: 2,
+              mt: 1.5,
             }}
           >
             Real-time data from our platform
@@ -233,14 +196,14 @@ const StatsSection: React.FC = () => {
         </Box>
 
         {/* Stats grid */}
-        <Grid container spacing={{ xs: 2, sm: 2.5, md: 3 }}>
+        <Grid container spacing={{ xs: 1.5, sm: 2, md: 2.5 }}>
           {stats.map((stat, index) => (
             <Grid item xs={6} sm={6} md={3} key={index}>
               <Box
                 sx={{
                   height: '100%',
-                  px: { xs: 2, sm: 2.5, md: 3 },
-                  py: { xs: 2.5, sm: 3, md: 3.5 },
+                  px: { xs: 1.5, sm: 2, md: 2.5 },
+                  py: { xs: 2, sm: 2.5, md: 3 },
                   borderRadius: '12px',
                   backgroundColor: alpha(WHITE, 0.04),
                   border: `1px solid ${alpha(WHITE, 0.08)}`,
@@ -288,7 +251,7 @@ const StatsSection: React.FC = () => {
                     alignItems: 'center',
                     justifyContent: 'center',
                     mx: 'auto',
-                    mb: { xs: 2, md: 2.5 },
+                    mb: { xs: 1.5, md: 2 },
                     transition: 'all 0.25s ease',
                   }}
                 >

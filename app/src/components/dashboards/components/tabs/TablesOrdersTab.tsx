@@ -1,3 +1,4 @@
+
 import React, { useMemo } from 'react';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
@@ -268,7 +269,7 @@ export default function TablesOrdersTab({ dashboardData }: TablesOrdersTabProps)
             label="Total Tables"
             value={totalTables}
             subtext="Configured"
-            accentColor="#1976D2"
+            accentColor="#00A6CA"
           />
         </Grid>
       </Grid>
@@ -340,7 +341,7 @@ export default function TablesOrdersTab({ dashboardData }: TablesOrdersTabProps)
         {/* Left: Table Grid */}
         <Grid item xs={12} md={7}>
           <Box sx={{ ...CARD_SX, height: '100%' }}>
-            <SectionTitle label="Table Status" accentColor="#1976D2" />
+            <SectionTitle label="Table Status" accentColor="#00A6CA" />
 
             {tableStatuses.length === 0 ? (
               <Typography sx={{ fontSize: '0.8125rem', color: '#999999' }}>
@@ -479,8 +480,8 @@ export default function TablesOrdersTab({ dashboardData }: TablesOrdersTabProps)
                               sx={{
                                 height: 18,
                                 fontSize: '0.65rem',
-                                bgcolor: 'rgba(25,118,210,0.18)',
-                                color: '#42A5F5',
+                                bgcolor: 'rgba(0,166,202,0.12)',
+                                color: '#00A6CA',
                                 fontWeight: 600,
                                 borderRadius: '4px',
                                 '& .MuiChip-label': { px: 0.75 },

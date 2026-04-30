@@ -73,13 +73,13 @@ const STATUS_CONFIG: Record<string, { color: string; bg: string }> = {
   confirmed: { color: '#0ea5e9', bg: 'rgba(14,165,233,0.10)'  },
   preparing: { color: '#8b5cf6', bg: 'rgba(139,92,246,0.10)' },
   ready:     { color: '#10b981', bg: 'rgba(16,185,129,0.10)'  },
-  served:    { color: '#1976D2', bg: 'rgba(25,118,210,0.10)'  },
+  served:    { color: '#00A6CA', bg: 'rgba(25,118,210,0.10)'  },
   completed: { color: '#16a34a', bg: 'rgba(22,163,74,0.10)'  },
   cancelled: { color: '#ef4444', bg: 'rgba(239,68,68,0.10)' },
 };
 
 function getStatusColor(status: string): string {
-  return STATUS_CONFIG[status.toLowerCase()]?.color ?? '#94a3b8';
+  return STATUS_CONFIG[status.toLowerCase()]?.color ?? '#999999';
 }
 
 function getStatusBg(status: string): string {
@@ -137,14 +137,14 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ dashboardData }) => {
       <Grid container spacing={2.5}>
         <Grid item xs={12} md={8}>
           <Box sx={CARD_SX}>
-            <SectionTitle label="Revenue Trend" accentColor="#1976D2" />
+            <SectionTitle label="Revenue Trend" accentColor="#00A6CA" />
             <RevenueChart data={analytics.revenueTrend ?? []} height={260} />
           </Box>
         </Grid>
 
         <Grid item xs={12} md={4}>
           <Box sx={CARD_SX}>
-            <SectionTitle label="Order Status" accentColor="#42A5F5" />
+            <SectionTitle label="Order Status" accentColor="#00A6CA" />
             <OrderStatusChart data={analytics.orderStatusBreakdown ?? {}} height={260} />
           </Box>
         </Grid>

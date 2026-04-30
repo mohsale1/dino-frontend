@@ -2,15 +2,13 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   Dialog, DialogContent, DialogActions, Button, TextField,
   Grid, MenuItem, CircularProgress, Box, Typography,
-  IconButton, InputAdornment, Stack, Alert,
-  useTheme, useMediaQuery, Chip,
+  IconButton, InputAdornment, Alert,
+  useTheme, useMediaQuery,
 } from '@mui/material';
 import {
   Close as CloseIcon,
-  Add as AddIcon,
   Image as ImageIcon,
   Delete as DeleteIcon,
-  AccessTime as TimeIcon,
 } from '@mui/icons-material';
 import type { CatalogItem, Category, CatalogItemCreate, CatalogItemUpdate } from '../types';
 
@@ -42,12 +40,9 @@ export const CatalogItemFormDialog: React.FC<CatalogItemFormDialogProps> = ({
     description: '',
     basePrice: '',
     categoryId: '',
-    preparationTime: '',
     isVegetarian: false,
-    tags: [] as string[],
   });
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [tagInput, setTagInput] = useState('');
   const [formError, setFormError] = useState('');
 
   useEffect(() => {
@@ -61,27 +56,22 @@ export const CatalogItemFormDialog: React.FC<CatalogItemFormDialogProps> = ({
   useEffect(() => {
     if (open) {
       setFormError('');
-      setTagInput('');
       if (item) {
         setFormData({
           name: item.name || '',
           description: item.description || '',
           basePrice: item.basePrice?.toString() || '',
           categoryId: item.categoryId || '',
-          preparationTime: item.preparationTime?.toString() || '',
           isVegetarian: item.isVegetarian || false,
-          tags: item.tags || [],
         });
-        setImagePreview(item.imageUrls?.[0] || null);
+        setImagePreview(item.imageUrl || null);
       } else {
         setFormData({
           name: '',
           description: '',
           basePrice: '',
           categoryId: categories[0]?.id || '',
-          preparationTime: '',
           isVegetarian: false,
-          tags: [],
         });
         setImagePreview(null);
       }
@@ -94,17 +84,6 @@ export const CatalogItemFormDialog: React.FC<CatalogItemFormDialogProps> = ({
     setImagePreview(URL.createObjectURL(file));
     e.target.value = '';
   };
-
-  const handleAddTag = () => {
-    const t = tagInput.trim();
-    if (t && !formData.tags.includes(t)) {
-      setFormData(prev => ({ ...prev, tags: [...prev.tags, t] }));
-    }
-    setTagInput('');
-  };
-
-  const handleRemoveTag = (tag: string) =>
-    setFormData(prev => ({ ...prev, tags: prev.tags.filter(t => t !== tag) }));
 
   const handleSubmit = async () => {
     setFormError('');
@@ -119,8 +98,6 @@ export const CatalogItemFormDialog: React.FC<CatalogItemFormDialogProps> = ({
       basePrice: price,
       categoryId: formData.categoryId,
       isVegetarian: formData.isVegetarian,
-      tags: formData.tags.length > 0 ? formData.tags : undefined,
-      preparationTime: formData.preparationTime ? parseInt(formData.preparationTime, 10) : undefined,
     };
 
     await onSave(payload);
@@ -270,25 +247,7 @@ export const CatalogItemFormDialog: React.FC<CatalogItemFormDialogProps> = ({
             </TextField>
           </Grid>
 
-          {/* Prep time + Dietary */}
-          <Grid item xs={12} sm={6}>
-            <Typography component="span" sx={labelSx}>Preparation Time</Typography>
-            <TextField
-              fullWidth
-              size="small"
-              type="number"
-              placeholder="e.g. 15"
-              value={formData.preparationTime}
-              onChange={e => setFormData(p => ({ ...p, preparationTime: e.target.value }))}
-              inputProps={{ min: 0 }}
-              InputProps={{
-                startAdornment: <InputAdornment position="start"><TimeIcon sx={{ fontSize: 16, color: '#94a3b8' }} /></InputAdornment>,
-                endAdornment: <InputAdornment position="end"><Typography sx={{ fontSize: '0.75rem', color: '#94a3b8' }}>min</Typography></InputAdornment>,
-              }}
-              sx={inputSx}
-            />
-          </Grid>
-
+          {/* Dietary */}
           <Grid item xs={12} sm={6}>
             <Typography component="span" sx={labelSx}>Dietary</Typography>
             <TextField
@@ -304,43 +263,6 @@ export const CatalogItemFormDialog: React.FC<CatalogItemFormDialogProps> = ({
             </TextField>
           </Grid>
 
-          {/* Tags */}
-          <Grid item xs={12}>
-            <Typography component="span" sx={labelSx}>Tags</Typography>
-            {formData.tags.length > 0 && (
-              <Stack direction="row" spacing={0.75} flexWrap="wrap" useFlexGap sx={{ mb: 1 }}>
-                {formData.tags.map(tag => (
-                  <Chip
-                    key={tag}
-                    label={tag}
-                    size="small"
-                    onDelete={() => handleRemoveTag(tag)}
-                    sx={{ height: 24, fontSize: '0.75rem', fontWeight: 600, bgcolor: '#f8fafc', border: '1px solid #e0e0e0', color: '#666666' }}
-                  />
-                ))}
-              </Stack>
-            )}
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              <TextField
-                size="small"
-                placeholder="Add a tag and press Enter"
-                value={tagInput}
-                onChange={e => setTagInput(e.target.value)}
-                onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleAddTag(); } }}
-                sx={{ flex: 1, ...inputSx }}
-              />
-              <Button
-                variant="outlined"
-                size="small"
-                onClick={handleAddTag}
-                disabled={!tagInput.trim()}
-                startIcon={<AddIcon sx={{ fontSize: 14 }} />}
-                sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600, fontSize: '0.8rem', borderColor: '#e0e0e0', color: '#666666', '&:hover': { borderColor: '#999999' } }}
-              >
-                Add
-              </Button>
-            </Box>
-          </Grid>
         </Grid>
       </DialogContent>
 

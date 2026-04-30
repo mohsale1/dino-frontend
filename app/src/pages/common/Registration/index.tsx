@@ -84,6 +84,16 @@ const RegisterPage: React.FC = () => {
   const { isAuthenticated } = useAuth();
   const { showToast } = useToast();
 
+  // Lock body scroll — this page manages its own scroll internally
+  React.useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    document.body.style.height = '100vh';
+    return () => {
+      document.body.style.overflow = '';
+      document.body.style.height = '';
+    };
+  }, []);
+
   const [activeStep,          setActiveStep]          = useState(0);
   const [loading,             setLoading]             = useState(false);
   const [error,               setError]               = useState('');
@@ -114,7 +124,7 @@ const RegisterPage: React.FC = () => {
     switch (step) {
       case 0:
         if (!formData.referralEmail.trim()) {
-          errors.referralEmail = 'Agent email is required';
+          break;
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.referralEmail)) {
           errors.referralEmail = 'Enter a valid email address';
         } else if (!formData.referralEmailValid) {
@@ -364,6 +374,27 @@ const RegisterPage: React.FC = () => {
         )}
       </Stack>
 
+      {activeStep === 0 && (
+        <Box textAlign="center" mt={1.5}>
+          <Button
+            variant="text"
+            onClick={() => setActiveStep(1)}
+            disabled={loading}
+            sx={{
+              color: '#64748b',
+              fontSize: '0.8125rem',
+              textTransform: 'none',
+              fontWeight: 400,
+              p: 0,
+              minWidth: 0,
+              '&:hover': { background: 'none', color: '#475569' },
+            }}
+          >
+            Skip — I don't have a referral
+          </Button>
+        </Box>
+      )}
+
       <Typography variant="body2" textAlign="center" color="text.secondary" mt={3}>
         Already have an account?{' '}
         <Link component={RouterLink} to="/login" fontWeight={600} sx={{ color: BRAND.primary }}>
@@ -446,6 +477,7 @@ const RegisterPage: React.FC = () => {
         flexDirection: 'column',
         width: { md: 580, lg: 660, xl: 720 },
         flexShrink: 0,
+        height: '100%',
         bgcolor: '#ffffff',
         overflowY: 'auto',
         animation: 'authPanelIn 0.28s cubic-bezier(0.22,1,0.36,1) both',
@@ -479,10 +511,13 @@ const RegisterPage: React.FC = () => {
         flexDirection: 'column',
         alignItems: 'center',
         width: '100%',
+        height: '100%',
         bgcolor: '#ffffff',
         overflowY: 'auto',
+        overflowX: 'hidden',
         px: { xs: 2.5, sm: 4 },
         py: 4,
+        boxSizing: 'border-box',
         animation: 'authPanelIn 0.28s cubic-bezier(0.22,1,0.36,1) both',
         '@keyframes authPanelIn': {
           from: { opacity: 0, transform: 'translateX(18px)' },

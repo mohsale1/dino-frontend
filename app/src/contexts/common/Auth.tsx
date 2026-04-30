@@ -27,6 +27,8 @@ interface AuthContextType {
   refreshPermissions: () => Promise<void>;
   getPermissionsList: () => string[];
   hasBackendPermission: (permission: string) => boolean;
+  /** Dynamic object-level check — no hardcoded strings. Matches stored { resource, action } objects directly. */
+  hasPerm: (resource: string, action: string) => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -371,7 +373,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, [user]);
 
   const hasPermission = useCallback((permission: PermissionName): boolean => {
-    return PermissionService.hasPermission(getUserWithRole, permission);
+    return PermissionService.hasPermission(getUserWithRole, permission as any);
   }, [getUserWithRole]);
 
   const hasRole = useCallback((role: string): boolean => {
@@ -428,15 +430,28 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       .map((p: any) => p.name ?? `${p.resource}:${p.action}`);
   };
 
-  const hasBackendPermission = (permission: string): boolean => {
-    if (!userPermissions?.permissions) return false;
-    return userPermissions.permissions.some((p: any) => {
-      if (p?.resource && p?.action) {
-        return (p.name ?? `${p.resource}:${p.action}`) === permission;
+  const hasPerm = useCallback(
+    (resource: string, action: string): boolean => {
+      const perms: any[] = userPermissions?.permissions ?? [];
+      return perms.some((p: any) => p?.resource === resource && p?.action === action);
+    },
+    [userPermissions]
+  );
+
+  const hasBackendPermission = useCallback(
+    (permission: string): boolean => {
+      const perms: any[] = userPermissions?.permissions ?? [];
+      if (perms.length === 0) return false;
+      // Support both 'resource:action' string format and direct object matching
+      if (permission.includes(':')) {
+        const [resource, action] = permission.split(':');
+        return perms.some((p: any) => p?.resource === resource && p?.action === action);
       }
-      return false;
-    });
-  };
+      // Fallback: exact name match
+      return perms.some((p: any) => p?.name === permission);
+    },
+    [userPermissions]
+  );
 
   const value: AuthContextType = {
     user,
@@ -455,6 +470,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     refreshPermissions,
     getPermissionsList,
     hasBackendPermission,
+    hasPerm,
   };
 
   return (

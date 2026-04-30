@@ -138,7 +138,7 @@ const PersonaCardSkeleton: React.FC<PersonaCardSkeletonProps> = () => (
 
 const PersonaSwitch: React.FC = () => {
   const { refreshUserData } = useUserData();
-  const { hasBackendPermission } = useAuth();
+  const { hasPerm } = useAuth();
 
   // ── State ──────────────────────────────────────────────────────────────────
 
@@ -164,9 +164,9 @@ const PersonaSwitch: React.FC = () => {
 
   // ── Permissions ────────────────────────────────────────────────────────────
 
-  const canCreate = hasBackendPermission('application.personas.create');
-  const canEdit = hasBackendPermission('application.personas.update');
-  const canDelete = hasBackendPermission('application.personas.delete');
+  const canCreate = hasPerm('persona', 'create');
+  const canEdit   = hasPerm('persona', 'update');
+  const canDelete = hasPerm('persona', 'delete');
 
   // ── Helpers ────────────────────────────────────────────────────────────────
 

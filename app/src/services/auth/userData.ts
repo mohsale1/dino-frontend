@@ -87,6 +87,11 @@ class UserDataService {
     }
   }
 
+  /** Public alias so the UserData context can normalise a raw persona object directly */
+  normalizeVenuePublic(venueAny: any): UserData['venue'] {
+    return this._normalizeVenue(venueAny);
+  }
+
   private _normalizeVenue(venueAny: any): UserData['venue'] {
     if (!venueAny) return null;
 
@@ -148,15 +153,36 @@ class UserDataService {
 
   private async _fetchUserData(): Promise<UserData | null> {
     try {
-      // NOTE: ME_DATA resolves to '/application/users/me/data' — matches the backend route GET /application/users/me/data
       const response = await apiService.get<{ data: UserData; timestamp: string }>(API_ENDPOINTS.APPLICATION.USERS.ME_DATA);
 
       if (response.success && response.data) {
         const userData: UserData = (response.data as any).data || response.data;
 
-        // Support both `venue` and `persona` keys from the API response
-        const rawVenue = (userData as any).venue || (userData as any).persona || null;
+        // Backend /users/me/data returns { user, workspace, personas: [...] }
+        // Collect the raw personas array (handles both 'personas' and legacy 'venue'/'persona' keys)
+        const rawPersonas: any[] =
+          Array.isArray((userData as any).personas) ? (userData as any).personas :
+          Array.isArray((userData as any).venue)    ? (userData as any).venue    : [];
+
+        // Pick the persona matching active_persona_id from localStorage, else fall back to first
+        const storedId = localStorage.getItem('active_persona_id');
+        const targetId = storedId ? Number(storedId) : null;
+
+        const rawVenue =
+          // Legacy: single venue/persona object (not an array)
+          ((userData as any).venue && !Array.isArray((userData as any).venue))
+            ? (userData as any).venue
+          : ((userData as any).persona && !Array.isArray((userData as any).persona))
+            ? (userData as any).persona
+          // From personas array: prefer the stored active one, else first
+          : (targetId !== null
+              ? rawPersonas.find((p: any) => Number(p.id) === targetId) ?? rawPersonas[0]
+              : rawPersonas[0]) ?? null;
+
         userData.venue = this._normalizeVenue(rawVenue);
+
+        // Attach raw personas list so the context can cache it for instant switching
+        (userData as any)._rawPersonas = rawPersonas;
 
         if (userData.user) {
           const userAny = userData.user as any;
@@ -170,7 +196,7 @@ class UserDataService {
             venueIds: (userAny.venue_ids || userAny.venueIds || []).map(String),
             isActive: userAny.is_active !== undefined ? Boolean(userAny.is_active) : Boolean(userAny.isActive),
             createdAt: userAny.created_at || userAny.createdAt || new Date().toISOString(),
-            updatedAt: userAny.updated_at || userAny.updatedAt
+            updatedAt: userAny.updated_at || userAny.updatedAt,
           };
         }
 
@@ -183,7 +209,7 @@ class UserDataService {
             description: workspaceAny.description || '',
             isActive: workspaceAny.is_active !== undefined ? Boolean(workspaceAny.is_active) : Boolean(workspaceAny.isActive),
             createdAt: workspaceAny.created_at || workspaceAny.createdAt || new Date().toISOString(),
-            updatedAt: workspaceAny.updated_at || workspaceAny.updatedAt
+            updatedAt: workspaceAny.updated_at || workspaceAny.updatedAt,
           };
         }
 
@@ -192,35 +218,29 @@ class UserDataService {
 
       return null;
     } catch (error: any) {
-      if (error.response?.status === 401) {
-        throw new Error('Authentication required. Please log in again.');
-      }
-
-      if (error.response?.status === 403) {
-        throw new Error('You do not have permission to access this data.');
-      }
-
-      if (error.response?.status === 404) {
-        throw new Error('No venue assigned to your account. Please contact support.');
-      }
-
+      if (error.response?.status === 401) throw new Error('Authentication required. Please log in again.');
+      if (error.response?.status === 403) throw new Error('You do not have permission to access this data.');
+      if (error.response?.status === 404) throw new Error('No venue assigned to your account. Please contact support.');
       throw new Error(error.response?.data?.detail || error.message || 'Failed to fetch user data');
     }
   }
 
+
   async refreshUserData(): Promise<UserData | null> {
-    // Reset all debounce / in-flight state so the next call goes straight to the API
+    // Reset debounce / in-flight state so the next call goes straight to the API
     this.lastCallTime = 0;
     this.currentRequest = null;
     StorageManager.clearVenueData();
     StorageManager.removeItem(StorageManager.KEYS.USER);
 
-    // Also clear the HTTP-layer request queue so the GET isn't deduped
+    // Clear the HTTP-layer request queue so the GET isn't deduped
     const { apiService } = await import('../../utils/api');
     apiService.clearRequestQueue();
 
+    // _fetchUserData already honours active_persona_id from localStorage
     return this._fetchUserData();
   }
+
 
   hasPermission(userData: UserData | null, permission: string): boolean {
     if (!userData?.user?.role) return false;

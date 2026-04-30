@@ -133,7 +133,7 @@ const CTASection: React.FC = () => {
     <Box
       id="cta"
       sx={{
-        py: { xs: 8, sm: 10, md: 12 },
+        py: { xs: 5, sm: 6, md: 8 },
         background: 'linear-gradient(135deg, #0b1120 0%, #0f172a 100%)',
         position: 'relative',
         overflow: 'hidden',
@@ -189,7 +189,7 @@ const CTASection: React.FC = () => {
           px: { xs: 2, sm: 3, md: 3 },
         }}
       >
-        <Grid container spacing={{ xs: 6, md: 8 }} alignItems="center">
+        <Grid container spacing={{ xs: 4, md: 6 }} alignItems="center">
           {/* Left panel */}
           <Grid item xs={12} md={6}>
             {/* Badge pill */}
@@ -204,7 +204,7 @@ const CTASection: React.FC = () => {
                 border: '1px solid rgba(25,118,210,0.25)',
                 px: 1.75,
                 py: 0.625,
-                mb: 2.5,
+                mb: 2,
               }}
             >
               <Box
@@ -234,12 +234,12 @@ const CTASection: React.FC = () => {
             <Typography
               variant="h2"
               sx={{
-                fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' },
+                fontSize: { xs: '1.625rem', sm: '2rem', md: '2.5rem' },
                 fontWeight: 800,
                 color: '#ffffff',
                 letterSpacing: '-0.02em',
                 lineHeight: 1.15,
-                mb: 2.5,
+                mb: 2,
               }}
             >
               Ready to Transform Your Business?
@@ -252,7 +252,7 @@ const CTASection: React.FC = () => {
                 fontSize: { xs: '1rem', md: '1.125rem' },
                 fontWeight: 400,
                 lineHeight: 1.7,
-                mb: 4,
+                mb: 3,
               }}
             >
               Join businesses already using {APP_CONFIG.NAME} to streamline operations and
@@ -369,7 +369,7 @@ const CTASection: React.FC = () => {
                       method.action && window.open(method.action, '_self')
                     }
                     sx={{
-                      p: { xs: 2.5, md: 3 },
+                      p: { xs: 2, md: 2.5 },
                       backgroundColor: 'rgba(255,255,255,0.04)',
                       backdropFilter: 'blur(12px)',
                       WebkitBackdropFilter: 'blur(12px)',

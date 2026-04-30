@@ -9,6 +9,7 @@ import type { CatalogItem, Category, CatalogItemCreate, CatalogItemUpdate, Categ
 
 export interface UseCatalogOptions {
   workspaceId: string;
+  personaId?: number;
   autoLoad?: boolean;
 }
 
@@ -16,35 +17,34 @@ export interface UseCatalogResult {
   // Data
   items: CatalogItem[];
   categories: Category[];
-  
+
   // Loading states
   loading: boolean;
   itemsLoading: boolean;
   categoriesLoading: boolean;
-  
+
   // Error states
   error: string | null;
-  
+
   // Item operations
   loadItems: (categoryId?: string) => Promise<void>;
   createItem: (data: CatalogItemCreate) => Promise<void>;
   updateItem: (id: string, data: CatalogItemUpdate) => Promise<void>;
   deleteItem: (id: string) => Promise<void>;
   toggleItemAvailability: (id: string, isAvailable: boolean) => Promise<void>;
-  uploadItemImage: (id: string, file: File) => Promise<void>;
-  
+
   // Category operations
   loadCategories: () => Promise<void>;
   createCategory: (data: CategoryCreate) => Promise<void>;
   updateCategory: (id: string, data: CategoryUpdate) => Promise<void>;
   deleteCategory: (id: string) => Promise<void>;
-  
+
   // Utility
   getCategoryName: (categoryId: string) => string;
   refresh: () => Promise<void>;
 }
 
-export function useCatalog({ workspaceId, autoLoad = true }: UseCatalogOptions): UseCatalogResult {
+export function useCatalog({ personaId, autoLoad = true }: UseCatalogOptions): UseCatalogResult {
   const [items, setItems] = useState<CatalogItem[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
@@ -52,144 +52,140 @@ export function useCatalog({ workspaceId, autoLoad = true }: UseCatalogOptions):
   const [categoriesLoading, setCategoriesLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Load categories
+  // Load categories — requires personaId
   const loadCategories = useCallback(async () => {
-    if (!workspaceId) return;
-    
+    if (!personaId) return;
+
     setCategoriesLoading(true);
     setError(null);
-    
+
     try {
-      const data = await catalogService.getCategories({ venue_id: workspaceId });
+      const data = await catalogService.getCategories({ persona_id: personaId });
       setCategories(data);
     } catch (err: any) {
       setError(err.message || 'Failed to load categories');
     } finally {
       setCategoriesLoading(false);
     }
-  }, [workspaceId]);
+  }, [personaId]);
 
-  // Load items
+  // Load items — requires personaId
   const loadItems = useCallback(async (categoryId?: string) => {
-    if (!workspaceId) return;
-    
+    if (!personaId) return;
+
     setItemsLoading(true);
     setError(null);
-    
+
     try {
-      const data = await catalogService.getItems({ venue_id: workspaceId, category_id: categoryId });
+      const params: { persona_id: number; category_id?: number } = { persona_id: personaId };
+      if (categoryId) params.category_id = Number(categoryId);
+      const data = await catalogService.getItems(params);
       setItems(data);
     } catch (err: any) {
       setError(err.message || 'Failed to load items');
     } finally {
       setItemsLoading(false);
     }
-  }, [workspaceId]);
+  }, [personaId]);
 
   // Create item
   const createItem = useCallback(async (data: CatalogItemCreate) => {
+    if (!personaId) return;
     setError(null);
-    
+
     try {
-      await catalogService.createItem(data);
+      await catalogService.createItem({ ...data, personaId });
       await loadItems();
     } catch (err: any) {
       setError(err.message || 'Failed to create item');
       throw err;
     }
-  }, [loadItems]);
+  }, [personaId, loadItems]);
 
   // Update item
   const updateItem = useCallback(async (id: string, data: CatalogItemUpdate) => {
+    if (!personaId) return;
     setError(null);
-    
+
     try {
-      await catalogService.updateItem(id, data);
+      await catalogService.updateItem(id, personaId, data);
       await loadItems();
     } catch (err: any) {
       setError(err.message || 'Failed to update item');
       throw err;
     }
-  }, [loadItems]);
+  }, [personaId, loadItems]);
 
   // Delete item
   const deleteItem = useCallback(async (id: string) => {
+    if (!personaId) return;
     setError(null);
-    
+
     try {
-      await catalogService.deleteItem(id);
+      await catalogService.deleteItem(id, personaId);
       await loadItems();
     } catch (err: any) {
       setError(err.message || 'Failed to delete item');
       throw err;
     }
-  }, [loadItems]);
+  }, [personaId, loadItems]);
 
   // Toggle item availability
   const toggleItemAvailability = useCallback(async (id: string, isAvailable: boolean) => {
+    if (!personaId) return;
     setError(null);
-    
+
     try {
-      await catalogService.bulkUpdateItemAvailability([id], isAvailable);
+      await catalogService.updateItemAvailability(id, personaId, isAvailable);
       await loadItems();
     } catch (err: any) {
       setError(err.message || 'Failed to toggle availability');
       throw err;
     }
-  }, [loadItems]);
+  }, [personaId, loadItems]);
 
-  // Upload item image
-  const uploadItemImage = useCallback(async (id: string, file: File) => {
-    setError(null);
-    
-    try {
-      await catalogService.uploadItemImage(id, file);
-      await loadItems();
-    } catch (err: any) {
-      setError(err.message || 'Failed to upload image');
-      throw err;
-    }
-  }, [loadItems]);
-
-  // Create category
+  // Create category — requires personaId
   const createCategory = useCallback(async (data: CategoryCreate) => {
+    if (!personaId) return;
     setError(null);
-    
+
     try {
-      await catalogService.createCategory(data);
+      await catalogService.createCategory({ ...data, personaId });
       await loadCategories();
     } catch (err: any) {
       setError(err.message || 'Failed to create category');
       throw err;
     }
-  }, [loadCategories]);
+  }, [personaId, loadCategories]);
 
-  // Update category
+  // Update category — requires personaId
   const updateCategory = useCallback(async (id: string, data: CategoryUpdate) => {
+    if (!personaId) return;
     setError(null);
-    
+
     try {
-      await catalogService.updateCategory(id, data);
+      await catalogService.updateCategory(id, personaId, data);
       await loadCategories();
     } catch (err: any) {
       setError(err.message || 'Failed to update category');
       throw err;
     }
-  }, [loadCategories]);
+  }, [personaId, loadCategories]);
 
-  // Delete category
+  // Delete category — requires personaId
   const deleteCategory = useCallback(async (id: string) => {
+    if (!personaId) return;
     setError(null);
-    
+
     try {
-      await catalogService.deleteCategory(id);
+      await catalogService.deleteCategory(id, personaId);
       await loadCategories();
-      await loadItems(); // Reload items as they might be affected
+      await loadItems();
     } catch (err: any) {
       setError(err.message || 'Failed to delete category');
       throw err;
     }
-  }, [loadCategories, loadItems]);
+  }, [personaId, loadCategories, loadItems]);
 
   // Get category name by ID
   const getCategoryName = useCallback((categoryId: string): string => {
@@ -204,41 +200,40 @@ export function useCatalog({ workspaceId, autoLoad = true }: UseCatalogOptions):
     setLoading(false);
   }, [loadCategories, loadItems]);
 
-  // Auto-load on mount
+  // Auto-load on mount or when personaId changes
   useEffect(() => {
-    if (autoLoad && workspaceId) {
+    if (autoLoad && personaId) {
       refresh();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [autoLoad, workspaceId]); // Only run on mount or workspaceId change
+  }, [autoLoad, personaId]);
 
   return {
     // Data
     items,
     categories,
-    
+
     // Loading states
     loading: loading || itemsLoading || categoriesLoading,
     itemsLoading,
     categoriesLoading,
-    
+
     // Error state
     error,
-    
+
     // Item operations
     loadItems,
     createItem,
     updateItem,
     deleteItem,
     toggleItemAvailability,
-    uploadItemImage,
-    
+
     // Category operations
     loadCategories,
     createCategory,
     updateCategory,
     deleteCategory,
-    
+
     // Utility
     getCategoryName,
     refresh,
