@@ -1,9 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Typography,
   Snackbar,
   Alert,
+  Card,
+  Chip,
+  Skeleton,
+  Switch,
 } from '@mui/material';
 import {
   PersonOutlined,
@@ -12,6 +16,10 @@ import {
   CalendarToday,
   RateReviewOutlined,
   CreditCardOutlined,
+  StorefrontOutlined,
+  LocationOnOutlined,
+  QrCodeOutlined,
+  PointOfSaleOutlined,
 } from '@mui/icons-material';
 import { useAuth } from '../../../contexts/common/Auth';
 import { useUserData } from '../../../contexts/application/UserData';
@@ -21,6 +29,12 @@ import SecuritySection from './components/SecuritySection';
 import WorkspaceSection from './components/WorkspaceSection';
 import ReviewSection from './components/ReviewSection';
 import BillingSection from './components/BillingSection';
+import { personaService, Persona } from '../../../services/application/persona.service';
+
+const PRIMARY         = '#1976D2';
+const PRIMARY_BG      = 'rgba(25,118,210,0.08)';
+const PRIMARY_BG_ICON = 'rgba(25,118,210,0.12)';
+const PRIMARY_BORDER  = 'rgba(25,118,210,0.2)';
 
 const ROLE_DISPLAY: Record<string, string> = {
   superadmin: 'Super Admin',
@@ -32,10 +46,266 @@ const ROLE_DISPLAY: Record<string, string> = {
 const SECTIONS = [
   { id: 'profile',   label: 'Profile',   icon: PersonOutlined,     description: 'Personal info & avatar'   },
   { id: 'workspace', label: 'Workspace', icon: BusinessOutlined,   description: 'Venue details & location' },
+  { id: 'outlets',   label: 'Outlets',   icon: StorefrontOutlined, description: 'Manage your outlets'      },
   { id: 'security',  label: 'Security',  icon: LockOutlined,       description: 'Password & access'        },
   { id: 'billing',   label: 'Billing',   icon: CreditCardOutlined, description: 'Plan & billing details'   },
   { id: 'review',    label: 'Review',    icon: RateReviewOutlined, description: 'Share your feedback'      },
 ];
+
+// ── OutletsSection ────────────────────────────────────────────────────────────
+
+const OutletsSection: React.FC = () => {
+  const [personas, setPersonas]     = useState<Persona[]>([]);
+  const [loading, setLoading]       = useState(true);
+  const [toggling, setToggling]     = useState<Record<number, boolean>>({});
+  const [error, setError]           = useState<string | null>(null);
+
+  const fetchPersonas = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await personaService.getPersonas();
+      setPersonas(res.data.filter((p) => !p.is_deactivated));
+    } catch {
+      setError('Failed to load outlets. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { fetchPersonas(); }, [fetchPersonas]);
+
+  const handleToggle = async (persona: Persona) => {
+    const next = !persona.is_open;
+    setToggling((prev) => ({ ...prev, [persona.id]: true }));
+    setPersonas((prev) =>
+      prev.map((p) => (p.id === persona.id ? { ...p, is_open: next } : p))
+    );
+    try {
+      await personaService.setPersonaOpenStatus(persona.id, next);
+    } catch {
+      // revert on failure
+      setPersonas((prev) =>
+        prev.map((p) => (p.id === persona.id ? { ...p, is_open: !next } : p))
+      );
+    } finally {
+      setToggling((prev) => ({ ...prev, [persona.id]: false }));
+    }
+  };
+
+  const buildAddress = (p: Persona): string => {
+    return [p.address, p.city, p.state, p.country]
+      .filter(Boolean)
+      .join(', ');
+  };
+
+  return (
+    <Box>
+      {/* Section header */}
+      <Box sx={{ mb: 3 }}>
+        <Typography sx={{ fontWeight: 700, fontSize: '1.1rem', color: '#1C1C1E', mb: 0.5 }}>
+          Outlets
+        </Typography>
+        <Typography sx={{ fontSize: '0.875rem', color: '#666666' }}>
+          View and manage the open/closed status of your outlets.
+        </Typography>
+      </Box>
+
+      {/* Error state */}
+      {error && (
+        <Box
+          sx={{
+            p: 2,
+            mb: 2,
+            borderRadius: '10px',
+            bgcolor: 'rgba(211,47,47,0.06)',
+            border: '1px solid rgba(211,47,47,0.2)',
+          }}
+        >
+          <Typography sx={{ fontSize: '0.875rem', color: '#d32f2f' }}>{error}</Typography>
+        </Box>
+      )}
+
+      {/* Skeleton */}
+      {loading && (
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          {[1, 2, 3].map((i) => (
+            <Card
+              key={i}
+              elevation={0}
+              sx={{ border: '1px solid #e0e0e0', borderRadius: '12px', p: 2.5 }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1.5 }}>
+                <Skeleton variant="rounded" width={40} height={40} sx={{ borderRadius: '10px' }} />
+                <Box sx={{ flex: 1 }}>
+                  <Skeleton variant="text" width="40%" height={20} />
+                  <Skeleton variant="text" width="25%" height={16} sx={{ mt: 0.5 }} />
+                </Box>
+                <Skeleton variant="rounded" width={48} height={24} sx={{ borderRadius: '12px' }} />
+              </Box>
+              <Skeleton variant="text" width="60%" height={16} />
+            </Card>
+          ))}
+        </Box>
+      )}
+
+      {/* Persona cards */}
+      {!loading && !error && personas.length === 0 && (
+        <Box
+          sx={{
+            py: 6,
+            textAlign: 'center',
+            border: '1px dashed #e0e0e0',
+            borderRadius: '12px',
+            bgcolor: '#fafafa',
+          }}
+        >
+          <StorefrontOutlined sx={{ fontSize: 40, color: '#cccccc', mb: 1 }} />
+          <Typography sx={{ fontSize: '0.875rem', color: '#999999' }}>
+            No outlets found.
+          </Typography>
+        </Box>
+      )}
+
+      {!loading && !error && personas.length > 0 && (
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          {personas.map((persona) => {
+            const isQR      = persona.order_type === 0;
+            const address   = buildAddress(persona);
+            const isToggling = toggling[persona.id] ?? false;
+
+            return (
+              <Card
+                key={persona.id}
+                elevation={0}
+                sx={{
+                  border: `1px solid ${persona.is_open ? PRIMARY_BORDER : '#e0e0e0'}`,
+                  borderRadius: '12px',
+                  p: 2.5,
+                  bgcolor: persona.is_open ? PRIMARY_BG : '#ffffff',
+                  transition: 'border-color 0.2s, background-color 0.2s',
+                }}
+              >
+                <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
+                  {/* Icon */}
+                  <Box
+                    sx={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: '10px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0,
+                      bgcolor: persona.is_open ? PRIMARY_BG_ICON : '#f8fafc',
+                      border: `1px solid ${persona.is_open ? PRIMARY_BORDER : '#e0e0e0'}`,
+                      color: persona.is_open ? PRIMARY : '#999999',
+                      transition: 'all 0.2s',
+                    }}
+                  >
+                    <StorefrontOutlined sx={{ fontSize: 20 }} />
+                  </Box>
+
+                  {/* Info */}
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap', mb: 0.75 }}>
+                      <Typography
+                        sx={{
+                          fontWeight: 600,
+                          fontSize: '0.9375rem',
+                          color: '#1C1C1E',
+                          lineHeight: 1.3,
+                        }}
+                      >
+                        {persona.name}
+                      </Typography>
+
+                      {/* Order type badge */}
+                      <Chip
+                        icon={isQR
+                          ? <QrCodeOutlined sx={{ fontSize: '13px !important' }} />
+                          : <PointOfSaleOutlined sx={{ fontSize: '13px !important' }} />
+                        }
+                        label={isQR ? 'QR / Online' : 'POS / Manual'}
+                        size="small"
+                        sx={{
+                          height: 22,
+                          fontSize: '0.7rem',
+                          fontWeight: 600,
+                          bgcolor: isQR ? 'rgba(25,118,210,0.08)' : 'rgba(102,102,102,0.08)',
+                          color: isQR ? PRIMARY : '#555555',
+                          border: `1px solid ${isQR ? PRIMARY_BORDER : 'rgba(102,102,102,0.2)'}`,
+                          '& .MuiChip-icon': { color: 'inherit' },
+                          '& .MuiChip-label': { px: 0.75 },
+                        }}
+                      />
+
+                      {/* Open/Closed status chip */}
+                      <Chip
+                        label={persona.is_open ? 'Open' : 'Closed'}
+                        size="small"
+                        sx={{
+                          height: 22,
+                          fontSize: '0.7rem',
+                          fontWeight: 600,
+                          bgcolor: persona.is_open
+                            ? 'rgba(46,125,50,0.08)'
+                            : 'rgba(211,47,47,0.08)',
+                          color: persona.is_open ? '#2e7d32' : '#d32f2f',
+                          border: `1px solid ${persona.is_open ? 'rgba(46,125,50,0.2)' : 'rgba(211,47,47,0.2)'}`,
+                          '& .MuiChip-label': { px: 0.75 },
+                        }}
+                      />
+                    </Box>
+
+                    {/* Address */}
+                    {address && (
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <LocationOnOutlined sx={{ fontSize: 13, color: '#999999', flexShrink: 0 }} />
+                        <Typography
+                          sx={{
+                            fontSize: '0.8rem',
+                            color: '#888888',
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                          }}
+                        >
+                          {address}
+                        </Typography>
+                      </Box>
+                    )}
+                  </Box>
+
+                  {/* Toggle */}
+                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0 }}>
+                    <Switch
+                      checked={persona.is_open}
+                      disabled={isToggling}
+                      onChange={() => handleToggle(persona)}
+                      size="small"
+                      sx={{
+                        '& .MuiSwitch-switchBase.Mui-checked': { color: PRIMARY },
+                        '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                          bgcolor: PRIMARY,
+                        },
+                      }}
+                    />
+                    <Typography sx={{ fontSize: '0.65rem', color: '#999999', mt: 0.25 }}>
+                      {persona.is_open ? 'Open' : 'Closed'}
+                    </Typography>
+                  </Box>
+                </Box>
+              </Card>
+            );
+          })}
+        </Box>
+      )}
+    </Box>
+  );
+};
+
+// ── Settings ──────────────────────────────────────────────────────────────────
 
 const Settings: React.FC = () => {
   const { user } = useAuth();
@@ -68,6 +338,7 @@ const Settings: React.FC = () => {
     switch (activeSection) {
       case 'profile':   return <ProfileSection />;
       case 'workspace': return <WorkspaceSection onSave={() => handleSave(null, 'Workspace')} />;
+      case 'outlets':   return <OutletsSection />;
       case 'security':  return <SecuritySection />;
       case 'billing':   return <BillingSection />;
       case 'review':    return <ReviewSection />;
@@ -145,13 +416,13 @@ const Settings: React.FC = () => {
                   py: 0.875,
                   borderRadius: '8px',
                   cursor: 'pointer',
-                  border: `1px solid ${isActive ? '#00A6CA' : '#e0e0e0'}`,
-                  bgcolor: isActive ? 'rgba(0,166,202,0.08)' : '#ffffff',
+                  border: `1px solid ${isActive ? PRIMARY : '#e0e0e0'}`,
+                  bgcolor: isActive ? PRIMARY_BG : '#ffffff',
                   transition: 'all 0.15s',
                 }}
               >
-                <Icon sx={{ fontSize: 16, color: isActive ? '#00A6CA' : '#666666' }} />
-                <Typography sx={{ fontSize: '0.875rem', fontWeight: isActive ? 700 : 500, color: isActive ? '#00A6CA' : '#1C1C1E' }}>
+                <Icon sx={{ fontSize: 16, color: isActive ? PRIMARY : '#666666' }} />
+                <Typography sx={{ fontSize: '0.875rem', fontWeight: isActive ? 700 : 500, color: isActive ? PRIMARY : '#1C1C1E' }}>
                   {section.label}
                 </Typography>
               </Box>
@@ -202,10 +473,10 @@ const Settings: React.FC = () => {
                       my: 0.25,
                       borderRadius: '8px',
                       cursor: 'pointer',
-                      bgcolor: isActive ? 'rgba(0,166,202,0.08)' : 'transparent',
+                      bgcolor: isActive ? PRIMARY_BG : 'transparent',
                       transition: 'background-color 0.15s',
                       '&:hover': {
-                        bgcolor: isActive ? 'rgba(0,166,202,0.08)' : 'rgba(0,0,0,0.04)',
+                        bgcolor: isActive ? PRIMARY_BG : 'rgba(0,0,0,0.04)',
                       },
                     }}
                   >
@@ -218,9 +489,9 @@ const Settings: React.FC = () => {
                         alignItems: 'center',
                         justifyContent: 'center',
                         flexShrink: 0,
-                        bgcolor: isActive ? 'rgba(0,166,202,0.12)' : '#f8fafc',
-                        border: `1px solid ${isActive ? 'rgba(0,166,202,0.25)' : '#e0e0e0'}`,
-                        color: isActive ? '#00A6CA' : '#666666',
+                        bgcolor: isActive ? PRIMARY_BG_ICON : '#f8fafc',
+                        border: `1px solid ${isActive ? PRIMARY_BORDER : '#e0e0e0'}`,
+                        color: isActive ? PRIMARY : '#666666',
                         transition: 'all 0.15s',
                       }}
                     >
@@ -232,7 +503,7 @@ const Settings: React.FC = () => {
                         sx={{
                           fontSize: '0.875rem',
                           fontWeight: isActive ? 700 : 500,
-                          color: isActive ? '#00A6CA' : '#1C1C1E',
+                          color: isActive ? PRIMARY : '#1C1C1E',
                           lineHeight: 1.3,
                           transition: 'color 0.15s',
                         }}
@@ -259,7 +530,7 @@ const Settings: React.FC = () => {
                           width: 3,
                           height: 20,
                           borderRadius: '2px',
-                          bgcolor: '#00A6CA',
+                          bgcolor: PRIMARY,
                           flexShrink: 0,
                           ml: 'auto',
                         }}

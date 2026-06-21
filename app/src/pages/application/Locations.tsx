@@ -2,7 +2,7 @@
  * Locations Management Page
  *
  * Manage service locations (tables) and areas.
- * Follows the canonical layout: white header bar, toolbar Paper, tabs, content area, mobile FAB.
+ * Follows the canonical layout: white header bar, stat strip, toolbar, tabs, content area, mobile FAB.
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -19,9 +19,11 @@ import {
   DialogContent,
   DialogActions,
   Radio,
-  Divider,
   Paper,
   Fab,
+  TablePagination,
+  Divider,
+  Grid,
   useTheme,
   useMediaQuery,
 } from '@mui/material';
@@ -48,7 +50,12 @@ import { usePermissions } from '../../hooks/usePermissions';
 import { APP_CONFIG } from '../../constants/app';
 import type { ServiceLocation, ServiceArea } from '../../features/locations/types';
 
-// --- Bulk Print ---
+// ── Brand constants ──────────────────────────────────────────────────────────
+
+const PRIMARY    = '#1976D2';
+const PRIMARY_BG = 'rgba(25,118,210,0.08)';
+
+// ── Bulk Print ───────────────────────────────────────────────────────────────
 
 type BulkQRStyle = 'classic' | 'rounded' | 'dark' | 'branded' | 'minimal' | 'framed';
 
@@ -107,8 +114,7 @@ const buildBulkPrintHtml = (items: BulkQRItem[], style: BulkQRStyle = 'classic')
 </html>`;
 };
 
-
-// --- Page Component ---
+// ── Page Component ───────────────────────────────────────────────────────────
 
 const LocationsManagementPage: React.FC = () => {
   const theme = useTheme();
@@ -119,10 +125,24 @@ const LocationsManagementPage: React.FC = () => {
   const organizationId = userData?.venue?.id || '';
   const { canCreateTables, canCreateAreas } = usePermissions();
 
-  // State
+  // ── Core state ──
+
   const [activeTab, setActiveTab]       = useState<'locations' | 'areas'>('locations');
   const [searchQuery, setSearchQuery]   = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
+
+  // ── Tables pagination ──
+
+  const [page, setPage]               = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [total, setTotal]             = useState(0);
+
+  // ── Areas pagination ──
+
+  const [areaPage, setAreaPage]               = useState(0);
+  const [areaRowsPerPage, setAreaRowsPerPage] = useState(10);
+
+  // ── Dialog state ──
 
   const [locationDialogOpen, setLocationDialogOpen] = useState(false);
   const [locationDeleteOpen, setLocationDeleteOpen] = useState(false);
@@ -147,13 +167,25 @@ const LocationsManagementPage: React.FC = () => {
   const [bulkStyleOpen, setBulkStyleOpen]       = useState(false);
   const [bulkStyle, setBulkStyle]               = useState<BulkQRStyle>('classic');
 
-  // Data fetching
+  // ── Data fetching ──
 
   const fetchLocations = useCallback(async () => {
     if (!personaId) return;
-    const data = await locationService.getTables(personaId);
-    setLocations(data);
-  }, [personaId]);
+    const response = await locationService.getTables(personaId, {
+      page: page + 1,
+      page_size: rowsPerPage,
+    });
+    // Handle both array and paginated object responses
+    if (Array.isArray(response)) {
+      setLocations(response);
+      setTotal(response.length);
+    } else {
+      const data = (response as any).data ?? [];
+      const pagination = (response as any).pagination;
+      setLocations(data);
+      setTotal(pagination?.total ?? data.length);
+    }
+  }, [personaId, page, rowsPerPage]);
 
   const fetchAreas = useCallback(async () => {
     if (!personaId) return;
@@ -177,7 +209,15 @@ const LocationsManagementPage: React.FC = () => {
     load();
   }, [personaId, fetchLocations, fetchAreas]);
 
-  // Filtered data
+  // Re-fetch tables when page/rowsPerPage changes
+  useEffect(() => {
+    if (!loading) {
+      fetchLocations();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, rowsPerPage]);
+
+  // ── Filtered data (client-side within loaded page) ──
 
   const filteredLocations = locations.filter((l) => {
     const q = searchQuery.toLowerCase();
@@ -203,10 +243,16 @@ const LocationsManagementPage: React.FC = () => {
     return matchSearch && matchStatus;
   });
 
+  // Paginated slice for areas (client-side)
+  const pagedAreas = filteredAreas.slice(
+    areaPage * areaRowsPerPage,
+    areaPage * areaRowsPerPage + areaRowsPerPage,
+  );
+
   const locationCountByArea = (areaId: string): number =>
     locations.filter((l) => l.areaId === areaId).length;
 
-  // Helpers
+  // ── Helpers ──
 
   const showSnack = (message: string, severity: 'success' | 'error' | 'info') =>
     setSnackbar({ open: true, message, severity });
@@ -215,9 +261,23 @@ const LocationsManagementPage: React.FC = () => {
     setActiveTab(tab as 'locations' | 'areas');
     setSearchQuery('');
     setFilterStatus('all');
+    setPage(0);
+    setAreaPage(0);
   };
 
-  // Location handlers
+  const handleSearchChange = (value: string) => {
+    setSearchQuery(value);
+    setPage(0);
+    setAreaPage(0);
+  };
+
+  const handleFilterChange = (value: string) => {
+    setFilterStatus(value);
+    setPage(0);
+    setAreaPage(0);
+  };
+
+  // ── Location handlers ──
 
   const handleAddNew = () => {
     if (activeTab === 'locations') {
@@ -248,7 +308,6 @@ const LocationsManagementPage: React.FC = () => {
           area_id: data.area_id || undefined,
           capacity: data.capacity,
           status: data.status,
-          display_order: data.display_order,
         });
         showSnack('Table updated successfully', 'success');
       } else {
@@ -257,7 +316,6 @@ const LocationsManagementPage: React.FC = () => {
           area_id: data.area_id || undefined,
           capacity: data.capacity,
           status: data.status,
-          display_order: data.display_order,
         });
         showSnack('Table created successfully', 'success');
       }
@@ -312,7 +370,7 @@ const LocationsManagementPage: React.FC = () => {
     }
   };
 
-  // Area handlers
+  // ── Area handlers ──
 
   const handleEditArea = (area: ServiceArea) => {
     setSelectedArea(area);
@@ -357,7 +415,7 @@ const LocationsManagementPage: React.FC = () => {
     }
   };
 
-  // Bulk Print QR
+  // ── Bulk Print QR ──
 
   const handleBulkPrintQR = () => {
     if (filteredLocations.length === 0) {
@@ -392,12 +450,12 @@ const LocationsManagementPage: React.FC = () => {
     }
   };
 
-  // Loading / error states
+  // ── Loading / error states ──
 
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
-        <CircularProgress color="primary" />
+        <CircularProgress sx={{ color: PRIMARY }} />
       </Box>
     );
   }
@@ -410,9 +468,12 @@ const LocationsManagementPage: React.FC = () => {
     );
   }
 
-  // Derived
-  const canAdd = activeTab === 'locations' ? canCreateTables : canCreateAreas;
+  // ── Derived ──
+
+  const canAdd   = activeTab === 'locations' ? canCreateTables : canCreateAreas;
   const addLabel = activeTab === 'locations' ? 'Add Table' : 'Add Area';
+
+  const availableCount = locations.filter((l) => l.status === 'available').length;
 
   return (
     <Box sx={{ minHeight: '100%', bgcolor: '#f8fafc' }}>
@@ -447,7 +508,7 @@ const LocationsManagementPage: React.FC = () => {
             onClick={handleAddNew}
             disableElevation
             sx={{
-              bgcolor: '#00A6CA',
+              bgcolor: PRIMARY,
               color: '#ffffff',
               fontWeight: 600,
               textTransform: 'none',
@@ -455,7 +516,7 @@ const LocationsManagementPage: React.FC = () => {
               px: 2.5,
               py: 0.875,
               fontSize: '0.875rem',
-              '&:hover': { bgcolor: '#005F8D' },
+              '&:hover': { bgcolor: '#1565C0' },
             }}
           >
             {addLabel}
@@ -476,9 +537,9 @@ const LocationsManagementPage: React.FC = () => {
         }}
       >
         {[
-          { icon: <LocationOnIcon sx={{ fontSize: 18 }} />, value: locations.length, label: 'Total Tables' },
-          { icon: <TableBarIcon sx={{ fontSize: 18 }} />,   value: areas.length,     label: 'Total Areas'     },
-          { icon: <QrCodeIcon sx={{ fontSize: 18 }} />,     value: locations.length, label: 'QR Codes'        },
+          { icon: <TableBarIcon sx={{ fontSize: 18 }} />,   value: total || locations.length, label: 'Total Tables'     },
+          { icon: <LocationOnIcon sx={{ fontSize: 18 }} />, value: areas.length,              label: 'Total Areas'      },
+          { icon: <QrCodeIcon sx={{ fontSize: 18 }} />,     value: availableCount,            label: 'Available Tables' },
         ].map(({ icon, value, label }) => (
           <Box
             key={label}
@@ -499,8 +560,8 @@ const LocationsManagementPage: React.FC = () => {
                 width: 36,
                 height: 36,
                 borderRadius: 1.5,
-                bgcolor: 'rgba(0,166,202,0.08)',
-                color: '#00A6CA',
+                bgcolor: PRIMARY_BG,
+                color: PRIMARY,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -527,6 +588,7 @@ const LocationsManagementPage: React.FC = () => {
         sx={{ borderRadius: 0, border: 'none', borderBottom: '1px solid #e0e0e0', bgcolor: '#ffffff' }}
       >
         <Box sx={{ px: 2.5, py: 1.5, display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap' }}>
+
           {/* Search */}
           <Box
             sx={{
@@ -539,7 +601,7 @@ const LocationsManagementPage: React.FC = () => {
               borderRadius: 2,
               px: 1.5,
               py: 0.75,
-              '&:focus-within': { borderColor: '#00A6CA', boxShadow: '0 0 0 2px rgba(0,166,202,0.2)' },
+              '&:focus-within': { borderColor: PRIMARY, boxShadow: `0 0 0 2px ${PRIMARY_BG}` },
               transition: 'border-color 0.15s, box-shadow 0.15s',
             }}
           >
@@ -547,11 +609,11 @@ const LocationsManagementPage: React.FC = () => {
             <InputBase
               placeholder={activeTab === 'locations' ? 'Search tables...' : 'Search areas...'}
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => handleSearchChange(e.target.value)}
               sx={{ flex: 1, fontSize: '0.875rem', color: '#1C1C1E', '& input::placeholder': { color: '#999999' } }}
             />
             {searchQuery && (
-              <IconButton size="small" onClick={() => setSearchQuery('')} sx={{ p: 0.25, color: '#999999' }}>
+              <IconButton size="small" onClick={() => handleSearchChange('')} sx={{ p: 0.25, color: '#999999' }}>
                 <CloseIcon sx={{ fontSize: 14 }} />
               </IconButton>
             )}
@@ -561,7 +623,7 @@ const LocationsManagementPage: React.FC = () => {
           <Select
             size="small"
             value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
+            onChange={(e) => handleFilterChange(e.target.value)}
             displayEmpty
             sx={{
               minWidth: 130,
@@ -570,13 +632,13 @@ const LocationsManagementPage: React.FC = () => {
               bgcolor: '#f8fafc',
               '& .MuiOutlinedInput-notchedOutline': { borderColor: '#e0e0e0' },
               '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#c0c0c0' },
-              '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#00A6CA' },
+              '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: PRIMARY },
             }}
           >
-            <MenuItem value="all" sx={{ fontSize: '0.875rem' }}>All Status</MenuItem>
-            <MenuItem value="available" sx={{ fontSize: '0.875rem' }}>Available</MenuItem>
-            <MenuItem value="occupied" sx={{ fontSize: '0.875rem' }}>Occupied</MenuItem>
-            <MenuItem value="reserved" sx={{ fontSize: '0.875rem' }}>Reserved</MenuItem>
+            <MenuItem value="all"         sx={{ fontSize: '0.875rem' }}>All Status</MenuItem>
+            <MenuItem value="available"   sx={{ fontSize: '0.875rem' }}>Available</MenuItem>
+            <MenuItem value="occupied"    sx={{ fontSize: '0.875rem' }}>Occupied</MenuItem>
+            <MenuItem value="reserved"    sx={{ fontSize: '0.875rem' }}>Reserved</MenuItem>
             <MenuItem value="maintenance" sx={{ fontSize: '0.875rem' }}>Maintenance</MenuItem>
           </Select>
 
@@ -600,7 +662,7 @@ const LocationsManagementPage: React.FC = () => {
           sx={{
             px: 2,
             minHeight: 44,
-            '& .MuiTabs-indicator': { bgcolor: '#00A6CA', height: 2 },
+            '& .MuiTabs-indicator': { bgcolor: PRIMARY, height: 2 },
             '& .MuiTab-root': {
               minHeight: 44,
               textTransform: 'none',
@@ -612,15 +674,15 @@ const LocationsManagementPage: React.FC = () => {
             },
           }}
         >
-          <Tab value="locations" label={`Tables (${locations.length})`} />
-          <Tab value="areas" label={`Areas (${areas.length})`} />
+          <Tab value="locations" label={`Tables (${total || locations.length})`} />
+          <Tab value="areas"     label={`Areas (${areas.length})`} />
         </MuiTabs>
       </Paper>
 
       {/* ── Content Area ── */}
       <Box sx={{ bgcolor: '#f8fafc', px: { xs: 2, sm: 3, md: 5 }, pt: 3, pb: 6 }}>
 
-        {/* Locations tab */}
+        {/* ── Tables tab ── */}
         {activeTab === 'locations' && (
           <>
             {filteredLocations.length > 0 && (
@@ -642,7 +704,7 @@ const LocationsManagementPage: React.FC = () => {
                     borderRadius: 2,
                     color: '#1C1C1E',
                     borderColor: '#e0e0e0',
-                    '&:hover': { borderColor: '#00A6CA', bgcolor: 'rgba(0,166,202,0.06)' },
+                    '&:hover': { borderColor: PRIMARY, bgcolor: PRIMARY_BG },
                   }}
                 >
                   Print All QRs
@@ -651,8 +713,24 @@ const LocationsManagementPage: React.FC = () => {
             )}
 
             {filteredLocations.length === 0 ? (
-              <Paper elevation={0} sx={{ p: 6, textAlign: 'center', border: '1px solid #e0e0e0', borderRadius: 3, bgcolor: '#ffffff', mt: 3 }}>
-                <Box sx={{ width: 64, height: 64, borderRadius: '50%', bgcolor: '#f8fafc', border: '1px solid #e0e0e0', display: 'flex', alignItems: 'center', justifyContent: 'center', mx: 'auto', mb: 2 }}>
+              <Paper
+                elevation={0}
+                sx={{ p: 6, textAlign: 'center', border: '1px solid #e0e0e0', borderRadius: 3, bgcolor: '#ffffff', mt: 3 }}
+              >
+                <Box
+                  sx={{
+                    width: 64,
+                    height: 64,
+                    borderRadius: '50%',
+                    bgcolor: '#f8fafc',
+                    border: '1px solid #e0e0e0',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    mx: 'auto',
+                    mb: 2,
+                  }}
+                >
                   <QrCodeIcon sx={{ fontSize: 28, color: '#999999' }} />
                 </Box>
                 <Typography sx={{ fontWeight: 600, color: '#666666', fontSize: '0.95rem', mb: 0.5 }}>
@@ -671,7 +749,7 @@ const LocationsManagementPage: React.FC = () => {
                     disableElevation
                     sx={{
                       mt: 3,
-                      bgcolor: '#00A6CA',
+                      bgcolor: PRIMARY,
                       color: '#ffffff',
                       fontWeight: 600,
                       textTransform: 'none',
@@ -679,7 +757,7 @@ const LocationsManagementPage: React.FC = () => {
                       px: 3,
                       py: 1,
                       fontSize: '0.875rem',
-                      '&:hover': { bgcolor: '#005F8D' },
+                      '&:hover': { bgcolor: '#1565C0' },
                     }}
                   >
                     Add Table
@@ -687,32 +765,67 @@ const LocationsManagementPage: React.FC = () => {
                 )}
               </Paper>
             ) : (
-              <Box sx={{ bgcolor: '#ffffff', border: '1px solid #e0e0e0', borderRadius: 2, overflow: 'hidden' }}>
+              <Paper elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 2, overflow: 'hidden', bgcolor: '#ffffff' }}>
                 {filteredLocations.map((location, idx) => (
                   <React.Fragment key={location.id}>
-                    <Box sx={{ '&:hover': { bgcolor: 'rgba(0,166,202,0.04)' } }}>
-                      <LocationCard
-                        location={location}
-                        onEdit={handleEditLocation}
-                        onDelete={handleDeleteLocation}
-                        onToggleStatus={handleToggleStatus}
-                        onViewQR={handleViewQR}
-                      />
-                    </Box>
-                    {idx < filteredLocations.length - 1 && <Divider sx={{ borderColor: '#e0e0e0' }} />}
+                    <LocationCard
+                      location={location}
+                      areaName={areas.find((a) => a.id === location.areaId)?.name}
+                      onEdit={handleEditLocation}
+                      onDelete={handleDeleteLocation}
+                      onToggleStatus={handleToggleStatus}
+                      onViewQR={handleViewQR}
+                    />
+                    {idx < filteredLocations.length - 1 && <Divider sx={{ borderColor: '#f3f4f6' }} />}
                   </React.Fragment>
                 ))}
-              </Box>
+                <TablePagination
+                  component="div"
+                  count={total}
+                  page={page}
+                  rowsPerPage={rowsPerPage}
+                  rowsPerPageOptions={[10, 25, 50]}
+                  onPageChange={(_, newPage) => setPage(newPage)}
+                  onRowsPerPageChange={(e) => {
+                    setRowsPerPage(parseInt(e.target.value, 10));
+                    setPage(0);
+                  }}
+                  sx={{
+                    borderTop: '1px solid #e0e0e0',
+                    bgcolor: '#ffffff',
+                    '& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows': {
+                      fontSize: '0.8125rem',
+                      color: '#666666',
+                    },
+                  }}
+                />
+              </Paper>
             )}
           </>
         )}
 
-        {/* Areas tab */}
+        {/* ── Areas tab ── */}
         {activeTab === 'areas' && (
           <>
             {filteredAreas.length === 0 ? (
-              <Paper elevation={0} sx={{ p: 6, textAlign: 'center', border: '1px solid #e0e0e0', borderRadius: 3, bgcolor: '#ffffff', mt: 3 }}>
-                <Box sx={{ width: 64, height: 64, borderRadius: '50%', bgcolor: '#f8fafc', border: '1px solid #e0e0e0', display: 'flex', alignItems: 'center', justifyContent: 'center', mx: 'auto', mb: 2 }}>
+              <Paper
+                elevation={0}
+                sx={{ p: 6, textAlign: 'center', border: '1px solid #e0e0e0', borderRadius: 3, bgcolor: '#ffffff', mt: 3 }}
+              >
+                <Box
+                  sx={{
+                    width: 64,
+                    height: 64,
+                    borderRadius: '50%',
+                    bgcolor: '#f8fafc',
+                    border: '1px solid #e0e0e0',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    mx: 'auto',
+                    mb: 2,
+                  }}
+                >
                   <LocationOnIcon sx={{ fontSize: 28, color: '#999999' }} />
                 </Box>
                 <Typography sx={{ fontWeight: 600, color: '#666666', fontSize: '0.95rem', mb: 0.5 }}>
@@ -731,7 +844,7 @@ const LocationsManagementPage: React.FC = () => {
                     disableElevation
                     sx={{
                       mt: 3,
-                      bgcolor: '#00A6CA',
+                      bgcolor: PRIMARY,
                       color: '#ffffff',
                       fontWeight: 600,
                       textTransform: 'none',
@@ -739,7 +852,7 @@ const LocationsManagementPage: React.FC = () => {
                       px: 3,
                       py: 1,
                       fontSize: '0.875rem',
-                      '&:hover': { bgcolor: '#005F8D' },
+                      '&:hover': { bgcolor: '#1565C0' },
                     }}
                   >
                     Add Area
@@ -747,28 +860,53 @@ const LocationsManagementPage: React.FC = () => {
                 )}
               </Paper>
             ) : (
-              <Box sx={{ bgcolor: '#ffffff', border: '1px solid #e0e0e0', borderRadius: 2, overflow: 'hidden' }}>
-                {filteredAreas.map((area, idx) => (
-                  <React.Fragment key={area.id}>
-                    <Box sx={{ '&:hover': { bgcolor: 'rgba(0,166,202,0.04)' } }}>
+              <>
+                <Grid container spacing={2}>
+                  {pagedAreas.map((area) => (
+                    <Grid item xs={12} sm={6} md={4} key={area.id}>
                       <AreaCard
                         area={area}
                         locationCount={locationCountByArea(area.id)}
                         onEdit={handleEditArea}
                         onDelete={handleDeleteArea}
                       />
-                    </Box>
-                    {idx < filteredAreas.length - 1 && <Divider sx={{ borderColor: '#e0e0e0' }} />}
-                  </React.Fragment>
-                ))}
-              </Box>
+                    </Grid>
+                  ))}
+                </Grid>
+                {filteredAreas.length > areaRowsPerPage && (
+                  <Paper
+                    elevation={0}
+                    sx={{ mt: 2, border: '1px solid #e0e0e0', borderRadius: 2, overflow: 'hidden', bgcolor: '#ffffff' }}
+                  >
+                    <TablePagination
+                      component="div"
+                      count={filteredAreas.length}
+                      page={areaPage}
+                      rowsPerPage={areaRowsPerPage}
+                      rowsPerPageOptions={[10, 25, 50]}
+                      onPageChange={(_, newPage) => setAreaPage(newPage)}
+                      onRowsPerPageChange={(e) => {
+                        setAreaRowsPerPage(parseInt(e.target.value, 10));
+                        setAreaPage(0);
+                      }}
+                      sx={{
+                        bgcolor: '#ffffff',
+                        '& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows': {
+                          fontSize: '0.8125rem',
+                          color: '#666666',
+                        },
+                      }}
+                    />
+                  </Paper>
+                )}
+              </>
             )}
           </>
         )}
 
       </Box>
 
-      {/* Mobile FAB */}
+      {/* ── Mobile FAB ── */}
       {isMobile && canAdd && (
         <Fab
           onClick={handleAddNew}
@@ -776,16 +914,16 @@ const LocationsManagementPage: React.FC = () => {
             position: 'fixed',
             bottom: 80,
             right: 16,
-            bgcolor: '#00A6CA',
+            bgcolor: PRIMARY,
             color: '#ffffff',
-            '&:hover': { bgcolor: '#005F8D' },
+            '&:hover': { bgcolor: '#1565C0' },
           }}
         >
           <AddIcon />
         </Fab>
       )}
 
-      {/* Location form dialog */}
+      {/* ── Location form dialog ── */}
       <ServiceLocationFormDialog
         open={locationDialogOpen}
         onClose={() => { setLocationDialogOpen(false); setSelectedLocation(null); }}
@@ -794,7 +932,7 @@ const LocationsManagementPage: React.FC = () => {
         areas={areas}
       />
 
-      {/* Location delete dialog */}
+      {/* ── Location delete dialog ── */}
       <DeleteConfirmationDialog
         open={locationDeleteOpen}
         onClose={() => { setLocationDeleteOpen(false); setSelectedLocation(null); }}
@@ -806,7 +944,7 @@ const LocationsManagementPage: React.FC = () => {
         requireTyping={false}
       />
 
-      {/* Area form dialog */}
+      {/* ── Area form dialog ── */}
       <ServiceAreaFormDialog
         open={areaDialogOpen}
         onClose={() => { setAreaDialogOpen(false); setSelectedArea(null); }}
@@ -814,7 +952,7 @@ const LocationsManagementPage: React.FC = () => {
         area={selectedArea}
       />
 
-      {/* Area delete dialog */}
+      {/* ── Area delete dialog ── */}
       <DeleteConfirmationDialog
         open={areaDeleteOpen}
         onClose={() => { setAreaDeleteOpen(false); setSelectedArea(null); }}
@@ -826,7 +964,7 @@ const LocationsManagementPage: React.FC = () => {
         requireTyping={false}
       />
 
-      {/* Bulk Print Style Picker */}
+      {/* ── Bulk Print Style Picker ── */}
       <Dialog
         open={bulkStyleOpen}
         onClose={() => setBulkStyleOpen(false)}
@@ -881,17 +1019,17 @@ const LocationsManagementPage: React.FC = () => {
                   px: 2,
                   py: 1.25,
                   borderRadius: '8px',
-                  border: `1.5px solid ${bulkStyle === s.value ? '#00A6CA' : '#e0e0e0'}`,
-                  bgcolor: bulkStyle === s.value ? 'rgba(0,166,202,0.04)' : '#f8fafc',
+                  border: `1.5px solid ${bulkStyle === s.value ? PRIMARY : '#e0e0e0'}`,
+                  bgcolor: bulkStyle === s.value ? PRIMARY_BG : '#f8fafc',
                   cursor: 'pointer',
                   transition: 'all 0.15s',
-                  '&:hover': { borderColor: '#00A6CA', bgcolor: 'rgba(0,166,202,0.04)' },
+                  '&:hover': { borderColor: PRIMARY, bgcolor: PRIMARY_BG },
                 }}
               >
                 <Radio
                   checked={bulkStyle === s.value}
                   size="small"
-                  sx={{ p: 0, color: '#00A6CA', '&.Mui-checked': { color: '#00A6CA' } }}
+                  sx={{ p: 0, color: PRIMARY, '&.Mui-checked': { color: PRIMARY } }}
                 />
                 <Box>
                   <Typography sx={{ fontWeight: 700, fontSize: '0.875rem', color: '#1C1C1E', lineHeight: 1.2 }}>
@@ -920,10 +1058,10 @@ const LocationsManagementPage: React.FC = () => {
             sx={{
               textTransform: 'none',
               fontWeight: 600,
-              bgcolor: '#00A6CA',
+              bgcolor: PRIMARY,
               borderRadius: '8px',
               boxShadow: 'none',
-              '&:hover': { bgcolor: '#005F8D', boxShadow: 'none' },
+              '&:hover': { bgcolor: '#1565C0', boxShadow: 'none' },
             }}
           >
             Print All QRs
@@ -931,7 +1069,7 @@ const LocationsManagementPage: React.FC = () => {
         </DialogActions>
       </Dialog>
 
-      {/* QR viewer */}
+      {/* ── QR viewer ── */}
       <QRCodeDialog
         open={!!qrDialogLocation}
         location={qrDialogLocation}

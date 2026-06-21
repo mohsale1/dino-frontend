@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import {
   Dialog,
@@ -29,29 +30,32 @@ import {
   PhoneOutlined,
   LockResetOutlined,
   BusinessOutlined,
-  Store,
+  BadgeOutlined,
 } from '@mui/icons-material';
 import { applicationUserService } from '../../../services/application/user';
-import { apiService } from '../../../utils/api';
 
 // ─── Design tokens ──────────────────────────────────────────────────────────
+const PRIMARY = '#1976D2';
+const PRIMARY_BG = 'rgba(25,118,210,0.08)';
+const PRIMARY_BORDER = 'rgba(25,118,210,0.2)';
+
 const fieldSx = {
   '& .MuiOutlinedInput-root': {
     borderRadius: 2,
     bgcolor: '#f8fafc',
     '& fieldset': { borderColor: '#e0e0e0' },
-    '&:hover fieldset': { borderColor: 'rgba(0,166,202,0.4)' },
-    '&.Mui-focused fieldset': { borderColor: '#00A6CA' },
+    '&:hover fieldset': { borderColor: PRIMARY_BORDER },
+    '&.Mui-focused fieldset': { borderColor: PRIMARY },
   },
-  '& .MuiInputLabel-root.Mui-focused': { color: '#00A6CA' },
+  '& .MuiInputLabel-root.Mui-focused': { color: PRIMARY },
 };
 
 const selectSx = {
   borderRadius: 2,
   bgcolor: '#f8fafc',
   '& fieldset': { borderColor: '#e0e0e0' },
-  '&:hover fieldset': { borderColor: 'rgba(0,166,202,0.4)' },
-  '&.Mui-focused fieldset': { borderColor: '#00A6CA' },
+  '&:hover fieldset': { borderColor: PRIMARY_BORDER },
+  '&.Mui-focused fieldset': { borderColor: PRIMARY },
 };
 
 // ─── Interfaces ──────────────────────────────────────────────────────────────
@@ -63,10 +67,7 @@ interface UserFormData {
   password: string;
   confirm_password: string;
   role_id: string;
-  role_name: string;
-  workspaceId: string;
   venueId: string;
-  isActive: boolean;
 }
 
 interface UserFormDialogProps {
@@ -77,6 +78,7 @@ interface UserFormDialogProps {
   workspaceId: string;
   venueId: string;
   venues: any[];
+  roles: any[];
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
@@ -88,9 +90,10 @@ const UserFormDialog: React.FC<UserFormDialogProps> = ({
   workspaceId,
   venueId,
   venues,
+  roles,
 }) => {
   const theme = useTheme();
-  const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
+  const fullScreen = useMediaQuery(theme.breakpoints.down('xs'));
 
   const [formData, setFormData] = useState<UserFormData>({
     email: '',
@@ -100,36 +103,29 @@ const UserFormDialog: React.FC<UserFormDialogProps> = ({
     password: '',
     confirm_password: '',
     role_id: '',
-    role_name: '',
-    workspaceId: workspaceId,
     venueId: venueId,
-    isActive: true,
   });
 
-  const [roles, setRoles] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [loadingRoles, setLoadingRoles] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formError, setFormError] = useState('');
+  const [passwordMismatch, setPasswordMismatch] = useState(false);
 
   useEffect(() => {
     if (open) {
-      loadRoles();
       setFormError('');
+      setPasswordMismatch(false);
       if (editingUser) {
         setFormData({
           email: editingUser.email || '',
-          firstName: editingUser.firstName || '',
-          lastName: editingUser.lastName || '',
+          firstName: editingUser.firstName || editingUser.first_name || '',
+          lastName: editingUser.lastName || editingUser.last_name || '',
           phone: editingUser.phone || '',
           password: '',
           confirm_password: '',
-          role_id: editingUser.role?.id || '',
-          role_name: editingUser.role?.name || '',
-          workspaceId: editingUser.workspaceId || workspaceId,
-          venueId: editingUser.venueId || venueId,
-          isActive: editingUser.isActive !== undefined ? editingUser.isActive : true,
+          role_id: String(editingUser.role?.id || editingUser.role_id || ''),
+          venueId: String(editingUser.venueId || venueId || ''),
         });
       } else {
         setFormData({
@@ -140,62 +136,52 @@ const UserFormDialog: React.FC<UserFormDialogProps> = ({
           password: '',
           confirm_password: '',
           role_id: '',
-          role_name: '',
-          workspaceId: workspaceId,
-          venueId: venueId,
-          isActive: true,
+          venueId: String(venueId || ''),
         });
       }
     }
   }, [open, editingUser, workspaceId, venueId]);
 
-  const loadRoles = async () => {
-    try {
-      setLoadingRoles(true);
-      // GET /application/roles — returns application roles only (role_type=1)
-      const response = await apiService.get('/application/roles', {
-        params: { page: 1, page_size: 100 },
-      });
-      const raw = (response.data as any);
-      let rolesArray: any[] = [];
-      if (Array.isArray(raw)) {
-        rolesArray = raw;
-      } else if (Array.isArray(raw?.data)) {
-        rolesArray = raw.data;
-      } else if (Array.isArray(raw?.items)) {
-        rolesArray = raw.items;
-      }
-      setRoles(rolesArray);
-    } catch {
-      setFormError('Failed to load roles. Please close and try again.');
-      setRoles([]);
-    } finally {
-      setLoadingRoles(false);
-    }
+  const handleConfirmPasswordChange = (value: string) => {
+    setFormData((prev) => ({ ...prev, confirm_password: value }));
+    setPasswordMismatch(!!formData.password && value !== formData.password);
   };
 
   const handleSubmit = async () => {
+    setFormError('');
+
+    if (editingUser) {
+      if (!formData.firstName.trim() || !formData.lastName.trim()) {
+        setFormError('First name and last name are required.');
+        return;
+      }
+    } else {
+      if (!formData.email.trim() || !formData.firstName.trim() || !formData.lastName.trim() || !formData.role_id) {
+        setFormError('Email, first name, last name, and role are required.');
+        return;
+      }
+      if (!formData.password || formData.password.length < 8) {
+        setFormError('Password must be at least 8 characters.');
+        return;
+      }
+      if (formData.password !== formData.confirm_password) {
+        setPasswordMismatch(true);
+        setFormError('Passwords do not match.');
+        return;
+      }
+    }
+
     try {
       setLoading(true);
-      setFormError('');
 
       if (editingUser) {
-        const updateData: any = {
+        await applicationUserService.updateUser(editingUser.id, {
           first_name: formData.firstName,
           last_name: formData.lastName,
           phone: formData.phone,
-        };
-        if (formData.role_id) {
-          updateData.role_id = Number(formData.role_id);
-        }
-        await applicationUserService.updateUser(editingUser.id, updateData);
+          role_id: Number(formData.role_id),
+        });
       } else {
-        if (formData.password !== formData.confirm_password) {
-          setFormError('Passwords do not match');
-          setLoading(false);
-          return;
-        }
-
         const createData: any = {
           email: formData.email,
           password: formData.password,
@@ -213,17 +199,18 @@ const UserFormDialog: React.FC<UserFormDialogProps> = ({
       onSuccess();
       onClose();
     } catch (error: any) {
-      setFormError(error?.message || 'Failed to save user');
+      setFormError(error?.message || 'Failed to save user. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  // Save button disabled logic
-  const isSaveDisabled = loading
-    || !formData.firstName
-    || !formData.lastName
-    || (!editingUser && (!formData.email || !formData.password || !formData.role_id));
+  const isSaveDisabled =
+    loading ||
+    !formData.firstName.trim() ||
+    !formData.lastName.trim() ||
+    (!editingUser && (!formData.email.trim() || !formData.password || !formData.role_id)) ||
+    passwordMismatch;
 
   return (
     <Dialog
@@ -239,7 +226,7 @@ const UserFormDialog: React.FC<UserFormDialogProps> = ({
         },
       }}
     >
-      {/* ── Clean white header ───────────────────────────────────────────────── */}
+      {/* ── Header ───────────────────────────────────────────────────────────── */}
       <Box sx={{ bgcolor: '#ffffff', borderBottom: '1px solid #e0e0e0', px: 3, pt: 3, pb: 3 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
@@ -248,21 +235,21 @@ const UserFormDialog: React.FC<UserFormDialogProps> = ({
                 width: 40,
                 height: 40,
                 borderRadius: 2,
-                bgcolor: 'rgba(0,166,202,0.08)',
-                border: '1px solid rgba(0,166,202,0.2)',
+                bgcolor: PRIMARY_BG,
+                border: `1px solid ${PRIMARY_BORDER}`,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
               }}
             >
               {editingUser
-                ? <Edit sx={{ fontSize: 20, color: '#00A6CA' }} />
-                : <PersonAddAltOutlined sx={{ fontSize: 20, color: '#00A6CA' }} />
+                ? <Edit sx={{ fontSize: 20, color: PRIMARY }} />
+                : <PersonAddAltOutlined sx={{ fontSize: 20, color: PRIMARY }} />
               }
             </Box>
             <Box>
               <Typography variant="h6" sx={{ color: '#1C1C1E', fontWeight: 700, lineHeight: 1.2 }}>
-                {editingUser ? 'Edit User' : 'Create New User'}
+                {editingUser ? 'Edit User' : 'Add User'}
               </Typography>
               <Typography variant="caption" sx={{ color: '#666666', fontSize: '0.75rem' }}>
                 {editingUser ? 'Update user information' : 'Add a new user to your workspace'}
@@ -290,7 +277,45 @@ const UserFormDialog: React.FC<UserFormDialogProps> = ({
             </Alert>
           )}
 
-          {/* First / Last name */}
+          {/* Email — read-only in edit mode, hidden in create until below */}
+          {editingUser ? (
+            <TextField
+              label="Email Address"
+              fullWidth
+              size="small"
+              type="email"
+              value={formData.email}
+              disabled
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Email sx={{ fontSize: 18, color: '#999999' }} />
+                  </InputAdornment>
+                ),
+              }}
+              sx={fieldSx}
+            />
+          ) : (
+            <TextField
+              label="Email Address"
+              fullWidth
+              size="small"
+              type="email"
+              value={formData.email}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              required
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Email sx={{ fontSize: 18, color: '#999999' }} />
+                  </InputAdornment>
+                ),
+              }}
+              sx={fieldSx}
+            />
+          )}
+
+          {/* First / Last name side by side */}
           <Grid container spacing={2}>
             <Grid item xs={6}>
               <TextField
@@ -316,27 +341,6 @@ const UserFormDialog: React.FC<UserFormDialogProps> = ({
             </Grid>
           </Grid>
 
-          {/* Email — create only */}
-          {!editingUser && (
-            <TextField
-              label="Email Address"
-              fullWidth
-              size="small"
-              type="email"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              required
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Email sx={{ fontSize: 18, color: '#999999' }} />
-                  </InputAdornment>
-                ),
-              }}
-              sx={fieldSx}
-            />
-          )}
-
           {/* Password fields — create only */}
           {!editingUser && (
             <>
@@ -348,6 +352,7 @@ const UserFormDialog: React.FC<UserFormDialogProps> = ({
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 required
+                helperText="Minimum 8 characters"
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
@@ -357,7 +362,10 @@ const UserFormDialog: React.FC<UserFormDialogProps> = ({
                   endAdornment: (
                     <InputAdornment position="end">
                       <IconButton onClick={() => setShowPassword(!showPassword)} edge="end" size="small">
-                        {showPassword ? <VisibilityOff sx={{ fontSize: 18 }} /> : <Visibility sx={{ fontSize: 18 }} />}
+                        {showPassword
+                          ? <VisibilityOff sx={{ fontSize: 18 }} />
+                          : <Visibility sx={{ fontSize: 18 }} />
+                        }
                       </IconButton>
                     </InputAdornment>
                   ),
@@ -371,8 +379,10 @@ const UserFormDialog: React.FC<UserFormDialogProps> = ({
                 size="small"
                 type={showConfirmPassword ? 'text' : 'password'}
                 value={formData.confirm_password}
-                onChange={(e) => setFormData({ ...formData, confirm_password: e.target.value })}
+                onChange={(e) => handleConfirmPasswordChange(e.target.value)}
                 required
+                error={passwordMismatch}
+                helperText={passwordMismatch ? 'Passwords do not match' : ''}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
@@ -382,7 +392,10 @@ const UserFormDialog: React.FC<UserFormDialogProps> = ({
                   endAdornment: (
                     <InputAdornment position="end">
                       <IconButton onClick={() => setShowConfirmPassword(!showConfirmPassword)} edge="end" size="small">
-                        {showConfirmPassword ? <VisibilityOff sx={{ fontSize: 18 }} /> : <Visibility sx={{ fontSize: 18 }} />}
+                        {showConfirmPassword
+                          ? <VisibilityOff sx={{ fontSize: 18 }} />
+                          : <Visibility sx={{ fontSize: 18 }} />
+                        }
                       </IconButton>
                     </InputAdornment>
                   ),
@@ -410,33 +423,30 @@ const UserFormDialog: React.FC<UserFormDialogProps> = ({
           />
 
           {/* Role */}
-          <FormControl fullWidth size="small" required sx={{ '& .MuiInputLabel-root.Mui-focused': { color: '#00A6CA' } }}>
+          <FormControl
+            fullWidth
+            size="small"
+            required
+            sx={{ '& .MuiInputLabel-root.Mui-focused': { color: PRIMARY } }}
+          >
             <InputLabel>Role</InputLabel>
             <Select
               label="Role"
               value={formData.role_id}
-              onChange={(e) => {
-                const selectedRole = roles.find((r) => r.id === e.target.value);
-                setFormData({
-                  ...formData,
-                  role_id: e.target.value as string,
-                  role_name: selectedRole?.name || '',
-                });
-              }}
-              disabled={loadingRoles}
+              onChange={(e) => setFormData({ ...formData, role_id: e.target.value as string })}
               sx={selectSx}
               renderValue={(value) => {
                 if (!value) {
                   return (
                     <Typography variant="body2" sx={{ color: '#999999' }}>
-                      {loadingRoles ? 'Loading roles...' : 'Select a role...'}
+                      Select a role...
                     </Typography>
                   );
                 }
-                const role = roles.find((r) => r.id === value);
+                const role = roles.find((r) => String(r.id) === String(value));
                 return (
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Store sx={{ fontSize: 16, color: '#666666' }} />
+                    <BadgeOutlined sx={{ fontSize: 16, color: '#666666' }} />
                     <Typography variant="body2">{role?.displayName || role?.name || value}</Typography>
                   </Box>
                 );
@@ -446,9 +456,9 @@ const UserFormDialog: React.FC<UserFormDialogProps> = ({
                 <Typography variant="body2" sx={{ color: '#999999' }}>Select a role...</Typography>
               </MenuItem>
               {roles.map((role) => (
-                <MenuItem key={role.id} value={role.id}>
+                <MenuItem key={role.id} value={String(role.id)}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Store sx={{ fontSize: 16, color: '#666666' }} />
+                    <BadgeOutlined sx={{ fontSize: 16, color: '#666666' }} />
                     <Typography variant="body2">{role.displayName || role.name}</Typography>
                   </Box>
                 </MenuItem>
@@ -456,41 +466,50 @@ const UserFormDialog: React.FC<UserFormDialogProps> = ({
             </Select>
           </FormControl>
 
-          {/* Venue */}
-          <FormControl fullWidth size="small" sx={{ '& .MuiInputLabel-root.Mui-focused': { color: '#00A6CA' } }}>
-            <InputLabel>Persona</InputLabel>
-            <Select
-              label="Persona"
-              value={formData.venueId}
-              onChange={(e) => setFormData({ ...formData, venueId: e.target.value as string })}
-              disabled={!!editingUser}
-              sx={selectSx}
-              renderValue={(value) => {
-                if (!value) {
-                  return <Typography variant="body2" sx={{ color: '#999999' }}>Select a persona...</Typography>;
-                }
-                const venue = venues.find((v) => v.id === value);
-                return (
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <BusinessOutlined sx={{ fontSize: 16, color: '#666666' }} />
-                    <Typography variant="body2">{venue?.name || value}</Typography>
-                  </Box>
-                );
-              }}
+          {/* Outlet / Persona — create mode only */}
+          {!editingUser && (
+            <FormControl
+              fullWidth
+              size="small"
+              sx={{ '& .MuiInputLabel-root.Mui-focused': { color: PRIMARY } }}
             >
-              <MenuItem value="" disabled>
-                <Typography variant="body2" sx={{ color: '#999999' }}>Select a persona...</Typography>
-              </MenuItem>
-              {venues.map((venue) => (
-                <MenuItem key={venue.id} value={venue.id}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <BusinessOutlined sx={{ fontSize: 16, color: '#666666' }} />
-                    <Typography variant="body2">{venue.name}</Typography>
-                  </Box>
+              <InputLabel>Outlet / Persona</InputLabel>
+              <Select
+                label="Outlet / Persona"
+                value={formData.venueId}
+                onChange={(e) => setFormData({ ...formData, venueId: e.target.value as string })}
+                sx={selectSx}
+                renderValue={(value) => {
+                  if (!value) {
+                    return (
+                      <Typography variant="body2" sx={{ color: '#999999' }}>
+                        Select an outlet...
+                      </Typography>
+                    );
+                  }
+                  const venue = venues.find((v) => String(v.id) === String(value));
+                  return (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <BusinessOutlined sx={{ fontSize: 16, color: '#666666' }} />
+                      <Typography variant="body2">{venue?.name || value}</Typography>
+                    </Box>
+                  );
+                }}
+              >
+                <MenuItem value="">
+                  <Typography variant="body2" sx={{ color: '#999999' }}>None</Typography>
                 </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+                {venues.map((venue) => (
+                  <MenuItem key={venue.id} value={String(venue.id)}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <BusinessOutlined sx={{ fontSize: 16, color: '#666666' }} />
+                      <Typography variant="body2">{venue.name}</Typography>
+                    </Box>
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
 
         </Box>
       </DialogContent>
@@ -500,13 +519,15 @@ const UserFormDialog: React.FC<UserFormDialogProps> = ({
         <Button
           onClick={onClose}
           disabled={loading}
+          variant="outlined"
           sx={{
             textTransform: 'none',
             fontWeight: 600,
-            color: '#666666',
             borderRadius: 2,
             px: 2.5,
-            '&:hover': { bgcolor: 'rgba(0,0,0,0.04)' },
+            color: '#666666',
+            borderColor: '#e0e0e0',
+            '&:hover': { bgcolor: 'rgba(0,0,0,0.04)', borderColor: '#bdbdbd' },
           }}
         >
           Cancel
@@ -527,8 +548,8 @@ const UserFormDialog: React.FC<UserFormDialogProps> = ({
             fontWeight: 700,
             borderRadius: 2,
             px: 3,
-            bgcolor: '#00A6CA',
-            '&:hover': { bgcolor: '#005F8D' },
+            bgcolor: PRIMARY,
+            '&:hover': { bgcolor: '#1565C0' },
             '&.Mui-disabled': { bgcolor: '#e0e0e0' },
           }}
         >

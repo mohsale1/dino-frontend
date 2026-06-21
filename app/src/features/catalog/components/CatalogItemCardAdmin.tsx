@@ -176,13 +176,22 @@ export const CatalogItemCardAdmin: React.FC<CatalogItemCardAdminProps> = ({
         <Divider sx={{ mb: 1.5 }} />
 
         {showActions && (
-          <Stack direction="row" spacing={0.5}>
+          <Stack direction="row" spacing={0.5} justifyContent="flex-end">
             {onToggleAvailability && (
               <Tooltip title={item.isAvailable ? 'Mark Unavailable' : 'Mark Available'}>
                 <IconButton
                   size="small"
                   onClick={() => onToggleAvailability(item.id)}
-                  sx={{ border: '1px solid #e0e0e0' }}
+                  sx={{
+                    width: 30,
+                    height: 30,
+                    borderRadius: '7px',
+                    color: '#9e9e9e',
+                    '&:hover': {
+                      color: '#10b981',
+                      bgcolor: 'rgba(16,185,129,0.08)',
+                    },
+                  }}
                 >
                   {item.isAvailable ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
                 </IconButton>
@@ -193,7 +202,16 @@ export const CatalogItemCardAdmin: React.FC<CatalogItemCardAdminProps> = ({
                 <IconButton
                   size="small"
                   onClick={() => onEdit(item)}
-                  sx={{ border: '1px solid #e0e0e0' }}
+                  sx={{
+                    width: 30,
+                    height: 30,
+                    borderRadius: '7px',
+                    color: '#9e9e9e',
+                    '&:hover': {
+                      color: '#1976D2',
+                      bgcolor: 'rgba(25,118,210,0.08)',
+                    },
+                  }}
                 >
                   <Edit fontSize="small" />
                 </IconButton>
@@ -204,7 +222,16 @@ export const CatalogItemCardAdmin: React.FC<CatalogItemCardAdminProps> = ({
                 <IconButton
                   size="small"
                   onClick={() => onDelete(item.id)}
-                  sx={{ border: '1px solid #e0e0e0' }}
+                  sx={{
+                    width: 30,
+                    height: 30,
+                    borderRadius: '7px',
+                    color: '#9e9e9e',
+                    '&:hover': {
+                      color: '#ef4444',
+                      bgcolor: 'rgba(239,68,68,0.08)',
+                    },
+                  }}
                 >
                   <Delete fontSize="small" />
                 </IconButton>

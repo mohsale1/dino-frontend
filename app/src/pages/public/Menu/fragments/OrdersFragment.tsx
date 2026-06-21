@@ -11,10 +11,11 @@ import {
   DoneAll as ReadyIcon,
   DeliveryDining as ServedIcon,
 } from '@mui/icons-material';
-import { PublicOrder } from '../../../../services/application/publicMenuService';
+import { PublicOrder, publicMenuService } from '../../../../services/application/publicMenuService';
 
 interface OrdersFragmentProps {
   organizationId: string;
+  personaId: string;
   tableId: string;
   customerPhone?: string;
   recentOrderId?: string;
@@ -214,6 +215,7 @@ const OrderCard: React.FC<{ order: PublicOrder; isRecent?: boolean }> = ({ order
 // ── Main fragment ────────────────────────────────────────────────────────────
 const OrdersFragment: React.FC<OrdersFragmentProps> = ({
   organizationId,
+  personaId,
   tableId,
   customerPhone,
   recentOrderId,
@@ -226,12 +228,15 @@ const OrdersFragment: React.FC<OrdersFragmentProps> = ({
     if (!customerPhone) return;
     setLoading(true);
     try {
-      setOrders([]);
+      const data = await publicMenuService.getOrdersByPhone(organizationId, personaId, customerPhone);
+      setOrders(data);
       setLastRefresh(new Date());
+    } catch {
+      // Silently fail — keep existing orders visible
     } finally {
       setLoading(false);
     }
-  }, [organizationId, tableId, customerPhone]);
+  }, [organizationId, personaId, tableId, customerPhone]);
 
   useEffect(() => {
     fetchOrders();

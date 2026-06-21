@@ -38,7 +38,6 @@ interface FormState {
   area_id: number;
   capacity: number;
   status: BackendStatus;
-  display_order: string;
 }
 
 const DEFAULT_FORM: FormState = {
@@ -46,7 +45,6 @@ const DEFAULT_FORM: FormState = {
   area_id: 0,
   capacity: 4,
   status: 'available',
-  display_order: '',
 };
 
 export interface TableFormDialogProps {
@@ -92,7 +90,6 @@ export const ServiceLocationFormDialog: React.FC<TableFormDialogProps> = ({
           area_id: table.areaId ? Number(table.areaId) : 0,
           capacity: table.capacity ?? 4,
           status: toBackendStatus(table.status),
-          display_order: '',
         });
       } else {
         setFormData(DEFAULT_FORM);
@@ -125,19 +122,12 @@ export const ServiceLocationFormDialog: React.FC<TableFormDialogProps> = ({
   const handleSave = () => {
     if (!validate()) return;
 
-    const payload: Record<string, any> = {
+    onSave({
       table_number: formData.table_number.trim(),
       area_id: formData.area_id !== 0 ? formData.area_id : undefined,
       capacity: formData.capacity,
       status: formData.status,
-    };
-
-    const displayOrder = formData.display_order !== '' ? Number(formData.display_order) : undefined;
-    if (displayOrder !== undefined && !isNaN(displayOrder)) {
-      payload.display_order = displayOrder;
-    }
-
-    onSave(payload);
+    });
   };
 
   const handleFieldChange = <K extends keyof FormState>(field: K, value: FormState[K]) => {
@@ -296,20 +286,6 @@ export const ServiceLocationFormDialog: React.FC<TableFormDialogProps> = ({
             />
           </Grid>
 
-          {/* Display Order */}
-          <Grid item xs={12} sm={6}>
-            <TextField
-              label="Display Order"
-              type="number"
-              value={formData.display_order}
-              onChange={(e) => handleFieldChange('display_order', e.target.value)}
-              helperText="Order in which table appears"
-              variant="outlined"
-              size="small"
-              fullWidth
-              inputProps={{ min: 0 }}
-            />
-          </Grid>
         </Grid>
       </DialogContent>
 

@@ -15,6 +15,7 @@ import {
   ShoppingCartOutlined as EmptyCartIcon,
 } from '@mui/icons-material';
 import { CartItem } from '../hooks/useCart';
+import { BillingConfig } from '../../../../services/application/publicMenuService';
 
 interface CartDrawerProps {
   open: boolean;
@@ -22,10 +23,8 @@ interface CartDrawerProps {
   cart: CartItem[];
   onUpdateQuantity: (itemId: string, quantity: number) => void;
   onCheckout: () => void;
+  billingConfig: BillingConfig;
 }
-
-const TAX_RATE = 0.05;
-const SERVICE_RATE = 0.10;
 
 const CartDrawer: React.FC<CartDrawerProps> = ({
   open,
@@ -33,10 +32,11 @@ const CartDrawer: React.FC<CartDrawerProps> = ({
   cart,
   onUpdateQuantity,
   onCheckout,
+  billingConfig,
 }) => {
   const subtotal = cart.reduce((s, i) => s + i.total_price, 0);
-  const tax = Math.round(subtotal * TAX_RATE);
-  const serviceCharge = Math.round(subtotal * SERVICE_RATE);
+  const tax = Math.round(subtotal * billingConfig.tax_rate);
+  const serviceCharge = Math.round(subtotal * billingConfig.service_charge_rate);
   const total = subtotal + tax + serviceCharge;
   const itemCount = cart.reduce((s, i) => s + i.quantity, 0);
 
@@ -47,7 +47,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({
       onClose={onClose}
       PaperProps={{
         sx: {
-          width: { xs: '100%', sm: 380 },
+          width: { xs: '100vw', sm: 420 },
           display: 'flex',
           flexDirection: 'column',
           bgcolor: '#f8fafc',
@@ -186,14 +186,22 @@ const CartDrawer: React.FC<CartDrawerProps> = ({
               <Typography sx={{ fontSize: '0.78rem', color: '#64748b' }}>Subtotal</Typography>
               <Typography sx={{ fontSize: '0.78rem', color: '#374151' }}>₹{subtotal.toLocaleString('en-IN')}</Typography>
             </Box>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-              <Typography sx={{ fontSize: '0.78rem', color: '#64748b' }}>Tax (5%)</Typography>
-              <Typography sx={{ fontSize: '0.78rem', color: '#374151' }}>₹{tax.toLocaleString('en-IN')}</Typography>
-            </Box>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-              <Typography sx={{ fontSize: '0.78rem', color: '#64748b' }}>Service (10%)</Typography>
-              <Typography sx={{ fontSize: '0.78rem', color: '#374151' }}>₹{serviceCharge.toLocaleString('en-IN')}</Typography>
-            </Box>
+            {billingConfig.tax_rate > 0 && (
+              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                <Typography sx={{ fontSize: '0.78rem', color: '#64748b' }}>
+                  {billingConfig.tax_label} ({(billingConfig.tax_rate * 100).toFixed(0)}%)
+                </Typography>
+                <Typography sx={{ fontSize: '0.78rem', color: '#374151' }}>₹{tax.toLocaleString('en-IN')}</Typography>
+              </Box>
+            )}
+            {billingConfig.service_charge_rate > 0 && (
+              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                <Typography sx={{ fontSize: '0.78rem', color: '#64748b' }}>
+                  {billingConfig.service_charge_label} ({(billingConfig.service_charge_rate * 100).toFixed(0)}%)
+                </Typography>
+                <Typography sx={{ fontSize: '0.78rem', color: '#374151' }}>₹{serviceCharge.toLocaleString('en-IN')}</Typography>
+              </Box>
+            )}
             <Divider sx={{ my: 0.5, borderColor: '#f1f5f9' }} />
             <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
               <Typography sx={{ fontSize: '0.95rem', fontWeight: 800, color: '#0f172a' }}>Total</Typography>

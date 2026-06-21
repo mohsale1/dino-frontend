@@ -116,9 +116,6 @@ export interface PaginatedOrders {
 }
 
 class OrderService {
-  /**
-   * List orders with optional filters — GET /application/orders
-   */
   async getOrders(filters?: OrderFilters): Promise<ApiResponse<PaginatedOrders>> {
     try {
       const params: Record<string, unknown> = {};
@@ -133,13 +130,37 @@ class OrderService {
 
       const response = await apiService.get<any>(API_ENDPOINTS.APPLICATION.ORDERS.BASE, { params });
 
+      // The API interceptor applies camelCase transformation to the full response.
+      // Backend shape: { success, data: { items: [...], pagination: {...} } }
+      //            or: { success, data: [...], pagination: {...} }
+      // After camelCase: snake_case keys like total_pages → totalPages, page_size → pageSize
       const raw = response.data as any;
-      const items: Order[] = Array.isArray(raw?.data) ? raw.data : Array.isArray(raw) ? raw : [];
-      const pagination: OrderPagination = raw?.pagination ?? {
-        page: filters?.page ?? 1,
-        page_size: filters?.page_size ?? DEFAULTS.DEFAULT_PAGE_SIZE,
-        total: items.length,
-        total_pages: 1,
+
+      // Resolve the orders array — handle both nested (data.items) and flat (data) shapes
+      let items: Order[] = [];
+      let paginationRaw: any = null;
+
+      if (raw?.data && typeof raw.data === 'object' && !Array.isArray(raw.data)) {
+        // Shape: { data: { items: [...], pagination: {...} } }
+        const inner = raw.data;
+        items = Array.isArray(inner?.items) ? inner.items : [];
+        paginationRaw = inner?.pagination ?? raw?.pagination ?? null;
+      } else if (Array.isArray(raw?.data)) {
+        // Shape: { data: [...], pagination: {...} }
+        items = raw.data;
+        paginationRaw = raw?.pagination ?? null;
+      } else if (Array.isArray(raw)) {
+        // Shape: [...] (bare array)
+        items = raw;
+        paginationRaw = null;
+      }
+
+      // Resolve pagination — handle both camelCase (after transform) and snake_case keys
+      const pagination: OrderPagination = {
+        page: paginationRaw?.page ?? filters?.page ?? 1,
+        page_size: paginationRaw?.pageSize ?? paginationRaw?.page_size ?? filters?.page_size ?? DEFAULTS.DEFAULT_PAGE_SIZE,
+        total: paginationRaw?.total ?? items.length,
+        total_pages: paginationRaw?.totalPages ?? paginationRaw?.total_pages ?? 1,
       };
 
       return {
@@ -164,6 +185,7 @@ class OrderService {
       };
     }
   }
+
 
   /**
    * Get order by ID — GET /application/orders/{id}

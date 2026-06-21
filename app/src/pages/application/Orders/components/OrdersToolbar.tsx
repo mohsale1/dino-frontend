@@ -1,10 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
   Box, InputBase, IconButton, Select, MenuItem,
-  FormControl, Tabs, Tab, Typography, GlobalStyles, Collapse,
+  FormControl, Tabs, Tab, Typography, GlobalStyles, Collapse, Divider,
 } from '@mui/material';
-import { Search, Close, Refresh, DateRange as DateRangeIcon } from '@mui/icons-material';
-import { StatusFilter, DateFilter, STATUS_CONFIG } from '../orders.types';
+import {
+  Search, Close, Refresh, DateRange as DateRangeIcon,
+  TableRestaurant as TableRestaurantIcon,
+} from '@mui/icons-material';
+import { StatusFilter, DateFilter, TableFilter, STATUS_CONFIG } from '../orders.types';
 
 interface OrdersToolbarProps {
   searchQuery: string;
@@ -17,6 +20,9 @@ interface OrdersToolbarProps {
   customEndDate: string;
   onCustomStartDateChange: (v: string) => void;
   onCustomEndDateChange: (v: string) => void;
+  tableFilter: TableFilter;
+  onTableFilterChange: (v: TableFilter) => void;
+  availableTables: string[];
   filteredCount: number;
   totalCount: number;
   onRefresh: () => void;
@@ -53,18 +59,30 @@ const DATE_INPUT_SX = {
   '&::-webkit-calendar-picker-indicator': { cursor: 'pointer', opacity: 0.6 },
 } as const;
 
+const SELECT_SX = {
+  borderRadius: 2,
+  fontSize: '0.83rem',
+  bgcolor: '#f8fafc',
+  color: '#1C1C1E',
+  '& .MuiOutlinedInput-notchedOutline': { borderColor: '#e0e0e0' },
+  '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#00A6CA' },
+  '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#00A6CA', borderWidth: 1 },
+  '& .MuiSelect-select': { py: '6.5px' },
+} as const;
+
 const OrdersToolbar: React.FC<OrdersToolbarProps> = ({
   searchQuery, onSearchChange,
   statusFilter, onStatusFilterChange,
   dateFilter, onDateFilterChange,
   customStartDate, customEndDate,
   onCustomStartDateChange, onCustomEndDateChange,
+  tableFilter, onTableFilterChange,
+  availableTables,
   filteredCount, totalCount,
   onRefresh,
 }) => {
   const today = new Date().toISOString().split('T')[0];
 
-  // Track previous dateFilter to detect transition away from 'custom'
   const prevDateFilter = useRef(dateFilter);
   const [customRowVisible, setCustomRowVisible] = useState(dateFilter === 'custom');
 
@@ -77,43 +95,46 @@ const OrdersToolbar: React.FC<OrdersToolbarProps> = ({
     prevDateFilter.current = dateFilter;
   }, [dateFilter]);
 
+  const isTableFiltered = tableFilter !== '';
+  const isDateCustom = dateFilter === 'custom';
+
   return (
     <Box sx={{ bgcolor: '#ffffff', borderBottom: '1px solid #e0e0e0', flexShrink: 0 }}>
       <GlobalStyles styles={{
         '@keyframes livePulse': {
           '0%, 100%': { opacity: 1, transform: 'scale(1)' },
-          '50%':      { opacity: 0.4, transform: 'scale(0.72)' },
+          '50%': { opacity: 0.4, transform: 'scale(0.72)' },
         },
       }} />
 
-      {/* Main toolbar row */}
+      {/* ── Main toolbar row ─────────────────────────────────────────────── */}
       <Box
         sx={{
-          px: 2,
+          px: { xs: 1.5, sm: 2 },
           py: 1.25,
           display: 'flex',
           alignItems: 'center',
-          gap: 1.5,
+          gap: { xs: 1, sm: 1.5 },
           flexWrap: 'wrap',
         }}
       >
-        {/* 1. Page title + live indicator */}
+        {/* 1. Title + live dot */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, flexShrink: 0 }}>
-          <Typography sx={{ fontWeight: 700, fontSize: '22px', letterSpacing: '-0.3px', color: '#1C1C1E', lineHeight: 1 }}>
+          <Typography sx={{ fontWeight: 700, fontSize: { xs: '18px', sm: '22px' }, letterSpacing: '-0.3px', color: '#1C1C1E', lineHeight: 1 }}>
             Orders
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, ml: 0.25 }}>
             <Box
               sx={{
-                width: 8,
-                height: 8,
+                width: 7,
+                height: 7,
                 borderRadius: '50%',
                 bgcolor: '#16a34a',
                 animation: 'livePulse 1.8s ease-in-out infinite',
                 flexShrink: 0,
               }}
             />
-            <Typography sx={{ fontSize: '0.68rem', color: '#16a34a', fontWeight: 600, lineHeight: 1, letterSpacing: '0.02em' }}>
+            <Typography sx={{ fontSize: '0.65rem', color: '#16a34a', fontWeight: 600, lineHeight: 1, letterSpacing: '0.02em' }}>
               Live
             </Typography>
           </Box>
@@ -122,7 +143,7 @@ const OrdersToolbar: React.FC<OrdersToolbarProps> = ({
         {/* 2. Search box */}
         <Box
           sx={{
-            flex: '1 1 220px',
+            flex: '1 1 180px',
             display: 'flex',
             alignItems: 'center',
             gap: 0.75,
@@ -135,7 +156,7 @@ const OrdersToolbar: React.FC<OrdersToolbarProps> = ({
             '&:focus-within': { borderColor: '#00A6CA' },
           }}
         >
-          <Search sx={{ fontSize: 16, color: '#999999', flexShrink: 0 }} />
+          <Search sx={{ fontSize: 15, color: '#999999', flexShrink: 0 }} />
           <InputBase
             placeholder="Search order # or customer..."
             value={searchQuery}
@@ -159,8 +180,56 @@ const OrdersToolbar: React.FC<OrdersToolbarProps> = ({
           )}
         </Box>
 
-        {/* 3. Date select */}
-        <FormControl size="small" sx={{ minWidth: 148, flexShrink: 0 }}>
+        {/* 3. Table filter */}
+        <FormControl size="small" sx={{ minWidth: { xs: 120, sm: 140 }, flexShrink: 0 }}>
+          <Select
+            value={tableFilter}
+            onChange={(e) => onTableFilterChange(e.target.value as TableFilter)}
+            displayEmpty
+            renderValue={(val) => {
+              if (!val) {
+                return (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                    <TableRestaurantIcon sx={{ fontSize: 14, color: '#94a3b8' }} />
+                    <span style={{ color: '#94a3b8' }}>All Tables</span>
+                  </Box>
+                );
+              }
+              return (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                  <TableRestaurantIcon sx={{ fontSize: 14, color: '#00A6CA' }} />
+                  <span>Table {val}</span>
+                </Box>
+              );
+            }}
+            sx={{
+              ...SELECT_SX,
+              bgcolor: isTableFiltered ? 'rgba(0,166,202,0.07)' : '#f8fafc',
+              '& .MuiOutlinedInput-notchedOutline': {
+                borderColor: isTableFiltered ? 'rgba(0,166,202,0.3)' : '#e0e0e0',
+              },
+            }}
+          >
+            <MenuItem value="" sx={{ fontSize: '0.83rem', color: '#64748b' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                <TableRestaurantIcon sx={{ fontSize: 14, color: '#94a3b8' }} />
+                All Tables
+              </Box>
+            </MenuItem>
+            {availableTables.length > 0 && <Divider sx={{ my: 0.5 }} />}
+            {availableTables.map((t) => (
+              <MenuItem key={t} value={t} sx={{ fontSize: '0.83rem' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                  <TableRestaurantIcon sx={{ fontSize: 14, color: '#64748b' }} />
+                  Table {t}
+                </Box>
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        {/* 4. Date filter */}
+        <FormControl size="small" sx={{ minWidth: { xs: 120, sm: 148 }, flexShrink: 0 }}>
           <Select
             value={dateFilter}
             onChange={(e) => onDateFilterChange(e.target.value as DateFilter)}
@@ -169,7 +238,7 @@ const OrdersToolbar: React.FC<OrdersToolbarProps> = ({
               if (val === 'custom') {
                 return (
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-                    <DateRangeIcon sx={{ fontSize: 15, color: '#00A6CA' }} />
+                    <DateRangeIcon sx={{ fontSize: 14, color: '#00A6CA' }} />
                     <span>Custom Range</span>
                   </Box>
                 );
@@ -180,45 +249,33 @@ const OrdersToolbar: React.FC<OrdersToolbarProps> = ({
               return labels[val as string] ?? val;
             }}
             sx={{
-              borderRadius: 2,
-              fontSize: '0.83rem',
-              bgcolor: dateFilter === 'custom' ? 'rgba(0,166,202,0.08)' : '#f8fafc',
-              color: '#1C1C1E',
+              ...SELECT_SX,
+              bgcolor: isDateCustom ? 'rgba(0,166,202,0.07)' : '#f8fafc',
               '& .MuiOutlinedInput-notchedOutline': {
-                borderColor: dateFilter === 'custom' ? 'rgba(0,166,202,0.2)' : '#e0e0e0',
+                borderColor: isDateCustom ? 'rgba(0,166,202,0.3)' : '#e0e0e0',
               },
-              '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#00A6CA' },
-              '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#00A6CA', borderWidth: 1 },
-              '& .MuiSelect-select': { py: '6.5px' },
             }}
           >
             <MenuItem value="today" sx={{ fontSize: '0.83rem' }}>Today</MenuItem>
             <MenuItem value="week" sx={{ fontSize: '0.83rem' }}>This Week</MenuItem>
             <MenuItem value="month" sx={{ fontSize: '0.83rem' }}>This Month</MenuItem>
             <MenuItem value="" sx={{ fontSize: '0.83rem' }}>All Dates</MenuItem>
-            <MenuItem
-              value="custom"
-              sx={{
-                fontSize: '0.83rem',
-                color: '#00A6CA',
-                fontWeight: 600,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 0.75,
-              }}
-            >
-              <DateRangeIcon sx={{ fontSize: 15 }} />
-              Custom Range
+            <Divider sx={{ my: 0.5 }} />
+            <MenuItem value="custom" sx={{ fontSize: '0.83rem', color: '#00A6CA', fontWeight: 600 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                <DateRangeIcon sx={{ fontSize: 14 }} />
+                Custom Range
+              </Box>
             </MenuItem>
           </Select>
         </FormControl>
 
-        {/* 4. Refresh button */}
+        {/* 5. Refresh */}
         <IconButton
           onClick={onRefresh}
           sx={{
-            width: 36,
-            height: 36,
+            width: 34,
+            height: 34,
             border: '1px solid #e0e0e0',
             borderRadius: 2,
             color: '#666666',
@@ -226,10 +283,10 @@ const OrdersToolbar: React.FC<OrdersToolbarProps> = ({
             '&:hover': { bgcolor: '#f8fafc', borderColor: '#00A6CA', color: '#00A6CA' },
           }}
         >
-          <Refresh sx={{ fontSize: 18 }} />
+          <Refresh sx={{ fontSize: 17 }} />
         </IconButton>
 
-        {/* 5. Count pill */}
+        {/* 6. Count pill */}
         <Box
           sx={{
             display: 'flex',
@@ -242,7 +299,7 @@ const OrdersToolbar: React.FC<OrdersToolbarProps> = ({
             flexShrink: 0,
           }}
         >
-          <Typography sx={{ fontSize: '0.75rem', fontWeight: 600, color: '#666666', lineHeight: 1, whiteSpace: 'nowrap' }}>
+          <Typography sx={{ fontSize: '0.73rem', fontWeight: 600, color: '#666666', lineHeight: 1, whiteSpace: 'nowrap' }}>
             {filteredCount === totalCount
               ? `${totalCount} orders`
               : `${filteredCount} of ${totalCount}`}
@@ -250,11 +307,11 @@ const OrdersToolbar: React.FC<OrdersToolbarProps> = ({
         </Box>
       </Box>
 
-      {/* Custom date range row */}
+      {/* ── Custom date range row ─────────────────────────────────────────── */}
       <Collapse in={customRowVisible} timeout={200}>
         <Box
           sx={{
-            px: 2,
+            px: { xs: 1.5, sm: 2 },
             py: 1.25,
             display: 'flex',
             alignItems: 'center',
@@ -264,13 +321,12 @@ const OrdersToolbar: React.FC<OrdersToolbarProps> = ({
             borderTop: '1px solid #e0e0e0',
           }}
         >
-          <DateRangeIcon sx={{ fontSize: 16, color: '#00A6CA', flexShrink: 0 }} />
+          <DateRangeIcon sx={{ fontSize: 15, color: '#00A6CA', flexShrink: 0 }} />
           <Typography sx={{ fontSize: '0.78rem', fontWeight: 600, color: '#666666', flexShrink: 0 }}>
             Date Range
           </Typography>
 
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
-            {/* Start date */}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
               <Typography sx={{ fontSize: '0.75rem', color: '#666666', flexShrink: 0 }}>From</Typography>
               <Box
@@ -285,7 +341,6 @@ const OrdersToolbar: React.FC<OrdersToolbarProps> = ({
 
             <Typography sx={{ fontSize: '0.75rem', color: '#999999' }}>—</Typography>
 
-            {/* End date */}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
               <Typography sx={{ fontSize: '0.75rem', color: '#666666', flexShrink: 0 }}>To</Typography>
               <Box
@@ -300,7 +355,6 @@ const OrdersToolbar: React.FC<OrdersToolbarProps> = ({
             </Box>
           </Box>
 
-          {/* Active range summary badge */}
           {customStartDate && customEndDate && (
             <Box
               sx={{
@@ -314,7 +368,7 @@ const OrdersToolbar: React.FC<OrdersToolbarProps> = ({
                 py: 0.35,
               }}
             >
-              <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: '#00A6CA', flexShrink: 0 }} />
+              <Box sx={{ width: 5, height: 5, borderRadius: '50%', bgcolor: '#00A6CA', flexShrink: 0 }} />
               <Typography sx={{ fontSize: '0.72rem', fontWeight: 600, color: '#00A6CA', lineHeight: 1 }}>
                 {customStartDate === customEndDate
                   ? customStartDate
@@ -323,24 +377,18 @@ const OrdersToolbar: React.FC<OrdersToolbarProps> = ({
             </Box>
           )}
 
-          {/* Clear custom range */}
           <IconButton
             size="small"
             onClick={() => onDateFilterChange('today')}
-            sx={{
-              ml: 'auto',
-              p: 0.4,
-              color: '#999999',
-              '&:hover': { color: '#ef4444', bgcolor: '#FEF2F2' },
-            }}
+            sx={{ ml: 'auto', p: 0.4, color: '#999999', '&:hover': { color: '#ef4444', bgcolor: '#FEF2F2' } }}
             title="Clear custom range"
           >
-            <Close sx={{ fontSize: 15 }} />
+            <Close sx={{ fontSize: 14 }} />
           </IconButton>
         </Box>
       </Collapse>
 
-      {/* Status filter tabs row */}
+      {/* ── Status tabs ───────────────────────────────────────────────────── */}
       <Tabs
         value={statusFilter}
         onChange={(_, v) => onStatusFilterChange(v as StatusFilter)}
@@ -350,21 +398,20 @@ const OrdersToolbar: React.FC<OrdersToolbarProps> = ({
           style: { backgroundColor: '#00A6CA', height: 2, borderRadius: '2px 2px 0 0' },
         }}
         sx={{
-          minHeight: 40,
-          px: 1.5,
+          minHeight: 38,
+          px: { xs: 1, sm: 1.5 },
           borderTop: '1px solid #e0e0e0',
           '& .MuiTab-root': {
-            minHeight: 40,
-            fontSize: '0.78rem',
+            minHeight: 38,
+            fontSize: '0.77rem',
             textTransform: 'none',
             fontWeight: 600,
             py: 0,
-            px: 1.5,
+            px: { xs: 1, sm: 1.5 },
             color: '#666666',
-            gap: 0.6,
           },
           '& .MuiTab-root.Mui-selected': { color: '#1C1C1E' },
-          '& .MuiTabs-scrollButtons': { width: 28 },
+          '& .MuiTabs-scrollButtons': { width: 24 },
         }}
       >
         {STATUS_TABS.map((tab) => {
@@ -382,7 +429,7 @@ const OrdersToolbar: React.FC<OrdersToolbarProps> = ({
                         width: 6,
                         height: 6,
                         borderRadius: '50%',
-                        bgcolor: isActive ? dotColor : '#e0e0e0',
+                        bgcolor: isActive ? dotColor : '#d1d5db',
                         flexShrink: 0,
                         transition: 'background-color 0.15s',
                       }}

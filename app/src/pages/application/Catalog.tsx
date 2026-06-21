@@ -13,6 +13,7 @@ import {
   Select,
   MenuItem,
   InputBase,
+  TablePagination,
 } from '@mui/material';
 import {
   Inventory as InventoryIcon,
@@ -35,10 +36,10 @@ import type { CatalogItem, Category } from '../../features/catalog/types';
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const T = {
-  primary: '#00A6CA',
-  primaryHv: '#005F8D',
-  primaryBg: 'rgba(0,166,202,0.08)',
-  primaryBorder: 'rgba(0,166,202,0.2)',
+  primary: '#1976D2',
+  primaryHv: '#1565C0',
+  primaryBg: 'rgba(25,118,210,0.08)',
+  primaryBorder: 'rgba(25,118,210,0.2)',
   textPri: '#1C1C1E',
   textSec: '#666666',
   textMuted: '#999999',
@@ -50,6 +51,16 @@ const T = {
   error: '#EB0000',
   warning: '#FF871F',
 };
+
+// ── Pagination paper style ─────────────────────────────────────────────────────
+const paginationPaperSx = {
+  border: '1px solid #e0e0e0',
+  borderRadius: 2,
+  mt: 2,
+  bgcolor: '#ffffff',
+  display: 'flex',
+  justifyContent: 'flex-end',
+} as const;
 
 // ── Skeleton cards ─────────────────────────────────────────────────────────────
 const ItemSkeleton: React.FC = () => (
@@ -261,6 +272,12 @@ const CatalogManagementPage: React.FC = () => {
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [availFilter, setAvailFilter] = useState('all');
 
+  // ── Pagination state ──────────────────────────────────────────────────────────
+  const [itemPage, setItemPage] = useState(0);
+  const [itemRowsPerPage, setItemRowsPerPage] = useState(12);
+  const [catPage, setCatPage] = useState(0);
+  const [catRowsPerPage, setCatRowsPerPage] = useState(12);
+
   // ── Dialog state ──────────────────────────────────────────────────────────────
   const [itemDialogOpen, setItemDialogOpen] = useState(false);
   const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
@@ -303,6 +320,17 @@ const CatalogManagementPage: React.FC = () => {
     || cat.description?.toLowerCase().includes(q)
   ), [categories, q]);
 
+  // ── Pagination slices ─────────────────────────────────────────────────────────
+  const pagedItems = useMemo(
+    () => filteredItems.slice(itemPage * itemRowsPerPage, (itemPage + 1) * itemRowsPerPage),
+    [filteredItems, itemPage, itemRowsPerPage],
+  );
+
+  const pagedCategories = useMemo(
+    () => filteredCategories.slice(catPage * catRowsPerPage, (catPage + 1) * catRowsPerPage),
+    [filteredCategories, catPage, catRowsPerPage],
+  );
+
   const getCategoryItemCount = (catId: string) =>
     items.filter(i => i.categoryId === catId).length;
 
@@ -319,6 +347,8 @@ const CatalogManagementPage: React.FC = () => {
     setSearchQuery('');
     setCategoryFilter('all');
     setAvailFilter('all');
+    setItemPage(0);
+    setCatPage(0);
   };
 
   // ── Item handlers ─────────────────────────────────────────────────────────────
@@ -426,6 +456,8 @@ const CatalogManagementPage: React.FC = () => {
     setSearchQuery('');
     setCategoryFilter('all');
     setAvailFilter('all');
+    setItemPage(0);
+    setCatPage(0);
   };
 
   // ── Render ────────────────────────────────────────────────────────────────────
@@ -464,32 +496,29 @@ const CatalogManagementPage: React.FC = () => {
           </Typography>
         </Box>
 
-        <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center', flexShrink: 0 }}>
-          {canAddCategory && (
+        <Box sx={{ flexShrink: 0 }}>
+          {activeTab === 'categories' && canAddCategory && (
             <Button
-              variant="outlined"
+              variant="contained"
               startIcon={<AddIcon />}
               onClick={handleAddCategory}
+              disableElevation
               sx={{
-                borderColor: T.primary,
-                color: T.primary,
+                bgcolor: T.primary,
+                color: T.surface,
                 fontWeight: 600,
                 textTransform: 'none',
                 borderRadius: 2,
                 px: 2.5,
                 py: 0.875,
                 fontSize: '0.875rem',
-                '&:hover': {
-                  borderColor: T.primaryHv,
-                  color: T.primaryHv,
-                  bgcolor: T.primaryBg,
-                },
+                '&:hover': { bgcolor: T.primaryHv },
               }}
             >
               Add Category
             </Button>
           )}
-          {canAddItem && (
+          {activeTab === 'items' && canAddItem && (
             <Button
               variant="contained"
               startIcon={<AddIcon />}
@@ -590,7 +619,11 @@ const CatalogManagementPage: React.FC = () => {
             <InputBase
               placeholder={activeTab === 'items' ? 'Search items...' : 'Search categories...'}
               value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
+              onChange={e => {
+                setSearchQuery(e.target.value);
+                setItemPage(0);
+                setCatPage(0);
+              }}
               sx={{
                 flex: 1,
                 fontSize: '0.875rem',
@@ -601,7 +634,7 @@ const CatalogManagementPage: React.FC = () => {
             {searchQuery && (
               <Box
                 component="span"
-                onClick={() => setSearchQuery('')}
+                onClick={() => { setSearchQuery(''); setItemPage(0); setCatPage(0); }}
                 sx={{
                   display: 'flex',
                   alignItems: 'center',
@@ -620,7 +653,7 @@ const CatalogManagementPage: React.FC = () => {
             <Select
               size="small"
               value={categoryFilter}
-              onChange={e => setCategoryFilter(e.target.value)}
+              onChange={e => { setCategoryFilter(e.target.value); setItemPage(0); }}
               displayEmpty
               sx={{
                 minWidth: 140,
@@ -646,7 +679,7 @@ const CatalogManagementPage: React.FC = () => {
             <Select
               size="small"
               value={availFilter}
-              onChange={e => setAvailFilter(e.target.value)}
+              onChange={e => { setAvailFilter(e.target.value); setItemPage(0); }}
               displayEmpty
               sx={{
                 minWidth: 120,
@@ -763,23 +796,39 @@ const CatalogManagementPage: React.FC = () => {
               canAdd={canAddItem}
             />
           ) : (
-            <Grid container spacing={{ xs: 2, sm: 2.5 }}>
-              {filteredItems.map(item => (
-                <Grid item xs={12} sm={6} md={4} lg={3} key={item.id}>
-                  <CatalogItemCardAdmin
-                    item={item}
-                    categoryName={categories.find(c => c.id === item.categoryId)?.name}
-                    onEdit={handleEditItem}
-                    onDelete={(itemId) => {
-                      const found = items.find(i => i.id === itemId);
-                      if (found) handleDeleteItem(found);
-                    }}
-                    onToggleAvailability={handleToggleAvailability}
-                    showActions
-                  />
-                </Grid>
-              ))}
-            </Grid>
+            <>
+              <Grid container spacing={{ xs: 2, sm: 2.5 }}>
+                {pagedItems.map(item => (
+                  <Grid item xs={12} sm={6} md={4} lg={3} key={item.id}>
+                    <CatalogItemCardAdmin
+                      item={item}
+                      categoryName={categories.find(c => c.id === item.categoryId)?.name}
+                      onEdit={handleEditItem}
+                      onDelete={(itemId) => {
+                        const found = items.find(i => i.id === itemId);
+                        if (found) handleDeleteItem(found);
+                      }}
+                      onToggleAvailability={handleToggleAvailability}
+                      showActions
+                    />
+                  </Grid>
+                ))}
+              </Grid>
+              <Paper elevation={0} sx={paginationPaperSx}>
+                <TablePagination
+                  component="div"
+                  count={filteredItems.length}
+                  page={itemPage}
+                  onPageChange={(_, newPage) => setItemPage(newPage)}
+                  rowsPerPage={itemRowsPerPage}
+                  onRowsPerPageChange={e => {
+                    setItemRowsPerPage(parseInt(e.target.value, 10));
+                    setItemPage(0);
+                  }}
+                  rowsPerPageOptions={[12, 24, 48]}
+                />
+              </Paper>
+            </>
           )
         ) : (
           loading ? (
@@ -798,18 +847,34 @@ const CatalogManagementPage: React.FC = () => {
               canAdd={canAddCategory}
             />
           ) : (
-            <Grid container spacing={{ xs: 2, sm: 2.5 }}>
-              {filteredCategories.map(cat => (
-                <Grid item xs={12} sm={6} md={4} lg={3} key={cat.id}>
-                  <CategoryCard
-                    category={cat}
-                    itemCount={getCategoryItemCount(cat.id)}
-                    onEdit={handleEditCategory}
-                    onDelete={handleDeleteCategory}
-                  />
-                </Grid>
-              ))}
-            </Grid>
+            <>
+              <Grid container spacing={{ xs: 2, sm: 2.5 }}>
+                {pagedCategories.map(cat => (
+                  <Grid item xs={12} sm={6} md={4} lg={3} key={cat.id}>
+                    <CategoryCard
+                      category={cat}
+                      itemCount={getCategoryItemCount(cat.id)}
+                      onEdit={handleEditCategory}
+                      onDelete={handleDeleteCategory}
+                    />
+                  </Grid>
+                ))}
+              </Grid>
+              <Paper elevation={0} sx={paginationPaperSx}>
+                <TablePagination
+                  component="div"
+                  count={filteredCategories.length}
+                  page={catPage}
+                  onPageChange={(_, newPage) => setCatPage(newPage)}
+                  rowsPerPage={catRowsPerPage}
+                  onRowsPerPageChange={e => {
+                    setCatRowsPerPage(parseInt(e.target.value, 10));
+                    setCatPage(0);
+                  }}
+                  rowsPerPageOptions={[12, 24, 48]}
+                />
+              </Paper>
+            </>
           )
         )}
       </Box>

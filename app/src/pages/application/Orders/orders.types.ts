@@ -6,6 +6,7 @@ export type OrderDetail = _OrderDetail;
 // ── Filter types ─────────────────────────────────────────────────────────────
 export type StatusFilter = '' | 'pending' | 'confirmed' | 'preparing' | 'ready' | 'completed' | 'cancelled';
 export type DateFilter = '' | 'today' | 'week' | 'month' | 'custom';
+export type TableFilter = string; // table_number value or '' for all
 
 export interface CustomDateRange {
   startDate: string;
@@ -74,8 +75,21 @@ export function formatINR(value: number | undefined | null): string {
 }
 
 export function toISODate(d: Date): string {
-  return d.toISOString().split('T')[0];
+  // Format as YYYY-MM-DD in IST (UTC+5:30) to avoid date shifting
+  const ist = new Date(d.getTime() + 5.5 * 60 * 60 * 1000);
+  return ist.toISOString().split('T')[0];
 }
+
+/**
+ * Convert a YYYY-MM-DD date string to an IST-aware ISO datetime string.
+ * start=true  → YYYY-MM-DDT00:00:00+05:30  (beginning of day in IST)
+ * start=false → YYYY-MM-DDT23:59:59+05:30  (end of day in IST)
+ */
+export function toISTDatetime(dateStr: string, start: boolean): string {
+  const time = start ? 'T00:00:00+05:30' : 'T23:59:59+05:30';
+  return `${dateStr}${time}`;
+}
+
 
 export function getDateRange(
   filter: DateFilter,
@@ -83,10 +97,32 @@ export function getDateRange(
   customEnd?: string,
 ): { startDate?: string; endDate?: string } {
   const now = new Date();
-  if (filter === 'today') { const s = toISODate(now); return { startDate: s, endDate: s }; }
-  if (filter === 'week') { const s = new Date(now); s.setDate(s.getDate() - 7); return { startDate: toISODate(s), endDate: toISODate(now) }; }
-  if (filter === 'month') { const s = new Date(now); s.setDate(s.getDate() - 30); return { startDate: toISODate(s), endDate: toISODate(now) }; }
-  if (filter === 'custom') { return { startDate: customStart || undefined, endDate: customEnd || undefined }; }
+
+  if (filter === 'today') {
+    const s = toISODate(now);
+    return { startDate: toISTDatetime(s, true), endDate: toISTDatetime(s, false) };
+  }
+  if (filter === 'week') {
+    const from = new Date(now);
+    from.setDate(from.getDate() - 7);
+    return {
+      startDate: toISTDatetime(toISODate(from), true),
+      endDate: toISTDatetime(toISODate(now), false),
+    };
+  }
+  if (filter === 'month') {
+    const from = new Date(now);
+    from.setDate(from.getDate() - 30);
+    return {
+      startDate: toISTDatetime(toISODate(from), true),
+      endDate: toISTDatetime(toISODate(now), false),
+    };
+  }
+  if (filter === 'custom') {
+    return {
+      startDate: customStart ? toISTDatetime(customStart, true) : undefined,
+      endDate: customEnd ? toISTDatetime(customEnd, false) : undefined,
+    };
+  }
   return {};
 }
-

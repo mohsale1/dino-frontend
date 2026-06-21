@@ -1,4 +1,4 @@
-/*
+/**
  * Location Service
  * Handles API calls for area and table operations.
  * Base URL: /api/v1 (set in apiService) — paths here are relative to that base.
@@ -182,16 +182,16 @@ class LocationService {
     const response = await apiService.post(
       this.tablesBase,
       {
+        persona_id: personaId,
         table_number: data.table_number,
-        area_id: data.area_id,
+        ...(data.area_id !== undefined && { area_id: data.area_id }),
         ...(data.capacity !== undefined && { capacity: data.capacity }),
         ...(data.status !== undefined && { status: data.status }),
-        ...(data.display_order !== undefined && { display_order: data.display_order }),
       },
-      { params: { persona_id: personaId } },
     );
     return (response.data as any)?.data ?? response.data;
   }
+
 
   async updateTable(
     id: string | number,

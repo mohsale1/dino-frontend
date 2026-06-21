@@ -192,43 +192,6 @@ const CTASection: React.FC = () => {
         <Grid container spacing={{ xs: 4, md: 6 }} alignItems="center">
           {/* Left panel */}
           <Grid item xs={12} md={6}>
-            {/* Badge pill */}
-            <Box
-              sx={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 1,
-                borderRadius: '999px',
-                background:
-                  'linear-gradient(135deg, rgba(25,118,210,0.15) 0%, rgba(66,165,245,0.1) 100%)',
-                border: '1px solid rgba(25,118,210,0.25)',
-                px: 1.75,
-                py: 0.625,
-                mb: 2,
-              }}
-            >
-              <Box
-                sx={{
-                  width: 6,
-                  height: 6,
-                  borderRadius: '50%',
-                  backgroundColor: '#42A5F5',
-                  flexShrink: 0,
-                }}
-              />
-              <Typography
-                sx={{
-                  fontSize: '0.6875rem',
-                  fontWeight: 700,
-                  letterSpacing: '0.12em',
-                  color: '#42A5F5',
-                  textTransform: 'uppercase',
-                  lineHeight: 1,
-                }}
-              >
-                Get Started Today
-              </Typography>
-            </Box>
 
             {/* Heading */}
             <Typography

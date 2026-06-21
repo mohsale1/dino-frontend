@@ -51,13 +51,15 @@ const AppContent = memo(() => {
     <>
       <Suspense fallback={null}>
         <Routes>
+          {/* Standalone public menu — no layout wrapper, no auth */}
+          <Route path="/menu/:workspaceId/:personaId/:tableId" element={<PublicMenu />} />
+
           {/* Public routes */}
           <Route element={<AppLayout />}>
             <Route path="/" element={<Home />} />
             <Route path="/home" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            <Route path="/:organizationId/:tableId/menu" element={<PublicMenu />} />
           </Route>
 
           {/* Protected application routes */}

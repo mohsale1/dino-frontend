@@ -195,6 +195,30 @@ class WorkspaceService {
     };
   }
 
+  async updateWorkspaceBilling(
+    id: string | number,
+    data: Partial<WorkspaceBilling>,
+  ): Promise<WorkspaceBilling> {
+    const response = await apiService.put<WorkspaceBilling>(
+      API_ENDPOINTS.APPLICATION.WORKSPACES.BILLING(id),
+      data,
+    );
+    const raw = (response as any)?.data ?? response;
+    return (raw?.data ?? raw) as WorkspaceBilling;
+  }
+
+  async updateBillingDetail(
+    id: string | number,
+    data: Partial<BillingDetail>,
+  ): Promise<BillingDetail> {
+    const response = await apiService.put<BillingDetail>(
+      API_ENDPOINTS.APPLICATION.WORKSPACES.BILLING_DETAIL(id),
+      data,
+    );
+    const raw = (response as any)?.data ?? response;
+    return (raw?.data ?? raw) as BillingDetail;
+  }
+
   // ── Venues (delegated to personaService) ───────────────────────────────────
 
   async getVenues(): Promise<PersonaListResponse> {

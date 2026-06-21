@@ -24,20 +24,19 @@ interface CheckoutPageProps {
   cart: CartItem[];
   customerInfo: { name: string; phone: string };
   organizationId: string;
-  tableId: string;
+  personaId: string;
+  tableId?: string;
   menuData: PublicMenuWithValidation;
   onBack: () => void;
   onOrderPlaced: (order: PublicOrder) => void;
   onUpdateQuantity: (itemId: string, quantity: number) => void;
 }
 
-const TAX_RATE = 0.05;
-const SERVICE_RATE = 0.10;
-
 const CheckoutPage: React.FC<CheckoutPageProps> = ({
   cart,
   customerInfo,
   organizationId,
+  personaId,
   tableId,
   menuData,
   onBack,
@@ -49,9 +48,10 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [placedOrder, setPlacedOrder] = useState<PublicOrder | null>(null);
 
+  const { tax_rate, tax_label, service_charge_rate, service_charge_label } = menuData.billing_config;
   const subtotal = cart.reduce((s, i) => s + i.total_price, 0);
-  const tax = Math.round(subtotal * TAX_RATE);
-  const serviceCharge = Math.round(subtotal * SERVICE_RATE);
+  const tax = Math.round(subtotal * tax_rate);
+  const serviceCharge = Math.round(subtotal * service_charge_rate);
   const total = subtotal + tax + serviceCharge;
 
   const handlePlaceOrder = async () => {
@@ -60,7 +60,8 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
     setError(null);
     try {
       const order = await publicMenuService.createOrder({
-        venue_id: organizationId,
+        workspace_id: organizationId,
+        persona_id: personaId,
         table_id: tableId,
         customer_name: customerInfo.name,
         customer_phone: customerInfo.phone,
@@ -251,14 +252,22 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({
               <Typography sx={{ fontSize: '0.8rem', color: '#64748b' }}>Subtotal</Typography>
               <Typography sx={{ fontSize: '0.8rem', color: '#374151' }}>₹{subtotal.toLocaleString('en-IN')}</Typography>
             </Box>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-              <Typography sx={{ fontSize: '0.8rem', color: '#64748b' }}>Tax (5%)</Typography>
-              <Typography sx={{ fontSize: '0.8rem', color: '#374151' }}>₹{tax.toLocaleString('en-IN')}</Typography>
-            </Box>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-              <Typography sx={{ fontSize: '0.8rem', color: '#64748b' }}>Service charge (10%)</Typography>
-              <Typography sx={{ fontSize: '0.8rem', color: '#374151' }}>₹{serviceCharge.toLocaleString('en-IN')}</Typography>
-            </Box>
+            {tax_rate > 0 && (
+              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                <Typography sx={{ fontSize: '0.8rem', color: '#64748b' }}>
+                  {tax_label} ({(tax_rate * 100).toFixed(0)}%)
+                </Typography>
+                <Typography sx={{ fontSize: '0.8rem', color: '#374151' }}>₹{tax.toLocaleString('en-IN')}</Typography>
+              </Box>
+            )}
+            {service_charge_rate > 0 && (
+              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                <Typography sx={{ fontSize: '0.8rem', color: '#64748b' }}>
+                  {service_charge_label} ({(service_charge_rate * 100).toFixed(0)}%)
+                </Typography>
+                <Typography sx={{ fontSize: '0.8rem', color: '#374151' }}>₹{serviceCharge.toLocaleString('en-IN')}</Typography>
+              </Box>
+            )}
             <Divider sx={{ my: 0.5, borderColor: '#f1f5f9' }} />
             <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
               <Typography sx={{ fontSize: '1rem', fontWeight: 800, color: '#0f172a' }}>Total</Typography>

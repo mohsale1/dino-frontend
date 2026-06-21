@@ -23,16 +23,14 @@ import {
   ExitToApp,
   Login,
   PersonAdd,
-  Dashboard,
-  Restaurant,
-  People,
+  SpaceDashboard,
   Settings,
   Store,
   CheckCircle,
   Cancel,
   Home,
   MenuBook,
-  ShoppingCart,
+  ShoppingBag,
   LocalOffer,
   Info,
   ContactMail,
@@ -43,6 +41,10 @@ import {
   HelpOutline,
   PlayCircleOutline,
   Storefront,
+  PointOfSale,
+  TableRestaurant,
+  Group,
+  Tune,
 } from '@mui/icons-material';
 import DinoLogo from '../../ui/DinoLogo';
 import { getUserFirstName } from '../../../utils/data/userUtils';
@@ -52,6 +54,14 @@ import { useUserData } from '../../../contexts/application/UserData';
 import { personaService } from '../../../services/application/persona.service';
 import { usePermissionCheck } from '../../common/PermissionWrapper';
 import { APP_CONFIG } from '../../../constants/app';
+import { useLocation } from 'react-router-dom';
+
+// ── Design tokens ─────────────────────────────────────────────────────────────
+const BLUE     = '#1976D2';
+const MUTED    = '#9aa0a6';
+const TEXT_DIM = '#5f6368';
+const TEXT_MAIN = '#202124';
+const BORDER   = '#e8eaed';
 
 interface AppMobileMenuProps {
   open: boolean;
@@ -66,6 +76,17 @@ interface AppMobileMenuProps {
   isAdminRoute?: boolean;
 }
 
+// Order: Dashboard → Orders → POS (type=1) → Catalog → Tables (type=0) → Users → Settings
+const ALL_ADMIN_MENU_ITEMS = [
+  { label: 'Dashboard', path: '/admin/dashboard', icon: <SpaceDashboard />, resource: 'dashboard', action: 'view', orderTypeRestriction: undefined as number | undefined },
+  { label: 'Orders',    path: '/admin/orders',    icon: <ShoppingBag />,    resource: 'orders',    action: 'view', orderTypeRestriction: undefined },
+  { label: 'POS',       path: '/admin/pos',       icon: <PointOfSale />,    resource: 'pos',       action: 'view', orderTypeRestriction: 1 },
+  { label: 'Catalog',   path: '/admin/catalog',   icon: <MenuBook />,       resource: 'catalog',   action: 'view', orderTypeRestriction: undefined },
+  { label: 'Tables',    path: '/admin/locations', icon: <TableRestaurant />,resource: 'locations', action: 'view', orderTypeRestriction: 0 },
+  { label: 'Users',     path: '/admin/users',     icon: <Group />,          resource: 'users',     action: 'view', orderTypeRestriction: undefined },
+  { label: 'Settings',  path: '/admin/settings',  icon: <Tune />,           resource: 'settings',  action: 'view', orderTypeRestriction: undefined },
+];
+
 const AppMobileMenu: React.FC<AppMobileMenuProps> = ({
   open,
   onClose,
@@ -77,6 +98,7 @@ const AppMobileMenu: React.FC<AppMobileMenuProps> = ({
   onNavigate,
   isHomePage,
 }) => {
+  const location                      = useLocation();
   const { userData, refreshUserData } = useUserData();
   const { hasPerm }                   = useAuth();
   usePermissionCheck();
@@ -89,6 +111,7 @@ const AppMobileMenu: React.FC<AppMobileMenuProps> = ({
   const [statusLoading, setStatusLoading] = useState(false);
 
   const canManageVenue = hasPerm('workspace', 'update');
+  const venueOrderType = userData?.venue?.orderType;
 
   useEffect(() => {
     if (!user || !canManageVenue) { setVenueStatus(null); return; }
@@ -97,9 +120,9 @@ const AppMobileMenu: React.FC<AppMobileMenuProps> = ({
       return;
     }
     setVenueStatus({
-      isActive: userData.venue.isActive || false,
-      isOpen:   userData.venue.isOpen   || false,
-      venueName: userData.venue.name    || 'Current Venue',
+      isActive:  userData.venue.isActive || false,
+      isOpen:    userData.venue.isOpen   || false,
+      venueName: userData.venue.name     || 'Current Venue',
     });
   }, [user, userData?.venue, canManageVenue]);
 
@@ -111,7 +134,7 @@ const AppMobileMenu: React.FC<AppMobileMenuProps> = ({
       const personaId = (userData.venue as any).personaId || Number(userData.venue.id);
       await personaService.setPersonaOpenStatus(personaId, newStatus);
       await refreshUserData();
-    } catch (_) {
+    } catch {
       // silent
     } finally {
       setStatusLoading(false);
@@ -119,24 +142,17 @@ const AppMobileMenu: React.FC<AppMobileMenuProps> = ({
   };
 
   const handleSectionClick = (sectionId: string) => { onSectionClick(sectionId); onClose(); };
-  const handleNavigate    = (path: string)        => { onNavigate(path);          onClose(); };
-  const handleLogout      = ()                    => { onLogout(); };
+  const handleNavigate     = (path: string)        => { onNavigate(path);          onClose(); };
+  const handleLogout       = ()                    => { onLogout(); };
 
-  const allAdminMenuItems = [
-    { label: 'Dashboard', path: '/admin',           icon: <Dashboard />,    resource: 'dashboard', action: 'view' },
-    { label: 'POS',       path: '/admin/pos',       icon: <MenuBook />,     resource: 'pos',       action: 'view' },
-    { label: 'Location',  path: '/admin/locations', icon: <Store />,        resource: 'locations', action: 'view' },
-    { label: 'Orders',    path: '/admin/orders',    icon: <ShoppingCart />, resource: 'orders',    action: 'view' },
-    { label: 'Catalog',   path: '/admin/catalog',   icon: <Star />,         resource: 'catalog',   action: 'view' },
-    { label: 'Coupons',   path: '/admin/coupons',   icon: <LocalOffer />,   resource: 'coupons',   action: 'view' },
-    { label: 'Users',     path: '/admin/users',     icon: <People />,       resource: 'users',     action: 'view' },
-    { label: 'Settings',  path: '/admin/settings',  icon: <Settings />,     resource: 'settings',  action: 'view' },
-  ];
-  // Note: Personas are accessed via the header dropdown, not the mobile menu nav
-
-  const adminMenuItems = allAdminMenuItems.filter(item =>
-    hasPerm(item.resource, item.action)
-  );
+  // Filter by permission + orderType
+  const adminMenuItems = ALL_ADMIN_MENU_ITEMS.filter((item) => {
+    if (!hasPerm(item.resource, item.action)) return false;
+    if (item.orderTypeRestriction !== undefined && venueOrderType !== undefined) {
+      return venueOrderType === item.orderTypeRestriction;
+    }
+    return true;
+  });
 
   const getNavigationIcon = (item: { label: string; id: string }) => {
     const id    = item.id.toLowerCase();
@@ -157,12 +173,12 @@ const AppMobileMenu: React.FC<AppMobileMenuProps> = ({
     if (label.includes('faq') || label.includes('question'))         return <HelpOutline />;
     if (label.includes('contact'))                                   return <ContactMail />;
     if (label.includes('menu'))                                      return <MenuBook />;
-    if (label.includes('order'))                                     return <ShoppingCart />;
+    if (label.includes('order'))                                     return <ShoppingBag />;
     if (label.includes('offer') || label.includes('promo'))          return <LocalOffer />;
     if (label.includes('about'))                                     return <Info />;
     if (label.includes('popular') || label.includes('featured'))     return <Star />;
     if (label.includes('dish') || label.includes('food'))            return <Fastfood />;
-    return <Restaurant />;
+    return <Storefront />;
   };
 
   const getUserRoleDisplayName = (role: string | any): string => {
@@ -187,17 +203,13 @@ const AppMobileMenu: React.FC<AppMobileMenuProps> = ({
 
   const userInitials = (() => {
     const firstName = getUserFirstName(user);
-    if (firstName)    return firstName.charAt(0).toUpperCase();
-    if (user?.email)  return user.email.charAt(0).toUpperCase();
+    if (firstName)   return firstName.charAt(0).toUpperCase();
+    if (user?.email) return user.email.charAt(0).toUpperCase();
     return 'U';
   })();
 
   const hasAdminItems = user && adminMenuItems.length > 0;
   const hasHomeNav    = isHomePage && homeNavItems.length > 0;
-
-  // ── Design tokens ─────────────────────────────────────────────────────────────
-  const BLUE      = '#1976D2';
-  const BLUE_LITE = '#42A5F5';
 
   return (
     <Drawer
@@ -206,7 +218,7 @@ const AppMobileMenu: React.FC<AppMobileMenuProps> = ({
       onClose={onClose}
       PaperProps={{
         sx: {
-          width: { xs: '100vw', sm: '360px' },
+          width: { xs: '100vw', sm: '320px' },
           height: '100vh',
           maxHeight: '100vh',
           top: 0,
@@ -215,7 +227,7 @@ const AppMobileMenu: React.FC<AppMobileMenuProps> = ({
           flexDirection: 'column',
           overflow: 'hidden',
           backgroundColor: '#ffffff',
-          borderLeft: '1px solid #e0e0e0',
+          borderLeft: `1px solid ${BORDER}`,
           boxSizing: 'border-box',
           willChange: 'transform',
         },
@@ -223,47 +235,48 @@ const AppMobileMenu: React.FC<AppMobileMenuProps> = ({
       sx={{
         zIndex: 1300,
         '& .MuiBackdrop-root': {
-          backgroundColor: 'rgba(0,0,0,0.4)',
-          backdropFilter: 'blur(4px)',
-          WebkitBackdropFilter: 'blur(4px)',
+          backgroundColor: 'rgba(0,0,0,0.3)',
+          backdropFilter: 'blur(2px)',
+          WebkitBackdropFilter: 'blur(2px)',
         },
       }}
     >
-      {/* ── Header ─────────────────────────────────────────────────────────────── */}
+      {/* ── Header ── */}
       <Box
         sx={{
           px: 2.5,
-          pt: 'max(18px, env(safe-area-inset-top))',
-          pb: 2,
+          pt: 'max(16px, env(safe-area-inset-top))',
+          pb: 1.75,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
           flexShrink: 0,
-          borderBottom: '1px solid #e0e0e0',
-          position: 'relative',
-          zIndex: 1,
+          borderBottom: `1px solid ${BORDER}`,
+          bgcolor: '#ffffff',
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <DinoLogo size={30} animated={false} />
-          <Box>
-            <Typography sx={{ color: '#1C1C1E', fontWeight: 700, fontSize: '1.05rem', lineHeight: 1.2, letterSpacing: '-0.01em' }}>
-              {APP_CONFIG.NAME}
-            </Typography>
-            <Typography sx={{ color: '#999999', fontSize: '0.65rem', lineHeight: 1, display: 'block' }}>
-              {APP_CONFIG.TAGLINE}
-            </Typography>
-          </Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <DinoLogo size={26} animated={false} />
+          <Typography
+            sx={{
+              color: TEXT_MAIN,
+              fontWeight: 700,
+              fontSize: '0.9375rem',
+              lineHeight: 1,
+              letterSpacing: '-0.01em',
+            }}
+          >
+            {APP_CONFIG.NAME}
+          </Typography>
         </Box>
         <IconButton
           onClick={onClose}
           size="small"
           sx={{
-            color: '#999999',
-            border: '1px solid #e0e0e0',
-            borderRadius: '8px',
-            width: 34, height: 34,
-            '&:hover': { color: '#1C1C1E', backgroundColor: alpha('#000', 0.06), borderColor: '#bdbdbd' },
+            color: MUTED,
+            borderRadius: '6px',
+            width: 32, height: 32,
+            '&:hover': { color: TEXT_MAIN, bgcolor: '#f1f3f4' },
             transition: 'all 0.15s ease',
           }}
         >
@@ -271,35 +284,37 @@ const AppMobileMenu: React.FC<AppMobileMenuProps> = ({
         </IconButton>
       </Box>
 
-      {/* ── Scrollable content ───────────────────────────────────────────────── */}
+      {/* ── Scrollable body ── */}
       <Box
         sx={{
           flex: 1,
           overflowY: 'auto',
           overflowX: 'hidden',
-          position: 'relative',
-          zIndex: 1,
           pt: 1.5,
+          scrollbarWidth: 'none',
+          '&::-webkit-scrollbar': { display: 'none' },
         }}
       >
         {/* ── User card ── */}
         {user && (
-          <Box sx={{ px: 2, pb: 1.5, flexShrink: 0 }}>
+          <Box sx={{ px: 2, pb: 1.5 }}>
             <Box
               sx={{
-                backgroundColor: alpha(BLUE, 0.06),
-                borderRadius: '12px',
-                p: 1.75,
-                border: `1px solid rgba(25,118,210,0.15)`,
+                bgcolor: '#f8f9fa',
+                borderRadius: '8px',
+                p: 1.5,
+                border: `1px solid ${BORDER}`,
               }}
             >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25 }}>
                 <Avatar
                   sx={{
-                    width: 40, height: 40,
-                    backgroundColor: BLUE,
-                    fontSize: '0.9375rem', fontWeight: 700,
-                    color: '#ffffff', flexShrink: 0,
+                    width: 36, height: 36,
+                    bgcolor: BLUE,
+                    fontSize: '0.875rem',
+                    fontWeight: 600,
+                    color: '#fff',
+                    flexShrink: 0,
                   }}
                 >
                   {userInitials}
@@ -307,9 +322,13 @@ const AppMobileMenu: React.FC<AppMobileMenuProps> = ({
                 <Box sx={{ flex: 1, minWidth: 0 }}>
                   <Typography
                     sx={{
-                      fontWeight: 600, color: '#1C1C1E', fontSize: '0.875rem',
-                      lineHeight: 1.3, whiteSpace: 'nowrap',
-                      overflow: 'hidden', textOverflow: 'ellipsis',
+                      fontWeight: 500,
+                      color: TEXT_MAIN,
+                      fontSize: '0.875rem',
+                      lineHeight: 1.3,
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
                     }}
                   >
                     {getUserFirstName(user) || user.email}
@@ -318,34 +337,39 @@ const AppMobileMenu: React.FC<AppMobileMenuProps> = ({
                     label={resolvedRoleLabel}
                     size="small"
                     sx={{
-                      mt: 0.4, height: 18, fontSize: '0.62rem', fontWeight: 600,
-                      backgroundColor: alpha(BLUE, 0.1), color: BLUE,
-                      border: 'none', '& .MuiChip-label': { px: 1 },
+                      mt: 0.35,
+                      height: 17,
+                      fontSize: '0.6rem',
+                      fontWeight: 600,
+                      bgcolor: alpha(BLUE, 0.08),
+                      color: BLUE,
+                      border: 'none',
+                      '& .MuiChip-label': { px: 0.875 },
                     }}
                   />
                 </Box>
-                <Box sx={{ display: 'flex', gap: 0.5, flexShrink: 0 }}>
+                <Box sx={{ display: 'flex', gap: 0.25, flexShrink: 0 }}>
                   <IconButton
                     size="small"
                     onClick={() => handleNavigate('/admin/settings')}
                     title="Settings"
                     sx={{
-                      color: '#999999', width: 30, height: 30,
-                      '&:hover': { color: BLUE, backgroundColor: alpha(BLUE, 0.08) },
+                      color: MUTED, width: 28, height: 28, borderRadius: '6px',
+                      '&:hover': { color: TEXT_MAIN, bgcolor: '#e8eaed' },
                     }}
                   >
-                    <Settings sx={{ fontSize: 16 }} />
+                    <Settings sx={{ fontSize: 15 }} />
                   </IconButton>
                   <IconButton
                     size="small"
                     onClick={handleLogout}
-                    title="Logout"
+                    title="Sign out"
                     sx={{
-                      color: '#999999', width: 30, height: 30,
-                      '&:hover': { color: '#ef4444', backgroundColor: 'rgba(239,68,68,0.08)' },
+                      color: MUTED, width: 28, height: 28, borderRadius: '6px',
+                      '&:hover': { color: '#d93025', bgcolor: alpha('#d93025', 0.06) },
                     }}
                   >
-                    <ExitToApp sx={{ fontSize: 16 }} />
+                    <ExitToApp sx={{ fontSize: 15 }} />
                   </IconButton>
                 </Box>
               </Box>
@@ -355,41 +379,41 @@ const AppMobileMenu: React.FC<AppMobileMenuProps> = ({
 
         {/* ── Venue status card ── */}
         {user && canManageVenue && (
-          <Box sx={{ px: 2, pb: 1.5, flexShrink: 0 }}>
+          <Box sx={{ px: 2, pb: 1.5 }}>
             <Box
               sx={{
-                borderRadius: '12px',
+                borderRadius: '8px',
                 border: `1px solid`,
-                borderColor: venueStatus?.isOpen ? 'rgba(22,163,74,0.2)' : '#e0e0e0',
-                backgroundColor: venueStatus?.isOpen ? 'rgba(22,163,74,0.04)' : '#f8fafc',
+                borderColor: venueStatus?.isOpen ? alpha('#1e7e34', 0.25) : BORDER,
+                bgcolor: venueStatus?.isOpen ? alpha('#1e7e34', 0.04) : '#f8f9fa',
                 p: 1.5,
                 transition: 'border-color 0.2s, background-color 0.2s',
               }}
             >
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-                  <Store sx={{ fontSize: 13, color: '#999999' }} />
-                  <Typography sx={{ fontWeight: 700, color: '#999999', fontSize: '0.62rem', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.875 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.625 }}>
+                  <Store sx={{ fontSize: 13, color: MUTED }} />
+                  <Typography sx={{ fontWeight: 600, color: MUTED, fontSize: '0.6rem', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
                     Venue Status
                   </Typography>
                 </Box>
                 {venueStatus ? (
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                     {venueStatus.isOpen
-                      ? <CheckCircle sx={{ fontSize: 13, color: '#16a34a' }} />
-                      : <Cancel      sx={{ fontSize: 13, color: '#999999' }} />
+                      ? <CheckCircle sx={{ fontSize: 12, color: '#1e7e34' }} />
+                      : <Cancel      sx={{ fontSize: 12, color: MUTED }} />
                     }
-                    <Typography sx={{ fontWeight: 700, fontSize: '0.62rem', color: venueStatus.isOpen ? '#16a34a' : '#999999', letterSpacing: '0.04em' }}>
+                    <Typography sx={{ fontWeight: 600, fontSize: '0.6rem', color: venueStatus.isOpen ? '#1e7e34' : MUTED, letterSpacing: '0.04em' }}>
                       {venueStatus.isOpen ? 'OPEN' : 'CLOSED'}
                     </Typography>
                   </Box>
                 ) : (
-                  <Typography sx={{ color: '#999999', fontSize: '0.62rem' }}>Loading...</Typography>
+                  <Typography sx={{ color: MUTED, fontSize: '0.6rem' }}>Loading...</Typography>
                 )}
               </Box>
               {venueStatus ? (
                 <>
-                  <Typography sx={{ fontWeight: 600, color: '#1C1C1E', fontSize: '0.78rem', mb: 0.75 }}>
+                  <Typography sx={{ fontWeight: 500, color: TEXT_MAIN, fontSize: '0.8125rem', mb: 0.75 }}>
                     {venueStatus.venueName}
                   </Typography>
                   <FormControlLabel
@@ -404,12 +428,12 @@ const AppMobileMenu: React.FC<AppMobileMenuProps> = ({
                     }
                     label={
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-                        {statusLoading && <CircularProgress size={10} sx={{ color: '#999999' }} />}
+                        {statusLoading && <CircularProgress size={10} sx={{ color: MUTED }} />}
                         <Box>
-                          <Typography sx={{ fontWeight: 500, color: '#1C1C1E', fontSize: '0.72rem', display: 'block' }}>
+                          <Typography sx={{ fontWeight: 500, color: TEXT_MAIN, fontSize: '0.75rem', display: 'block' }}>
                             {venueStatus.isOpen ? 'Open for Orders' : 'Closed for Orders'}
                           </Typography>
-                          <Typography sx={{ color: '#999999', fontSize: '0.62rem', display: 'block' }}>
+                          <Typography sx={{ color: MUTED, fontSize: '0.6875rem', display: 'block' }}>
                             {venueStatus.isActive
                               ? venueStatus.isOpen ? 'Customers can place orders' : 'Orders are disabled'
                               : 'Venue is inactive'}
@@ -421,7 +445,7 @@ const AppMobileMenu: React.FC<AppMobileMenuProps> = ({
                   />
                 </>
               ) : (
-                <Typography sx={{ fontWeight: 600, color: '#1C1C1E', fontSize: '0.78rem' }}>
+                <Typography sx={{ fontWeight: 500, color: TEXT_MAIN, fontSize: '0.8125rem' }}>
                   {userData?.venue?.name || 'Current Venue'}
                 </Typography>
               )}
@@ -431,12 +455,12 @@ const AppMobileMenu: React.FC<AppMobileMenuProps> = ({
 
         {/* ── Home navigation ── */}
         {hasHomeNav && (
-          <Box sx={{ px: 2, flexShrink: 0 }}>
-            {user && <Divider sx={{ mb: 1.5, borderColor: '#e0e0e0' }} />}
+          <Box sx={{ px: 2 }}>
+            {user && <Divider sx={{ mb: 1.5, borderColor: BORDER }} />}
             <Typography
               sx={{
-                color: '#999999', fontWeight: 700, fontSize: '0.6rem',
-                letterSpacing: '0.12em', textTransform: 'uppercase',
+                color: MUTED, fontWeight: 600, fontSize: '0.6rem',
+                letterSpacing: '0.1em', textTransform: 'uppercase',
                 mb: 0.5, display: 'block', px: 0.5,
               }}
             >
@@ -446,41 +470,27 @@ const AppMobileMenu: React.FC<AppMobileMenuProps> = ({
               {homeNavItems.map((item) => {
                 const isActive = activeSection === item.id;
                 return (
-                  <ListItem key={item.id} disablePadding sx={{ mb: 0.25 }}>
+                  <ListItem key={item.id} disablePadding sx={{ mb: 0.125 }}>
                     <ListItemButton
                       onClick={() => handleSectionClick(item.id)}
                       sx={{
-                        borderRadius: '8px',
+                        borderRadius: '6px',
                         minHeight: 40,
-                        px: 1.5,
-                        position: 'relative',
-                        backgroundColor: isActive ? alpha(BLUE, 0.08) : 'transparent',
-                        '&:hover': {
-                          backgroundColor: isActive ? alpha(BLUE, 0.10) : alpha('#000', 0.04),
-                        },
-                        '&::before': {
-                          content: '""',
-                          position: 'absolute',
-                          left: 0, top: '50%',
-                          transform: 'translateY(-50%)',
-                          width: '3px',
-                          height: isActive ? '60%' : '0%',
-                          backgroundColor: BLUE_LITE,
-                          borderRadius: '0 3px 3px 0',
-                          transition: 'height 0.2s ease',
-                        },
+                        px: 1.25,
+                        bgcolor: isActive ? alpha(BLUE, 0.07) : 'transparent',
+                        '&:hover': { bgcolor: isActive ? alpha(BLUE, 0.09) : '#f1f3f4' },
+                        transition: 'background 0.15s ease',
                       }}
                     >
-                      <ListItemIcon sx={{ color: isActive ? BLUE : '#999999', minWidth: 34, transition: 'color 0.15s' }}>
+                      <ListItemIcon sx={{ color: isActive ? BLUE : MUTED, minWidth: 32, transition: 'color 0.15s' }}>
                         {getNavigationIcon(item)}
                       </ListItemIcon>
                       <ListItemText
                         primary={item.label}
                         primaryTypographyProps={{
                           fontWeight: isActive ? 600 : 400,
-                          color: isActive ? BLUE : '#666666',
+                          color: isActive ? BLUE : TEXT_DIM,
                           fontSize: '0.875rem',
-                          sx: { transition: 'color 0.15s' },
                         }}
                       />
                     </ListItemButton>
@@ -493,64 +503,89 @@ const AppMobileMenu: React.FC<AppMobileMenuProps> = ({
 
         {/* ── Admin menu ── */}
         {hasAdminItems && (
-          <Box sx={{ px: 2, flexShrink: 0 }}>
-            <Divider sx={{ my: 1.5, borderColor: '#e0e0e0' }} />
+          <Box sx={{ px: 2 }}>
+            {(hasHomeNav || user) && <Divider sx={{ my: 1.5, borderColor: BORDER }} />}
             <Typography
               sx={{
-                color: '#999999', fontWeight: 700, fontSize: '0.6rem',
-                letterSpacing: '0.12em', textTransform: 'uppercase',
+                color: MUTED, fontWeight: 600, fontSize: '0.6rem',
+                letterSpacing: '0.1em', textTransform: 'uppercase',
                 mb: 0.5, display: 'block', px: 0.5,
               }}
             >
-              Admin
+              Menu
             </Typography>
             <List disablePadding>
-              {adminMenuItems.map((item) => (
-                <ListItem key={item.path} disablePadding sx={{ mb: 0.25 }}>
-                  <ListItemButton
-                    onClick={() => handleNavigate(item.path)}
-                    sx={{
-                      borderRadius: '8px',
-                      minHeight: 40,
-                      px: 1.5,
-                      '&:hover': { backgroundColor: alpha('#000', 0.04) },
-                    }}
-                  >
-                    <ListItemIcon sx={{ color: '#999999', minWidth: 34 }}>
-                      {item.icon}
-                    </ListItemIcon>
-                    <ListItemText
-                      primary={item.label}
-                      primaryTypographyProps={{
-                        fontWeight: 400,
-                        color: '#666666',
-                        fontSize: '0.875rem',
+              {adminMenuItems.map((item) => {
+                const isActive = location.pathname.startsWith(item.path);
+                return (
+                  <ListItem key={item.path} disablePadding sx={{ mb: 0.125 }}>
+                    <ListItemButton
+                      onClick={() => handleNavigate(item.path)}
+                      sx={{
+                        borderRadius: '6px',
+                        minHeight: 42,
+                        px: 1.25,
+                        bgcolor: isActive ? alpha(BLUE, 0.07) : 'transparent',
+                        '&:hover': { bgcolor: isActive ? alpha(BLUE, 0.09) : '#f1f3f4' },
+                        transition: 'background 0.15s ease',
                       }}
-                    />
-                  </ListItemButton>
-                </ListItem>
-              ))}
+                    >
+                      <ListItemIcon
+                        sx={{
+                          color: isActive ? BLUE : MUTED,
+                          minWidth: 34,
+                          transition: 'color 0.15s',
+                          '& .MuiSvgIcon-root': { fontSize: 18 },
+                        }}
+                      >
+                        {item.icon}
+                      </ListItemIcon>
+                      <ListItemText
+                        primary={item.label}
+                        primaryTypographyProps={{
+                          fontWeight: isActive ? 600 : 400,
+                          color: isActive ? BLUE : TEXT_DIM,
+                          fontSize: '0.875rem',
+                        }}
+                      />
+                      {/* Active indicator */}
+                      {isActive && (
+                        <Box
+                          sx={{
+                            width: 5,
+                            height: 5,
+                            borderRadius: '50%',
+                            bgcolor: BLUE,
+                            flexShrink: 0,
+                            ml: 1,
+                            opacity: 0.8,
+                          }}
+                        />
+                      )}
+                    </ListItemButton>
+                  </ListItem>
+                );
+              })}
             </List>
           </Box>
         )}
 
-        {/* bottom padding so last nav item isn't flush against the footer */}
         <Box sx={{ pb: 2 }} />
       </Box>
 
-      {/* ── Guest actions — fixed footer, always visible, never scrolls ───────── */}
+      {/* ── Guest footer ── */}
       {!user && (
         <Box
           sx={{
             px: 2,
             pt: 1.5,
             pb: 'max(20px, env(safe-area-inset-bottom))',
-            borderTop: '1px solid #e0e0e0',
+            borderTop: `1px solid ${BORDER}`,
             flexShrink: 0,
             display: 'flex',
             flexDirection: 'column',
             gap: 1,
-            backgroundColor: '#ffffff',
+            bgcolor: '#ffffff',
           }}
         >
           <Button
@@ -559,10 +594,14 @@ const AppMobileMenu: React.FC<AppMobileMenuProps> = ({
             startIcon={<Login />}
             onClick={() => handleNavigate('/login')}
             sx={{
-              textTransform: 'none', fontWeight: 600,
-              fontSize: '0.875rem', borderRadius: '8px', height: 42,
-              borderColor: alpha(BLUE, 0.4), color: BLUE,
-              '&:hover': { borderColor: BLUE, backgroundColor: alpha(BLUE, 0.06) },
+              textTransform: 'none',
+              fontWeight: 500,
+              fontSize: '0.875rem',
+              borderRadius: '6px',
+              height: 40,
+              borderColor: BORDER,
+              color: TEXT_DIM,
+              '&:hover': { borderColor: '#bdc1c6', bgcolor: '#f1f3f4', color: TEXT_MAIN },
             }}
           >
             Sign In
@@ -572,11 +611,16 @@ const AppMobileMenu: React.FC<AppMobileMenuProps> = ({
             variant="contained"
             startIcon={<PersonAdd />}
             onClick={() => handleNavigate('/register')}
+            disableElevation
             sx={{
-              textTransform: 'none', fontWeight: 600,
-              fontSize: '0.875rem', borderRadius: '8px', height: 42,
-              backgroundColor: BLUE, color: '#ffffff', boxShadow: 'none',
-              '&:hover': { backgroundColor: '#1565C0', boxShadow: 'none' },
+              textTransform: 'none',
+              fontWeight: 600,
+              fontSize: '0.875rem',
+              borderRadius: '6px',
+              height: 40,
+              bgcolor: BLUE,
+              color: '#fff',
+              '&:hover': { bgcolor: '#1565C0' },
             }}
           >
             Get Started

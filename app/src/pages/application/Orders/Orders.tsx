@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import {
   Box, Grid, Typography, Skeleton, TablePagination, Snackbar, Alert,
 } from '@mui/material';
@@ -9,7 +9,7 @@ import { useUserData } from '../../../contexts/application/UserData';
 import { ConfirmationDialog } from '../../../components/dialogs/ConfirmationDialog';
 
 import {
-  Order, StatusFilter, DateFilter, ROWS_PER_PAGE, getDateRange, toISODate,
+  Order, StatusFilter, DateFilter, TableFilter, ROWS_PER_PAGE, getDateRange, toISODate,
 } from './orders.types';
 
 import OrdersToolbar from './components/OrdersToolbar';
@@ -18,34 +18,63 @@ import OrderDetailPanel from './components/OrderDetailPanel';
 
 // ── Skeleton card ─────────────────────────────────────────────────────────────
 const SkeletonCard: React.FC = () => (
-  <Box sx={{ bgcolor: '#fff', border: '1px solid #e0e0e0', borderRadius: 3, overflow: 'hidden' }}>
-    <Box sx={{ px: 2, py: 1.25, display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #e0e0e0' }}>
-      <Skeleton variant="text" width={80} height={18} />
-      <Skeleton variant="rounded" width={72} height={22} sx={{ borderRadius: 1 }} />
+  <Box
+    sx={{
+      bgcolor: '#fff',
+      border: '1px solid #e8ecf0',
+      borderLeft: '3px solid #e2e8f0',
+      borderRadius: 2.5,
+      overflow: 'hidden',
+    }}
+  >
+    <Box sx={{ px: 2, py: 1.25, display: 'flex', justifyContent: 'space-between', alignItems: 'center', bgcolor: '#f8fafc', borderBottom: '1px solid #f1f5f9' }}>
+      <Skeleton variant="text" width={72} height={16} />
+      <Skeleton variant="text" width={56} height={14} />
     </Box>
     <Box sx={{ px: 2, py: 1.5, display: 'flex', flexDirection: 'column', gap: 1 }}>
-      <Skeleton variant="text" width="60%" height={16} />
-      <Skeleton variant="text" width="80%" height={16} />
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Skeleton variant="rounded" width={60} height={20} sx={{ borderRadius: 1 }} />
-        <Skeleton variant="text" width={70} height={22} />
+      <Skeleton variant="text" width="55%" height={15} />
+      <Box sx={{ display: 'flex', gap: 1 }}>
+        <Skeleton variant="rounded" width={72} height={20} sx={{ borderRadius: 1 }} />
+        <Box sx={{ flex: 1 }} />
+        <Skeleton variant="text" width={48} height={15} />
+      </Box>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pt: 0.5, borderTop: '1px solid #f1f5f9' }}>
+        <Skeleton variant="text" width={52} height={14} />
+        <Skeleton variant="text" width={60} height={22} />
       </Box>
     </Box>
-    <Box sx={{ px: 2, py: 1.25, borderTop: '1px solid #e0e0e0', display: 'flex', gap: 1 }}>
-      <Skeleton variant="rounded" height={30} sx={{ flex: 1, borderRadius: 1.5 }} />
-      <Skeleton variant="rounded" width={72} height={30} sx={{ borderRadius: 1.5 }} />
+    <Box sx={{ px: 2, py: 1, borderTop: '1px solid #f1f5f9', bgcolor: '#fafbfc', display: 'flex', gap: 0.75 }}>
+      <Skeleton variant="rounded" height={28} sx={{ flex: 1, borderRadius: 1.5 }} />
+      <Skeleton variant="rounded" width={28} height={28} sx={{ borderRadius: 1.5 }} />
     </Box>
   </Box>
 );
 
 // ── Empty state ───────────────────────────────────────────────────────────────
-const EmptyState: React.FC = () => (
+const EmptyState: React.FC<{ hasFilters: boolean }> = ({ hasFilters }) => (
   <Box sx={{ py: 12, textAlign: 'center' }}>
-    <Box sx={{ width: 64, height: 64, borderRadius: '12px', bgcolor: '#F7F9FA', border: '1px solid #e0e0e0', display: 'flex', alignItems: 'center', justifyContent: 'center', mx: 'auto', mb: 2 }}>
-      <ReceiptIcon sx={{ fontSize: 30, color: '#999999' }} />
+    <Box
+      sx={{
+        width: 60,
+        height: 60,
+        borderRadius: '14px',
+        bgcolor: '#f8fafc',
+        border: '1px solid #e2e8f0',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        mx: 'auto',
+        mb: 2,
+      }}
+    >
+      <ReceiptIcon sx={{ fontSize: 28, color: '#94a3b8' }} />
     </Box>
-    <Typography sx={{ fontWeight: 600, color: '#666666', fontSize: '0.9rem' }}>No orders found</Typography>
-    <Typography sx={{ color: '#666666', fontSize: '0.8rem', mt: 0.5 }}>Try adjusting your filters or date range</Typography>
+    <Typography sx={{ fontWeight: 600, color: '#475569', fontSize: '0.9rem' }}>
+      No orders found
+    </Typography>
+    <Typography sx={{ color: '#94a3b8', fontSize: '0.8rem', mt: 0.5 }}>
+      {hasFilters ? 'Try adjusting your filters or date range' : 'Orders will appear here once placed'}
+    </Typography>
   </Box>
 );
 
@@ -61,9 +90,10 @@ const OrdersManagementPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('');
-  const [dateFilter, setDateFilter] = useState<DateFilter>('today');
+  const [dateFilter, setDateFilter] = useState<DateFilter>('');
   const [customStartDate, setCustomStartDate] = useState<string>('');
   const [customEndDate, setCustomEndDate] = useState<string>('');
+  const [tableFilter, setTableFilter] = useState<TableFilter>('');
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -90,7 +120,6 @@ const OrdersManagementPage: React.FC = () => {
   // ── Data loading ──────────────────────────────────────────────────────────
   const loadOrders = useCallback(async () => {
     if (!personaId) return;
-    // For custom range, only fetch when both dates are set
     if (dateFilter === 'custom' && (!customStartDate || !customEndDate)) return;
     setLoading(true);
     const { startDate, endDate } = getDateRange(dateFilter, customStartDate, customEndDate);
@@ -120,6 +149,24 @@ const OrdersManagementPage: React.FC = () => {
     }, 60000);
     return () => clearInterval(interval);
   }, [loadOrders]);
+
+  // ── Derived: available table numbers from loaded orders ───────────────────
+  const availableTables = useMemo(() => {
+    const seen = new Set<string>();
+    const tables: string[] = [];
+    for (const o of orders) {
+      if (o.table_number && !seen.has(o.table_number)) {
+        seen.add(o.table_number);
+        tables.push(o.table_number);
+      }
+    }
+    return tables.sort((a, b) => {
+      const na = parseInt(a, 10);
+      const nb = parseInt(b, 10);
+      if (!isNaN(na) && !isNaN(nb)) return na - nb;
+      return a.localeCompare(b);
+    });
+  }, [orders]);
 
   // ── Handlers ──────────────────────────────────────────────────────────────
   const handleStatusUpdate = async (orderId: string, newStatus: Order['status']) => {
@@ -154,11 +201,11 @@ const OrdersManagementPage: React.FC = () => {
 
   const handleOrderClick = (order: Order) => { setSelectedOrderId(order.id); setDrawerOpen(true); };
   const handleRefresh = () => loadOrders();
+
   const handleStatusFilterChange = (v: StatusFilter) => { setStatusFilter(v); setPage(0); };
   const handleDateFilterChange = (d: DateFilter) => {
     setDateFilter(d);
     setPage(0);
-    // Pre-fill custom range with today when switching to custom for the first time
     if (d === 'custom' && !customStartDate && !customEndDate) {
       const today = toISODate(new Date());
       setCustomStartDate(today);
@@ -167,20 +214,35 @@ const OrdersManagementPage: React.FC = () => {
   };
   const handleCustomStartDateChange = (v: string) => { setCustomStartDate(v); setPage(0); };
   const handleCustomEndDateChange = (v: string) => { setCustomEndDate(v); setPage(0); };
+  const handleTableFilterChange = (v: TableFilter) => { setTableFilter(v); setPage(0); };
 
-  // Client-side search
-  const filteredOrders = debouncedSearch
-    ? orders.filter((o) =>
-        o.order_number?.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-        o.customer_name?.toLowerCase().includes(debouncedSearch.toLowerCase())
-      )
-    : orders;
+  // ── Client-side filtering (search + table) ────────────────────────────────
+  const filteredOrders = useMemo(() => {
+    let result = orders;
+
+    if (debouncedSearch) {
+      const q = debouncedSearch.toLowerCase();
+      result = result.filter(
+        (o) =>
+          o.order_number?.toLowerCase().includes(q) ||
+          o.customer_name?.toLowerCase().includes(q)
+      );
+    }
+
+    if (tableFilter) {
+      result = result.filter((o) => o.table_number === tableFilter);
+    }
+
+    return result;
+  }, [orders, debouncedSearch, tableFilter]);
+
+  const hasActiveFilters = !!(debouncedSearch || tableFilter || statusFilter || dateFilter);
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
     <Box sx={{ minHeight: '100%', bgcolor: '#f8fafc', display: 'flex', flexDirection: 'column' }}>
 
-      {/* Toolbar: title + search + filters + status tabs */}
+      {/* Toolbar */}
       <OrdersToolbar
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
@@ -192,15 +254,18 @@ const OrdersManagementPage: React.FC = () => {
         customEndDate={customEndDate}
         onCustomStartDateChange={handleCustomStartDateChange}
         onCustomEndDateChange={handleCustomEndDateChange}
+        tableFilter={tableFilter}
+        onTableFilterChange={handleTableFilterChange}
+        availableTables={availableTables}
         filteredCount={filteredOrders.length}
         totalCount={totalOrders}
         onRefresh={handleRefresh}
       />
 
       {/* Card grid */}
-      <Box sx={{ flex: 1, px: { xs: 2, sm: 3, md: 4 }, pt: 3, pb: 6 }}>
+      <Box sx={{ flex: 1, px: { xs: 1.5, sm: 2.5, md: 3 }, pt: 2.5, pb: 6 }}>
         {loading ? (
-          <Grid container spacing={2}>
+          <Grid container spacing={{ xs: 1.5, sm: 2 }}>
             {Array.from({ length: 12 }).map((_, i) => (
               <Grid item xs={12} sm={6} md={4} lg={3} key={i}>
                 <SkeletonCard />
@@ -208,10 +273,10 @@ const OrdersManagementPage: React.FC = () => {
             ))}
           </Grid>
         ) : filteredOrders.length === 0 ? (
-          <EmptyState />
+          <EmptyState hasFilters={hasActiveFilters} />
         ) : (
           <>
-            <Grid container spacing={2}>
+            <Grid container spacing={{ xs: 1.5, sm: 2 }}>
               {filteredOrders.map((order) => (
                 <Grid item xs={12} sm={6} md={4} lg={3} key={order.id}>
                   <OrderCard
@@ -240,11 +305,11 @@ const OrdersManagementPage: React.FC = () => {
                 sx={{
                   '& .MuiTablePagination-selectLabel': { display: 'none' },
                   '& .MuiTablePagination-select': { display: 'none' },
-                  '& .MuiTablePagination-displayedRows': { fontSize: '0.78rem', color: '#666666' },
+                  '& .MuiTablePagination-displayedRows': { fontSize: '0.78rem', color: '#64748b' },
                   '& .MuiTablePagination-actions button': {
                     borderRadius: '8px',
                     border: '1px solid #e0e0e0',
-                    color: '#666666',
+                    color: '#64748b',
                     mx: 0.25,
                     '&:hover': { bgcolor: '#f8fafc' },
                     '&.Mui-disabled': { opacity: 0.4 },

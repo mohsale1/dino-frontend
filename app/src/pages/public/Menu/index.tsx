@@ -310,7 +310,8 @@ const TabDot: React.FC<{ active: boolean }> = ({ active }) => (
 
 // ─── Main component ───────────────────────────────────────────────────────────
 const PublicMenu: React.FC = () => {
-  const { organizationId, tableId } = useParams<{ organizationId: string; tableId: string }>();
+  const { workspaceId, personaId, tableId } = useParams<{ workspaceId: string; personaId: string; tableId: string }>();
+  const organizationId = workspaceId;
 
   const [activeTab, setActiveTab] = useState(1);
   const [loading, setLoading] = useState(true);
@@ -318,6 +319,7 @@ const PublicMenu: React.FC = () => {
   const [menuData, setMenuData] = useState<any>(null);
   const [orgUnavailable, setOrgUnavailable] = useState(false);
   const [menuNotFound, setMenuNotFound] = useState(false);
+  const [personaDeactivated, setPersonaDeactivated] = useState(false);
 
   const [showCustomerDetails, setShowCustomerDetails] = useState(false);
   const [showCheckout, setShowCheckout] = useState(false);
@@ -338,7 +340,7 @@ const PublicMenu: React.FC = () => {
   const { storeOrder } = useOrderStorage();
 
   const loadMenuData = useCallback(async () => {
-    if (!organizationId || !tableId) {
+    if (!workspaceId || !personaId) {
       setError('Invalid QR code. Please scan the QR code again.');
       setLoading(false);
       return;
@@ -349,28 +351,29 @@ const PublicMenu: React.FC = () => {
       setError(null);
       setOrgUnavailable(false);
       setMenuNotFound(false);
-      const data = await publicMenuService.getMenuWithValidation(organizationId, tableId);
+      setPersonaDeactivated(false);
+      const data = await publicMenuService.getMenu(workspaceId, personaId, tableId);
       setMenuData(data);
     } catch (err: any) {
       const status = err?.response?.status;
       const detail = err?.response?.data?.detail || err?.response?.data?.message || '';
 
+      // Persona permanently deactivated
+      if (status === 410) {
+        setPersonaDeactivated(true);
+        return;
+      }
+
+      // Venue closed (persona.is_open = false)
+      if (status === 403) {
+        setOrgUnavailable(true);
+        return;
+      }
+
       // Network error (no response) or not found / server error → show not-found page
       const isNetworkError = !err?.response;
       if (isNetworkError || status === 404 || (status >= 500 && status <= 599)) {
         setMenuNotFound(true);
-        return;
-      }
-
-      // Org inactive / unavailable
-      if (
-        status === 403 ||
-        detail.toLowerCase().includes('inactive') ||
-        detail.toLowerCase().includes('not active') ||
-        detail.toLowerCase().includes('not available') ||
-        detail.toLowerCase().includes('closed')
-      ) {
-        setOrgUnavailable(true);
         return;
       }
 
@@ -382,7 +385,7 @@ const PublicMenu: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [organizationId, tableId]);
+  }, [workspaceId, personaId, tableId]);
 
   useEffect(() => {
     loadMenuData();
@@ -422,9 +425,54 @@ const PublicMenu: React.FC = () => {
   // ── Not found / server error ─────────────────────────────────────────────────
   if (menuNotFound) return <MenuNotFoundUI />;
 
-  // ── Org unavailable ──────────────────────────────────────────────────────────
+  // ── Org unavailable (403 — closed) ───────────────────────────────────────────
   if (orgUnavailable) {
     return <UnavailableView orgName={menuData?.venue?.name} />;
+  }
+
+  // ── Persona deactivated (410) ─────────────────────────────────────────────────
+  if (personaDeactivated) {
+    return (
+      <Box
+        sx={{
+          minHeight: '100dvh',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          bgcolor: '#ffffff',
+          px: 3,
+          textAlign: 'center',
+        }}
+      >
+        <Box sx={{ height: 4, width: '100%', position: 'absolute', top: 0, left: 0, background: 'linear-gradient(90deg, #94a3b8, #cbd5e1)' }} />
+        <Box
+          sx={{
+            width: 72,
+            height: 72,
+            borderRadius: '50%',
+            bgcolor: '#f1f5f9',
+            border: '1.5px solid #e2e8f0',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            mb: 3,
+          }}
+        >
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+            <circle cx="16" cy="16" r="14" stroke="#94a3b8" strokeWidth="2" />
+            <line x1="10" y1="10" x2="22" y2="22" stroke="#94a3b8" strokeWidth="2.5" strokeLinecap="round" />
+            <line x1="22" y1="10" x2="10" y2="22" stroke="#94a3b8" strokeWidth="2.5" strokeLinecap="round" />
+          </svg>
+        </Box>
+        <Typography sx={{ fontSize: '1.15rem', fontWeight: 800, color: '#0f172a', mb: 1 }}>
+          This outlet is no longer available
+        </Typography>
+        <Typography sx={{ fontSize: '0.875rem', color: '#64748b', lineHeight: 1.7, maxWidth: 280 }}>
+          This menu link has been permanently deactivated. Please ask a staff member for assistance.
+        </Typography>
+      </Box>
+    );
   }
 
   // ── Error ────────────────────────────────────────────────────────────────────
@@ -440,7 +488,8 @@ const PublicMenu: React.FC = () => {
         cart={cart}
         customerInfo={customerInfo}
         organizationId={organizationId!}
-        tableId={tableId!}
+        personaId={personaId!}
+        tableId={tableId}
         menuData={menuData}
         onBack={() => setShowCheckout(false)}
         onOrderPlaced={handleOrderPlaced}
@@ -546,6 +595,7 @@ const PublicMenu: React.FC = () => {
         {activeTab === 2 && (
           <OrdersFragment
             organizationId={organizationId!}
+            personaId={personaId!}
             tableId={tableId!}
             customerPhone={customerInfo?.phone}
             recentOrderId={recentOrderId}
@@ -663,6 +713,7 @@ const PublicMenu: React.FC = () => {
         cart={cart}
         onUpdateQuantity={updateQuantity}
         onCheckout={handleCheckoutClick}
+        billingConfig={menuData.billing_config}
       />
 
       {/* ── Customer Details Bottom Sheet ────────────────────────────────────── */}
