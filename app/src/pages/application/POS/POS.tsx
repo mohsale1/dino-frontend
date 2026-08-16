@@ -53,6 +53,7 @@ const POS: React.FC = () => {
   const [selectedTableId, setSelectedTableId] = useState<string>('');
   const [orderNotes, setOrderNotes] = useState('');
   const [discountAmount, setDiscountAmount] = useState<string>('');
+  const [includeTax, setIncludeTax] = useState(false);
   const [processingOrder, setProcessingOrder] = useState(false);
   const [orderError, setOrderError] = useState('');
 
@@ -134,7 +135,7 @@ const POS: React.FC = () => {
   const subtotal = cart.reduce((s, c) => s + c.price * c.quantity, 0);
   const discount = Math.min(parseFloat(discountAmount) || 0, subtotal);
   const taxable = subtotal - discount;
-  const tax = taxable * TAX_RATE;
+  const tax = includeTax ? taxable * TAX_RATE : 0;
   const total = taxable + tax;
   const totalItems = cart.reduce((s, c) => s + c.quantity, 0);
 
@@ -209,6 +210,7 @@ const handlePlaceOrder = async () => {
       setSelectedTableId('');
       setOrderNotes('');
       setDiscountAmount('');
+      setIncludeTax(false);
       showSnackbar(`Order #${orderData.orderNumber} placed successfully`, 'success');
     } catch (err: any) {
       setOrderError(err.message || 'Failed to place order. Please try again.');
@@ -217,6 +219,46 @@ const handlePlaceOrder = async () => {
     }
   };
 
+
+  // ── Print KOT ────────────────────────────────────────────────────────────────
+  const handlePrintKOT = () => {
+    if (!completedOrder) return;
+    const win = window.open('', '_blank');
+    if (!win) return;
+    win.document.write(`<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>KOT - ${completedOrder.orderNumber}</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+@page{margin:0;size:80mm auto}
+body{font-family:'Courier New',monospace;padding:6mm 4mm;max-width:80mm;margin:0 auto;font-size:12px;line-height:1.4}
+.header{text-align:center;border-bottom:2px dashed #000;padding-bottom:8px;margin-bottom:8px}
+.kot-label{font-size:18px;font-weight:bold;letter-spacing:3px}
+.order-num{font-size:13px;font-weight:bold;margin:4px 0}
+.meta{font-size:10px;color:#333}
+.items-header{font-weight:bold;font-size:10px;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid #000;padding-bottom:4px;margin-bottom:6px;display:flex;justify-content:space-between}
+.item{display:flex;justify-content:space-between;margin-bottom:5px;font-size:12px}
+.item-name{flex:1}
+.item-qty{font-weight:bold;min-width:30px;text-align:right}
+.footer{text-align:center;border-top:2px dashed #000;padding-top:8px;margin-top:8px;font-size:10px}
+</style></head><body>
+<div class="header">
+  <div class="kot-label">KOT</div>
+  <div class="order-num">Order #${completedOrder.orderNumber}</div>
+  ${completedOrder.tableNumber ? `<div class="meta">Table: ${completedOrder.tableNumber}</div>` : ''}
+  <div class="meta">${new Date(completedOrder.timestamp).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</div>
+  ${completedOrder.customer.name ? `<div class="meta">Customer: ${completedOrder.customer.name}</div>` : ''}
+</div>
+<div class="items-header"><span>Item</span><span>Qty</span></div>
+${completedOrder.items.map((item: CartItem) => `
+<div class="item">
+  <span class="item-name">${item.name}</span>
+  <span class="item-qty">x${item.quantity}</span>
+</div>`).join('')}
+<div class="footer">*** Kitchen Copy ***</div>
+<script>window.onload=function(){setTimeout(function(){window.print()},250)};window.onafterprint=function(){setTimeout(function(){window.close()},100)}</script>
+</body></html>`);
+    win.document.close();
+  };
 
   // ── Print receipt ─────────────────────────────────────────────────────────────
   const handlePrintReceipt = () => {
@@ -370,6 +412,8 @@ ${completedOrder.notes ? `<div class="customer-box"><div class="row"><span>Notes
           totalItems={totalItems}
           discountAmount={discountAmount}
           setDiscountAmount={setDiscountAmount}
+          includeTax={includeTax}
+          onToggleTax={() => setIncludeTax(v => !v)}
           updateQuantity={updateQuantity}
           removeFromCart={removeFromCart}
           clearCart={clearCart}
@@ -421,6 +465,8 @@ ${completedOrder.notes ? `<div class="customer-box"><div class="row"><span>Notes
           onCheckout={() => { setCartOpen(false); setPaymentDialogOpen(true); }}
           inDrawer
           onClose={() => setCartOpen(false)}
+          includeTax={includeTax}
+          onToggleTax={() => setIncludeTax(v => !v)}
           formatINR={formatINR}
         />
       </Drawer>
@@ -442,13 +488,14 @@ ${completedOrder.notes ? `<div class="customer-box"><div class="row"><span>Notes
         setCustomerPhone={setCustomerPhone}
         selectedTableId={selectedTableId}
         setSelectedTableId={setSelectedTableId}
-        orderNotes={orderNotes}
-        setOrderNotes={setOrderNotes}
+
         paymentMethod={paymentMethod}
         setPaymentMethod={setPaymentMethod}
         processingOrder={processingOrder}
         orderError={orderError}
         onPlaceOrder={handlePlaceOrder}
+        includeTax={includeTax}
+        onToggleTax={() => setIncludeTax(v => !v)}
         formatINR={formatINR}
       />
 
@@ -458,6 +505,7 @@ ${completedOrder.notes ? `<div class="customer-box"><div class="row"><span>Notes
         onClose={() => setConfirmationOpen(false)}
         completedOrder={completedOrder}
         onPrintReceipt={handlePrintReceipt}
+        onPrintKOT={handlePrintKOT}
         formatINR={formatINR}
       />
 

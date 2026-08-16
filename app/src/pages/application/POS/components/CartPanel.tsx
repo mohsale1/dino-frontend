@@ -11,6 +11,8 @@ import {
   Chip,
   TextField,
   InputAdornment,
+  Checkbox,
+  FormControlLabel,
 } from '@mui/material';
 import Add from '@mui/icons-material/Add';
 import Remove from '@mui/icons-material/Remove';
@@ -38,6 +40,8 @@ interface CartPanelProps {
   inDrawer?: boolean;
   onClose?: () => void;
   formatINR: (n: number) => string;
+  includeTax: boolean;
+  onToggleTax: () => void;
 }
 
 const CartPanel: React.FC<CartPanelProps> = ({
@@ -56,6 +60,8 @@ const CartPanel: React.FC<CartPanelProps> = ({
   inDrawer = false,
   onClose,
   formatINR,
+  includeTax,
+  onToggleTax,
 }) => {
   const isEmpty = cart.length === 0;
 
@@ -94,7 +100,7 @@ const CartPanel: React.FC<CartPanelProps> = ({
             label={totalItems}
             size="small"
             sx={{
-              bgcolor: '#1976D2',
+              bgcolor: '#0f172a',
               color: '#ffffff',
               fontWeight: 700,
               fontSize: '0.75rem',
@@ -225,7 +231,7 @@ const CartPanel: React.FC<CartPanelProps> = ({
                       </Typography>
                       <Typography
                         variant="caption"
-                        sx={{ color: '#1976D2', fontWeight: 700, fontSize: '0.78rem' }}
+                        sx={{ color: '#0f172a', fontWeight: 700, fontSize: '0.78rem' }}
                       >
                         {formatINR(item.price)}
                       </Typography>
@@ -245,8 +251,8 @@ const CartPanel: React.FC<CartPanelProps> = ({
                             boxShadow: 'none',
                             textTransform: 'none',
                             '&:hover': {
-                              borderColor: '#1976D2',
-                              color: '#1976D2',
+                              borderColor: '#0f172a',
+                              color: '#0f172a',
                               bgcolor: 'transparent',
                             },
                           },
@@ -321,10 +327,10 @@ const CartPanel: React.FC<CartPanelProps> = ({
                   bgcolor: '#ffffff',
                   borderRadius: 2,
                   '& fieldset': { borderColor: '#e0e0e0' },
-                  '&:hover fieldset': { borderColor: '#1976D2' },
-                  '&.Mui-focused fieldset': { borderColor: '#1976D2' },
+                  '&:hover fieldset': { borderColor: '#0f172a' },
+                  '&.Mui-focused fieldset': { borderColor: '#0f172a' },
                 },
-                '& .MuiInputLabel-root.Mui-focused': { color: '#1976D2' },
+                '& .MuiInputLabel-root.Mui-focused': { color: '#0f172a' },
               }}
             />
 
@@ -365,17 +371,35 @@ const CartPanel: React.FC<CartPanelProps> = ({
                   </Stack>
                 )}
 
-                <Stack direction="row" justifyContent="space-between" alignItems="center">
-                  <Typography variant="body2" sx={{ color: '#64748b', fontSize: '0.82rem' }}>
-                    Tax (10%)
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{ fontWeight: 500, color: '#1C1C1E', fontSize: '0.82rem' }}
-                  >
-                    {formatINR(tax)}
-                  </Typography>
-                </Stack>
+                {/* Service Tax Toggle Row */}
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        size="small"
+                        checked={includeTax}
+                        onChange={onToggleTax}
+                        sx={{
+                          color: '#0f172a',
+                          '&.Mui-checked': { color: '#0f172a' },
+                          p: 0.5,
+                          mr: 0.5,
+                        }}
+                      />
+                    }
+                    label={
+                      <Typography sx={{ fontSize: '0.78rem', color: '#64748b' }}>
+                        Service Tax (10%)
+                      </Typography>
+                    }
+                    sx={{ m: 0 }}
+                  />
+                  {includeTax && (
+                    <Typography sx={{ fontWeight: 500, color: '#1C1C1E', fontSize: '0.82rem' }}>
+                      {formatINR(tax)}
+                    </Typography>
+                  )}
+                </Box>
 
                 <Box
                   sx={{
@@ -427,7 +451,7 @@ const CartPanel: React.FC<CartPanelProps> = ({
           startIcon={<CheckCircle />}
           onClick={onCheckout}
           sx={{
-            bgcolor: '#1C1C1E',
+            bgcolor: '#0f172a',
             color: '#ffffff',
             fontWeight: 700,
             fontSize: '0.9rem',
@@ -436,7 +460,7 @@ const CartPanel: React.FC<CartPanelProps> = ({
             textTransform: 'none',
             boxShadow: 'none',
             '&:hover': {
-              bgcolor: '#374151',
+              bgcolor: '#1e293b',
               boxShadow: 'none',
             },
             '&.Mui-disabled': {

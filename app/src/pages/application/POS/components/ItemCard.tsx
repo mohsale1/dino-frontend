@@ -73,7 +73,7 @@ const ItemCard: React.FC<ItemCardProps> = ({
           <Typography
             fontWeight={600}
             noWrap
-            sx={{ fontSize: '0.83rem', color: '#1C1C1E', mb: 0.25 }}
+            sx={{ fontSize: '0.83rem', color: '#0f172a', mb: 0.25 }}
           >
             {item.name}
           </Typography>
@@ -110,7 +110,7 @@ const ItemCard: React.FC<ItemCardProps> = ({
             flexShrink: 0,
           }}
         >
-          <Typography fontWeight={800} sx={{ fontSize: '0.9rem', color: '#1C1C1E' }}>
+          <Typography fontWeight={800} sx={{ fontSize: '0.9rem', color: '#0f172a' }}>
             {formatINR(item.price)}
           </Typography>
 
@@ -123,9 +123,9 @@ const ItemCard: React.FC<ItemCardProps> = ({
                   minWidth: 28,
                   px: 0,
                   borderColor: '#e0e0e0',
-                  color: '#1C1C1E',
+                  color: '#0f172a',
                   boxShadow: 'none',
-                  '&:hover': { borderColor: '#1976D2', color: '#1976D2', bgcolor: 'transparent' },
+                  '&:hover': { borderColor: '#0f172a', color: '#0f172a', bgcolor: 'transparent' },
                 },
               }}
             >
@@ -149,7 +149,7 @@ const ItemCard: React.FC<ItemCardProps> = ({
               startIcon={<Add sx={{ fontSize: 14 }} />}
               onClick={onAdd}
               sx={{
-                bgcolor: '#1C1C1E',
+                bgcolor: '#0f172a',
                 color: '#fff',
                 fontSize: '0.72rem',
                 fontWeight: 600,
@@ -158,7 +158,7 @@ const ItemCard: React.FC<ItemCardProps> = ({
                 borderRadius: 1.5,
                 textTransform: 'none',
                 boxShadow: 'none',
-                '&:hover': { bgcolor: '#374151', boxShadow: 'none' },
+                '&:hover': { bgcolor: '#1e293b', boxShadow: 'none' },
               }}
             >
               Add
@@ -222,7 +222,7 @@ const ItemCard: React.FC<ItemCardProps> = ({
             fontWeight: 700,
             bgcolor: 'rgba(255,255,255,0.85)',
             backdropFilter: 'blur(6px)',
-            color: '#1C1C1E',
+            color: '#0f172a',
             border: '1px solid rgba(255,255,255,0.6)',
             '& .MuiChip-label': { px: 1 },
           }}
@@ -238,7 +238,7 @@ const ItemCard: React.FC<ItemCardProps> = ({
               width: 22,
               height: 22,
               borderRadius: '50%',
-              bgcolor: '#1976D2',
+              bgcolor: '#0f172a',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -261,7 +261,7 @@ const ItemCard: React.FC<ItemCardProps> = ({
           fontWeight={700}
           sx={{
             fontSize: '0.85rem',
-            color: '#1C1C1E',
+            color: '#0f172a',
             mb: 0.4,
             overflow: 'hidden',
             textOverflow: 'ellipsis',
@@ -290,7 +290,7 @@ const ItemCard: React.FC<ItemCardProps> = ({
 
         {/* Price + controls */}
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Typography fontWeight={800} sx={{ fontSize: '0.95rem', color: '#1C1C1E' }}>
+          <Typography fontWeight={800} sx={{ fontSize: '0.95rem', color: '#0f172a' }}>
             {formatINR(item.price)}
           </Typography>
 
@@ -303,9 +303,9 @@ const ItemCard: React.FC<ItemCardProps> = ({
                   minWidth: 26,
                   px: 0,
                   borderColor: '#e0e0e0',
-                  color: '#1C1C1E',
+                  color: '#0f172a',
                   boxShadow: 'none',
-                  '&:hover': { borderColor: '#1976D2', color: '#1976D2', bgcolor: 'transparent' },
+                  '&:hover': { borderColor: '#0f172a', color: '#0f172a', bgcolor: 'transparent' },
                 },
               }}
             >
@@ -329,7 +329,7 @@ const ItemCard: React.FC<ItemCardProps> = ({
               startIcon={<Add sx={{ fontSize: 13 }} />}
               onClick={onAdd}
               sx={{
-                bgcolor: '#1C1C1E',
+                bgcolor: '#0f172a',
                 color: '#fff',
                 fontSize: '0.72rem',
                 fontWeight: 600,
@@ -338,7 +338,7 @@ const ItemCard: React.FC<ItemCardProps> = ({
                 borderRadius: 1.5,
                 textTransform: 'none',
                 boxShadow: 'none',
-                '&:hover': { bgcolor: '#374151', boxShadow: 'none' },
+                '&:hover': { bgcolor: '#1e293b', boxShadow: 'none' },
               }}
             >
               Add

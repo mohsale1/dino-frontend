@@ -66,7 +66,7 @@ const POSToolbar: React.FC<POSToolbarProps> = ({
           sx={{
             fontWeight: 700,
             fontSize: '1.1rem',
-            color: '#1C1C1E',
+            color: '#0f172a',
             flexShrink: 0,
             lineHeight: 1,
           }}
@@ -112,7 +112,7 @@ const POSToolbar: React.FC<POSToolbarProps> = ({
             py: 0.625,
             transition: 'border-color 0.15s ease, background-color 0.15s ease',
             '&:focus-within': {
-              borderColor: '#1976D2',
+              borderColor: '#0f172a',
               bgcolor: '#ffffff',
             },
           }}
@@ -125,7 +125,7 @@ const POSToolbar: React.FC<POSToolbarProps> = ({
             sx={{
               flex: 1,
               fontSize: '0.83rem',
-              color: '#1C1C1E',
+              color: '#0f172a',
               '& input': {
                 padding: 0,
                 '&::placeholder': {
@@ -195,7 +195,7 @@ const POSToolbar: React.FC<POSToolbarProps> = ({
             onClick={() => onViewModeChange('grid')}
             disableRipple={false}
             sx={{
-              bgcolor: viewMode === 'grid' ? '#1C1C1E' : '#ffffff',
+              bgcolor: viewMode === 'grid' ? '#0f172a' : '#ffffff',
               color: viewMode === 'grid' ? '#ffffff' : '#64748b',
               '&:hover': {
                 bgcolor: viewMode === 'grid' ? '#2d2d2f' : '#f7f9fa',
@@ -208,7 +208,7 @@ const POSToolbar: React.FC<POSToolbarProps> = ({
             onClick={() => onViewModeChange('list')}
             disableRipple={false}
             sx={{
-              bgcolor: viewMode === 'list' ? '#1C1C1E' : '#ffffff',
+              bgcolor: viewMode === 'list' ? '#0f172a' : '#ffffff',
               color: viewMode === 'list' ? '#ffffff' : '#64748b',
               borderLeft: '1px solid #e0e0e0 !important',
               '&:hover': {
@@ -233,8 +233,8 @@ const POSToolbar: React.FC<POSToolbarProps> = ({
             bgcolor: '#ffffff',
             '&:hover': {
               bgcolor: '#f7f9fa',
-              borderColor: '#1976D2',
-              color: '#1976D2',
+              borderColor: '#0f172a',
+              color: '#0f172a',
             },
           }}
         >
@@ -271,9 +271,9 @@ const POSToolbar: React.FC<POSToolbarProps> = ({
                 cursor: 'pointer',
                 textTransform: 'none',
                 boxShadow: 'none',
-                bgcolor: isActive ? '#1C1C1E' : '#f7f9fa',
+                bgcolor: isActive ? '#0f172a' : '#f7f9fa',
                 color: isActive ? '#ffffff' : '#64748b',
-                border: `1px solid ${isActive ? '#1C1C1E' : '#e0e0e0'}`,
+                border: `1px solid ${isActive ? '#0f172a' : '#e0e0e0'}`,
                 '& .MuiChip-label': { px: 1.25 },
                 '&:hover': {
                   bgcolor: isActive ? '#2d2d2f' : '#f1f5f9',

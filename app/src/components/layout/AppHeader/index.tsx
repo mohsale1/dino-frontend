@@ -94,6 +94,7 @@ const AppHeader: React.FC = () => {
 
   const navItems = useMemo<AdminNavItem[]>(() => {
     return ALL_ADMIN_NAV.filter((item) => {
+      if (item.resource === 'pos') return true; // POS is always visible
       if (!hasPerm(item.resource, item.action)) return false;
       if (item.orderTypeRestriction !== undefined && venueOrderType !== undefined) {
         return venueOrderType === item.orderTypeRestriction;

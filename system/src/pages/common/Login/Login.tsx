@@ -16,22 +16,22 @@ import { PageTransitionLoader } from '../../../components/ui/PageTransitionLoade
 
 // ── Design tokens aligned to Vanguard UI ──────────────────────────────────────
 const T = {
-  primary:      '#00A6CA',
+  primary: '#00A6CA',
   primaryHover: '#005F8D',
   primaryLight: '#CCEDF4',
-  panelBg:      '#102b3d',   // blue-900
-  panelBg2:     '#004364',   // blue-700
-  accent:       'rgba(0,166,202,0.15)',
+  panelBg: '#102b3d',   // blue-900
+  panelBg2: '#004364',   // blue-700
+  accent: 'rgba(0,166,202,0.15)',
   accentBorder: 'rgba(0,166,202,0.25)',
-  textPrimary:  '#1C1C1E',
-  textMuted:    '#666666',
+  textPrimary: '#1C1C1E',
+  textMuted: '#666666',
 };
 
 const SYSTEM_FEATURES = [
   { icon: AdminPanelSettings, text: 'Full system control' },
-  { icon: ManageAccounts,     text: 'User & workspace management' },
-  { icon: Assessment,         text: 'Billing & registration oversight' },
-  { icon: Security,           text: 'Roles & permissions management' },
+  { icon: ManageAccounts, text: 'User & workspace management' },
+  { icon: Assessment, text: 'Billing & registration oversight' },
+  { icon: Security, text: 'Roles & permissions management' },
 ];
 
 const fieldSx = {
@@ -48,12 +48,12 @@ const SystemLoginPage: React.FC = () => {
   const navigate = useNavigate();
   const { login, isAuthenticated, userPermissions } = useAuth();
 
-  const [email,        setEmail]        = useState('');
-  const [password,     setPassword]     = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [loading,      setLoading]      = useState(false);
-  const [navigating,   setNavigating]   = useState(false);
-  const [error,        setError]        = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [navigating, setNavigating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Already authenticated (e.g. page refresh on /login) — redirect using
   // settled userPermissions from state. Only fires when permissions are loaded.
@@ -185,11 +185,11 @@ const SystemLoginPage: React.FC = () => {
           <Box sx={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', maxWidth: 320 }}>
             <DinoLogo size={68} animated />
             <Typography variant="h4" fontWeight={700} color="white" mt={3} textAlign="center" sx={{ letterSpacing: '-0.5px', lineHeight: 1.2 }}>
-              System Administration
+              Administration
             </Typography>
             <Typography variant="body2" mt={1.5} textAlign="center" lineHeight={1.7}
               sx={{ color: 'rgba(255,255,255,0.55)', maxWidth: 280 }}>
-              Secure access portal for authorised system administrators
+              Secure access portal for authorised 
             </Typography>
             <Box sx={{ width: 40, height: 2, bgcolor: T.accentBorder, borderRadius: 1, my: 4 }} />
             <Box display="flex" flexDirection="column" gap={1.5} width="100%">
@@ -239,47 +239,83 @@ const SystemLoginPage: React.FC = () => {
         </Box>
 
         {/* ── MOBILE LAYOUT ── */}
-        <Box sx={{ display: { xs: 'flex', md: 'none' }, flexDirection: 'column', height: '100vh', overflow: 'hidden', width: '100%', bgcolor: T.panelBg }}>
+        <Box sx={{
+          display: { xs: 'flex', md: 'none' },
+          flexDirection: 'column',
+          width: '100%',
+          height: '100%',
+          overflow: 'hidden',
+          bgcolor: T.panelBg,
+        }}>
+          {/* Dark branded header */}
           <Box sx={{
-            flexShrink: 0, position: 'relative', overflow: 'hidden',
-            px: 3, pt: 4, pb: 3, display: 'flex', flexDirection: 'column', alignItems: 'center',
+            flexShrink: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            px: 3,
+            pt: 5,
+            pb: 4,
+            position: 'relative',
+            overflow: 'hidden',
             background: `linear-gradient(160deg, ${T.panelBg} 0%, ${T.panelBg2} 100%)`,
-            '&::before': { content: '""', position: 'absolute', top: -60, right: -40, width: 220, height: 220, borderRadius: '50%', background: 'radial-gradient(circle, rgba(0,166,202,0.12) 0%, transparent 70%)', pointerEvents: 'none' },
           }}>
-            <Box sx={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px)', backgroundSize: '32px 32px', pointerEvents: 'none' }} />
+            {/* Radial glow */}
+            <Box sx={{
+              position: 'absolute', top: -40, right: -40,
+              width: 200, height: 200, borderRadius: '50%',
+              background: 'radial-gradient(circle, rgba(25,118,210,0.18) 0%, transparent 70%)',
+              pointerEvents: 'none',
+            }} />
+            {/* Dot grid */}
+            <Box sx={{
+              position: 'absolute', inset: 0,
+              backgroundImage: 'linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)',
+              backgroundSize: '28px 28px',
+              pointerEvents: 'none',
+            }} />
             <Box sx={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               <DinoLogo size={48} animated />
-              <Typography variant="h6" fontWeight={700} color="white" mt={1.5} textAlign="center" sx={{ letterSpacing: '-0.3px' }}>
-                System Administration
+              <Typography variant="h6" fontWeight={700} color="white" mt={1.5} textAlign="center" sx={{ letterSpacing: '-0.3px', lineHeight: 1.2 }}>
+                Welcome back
               </Typography>
-              <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.5)', mt: 0.5, textAlign: 'center', maxWidth: 260, lineHeight: 1.5, display: 'block' }}>
-                Secure access for authorised administrators
+              <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.5)', mt: 0.5, textAlign: 'center', display: 'block' }}>
+                Sign in to your {APP_CONFIG.NAME} account
               </Typography>
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75, mt: 2, justifyContent: 'center' }}>
-                {SYSTEM_FEATURES.map(({ icon: Icon, text }, i) => (
-                  <Chip key={i} icon={<Icon sx={{ fontSize: '13px !important', color: `${T.primary} !important` }} />} label={text} size="small"
-                    sx={{ bgcolor: T.accent, border: `1px solid ${T.accentBorder}`, color: 'rgba(255,255,255,0.82)', fontSize: '0.7rem', fontWeight: 500, height: 26, '& .MuiChip-icon': { ml: 0.5 } }} />
-                ))}
-              </Box>
             </Box>
           </Box>
 
-          <Box sx={{ flex: 1, bgcolor: '#ffffff', borderRadius: '20px 20px 0 0', px: { xs: 3, sm: 5 }, pt: 3.5, pb: 3, mt: -2, position: 'relative', zIndex: 1, boxShadow: '0 -4px 24px rgba(0,0,0,0.15)', overflowY: 'auto', '&::-webkit-scrollbar': { width: 4 }, '&::-webkit-scrollbar-track': { background: 'transparent' }, '&::-webkit-scrollbar-thumb': { background: 'rgba(0,0,0,0.12)', borderRadius: 2 } }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
-              <Box sx={{ width: 36, height: 36, borderRadius: '8px', bgcolor: 'rgba(0,166,202,0.08)', border: '1px solid rgba(0,166,202,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          {/* White form card */}
+          <Box sx={{
+            flex: 1,
+            bgcolor: '#ffffff',
+            borderRadius: '20px 20px 0 0',
+            mt: -1.5,
+            px: { xs: 2.5, sm: 4 },
+            pt: 3,
+            pb: 3,
+            overflowY: 'auto',
+            overflowX: 'hidden',
+            boxSizing: 'border-box',
+            boxShadow: '0 -4px 20px rgba(0,0,0,0.12)',
+          }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2.5 }}>
+              <Box sx={{ width: 36, height: 36, borderRadius: '8px', bgcolor: 'rgba(25,118,210,0.08)', border: '1px solid rgba(25,118,210,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <LockOutlined sx={{ color: T.primary, fontSize: 18 }} />
               </Box>
               <Box>
-                <Typography variant="h6" fontWeight={700} color={T.textPrimary} lineHeight={1.2}>Sign In</Typography>
-                <Typography variant="caption" sx={{ color: T.textMuted }}>Administrator access only</Typography>
+                <Typography variant="subtitle1" fontWeight={700} color={T.textPrimary} lineHeight={1.2}>Sign In</Typography>
+                <Typography variant="caption" sx={{ color: T.textMuted }}>Enter your credentials below</Typography>
               </Box>
             </Box>
             {form}
-            <Typography variant="caption" sx={{ color: '#cccccc', display: 'block', textAlign: 'center', mt: 3, fontSize: '0.75rem' }}>
-              Restricted access. Unauthorised login attempts are logged.
+            <Typography variant="caption" sx={{ color: '#cccccc', display: 'block', textAlign: 'center', mt: 2, fontSize: '0.75rem' }}>
+              Authorised users only. Access attempts are monitored.
             </Typography>
           </Box>
         </Box>
+
 
       </Box>
     </>

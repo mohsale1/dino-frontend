@@ -66,7 +66,7 @@ const AppContent = memo(() => {
           <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
             <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
             <Route path="/admin/dashboard" element={<ProtectedRoute requiredPermission="dashboard:view"><AppDashboard /></ProtectedRoute>} />
-            <Route path="/admin/pos" element={<ProtectedRoute requiredPermission="pos:view"><POS /></ProtectedRoute>} />
+            <Route path="/admin/pos" element={<POS />}/>
             <Route path="/admin/catalog" element={<ProtectedRoute requiredPermission="catalog:view"><Catalog /></ProtectedRoute>} />
             <Route path="/admin/locations" element={<ProtectedRoute requiredPermission="locations:view"><Locations /></ProtectedRoute>} />
             <Route path="/admin/orders" element={<ProtectedRoute requiredPermission="orders:view"><Orders /></ProtectedRoute>} />

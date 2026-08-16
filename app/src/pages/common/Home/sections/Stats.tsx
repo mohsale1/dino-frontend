@@ -262,7 +262,7 @@ const StatsSection: React.FC = () => {
 
                 {/* Counter */}
                 <AnimatedCounter
-                  end={stat.number}
+                  end={Number(stat.number) || 0}
                   suffix={stat.suffix}
                   decimals={stat.decimals || 0}
                   duration={2000}

@@ -275,9 +275,9 @@ const Workspaces: React.FC = () => {
                   <TableRow sx={{ bgcolor: C.bg, borderBottom: `2px solid ${C.border}` }}>
                     {[
                       { label: 'Workspace',    hide: false },
-                      { label: 'Plan',         hide: false },
+                      { label: 'Description',  hide: true },
                       { label: 'Status',       hide: false },
-                      { label: 'Subscription', hide: false, xs: true },
+                      { label: 'Subscription', hide: true, xs: true },
                       { label: 'Created',      hide: false, md: true },
                       { label: 'Actions',      hide: false, right: true },
                     ].map(({ label, xs, md, right }) => (
